@@ -30,6 +30,24 @@ PROBES = {
  'grenade': ['a grenade launcher thump', 'an explosion', 'a gunshot', 'a door slam'],
  'clunk': ['a metal canister bouncing', 'a gunshot', 'a footstep', 'static noise'],
  'pin': ['a spike hammered into wood', 'a gunshot', 'a metal clang', 'a footstep'],
+ # overdrive round
+ 'dash': ['a fast whoosh of air', 'an explosion', 'a gunshot', 'static noise'],
+ 'hornet': ['a small rocket launching with a whoosh', 'an explosion', 'a gunshot', 'wind'],
+ 'lanceFire': ['a powerful energy blast', 'an explosion', 'a gunshot', 'thunder'],
+ 'lanceLoop': ['an electrical hum', 'an engine running', 'wind', 'static noise'],
+ 'ripperLoop': ['a chainsaw running', 'a motorcycle engine', 'a lawn mower', 'static noise'],
+ 'ripperBite': ['a chainsaw cutting wood', 'a motorcycle engine', 'a drill', 'static noise'],
+ 'glaive': ['a fast metallic whoosh', 'a gunshot', 'a bell ringing', 'static noise'],
+ 'glaiveCatch': ['a metallic clack', 'a gunshot', 'a footstep', 'glass breaking'],
+ 'whirr': ['a spinning blade whirring', 'an engine', 'wind', 'static noise'],
+ 'sizzle': ['hot metal sizzling', 'rain', 'static noise', 'applause'],
+ 'splat': ['a wet splat', 'a gunshot', 'a footstep', 'an explosion'],
+ 'rumble': ['a deep rumble', 'thunder', 'an engine', 'wind'],
+ 'erupt': ['rocks and rubble crashing', 'an explosion', 'a gunshot', 'thunder'],
+ 'dig': ['digging in gravel', 'a footstep', 'static noise', 'rain'],
+ 'chain': ['a metal chain rattling', 'coins jingling', 'a bell', 'static noise'],
+ 'linkOn': ['an electric power up hum', 'a siren', 'an engine', 'static noise'],
+ 'buzz': ['an electric buzz', 'a bee buzzing', 'an engine', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

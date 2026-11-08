@@ -1,0 +1,863 @@
+{
+ "nail": {
+  "ids": [
+   "5-2",
+   "3-0",
+   "1-2",
+   "2-2"
+  ],
+  "wav": [
+   "cd6775f890580ed0",
+   "3e78b2d267081523",
+   "c9c981d8750e8564",
+   "8565d55cd3c9bfdd"
+  ],
+  "rate": "40k"
+ },
+ "shotgun": {
+  "ids": [
+   "0",
+   "5"
+  ],
+  "wav": [
+   "bf74aa1f93cc6fb3",
+   "6f8f17af1ed48c1f"
+  ],
+  "rate": "40k"
+ },
+ "rocket": {
+  "ids": [
+   "3",
+   "0"
+  ],
+  "wav": [
+   "c59b03598096a8ca",
+   "6e3428077d6379f9"
+  ],
+  "rate": "40k"
+ },
+ "grenade": {
+  "ids": [
+   "4",
+   "0"
+  ],
+  "wav": [
+   "7c5aaea27b4a49a6",
+   "d835f8fd73048951"
+  ],
+  "rate": "40k"
+ },
+ "stake": {
+  "ids": [
+   "0",
+   "3"
+  ],
+  "wav": [
+   "7eca958dae9484db",
+   "a3a5ac67763febcb"
+  ],
+  "rate": "40k"
+ },
+ "rivet": {
+  "ids": [
+   "4-2",
+   "7-4",
+   "0-0",
+   "3-0",
+   "6-3"
+  ],
+  "wav": [
+   "3eeb57737f518c3a",
+   "4224a0c9b2833d20",
+   "db98108aeb0953c7",
+   "40dc504c00554ca4",
+   "4f67ce28228a9689"
+  ],
+  "rate": "40k"
+ },
+ "mortar": {
+  "ids": [
+   "5",
+   "3"
+  ],
+  "wav": [
+   "d6ba639ede87ab1b",
+   "6fcefb6923d5140a"
+  ],
+  "rate": "40k"
+ },
+ "sawLaunch": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "dad15d7b71a3496d"
+  ],
+  "rate": "40k"
+ },
+ "rail": {
+  "ids": [
+   "4",
+   "0"
+  ],
+  "wav": [
+   "968704e4e42a7545",
+   "c8caa08f1cda4093"
+  ],
+  "rate": "40k"
+ },
+ "clusterPop": {
+  "ids": [
+   "5",
+   "0"
+  ],
+  "wav": [
+   "1c9646afd707a498",
+   "bacfcde0ec9423c7"
+  ],
+  "rate": "40k"
+ },
+ "mineThrow": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "0769e4cdb51a5861"
+  ],
+  "rate": "40k"
+ },
+ "hookFire": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "eb71ea3ab2524727"
+  ],
+  "rate": "40k"
+ },
+ "hookHit": {
+  "ids": [
+   "2"
+  ],
+  "wav": [
+   "a3e3aa5b3391d4fa"
+  ],
+  "rate": "40k"
+ },
+ "prism": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "171b9e181c635efd"
+  ],
+  "rate": "40k"
+ },
+ "zap": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "541c0bf4aef4be94"
+  ],
+  "rate": "40k"
+ },
+ "eshot": {
+  "ids": [
+   "3",
+   "4"
+  ],
+  "wav": [
+   "1d888ec515c5351b",
+   "8c694a2a70c0a2d5"
+  ],
+  "rate": "40k"
+ },
+ "snipe": {
+  "ids": [
+   "2",
+   "3"
+  ],
+  "wav": [
+   "e151e8b464483ea9",
+   "84783f5ba62de0dc"
+  ],
+  "rate": "40k"
+ },
+ "whistle": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "e00aa064d540e7eb"
+  ],
+  "rate": "40k"
+ },
+ "radio": {
+  "ids": [
+   "0",
+   "2"
+  ],
+  "wav": [
+   "73d134647eec6c36",
+   "6a5fcc04b654fa55"
+  ],
+  "rate": "40k"
+ },
+ "explosion": {
+  "ids": [
+   "5",
+   "3",
+   "1"
+  ],
+  "wav": [
+   "a8c0f34e5f5a8e2c",
+   "87509145d13c68b5",
+   "9259f11a36a24309"
+  ],
+  "rate": "40k"
+ },
+ "killcam": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "b42fe63b0fe721b1"
+  ],
+  "rate": "40k"
+ },
+ "stomp": {
+  "ids": [
+   "4",
+   "5"
+  ],
+  "wav": [
+   "f7e2b245c47c959b",
+   "4bfe627d5d0404e1"
+  ],
+  "rate": "40k"
+ },
+ "rampage": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "fd45c715c6c9f0f5"
+  ],
+  "rate": "40k"
+ },
+ "clang": {
+  "ids": [
+   "3",
+   "5",
+   "1"
+  ],
+  "wav": [
+   "8948153187b046f8",
+   "ebed921db803173f",
+   "003db402963af0d7"
+  ],
+  "rate": "40k"
+ },
+ "tink": {
+  "ids": [
+   "5-0",
+   "5-2",
+   "5-1"
+  ],
+  "wav": [
+   "335306e4c9ec7867",
+   "a19fef8e2a4da3cd",
+   "128db696986fa1b8"
+  ],
+  "rate": "40k"
+ },
+ "clunk": {
+  "ids": [
+   "4-5",
+   "1-3",
+   "0-1"
+  ],
+  "wav": [
+   "628df1156dd3937b",
+   "2ffd6d100c268b24",
+   "2c40ed2cd6ab9344"
+  ],
+  "rate": "40k"
+ },
+ "smash": {
+  "ids": [
+   "0",
+   "5"
+  ],
+  "wav": [
+   "919eb0c55bde8078",
+   "340eedef26f6d381"
+  ],
+  "rate": "40k"
+ },
+ "smashMetal": {
+  "ids": [
+   "4",
+   "3"
+  ],
+  "wav": [
+   "dd50d9657ca7ead1",
+   "60dbfa751142afb0"
+  ],
+  "rate": "40k"
+ },
+ "creak": {
+  "ids": [
+   "5"
+  ],
+  "wav": [
+   "ab5a312334d2db6b"
+  ],
+  "rate": "40k"
+ },
+ "snap": {
+  "ids": [
+   "2"
+  ],
+  "wav": [
+   "7c9fef0e4438698f"
+  ],
+  "rate": "40k"
+ },
+ "pin": {
+  "ids": [
+   "3"
+  ],
+  "wav": [
+   "b8a04f490cd2679b"
+  ],
+  "rate": "40k"
+ },
+ "shieldHit": {
+  "ids": [
+   "0",
+   "1"
+  ],
+  "wav": [
+   "9a1298bac185e523",
+   "76376396c4afb1a1"
+  ],
+  "rate": "40k"
+ },
+ "freeze": {
+  "ids": [
+   "2"
+  ],
+  "wav": [
+   "11f24c1ca03e5d6a"
+  ],
+  "rate": "40k"
+ },
+ "crack": {
+  "ids": [
+   "2"
+  ],
+  "wav": [
+   "e9248fd1a4f4efcd"
+  ],
+  "rate": "40k"
+ },
+ "shatter": {
+  "ids": [
+   "5",
+   "2"
+  ],
+  "wav": [
+   "7ab88527fccbfef5",
+   "15eb2ad242ade37a"
+  ],
+  "rate": "40k"
+ },
+ "hit": {
+  "ids": [
+   "4",
+   "2",
+   "5"
+  ],
+  "wav": [
+   "fa79acb483f368b8",
+   "272ba920865f5f72",
+   "a82538e375b2dfc0"
+  ],
+  "rate": "40k"
+ },
+ "kickHit": {
+  "ids": [
+   "1",
+   "3",
+   "2"
+  ],
+  "wav": [
+   "c364b2524b45ece3",
+   "53e982749f36fdab",
+   "39afa56093b2a790"
+  ],
+  "rate": "40k"
+ },
+ "squish": {
+  "ids": [
+   "2",
+   "6",
+   "5"
+  ],
+  "wav": [
+   "9c3ce740024b571d",
+   "88851997df578a89",
+   "fcec730ee38fe4f8"
+  ],
+  "rate": "40k"
+ },
+ "gib": {
+  "ids": [
+   "0",
+   "2",
+   "4"
+  ],
+  "wav": [
+   "ff68334cedf69fb8",
+   "4efd8781aed6ab1f",
+   "28dd44017e0242de"
+  ],
+  "rate": "40k"
+ },
+ "splatWall": {
+  "ids": [
+   "4",
+   "6"
+  ],
+  "wav": [
+   "4fcf81cca5faf428",
+   "30989e5dc517d60b"
+  ],
+  "rate": "40k"
+ },
+ "step": {
+  "ids": [
+   "5-1",
+   "2-0",
+   "2-1",
+   "5-4"
+  ],
+  "wav": [
+   "0a54faeaebf629d6",
+   "477a12f560c04972",
+   "e390d112a1be017a",
+   "b977fcbfc3120277"
+  ],
+  "rate": "40k"
+ },
+ "land": {
+  "ids": [
+   "3",
+   "2"
+  ],
+  "wav": [
+   "d3c3ab8716e006c7",
+   "1074909ad8adba2a"
+  ],
+  "rate": "40k"
+ },
+ "jump": {
+  "ids": [
+   "5",
+   "6"
+  ],
+  "wav": [
+   "c7f6e4c9d280c910",
+   "84a51f53babf6612"
+  ],
+  "rate": "40k"
+ },
+ "swap": {
+  "ids": [
+   "4",
+   "3"
+  ],
+  "wav": [
+   "2bc5fd49f9b2cf3f",
+   "b3ed3999ec9681ca"
+  ],
+  "rate": "40k"
+ },
+ "whoosh": {
+  "ids": [
+   "3",
+   "2"
+  ],
+  "wav": [
+   "70c60d7fce5273fd",
+   "c58f0e03885fbde2"
+  ],
+  "rate": "40k"
+ },
+ "hurt": {
+  "ids": [
+   "8",
+   "2",
+   "5",
+   "11"
+  ],
+  "wav": [
+   "d14149ae32c0191f",
+   "968be40787e463c3",
+   "c273f351ebfcfed5",
+   "0ec99fedbaf0a475"
+  ],
+  "rate": "40k"
+ },
+ "heart": {
+  "ids": [
+   "4-1",
+   "3-1"
+  ],
+  "wav": [
+   "44650bb583ed5c90",
+   "7a7c00de2c4d9d03"
+  ],
+  "rate": "40k"
+ },
+ "roar": {
+  "ids": [
+   "0",
+   "4"
+  ],
+  "wav": [
+   "4ede3c87be1b3aa2",
+   "bfd00ffb2f9a00f8"
+  ],
+  "rate": "40k"
+ },
+ "growl": {
+  "ids": [
+   "2",
+   "3"
+  ],
+  "wav": [
+   "22ed445c22c21af2",
+   "3be6a8775895a7b4"
+  ],
+  "rate": "40k"
+ },
+ "snort": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "72b4af58d52d3071"
+  ],
+  "rate": "40k"
+ },
+ "scream": {
+  "ids": [
+   "4",
+   "5"
+  ],
+  "wav": [
+   "7fadfb0757fc1bf7",
+   "0bfb42886fb8337d"
+  ],
+  "rate": "40k"
+ },
+ "hiss": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "f34cf01c5bd7618c"
+  ],
+  "rate": "40k"
+ },
+ "ignite": {
+  "ids": [
+   "2"
+  ],
+  "wav": [
+   "29a8acf294631ece"
+  ],
+  "rate": "40k"
+ },
+ "gasHiss": {
+  "ids": [
+   "4",
+   "2"
+  ],
+  "wav": [
+   "e61b9ef46033ffc7",
+   "dbdbda635fc6393d"
+  ],
+  "rate": "40k"
+ },
+ "sputter": {
+  "ids": [
+   "5-1",
+   "4-1",
+   "1-1"
+  ],
+  "wav": [
+   "810e9d7a8d7b61ab",
+   "01ba92341ace5737",
+   "156eb9bbc87d209a"
+  ],
+  "rate": "40k"
+ },
+ "singOpen": {
+  "ids": [
+   "3"
+  ],
+  "wav": [
+   "f6d594ef18e23267"
+  ],
+  "rate": "40k"
+ },
+ "warp": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "b85a8a62eeae8857"
+  ],
+  "rate": "40k"
+ },
+ "decloak": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "ff6609880a88d346"
+  ],
+  "rate": "40k"
+ },
+ "flameLoop": {
+  "ids": [
+   "2",
+   "0"
+  ],
+  "wav": [
+   "496bc09d0bbb0d78",
+   "db0b305907a3615e"
+  ],
+  "rate": "40k"
+ },
+ "cryoLoop": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "965e936764279086"
+  ],
+  "rate": "40k"
+ },
+ "arcLoop": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "4dcbcac92767cfe3"
+  ],
+  "rate": "40k"
+ },
+ "humLoop": {
+  "ids": [
+   "3"
+  ],
+  "wav": [
+   "58dbcf191e8155f4"
+  ],
+  "rate": "40k"
+ },
+ "dash": {
+  "ids": [
+   "0",
+   "1"
+  ],
+  "wav": [
+   "b81298d2a7917fd3",
+   "fd3da47f23e4a17a"
+  ],
+  "rate": "40k"
+ },
+ "hornet": {
+  "ids": [
+   "6",
+   "7",
+   "5"
+  ],
+  "wav": [
+   "e5db15507005633c",
+   "91ddf1767ad73dfc",
+   "b8112f435c66f7d1"
+  ],
+  "rate": "40k"
+ },
+ "lanceFire": {
+  "ids": [
+   "6",
+   "0"
+  ],
+  "wav": [
+   "6943dc8461a3f2c1",
+   "af6d4e1aeca65580"
+  ],
+  "rate": "40k"
+ },
+ "lanceLoop": {
+  "ids": [
+   "5"
+  ],
+  "wav": [
+   "f457308705b38898"
+  ],
+  "rate": "40k"
+ },
+ "ripperLoop": {
+  "ids": [
+   "3"
+  ],
+  "wav": [
+   "ac1e3a6212492439"
+  ],
+  "rate": "40k"
+ },
+ "ripperBite": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "9145b86e0638e183"
+  ],
+  "rate": "40k"
+ },
+ "glaive": {
+  "ids": [
+   "2",
+   "0"
+  ],
+  "wav": [
+   "7e8cebdd155d3086",
+   "8d53ea127dc9ef1b"
+  ],
+  "rate": "40k"
+ },
+ "glaiveCatch": {
+  "ids": [
+   "1",
+   "5"
+  ],
+  "wav": [
+   "85ff71d53b037552",
+   "0ff4abdb7ca7c47e"
+  ],
+  "rate": "40k"
+ },
+ "whirr": {
+  "ids": [
+   "3-4",
+   "3-1",
+   "1-2",
+   "1-1"
+  ],
+  "wav": [
+   "41c6e64903001b79",
+   "81175388345b9fd3",
+   "03afd98f60537aa6",
+   "8c18ab37ae409565"
+  ],
+  "rate": "40k"
+ },
+ "sizzle": {
+  "ids": [
+   "1",
+   "2"
+  ],
+  "wav": [
+   "8226b57c09518b25",
+   "3f9c12fac788b1f0"
+  ],
+  "rate": "40k"
+ },
+ "splat": {
+  "ids": [
+   "0",
+   "1",
+   "6"
+  ],
+  "wav": [
+   "d4d57b2e05c7a296",
+   "42ff8eb908dc175d",
+   "448364a03e45b997"
+  ],
+  "rate": "40k"
+ },
+ "rumble": {
+  "ids": [
+   "0",
+   "5"
+  ],
+  "wav": [
+   "a5b2abf946bf65e0",
+   "e878df8d89efa558"
+  ],
+  "rate": "40k"
+ },
+ "erupt": {
+  "ids": [
+   "1",
+   "0"
+  ],
+  "wav": [
+   "cc395bf0368c0e89",
+   "e826787c7689340d"
+  ],
+  "rate": "40k"
+ },
+ "dig": {
+  "ids": [
+   "4",
+   "3"
+  ],
+  "wav": [
+   "2fb0a4ce281c91ed",
+   "f18904414297bdf3"
+  ],
+  "rate": "40k"
+ },
+ "chain": {
+  "ids": [
+   "5",
+   "7"
+  ],
+  "wav": [
+   "7d378b9159642fa5",
+   "9ecfe0af01ab6ab6"
+  ],
+  "rate": "40k"
+ },
+ "linkOn": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "b0b91d2cce083037"
+  ],
+  "rate": "40k"
+ },
+ "buzz": {
+  "ids": [
+   "4",
+   "0",
+   "1"
+  ],
+  "wav": [
+   "60040ba2161f917e",
+   "7e689bab62d107db",
+   "ffac5f1c6c16d284"
+  ],
+  "rate": "40k"
+ }
+}

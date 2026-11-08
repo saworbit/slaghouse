@@ -2,7 +2,8 @@
 <!--
   =============================================================================
   SLAGHOUSE - pixel-art side-scrolling arena shooter (vertical slice prototype)
-  Single file - Phaser 4.2.1 from CDN - Arcade Physics - all art and audio procedural
+  Single file - Phaser 4.2.1 from CDN - Arcade Physics - all art procedural; audio procedural with
+  optional sample banks beside it (sfx_bank.js, music_bank.js) that it uses when present
   =============================================================================
   FINAL TUNING VALUES  (1 world unit = 1 art pixel; 960x540 canvas, camera zoom 2)
     Gravity ............. 800 px/s^2  (+250 extra while falling, for snappier arcs)
@@ -40,6 +41,26 @@
                           Frozen fliers drop. Boss only slows; the juggernaut chills at half rate.
     Prism laser ([) ..... 2.4 shots/s (420 ms) instant beam that ricochets off walls 4 times (900 px total),
                           piercing everything; 30 dmg (x2 head), each enemy can be hit twice per shot.
+    Ripper (]) .......... held chain blade, 18 bites/s (55 ms) at 24 px reach, 5 dmg a bite (90 DPS, x1.5 head);
+                          holds what it chews in place, shreds corpses, cuts crates (9/bite), eats enemy shots,
+                          grinds through a riot shield in 10 bites. Ripper kills heal you 6 HP.
+    Hornet pod (\) ...... hold to paint locks (one per 150 ms, up to 6, max 3 per target) on enemies within 80 px
+                          of the crosshair and 330 px of you; release to launch one seeker per lock (pop up, then
+                          curl in at 7.5 rad/s, 150 -> 390 px/s). Blast radius 24, 28->10 dmg. A tap with no
+                          locks dumb-fires two. 650 ms reload after a launch.
+    Magma lance (;) ..... hold to charge (1.0 s), release: molten beam, 35->170 dmg by charge (x1.5 head), 2->7 px
+                          wide, pierces everything, bores through up to 5 breakable tiles, ignites (3 s), kicks you
+                          back up to 420 px/s (aim down to lance-jump). Over 85% charge it bursts where it lands
+                          (radius 46, 70->20). Hold a full charge past 2.2 s and it vents: fires and scalds you 8.
+    Glaive (') .......... 470 px/s thrown ring, 200 px out and back, 24 dmg each way (x2 head); catch it and the next
+                          throw is ready at once. Hold fire and it stops at the end of its throw (or on a wall) and
+                          grinds in place for up to 2.4 s: 11 dmg per 140 ms, steerable with the mouse, chews crates.
+    Weapon swap ......... 1-9 0 - = BKSP [ ] \ ; ' or Q/E / wheel; 120 ms draw. Each gun keeps its own fire
+                          cooldown, so swapping off a slow gun (Singularity, railgun) never delays the next one.
+    Dash (Shift) ........ 440 px/s burst for 0.15 s in the held direction (8-way; down only in the air), 0.2 s of
+                          i-frames, 0.55 s cooldown, one air dash until you land. Anything that goes through you
+                          mid-dash is a DODGE (+style). Kick within 150 ms of a dash: DROPKICK (x1.7 dmg, x1.3
+                          launch). Dashing or kicking snaps a harpoon chain.
     Grapple hook (C) .... 270 px chain hook (650 ms cooldown). Light enemies, corpses and gas cans get reeled in
                           to point blank (8 dmg + stun); walls and anything heavy reel YOU in at 480 px/s.
                           C again lets go mid-haul; you pop up when you arrive (ledge climbing).
@@ -121,21 +142,52 @@
     Gunship 500 HP ...... flying mini-boss (own health bar) under the ceiling: rocket volleys after a 0.6 s pod
                           glow, chain-gun strafing runs, drops 2 troops (x3). Killed, it spirals down burning,
                           flattens what it lands on and craters (radius 90) with fire patches.
+    Slagling 70/30/12 HP  hopping molten blob in three sizes: a big one splits into 2 mid, each mid into 2 small
+                          (7 kills; the halves count toward the wave). Contact 12/8/5. Fireproof, scorches where
+                          it lands; frozen ones shatter without splitting.
+    Burrower 120 HP ..... slag worm that swims under whatever floor you stand on (grit trail, rumble), stops under
+                          you for a 0.7 s tell (glow, debris), then erupts at 430 px/s: 22 dmg + launch. Only
+                          hittable once it's out (in the air, then 1 s writhing on the floor) before it digs back
+                          in for 1.2-2.2 s.
+    Harpooner 70 HP ..... humanoid with a chain harpoon: 0.6 s windup (dotted sight line, locks for the last 30%),
+                          430 px/s throw, 260 px reach. Hooked: 6 dmg and you're reeled in at 270 px/s for a
+                          16-dmg slash. Kick, dash or hurt it for 25 to break free.
+    Linker 40 HP ........ fence drones that pair up either side of you and throw a beam between them at your chest
+                          height: 0.8 s flickering charge, 2 s live (12 dmg, fries their own side for 30 DPS),
+                          1.8 s off. Jump it, dash through it, leave the gap or kill one. A lone linker shoots.
     THE SMELTER (boss) .. 900 HP, 3 phases (66% / 33%), rage speeds it up; slag mortars (3-5 shells,
                           landing markers, burning puddles), leap slams that send ground shockwaves,
                           sweeping slag breath (phase 2+), summons ticks (phase 3); +50% crits on
                           its head vent. Letterbox intro, boss bar with phase notches.
     Waves ............... wave 1 = 10 placed enemies; wave 2 = 17 in a BLACKOUT (vision shrinks to a pool round
                           you, enemy eyes and lasers glow, gunfire strobes it wider) with cloakers; wave 3 = 17
-                          under SLAG RAIN with a pyro and the gunship; wave 4 = 16 in LOW GRAVITY led by the
-                          juggernaut; wave 5 = the boss. Medkits restock between waves.
+                          under SLAG RAIN with a pyro, a harpooner and the gunship; wave 4 = 16 in LOW GRAVITY led
+                          by the juggernaut, with a linker pair; wave 5 = 15 (27 with splits) in MELTDOWN with
+                          slaglings, burrowers, harpooners and linkers; wave 6 = the boss. Each wave opens with a
+                          title card. Medkits restock between waves.
+    Meltdown tide ....... wave 5: every ~11 s the floor seams glow for 2.2 s, then slag floods the ground floor
+                          28 px deep (3 s rise, 6 s hold, 3 s drain). Wading burns 5 per 0.4 s; it ignites
+                          anything not fireproof, sets off ticks and drums, and melts gibs.
     Music ............... synthwave soundtrack from music_bank.js (rendered by dev/synthwave): title theme,
-                          MELT FLOOR (waves 1-2), SLAG RAIN (waves 3-4), THE SMELTER (boss), clear / game over
+                          MELT FLOOR (waves 1-2), SLAG RAIN (waves 3-5), THE SMELTER (boss), clear / game over
                           jingles. Stage loops are muffled until you're noticed and open up as the fight heats
                           up. B flips to the procedural 132 BPM drum + bass loop (the fallback without the bank).
+    SFX ................. AudioGen sample bank from sfx_bank.js (dev/sfxgen) over the procedural synth; N flips
+                          to the synth versions (the fallback without the bank). M mutes all audio, and all
+                          audio pauses while the tab is hidden.
     Hearing ............. gunfire alerts enemies within 210-270 px, explosions within 300 px
     Player .............. 100 HP, 750 ms i-frames; contact dmg grunt 12 / heavy 20,
                           heavy stomp 15, drone bolt 10; four +30 health packs in the arena
+    Pause (Esc / P) ..... pause menu: resume, restart, post FX on/off, quit to title. Physics, timers and weapon
+                          loops stop and the music muffles. Hiding the tab pauses too, and coming back waits on the
+                          menu. Esc on the results screen goes back to the title.
+    Post FX (V) ......... Phaser 4 camera filters on the world (not the HUD): bloom, a barrel-warp pulse on nearby
+                          blasts, colour grading (rampage saturation, low-health desaturation, grey on death and
+                          while paused). The choice is remembered in localStorage.
+    HUD ................. 18 weapon slots; dash meter under the health bar; red markers round you show where a hit
+                          came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
+                          (and to a boss); lance charge ring and hornet lock pips at the crosshair. Damage numbers
+                          step aside from ones still rising nearby.
   =============================================================================
 -->
 <html lang="en">
@@ -230,6 +282,19 @@ const TUNE = {
              tank: { radius: 48, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 360, maxRise: 460, burn: 3, tileDamage: 70 } },
   GUNSHIP: { speed: 75, alt: 124, volleyCd: 4, dropCd: 9, strafeCd: 6.5,
              crash: { radius: 90, maxDamage: 120, minDamage: 30, selfDamage: 30, push: 520, maxRise: 640, tileDamage: 140 } },
+  // ---- overdrive round ----
+  DASH:    { speed: 440, time: 0.15, cd: 0.55, iframes: 0.2, keep: 0.55 },
+  RIPPER:  { cooldown: 55, damage: 5, reach: 24, half: 7, heal: 6, tile: 9 },
+  HORNET:  { cooldown: 650, lockMs: 150, maxLocks: 6, perTarget: 3, lockRange: 330, lockRadius: 80, speed: 150, top: 390, accel: 760, turn: 7.5, life: 3,
+             blast: { radius: 24, maxDamage: 28, minDamage: 10, selfDamage: 3, push: 140, maxRise: 220, tileDamage: 30 } },
+  LANCE:   { cooldown: 450, charge: 1.0, minDamage: 35, maxDamage: 170, range: 760, bore: 5, recoil: 420, burn: 3, vent: 2.2, ventDmg: 8,
+             burst: { radius: 46, maxDamage: 70, minDamage: 20, selfDamage: 10, push: 360, maxRise: 460, tileDamage: 90, burn: 2 } },
+  GLAIVE:  { cooldown: 260, speed: 470, range: 200, damage: 24, grind: 11, grindMs: 140, hover: 2.4, back: 520 },
+  SLAGLING: { hop: [0.45, 0.9], vx: 120, vy: [230, 320] },
+  BURROWER: { speed: 150, tellMs: 700, rise: 430, exposed: 1.0, cd: [1.2, 2.2], dmg: 22 },
+  HARPOON:  { windMs: 600, speed: 430, range: 260, reel: 270, reelT: 1.4, hookDmg: 6, slashDmg: 16, breakDmg: 25, cd: 3.4 },
+  LINKER:   { speed: 95, gap: 170, chargeMs: 800, liveMs: 2000, offMs: 1800, dmg: 12, enemyDps: 30, pair: 420 },
+  TIDE:     { calm: 11, warn: 2.2, rise: 3, hold: 6, fall: 3, top: 372, floor: 400, dmg: 5, tick: 0.4 },
 };
 const WEAPONS = [
   Object.assign({ id: 'nail', name: 'NAILGUN', gun: 'nail' }, TUNE.NAIL),
@@ -246,7 +311,12 @@ const WEAPONS = [
   Object.assign({ id: 'stake', name: 'STAKE DRIVER', gun: 'stake' }, TUNE.STAKE),
   Object.assign({ id: 'cryo', name: 'CRYO CANNON', gun: 'cryo' }, TUNE.CRYO),
   Object.assign({ id: 'prism', name: 'PRISM LASER', gun: 'prism' }, TUNE.PRISM),
+  Object.assign({ id: 'ripper', name: 'RIPPER', gun: 'ripper' }, TUNE.RIPPER),
+  Object.assign({ id: 'hornet', name: 'HORNET POD', gun: 'hornet' }, TUNE.HORNET),
+  Object.assign({ id: 'lance', name: 'MAGMA LANCE', gun: 'lance' }, TUNE.LANCE),
+  Object.assign({ id: 'glaive', name: 'GLAIVE', gun: 'glaive' }, TUNE.GLAIVE),
 ];
+const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'"];   // HUD labels (< = backspace)
 const ENEMY = {
   grunt: { key: 'grunt', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
            gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15] },
@@ -290,14 +360,28 @@ const ENEMY = {
   boss: { key: 'boss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
           gibs: ['g_core', 'g_core', 'g_core', 'g_plateL', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2',
                  'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40] },
+  // ---- overdrive round ----
+  slagling: { key: 'slagling', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
+              gibs: ['g_slag', 'g_crust', 'g_slag', 'g_crust', 'g_slag', 'g_slag', 'g_crust'], gibN: [10, 13] },
+  slagmid:  { key: 'slagmid', fw: 18, fh: 14, bw: 14, bh: 10, hp: 30, sight: 300, touch: 8, kb: 0.8, tier: 1, child: 'slagbit', molten: true,
+              gibs: ['g_slag', 'g_crust', 'g_slag', 'g_slag'], gibN: [6, 8] },
+  slagbit:  { key: 'slagbit', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
+  burrower: { key: 'burrower', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
+              gibs: ['g_wormseg', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_core', 'g_wormseg'], gibN: [16, 20] },
+  harpooner: { key: 'harpooner', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
+               gibs: ['g_chain', 'g_chain', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
+  linker: { key: 'linker', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
+            gibs: ['g_emitter', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [8, 10] },
 };
-const isHumanoid = e => e.kind === 'enforcer' || e.kind === 'stalker' || e.kind === 'bulwark' || e.kind === 'sniper' || e.kind === 'rocketeer' || e.kind === 'sapper' || e.kind === 'cloaker' || e.kind === 'pyro';
+const isHumanoid = e => e.kind === 'enforcer' || e.kind === 'stalker' || e.kind === 'bulwark' || e.kind === 'sniper' || e.kind === 'rocketeer' || e.kind === 'sapper' || e.kind === 'cloaker' || e.kind === 'pyro' || e.kind === 'harpooner';
 const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind === 'rocketeer';
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
-const FLIERS = new Set(['drone', 'mender', 'wasp', 'jet', 'screamer', 'warden', 'gunship']);
-const WAVE_MODS = [null, 'dark', 'slag', 'lowg', null];              // wave 2 blacks out, 3 rains slag, 4 is low gravity
+const FLIERS = new Set(['drone', 'mender', 'wasp', 'jet', 'screamer', 'warden', 'gunship', 'linker']);
+const WAVE_MODS = [null, 'dark', 'slag', 'lowg', 'melt', null];      // wave 2 blacks out, 3 rains slag, 4 is low gravity, 5 floods with slag
+const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
+const POSTFX = { on: (() => { try { return localStorage.getItem('slaghouse.postfx') !== '0'; } catch (err) { return true; } })() };   // V toggles bloom / warp / grading
 const STYLE_RANKS = [
   { n: 'D', t: 0, c: '#8f9bab' }, { n: 'C', t: 90, c: '#5cc8ff' }, { n: 'B', t: 220, c: '#5cff7a' }, { n: 'A', t: 400, c: '#ffe14a' },
   { n: 'S', t: 640, c: '#ff9a2a' }, { n: 'SS', t: 920, c: '#ff5a3a' }, { n: 'SSS', t: 1250, c: '#ff3aa0' },
@@ -614,6 +698,89 @@ const Sfx = {
   hookFire() { if (!this.ok('hookf', 0.05)) return; if (this.smp('hookFire')) return; this.noise({ filter: 'bandpass', f0: 1200, f1: 3000, q: 1.5, dur: 0.15, vol: 0.2 }); this.tone({ type: 'square', f0: 300, f1: 900, dur: 0.1, vol: 0.04 }); },
   hookHit() { if (!this.ok('hookh', 0.05)) return; if (this.smp('hookHit')) return; this.tone({ type: 'square', f0: 700, f1: 200, dur: 0.08, vol: 0.1 }); this.noise({ filter: 'lowpass', f0: 1500, dur: 0.08, vol: 0.25 }); },
   decloak() { if (!this.ok('dcl', 0.2)) return; if (this.smp('decloak')) return; this.noise({ filter: 'bandpass', f0: 5000, f1: 800, q: 3, dur: 0.3, vol: 0.18 }); this.tone({ type: 'sine', f0: 2000, f1: 300, dur: 0.3, vol: 0.05 }); },
+  // ---- overdrive round: sampled from sfx_bank.js when it has them (lockOn / dodge stay synth: UI cues) ----
+  dash() { if (!this.ok('dash', 0.05)) return; if (this.smp('dash')) return; this.noise({ filter: 'bandpass', f0: 900, f1: 3800, q: 1.2, dur: 0.16, vol: 0.28 }); this.tone({ type: 'sine', f0: 320, f1: 900, dur: 0.1, vol: 0.06 }); },
+  dodge() { if (!this.ok('dodge', 0.2)) return; this.tone({ type: 'triangle', f0: 1400, f1: 2200, dur: 0.12, vol: 0.06 }); this.tone({ type: 'triangle', f0: 2100, f1: 2900, dur: 0.1, vol: 0.04, delay: 0.05 }); },
+  lockOn(n) { if (!this.ok('lock', 0.03)) return; this.tone({ type: 'square', f0: 620 + n * 140, dur: 0.05, vol: 0.06 }); this.tone({ type: 'square', f0: 930 + n * 210, dur: 0.04, vol: 0.04, delay: 0.05 }); },
+  hornet() { if (!this.ok('hornet', 0.03)) return; if (this.smp('hornet')) return; this.noise({ filter: 'bandpass', f0: 1800, f1: 600, q: 1, dur: 0.22, vol: 0.22 }); this.tone({ type: 'sawtooth', f0: 520, f1: 1400, dur: 0.12, vol: 0.05 }); this.tone({ type: 'sine', f0: 160, f1: 60, dur: 0.08, vol: 0.2 }); },
+  lanceFire(c) { if (!this.ok('lance', 0.05)) return; if (this.smp('lanceFire', 0.5 + 0.5 * c, { rate: 1.15 - 0.15 * c })) return;   // weak shots: quieter, a touch higher
+    this.noise({ filter: 'lowpass', f0: 3000 + 3000 * c, f1: 200, dur: 0.3 + 0.4 * c, vol: 0.45 + 0.4 * c, dest: this.crunch });
+    this.tone({ type: 'sawtooth', f0: 900 + 600 * c, f1: 80, dur: 0.25 + 0.35 * c, vol: 0.12 + 0.12 * c });
+    this.tone({ type: 'sine', f0: 120, f1: 30, dur: 0.3 + 0.3 * c, vol: 0.2 + 0.5 * c }); },
+  lanceSet(c) {                                                    // charge hum: the sampled loop pitches up with charge; the synth whine is the fallback
+    if (!this.ctx) return;
+    if (c > 0.01 && !this.lanceNode && !this.muted) {
+      const L = this.loopNode('lanceLoop', 0.05);
+      if (L) this.lanceNode = Object.assign(L, { bank: true });
+      else {
+        const x = this.ctx, g = x.createGain(); g.gain.value = 0.0001;
+        const o = x.createOscillator(); o.type = 'sawtooth'; const o2 = x.createOscillator(); o2.type = 'square';
+        const f = x.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 4; const g2 = x.createGain(); g2.gain.value = 0.25;
+        o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(this.out); o.start(); o2.start();
+        this.lanceNode = { g, o, o2, f, nodes: [o, o2] };
+      }
+    }
+    const n = this.lanceNode; if (!n) return;
+    const t = this.ctx.currentTime;
+    if (c <= 0.01) { this.lanceNode = null; n.g.gain.setTargetAtTime(0.0001, t, 0.03); for (const s of n.nodes) s.stop(t + 0.2); return; }
+    if (n.bank) {                                                  // full charge: a nervous wobble on top
+      n.nodes[0].playbackRate.setTargetAtTime(0.7 + 0.7 * c + (c >= 1 ? Math.sin(t * 60) * 0.05 : 0), t, 0.03);
+      n.g.gain.setTargetAtTime(this.bankGain.lanceLoop * (0.35 + 0.65 * c), t, 0.03);
+      return;
+    }
+    const wob = c >= 1 ? Math.sin(t * 60) * 30 : 0;
+    n.o.frequency.setTargetAtTime(120 + 520 * c + wob, t, 0.02); n.o2.frequency.setTargetAtTime(60 + 260 * c, t, 0.02);
+    n.f.frequency.setTargetAtTime(500 + 2400 * c, t, 0.03); n.g.gain.setTargetAtTime(0.025 + 0.05 * c, t, 0.03);
+  },
+  ripperSet(v) {                                                   // sampled: a revving chainsaw loop crossfades to a cutting one on a bite
+    if (!this.ctx) return;
+    if (v > 0.01 && !this.ripNode && !this.muted) {
+      const a = this.loopNode('ripperLoop', 0.03), b = a && this.loopNode('ripperBite', 0.03);
+      if (a && b) {
+        b.g.gain.cancelScheduledValues(this.ctx.currentTime); b.g.gain.value = 0.0001;
+        this.ripNode = { bank: true, a, b };
+      } else {
+        if (a) a.nodes[0].stop();
+        const x = this.ctx, g = x.createGain(); g.gain.value = 0.0001;   // two-stroke synth chug; lower and grindier on meat
+        const o = x.createOscillator(); o.type = 'sawtooth';
+        const lfo = x.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 30; const lg = x.createGain(); lg.gain.value = 0.5;
+        const am = x.createGain(); am.gain.value = 0.5; lfo.connect(lg); lg.connect(am.gain);
+        const f = x.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 3;
+        const ns = x.createBufferSource(); ns.buffer = this.noiseBuf; ns.loop = true;
+        const nf = x.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2400; nf.Q.value = 1.2; const ng = x.createGain(); ng.gain.value = 0;
+        o.connect(am); am.connect(f); f.connect(g); ns.connect(nf); nf.connect(ng); ng.connect(g); g.connect(this.out);
+        o.start(); lfo.start(); ns.start();
+        this.ripNode = { g, o, lfo, f, ns, ng, nodes: [o, lfo, ns] };
+      }
+    }
+    const n = this.ripNode; if (!n) return;
+    const t = this.ctx.currentTime, bite = v > 0.9;
+    if (v <= 0.01) {
+      this.ripNode = null;
+      if (n.bank) for (const L of [n.a, n.b]) { L.g.gain.setTargetAtTime(0.0001, t, 0.04); L.nodes[0].stop(t + 0.3); }
+      else { n.g.gain.setTargetAtTime(0.0001, t, 0.04); for (const s of n.nodes) s.stop(t + 0.3); }
+      return;
+    }
+    if (n.bank) {
+      n.a.g.gain.setTargetAtTime(this.bankGain.ripperLoop * (bite ? 0.3 : 1), t, 0.03);
+      n.b.g.gain.setTargetAtTime(bite ? this.bankGain.ripperBite : 0.0001, t, 0.03);
+      n.a.nodes[0].playbackRate.setTargetAtTime(bite ? 0.9 : 1.05, t, 0.05);
+      return;
+    }
+    n.o.frequency.setTargetAtTime(bite ? 72 : 118, t, 0.03); n.lfo.frequency.setTargetAtTime(bite ? 22 : 34, t, 0.03);
+    n.f.frequency.setTargetAtTime(bite ? 900 : 1500, t, 0.03); n.ng.gain.setTargetAtTime(bite ? 0.5 : 0.12, t, 0.03); n.g.gain.setTargetAtTime(bite ? 0.13 : 0.07, t, 0.03);
+  },
+  glaive() { if (!this.ok('glaive', 0.05)) return; if (this.smp('glaive')) return; this.noise({ filter: 'bandpass', f0: 2600, f1: 900, q: 2, dur: 0.18, vol: 0.2 }); this.tone({ type: 'triangle', f0: 1800, f1: 2400, dur: 0.1, vol: 0.05 }); },
+  glaiveCatch() { if (!this.ok('gcatch', 0.05)) return; if (this.smp('glaiveCatch')) return; this.tone({ type: 'square', f0: 340, f1: 200, dur: 0.05, vol: 0.12 }); this.noise({ filter: 'highpass', f0: 2500, dur: 0.04, vol: 0.2 }); this.tone({ type: 'triangle', f0: 2600, dur: 0.12, vol: 0.05, delay: 0.02 }); },
+  whirr(v) { if (!this.ok('whirr', 0.07)) return; if (this.smp('whirr', 0.5 + 0.5 * v)) return; this.noise({ filter: 'bandpass', f0: 1600 + 600 * v, q: 3, dur: 0.1, vol: 0.06 + 0.1 * v }); },
+  sizzle() { if (!this.ok('sizzle', 0.25)) return; if (this.smp('sizzle')) return; this.noise({ filter: 'highpass', f0: 3500, f1: 6000, dur: 0.35, vol: 0.12 }); },
+  splat(tier) { if (!this.ok('splat', 0.05)) return; if (this.smp('splat', [0.64, 1, 1.36][tier] || 1, { rate: [1.25, 1, 0.82][tier] || 1 })) return; this.noise({ filter: 'lowpass', f0: 900 + 300 * tier, f1: 200, dur: 0.14 + 0.05 * tier, vol: 0.18 + 0.1 * tier }); this.noise({ filter: 'highpass', f0: 4000, dur: 0.12, vol: 0.06 }); this.tone({ type: 'sine', f0: 140 - tier * 20, f1: 60, dur: 0.1, vol: 0.12 + tier * 0.06 }); },
+  rumble(v) { if (!this.ok('rumble', 0.2)) return; if (this.smp('rumble', 0.25 + 0.75 * v)) return; this.noise({ filter: 'lowpass', f0: 220, f1: 120, q: 1.5, dur: 0.4, vol: 0.12 + 0.35 * v }); this.tone({ type: 'sine', f0: 48, f1: 40, dur: 0.35, vol: 0.12 * v }); },
+  erupt() { if (!this.ok('erupt', 0.1)) return; if (this.smp('erupt')) return; this.noise({ filter: 'lowpass', f0: 2400, f1: 150, dur: 0.6, vol: 0.7, dest: this.crunch }); this.tone({ type: 'sawtooth', f0: 90, f1: 40, dur: 0.5, vol: 0.25 }); this.tone({ type: 'square', f0: 420, f1: 160, dur: 0.3, vol: 0.08, delay: 0.05 }); },
+  dig() { if (!this.ok('dig', 0.1)) return; if (this.smp('dig')) return; this.noise({ filter: 'lowpass', f0: 1200, f1: 200, dur: 0.35, vol: 0.35 }); },
+  chain() { if (!this.ok('chain', 0.08)) return; if (this.smp('chain')) return; for (let i = 0; i < 3; i++) this.tone({ type: 'square', f0: rand(1800, 2600), dur: 0.025, vol: 0.035, delay: i * 0.03 }); this.noise({ filter: 'highpass', f0: 5000, dur: 0.08, vol: 0.06 }); },
+  linkOn() { if (!this.ok('linkon', 0.2)) return; if (this.smp('linkOn')) return; this.tone({ type: 'sawtooth', f0: 220, f1: 880, dur: 0.2, vol: 0.08 }); this.noise({ filter: 'bandpass', f0: 3000, q: 2, dur: 0.2, vol: 0.12 }); },
+  buzz() { if (!this.ok('buzz', 0.14)) return; if (this.smp('buzz')) return; this.tone({ type: 'sawtooth', f0: 110 + rand(-6, 6), dur: 0.13, vol: 0.05 }); this.noise({ filter: 'bandpass', f0: 2600, q: 3, dur: 0.1, vol: 0.05 }); },
   heart() { if (!this.ok('heart', 0.4)) return; if (this.smp('heart')) return;
     this.tone({ type: 'sine', f0: 72, f1: 40, dur: 0.12, vol: 0.42 }); this.tone({ type: 'sine', f0: 62, f1: 36, dur: 0.12, vol: 0.3, delay: 0.17 }); },
   pickup() { if (!this.ok('pk', 0.1)) return; [523, 659, 784, 1046].forEach((f, i) => this.tone({ type: 'square', f0: f, dur: 0.08, vol: 0.06, delay: i * 0.06 })); },
@@ -643,11 +810,11 @@ const Sfx = {
 };
 
 // Music. With music_bank.js loaded (synthwave soundtrack rendered by dev/synthwave) the game plays sampled
-// tracks: title / stage1 (waves 1-2) / stage2 (waves 3-4) / boss (wave 5) loops and win / lose jingles.
+// tracks: title / stage1 (waves 1-2) / stage2 (waves 3-5) / boss (wave 6) loops and win / lose jingles.
 // Combat intensity colours the stage loops: unnoticed = muffled and low, noticed = opening up, fighting = full.
 // Without the bank (or after B flips it off) the procedural drum machine + bass plays instead:
 // intensity 0 = silent, 1 = kick/hats (you've been noticed), 2 = + snare & bass, 3 = full (boss or S rank).
-const WAVE_MUSIC = ['stage1', 'stage1', 'stage2', 'stage2', 'boss'];
+const WAVE_MUSIC = ['stage1', 'stage1', 'stage2', 'stage2', 'stage2', 'boss'];
 const Music = {
   intensity: 0, step: 0, nextT: 0, timer: null, out: null,
   LEVEL: 0.2, bank: {}, bankLoading: false, useBank: true, bus: null, lp: null, cur: null, want: null, shownI: -1,
@@ -712,7 +879,7 @@ const Music = {
     return this.useBank;
   },
   shade() {                                        // stage loops follow the fight; title, boss and jingles always play full
-    const I = this.cur && this.cur.name.startsWith('stage') ? this.intensity : 3;
+    const I = this.paused ? 0 : this.cur && this.cur.name.startsWith('stage') ? this.intensity : 3;   // the pause menu muffles everything
     if (I === this.shownI) return;
     const t = Sfx.ctx.currentTime, up = I > this.shownI;
     this.shownI = I;
@@ -727,7 +894,7 @@ const Music = {
     while (this.nextT < c.currentTime + 0.12) { this.play(this.step, this.nextT); this.nextT += spb; this.step++; }
   },
   play(s, t) {
-    const I = this.intensity; if (I <= 0 || Sfx.muted) return;
+    const I = this.paused ? 0 : this.intensity; if (I <= 0 || Sfx.muted) return;
     const d = Math.max(0, t - Sfx.ctx.currentTime), beat = s % 16, bar = (s >> 4) % 4, o = this.out;
     if (beat % 4 === 0 || (I >= 3 && (beat === 10 || beat === 7))) {
       Sfx.tone({ type: 'sine', f0: 150, f1: 42, dur: 0.14, vol: 0.85, delay: d, dest: o }); Sfx.noise({ filter: 'lowpass', f0: 3000, dur: 0.01, vol: 0.2, delay: d, dest: o });
@@ -762,7 +929,7 @@ const FONT = {
   '/': [0, 1, 2, 4, 8, 16, 0], '(': [2, 4, 8, 8, 8, 4, 2], ')': [8, 4, 2, 2, 2, 4, 8], "'": [12, 4, 8, 0, 0, 0, 0],
   '%': [24, 25, 2, 4, 8, 19, 3], '>': [8, 4, 2, 1, 2, 4, 8], '<': [2, 4, 8, 16, 8, 4, 2], '[': [14, 8, 8, 8, 8, 8, 14],
   ']': [14, 2, 2, 2, 2, 2, 14], '=': [0, 0, 31, 0, 31, 0, 0], '|': [4, 4, 4, 4, 4, 4, 4], '*': [0, 4, 21, 14, 21, 4, 0],
-  '#': [10, 10, 31, 10, 31, 10, 10], '_': [0, 0, 0, 0, 0, 0, 31],
+  '#': [10, 10, 31, 10, 31, 10, 10], '_': [0, 0, 0, 0, 0, 0, 31], '\\': [0, 16, 8, 4, 2, 1, 0], ';': [0, 12, 12, 0, 12, 4, 8],
 };
 function drawGlyphs(ctx, str, x, y, color, rows) {
   for (let i = 0; i < str.length; i++) {
@@ -812,8 +979,8 @@ const LOGO_ROWS = ['#eef2f6', '#c6ced8', '#9ba6b3', '#ffa040', '#ff7a1a', '#d948
 const CALL_ROWS = ['#fff8c8', '#ffe46a', '#ffd040', '#ffb030', '#ff8a1f', '#ff6a10', '#c84008'];
 const WIN_ROWS = ['#ffffff', '#e6f7ff', '#bfe9ff', '#7dd8ff', '#46b8f0', '#2a86c8', '#1a5a90'];
 const LOSE_ROWS = ['#ffd0c0', '#ff9a80', '#ff6a50', '#ff3a2a', '#d81e14', '#a0100c', '#600808'];
-const HINT1 = 'A/D MOVE  SPACE JUMP  S+SPACE DROP  CLICK FIRE  F KICK  G MINE  C HOOK  M MUTE';
-const HINT2 = 'J FIRE (KEYS)  1-9 0 - = BKSP [  Q/E WHEEL  T SENTRY  R RESTART  N SFX  B MUSIC';
+const HINT1 = 'A/D MOVE  SPACE JUMP  SHIFT DASH  CLICK FIRE  F KICK  G MINE  C HOOK  T SENTRY';
+const HINT2 = '1-9 0 - = BKSP [ ] \\ ; \'  Q/E WHEEL  ESC/P PAUSE  V POST FX  M MUTE  R RESTART';
 const TRACE_NAIL = [0xffe46a, 0xff8a1f], TRACE_PELLET = [0xfff0a0, 0xffa030], TRACE_ENEMY = [0xff6a4a, 0xc02010], TRACE_PARRY = [0xffffff, 0xffe14a];
 const TRACE_SNIPE = [0xffffff, 0x9adcff];
 
@@ -1312,6 +1479,71 @@ function drawGunship(ctx, f, wreck) {                // 56x24 armoured gunship (
 // boxes are [x, y, w, h] in the source frame. 'up' = stands on a vertical spine; the husk lies along a horizontal one.
 // clear = regions wiped before cutting (arms/shields that become their own pieces). hp = corpse toughness.
 // The heavy isn't here on purpose: it's drawn front-on, so it always bursts.
+// ---- overdrive round: new enemies ------------------------------------------------
+const SLG = ['#2a0a04', '#4a1406', '#7a2008', '#b8380a', '#f06a14', '#ffa030', '#ffd870', '#fff6d0'];   // molten slag ramp
+const CRUST = ['#140c0a', '#241612', '#36221a', '#4a3024'];
+function drawSlagling(ctx, w, h, form, tier) {       // molten splitter blob, faces right; form 'a' rest | 'q' squash | 's' stretch
+  const sq = form === 'q' ? [1.08, 0.78] : form === 's' ? [0.86, 1.12] : [1, 1];
+  const rx = (w / 2 - 1.5) * sq[0], ry = (h / 2 - 1.5) * sq[1], cx = w / 2, cy = h - 1 - ry;
+  blob(ctx, cx, cy, rx, ry, SLG, 2.2, 0.08);
+  const n = 2 + tier * 2;                             // cooling crust plates riding on top
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI * (0.12 + 0.76 * (i + 0.5) / n), px = cx + Math.cos(a) * rx * 0.6, py = cy + Math.sin(a) * ry * 0.62;
+    const pw = Math.max(2, Math.round(rx * 0.42)), ph = Math.max(1, Math.round(ry * 0.28));
+    R(ctx, CRUST[2], Math.round(px - pw / 2), Math.round(py - ph / 2), pw, ph); R(ctx, CRUST[3], Math.round(px - pw / 2), Math.round(py - ph / 2), pw, 1);
+  }
+  const es = tier >= 1 ? 2 : 1, ex = Math.round(cx + rx * 0.3), ey = Math.round(cy + ry * 0.05);   // white-hot eyes
+  R(ctx, SLG[1], ex - es - 1, ey - 1, es * 2 + 3, es + 2);
+  R(ctx, SLG[7], ex - es, ey, es, es); R(ctx, SLG[7], ex + 1, ey, es, es);
+  if (tier >= 1) { R(ctx, SLG[1], ex - es + 1, ey + es + 1, es * 2, 1); R(ctx, SLG[6], ex - es + 2, ey + es + 1, 1, 1); }   // grin
+  R(ctx, SLG[5], Math.round(cx - rx * 0.45), h - 1, 1, 1); R(ctx, SLG[6], Math.round(cx + rx * 0.15), h - 1, 1, 1);           // drips
+}
+const WRM = ['#1a0e10', '#2e1618', '#4a2224', '#6a3430', '#8c4a3e', '#b06850', '#d08a6a'];
+function drawBurrower(ctx, open, sway) {             // 18x30 slag worm, head up: ringed hide, magma maw
+  for (let i = 5; i >= 0; i--) {                      // tail (bottom) up to the neck
+    const t = i / 5, y = 27.5 - i * 3.5, x = 9 + Math.sin(t * Math.PI) * sway * 1.6, r = 4 + t * 1.8;
+    blob(ctx, x, y, r, 2.7, WRM, 2, 0.04);
+    R(ctx, i % 2 ? '#ff8a20' : '#c84008', Math.round(x - r + 1.5), Math.round(y + 1.4), Math.max(1, Math.round(r * 2 - 3)), 1);   // glowing seams
+  }
+  const hx = 9 + sway * 0.8;
+  blob(ctx, hx, 6.5, 6.5, 6, WRM, 2.3, 0.1);
+  R(ctx, '#ffd040', Math.round(hx - 6), 8, 1, 1); R(ctx, '#ffd040', Math.round(hx + 5), 8, 1, 1);                 // pit eyes
+  if (open) {
+    for (let y = 0; y < 9; y++) for (let x = 2; x < 17; x++) {
+      const d = Math.hypot((x + 0.5 - hx) / 4.4, (y + 0.5 - 4) / 3.4);
+      if (d < 1) R(ctx, d < 0.4 ? '#fff6d0' : d < 0.68 ? '#ffa030' : '#7a2008', x, y);
+    }
+    for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; R(ctx, '#e8e2d0', Math.round(hx - 0.5 + Math.cos(a) * 4), Math.round(3.5 + Math.sin(a) * 3)); }   // tooth ring
+  } else {
+    R(ctx, '#e8e2d0', Math.round(hx - 4), 1, 2, 3); R(ctx, '#e8e2d0', Math.round(hx + 2), 1, 2, 3); R(ctx, '#e8e2d0', Math.round(hx - 1), 0, 2, 2);   // mandibles
+    R(ctx, '#ff8a20', Math.round(hx - 2), 4, 4, 1);
+  }
+}
+const HPN = { k: '#0e0c0a', d: '#22201a', a: '#3a3628', b: '#5a5238', c: '#7e7450', brass: '#b08428', brassHi: '#f0c860', port: '#ffe040', chain: '#a0aab6', chainD: '#4a525c', hook: '#e0e8f0' };
+const HPLEG = { a: HPN.a, b: HPN.b, c: HPN.c, d: HPN.d, k: HPN.k };
+function drawHarpooner(ctx, by, front, back, pose) { // 20x24 dock brute: brass diving helmet, chain coil, hand harpoon
+  drawPLeg(ctx, 8, 15 + by, back[0], back[1], true, HPLEG);
+  drawPLeg(ctx, 11, 15 + by, front[0], front[1], false, HPLEG);
+  const u = (col, x, y, w, h) => R(ctx, col, x + 1, y + by, w, h);
+  u(HPN.chainD, 1, 8, 4, 6); for (let i = 0; i < 5; i++) u(HPN.chain, 1 + (i % 2) * 2, 8 + i, 1, 1);             // chain coil
+  u(HPN.brass, 5, 0, 7, 1); u(HPN.brass, 4, 1, 9, 6); u(HPN.brassHi, 5, 1, 3, 1); u(HPN.brassHi, 4, 2, 1, 2);   // diving helmet
+  u(HPN.k, 8, 2, 5, 4); u(HPN.port, 9, 3, 3, 2); u('#ffffff', 10, 3, 1, 1); u(HPN.brass, 6, 7, 6, 1);
+  u(HPN.c, 3, 8, 11, 1); u(HPN.b, 3, 9, 11, 2); u(HPN.b, 4, 11, 9, 3); u(HPN.c, 5, 9, 3, 1);                       // heavy coat
+  u(HPN.a, 4, 13, 9, 1); u(HPN.k, 4, 14, 9, 1); u(HPN.brass, 8, 14, 2, 1);
+  if (pose === 'crouch') { u(HPN.b, 1, 6, 3, 3); u(HPN.chainD, 1, 1, 1, 6); u(HPN.hook, 0, 0, 3, 1); u(HPN.hook, 1, 0, 1, 2); }   // harpoon cocked over the shoulder
+  else if (pose === 'lunge') u(HPN.b, 12, 9, 5, 2);                                                                  // follow-through, harpoon gone
+  else { u(HPN.b, 12, 10, 2, 4); u(HPN.chainD, 13, 5, 1, 11); u(HPN.hook, 12, 3, 3, 1); u(HPN.hook, 13, 2, 1, 2); }   // harpoon held upright
+}
+function drawLinker(ctx, f, hot) {                   // 16x14 fence drone: twin prongs throw a beam to its partner
+  const y = f ? 1 : 0;
+  R(ctx, '#2a3038', 3, 3 + y, 10, 7); R(ctx, '#4a5562', 4, 3 + y, 8, 1); R(ctx, '#1a1e24', 3, 9 + y, 10, 1);   // hull
+  R(ctx, '#e8b422', 4, 8 + y, 2, 1); R(ctx, '#e8b422', 7, 8 + y, 2, 1);
+  R(ctx, hot ? '#e0ffff' : '#40f0ff', 5, 5 + y, 5, 2); R(ctx, '#ffffff', 6, 5 + y, 1, 1);                       // core
+  R(ctx, '#5a636e', 13, 2 + y, 2, 2); R(ctx, '#5a636e', 13, 8 + y, 2, 2);                                       // prongs
+  R(ctx, hot ? '#ffffff' : '#9af8ff', 15, 2 + y, 1, 2); R(ctx, hot ? '#ffffff' : '#9af8ff', 15, 8 + y, 1, 2);
+  R(ctx, '#3a414b', 1, 4 + y, 2, 4); R(ctx, '#6a7380', 0, 5 + y, 1, 2);                                         // rear fin
+  R(ctx, '#3a414b', 6, 10 + y, 4, 2); R(ctx, '#7dd8ff', 7, 12 + y, 2, 1);                                       // thruster
+}
 const RAG = {
   grunt:    { up: false, hp: 35, fw: 20, fh: 18, body: x => drawGrunt(x, 1, false), head: [12, 5, 6, 6], torso: [3, 2, 9, 10],
               leg: x => { for (let y = 12; y < 16; y++) R(x, EP.f, 10, y, 2, 1); R(x, EP.m, 10, 16, 3, 1); R(x, EP.bone, 13, 16); }, thigh: [10, 12, 2, 2], shin: [10, 14, 4, 3] },
@@ -1461,7 +1693,51 @@ const GUNS = {
     R(ctx, '#7c8790', 23, 2, 3, 9); R(ctx, '#aab4bc', 23, 2, 3, 1); R(ctx, '#1a1d20', 24, 4, 2, 5);
     R(ctx, '#2a2e35', 3, 4, 2, 5); R(ctx, '#2a2e35', 12, 1, 3, 2); R(ctx, '#ff3a2a', 13, 1, 1, 1); R(ctx, '#2a2e35', 9, 10, 2, 2);
   } },
+  ripper: { w: 28, h: 13, py: 6, muzzle: 22, draw(ctx, arm, alt) {           // chain blade; alt = teeth advanced one link
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 9, 7); R(ctx, '#6a7380', 5, 3, 9, 1); R(ctx, '#23272d', 5, 9, 9, 1);                       // motor housing
+    R(ctx, '#e8b422', 6, 5, 6, 1); R(ctx, '#15161a', 7, 5, 1, 1); R(ctx, '#15161a', 9, 5, 1, 1); R(ctx, '#15161a', 11, 5, 1, 1);
+    R(ctx, '#2a2e35', 6, 10, 3, 2); R(ctx, '#8a94a0', 13, 2, 2, 9); R(ctx, '#c8d0d8', 13, 2, 1, 9);                    // grip + guard
+    R(ctx, '#4a525c', 15, 4, 11, 5); R(ctx, '#8a94a0', 15, 4, 11, 1); R(ctx, '#2a2e35', 15, 8, 11, 1);                 // bar
+    R(ctx, '#ff8a20', 17, 6, 7, 1);                                                                                     // hot groove
+    for (let x = 15; x < 27; x++) { const on = (x + (alt ? 1 : 0)) % 2 === 0; R(ctx, on ? '#eef2f6' : '#6a7380', x, 3); R(ctx, on ? '#6a7380' : '#eef2f6', x, 9); }
+    R(ctx, '#eef2f6', 26, 4, 1, 5); R(ctx, '#6a7380', 27, 5, 1, 3);
+  } },
+  hornet: { w: 26, h: 14, py: 7, muzzle: 24, draw(ctx, arm) {                 // six-shot seeker pod
+    if (arm) drawArm(ctx, 7);
+    R(ctx, '#3a3f47', 5, 6, 8, 5); R(ctx, '#6a7380', 5, 6, 8, 1); R(ctx, '#2a2e35', 6, 11, 2, 3);
+    R(ctx, '#4a5240', 10, 1, 14, 10); R(ctx, '#6e7a5e', 10, 1, 14, 1); R(ctx, '#2e3428', 10, 10, 14, 1);              // pod
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 3; i++) { R(ctx, '#15161a', 13 + i * 4, 3 + r * 4, 3, 3); R(ctx, '#ffd040', 14 + i * 4, 4 + r * 4, 1, 1); }
+    R(ctx, '#e8b422', 11, 2, 1, 8); R(ctx, '#9aa4b0', 24, 1, 1, 10); R(ctx, '#ff3a2a', 22, 1, 1, 1);
+  } },
+  lance: { w: 32, h: 13, py: 6, muzzle: 30, draw(ctx, arm) {                  // charge beam with a magma core
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#2e333b', 5, 3, 10, 7); R(ctx, '#5a636e', 5, 3, 10, 1); R(ctx, '#2a2e35', 7, 10, 2, 3);
+    R(ctx, '#7a2a10', 7, 5, 6, 3); R(ctx, '#ff8a20', 8, 6, 4, 1); R(ctx, '#ffe68a', 9, 6, 1, 1);                       // magma chamber
+    R(ctx, '#3a414b', 15, 3, 14, 7); R(ctx, '#6a7380', 15, 3, 14, 1); R(ctx, '#23272d', 15, 9, 14, 1);
+    for (let i = 0; i < 4; i++) R(ctx, '#c84008', 17 + i * 3, 4, 1, 5);                                                 // heat vents
+    R(ctx, '#ffb840', 15, 6, 14, 1); R(ctx, '#8a94a0', 29, 2, 2, 9); R(ctx, '#ffe68a', 30, 5, 1, 3);
+  } },
+  glaive: { w: 27, h: 17, py: 8, muzzle: 18, draw(ctx, arm, empty) {          // mag gauntlet; empty while the glaive is out
+    if (arm) drawArm(ctx, 8);
+    R(ctx, '#3a3f47', 5, 6, 8, 5); R(ctx, '#6a7380', 5, 6, 8, 1); R(ctx, '#2a2e35', 6, 11, 2, 3);
+    R(ctx, '#23272d', 11, 6, 2, 5); R(ctx, empty ? '#1a5a70' : '#46e6ff', 12, 7, 1, 3);                                  // mag clamp
+    if (!empty) drawGlaiveBlade(ctx, 19, 8.5);
+  } },
 };
+function drawGlaiveBlade(ctx, cx, cy) {              // three hooked blades on a ring, centred on (cx, cy)
+  for (let y = Math.floor(cy - 9); y < cy + 9; y++) for (let x = Math.floor(cx - 9); x < cx + 9; x++) {
+    const px = x + 0.5 - cx, py = y + 0.5 - cy, d = Math.hypot(px, py);
+    if (d < 1.6) R(ctx, '#e0ffff', x, y);
+    else if (d < 2.6) R(ctx, '#46e6ff', x, y);
+    else if (d > 3.2 && d < 5.4) R(ctx, (x + y) % 2 ? '#c8d0d8' : '#9aa4b0', x, y);
+  }
+  for (let k = 0; k < 3; k++) for (let t = 0; t <= 1.001; t += 0.12) {             // swept hooks
+    const a = k * Math.PI * 2 / 3 + t * 1.1, r = 5 + t * 3.6;
+    R(ctx, t > 0.7 ? '#ffffff' : '#e8eef4', Math.round(cx - 0.5 + Math.cos(a) * r), Math.round(cy - 0.5 + Math.sin(a) * r));
+    if (t < 0.6) R(ctx, '#7c8692', Math.round(cx - 0.5 + Math.cos(a - 0.25) * (r - 0.6)), Math.round(cy - 0.5 + Math.sin(a - 0.25) * (r - 0.6)));
+  }
+}
 
 // ---- enemies ------------------------------------------------------------------
 const LEG4 = [[2, 0, -2, 0], [0, 0, 0, 1], [-2, 0, 2, 0], [0, 1, 0, 0]];
@@ -1583,6 +1859,14 @@ const GIBDEF = {
   g_jplate: [11, 7, c => { R(c, '#3a414b', 1, 1, 9, 5); R(c, '#5a636e', 1, 1, 9, 1); for (let i = 0; i < 3; i++) R(c, i % 2 ? '#15161a' : '#e8b422', 2 + i * 3, 3, 3, 2); }],
   g_jughelm: [10, 9, c => { R(c, '#3a414b', 1, 1, 8, 6); R(c, '#5a636e', 2, 1, 6, 1); R(c, '#15171a', 3, 3, 6, 2); R(c, '#ff3020', 4, 3, 4, 1); R(c, '#7a0c0c', 1, 7, 4, 1); }],
   g_barrel: [7, 5, c => { R(c, '#a02018', 1, 1, 5, 3); R(c, '#e8b422', 2, 2, 2, 1); R(c, '#601010', 1, 3, 5, 1); }],
+  // overdrive round
+  g_slag: [6, 6, c => { R(c, '#b8380a', 1, 1, 4, 4); R(c, '#ffa030', 1, 1, 3, 3); R(c, '#fff6d0', 2, 2, 1, 1); }],
+  g_crust: [6, 4, c => { R(c, '#36221a', 1, 1, 4, 2); R(c, '#4a3024', 1, 1, 4, 1); R(c, '#f06a14', 4, 2, 1, 1); }],
+  g_wormseg: [9, 6, c => { R(c, '#6a3430', 1, 1, 7, 4); R(c, '#8c4a3e', 2, 1, 5, 1); R(c, '#ff8a20', 1, 4, 7, 1); R(c, '#2e1618', 1, 3, 1, 1); }],
+  g_tooth: [4, 5, c => { R(c, '#e8e2d0', 1, 1, 2, 2); R(c, '#e8e2d0', 1, 3, 1, 1); R(c, '#a89f80', 2, 2, 1, 1); }],
+  g_hhelm: [10, 9, c => { R(c, '#b08428', 1, 1, 8, 6); R(c, '#f0c860', 2, 1, 3, 1); R(c, '#0e0c0a', 4, 2, 4, 3); R(c, '#ffe040', 5, 3, 2, 1); R(c, '#7a0c0c', 1, 7, 4, 1); }],
+  g_chain: [8, 3, c => { R(c, '#a0aab6', 1, 1, 2, 1); R(c, '#4a525c', 3, 1, 1, 1); R(c, '#a0aab6', 4, 1, 2, 1); R(c, '#4a525c', 6, 1, 1, 1); }],
+  g_emitter: [6, 6, c => { R(c, '#2a3038', 1, 1, 4, 4); R(c, '#40f0ff', 2, 2, 2, 2); R(c, '#ffffff', 2, 2, 1, 1); }],
 };
 
 // ---- level ----------------------------------------------------------------------
@@ -1616,10 +1900,12 @@ const WAVES = [
   SPAWNS.enemies,
   [['bulwark', 'G'], ['bulwark', 'G'], ['mender', 'A'], ['enforcer', 'G'], ['sniper', 'G'], ['stalker', 'G'], ['drone', 'A'], ['tick', 'G'], ['tick', 'G'], ['tick', 'G'],
    ['rocketeer', 'G'], ['wasp', 'A'], ['sapper', 'G'], ['screamer', 'A'], ['screamer', 'A'], ['cloaker', 'G'], ['cloaker', 'G']],
-  [['rammer', 'G'], ['rammer', 'G'], ['rocketeer', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['wasp', 'A'], ['grunt', 'G'], ['grunt', 'G'], ['stalker', 'G'],
+  [['rammer', 'G'], ['rammer', 'G'], ['rocketeer', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['wasp', 'A'], ['grunt', 'G'], ['harpooner', 'G'], ['stalker', 'G'],
    ['tick', 'G'], ['tick', 'G'], ['jet', 'A'], ['brood', 'G'], ['warden', 'A'], ['screamer', 'A'], ['pyro', 'G'], ['gunship', 'A']],
   [['jet', 'A'], ['jet', 'A'], ['sapper', 'G'], ['sapper', 'G'], ['brood', 'G'], ['rammer', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['bulwark', 'G'], ['mender', 'A'],
-   ['enforcer', 'G'], ['jugg', 'G'], ['tick', 'G'], ['tick', 'G'], ['warden', 'A'], ['pyro', 'G']],
+   ['enforcer', 'G'], ['jugg', 'G'], ['linker', 'A'], ['linker', 'A'], ['warden', 'A'], ['pyro', 'G']],
+  [['slagling', 'G'], ['burrower', 'G'], ['linker', 'A'], ['linker', 'A'], ['harpooner', 'G'], ['enforcer', 'G'], ['stalker', 'G'], ['slagling', 'G'],
+   ['harpooner', 'G'], ['rocketeer', 'G'], ['warden', 'A'], ['pyro', 'G'], ['burrower', 'G'], ['sniper', 'G'], ['stalker', 'G']],
   [['boss', 'B']],
 ];
 const WAVE_POINTS = {
@@ -2077,6 +2363,22 @@ function genTextures(scene) {
   const grd = vx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.35, VIEW_W / 2, VIEW_H / 2, VIEW_W * 0.62);
   grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(1, 'rgba(0,0,0,0.6)'); vx.fillStyle = grd; vx.fillRect(0, 0, VIEW_W, VIEW_H);
   addTex(scene, 'vignette', vc);
+  // ---- overdrive round ----
+  addTex(scene, 'gun_ripper2', makeSprite(GUNS.ripper.w, GUNS.ripper.h, x => GUNS.ripper.draw(x, true, true)));
+  addTex(scene, 'gun_glaive2', makeSprite(GUNS.glaive.w, GUNS.glaive.h, x => GUNS.glaive.draw(x, true, true)));
+  addTex(scene, 'glaive', makeSprite(19, 19, c => drawGlaiveBlade(c, 9.5, 9.5)));
+  addTex(scene, 'hornet', makeSprite(9, 4, c => { R(c, '#8a94a0', 2, 1, 5, 2); R(c, '#c4ccd4', 2, 1, 5, 1); R(c, '#ffd040', 7, 1, 1, 2); R(c, '#e8b422', 4, 1, 1, 2); R(c, '#4a525c', 0, 0, 2, 1); R(c, '#4a525c', 0, 3, 2, 1); }));
+  addTex(scene, 'harpoon', makeSprite(11, 7, c => { R(c, '#6a7380', 0, 3, 6, 1); R(c, '#e0e8f0', 6, 2, 3, 3); R(c, '#ffffff', 9, 3, 2, 1); R(c, '#e0e8f0', 6, 0, 2, 2); R(c, '#e0e8f0', 6, 5, 2, 2); }));
+  for (const [key, w, h, tier] of [['slagling', 26, 20, 2], ['slagmid', 18, 14, 1], ['slagbit', 12, 10, 0]])
+    addSheet(scene, key, ['a', 'q', 's'].map(f => ({ name: f, c: makeSprite(w, h, x => drawSlagling(x, w, h, f, tier), '#1a0604') })), w, h, true);
+  addSheet(scene, 'burrower', [{ name: 'up', c: makeSprite(18, 30, x => drawBurrower(x, true, 0)) }, { name: 'shut', c: makeSprite(18, 30, x => drawBurrower(x, false, 0)) },
+                               { name: 'sw0', c: makeSprite(18, 30, x => drawBurrower(x, true, -1)) }, { name: 'sw1', c: makeSprite(18, 30, x => drawBurrower(x, false, 1)) }], 18, 30, true);
+  const hpf = [{ name: 'idle', c: makeSprite(20, 24, x => drawHarpooner(x, 0, [1, 0], [-1, 0], 'idle')) }, { name: 'crouch', c: makeSprite(20, 24, x => drawHarpooner(x, 1, [2, 0], [-2, 0], 'crouch')) },
+               { name: 'lunge', c: makeSprite(20, 24, x => drawHarpooner(x, 0, [3, 0], [-3, 0], 'lunge')) }, { name: 'air', c: makeSprite(20, 24, x => drawHarpooner(x, 0, [3, 3], [-2, 1], 'idle')) }];
+  for (let i = 0; i < 6; i++) hpf.push({ name: 'run' + i, c: makeSprite(20, 24, x => drawHarpooner(x, RUN_BOB[i], RUN_LEGS[i], RUN_LEGS[(i + 3) % 6], 'idle')) });
+  addSheet(scene, 'harpooner', hpf, 20, 24, true);
+  addSheet(scene, 'linker', [{ name: 'l0', c: makeSprite(16, 14, x => drawLinker(x, 0, false)) }, { name: 'l1', c: makeSprite(16, 14, x => drawLinker(x, 1, false)) },
+                             { name: 'lc', c: makeSprite(16, 14, x => drawLinker(x, 0, true)) }], 16, 14, true);
   ART.levelBase = drawLevelArt(LEVEL_GRID);
 }
 const ART = { levelBase: null };
@@ -2188,7 +2490,7 @@ class TitleScene extends Phaser.Scene {
     new PixelLabel(this, 480, 160, 'title_sub',{ text: 'ARENA 01 :: THE MELT FLOOR', scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });
     const prompt = new PixelLabel(this, 480, 428, 'title_prompt', { text: 'PRESS ENTER TO FIGHT', scale: 3, color: '#ffe46a', shadow: '#000000', originY: 0.5 });
     this.tweens.add({ targets: prompt, alpha: 0.25, duration: 520, yoyo: true, repeat: -1 });
-    const lines = ['A/D OR ARROWS MOVE    SPACE/W JUMP    S+SPACE DROP', 'MOUSE AIM + CLICK FIRE    F / RIGHT CLICK KICK + PARRY', '1-9 0 - = BKSP [   G MINE   T SENTRY   C HOOK   R RESTART'];
+    const lines = ['A/D MOVE   SPACE/W JUMP   S+SPACE DROP   SHIFT DASH', 'MOUSE AIM + CLICK FIRE    F / RIGHT CLICK KICK + PARRY', '1-9 0 - = BKSP [ ] \\ ; \'   G MINE   T SENTRY   C HOOK   ESC PAUSE'];
     lines.forEach((t, i) => new PixelLabel(this, 480, 466 + i * 20, 'title_ctl' + i, { text: t, scale: 2, color: '#8f9bab', shadow: '#000000', originY: 0.5 }));
     new PixelLabel(this, 480, 138, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
     this.fx = new FX(this, 300, 5);
@@ -2221,7 +2523,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
     this.state = 'play'; this.overShown = false; this.needReset = true;
     this.stats = { t0: this.time.now, shots: 0, hits: 0, kills: 0 };
-    this.weapon = 0; this.nextFire = 0; this.wNext = []; this.escUntil = 0; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
+    this.weapon = 0; this.nextFire = 0; this.wNext = []; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
     this.hp = T.PLAYER_HP; this.invulnUntil = 0; this.dropUntil = 0;
     this.lastGround = -1e9; this.jumpBuffer = -1e9; this.jumpCuttable = false; this.wasGround = false; this.lastVy = 0;
     this.runT = 0; this.idleT = 0; this.stepIdx = 0; this.recoil = 0; this.look = { x: 0, y: 0 }; this.sqx = 1; this.sqy = 1;
@@ -2240,6 +2542,14 @@ class GameScene extends Phaser.Scene {
     this.physics.world.gravity.y = TUNE.GRAVITY;
     this.mineReady = 0; this.mineQueued = false; this.killTimes = []; this.killCamUntil = 0; this.chaosT = []; this.chaosCd = 0; this.lastRag = null;
     this.jd = {}; this._v = new Phaser.Math.Vector2();
+    // overdrive round: dash, the four new guns, harpoons, slag tide, pause
+    this.dashUntil = 0; this.dashReady = 0; this.dashAir = true; this.dashIUntil = 0; this.dashVx = 0; this.dashVy = 0; this.dashing = false; this.dashGhostT = 0; this.dashDodged = false;
+    this.ripperUntil = 0; this.ripperBiteUntil = 0; this.ripN = 0;
+    this.locks = []; this.lockT = 0; this.hornetHeld = false;
+    this.lanceCharge = 0; this.lanceOn = false; this.lanceFullT = 0; this.lanceFxT = 0;
+    this.glaive = { on: false, x: 0, y: 0, vx: 0, vy: 0, state: 'out', dist: 0, spin: 0, hits: new Map(), bsp: 0, hoverT: 0, trailT: 0, whirT: 0 }; this.glaiveHold = false;
+    this.reeledBy = null; this.tide = null; this.paused = false; this.linkerSeq = 0;
+    Sfx.ripperSet(0); Sfx.lanceSet(0); Music.paused = false;
     this.grid = LEVEL_GRID.map(r => r.slice()); NAV = buildNav(this.grid);   // a fresh breakable copy every run
 
     this.buildWorld();
@@ -2257,6 +2567,12 @@ class GameScene extends Phaser.Scene {
     // Phaser's startFollow lerps any offset you add, which smears the kick into a drift.
     this.camX = this.player.x; this.camY = this.player.y;
     this.applyCamera(0);
+    this.initPostFx();
+    this.events.on('resume', () => {                                   // back from the pause menu: no stale presses, no stray shot
+      this.paused = false; Music.paused = false; this.input.keyboard.resetKeys();
+      this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.time.now + 220); this.kickQueued = false; this.mineQueued = false;
+      this.lanceOn = false; this.lanceCharge = 0; this.hornetHeld = false; this.locks = [];
+    });
 
     // Visuals are synced after Arcade's post-update so camera, sprite and gun never disagree by a frame.
     this.events.on('postupdate', this.syncVisuals, this);
@@ -2356,6 +2672,20 @@ class GameScene extends Phaser.Scene {
     this.haywireList.forEach(h => { h.setDepth(6); h.glow = this.add.image(0, 0, 'glow').setBlendMode(ADD).setTint(0xffa040).setScale(0.8).setDepth(18).setVisible(false); });
     [this.canisters, this.canisterList] = mk(6, 'canister', true);
     this.canisterList.forEach(k => k.setDepth(4));
+    // overdrive round
+    for (let i = 0; i < 16; i++) { const l = this.add.image(0, 0, 'glow').setBlendMode(ADD).setVisible(false).setDepth(18); l.t = 0; l.on = false; this.lights.push(l); }   // dash ghosts need more lights
+    this.hornetList = [];
+    for (let i = 0; i < 16; i++) {
+      const h = this.add.image(-99, -99, 'hornet').setDepth(9).setVisible(false); h.on = false;
+      h.glow = this.add.image(0, 0, 'glow').setBlendMode(ADD).setTint(0xffa040).setScale(0.45).setAlpha(0.7).setDepth(18).setVisible(false);
+      this.hornetList.push(h);
+    }
+    this.glaiveImg = this.add.image(-99, -99, 'glaive').setDepth(9).setVisible(false);
+    this.glaiveGlow = this.add.image(-99, -99, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.8).setAlpha(0.55).setDepth(18).setVisible(false);
+    this.lanceGlow = this.add.image(-99, -99, 'glow').setBlendMode(ADD).setTint(0xff8a20).setDepth(18).setVisible(false);
+    this.tideG = this.add.graphics().setDepth(4.9);                    // slag tide: opaque behind the actors...
+    this.tideFG = this.add.graphics().setDepth(7.6);                   // ...and a see-through front with the bright surface
+    this.tideGlow = this.add.image(0, 0, 'glow').setBlendMode(ADD).setTint(0xff6a10).setAlpha(0).setDepth(18);
   }
   spawnBarrels(fx) {                                                   // explosive drums; restocked every wave
     BARRELS.forEach(([cx, cy], i) => {
@@ -2390,7 +2720,8 @@ class GameScene extends Phaser.Scene {
   spawnEnemy(kind, cx, cy) {
     const D = ENEMY[kind], x = cx * TS + 8, flier = FLIERS.has(kind);
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
-    const f0 = { drone: 'd0', mender: 'm0', enforcer: 'idle0', bulwark: 'idle0', sniper: 'idle0', rocketeer: 'idle0', stalker: 'idle', tick: 'k0', boss: 'w0', wasp: 'p0', jet: 'j0', sapper: 'idle', brood: 'w0', screamer: 's0', warden: 'v0', jugg: 's0w0', cloaker: 'idle', pyro: 'idle', gunship: 'g0' }[kind] || 'w0';
+    const f0 = { drone: 'd0', mender: 'm0', enforcer: 'idle0', bulwark: 'idle0', sniper: 'idle0', rocketeer: 'idle0', stalker: 'idle', tick: 'k0', boss: 'w0', wasp: 'p0', jet: 'j0', sapper: 'idle', brood: 'w0', screamer: 's0', warden: 'v0', jugg: 's0w0', cloaker: 'idle', pyro: 'idle', gunship: 'g0',
+                 slagling: 'a', slagmid: 'a', slagbit: 'a', burrower: 'sw0', harpooner: 'idle', linker: 'l0' }[kind] || 'w0';
     const e = this.enemies.create(x, y, D.key, f0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
     e.setDepth(5).setCollideWorldBounds(true);
@@ -2450,12 +2781,23 @@ class GameScene extends Phaser.Scene {
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3b1f).setScale(0.4).setAlpha(0.8).setDepth(18);
     } else if (kind === 'heavy') {
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7a1a).setScale(0.8).setAlpha(0.55).setDepth(18);
+    } else if (D.molten) {
+      Object.assign(e, { ai: 'hop', hopT: rand(0.4, 1.2), landT: 0 });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7020).setScale(0.5 + D.tier * 0.35).setAlpha(0.55).setDepth(18);
+    } else if (kind === 'burrower') {
+      Object.assign(e, { ai: 'exposed', aiUntil: this.time.now + 700, under: false, ux: x, floorY: (cy + 1) * TS, cd: 1.5, trailT: 0, rumT: 0, glowT: 0, hitP: false });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a10).setScale(0.6).setAlpha(0.7).setDepth(18);
+    } else if (kind === 'linker') {
+      e.body.setAllowGravity(false);
+      Object.assign(e, { lid: ++this.linkerSeq, partner: null, linkT: 0, phase: 'off', beamT: rand(1, 2), trackY: y, beam: null, zapT: 0, fireCd: 1.5 });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40f0ff).setScale(0.45).setAlpha(0.8).setDepth(18);
     } else if (isHumanoid(e)) {
       Object.assign(e, { ai: 'idle', path: null, pathI: 0, navAir: false, navAirT: 0, lkx: x, lky: y, lkT: -1e9, lastSeenT: -1e9,
         dodgeCd: 0, fleeT: 0, fleeDir: 1, attackCd: 0, repickT: 0, repathT: 0, retreated: false, bursts: 0, shotsLeft: 0, shotT: 0,
         reloadT: 0, aimA: e.dir > 0 ? 0.25 : Math.PI - 0.25, aimStart: 0, stuckT: 0, lookT: rand(1, 3), goalNode: -1, recoil: 0, searchUntil: 0,
         fr: f0, face: e.dir, shieldUp: kind === 'bulwark', healCheckT: 0, pack: null });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint({ enforcer: 0xff3020, stalker: 0x7dff4a, bulwark: 0xff9a2a, sniper: 0x60c0ff, rocketeer: 0xff8a20, sapper: 0x7dff4a, cloaker: 0x40f0ff, pyro: 0xffb040 }[kind]).setScale(0.3).setAlpha(0.85).setDepth(18);
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint({ enforcer: 0xff3020, stalker: 0x7dff4a, bulwark: 0xff9a2a, sniper: 0x60c0ff, rocketeer: 0xff8a20, sapper: 0x7dff4a, cloaker: 0x40f0ff, pyro: 0xffb040, harpooner: 0xffe040 }[kind]).setScale(0.3).setAlpha(0.85).setDepth(18);
+      if (kind === 'harpooner') { e.hk = null; e.reelDmg = 0; e.fireCd = rand(1, 2); e.hkImg = this.add.image(x, y, 'harpoon').setDepth(9).setVisible(false); }
       if (kind === 'enforcer') e.gun = this.add.image(x, y, 'gun_rifle').setOrigin(2 / 24, 5.5 / 11).setDepth(6);
       if (kind === 'sniper') { e.gun = this.add.image(x, y, 'gun_sniper').setOrigin(2 / 34, 4.5 / 9).setDepth(6); e.fireCd = 1; }
       if (kind === 'rocketeer') { e.gun = this.add.image(x, y, 'gun_rlaunch').setOrigin(2 / 26, 5.5 / 11).setDepth(6); e.fireCd = 1.5; }
@@ -2494,7 +2836,7 @@ class GameScene extends Phaser.Scene {
   }
 
   buildInput() {
-    this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,SPACE,J,Q,E,F,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO,MINUS,PLUS,BACKSPACE,OPEN_BRACKET,G,T,C,R,M,N,B,ENTER,ESC');
+    this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,SPACE,J,Q,E,F,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO,MINUS,PLUS,BACKSPACE,OPEN_BRACKET,CLOSED_BRACKET,BACK_SLASH,SEMICOLON,QUOTES,SHIFT,G,T,C,R,M,N,B,P,V,ENTER,ESC');
     this.input.on('pointermove', () => { this.aimMode = 'mouse'; });
     this.input.on('pointerdown', ptr => { this.aimMode = 'mouse'; Sfx.init(); if (ptr.rightButtonDown()) this.kickQueued = true; if (ptr.middleButtonDown()) this.mineQueued = true; });
     this.input.on('wheel', (ptr, over, dx, dy) => {
@@ -2610,24 +2952,31 @@ class GameScene extends Phaser.Scene {
     this.physics.world.timeScale = ts;
     const dt = Math.min(delta, 50) / 1000 / ts;
     const K = this.keys, JD = Phaser.Input.Keyboard.JustDown;
-    for (const k of ['SPACE', 'W', 'UP', 'J', 'Q', 'E', 'F', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'ZERO', 'MINUS', 'PLUS', 'BACKSPACE', 'OPEN_BRACKET', 'G', 'T', 'C', 'R', 'M', 'N', 'B', 'ENTER', 'ESC']) this.jd[k] = JD(K[k]);
+    for (const k of ['SPACE', 'W', 'UP', 'J', 'Q', 'E', 'F', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'ZERO', 'MINUS', 'PLUS', 'BACKSPACE', 'OPEN_BRACKET',
+      'CLOSED_BRACKET', 'BACK_SLASH', 'SEMICOLON', 'QUOTES', 'SHIFT', 'G', 'T', 'C', 'R', 'M', 'N', 'B', 'P', 'V', 'ENTER', 'ESC']) this.jd[k] = JD(K[k]);
     if (this.needReset) {
       this.needReset = false;
       BUS.emit('reset', { hp: this.hp, weapon: this.weapon, enemies: this.enemiesLeft });
       BUS.emit('wave', 1, WAVES.length);
       BUS.emit('mines', TUNE.MINE.max);
+      BUS.emit('wavecard', 'WAVE 1', 'THE MELT FLOOR :: CLEAR THE ARENA');
       Music.track(WAVE_MUSIC[0], true);                               // every (re)start begins the stage theme from the top
     }
     if (this.jd.M) Sfx.toggleMute();
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', Music.toggle() ? 'SAMPLED MUSIC' : 'SYNTH MUSIC');
-    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); BUS.emit('callout', Sfx.useBank ? 'SAMPLED SFX' : 'SYNTH SFX'); }
-    if (this.jd.R || (this.overShown && this.jd.ENTER)) { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); this.scene.restart(); return; }
-    if (this.jd.ESC && this.state === 'play' && now > this.escUntil) { this.escUntil = now + 1600; BUS.emit('callout', 'ESC AGAIN: QUIT'); }   // mid-run Esc asks first
-    else if (this.jd.ESC) { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); return; }
+    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); BUS.emit('callout', Sfx.useBank ? 'SAMPLED SFX' : 'SYNTH SFX'); }
+    if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
+    if (this.jd.R || (this.overShown && this.jd.ENTER)) { this.restartRun(); return; }
+    if ((this.jd.ESC || this.jd.P) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P: pause menu (resume, restart, quit)
+    else if (this.jd.ESC) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
 
     if (this.state !== 'dead') { this.updatePlayer(dt, now); this.updateHook(dt); } else if (this.hook) this.hook = null;
     this.updateEnemies(dt, now);
+    this.updateHarpoons(dt, now); this.updateLinkBeams(dt, now);
+    this.updateHornets(dt); this.updateGlaive(dt, now);
+    if (this.mod === 'melt' || this.tide) this.updateTide(dt, now);
+    this.updatePostFx(dt, now);
     this.updateProjectiles(dt);
     this.updateStakes(dt); this.updateMines(dt); this.updateCharges(dt); this.updateHaywires(dt); this.updateCanisters(dt);
     this.updateSentry(dt, now); this.updateWrecks(dt); if (this.mod === 'slag' && this.state === 'play') this.updateSlagRain(dt);
@@ -2650,6 +2999,8 @@ class GameScene extends Phaser.Scene {
     Sfx.flameSet(now < this.flameActiveUntil && this.state !== 'dead');
     Sfx.cryoSet(now < this.cryoActiveUntil && this.state !== 'dead');
     Sfx.miniSet(this.state !== 'dead' ? this.spin : 0);
+    Sfx.ripperSet(this.state !== 'dead' && now < this.ripperUntil ? (now < this.ripperBiteUntil ? 1 : 0.55) : 0);
+    Sfx.lanceSet(this.state !== 'dead' && this.lanceOn ? this.lanceCharge : 0);
     // music follows the fight: noticed -> fighting -> boss / high style
     let I = 0;
     if (this.state === 'play') {
@@ -2703,6 +3054,19 @@ class GameScene extends Phaser.Scene {
     }
     this.wasGround = onGround; this.lastVy = b.velocity.y;
 
+    // dash (Shift): a short burst in the held direction with i-frames; one in the air until you land
+    if (onGround) this.dashAir = true;
+    const up = K.W.isDown || K.UP.isDown;
+    if (this.jd.SHIFT && now >= this.dashReady && (onGround || this.dashAir)) this.startDash(now, dir, (down ? 1 : 0) - (up ? 1 : 0), onGround);
+    if (now < this.dashUntil) {
+      b.setVelocity(this.dashVx, this.dashVy);
+      if ((this.dashGhostT -= dt) <= 0) { this.dashGhostT = 0.022; this.spawnLight(this.pv.x, this.pv.y - 12, 'player', 0x46e6ff, 1, 1, 0.55, 0.2, this.pFrame, this.facing < 0); }
+      this.fx.emit(p.x, p.y + rand(-7, 7), { n: 1, angle: Math.atan2(-this.dashVy, -this.dashVx), spread: 0.3, speed: [40, 120], life: [0.1, 0.22], size: [2, 1], cols: [0xffffff, 0x9af0ff, 0x46b8f0], add: true });
+    } else if (this.dashing) {
+      this.dashing = false; b.setAllowGravity(true);
+      b.setVelocity(this.dashVx * TUNE.DASH.keep, this.dashVy * TUNE.DASH.keep);
+    }
+
     // aim
     const sx = p.x + (this.facing > 0 ? 0 : -1), sy = p.y - 2;
     this.shoulder.x = sx; this.shoulder.y = sy;
@@ -2735,6 +3099,10 @@ class GameScene extends Phaser.Scene {
     if (this.jd.PLUS) this.setWeapon(11);
     if (this.jd.BACKSPACE) this.setWeapon(12);
     if (this.jd.OPEN_BRACKET) this.setWeapon(13);
+    if (this.jd.CLOSED_BRACKET) this.setWeapon(14);
+    if (this.jd.BACK_SLASH) this.setWeapon(15);
+    if (this.jd.SEMICOLON) this.setWeapon(16);
+    if (this.jd.QUOTES) this.setWeapon(17);
     if (this.jd.C) { if (this.hook && this.hook.state === 'zip') this.endHook(); else this.fireHook(now); }
     if ((this.jd.F || this.kickQueued) && now >= this.kickReady) this.bootKick(now);
     this.kickQueued = false;
@@ -2745,7 +3113,12 @@ class GameScene extends Phaser.Scene {
     if (this.jd.E) this.cycleWeapon(1);
     const ptr = this.input.activePointer, trig = (ptr.isDown && ptr.leftButtonDown()) || K.J.isDown, mini = WEAPONS[this.weapon].id === 'mini';
     this.spin = clamp(this.spin + (mini && trig ? dt / TUNE.MINI.spinUp : -dt / 0.7), 0, 1);   // minigun barrels spin up before they bite
-    if (trig && now >= this.nextFire && (!mini || this.spin > 0.3)) this.fire(now);
+    const wid = WEAPONS[this.weapon].id;
+    if (wid === 'hornet') this.hornetTrigger(trig, now);                // hold to paint locks, release to launch
+    else if (wid === 'lance') this.lanceTrigger(trig, now, dt);         // hold to charge, release to fire
+    else if (wid === 'glaive') { if (trig && now >= this.nextFire && !this.glaive.on) this.throwGlaive(now); }
+    else if (trig && now >= this.nextFire && (!mini || this.spin > 0.3)) this.fire(now);
+    this.glaiveHold = wid === 'glaive' && trig;                         // holding keeps a thrown glaive grinding in place
     this.heat = Math.max(0, this.heat - dt * (trig && mini ? 0.12 : 0.5));
     this.recoil = Math.max(0, this.recoil - 40 * dt);
     this.swapT = Math.max(0, this.swapT - dt);
@@ -2781,6 +3154,7 @@ class GameScene extends Phaser.Scene {
     if (i === this.weapon || this.state === 'dead') return;
     this.wNext[this.weapon] = this.nextFire;                          // each gun keeps its own cooldown: swapping off a slow gun
     this.weapon = i; this.applyGunTexture(); this.swapT = 0.14; this.arcActiveUntil = 0; this.flameActiveUntil = 0; this.cryoActiveUntil = 0;   // gun dips and comes back up
+    this.locks = []; this.hornetHeld = false; this.lanceOn = false; this.lanceCharge = 0; this.lanceFullT = 0; this.ripperUntil = 0;           // swapping drops locks and charge
     this.nextFire = Math.max(this.wNext[i] || 0, this.time.now + 120);   // never locks the next one out
     Sfx.swap(); BUS.emit('weapon', i);
   }
@@ -2867,6 +3241,8 @@ class GameScene extends Phaser.Scene {
       this.muzzle(mx, my, a, 1.2, 70);
       this.fxSmoke(mx, my, 7); this.fxSparks(mx, my, 4, a, 0.7, [60, 160]);
       this.shake(90, 0.004); this.addKick(-ca * 4, -sa * 4);
+    } else if (W.id === 'ripper') {
+      this.fireRipper(now, a, ca, sa);
     } else if (W.id === 'saw') {
       this.stats.shots++;
       this.spawnSaw(ox, oy, a);
@@ -3046,27 +3422,30 @@ class GameScene extends Phaser.Scene {
     const K = TUNE.KICK, p = this.player, f = this.facing;
     this.kickReady = now + K.cooldown; this.kickUntil = now + 180;
     Sfx.whoosh(); this.addKick(f * 2, 0);
+    if (this.reeledBy) this.breakHarpoon('SNAPPED!');                  // kick the chain to break free
+    const drop = now < this.dashUntil + 150, dk = drop ? 1.7 : 1;      // kick out of a dash: DROPKICK
     const xa = p.x + f * 2, xb = p.x + f * (K.range + 2), xl = Math.min(xa, xb), xr = Math.max(xa, xb), yt = p.y - 14, yb = p.y + 12;
     const inBox = (x, y, pad) => x >= xl - pad && x <= xr + pad && y >= yt - pad && y <= yb + pad;
-    let hit = false;
+    let hit = false, hitE = false;
     for (const list of [this.ebulletList, this.boltList]) for (const b of list) {
       if (!b.active || !inBox(b.x, b.y, 10)) continue;
       const x = b.x, y = b.y; b.disableBody(true, true); this.parry(x, y); hit = true;
     }
     for (const e of this.enemies.getChildren()) {
-      if (!e.alive) continue;
+      if (!e.alive || e.under) continue;
       const b = e.body;
       if (b.right < xl || b.left > xr || b.bottom < yt || b.top > yb) continue;
-      hit = true;
+      hit = hitE = true;
       if (e.kind !== 'boss') {
         const kb = Math.max(0.3, e.def.kb);
-        b.velocity.x = f * K.push * kb; b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5);
+        b.velocity.x = f * K.push * kb * (drop ? 1.3 : 1); b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5);
         if (e.kind === 'bulwark') { e.ai = 'stagger'; e.aiUntil = now + 1100; e.shieldUp = false; }   // the boot breaks the guard
         if (e.kind === 'tick') e.armT = 0;                                                           // punt it at its friends instead
       }
       this.fxBlood(b.center.x, b.center.y, 6, f > 0 ? 0 : Math.PI, 1, [80, 220]);
-      this.damageEnemy(e, K.damage, f, -0.3, 'kick');
+      this.damageEnemy(e, K.damage * dk, f, -0.3, 'kick');
     }
+    if (drop && hitE) { BUS.emit('callout', 'DROPKICK!'); this.addStyle(60); this.zoomPunch = Math.max(this.zoomPunch, 0.05); this.slowmoUntil = Math.max(this.slowmoUntil, now + 160); }
     for (const g of this.gibList) if (g.active && inBox(g.x, g.y, 4)) {
       g.body.velocity.x = f * rand(300, 480); g.body.velocity.y = -rand(150, 300); g.body.angularVelocity = rand(-900, 900);
       if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); }
@@ -3151,11 +3530,11 @@ class GameScene extends Phaser.Scene {
     this.shake(30, 0.0008);
   }
   ignite(e, t) {
-    if (e.kind === 'pyro') return;                                       // fireproof
+    if (e.kind === 'pyro' || e.def.molten || e.under) return;            // fireproof
     if (e.kind === 'boss') t *= 0.5;
     if (e.burnT <= 0) {
       Sfx.ignite();
-      if (!['boss', 'drone', 'mender', 'bulwark', 'rammer', 'wasp', 'jet', 'brood', 'screamer', 'warden', 'jugg'].includes(e.kind)) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
+      if (!['boss', 'drone', 'mender', 'bulwark', 'rammer', 'wasp', 'jet', 'brood', 'screamer', 'warden', 'jugg', 'burrower', 'linker', 'gunship'].includes(e.kind)) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
     }
     e.burnT = Math.max(e.burnT, t);
   }
@@ -3272,7 +3651,7 @@ class GameScene extends Phaser.Scene {
       if (P.tick <= 0) {
         P.tick = 0.35;
         for (const rd of this.ragdolls) if (Math.abs(rd.pts[2].x - P.x) < P.w / 2 && Math.abs(rd.pts[2].y - P.y) < 12) rd.burnT = Math.max(rd.burnT, 2);   // corpses catch too
-        if (alive && Math.abs(pb.center.x - P.x) < P.w / 2 + 5 && Math.abs(pb.bottom - P.y) < 6) this.hurtPlayer(7, P.x, { knock: false, iframes: false });
+        if (alive && Math.abs(pb.center.x - P.x) < P.w / 2 + 5 && Math.abs(pb.bottom - P.y) < 6) this.hurtPlayer(7, P.x, { knock: false, iframes: false, burn: true, srcY: P.y + 8 });
         for (const e of this.enemies.getChildren()) if (e.alive && e.kind !== 'boss' && Math.abs(e.body.center.x - P.x) < P.w / 2 + 4 && Math.abs(e.body.bottom - P.y) < 6) this.ignite(e, 1.5);
       }
     }
@@ -3646,8 +4025,12 @@ class GameScene extends Phaser.Scene {
     this.stats.hits++;
     const hs = (isHumanoid(e) || e.kind === 'jet') && by < e.body.top + 5;                    // top quarter of a humanoid = head
     if (e.kind === 'boss' && by < e.body.top + 12) { e.dmgHead = true; b.dmg *= 1.5; }   // boss head / furnace crit
-    this.fxBlood(bx, by, b.kind === 'pellet' ? 5 : 4, ang, 0.9, [60, 200]);       // exit spray
-    this.fxBlood(bx, by, hs ? 6 : 2, hs ? -Math.PI / 2 : ang + Math.PI, 1.2, [30, hs ? 160 : 90]);
+    if (e.def.molten) this.fx.emit(bx, by, { n: 5, angle: ang + Math.PI, spread: 1.6, speed: [40, 160], life: [0.2, 0.45], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 400, mode: 1 });   // slag spits sparks, not blood
+    else if (e.def.mech) this.fxSparks(bx, by, 5, ang + Math.PI, 1.8);
+    else {
+      this.fxBlood(bx, by, b.kind === 'pellet' ? 5 : 4, ang, 0.9, [60, 200]);       // exit spray
+      this.fxBlood(bx, by, hs ? 6 : 2, hs ? -Math.PI / 2 : ang + Math.PI, 1.2, [30, hs ? 160 : 90]);
+    }
     if (e.kind === 'drone' || e.kind === 'mender') this.fxSparks(bx, by, 4, ang + Math.PI, 1.8);
     this.damageEnemy(e, b.dmg * (hs ? TUNE.HEADSHOT : 1), Math.cos(ang), Math.sin(ang), b.kind, hs);
   }
@@ -3697,7 +4080,7 @@ class GameScene extends Phaser.Scene {
         pb.velocity.y = Math.max(-W.maxRise, Math.min(pb.velocity.y, 0) + Math.sin(ang) * push);
         this.jumpCuttable = false; this.lastGround = -1e9;
         const sd = Math.round(W.selfDamage * f);
-        if (sd > 0) this.hurtPlayer(sd, x, W.enemy ? { knock: false } : { knock: false, iframes: false, self: true });
+        if (sd > 0) this.hurtPlayer(sd, x, W.enemy ? { knock: false, srcY: y } : { knock: false, iframes: false, self: true });
       }
     }
     for (const g of this.gibList) {
@@ -3736,12 +4119,15 @@ class GameScene extends Phaser.Scene {
     this.addKick(cdx / cd * 9 * cf, cdy / cd * 9 * cf);
     if (dp < 220) BUS.emit('flash', 0.28 * s * (1 - dp / 220));
     if (dp < 150) this.zoomPunch = Math.max(this.zoomPunch, 0.04 * s);
+    if (dp < 260 && s > 0.5) this.warpPulse(0.07 * Math.min(1.5, s) * (1 - dp / 260));   // shockwave warp (post FX)
     Sfx.explosion(clamp((1 - dp / 600) * Math.min(1, s + 0.2), 0.3, 1));
   }
 
   // ---------------------------------------------------------------- damage ----
   damageEnemy(e, dmg, dx, dy, src, hs) {
-    if (!e.alive) return;
+    if (!e.alive || e.under) return;                                     // a burrowed worm can't be touched
+    if (e.def.molten && src === 'burn') return;                          // slag doesn't burn
+    if (e.kind === 'harpooner' && e.hk && e.hk.state === 'hooked' && src !== 'burn' && (e.reelDmg += dmg) >= TUNE.HARPOON.breakDmg) { this.reeledBy = e; this.breakHarpoon('CUT LOOSE'); }
     if (e.kind === 'rammer') {                                          // ram plate soaks frontal fire; dizzy = wide open
       if (e.ai === 'dizzy') dmg *= 2;
       else if (dx && Math.sign(dx) === -e.dir && !['rocket', 'burn', 'flame', 'crush'].includes(src)) {
@@ -3759,16 +4145,17 @@ class GameScene extends Phaser.Scene {
     e.hp -= dmg; e.flashT = 0.08; e.aggro = true; e.aggroT = 5; e.lastHs = !!hs;
     e.dmgAcc += dmg; if (hs) e.dmgHead = true; if (!e.dmgFlushAt) e.dmgFlushAt = this.time.now + (src === 'burn' || src === 'flame' ? 420 : 90);   // batched damage numbers (streams batch longer)
     this.addStyle(dmg * 0.25);
-    const quiet = src === 'burn', rapid = src === 'arc' || src === 'flame';
+    const quiet = src === 'burn', rapid = src === 'arc' || src === 'flame' || src === 'ripper';
     if (src !== 'rocket' && !quiet) {
-      const kb = ({ pellet: 85, arc: 8, rail: TUNE.RAIL.knock, saw: 60, flame: 4, kick: 0, parry: 120, stake: 240 }[src] ?? 45) * e.def.kb;
+      const kb = ({ pellet: 85, arc: 8, rail: TUNE.RAIL.knock, saw: 60, flame: 4, kick: 0, parry: 120, stake: 240, ripper: 0, lance: 220, glaive: 70 }[src] ?? 45) * e.def.kb;
       e.body.velocity.x += dx * kb;
-      if (e.kind === 'drone' || e.kind === 'mender') e.body.velocity.y += dy * kb;
+      if (e.kind === 'drone' || e.kind === 'mender' || e.kind === 'linker') e.body.velocity.y += dy * kb;
       else if (e.body.blocked.down && kb > 0) e.body.velocity.y = Math.min(e.body.velocity.y, -50 * e.def.kb);
-      e.stunT = Math.max(e.stunT, ({ pellet: 0.2, arc: 0.05, rail: 0.3, flame: 0.02, kick: 0, parry: 0.3, stake: 0.4 }[src] ?? 0.07));
+      e.stunT = Math.max(e.stunT, ({ pellet: 0.2, arc: 0.05, rail: 0.3, flame: 0.02, kick: 0, parry: 0.3, stake: 0.4, ripper: 0.16, lance: 0.4, glaive: 0.15 }[src] ?? 0.07));
     }
     if (isRifleman(e) && e.ai === 'aim' && !rapid && src !== 'nail' && !quiet) { e.ai = 'engage'; e.fireCd = 0.5; }   // heavy hits spoil the aim
     if (e.kind !== 'boss' && !quiet) e.rotation = clamp(e.rotation + (dx >= 0 ? 1 : -1) * (src === 'nail' || rapid ? 0.12 : 0.3), -0.5, 0.5);   // visual wobble
+    if (hs && src === 'ripper' && Math.random() > 0.15) hs = false;          // the blade doesn't ding every bite
     if (hs) { this.headshots++; Sfx.ding(); this.fxBlood(e.body.center.x, e.body.top, 8, -Math.PI / 2, 1.0, [60, 200]); }
     if (!quiet) BUS.emit('hitmark', e.hp <= 0, !!hs);
     if (!quiet && (!rapid || Math.random() < 0.25)) Sfx.confirm(e.hp <= 0);
@@ -3787,7 +4174,16 @@ class GameScene extends Phaser.Scene {
       img.setTexture('dig' + col, ch === '!' ? 'x' : ch === '+' ? 'p' : ch).setVisible(true).setAlpha(1);
       imgs.push(img);
     }
-    this.dmgNums.push({ imgs, x: x + rand(-4, 4), y, t: 0, vx: rand(-16, 16), big: col === 'R' || col === 'Y' });
+    let nx = x + rand(-4, 4), ny = y;                                   // shove it clear of numbers still rising nearby
+    for (let k = 0; k < 6; k++) {
+      const clash = this.dmgNums.some(d => {
+        const q = d.t / (d.big ? 0.9 : 0.7), dy = d.y - 22 * (1 - Math.pow(1 - q, 3));
+        return q < 0.8 && Math.abs(dy - ny) < 9 && Math.abs(d.x + d.vx * d.t - nx) < (d.imgs.length + str.length) * 3.5 + 3;
+      });
+      if (!clash) break;
+      ny -= 9; nx += k % 2 ? 6 : -6;
+    }
+    this.dmgNums.push({ imgs, x: nx, y: ny, t: 0, vx: rand(-8, 8), big: col === 'R' || col === 'Y' });
   }
   addStyle(p) { this.style.pts = Math.min(1600, this.style.pts + p); }
   updateStyle(dt) {
@@ -3822,7 +4218,7 @@ class GameScene extends Phaser.Scene {
     }
     if (e.kind === 'mender') { this.fx.emit(cx, cy, { n: 22, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xa0ffc8, 0x40ff90], add: true, drag: 2 }); this.spawnLight(cx, cy, 'glow', 0x40ff90, 2, 3.5, 0.9, 0.3); }
     if (e.kind === 'heavy' || e.kind === 'bulwark') this.zoomPunch = Math.max(this.zoomPunch, 0.08);
-    if (!rag && Math.hypot(this.player.x - cx, this.player.y - cy) < 70) BUS.emit('splat', src === 'rocket' ? 6 : 3);   // too close: it gets on the lens
+    if (!rag && !D.molten && !D.mech && Math.hypot(this.player.x - cx, this.player.y - cy) < 70) BUS.emit('splat', src === 'rocket' || src === 'ripper' ? 6 : 3);   // too close: it gets on the lens
     const power = src === 'rocket' || e.kind === 'boss' ? 1.7 : src === 'pellet' ? 1.25 : 1, charred = e.burnT > 0, shat = src === 'shatter';
     if (shat) {                                                       // frozen solid: it goes like glass
       this.fx.emit(cx, cy, { n: 30, speed: [60, 260], life: [0.4, 0.9], size: [2, 1], cols: [0xffffff, 0xe0f8ff, 0x9adcff, 0x5aa8e0], g: 500, mode: 1, drag: 0.6 });
@@ -3831,8 +4227,8 @@ class GameScene extends Phaser.Scene {
     const n = rag || hay || e.kind === 'gunship' ? 0 : randi(D.gibN[0], D.gibN[1]) + (src === 'rocket' ? 4 : 0), spread = e.kind === 'boss' ? 18 : 5;
     for (let i = 0; i < n; i++) {
       const tex = shat && i % 2 === 0 ? pick(['g_ice1', 'g_ice2', 'g_ice3']) : i < D.gibs.length ? D.gibs[i] : pick(D.gibs);
-      const g = this.spawnGib(tex, cx + rand(-spread, spread), cy + rand(-spread, spread), dx * rand(60, 220) * power + rand(-130, 130) * power, (dy * 120 - rand(140, 330)) * power);
-      if (shat) g.setTint(0xc8f0ff); else if (charred) g.setTint(0x7a5a48);                                // burnt to a crisp
+      const g = this.spawnGib(tex, cx + rand(-spread, spread), cy + rand(-spread, spread), dx * rand(60, 220) * power + rand(-130, 130) * power, (dy * 120 - rand(140, 330)) * power, shat ? 'metal' : D.molten ? 'slag' : D.mech ? 'metal' : undefined);
+      if (shat) g.setTint(0xc8f0ff); else if (charred && !D.molten) g.setTint(0x7a5a48);                  // burnt to a crisp
     }
     if (e.kind === 'tick' && src !== 'tickboom' && src !== 'shatter') this.time.delayedCall(70, () => this.explode(cx, cy, TUNE.TICK));   // dead ticks still go off (chains!)
     if (e.kind === 'brood') this.time.delayedCall(60, () => this.broodBirth(cx, cy - 4, e.dir, TUNE.BROOD.burst, null));   // and out they all come
@@ -3846,19 +4242,39 @@ class GameScene extends Phaser.Scene {
       for (let i = 0; i < 5; i++) this.time.delayedCall(i * 110, () => this.boomFx(cx + rand(-14, 14), cy + rand(-14, 10), rand(0.5, 0.9)));
     }
     if (e.kind === 'sapper' && Math.random() < 0.35) { this.plantCharge(cx, cy, 1.4); BUS.emit('callout', 'DROPPED A CHARGE'); }
+    if (D.child && src !== 'shatter') { this.enemiesLeft += 2; this.totalEnemies += 2; this.time.delayedCall(16, () => this.slagSplit(cx, cy, D.child, dx)); }   // it splits; the halves count toward the wave
+    if (e.kind === 'harpooner' || this.reeledBy === e) this.dropHarpoon(e);
+    if (e.kind === 'linker') { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.spawnLight(cx, cy, 'glow', 0x40f0ff, 1.5, 3, 0.9, 0.25); if (e.partner && e.partner.partner === e) e.partner.partner = null; }
+    if (e.kind === 'burrower') { this.zoomPunch = Math.max(this.zoomPunch, 0.08); BUS.emit('callout', 'WORM SLAIN'); }
+    if (src === 'ripper' && this.state !== 'dead' && this.hp < TUNE.PLAYER_HP) {   // ripper kills feed you
+      const h = Math.min(TUNE.RIPPER.heal, TUNE.PLAYER_HP - this.hp);
+      this.hp += h; BUS.emit('hp', this.hp, 0); this.dmgNumber(this.player.x, this.player.y - 18, '+' + Math.round(h), 'G');
+      this.fx.emit(this.player.x, this.player.y, { n: 8, speed: [20, 70], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x7dff8a], add: true, g: -60 });
+    }
+    if (this.locks.length) this.locks = this.locks.filter(o => o !== e);
     if (e.kind === 'boss') {                                           // the big finish: rolling blasts, then everything it spawned pops
       this.slowmoUntil = this.time.now + 1600; BUS.emit('flash', 0.5); this.zoomPunch = 0.15; this.boss = null;
       for (let i = 0; i < 9; i++) this.time.delayedCall(i * 120, () => this.boomFx(cx + rand(-22, 22), cy + rand(-22, 18), rand(0.6, 1.1)));
       for (const o of this.enemies.getChildren()) if (o.alive && o.summoned) this.time.delayedCall(rand(100, 700), () => { if (o.alive) this.tickBoom(o); });
       BUS.emit('callout', 'SMELTER SLAIN');
     }
-    this.fxBlood(cx, cy, Math.round((rag ? 10 : 38) * power), -Math.PI / 2, Math.PI * 2, [60, 300]);
-    this.fxBlood(cx, cy, 14, Math.atan2(dy, dx), 0.8, [150, 380]);
-    this.fxMist(cx, cy, 10);
-    if (e.kind === 'drone') { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.fxSmoke(cx, cy, 6); }
-    if (e.kind === 'heavy') { this.fxFire(cx, cy, 16); this.spawnLight(cx, cy, 'glow', 0xff7a1a, 2, 4, 0.9, 0.4); }
-    this.paintSplatAround(cx, b.bottom - 2, rag ? 4 : 10 + 6 * power);
-    if (rag) { Sfx.squish(); Sfx.land(0.5); } else Sfx.gib(power);
+    if (D.molten) {                                                   // slag bursts: molten spatter, scorch, no blood
+      const t = D.tier + 1;
+      this.fx.emit(cx, cy, { n: 10 + 10 * t, speed: [50, 160 + 50 * t], life: [0.4, 0.9], size: [3, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a, 0xa02008], add: true, g: 420, mode: 1, drag: 0.6 });
+      this.fxFire(cx, cy, 4 + 4 * t); this.fxSmoke(cx, cy, 2 + t);
+      this.spawnLight(cx, cy, 'glow', 0xff7020, 1 + 0.6 * t, 2 + t, 0.9, 0.3);
+      this.paintScorch(cx, b.bottom, 4 + 3 * t); Sfx.splat(D.tier);
+    } else if (D.mech) {
+      this.fxSparks(cx, cy, 18, 0, Math.PI * 2, [80, 280]); this.fxSmoke(cx, cy, 6); Sfx.clang(0.6); Sfx.gib(0.5);
+    } else {
+      this.fxBlood(cx, cy, Math.round((rag ? 10 : 38) * power), -Math.PI / 2, Math.PI * 2, [60, 300]);
+      this.fxBlood(cx, cy, 14, Math.atan2(dy, dx), 0.8, [150, 380]);
+      this.fxMist(cx, cy, 10);
+      if (e.kind === 'drone') { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.fxSmoke(cx, cy, 6); }
+      if (e.kind === 'heavy' || e.kind === 'burrower') { this.fxFire(cx, cy, 16); this.spawnLight(cx, cy, 'glow', 0xff7a1a, 2, 4, 0.9, 0.4); }
+      this.paintSplatAround(cx, b.bottom - 2, rag ? 4 : 10 + 6 * power);
+      if (rag) { Sfx.squish(); Sfx.land(0.5); } else Sfx.gib(power);
+    }
     this.shake(e.kind === 'heavy' ? 220 : 120, e.kind === 'heavy' ? 0.01 : 0.005 * power);
     this.hitStop(e.kind === 'heavy' ? 90 : 45);
     if (e.glow) e.glow.setVisible(false);
@@ -5153,7 +5569,7 @@ class GameScene extends Phaser.Scene {
   applyMod(m) {                                                         // wave modifiers: chaos with rules
     this.mod = m; this.rainT = 1.5;
     this.physics.world.gravity.y = m === 'lowg' ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;
-    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
+    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
   }
   updateSlagRain(dt) {                                                  // molten drips from the ceiling, marked where they'll land
     this.rainT -= dt; if (this.rainT > 0) return;
@@ -5424,6 +5840,724 @@ class GameScene extends Phaser.Scene {
     }
   }
   // ------------------------------------------------------------------ waves ----
+  // =============================================================== overdrive round ====
+  // ----------------------------------------------------------------------- dash ----
+  startDash(now, dx, dy, onGround) {
+    const T = TUNE.DASH, p = this.player, b = p.body;
+    let ax = dx, ay = onGround && dy > 0 ? 0 : dy;
+    if (!ax && !ay) ax = this.facing;
+    const L = Math.hypot(ax, ay) || 1; ax /= L; ay /= L;
+    this.dashVx = ax * T.speed; this.dashVy = ay * T.speed * 0.85;
+    this.dashUntil = now + T.time * 1000; this.dashReady = now + T.cd * 1000; this.dashIUntil = now + T.iframes * 1000;
+    this.dashing = true; this.dashDodged = false; this.dashGhostT = 0; if (!onGround) this.dashAir = false;
+    b.setAllowGravity(false); this.jumpCuttable = false; this.jumpBuffer = -1e9;
+    this.squash(ax ? 1.35 : 0.75, ax ? 0.75 : 1.35);
+    if (onGround) this.fxDust(p.x, b.bottom, 6);
+    this.spawnLight(p.x, p.y, 'ring', 0x46e6ff, 0.15, 0.8, 0.8, 0.16);
+    this.addKick(-ax * 3, -ay * 3); this.shake(50, 0.0015);
+    Sfx.dash();
+    if (this.reeledBy) this.breakHarpoon('BROKE FREE');
+  }
+  dashDodge() {                                                         // something hostile went through you mid-dash
+    if (this.dashDodged) return;
+    this.dashDodged = true; this.addStyle(30); Sfx.dodge();
+    this.spawnLight(this.player.x, this.player.y, 'ring', 0x9af0ff, 0.3, 1.2, 0.9, 0.2);
+  }
+
+  // ------------------------------------------------------------- run control ----
+  stopLoops() { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); }
+  restartRun() { this.stopLoops(); Music.paused = false; this.scene.restart(); }
+  quitToTitle() { this.stopLoops(); Music.paused = false; Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); }
+  pauseGame() {
+    if (this.paused || this.state !== 'play') return;
+    this.paused = true; this.stopLoops(); Music.paused = true;
+    if (this.pfx && POSTFX.on) { const m = this.pfx.cm.colorMatrix; m.reset(); m.saturate(-0.75); m.brightness(0.55, true); this.pfx.key = 'pause'; }
+    this.input.setDefaultCursor('default');
+    BUS.emit('pause', true);
+    this.scene.pause();
+  }
+
+  // ---------------------------------------------------------------- post FX ----
+  // Phaser 4 camera filters on the world camera only (the HUD stays crisp): bloom, a barrel-warp pulse on big
+  // blasts, and colour grading (rampage saturation, low-health desaturation, grey when you die). V toggles.
+  initPostFx() {
+    this.pfx = null;
+    const cam = this.cameras.main;
+    if (!cam.filters || this.game.renderer.type !== Phaser.WEBGL) return;
+    try {
+      const ext = cam.filters.external;
+      const bloom = ext.addParallelFilters();
+      bloom.top.addThreshold(0.5, 0.85);
+      bloom.top.addBlur(1, 2, 2, 1.2);
+      bloom.blend.blendMode = Phaser.BlendModes.ADD; bloom.blend.amount = 0.55;
+      const barrel = ext.addBarrel(1);
+      const cm = ext.addColorMatrix();
+      this.pfx = { bloom, barrel, cm, warp: 0, key: '' };
+      this.applyPostFxEnabled();
+    } catch (err) { this.pfx = null; }
+  }
+  applyPostFxEnabled() { const P = this.pfx; if (P) for (const f of [P.bloom, P.barrel, P.cm]) f.active = POSTFX.on; }
+  togglePostFx() { POSTFX.on = !POSTFX.on; try { localStorage.setItem('slaghouse.postfx', POSTFX.on ? '1' : '0'); } catch (err) { /* private mode */ } this.applyPostFxEnabled(); }
+  warpPulse(v) { if (this.pfx) this.pfx.warp = Math.max(this.pfx.warp, v); }
+  updatePostFx(dt, now) {
+    const P = this.pfx; if (!P || !POSTFX.on) return;
+    P.warp *= Math.exp(-dt * 10); if (P.warp < 0.001) P.warp = 0;
+    P.barrel.amount = 1 + P.warp;
+    const ramp = now < this.rampageUntil, low = this.state !== 'dead' && this.hp <= 30 ? 1 - this.hp / 30 : 0;
+    P.bloom.blend.amount = ramp ? 0.85 : 0.55;
+    const key = this.state === 'dead' ? 'dead' : ramp ? 'ramp' : low > 0 ? 'low' + Math.round((0.3 + 0.5 * low + Math.sin(now / 160) * 0.08) * 20) : 'none';
+    if (key === P.key) return;
+    P.key = key;
+    const m = P.cm.colorMatrix; m.reset();
+    if (key === 'dead') m.saturate(-0.85);
+    else if (ramp) { m.saturate(0.45); m.contrast(0.12, true); }
+    else if (low > 0) m.saturate(-(0.3 + 0.5 * low + Math.sin(now / 160) * 0.08));
+  }
+
+  // ----------------------------------------------------------------- ripper ----
+  // Held chain blade: 18 bites/s at arm's length. Pins what it chews, shreds corpses, cuts crates, eats enemy
+  // shots and grinds through riot shields. Kills with it heal you.
+  fireRipper(now, a, ca, sa) {
+    const W = TUNE.RIPPER, sx = this.shoulder.x, sy = this.shoulder.y;
+    const x0 = sx + ca * 12, y0 = sy + sa * 12, x1 = sx + ca * (12 + W.reach), y1 = sy + sa * (12 + W.reach);
+    this.ripperUntil = now + 120;
+    let bit = false, meat = false;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue;
+      const bb = e.body, [d, t] = this.segDist(bb.center.x, bb.center.y, x0, y0, x1, y1);
+      if (d > W.half + Math.min(bb.halfWidth, bb.halfHeight)) continue;
+      const hx = x0 + (x1 - x0) * t, hy = y0 + (y1 - y0) * t;
+      bit = true;
+      if (this.shieldBlocks(e, ca, hy)) {                                 // grinds through a riot shield in about half a second
+        this.fxSparks(hx, hy, 4, a + Math.PI, 1.4, [80, 220]); Sfx.clang(0.35);
+        if ((e.grind = (e.grind || 0) + 1) >= 10) { e.grind = 0; e.shieldUp = false; e.ai = 'stagger'; e.aiUntil = now + 1100; BUS.emit('callout', 'GUARD SHREDDED'); this.addStyle(40); }
+        continue;
+      }
+      meat = true;
+      const hs = isHumanoid(e) && hy < bb.top + 5;
+      e.stunT = Math.max(e.stunT, 0.16); bb.velocity.x *= 0.25; bb.velocity.y = FLIERS.has(e.kind) ? bb.velocity.y * 0.3 : Math.min(bb.velocity.y, 20);   // it holds them on the blade
+      if (e.def.molten) this.fx.emit(hx, hy, { n: 3, angle: a + rand(-0.7, 0.7), spread: 0.6, speed: [80, 220], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 500, mode: 1 });
+      else {
+        this.fxBlood(hx, hy, 4, a + rand(-0.7, 0.7), 0.7, [120, 300]); this.fxBlood(hx, hy, 2, a + Math.PI + rand(-0.9, 0.9), 0.9, [60, 170]);
+        if (Math.random() < 0.25) this.paintSplatAround(hx, hy, 3);
+      }
+      this.stats.shots++; this.stats.hits++;                             // only bites count, so it never drags accuracy down
+      this.damageEnemy(e, W.damage * (hs ? 1.5 : 1), ca, sa, 'ripper', hs);
+    }
+    for (const [qx, qy] of [[x1 - ca * 7, y1 - sa * 7], [x1, y1]]) {    // corpses get shredded where they lie
+      const h = this.ragdolls.length ? this.ragAt(qx, qy, 3) : null;
+      if (!h) continue;
+      meat = bit = true;
+      for (const pt of h.rd.pts) { pt.vx *= 0.5; pt.vy = Math.min(pt.vy, 30); }
+      this.hitRagdoll(h.rd, h.x, h.y, 7, ca, sa, 'kick', h.pi); this.fxBlood(h.x, h.y, 3, a + rand(-0.6, 0.6), 0.8, [100, 260]);
+    }
+    for (const g of this.gibList) if (g.active && Math.abs(g.x - x1) < 8 && Math.abs(g.y - y1) < 8) {
+      g.body.velocity.x = ca * rand(200, 360) + rand(-60, 60); g.body.velocity.y = sa * 200 - rand(120, 260); g.body.angularVelocity = rand(-1200, 1200);
+      if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); }
+    }
+    const tx = Math.floor(x1 / TS), ty = Math.floor(y1 / TS);
+    if (TILE_HP[this.tileAt(tx, ty)]) { this.damageTile(tx, ty, W.tile); bit = true; this.fxSparks(x1, y1, 3, a + Math.PI, 1.6, [60, 200]); this.fx.emit(x1, y1, { n: 2, speed: [40, 120], life: [0.3, 0.6], size: [2, 1], cols: [0x9a5e2e, 0x6e4222], g: 500, mode: 1 }); }
+    else if (this.solidAt(x1, y1)) { bit = true; this.fxSparks(x1, y1, 5, a + Math.PI, 1.6, [80, 260]); if (Math.random() < 0.4) Sfx.clang(0.25); }
+    for (const list of [this.ebulletList, this.boltList]) for (const b of list) {     // the blade eats incoming fire
+      if (!b.active || this.segDist(b.x, b.y, x0, y0, x1, y1)[0] > W.half + 3) continue;
+      const x = b.x, y = b.y; b.disableBody(true, true); this.fxSparks(x, y, 6, a, 1.4, [80, 240]); Sfx.tink(0.8); this.addStyle(8);
+    }
+    this.propHitAt(x1, y1, ca, sa);
+    if (meat) { this.ripperBiteUntil = now + 120; if (++this.ripN % 3 === 0) this.hitStop(16); this.shake(70, 0.004); this.addKick(rand(-1.2, 1.2), rand(-1.2, 1.2)); this.recoil = rand(1.5, 3.5); }
+    else if (bit) { this.ripperBiteUntil = now + 80; this.shake(50, 0.002); this.recoil = rand(1, 2.5); }
+    else this.recoil = rand(0, 1);
+    if (Math.random() < 0.5) this.fx.emit(x1, y1, { n: 1, angle: a + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2, spread: 0.6, speed: [60, 160], life: [0.08, 0.2], size: [2, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f], add: true, g: 300 });
+  }
+
+  // ------------------------------------------------------------- hornet pod ----
+  // Hold to paint up to 6 locks (up to 3 on one target) near the crosshair, release to launch one seeker per
+  // lock. A tap with nothing locked dumb-fires two.
+  hornetTrigger(trig, now) {
+    const T = TUNE.HORNET;
+    this.locks = this.locks.filter(e => e.alive && !e.under);
+    if (trig && now >= this.nextFire) {
+      if (!this.hornetHeld) { this.hornetHeld = true; this.lockT = now + 60; }
+      if (this.locks.length < T.maxLocks && now >= this.lockT) {
+        const t = this.pickLockTarget();
+        if (t) { this.locks.push(t); t.lockT = now; this.lockT = now + T.lockMs; Sfx.lockOn(this.locks.length); }
+        else this.lockT = now + 50;
+      }
+    } else if (this.hornetHeld) { this.hornetHeld = false; this.launchHornets(now); }
+  }
+  hornetAim() {
+    const mouse = this.aimMode === 'mouse' && this.aimPt;
+    return mouse ? { x: this.aimPt.x, y: this.aimPt.y, r: TUNE.HORNET.lockRadius } : { x: this.shoulder.x + Math.cos(this.aim) * 150, y: this.shoulder.y + Math.sin(this.aim) * 150, r: 150 };
+  }
+  pickLockTarget() {
+    const T = TUNE.HORNET, sx = this.shoulder.x, sy = this.shoulder.y, A = this.hornetAim();
+    let best = null, bs = 1e9;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue;
+      const c = e.body.center, n = this.locks.filter(o => o === e).length;
+      if (n >= T.perTarget || Math.hypot(c.x - sx, c.y - sy) > T.lockRange) continue;
+      const d = Math.hypot(c.x - A.x, c.y - A.y);
+      if (d > A.r + Math.max(e.body.halfWidth, e.body.halfHeight) || !this.los(sx, sy, c.x, c.y)) continue;
+      const s = d + n * 45; if (s < bs) { bs = s; best = e; }
+    }
+    return best;
+  }
+  launchHornets(now) {
+    const T = TUNE.HORNET, targets = this.locks.length ? this.locks.slice() : [null, null];
+    this.locks = [];
+    this.nextFire = now + T.cooldown * (now < this.rampageUntil ? TUNE.RAMPAGE.fire : 1); this.lastShotT = now;
+    this.makeNoise(this.player.x, this.player.y, 270, true);
+    targets.forEach((tg, i) => this.time.delayedCall(i * 60, () => { if (this.state !== 'dead') this.spawnHornet(tg, i); }));
+  }
+  spawnHornet(tg, i) {
+    const h = this.hornetList.find(o => !o.on); if (!h) return;
+    const T = TUNE.HORNET, G = GUNS.hornet, a = this.aim, ca = Math.cos(a), sa = Math.sin(a);
+    let x = this.shoulder.x + ca * G.muzzle, y = this.shoulder.y + sa * G.muzzle;
+    if (this.solidAt(x, y) || !this.los(this.shoulder.x, this.shoulder.y, x, y)) { x = this.shoulder.x; y = this.shoulder.y; }
+    const fan = (i % 2 ? 1 : -1) * (0.12 + 0.1 * (i >> 1)), lift = tg ? (ca >= 0 ? -0.45 : 0.45) : 0;   // pop up and fan out, then curl onto their marks
+    Object.assign(h, { on: true, x, y, ang: a + lift + fan + rand(-0.06, 0.06), spd: T.speed, target: tg, life: T.life, age: 0, seed: rand(0, 6) });
+    h.setVisible(true).setPosition(x, y).setRotation(h.ang); h.glow.setVisible(true).setPosition(x, y);
+    this.stats.shots++;
+    this.recoil = 3; Sfx.hornet();
+    this.muzzle(x, y, a, 0.7, 40); this.fxSmoke(x, y, 2, 0.6);
+    this.shake(40, 0.0018); this.addKick(-ca * 1.5, -sa * 1.5);
+  }
+  updateHornets(dt) {
+    const T = TUNE.HORNET;
+    for (const h of this.hornetList) {
+      if (!h.on) continue;
+      h.life -= dt; h.age += dt;
+      const tg = h.target && h.target.alive && !h.target.under ? h.target : null;
+      if (tg && h.age > 0.1) {
+        let da = Math.atan2(tg.body.center.y - h.y, tg.body.center.x - h.x) - h.ang;
+        while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        h.ang += clamp(da, -T.turn * dt, T.turn * dt);
+      } else h.ang += Math.sin(h.age * 13 + h.seed) * dt * 1.4;             // dumb-fire wobble
+      h.spd = Math.min(T.top, h.spd + T.accel * dt);
+      const ca = Math.cos(h.ang), sa = Math.sin(h.ang), nx = h.x + ca * h.spd * dt, ny = h.y + sa * h.spd * dt;
+      const hit = this.sweep(h.x, h.y, nx, ny);
+      if (hit || h.life <= 0) { this.hornetBoom(h, hit ? hit.x : nx, hit ? hit.y : ny); continue; }
+      h.x = nx; h.y = ny;
+      if (this.enemyAt(h.x, h.y, 2) || this.propHitAt(h.x, h.y, ca, sa) || (this.ragdolls.length && this.ragAt(h.x, h.y, 1))) { this.hornetBoom(h, h.x, h.y); continue; }
+      h.setPosition(Math.round(h.x), Math.round(h.y)).setRotation(h.ang); h.glow.setPosition(h.x - ca * 4, h.y - sa * 4).setAlpha(0.5 + Math.random() * 0.3);
+      this.fx.emit(h.x - ca * 4, h.y - sa * 4, { n: 1, speed: [4, 14], life: [0.25, 0.5], size: [2, 4], cols: [0x9a9590, 0x6a6560, 0x4a4846], alpha: [0.45, 0], g: -20, drag: 2 });
+      this.fx.emit(h.x - ca * 4, h.y - sa * 4, { n: 1, angle: h.ang + Math.PI, spread: 0.5, speed: [20, 60], life: [0.05, 0.12], size: [2, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f], add: true });
+    }
+  }
+  hornetBoom(h, x, y) { h.on = false; h.setVisible(false); h.glow.setVisible(false); this.explode(x, y, TUNE.HORNET.blast); }
+
+  // ------------------------------------------------------------- magma lance ----
+  // Hold to charge (1 s), release: a molten beam that pierces everything, bores through up to 5 breakable tiles,
+  // sets things alight and kicks you back hard (aim down to lance-jump). A full charge bursts where it lands;
+  // hold a full charge past 2.2 s and it vents on its own and scalds you.
+  lanceTrigger(trig, now, dt) {
+    const T = TUNE.LANCE;
+    if (trig && now >= this.nextFire) {
+      if (!this.lanceOn) { this.lanceOn = true; this.lanceCharge = 0; this.lanceFullT = 0; }
+      this.lanceCharge = Math.min(1, this.lanceCharge + dt / (T.charge * (now < this.rampageUntil ? TUNE.RAMPAGE.fire : 1)));
+      const G = GUNS.lance, ca = Math.cos(this.aim), sa = Math.sin(this.aim), mx = this.shoulder.x + ca * G.muzzle, my = this.shoulder.y + sa * G.muzzle;
+      if ((this.lanceFxT -= dt) <= 0) {                                 // heat pulls in to the emitter
+        this.lanceFxT = 0.03;
+        const th = rand(0, Math.PI * 2), r = rand(10, 18);
+        this.fx.emit(mx + Math.cos(th) * r, my + Math.sin(th) * r, { n: 1, angle: th + Math.PI, spread: 0.1, speed: [r * 5, r * 6], life: [0.14, 0.18], size: [2, 1], cols: [0xffe080, 0xffa030, 0xff5a1a], add: true });
+      }
+      if (this.lanceCharge >= 1) {
+        this.lanceFullT += dt; this.recoil = rand(0, 1.5);
+        if (Math.random() < 0.3) this.fx.emit(mx, my, { n: 1, angle: -Math.PI / 2, spread: 1.2, speed: [20, 60], life: [0.3, 0.6], size: [3, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: -60 });
+        if (this.lanceFullT > T.vent) this.fireLance(now, 1, true);
+      }
+    } else if (this.lanceOn) this.fireLance(now, this.lanceCharge, false);
+  }
+  fireLance(now, c, vented) {
+    const T = TUNE.LANCE, G = GUNS.lance, a = this.aim, ca = Math.cos(a), sa = Math.sin(a);
+    this.lanceOn = false; this.lanceCharge = 0; this.lanceFullT = 0;
+    this.nextFire = now + T.cooldown; this.lastShotT = now; this.stats.shots++;
+    this.makeNoise(this.player.x, this.player.y, 300, true);
+    const pw = Math.pow(c, 1.25), dmg = T.minDamage + (T.maxDamage - T.minDamage) * pw, half = 2 + 5 * c, bore = Math.round(T.bore * c);
+    const sx = this.shoulder.x, sy = this.shoulder.y, mx = sx + ca * G.muzzle, my = sy + sa * G.muzzle;
+    const hits = new Map(), rhits = [], kegs = new Set();
+    let ex = sx, ey = sy, bored = 0;
+    for (let d = 0; d < T.range; d += 3) {
+      const x = sx + ca * d, y = sy + sa * d;
+      if (this.solidAt(x, y)) {
+        const tx = Math.floor(x / TS), ty = Math.floor(y / TS);
+        if (bored < bore && TILE_HP[this.tileAt(tx, ty)]) { bored++; this.destroyTile(tx, ty, true); } else break;
+      }
+      ex = x; ey = y;
+      if (d < 8) continue;
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || hits.has(e)) continue;
+        const b = e.body;
+        if (x >= b.left - half && x <= b.right + half && y >= b.top - half && y <= b.bottom + half) hits.set(e, { x, y });
+      }
+      for (const k of this.barrelList) if (k.active && Math.abs(k.x - x) < 5 + half && Math.abs(k.y - y) < 7 + half) kegs.add(k);
+      const rh = this.ragdolls.length ? this.ragAt(x, y, half) : null;
+      if (rh && !rhits.some(q => q.rd === rh.rd)) rhits.push(rh);
+      this.propHitAt(x, y, ca, sa);
+    }
+    const killsBefore = this.stats.kills;
+    if (hits.size) this.stats.hits++;
+    for (const [e, h] of hits) {
+      const hs = isHumanoid(e) && h.y < e.body.top + 5;
+      if (e.kind === 'boss' && h.y < e.body.top + 12) e.dmgHead = true;
+      if (e.kind === 'bulwark') { e.ai = 'stagger'; e.aiUntil = now + 900; }
+      this.ignite(e, T.burn * Math.max(0.4, c));
+      this.fx.emit(h.x, h.y, { n: 8, angle: a, spread: 0.8, speed: [80, 260], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 300, mode: 1 });
+      if (!e.def.molten) this.fxBlood(h.x, h.y, 8, a, 0.6, [120, 320]);
+      this.damageEnemy(e, dmg * (hs ? 1.5 : 1), ca, sa, 'lance', hs);
+    }
+    kegs.forEach(k => this.damageBarrel(k, dmg));
+    for (const h of rhits) { h.rd.burnT = Math.max(h.rd.burnT || 0, 2); this.hitRagdoll(h.rd, h.x, h.y, dmg, ca, sa, 'rail', h.pi); }
+    this.beams.push({ x0: mx, y0: my, x1: ex, y1: ey, t: 0, dur: 0.22 + 0.3 * c, col: 'lance', w: half });
+    const len = Math.hypot(ex - mx, ey - my), stepD = 7 - 3 * c;
+    for (let d = 0; d < len; d += stepD) this.fx.emit(mx + ca * d + rand(-half, half) * 0.5, my + sa * d + rand(-half, half) * 0.5, { n: 1, speed: [5, 30], life: [0.4, 0.9], size: [2, 1], cols: [0xffe080, 0xffa030, 0xff5a1a, 0xa02008], add: true, g: 380, mode: 1, drag: 0.5 });   // dripping slag
+    this.fxSparks(ex, ey, Math.round(6 + 10 * c), a + Math.PI, 1.8, [80, 280]);
+    this.spawnLight(ex, ey, 'glow', 0xff8a20, 1 + c, 2.4 + 2 * c, 0.9, 0.25);
+    this.spawnLight(mx, my, 'glow', 0xffd070, 1.4 + c, 3 + 2 * c, 1, 0.18);
+    this.paintScorch(ex + ca * 3, ey + sa * 3, Math.round(4 + 6 * c));
+    if (c > 0.85) this.time.delayedCall(30, () => this.explode(ex, ey, T.burst));        // a full charge bursts where it lands
+    const pb = this.player.body, rec = T.recoil * (0.25 + 0.75 * c);
+    pb.velocity.x -= ca * rec;
+    if (!pb.blocked.down || sa > 0.3) { pb.velocity.y = Math.max(-T.recoil, pb.velocity.y - sa * rec * 0.8); this.lastGround = -1e9; this.jumpCuttable = false; }
+    this.recoil = 4 + 6 * c; Sfx.lanceFire(c);
+    this.shake(120 + 160 * c, 0.004 + 0.01 * c); this.addKick(-ca * (4 + 8 * c), -sa * (4 + 8 * c));
+    this.zoomPunch = Math.max(this.zoomPunch, 0.03 + 0.06 * c); this.hitStop(20 + 50 * c); this.warpPulse(0.03 + 0.09 * c);
+    if (c > 0.6) BUS.emit('flash', 0.1 + 0.18 * c);
+    if (vented) { this.hurtPlayer(T.ventDmg, this.player.x, { knock: false, iframes: false, self: true }); BUS.emit('callout', 'LANCE VENTED'); }
+    const k = this.stats.kills - killsBefore;
+    if (k >= 2) BUS.emit('callout', k === 2 ? 'MELTED TWO!' : 'SLAG KEBAB!');
+  }
+
+  // ----------------------------------------------------------------- glaive ----
+  // Thrown hooked ring: cuts on the way out and on the way back, and you catch it to throw again at once.
+  // Hold fire and it stops at the end of its throw and grinds in place (steer it with the mouse) for up to 2.4 s.
+  throwGlaive(now) {
+    const T = TUNE.GLAIVE, G = GUNS.glaive, g = this.glaive, a = this.aim, ca = Math.cos(a), sa = Math.sin(a);
+    let x = this.shoulder.x + ca * G.muzzle, y = this.shoulder.y + sa * G.muzzle;
+    if (this.solidAt(x, y) || !this.los(this.shoulder.x, this.shoulder.y, x, y)) { x = this.shoulder.x; y = this.shoulder.y; }
+    Object.assign(g, { on: true, x, y, vx: ca * T.speed, vy: sa * T.speed, state: 'out', dist: 0, bsp: 0, hoverT: T.hover, trailT: 0, whirT: 0 });
+    g.hits.clear();
+    this.nextFire = now + T.cooldown; this.lastShotT = now; this.stats.shots++;
+    this.makeNoise(this.player.x, this.player.y, 210, true);
+    this.recoil = 3; Sfx.glaive();
+    this.fxSparks(x, y, 4, a, 0.8, [60, 180]); this.spawnLight(x, y, 'glow', 0x46e6ff, 0.8, 1.6, 0.8, 0.12);
+    this.shake(40, 0.0015); this.addKick(-ca * 1.5, -sa * 1.5);
+    this.glaiveImg.setVisible(true).setPosition(x, y); this.glaiveGlow.setVisible(true);
+  }
+  updateGlaive(dt, now) {
+    const g = this.glaive, T = TUNE.GLAIVE;
+    if (!g.on) return;
+    if (this.state === 'dead') { g.on = false; this.glaiveImg.setVisible(false); this.glaiveGlow.setVisible(false); return; }
+    const pb = this.player.body, px = pb.center.x, py = pb.center.y - 2;
+    g.spin += dt * (g.state === 'hover' ? 40 : 26);
+    if (g.state === 'out') {
+      const f = Math.max(0.12, 1 - Math.pow(g.dist / T.range, 2)), nx = g.x + g.vx * f * dt, ny = g.y + g.vy * f * dt;
+      g.dist += Math.hypot(nx - g.x, ny - g.y);
+      const hit = this.sweep(g.x, g.y, nx, ny);
+      if (hit) {
+        g.x = hit.x; g.y = hit.y;
+        const tx = Math.floor(nx / TS), ty = Math.floor(ny / TS);
+        if (TILE_HP[this.tileAt(tx, ty)]) this.damageTile(tx, ty, 20);
+        this.fxSparks(g.x, g.y, 8, Math.atan2(-g.vy, -g.vx), 1.6, [80, 240]); Sfx.clang(0.5); this.shake(40, 0.002);
+        g.state = this.glaiveHold ? 'hover' : 'back'; g.hoverT = T.hover;  // bites into the wall if you're still holding
+      } else { g.x = nx; g.y = ny; }
+      if (g.state === 'out' && g.dist >= T.range) { g.state = this.glaiveHold ? 'hover' : 'back'; g.hoverT = T.hover; }
+    } else if (g.state === 'hover') {
+      g.hoverT -= dt;
+      if (!this.glaiveHold || g.hoverT <= 0) g.state = 'back';
+      if ((g.tileT = (g.tileT || 0) - dt) <= 0) {                        // chews through crates and girders it's pressed against
+        g.tileT = T.grindMs / 1000;
+        for (const [ox, oy] of [[(Math.sign(g.vx) || 1) * 7, 0], [0, 7], [0, -7]]) {
+          const tx = Math.floor((g.x + ox) / TS), ty = Math.floor((g.y + oy) / TS);
+          if (TILE_HP[this.tileAt(tx, ty)]) { this.damageTile(tx, ty, 8); this.fxSparks(g.x + ox, g.y + oy, 2, Math.atan2(-oy, -ox), 1.2, [40, 140]); break; }
+        }
+      }
+      else if (this.aimMode === 'mouse' && this.aimPt) {                 // steer it toward the cursor while it grinds
+        const dx = clamp(this.aimPt.x - g.x, -70 * dt, 70 * dt), dy = clamp(this.aimPt.y - g.y, -70 * dt, 70 * dt);
+        if (!this.solidAt(g.x + dx, g.y + dy)) { g.x += dx; g.y += dy; }
+      }
+    } else {
+      const dx = px - g.x, dy = py - g.y, d = Math.hypot(dx, dy) || 1;
+      g.bsp = Math.min(T.back, g.bsp + 1100 * dt);
+      const step = Math.min(d, g.bsp * dt);
+      g.x += dx / d * step; g.y += dy / d * step; g.vx = dx / d * g.bsp; g.vy = dy / d * g.bsp;
+      if (this.solidAt(g.x, g.y) && Math.random() < 0.4) this.fxSparks(g.x, g.y, 1, Math.atan2(dy, dx) + Math.PI, 1, [40, 120]);   // recalled straight through walls
+      if (d < 12) {                                                      // caught: ready to throw again at once
+        g.on = false; this.glaiveImg.setVisible(false); this.glaiveGlow.setVisible(false);
+        this.nextFire = Math.min(this.nextFire, now + 60);
+        this.recoil = 3; Sfx.glaiveCatch(); this.shake(40, 0.0015);
+        this.spawnLight(px, py - 2, 'ring', 0x46e6ff, 0.15, 0.6, 0.7, 0.14);
+        return;
+      }
+    }
+    const grind = g.state === 'hover', rr = 8, sp = Math.hypot(g.vx, g.vy) || 1;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue;
+      const b = e.body;
+      if (g.x < b.left - rr || g.x > b.right + rr || g.y < b.top - rr || g.y > b.bottom + rr || (g.hits.get(e) || 0) > now) continue;
+      g.hits.set(e, now + (grind ? T.grindMs : 280));
+      const ix = g.state === 'back' ? Math.sign(px - g.x) || 1 : Math.sign(g.vx) || 1, hs = isHumanoid(e) && g.y < b.top + 5;
+      if (!grind && this.shieldBlocks(e, ix, g.y)) { this.fxSparks(g.x, g.y, 6, ix > 0 ? Math.PI : 0, 1.2); Sfx.clang(0.5); if (g.state === 'out') g.state = 'back'; continue; }
+      this.stats.hits++;
+      if (e.def.molten) this.fxSparks(g.x, g.y, 4); else this.fxBlood(g.x, g.y, grind ? 3 : 8, Math.atan2(g.vy, g.vx), 1.6, [60, 240]);
+      this.damageEnemy(e, (grind ? T.grind : T.damage) * (hs ? TUNE.HEADSHOT : 1), ix, 0, 'glaive', hs);
+      if (g.state === 'out') { g.vx *= 0.85; g.vy *= 0.85; }
+      Sfx.squish();
+    }
+    const rh = this.ragdolls.length ? this.ragAt(g.x, g.y, 4) : null;
+    if (rh && (g.hits.get(rh.rd) || 0) <= now) { g.hits.set(rh.rd, now + (grind ? T.grindMs : 250)); this.hitRagdoll(rh.rd, g.x, g.y, grind ? T.grind : T.damage, g.vx / sp, -0.2, 'saw', rh.pi); }
+    for (const list of [this.ebulletList, this.boltList]) for (const b of list) if (b.active && Math.abs(b.x - g.x) < 8 && Math.abs(b.y - g.y) < 8) { const x = b.x, y = b.y; b.disableBody(true, true); this.fxSparks(x, y, 5); Sfx.tink(0.7); this.addStyle(8); }
+    this.propHitAt(g.x, g.y, g.vx / sp, g.vy / sp);
+    for (const gb of this.gibList) if (gb.active && Math.abs(gb.x - g.x) < 7 && Math.abs(gb.y - g.y) < 7) { gb.body.velocity.x = g.vx * 0.5 + rand(-80, 80); gb.body.velocity.y = -rand(100, 220); gb.body.angularVelocity = rand(-1200, 1200); }
+    this.glaiveImg.setPosition(Math.round(g.x), Math.round(g.y)).setRotation(g.spin);
+    this.glaiveGlow.setPosition(g.x, g.y).setScale(grind ? 1.1 + Math.random() * 0.2 : 0.8);
+    if ((g.trailT -= dt) <= 0) { g.trailT = 0.03; this.spawnLight(g.x, g.y, 'glaive', 0x46e6ff, 1, 0.9, 0.45, 0.12); }
+    if (grind && Math.random() < 0.5) this.fxSparks(g.x, g.y + 4, 1, Math.PI / 2, 2, [40, 140]);
+    if ((g.whirT -= dt) <= 0) { g.whirT = grind ? 0.09 : 0.14; Sfx.whirr(clamp(1 - Math.hypot(g.x - px, g.y - py) / 400, 0.2, 1)); }
+  }
+
+  floorBelow(x, y, max = 320) {                                         // top of the first standable tile at or below (x, y)
+    for (let yy = Math.max(0, y); yy < y + max && yy < LH; yy += 4) if (this.standAt(x, yy)) return Math.floor(yy / TS) * TS;
+    return null;
+  }
+
+  // --------------------------------------------------------------- slagling ----
+  // Hopping molten blob: big ones split into two mid ones, mids into two small ones (7 kills per big slagling).
+  // Fireproof; frozen ones shatter without splitting.
+  updateSlagling(e, dt, now, dx, dy, dist, alive) {
+    const b = e.body, D = e.def, T = TUNE.SLAGLING, onGround = b.blocked.down || b.touching.down;
+    if (alive && !e.aggro && (e.sees || dist < 140) && dist < D.sight) { e.aggro = true; e.aggroT = 6; this.popAlert(e); Sfx.sizzle(); }
+    if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 4);
+    if (e.aggro && (e.aggroT <= 0 || !alive)) e.aggro = false;
+    e.hopT -= dt; e.landT -= dt;
+    if (onGround) {
+      if (!e.wasGround && e.airT > 0.12) {                               // splat down
+        e.landT = 0.16;
+        this.fx.emit(b.center.x, b.bottom - 1, { n: 3 + D.tier * 3, angle: -Math.PI / 2, spread: 2.6, speed: [30, 120], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a], add: true, g: 420, mode: 1 });
+        if (D.tier >= 1) this.paintScorch(b.center.x, b.bottom + 2, 3 + D.tier * 2);
+        Sfx.splat(D.tier);
+      }
+      if (e.stunT <= 0) b.velocity.x = approach(b.velocity.x, 0, 900 * dt);
+      if (e.stunT <= 0 && e.hopT <= 0) {
+        const chase = e.aggro && alive, dir = chase ? (Math.sign(dx) || e.dir) : (Math.random() < 0.5 ? -1 : 1);
+        e.dir = dir;
+        b.velocity.x = dir * T.vx * [1.15, 1, 0.82][D.tier] * (chase ? rand(0.85, 1.35) : 0.45);
+        b.velocity.y = -rand(T.vy[0], T.vy[1]) * (chase ? 1 : 0.55) * (chase && dy < -40 ? 1.25 : 1);   // hops higher to reach you on a ledge
+        e.hopT = rand(T.hop[0], T.hop[1]) * (chase ? 1 : 2.4);
+      }
+      e.fr = e.hopT < 0.16 || e.landT > 0 ? 'q' : 'a';
+    } else e.fr = b.velocity.y < -40 ? 's' : 'a';
+    e.airT = onGround ? 0 : e.airT + dt; e.wasGround = onGround;
+    if (Math.random() < dt * (1.5 + D.tier * 2)) this.fx.emit(b.center.x + rand(-b.halfWidth, b.halfWidth), b.bottom - 1, { n: 1, angle: Math.PI / 2, spread: 0.3, speed: [5, 20], life: [0.3, 0.6], size: [2, 1], cols: [0xffe080, 0xff8a20, 0xa02008], add: true, g: 300, mode: 1 });
+  }
+  slagSplit(x, y, kind, dx) {
+    for (let i = 0; i < 2; i++) {
+      const s = this.spawnEnemy(kind, clamp(Math.floor(x / TS), 2, MAP_W - 3), clamp(Math.floor(y / TS), 2, MAP_H - 3)), side = i ? 1 : -1;
+      s.body.reset(x + side * 4, y - 2); s.body.setVelocity(side * rand(80, 150) + dx * 40, -rand(200, 280));
+      Object.assign(s, { aggro: true, aggroT: 6, hopT: rand(0.35, 0.7), wasGround: false, airT: 0.2 });
+      this.spawnLight(s.x, s.y, s.def.key + '_w', 0xffffff, 1.4, 1, 0.9, 0.18, 'a');
+    }
+    this.fx.emit(x, y, { n: 18, speed: [40, 200], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a], add: true, g: 300, mode: 1, drag: 1 });
+    this.spawnLight(x, y, 'glow', 0xff7020, 1.5, 3, 0.9, 0.25);
+    Sfx.splat(2);
+  }
+
+  // --------------------------------------------------------------- burrower ----
+  // Slag worm that swims under whatever floor you stand on (a trail of grit gives it away), rumbles for 0.7 s
+  // under your feet, then erupts through you (22 dmg + launch). Only hittable once it's out: it hangs in the air,
+  // writhes on the floor for a second, then digs back in.
+  updateBurrower(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.BURROWER, b = e.body, pb = this.player.body, onGround = b.blocked.down || b.touching.down;
+    e.aggro = true; e.aggroT = 99;
+    if (e.ai === 'under') {
+      e.cd -= dt;
+      if (alive) { const fy = this.floorBelow(pb.center.x, pb.bottom - 4); if (fy !== null) e.floorY = fy; }
+      const du = (alive ? pb.center.x : e.ux) - e.ux, sp = T.speed * (Math.abs(du) > 160 ? 1.7 : 1);
+      e.ux = clamp(e.ux + clamp(du, -sp * dt, sp * dt), 40, LW - 40);
+      const surf = this.standAt(e.ux, e.floorY + 2);
+      if (surf && (e.trailT -= dt) <= 0) {                               // grit thrown up along its path
+        e.trailT = 0.045;
+        this.fx.emit(e.ux + rand(-3, 3), e.floorY - 1, { n: 1, angle: -Math.PI / 2, spread: 1.3, speed: [30, 90], life: [0.2, 0.45], size: [2, 1], cols: [0x7a6a58, 0x4a3e32, 0xff8a20], g: 420, mode: 1 });
+        if (Math.random() < 0.25) this.fxDust(e.ux, e.floorY, 1);
+      }
+      if ((e.rumT -= dt) <= 0) { e.rumT = 0.32; Sfx.rumble(clamp(1 - Math.abs(e.ux - pb.center.x) / 320, 0.1, 0.8)); }
+      if (alive && this.state === 'play' && e.cd <= 0 && Math.abs(du) < 10 && surf && Math.abs(pb.bottom - e.floorY) < 26) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; Sfx.rumble(1); }
+    } else if (e.ai === 'tell') {
+      if (Math.random() < 0.7) this.fx.emit(e.ux + rand(-7, 7), e.floorY - 1, { n: 1, angle: -Math.PI / 2, spread: 0.7, speed: [60, 170], life: [0.25, 0.5], size: [2, 1], cols: [0xffe080, 0xffa030, 0x7a6a58], g: 520, mode: 1 });
+      if ((e.glowT -= dt) <= 0) { e.glowT = 0.1; this.spawnLight(e.ux, e.floorY - 2, 'glow', 0xff4a10, 1.2, 2.2, 0.65, 0.16); }
+      this.shake(80, 0.002 + 0.004 * (1 - (e.aiUntil - now) / T.tellMs));
+      if (now >= e.aiUntil) this.burrowerErupt(e);
+    } else if (e.ai === 'erupt') {
+      e.fr = b.velocity.y < 60 ? 'up' : 'shut';
+      if (Math.random() < 0.5) this.fx.emit(b.center.x, b.bottom, { n: 1, speed: [10, 40], life: [0.3, 0.6], size: [2, 1], cols: [0xffa030, 0xff5a1a], add: true, g: 300 });
+      if (onGround && b.velocity.y >= 0 && e.airT > 0.12) { e.ai = 'exposed'; e.aiUntil = now + T.exposed * 1000; this.fxDust(b.center.x, b.bottom, 6); Sfx.land(0.8); this.shake(90, 0.004); }
+    } else {                                                              // exposed: writhing on the floor
+      if (onGround && e.stunT <= 0) b.velocity.x = approach(b.velocity.x, 0, 600 * dt);
+      e.fr = Math.floor(e.t * 7) % 2 ? 'sw0' : 'sw1';
+      if (now >= e.aiUntil && onGround) this.burrowerDig(e);
+    }
+    e.airT = onGround ? 0 : e.airT + dt;
+  }
+  burrowerErupt(e) {
+    const T = TUNE.BURROWER, pb = this.player.body, D = e.def;
+    Object.assign(e, { ai: 'erupt', under: false, hitP: false, airT: 0, fr: 'up' });
+    e.body.enable = true; e.body.setAllowGravity(true);
+    e.body.reset(e.ux, e.floorY - 1 - D.fh / 2);
+    e.body.setVelocity(clamp(pb.center.x - e.ux, -50, 50), -T.rise);
+    e.setVisible(true); e.glow.setVisible(true);
+    for (let i = 0; i < 8; i++) this.spawnGib(pick(['g_shard', 'g_shard2', 'g_plate']), e.ux + rand(-6, 6), e.floorY - 3, rand(-160, 160), rand(-380, -180), 'metal');
+    this.fx.emit(e.ux, e.floorY - 2, { n: 24, angle: -Math.PI / 2, spread: 1.4, speed: [80, 300], life: [0.3, 0.8], size: [3, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a, 0x7a6a58], add: true, g: 500, mode: 1 });
+    this.fxDust(e.ux, e.floorY, 10); this.fxSmoke(e.ux, e.floorY - 4, 6);
+    this.spawnLight(e.ux, e.floorY - 4, 'glow', 0xff6a10, 2, 4, 0.95, 0.3); this.spawnLight(e.ux, e.floorY - 4, 'ring', 0xffc080, 0.3, 1.4, 0.8, 0.22);
+    this.paintScorch(e.ux, e.floorY + 3, 9);
+    this.shake(200, 0.009); this.warpPulse(0.05); Sfx.erupt();
+    this.makeNoise(e.ux, e.floorY, 260, false);
+  }
+  burrowerDig(e) {
+    const b = e.body;
+    Object.assign(e, { ai: 'under', under: true, ux: b.center.x, floorY: Math.round(b.bottom / TS) * TS, cd: rand(...TUNE.BURROWER.cd), trailT: 0, rumT: 0.2, burnT: 0, chill: 0, frozen: 0, panicT: 0 });
+    this.fx.emit(e.ux, e.floorY - 2, { n: 14, angle: -Math.PI / 2, spread: 1.6, speed: [40, 160], life: [0.3, 0.6], size: [2, 1], cols: [0x7a6a58, 0x4a3e32, 0xffa030], g: 500, mode: 1 });
+    this.fxDust(e.ux, e.floorY, 8); Sfx.dig();
+    b.setVelocity(0, 0); b.setAllowGravity(false); b.enable = false;
+    b.reset(e.ux, LH + 300);                                              // parked below the map: nothing can find or hit it
+    e.setVisible(false); e.glow.setVisible(false);
+  }
+
+  // -------------------------------------------------------------- harpooner ----
+  // Dock brute with a chain harpoon: 0.6 s windup (yellow sight line, locks for the last 30%), then a 430 px/s
+  // throw. Hooked, you get reeled in for a 16-dmg slash. Kick or dash to snap the chain, or hurt it for 25 to
+  // make it let go.
+  thinkHarpooner(e, dt, now, c) {
+    const T = TUNE.HARPOON, pb = this.player.body;
+    e.fireCd -= dt; e.repickT -= dt;
+    if (e.hk) { if (c.onGround) e.body.velocity.x = approach(e.body.velocity.x, 0, 1600 * dt); return 'hold'; }   // plants its feet while the line is out
+    switch (e.ai) {
+      case 'idle': this.lookAround(e, dt); return 'hold';
+      case 'dodge': if (c.onGround && now > e.aiUntil + 120) { e.ai = 'engage'; e.repickT = 0; } return 'free';
+      case 'windup':
+        e.dir = c.dx >= 0 ? 1 : -1;
+        if (now < e.aiUntil - T.windMs * 0.3) e.aimA = Math.atan2(pb.center.y - (e.y - 8), pb.center.x + pb.velocity.x * 0.15 - e.x);
+        if (now >= e.aiUntil) { this.throwHarpoon(e); e.ai = 'throw'; e.aiUntil = now + 300; e.fireCd = T.cd * rand(0.9, 1.15); }
+        return 'hold';
+      case 'throw': case 'strike': if (now >= e.aiUntil) { e.ai = 'engage'; e.repickT = 0.5; } return 'hold';
+      default: {
+        if (!c.alive || now - e.lkT > 6000) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
+        if (c.onGround && !e.navAir && e.repickT <= 0) { e.repickT = rand(2, 3.5); if (!this.pickPosition(e, 'attack')) this.pathTo(e, navBelow(e.lkx, e.lky - 4), 140); }
+        if (c.canSee && c.onGround && !e.navAir && e.fireCd <= 0 && c.dist > 40 && c.dist < T.range * 0.95 && this.state === 'play') { e.ai = 'windup'; e.aiUntil = now + T.windMs; Sfx.chain(); return 'hold'; }
+        return 'path';
+      }
+    }
+  }
+  throwHarpoon(e) {
+    const T = TUNE.HARPOON, sx = e.x + e.dir * 4, sy = e.y - 8;
+    e.hk = { x: sx, y: sy, vx: Math.cos(e.aimA) * T.speed, vy: Math.sin(e.aimA) * T.speed, state: 'fly', t: 0, dist: 0, rattle: 0 };
+    e.reelDmg = 0; e.hkImg.setVisible(true).setPosition(sx, sy).setRotation(e.aimA);
+    Sfx.whoosh(); Sfx.chain();
+  }
+  updateHarpoons(dt, now) {
+    const T = TUNE.HARPOON, pb = this.player.body;
+    for (const e of this.enemies.getChildren()) {
+      const hk = e.hk; if (!hk) continue;
+      if (!e.alive) { this.dropHarpoon(e); continue; }
+      const hx = e.x + e.dir * 4, hy = e.y - 6;
+      if (hk.state === 'fly') {
+        const nx = hk.x + hk.vx * dt, ny = hk.y + hk.vy * dt;
+        hk.dist += Math.hypot(nx - hk.x, ny - hk.y);
+        const wall = this.sweep(hk.x, hk.y, nx, ny);
+        if (wall) { hk.x = wall.x; hk.y = wall.y; hk.state = 'stuck'; hk.t = 0.3; this.fxSparks(hk.x, hk.y, 6, Math.atan2(-hk.vy, -hk.vx), 1.4); Sfx.clang(0.5); this.paintHole(hk.x, hk.y); }
+        else {
+          hk.x = nx; hk.y = ny;
+          if (this.state !== 'dead' && !this.reeledBy && hk.x > pb.left - 3 && hk.x < pb.right + 3 && hk.y > pb.top - 3 && hk.y < pb.bottom + 3) {
+            if (now < this.dashIUntil) this.dashDodge();                 // dashed clean through it
+            else {
+              hk.state = 'hooked'; hk.t = T.reelT; this.reeledBy = e; e.reelDmg = 0;
+              this.hurtPlayer(T.hookDmg, hk.x, { knock: false, srcY: hk.y });
+              BUS.emit('callout', 'HOOKED!'); Sfx.hookHit(); this.shake(120, 0.006); this.fxBlood(hk.x, hk.y, 6);
+            }
+          }
+          if (hk.state === 'fly' && hk.dist > T.range) hk.state = 'back';
+        }
+      } else if (hk.state === 'hooked') {
+        if (this.state === 'dead' || this.reeledBy !== e) { hk.state = 'back'; continue; }
+        hk.x = pb.center.x; hk.y = pb.center.y; hk.t -= dt;
+        const ddx = hx - pb.center.x, ddy = hy - pb.center.y, d = Math.hypot(ddx, ddy) || 1;
+        if (d < 22 || hk.t <= 0) {                                       // reeled all the way in: the slash
+          this.releaseHarpoon(e);
+          if (d < 30) {
+            e.ai = 'strike'; e.aiUntil = now + 380;
+            if (this.hurtPlayer(T.slashDmg, e.x, { knock: false, srcY: e.y - 4 })) {
+              pb.velocity.x = e.dir * 300; pb.velocity.y = -210; this.shake(150, 0.008); this.addKick(e.dir * 5, -2); Sfx.kickHit();
+              this.fxBlood(pb.center.x, pb.center.y, 10, e.dir > 0 ? 0 : Math.PI, 1.2);
+            }
+          }
+          continue;
+        }
+        pb.velocity.x = ddx / d * T.reel; pb.velocity.y = ddy / d * T.reel - 50;
+        this.jumpCuttable = false; this.lastGround = -1e9;
+        if ((hk.rattle -= dt) <= 0) { hk.rattle = 0.12; Sfx.chain(); }
+      } else if (hk.state === 'stuck') { if ((hk.t -= dt) <= 0) hk.state = 'back'; }
+      else {                                                              // winding back in
+        const ddx = hx - hk.x, ddy = hy - hk.y, d = Math.hypot(ddx, ddy) || 1, step = Math.min(d, 560 * dt);
+        hk.x += ddx / d * step; hk.y += ddy / d * step;
+        if (d < 6) { this.dropHarpoon(e); continue; }
+      }
+      const rot = hk.state === 'fly' ? Math.atan2(hk.vy, hk.vx) : Math.atan2(hk.y - hy, hk.x - hx);
+      e.hkImg.setPosition(Math.round(hk.x), Math.round(hk.y)).setRotation(rot);
+    }
+  }
+  releaseHarpoon(e) { if (e.hk) e.hk.state = 'back'; if (this.reeledBy === e) this.reeledBy = null; }
+  dropHarpoon(e) { e.hk = null; if (e.hkImg) e.hkImg.setVisible(false); if (this.reeledBy === e) this.reeledBy = null; }
+  breakHarpoon(msg) {                                                   // the chain snaps: you're free, it staggers
+    const e = this.reeledBy; if (!e) return;
+    if (e.hk) {
+      const mx = (e.hk.x + e.x) / 2, my = (e.hk.y + e.y - 6) / 2;
+      for (let i = 0; i < 3; i++) this.spawnGib('g_chain', mx + rand(-6, 6), my, rand(-120, 120), rand(-200, -80), 'metal');
+      this.fxSparks(mx, my, 8);
+    }
+    this.dropHarpoon(e);
+    if (e.alive) { e.stunT = Math.max(e.stunT, 1.1); e.ai = 'engage'; e.fireCd = Math.max(e.fireCd, 1.5); }
+    BUS.emit('callout', msg); Sfx.snap(); this.addStyle(40); this.shake(80, 0.004);
+  }
+
+  // ------------------------------------------------------------------ linker ----
+  // Fence drones that fly in pairs either side of you and throw a beam between them at chest height: 0.8 s
+  // flickering charge, 2.3 s live (14 dmg, it fries their friends too), 1.7 s off. Jump it, dash through it,
+  // get out from between them, or kill one. A linker with no partner just shoots.
+  updateLinker(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.LINKER, b = e.body, pb = this.player.body;
+    if (alive && !e.aggro && (e.sees || dist < 170) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 5);
+    e.linkT -= dt;
+    if (e.partner && !e.partner.alive) { e.partner = null; e.phase = 'off'; }
+    if (!e.partner && e.linkT <= 0) {
+      e.linkT = 0.5;
+      let best = null, bd = T.pair;
+      for (const o of this.enemies.getChildren()) if (o !== e && o.alive && o.kind === 'linker' && !(o.partner && o.partner.alive)) { const d = Math.hypot(o.x - e.x, o.y - e.y); if (d < bd) { bd = d; best = o; } }
+      if (best) { e.partner = best; best.partner = e; e.phase = best.phase = 'off'; e.beamT = best.beamT = 1.2; }
+    }
+    const P = e.partner, lead = P && e.lid < P.lid;
+    if (lead) {
+      e.beamT -= dt;
+      if (e.beamT <= 0) {
+        if (e.phase === 'off') { if (e.aggro && alive) { e.phase = 'charge'; e.beamT = T.chargeMs / 1000; Sfx.charge(0.4); } else e.beamT = 0.5; }
+        else if (e.phase === 'charge') { e.phase = 'live'; e.beamT = T.liveMs / 1000; Sfx.linkOn(); }
+        else { e.phase = 'off'; e.beamT = T.offMs / 1000 * rand(0.85, 1.2); }
+      }
+      if (!alive) e.phase = 'off';
+      e.trackY += (pb.center.y - 1 - e.trackY) * Math.min(1, dt * 1.5);   // the fence trails your height
+      P.phase = e.phase; P.trackY = e.trackY;
+    } else if (!P) { e.phase = 'off'; e.trackY += (pb.center.y - 1 - e.trackY) * Math.min(1, dt * 1.5); }
+    let tx, ty;
+    if (e.aggro && alive) {
+      const side = P ? (e.x <= P.x ? -1 : 1) : (e.x < pb.center.x ? -1 : 1);
+      tx = pb.center.x + side * (P ? T.gap / 2 : 120) + Math.sin(e.t * 0.9 + e.lid) * 12;
+      ty = P ? e.trackY + (e.phase === 'live' ? Math.sin(now / 520) * 12 : -4) : pb.top - 40 + Math.sin(e.t * 2) * 8;
+      if (this.solidAt(tx, ty)) ty -= 18;
+    } else { tx = e.homeX + Math.sin(e.t * 0.7) * 24; ty = e.homeY + Math.sin(e.t * 1.7) * 6; }
+    if (e.stunT <= 0) { const k = Math.min(1, dt * 2.4), sp = T.speed; b.velocity.x += (clamp((tx - b.center.x) * 2, -sp, sp) - b.velocity.x) * k; b.velocity.y += (clamp((ty - b.center.y) * 2, -sp, sp) - b.velocity.y) * k; }
+    else { const f = Math.pow(0.05, dt); b.velocity.x *= f; b.velocity.y *= f; }
+    e.dir = P ? (P.x >= e.x ? 1 : -1) : (dx >= 0 ? 1 : -1);             // prongs face the partner
+    if (!P && e.aggro && alive && e.sees) { e.fireCd -= dt; if (e.fireCd <= 0) { e.fireCd = 1.7; this.fireBolt(e); } }
+    e.fr = e.phase === 'charge' ? (Math.floor(now / 60) % 2 ? 'lc' : 'l0') : e.phase === 'live' ? 'lc' : Math.floor(e.t * 8) % 2 ? 'l1' : 'l0';
+  }
+  updateLinkBeams(dt, now) {
+    const T = TUNE.LINKER, pb = this.player.body;
+    for (const e of this.enemies.getChildren()) {
+      if (e.kind !== 'linker') continue;
+      e.beam = null;
+      const P = e.partner;
+      if (!e.alive || !P || !P.alive || e.lid > P.lid || e.phase === 'off' || e.frozen > 0 || P.frozen > 0) continue;
+      const x0 = e.x + e.dir * 7, y0 = e.y, x1 = P.x + P.dir * 7, y1 = P.y, blk = this.sweep(x0, y0, x1, y1), ex = blk ? blk.x : x1, ey = blk ? blk.y : y1;
+      e.beam = { x0, y0, x1: ex, y1: ey, blocked: !!blk, live: e.phase === 'live' };
+      if (e.phase !== 'live') continue;
+      if (blk && Math.random() < 0.5) this.fxSparks(ex, ey, 1, Math.atan2(y0 - ey, x0 - ex), 1.4, [40, 140]);
+      if (Math.random() < dt * 8) Sfx.buzz();
+      if ((e.zapT -= dt) <= 0) {                                         // anything else caught in it fries
+        e.zapT = 0.1;
+        for (const o of this.enemies.getChildren()) {
+          if (!o.alive || o.kind === 'linker' || o.under) continue;
+          const c = o.body.center;
+          if (this.segDist(c.x, c.y, x0, y0, ex, ey)[0] < Math.max(o.body.halfWidth, o.body.halfHeight)) this.damageEnemy(o, T.enemyDps * 0.1, 0, -1, 'arc');
+        }
+        for (const rd of this.ragdolls) { const c = rd.pts[2]; if (this.segDist(c.x, c.y, x0, y0, ex, ey)[0] < 8) this.hitRagdoll(rd, c.x, c.y, 2, 0, -1, 'arc'); }
+      }
+      if (this.state === 'dead') continue;
+      let best = 1e9, qx = 0, qy = 0;
+      for (const py of [pb.top + 3, pb.center.y, pb.bottom - 3]) { const [d, t] = this.segDist(pb.center.x, py, x0, y0, ex, ey); if (d < best) { best = d; qx = x0 + (ex - x0) * t; qy = y0 + (ey - y0) * t; } }
+      if (best < 6 && this.hurtPlayer(T.dmg, qx, { knock: false, srcY: qy })) {
+        pb.velocity.y = pb.center.y < qy ? -260 : 180; pb.velocity.x += Math.sign(pb.center.x - (x0 + ex) / 2) * 60;
+        Sfx.zap(); this.shake(120, 0.006);
+        this.fx.emit(qx, qy, { n: 14, speed: [60, 200], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0x9af8ff, 0x40c0ff], add: true });
+      }
+    }
+  }
+
+  // ------------------------------------------------------------- slag tide ----
+  // MELTDOWN (wave 5): every ~11 s the floor seams glow, then molten slag floods the ground floor 28 px deep for
+  // 6 s. Wading in it burns you (5 per 0.4 s) and sets the unfireproof alight; ticks, gibs and drums go up.
+  updateTide(dt, now) {
+    const T = TUNE.TIDE;
+    if (!this.tide) this.tide = { y: T.floor + 8, phase: 'calm', t: T.calm * 0.45, tick: 0 };
+    const td = this.tide;
+    if ((this.mod !== 'melt' || this.state === 'won') && td.phase !== 'drain') td.phase = 'drain';
+    td.t -= dt;
+    const ease = k => k * k * (3 - 2 * k), lo = T.floor + 2;
+    switch (td.phase) {
+      case 'calm': td.y = T.floor + 8; if (td.t <= 0 && this.state === 'play') { td.phase = 'warn'; td.t = T.warn; BUS.emit('callout', 'SLAG TIDE!'); Sfx.roar(); Sfx.rumble(1); } break;
+      case 'warn': td.y = lo; this.shake(60, 0.0015); break;
+      case 'rise': td.y = lo + (T.top - lo) * ease(clamp(1 - td.t / T.rise, 0, 1)); break;
+      case 'hold': td.y = T.top; break;
+      case 'fall': td.y = lo + (T.top - lo) * ease(clamp(td.t / T.fall, 0, 1)); break;
+      case 'drain': td.y = approach(td.y, T.floor + 8, 16 * dt); if (td.y >= T.floor + 8) { this.tide = null; this.tideG.clear(); this.tideFG.clear(); this.tideGlow.setAlpha(0); return; } break;
+    }
+    if (td.t <= 0) {
+      if (td.phase === 'warn') { td.phase = 'rise'; td.t = T.rise; Sfx.erupt(); }
+      else if (td.phase === 'rise') { td.phase = 'hold'; td.t = T.hold; }
+      else if (td.phase === 'hold') { td.phase = 'fall'; td.t = T.fall; }
+      else if (td.phase === 'fall') { td.phase = 'calm'; td.t = T.calm * rand(0.85, 1.15); }
+    }
+    const lvl = td.y, deep = lvl < T.floor - 1;
+    if (deep && (td.tick -= dt) <= 0) {
+      td.tick = T.tick;
+      const pb = this.player.body;
+      if (this.state !== 'dead' && pb.bottom > lvl + 2) { this.hurtPlayer(T.dmg, pb.center.x, { knock: false, iframes: false, burn: true, srcY: pb.bottom + 12 }); this.fxFire(pb.center.x, pb.bottom - 4, 6); Sfx.sizzle(); }
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.molten || e.kind === 'pyro' || e.kind === 'boss' || e.kind === 'burrower' || e.body.bottom <= lvl + 2) continue;
+        if (e.kind === 'tick') this.tickBoom(e); else this.ignite(e, 1.5);
+      }
+      for (const k of this.barrelList) if (k.active && k.y + 6 > lvl) this.damageBarrel(k, 30, 0.4);
+      for (const rd of this.ragdolls) if (rd.pts[2].y > lvl) rd.burnT = Math.max(rd.burnT || 0, 1.5);
+    }
+    if (deep) for (const g of this.gibList) if (g.active && g.y > lvl + 1 && !(g.hot > 0)) {   // meat sizzles away
+      this.fx.emit(g.x, lvl, { n: 3, angle: -Math.PI / 2, spread: 1, speed: [20, 70], life: [0.2, 0.4], size: [2, 1], cols: [0xffe080, 0xff8a20], add: true, g: -30 });
+      g.disableBody(true, true);
+    }
+    this.drawTide(now);
+  }
+  drawTide(now) {
+    const td = this.tide, g = this.tideG, f = this.tideFG; g.clear(); f.clear();
+    if (!td) return;
+    const T = TUNE.TIDE, v = this.cameras.main.worldView, base = T.floor + 4, t = now / 1000;
+    const x0 = Math.max(2 * TS, Math.floor(v.x / 2) * 2), x1 = Math.min(LW - 2 * TS, v.right + 2);
+    if (td.phase === 'warn') {                                            // the seams start to glow
+      const a = 0.4 + 0.4 * Math.sin(now / 70);
+      g.fillStyle(0xff6a10, a); g.fillRect(x0, T.floor - 1, x1 - x0, 2);
+      if (Math.random() < 0.6) this.fx.emit(rand(x0, x1), T.floor - 1, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [30, 90], life: [0.2, 0.5], size: [2, 1], cols: [0xffe080, 0xff8a20], add: true, g: 200 });
+    }
+    if (td.y >= base - 1) { this.tideGlow.setAlpha(0); return; }
+    for (let x = x0; x < x1; x += 2) {
+      const off = Math.round(Math.sin(x * 0.07 + t * 2.3) * 1.2 + Math.sin(x * 0.19 - t * 3.4) * 0.8), top = Math.round(td.y) + off;
+      if (top >= base) continue;
+      g.fillStyle(0x8a2006, 1); g.fillRect(x, top, 2, base - top);
+      g.fillStyle(0xd84a0c, 1); g.fillRect(x, top, 2, Math.min(base - top, 6));
+      f.fillStyle(0xc83a08, 0.5); f.fillRect(x, top + 2, 2, base - top - 2);                       // what wades in it shows through, tinted
+      f.fillStyle(0xffa030, 0.95); f.fillRect(x, top, 2, Math.min(base - top, 2));
+      if ((x / 2 + Math.floor(t * 12)) % 9 === 0) { f.fillStyle(0xfff0b0, 1); f.fillRect(x, top, 2, 1); }
+      if ((x / 2 + Math.floor(t * 3)) % 23 < 3) { f.fillStyle(0x3a1a10, 0.7); f.fillRect(x, top + 2, 2, 2); }   // cooling crust rafts
+    }
+    this.tideGlow.setPosition(this.camX, td.y).setScale(v.width / 20, 1.8).setAlpha(clamp((base - td.y) / 20, 0, 1) * 0.35);
+    if (Math.random() < 0.6) this.fx.emit(rand(x0, x1), td.y + 1, { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [20, 60], life: [0.2, 0.5], size: [2, 1], cols: [0xfff0b0, 0xffa030, 0xff5a1a], add: true, g: 200 });   // bubbles
+  }
+
   waveCleared() {
     BUS.emit('callout', 'WAVE CLEARED');
     this.slowmoUntil = this.time.now + 500;
@@ -5433,7 +6567,8 @@ class GameScene extends Phaser.Scene {
     this.wave = i;
     const list = WAVES[i], used = new Set();
     this.enemiesLeft = list.length;
-    BUS.emit('wave', i + 1, WAVES.length); BUS.emit('enemies', this.enemiesLeft); BUS.emit('callout', i === WAVES.length - 1 ? 'FINAL WAVE' : 'WAVE ' + (i + 1));
+    BUS.emit('wave', i + 1, WAVES.length); BUS.emit('enemies', this.enemiesLeft);
+    BUS.emit('wavecard', i === WAVES.length - 1 ? 'FINAL WAVE' : 'WAVE ' + (i + 1), i === WAVES.length - 1 ? 'THE SMELTER WAKES' : MOD_CARDS[WAVE_MODS[i]] || 'HOSTILES INBOUND');
     this.spawnBarrels(true); this.spawnCanisters(true); this.applyMod(WAVE_MODS[i]);
     Sfx.warp(); Music.track(WAVE_MUSIC[Math.min(i, WAVE_MUSIC.length - 1)]);
     for (const k of this.pickups) if (k.taken) {                       // restock medkits between waves
@@ -5475,16 +6610,18 @@ class GameScene extends Phaser.Scene {
   }
   hurtPlayer(dmg, srcX, opts = {}) {
     if (this.state === 'dead') return false;
-    const now = this.time.now;
+    const now = this.time.now, soft = opts.self || opts.burn;
+    if (!soft && now < this.dashIUntil) { this.dashDodge(); return false; }   // dash i-frames: it went straight through you
     if (opts.iframes !== false && now < this.invulnUntil) return false;
     this.hp = Math.max(0, this.hp - dmg);
     if (opts.iframes !== false) this.invulnUntil = now + TUNE.IFRAMES_MS;
     const b = this.player.body;
     if (opts.knock !== false) { const dir = Math.sign(this.player.x - srcX) || -this.facing; b.velocity.x = dir * 230; b.velocity.y = -190; this.jumpCuttable = false; }
-    this.fxBlood(b.center.x, b.center.y, opts.self ? 4 : 9, -Math.PI / 2, Math.PI * 1.6, [40, 180]);
-    Sfx.hurt(); this.shake(130, opts.self ? 0.004 : 0.007);
-    this.style.pts = Math.max(0, this.style.pts - dmg * (opts.self ? 2 : 5));      // getting hit costs style
+    this.fxBlood(b.center.x, b.center.y, soft ? 4 : 9, -Math.PI / 2, Math.PI * 1.6, [40, 180]);
+    Sfx.hurt(); this.shake(130, soft ? 0.004 : 0.007);
+    this.style.pts = Math.max(0, this.style.pts - dmg * (soft ? 2 : 5));          // getting hit costs style
     BUS.emit('hp', this.hp, dmg);
+    if (!opts.self) BUS.emit('dmgdir', Math.atan2((opts.srcY ?? b.center.y) - b.center.y, srcX - b.center.x), dmg);   // HUD: which way it came from
     if (this.hp <= 0) this.killPlayer();
     return true;
   }
@@ -5497,6 +6634,7 @@ class GameScene extends Phaser.Scene {
     this.paintSplatAround(cx, b.bottom - 2, 16);
     p.disableBody(true, true);
     this.pv.setVisible(false); this.gun.setVisible(false); this.visor.setVisible(false); this.mflash.setVisible(false);
+    this.lanceGlow.setVisible(false); this.lanceOn = false; this.locks = []; this.hornetHeld = false; this.reeledBy = null; this.stopLoops();
     Sfx.gib(1.6); if (!Music.jingle('lose', 'title')) Sfx.lose(); Sfx.arcSet(false); Sfx.flameSet(false); BUS.emit('splat', 9);
     this.shake(320, 0.014); this.slowmoUntil = this.time.now + 900;
     this.time.delayedCall(1300, () => this.showOver(false));
@@ -5527,6 +6665,16 @@ class GameScene extends Phaser.Scene {
     if (e.frozen > 0) return;                                          // statues don't bite
     if (e.kind === 'screamer') { if (e.ai === 'dive') this.screamerBoom(e); return; }
     if (e.kind === 'cloaker') return;                                  // it only hurts when it means to (the strike)
+    if (e.kind === 'burrower') {                                       // only the eruption bites, and it throws you
+      if (e.ai === 'erupt' && !e.hitP && e.body.velocity.y < 120) {
+        e.hitP = true;
+        if (this.hurtPlayer(TUNE.BURROWER.dmg, e.body.center.x, { knock: false, srcY: e.body.bottom })) {
+          p.body.velocity.y = -380; p.body.velocity.x = Math.sign(p.x - e.x || 1) * 160; this.jumpCuttable = false; this.lastGround = -1e9;
+          this.shake(180, 0.01); Sfx.kickHit(); this.fxBlood(p.body.center.x, p.body.bottom, 10, -Math.PI / 2, 1.2);
+        }
+      }
+      return;
+    }
     if (e.kind === 'tick') { if (e.armT <= 0 && e.kickedT <= 0) { e.armT = TUNE.TICK.fuse / 1000; Sfx.chirp(); } return; }   // ticks don't bite, they blow
     if (e.kind === 'rammer' && e.ai === 'charge') return;               // the charge deals its own hits
     const lunging = e.kind === 'stalker' && e.ai === 'lunge', bashing = e.kind === 'bulwark' && e.ai === 'charge';
@@ -5551,8 +6699,8 @@ class GameScene extends Phaser.Scene {
   }
 
   // ------------------------------------------------------------------- gibs ----
-  spawnGib(tex, x, y, vx, vy, kind) {                     // kind: undefined = meat, 'shell', 'metal'
-    const shell = kind === 'shell', metal = kind === 'metal';
+  spawnGib(tex, x, y, vx, vy, kind) {                     // kind: undefined = meat, 'shell', 'metal', 'slag' (glowing, cools)
+    const shell = kind === 'shell', metal = kind === 'metal' || kind === 'slag';
     let g = this.gibs.getFirstDead(false);
     if (!g) { g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length; }   // recycle oldest
     g.setTexture(tex); g.clearTint();
@@ -5563,7 +6711,7 @@ class GameScene extends Phaser.Scene {
     g.setVelocity(vx, vy); g.body.setAngularVelocity(rand(-900, 900));
     g.setRotation(rand(0, Math.PI * 2)).setAlpha(1);
     Object.assign(g, { ttl: shell ? rand(2.5, 3.5) : metal ? rand(3, 5) : rand(7, 10), bleed: shell || metal ? 0 : rand(0.4, 1.4), bleedT: 0,
-      shell, metal, kickT: 0, prevV: 0, stuckT: 0, canStick: !shell && !metal });
+      shell, metal, kickT: 0, prevV: 0, stuckT: 0, canStick: !shell && !metal, hot: kind === 'slag' ? rand(1.2, 2.6) : 0 });
     return g;
   }
   updateGibs(dt) {
@@ -5573,6 +6721,12 @@ class GameScene extends Phaser.Scene {
       g.ttl -= dt;
       if (g.ttl <= 0) { g.disableBody(true, true); continue; }
       if (g.ttl < 1) g.setAlpha(Math.floor(g.ttl * 10) % 2 ? 0.35 : 0.9);
+      if (g.hot > 0) {                                       // molten chunk: smokes and dims as it cools
+        g.hot -= dt;
+        if (Math.random() < 0.3) this.fx.emit(g.x, g.y, { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [10, 30], life: [0.2, 0.4], size: [2, 1], cols: [0xffe080, 0xff8a20, 0xa02008], add: true, g: -40 });
+        const k = clamp(g.hot / 1.5, 0, 1), c = (255 << 16) | (Math.round(110 + 145 * k) << 8) | Math.round(80 + 175 * k);
+        if (g.hot <= 0) g.setTint(0x5a4034); else g.setTint(c);
+      }
       if (g.stuckT > 0) {                                  // meat glued to a wall/ceiling: drips, then lets go
         g.stuckT -= dt;
         if (Math.random() < dt * 6) this.fxBlood(g.x, g.y + 2, 1, Math.PI / 2, 0.3, [5, 20]);
@@ -5634,6 +6788,9 @@ class GameScene extends Phaser.Scene {
       else if (e.kind === 'warden') this.updateWarden(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'jugg') this.updateJugg(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'gunship') this.updateGunship(e, dt, now, dx, dy, dist, alive);
+      else if (e.def.molten) this.updateSlagling(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'burrower') this.updateBurrower(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'linker') this.updateLinker(e, dt, now, dx, dy, dist, alive);
       else if (isHumanoid(e)) this.updateHumanoid(e, dt, now, dx, dy, dist, alive);
       else this.updateWalker(e, dt, now, dx, dy, alive);
       if (!e.alive) continue;
@@ -5785,7 +6942,7 @@ class GameScene extends Phaser.Scene {
     if (e.stunT > 0) { if (onGround) b.velocity.x *= Math.pow(0.002, dt); }
     else {
       if (alive && e.ai !== 'lunge' && e.ai !== 'dodge') this.evade(e, now, onGround);
-      move = e.kind === 'cloaker' ? this.thinkCloaker(e, dt, now, c) : e.kind === 'pyro' ? this.thinkPyro(e, dt, now, c) : e.kind === 'sapper' ? this.thinkSapper(e, dt, now, c) : e.kind === 'rocketeer' ? this.thinkRocketeer(e, dt, now, c) : e.kind === 'enforcer' ? this.thinkEnforcer(e, dt, now, c) : e.kind === 'bulwark' ? this.thinkBulwark(e, dt, now, c) : e.kind === 'sniper' ? this.thinkSniper(e, dt, now, c) : this.thinkStalker(e, dt, now, c);
+      move = e.kind === 'harpooner' ? this.thinkHarpooner(e, dt, now, c) : e.kind === 'cloaker' ? this.thinkCloaker(e, dt, now, c) : e.kind === 'pyro' ? this.thinkPyro(e, dt, now, c) : e.kind === 'sapper' ? this.thinkSapper(e, dt, now, c) : e.kind === 'rocketeer' ? this.thinkRocketeer(e, dt, now, c) : e.kind === 'enforcer' ? this.thinkEnforcer(e, dt, now, c) : e.kind === 'bulwark' ? this.thinkBulwark(e, dt, now, c) : e.kind === 'sniper' ? this.thinkSniper(e, dt, now, c) : this.thinkStalker(e, dt, now, c);
     }
     if (move !== 'free' && e.fleeT > 0 && onGround) {                 // live grenade close by: clear the blast
       b.velocity.x = approach(b.velocity.x, e.fleeDir * D.speed * 1.15, 2400 * dt); e.path = null; e.navAir = false;
@@ -6173,12 +7330,12 @@ class GameScene extends Phaser.Scene {
     b.disableBody(true, true);
     this.fxSparks(x, y, 3, a + Math.PI, 1.4, [40, 120]);
     p.body.velocity.x += Math.cos(a) * 60;
-    this.hurtPlayer(b.dmg || TUNE.ENFORCER.damage, x, { knock: false, iframes: false });
+    this.hurtPlayer(b.dmg || TUNE.ENFORCER.damage, x - Math.cos(a) * 40, { knock: false, iframes: false, srcY: y - Math.sin(a) * 40 });
     if (b.snipe) { this.shake(120, 0.006); BUS.emit('splat', 1); }
   }
   alertHumanoid(e, now, shout) {
     if (e.ai !== 'idle') return;
-    e.aggro = true; e.ai = { enforcer: 'engage', stalker: 'hunt', bulwark: 'advance', sniper: 'engage', rocketeer: 'engage', sapper: 'hunt', cloaker: 'hunt', pyro: 'engage' }[e.kind]; e.repickT = 0; e.repathT = 0;
+    e.aggro = true; e.ai = { enforcer: 'engage', stalker: 'hunt', bulwark: 'advance', sniper: 'engage', rocketeer: 'engage', sapper: 'hunt', cloaker: 'hunt', pyro: 'engage', harpooner: 'engage' }[e.kind] || 'engage'; e.repickT = 0; e.repathT = 0;
     this.popAlert(e);
     if (!shout) return;
     if (e.kind === 'stalker') Sfx.hiss(); else Sfx.radio();
@@ -6300,11 +7457,19 @@ class GameScene extends Phaser.Scene {
       const sx = p.x + (this.facing > 0 ? 0 : -1), sy = p.y - 2 + bob + Math.round(this.swapT / 0.14 * 5);
       this.gun.setPosition(Math.round(sx - ca * this.recoil), Math.round(sy - sa * this.recoil)).setRotation(this.aim).setAlpha(this.pv.alpha);
       this.gun.scaleY = ca < 0 ? -1 : 1;                              // mirror around the shoulder pivot
-      if (WEAPONS[this.weapon].id === 'mini') {                       // spinning barrels + heat glow
+      const wid = WEAPONS[this.weapon].id;
+      if (wid === 'mini') {                                           // spinning barrels + heat glow
         const key = this.spin > 0.05 && Math.floor(now / (70 - 50 * this.spin)) % 2 ? 'gun_mini2' : 'gun_mini';
         if (this.gun.texture.key !== key) this.gun.setTexture(key);
         this.gun.setTint((255 << 16) | (Math.round(255 - 110 * this.heat) << 8) | Math.round(255 - 170 * this.heat)); this.gunTinted = true;
+      } else if (wid === 'lance' && this.lanceOn) {                     // charging: the barrel heats up, the emitter swells
+        const c = this.lanceCharge, G = GUNS.lance;
+        this.gun.setTint((255 << 16) | (Math.round(255 - 90 * c) << 8) | Math.round(255 - 190 * c)); this.gunTinted = true;
+        this.lanceGlow.setVisible(true).setPosition(this.gun.x + ca * G.muzzle, this.gun.y + sa * G.muzzle).setScale(0.35 + 1.1 * c + (c >= 1 ? Math.random() * 0.3 : 0)).setAlpha(0.45 + 0.45 * c);
       } else if (this.gunTinted) { this.gun.clearTint(); this.gunTinted = false; }
+      if (!(wid === 'lance' && this.lanceOn)) this.lanceGlow.setVisible(false);
+      if (wid === 'ripper') { const key = now < this.ripperUntil && Math.floor(now / 35) % 2 ? 'gun_ripper2' : 'gun_ripper'; if (this.gun.texture.key !== key) this.gun.setTexture(key); }
+      else if (wid === 'glaive') { const key = this.glaive.on ? 'gun_glaive2' : 'gun_glaive'; if (this.gun.texture.key !== key) this.gun.setTexture(key); }
       this.visor.setPosition(p.x + this.facing * 3, p.y - 7 + bob);
       if (this.mflash.visible) {
         if (now > this.mflashUntil) this.mflash.setVisible(false);
@@ -6320,6 +7485,14 @@ class GameScene extends Phaser.Scene {
     }
     for (const bm of this.beams) {                                       // rail slug trails
       const a = 1 - bm.t / bm.dur;
+      if (bm.col === 'lance') {                                          // magma lance: thick molten beam, narrows as it fades
+        const w = bm.w * (0.55 + 0.45 * a);
+        g.lineStyle(w * 2 + 4, 0xa02008, 0.35 * a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
+        g.lineStyle(w * 2, 0xff6a10, 0.75 * a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
+        g.lineStyle(Math.max(1, w), 0xffe080, a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
+        g.lineStyle(1, 0xffffff, a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
+        continue;
+      }
       const pr = bm.col === 'prism';
       g.lineStyle(4, pr ? 0xd02090 : 0x2a8ad0, 0.35 * a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
       g.lineStyle(2, pr ? 0xff60e0 : 0x6ad0ff, 0.6 * a).lineBetween(bm.x0, bm.y0, bm.x1, bm.y1);
@@ -6327,6 +7500,42 @@ class GameScene extends Phaser.Scene {
     }
     for (const e of this.enemies.getChildren()) {
       if (!e.alive) continue;
+      if (e.def.molten) { e.glow.setPosition(e.x, e.y + 2).setScale((0.5 + e.def.tier * 0.35) * (0.9 + Math.sin(now / 120 + e.x) * 0.1)); continue; }
+      if (e.kind === 'burrower') {
+        if (e.under) continue;
+        e.rotation = e.ai === 'erupt' ? Math.atan2(e.body.velocity.y, e.body.velocity.x) + Math.PI / 2 : Math.sin(e.t * 6) * 0.12;   // nose-first through the air
+        e.glow.setPosition(e.x + Math.sin(e.rotation) * 10, e.y - Math.cos(e.rotation) * 10).setScale(e.ai === 'erupt' ? 0.9 : 0.6);
+        continue;
+      }
+      if (e.kind === 'linker') {
+        e.glow.setPosition(e.x + e.dir * 2, e.y).setScale(e.phase !== 'off' ? 0.6 + Math.random() * 0.15 : 0.4);
+        const B = e.beam;
+        if (B && B.live) {                                               // live fence: hot core, wobbling halo, the odd arc
+          g.lineStyle(6, 0x1a8ad0, 0.3).lineBetween(B.x0, B.y0, B.x1, B.y1);
+          g.lineStyle(3, 0x60e0ff, 0.75).lineBetween(B.x0, B.y0 + rand(-1, 1), B.x1, B.y1 + rand(-1, 1));
+          g.lineStyle(1, 0xffffff, 1).lineBetween(B.x0, B.y0, B.x1, B.y1);
+          if (Math.random() < 0.25) this.zap(g, B.x0, B.y0, B.x1, B.y1);
+        } else if (B && Math.random() < 0.75) {                          // charging: thin dashed flicker
+          const len = Math.hypot(B.x1 - B.x0, B.y1 - B.y0) || 1, ux = (B.x1 - B.x0) / len, uy = (B.y1 - B.y0) / len, ph = (now / 25) % 8;
+          this.laserG.lineStyle(1, 0x60e0ff, 0.3 + Math.random() * 0.4);
+          for (let d = ph; d < len; d += 8) this.laserG.lineBetween(B.x0 + ux * d, B.y0 + uy * d, B.x0 + ux * Math.min(len, d + 4), B.y0 + uy * Math.min(len, d + 4));
+        }
+        continue;
+      }
+      if (e.kind === 'harpooner') {
+        e.glow.setPosition(e.x + e.dir * 5, e.y - 9 + (e.fr === 'crouch' ? 1 : 0)).setScale(e.ai === 'windup' ? 0.7 : 0.3);
+        const hx = e.x + e.dir * 4, hy = e.y - 6;
+        if (e.hk) {                                                      // the chain
+          const hk = e.hk, n = Math.max(1, Math.floor(Math.hypot(hk.x - hx, hk.y - hy) / 3));
+          this.laserG.lineStyle(1, 0x4a525c, 0.9).lineBetween(hx, hy, hk.x, hk.y);
+          for (let i = 1; i < n; i++) this.laserG.fillStyle(i % 2 ? 0xa0aab6 : 0x5a636e, 1).fillRect(Math.round(hx + (hk.x - hx) * i / n) - 1, Math.round(hy + (hk.y - hy) * i / n) - 1, 2, 2);
+        } else if (e.ai === 'windup') {                                  // dotted sight line, blinks once it locks
+          const k = clamp(1 - (e.aiUntil - now) / TUNE.HARPOON.windMs, 0, 1), locked = k > 0.7, ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
+          const col = locked ? 0xffffa0 : 0xffd040, a = locked ? (Math.floor(now / 40) % 2 ? 0.9 : 0.4) : 0.25 + 0.4 * k;
+          for (let d = 6; d < 30 + 70 * k; d += 5) this.laserG.fillStyle(col, a).fillRect(Math.round(hx + ca * d), Math.round(hy + sa * d), 2, 1);
+        }
+        continue;
+      }
       if (e.kind === 'mender') {
         e.glow.setPosition(e.x, e.y + 2).setScale(e.healing ? 0.9 + Math.sin(now / 50) * 0.15 : 0.6);
         const pt = e.patient;
@@ -6441,6 +7650,18 @@ class GameScene extends Phaser.Scene {
       }
     }
     for (const r of this.rocketList) if (r.active) r.glow.setPosition(r.x, r.y);
+    if (this.locks.length || this.hornetHeld) {                           // hornet locks: corner brackets that snap in, one pip per missile
+      const seen = new Map(); for (const e of this.locks) seen.set(e, (seen.get(e) || 0) + 1);
+      for (const [e, n] of seen) {
+        if (!e.alive) continue;
+        const b = e.body, age = (now - (e.lockT || 0)) / 150, s = Math.round(Math.max(b.halfWidth, b.halfHeight) + 4 + Math.max(0, 1 - age) * 8), cx = Math.round(b.center.x), cy = Math.round(b.center.y);
+        this.laserG.fillStyle(0xff5a2a, 0.95);
+        for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const x = cx + sx * s, y = cy + sy * s; this.laserG.fillRect(sx > 0 ? x - 2 : x, y, 3, 1).fillRect(x, sy > 0 ? y - 2 : y, 1, 3); }
+        this.laserG.fillStyle(0xffe14a, 1);
+        for (let i = 0; i < n; i++) this.laserG.fillRect(cx - Math.round(n * 1.5) + i * 3, cy - s - 4, 2, 2);
+      }
+      if (this.hornetHeld && this.state !== 'dead') { const A = this.hornetAim(); this.laserG.lineStyle(1, 0xff5a2a, 0.2).strokeCircle(A.x, A.y, A.r); }
+    }
     const hk = this.hook;                                                 // grapple chain
     if (hk && this.state !== 'dead') {
       const G = GUNS[WEAPONS[this.weapon].gun], ca = Math.cos(this.aim), sa = Math.sin(this.aim), gx = this.gun.x + ca * G.muzzle * 0.6, gy = this.gun.y + sa * G.muzzle * 0.6;
@@ -6467,18 +7688,32 @@ class HudScene extends Phaser.Scene {
     this.hurtA = 0; this.healA = 0; this.aimMode = 'keys'; this.overOn = false; this.t0 = this.time.now; this.countPulse = 0;
     this.flashA = 0; this.hmT = 0; this.hmKill = false; this.hmHead = false; this.panelShake = 0;
     this.splats = []; this.rankPop = 0; this.styleA = 0; this.shownRank = -1;
-    const shadow = '#000000', SW = 52;                                 // SW = weapon slot pitch
+    const shadow = '#000000', SW = 40;                                 // SW = weapon slot pitch (18 slots)
     this.add.image(VIEW_W / 2, VIEW_H / 2, 'vignette').setDepth(0);
     this.splatG = this.add.graphics().setDepth(0.5);                   // blood on the lens
     this.flashG = this.add.graphics().setDepth(1);
     this.g = this.add.graphics().setDepth(2);
     new PixelLabel(this, 26, 20, 'hud_hplbl', { text: 'HEALTH', align: 'left', scale: 2, color: '#8f9bab', shadow }).setDepth(3);
     this.lblHp = new PixelLabel(this, 304, 16, 'hud_hp', { maxChars: 3, text: '100', align: 'right', scale: 3, color: '#ffffff', shadow }).setDepth(3);
-    this.slotIcons = WEAPONS.map((w, i) => this.add.image(14 + i * SW + 24, 82 + 32, 'icon_' + w.gun).setScale(1.5).setDepth(3));
-    WEAPONS.forEach((w, i) => new PixelLabel(this, 14 + i * SW + 3, 86, 'hud_slot' + i, { text: i < 9 ? String(i + 1) : ['0', '-', '=', '<', '['][i - 9], align: 'left', scale: 2, color: '#ffffff', shadow }).setDepth(3));
-    this.lblWeapon = new PixelLabel(this, 26, 142, 'hud_wname', { maxChars: 16, align: 'left', scale: 2, color: '#ffb347', shadow }).setDepth(3);
-    this.lblMines = new PixelLabel(this, 26, 162, 'hud_mines', { maxChars: 12, text: 'G MINES ' + TUNE.MINE.max, align: 'left', scale: 2, color: '#ff6a4a', shadow }).setDepth(3);
-    this.lblSentry = new PixelLabel(this, 26, 182, 'hud_sentry', { maxChars: 16, text: 'T SENTRY READY', align: 'left', scale: 2, color: '#5cff7a', shadow }).setDepth(3); this.sentTxt = '';
+    this.slotIcons = WEAPONS.map((w, i) => this.add.image(14 + i * SW + 19, 82 + 28, 'icon_' + w.gun).setScale(Math.min(1.3, 33 / GUNS[w.gun].w)).setDepth(3));
+    WEAPONS.forEach((w, i) => new PixelLabel(this, 14 + i * SW + 3, 85, 'hud_slot' + i, { text: SLOT_KEYS[i], align: 'left', scale: 2, color: '#ffffff', shadow }).setDepth(3));
+    this.lblWeapon = new PixelLabel(this, 26, 136, 'hud_wname', { maxChars: 16, align: 'left', scale: 2, color: '#ffb347', shadow }).setDepth(3);
+    this.lblMines = new PixelLabel(this, 26, 156, 'hud_mines', { maxChars: 12, text: 'G MINES ' + TUNE.MINE.max, align: 'left', scale: 2, color: '#ff6a4a', shadow }).setDepth(3);
+    this.lblSentry = new PixelLabel(this, 26, 176, 'hud_sentry', { maxChars: 16, text: 'T SENTRY READY', align: 'left', scale: 2, color: '#5cff7a', shadow }).setDepth(3); this.sentTxt = '';
+    // overdrive round: off-screen arrows, hit direction, wave cards, pause menu
+    this.dirs = []; this.dashK = 1; this.wcT = 0; this.wcDur = 2.6; this.pauseOn = false; this.pSel = 0; this.pArm = -1; this.hudFrame = 0;
+    this.arrowG = this.add.graphics().setDepth(2.5);
+    this.wcG = this.add.graphics().setDepth(4.5);
+    this.wcTitle = new PixelLabel(this, 480, 246, 'hud_wct', { maxChars: 12, scale: 6, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
+    this.wcSub = new PixelLabel(this, 480, 286, 'hud_wcs', { maxChars: 36, scale: 2, color: '#ffd8a0', shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
+    this.pG = this.add.graphics().setDepth(10);
+    this.pTitle = new PixelLabel(this, 480, 168, 'hud_pt', { text: 'PAUSED', scale: 8, rows: LOGO_ROWS, shadow, originY: 0.5 }).setDepth(11);
+    this.pItems = ['RESUME', 'RESTART', 'POST FX: ON', 'QUIT TO TITLE'].map((t, i) => new PixelLabel(this, 480, 236 + i * 38, 'hud_pi' + i, { maxChars: 14, text: t, scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
+    this.pHint = new PixelLabel(this, 480, 404, 'hud_ph', { text: 'W/S OR MOUSE  :  ENTER TO PICK  :  ESC TO RESUME', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
+    this.setPause(false);
+    this.input.keyboard.on('keydown', ev => this.onPauseKey(ev));
+    this.input.on('pointermove', p => this.onPausePointer(p, false));
+    this.input.on('pointerdown', p => this.onPausePointer(p, true));
     this.lblRamp = new PixelLabel(this, 944, 214, 'hud_ramp', { maxChars: 8, text: 'RAMPAGE', align: 'right', scale: 2, color: '#ff7a2a', shadow }).setDepth(3).setVisible(false); this.rampA = 0;
     this.add.image(784, 40, 'skull').setScale(3).setDepth(3);
     new PixelLabel(this, 932, 20, 'hud_hostlbl', { text: 'HOSTILES', align: 'right', scale: 2, color: '#8f9bab', shadow }).setDepth(3);
@@ -6512,6 +7747,96 @@ class HudScene extends Phaser.Scene {
     on('callout', this.callout); on('over', this.showOver); on('aim', this.onAim);
     on('combo', this.onCombo); on('hitmark', this.onHitmark); on('flash', this.onFlash);
     on('wave', this.onWave); on('mines', this.onMines); on('minibar', this.onMinibar); on('splat', this.onSplat); on('rankup', this.onRankUp); on('boss', this.onBoss);
+    on('dmgdir', this.onDmgDir); on('wavecard', this.onWaveCard); on('pause', this.onPause);
+  }
+  // ---- overdrive round: hit direction, wave cards, pause menu ----
+  onDmgDir(a, dmg) { this.dirs.push({ a, t: 0.9, s: Math.min(1, 0.45 + dmg / 30) }); if (this.dirs.length > 6) this.dirs.shift(); }
+  onWaveCard(title, sub) {
+    this.wcDur = title === 'FINAL WAVE' ? 2.1 : 2.6; this.wcT = this.wcDur;
+    this.wcTitle.setText(title); this.wcSub.setText(sub || '');
+  }
+  onPause(on) { this.setPause(on); if (on) { this.pArm = this.hudFrame; this.pSel = 0; this.input.setDefaultCursor('default'); } }
+  setPause(on) {
+    this.pauseOn = on; this.pShownSel = -1;
+    [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(on));
+    if (on) this.pItems[2].setText(POSTFX.on ? 'POST FX: ON' : 'POST FX: OFF');
+    if (!on) this.pG.clear();
+  }
+  pausePick(i) {
+    const gs = this.scene.get('Game'); Sfx.ui();
+    if (i === 0) { this.setPause(false); this.scene.resume('Game'); BUS.emit('pause', false); }
+    else if (i === 1) { this.setPause(false); gs.restartRun(); }
+    else if (i === 2) { gs.togglePostFx(); this.pItems[2].setText(POSTFX.on ? 'POST FX: ON' : 'POST FX: OFF'); }
+    else { this.setPause(false); gs.quitToTitle(); }
+  }
+  onPauseKey(ev) {
+    if (!this.pauseOn || this.hudFrame === this.pArm) return;           // ignore the press that opened the menu
+    const k = ev.keyCode;
+    if (k === 38 || k === 87) { this.pSel = (this.pSel + 3) % 4; Sfx.swap(); }
+    else if (k === 40 || k === 83) { this.pSel = (this.pSel + 1) % 4; Sfx.swap(); }
+    else if (k === 13 || k === 32) this.pausePick(this.pSel);
+    else if (k === 27 || k === 80) this.pausePick(0);
+  }
+  onPausePointer(p, click) {
+    if (!this.pauseOn) return;
+    const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < 17 && Math.abs(p.x - 480) < 190);
+    if (i < 0) return;
+    if (i !== this.pSel) { this.pSel = i; Sfx.swap(); }
+    if (click && this.hudFrame !== this.pArm) this.pausePick(i);
+  }
+  drawPause(time) {
+    const g = this.pG; g.clear();
+    g.fillStyle(0x000000, 0.62); g.fillRect(0, 0, VIEW_W, VIEW_H);
+    g.fillStyle(0x06070a, 0.85); g.fillRect(270, 120, 420, 310);
+    g.fillStyle(0xff8a1f, 1); g.fillRect(270, 120, 420, 3); g.fillRect(270, 427, 420, 3);
+    if (this.pShownSel !== this.pSel) { this.pShownSel = this.pSel; this.pItems.forEach((o, i) => o.setStyle({ color: i === this.pSel ? '#ffe46a' : '#8f9bab' })); }
+    const o = this.pItems[this.pSel];
+    g.fillStyle(0x2a1806, 0.95); g.fillRect(300, o.y - 15, 360, 30); g.fillStyle(0xff8a1f, 1); g.fillRect(300, o.y - 15, 4, 30); g.fillRect(656, o.y - 15, 4, 30);
+    const s = this.pItems[this.pSel], bob = Math.round(Math.sin(time / 120) * 2);
+    g.fillStyle(0xffe46a, 1); g.fillTriangle(314 + bob, s.y - 6, 314 + bob, s.y + 6, 322 + bob, s.y);
+  }
+  drawWaveCard(dt) {
+    const g = this.wcG; g.clear();
+    if (this.wcT <= 0) { this.wcTitle.setVisible(false); this.wcSub.setVisible(false); return; }
+    this.wcT -= dt;
+    const kin = clamp((this.wcDur - this.wcT) / 0.25, 0, 1), kout = clamp(this.wcT / 0.3, 0, 1), k = Math.min(kin, kout), e = 1 - Math.pow(1 - k, 3);
+    const h = Math.round(92 * e), y = 262 - h / 2, slide = (1 - kin) * -140 + (1 - kout) * 140;
+    g.fillStyle(0x000000, 0.55 * e); g.fillRect(0, y, VIEW_W, h);
+    g.fillStyle(0xff8a1f, e); g.fillRect(480 - 480 * e, y, 960 * e, 2); g.fillRect(480 - 480 * e, y + h - 2, 960 * e, 2);
+    this.wcTitle.setVisible(true).setAlpha(e).setPosition(480 + slide, 246).setScale(6 + (1 - kin) * 2);
+    this.wcSub.setVisible(true).setAlpha(e).setPosition(480 - slide * 0.6, 288);
+  }
+  drawIndicators(gs, time) {                                            // off-screen hostiles + where the last hit came from
+    const g = this.arrowG; g.clear();
+    if (!gs || !gs.sys.isActive() || this.overOn) return;
+    const cam = gs.cameras.main, wv = cam.worldView, z = cam.zoom, toS = (x, y) => [(x - wv.x) * z, (y - wv.y) * z];
+    if (gs.state === 'play' && (gs.enemiesLeft <= 5 || (gs.boss && gs.boss.alive))) {
+      let n = 0;
+      for (const e of gs.enemies.getChildren()) {
+        if (!e.alive || n >= 8) continue;
+        const big = e === gs.boss;
+        if (gs.enemiesLeft > 5 && !big) continue;
+        const [sx, sy] = e.under ? toS(e.ux, e.floorY - 8) : toS(e.body.center.x, e.body.center.y);
+        if (sx > 8 && sx < VIEW_W - 8 && sy > 8 && sy < VIEW_H - 8) continue;
+        n++;
+        const cx = VIEW_W / 2, cy = VIEW_H / 2, a = Math.atan2(sy - cy, sx - cx), ca = Math.cos(a), sa = Math.sin(a);
+        const t = Math.min((VIEW_W / 2 - 26) / Math.abs(ca || 1e-6), (VIEW_H / 2 - 26) / Math.abs(sa || 1e-6)), px = cx + ca * t, py = cy + sa * t;
+        const r = big ? 13 : 9, al = 0.55 + 0.35 * Math.sin(time / 140 + n);
+        g.fillStyle(0x000000, al * 0.8).fillTriangle(px + ca * (r + 2), py + sa * (r + 2), px - sa * (r * 0.75 + 2) - ca * 3, py + ca * (r * 0.75 + 2) - sa * 3, px + sa * (r * 0.75 + 2) - ca * 3, py - ca * (r * 0.75 + 2) - sa * 3);
+        g.fillStyle(big ? 0xffb040 : 0xff5a3a, al).fillTriangle(px + ca * r, py + sa * r, px - sa * r * 0.75, py + ca * r * 0.75, px + sa * r * 0.75, py - ca * r * 0.75);
+      }
+    }
+    if (gs.state !== 'dead' && this.dirs.length) {
+      const [px, py] = toS(gs.pv.x, gs.pv.y - 12);
+      for (const d of this.dirs) {
+        const al = Math.min(1, d.t * 1.6) * d.s;
+        for (let k = -2; k <= 2; k++) {
+          const a = d.a + k * 0.13, r = 58 - Math.abs(k) * 2, x = Math.round((px + Math.cos(a) * r) / 2) * 2, y = Math.round((py + Math.sin(a) * r) / 2) * 2, s = k === 0 ? 8 : 6;
+          g.fillStyle(0x000000, al * 0.7).fillRect(x - s / 2 - 1, y - s / 2 - 1, s + 2, s + 2);
+          g.fillStyle(k === 0 ? 0xff6a4a : 0xff2a1a, al).fillRect(x - s / 2, y - s / 2, s, s);
+        }
+      }
+    }
   }
   onCombo(n) {
     this.tweens.killTweensOf(this.lblCombo);
@@ -6530,6 +7855,7 @@ class HudScene extends Phaser.Scene {
   onMinibar(name) { this.bossName.setText(name); this.bossDisp = 1; }
   onRankUp() { this.rankPop = 0.35; }
   onBoss(name, sub) {
+    this.wcT = Math.min(this.wcT, 0.3);                                 // the boss title card takes over from the wave card
     this.lbT = 2.8; this.lbTitle.setText(name); this.lbSub.setText(sub); this.bossName.setText(name); this.bossDisp = 1;
     this.tweens.killTweensOf(this.call); this.call.setAlpha(0);          // the title card owns the screen
   }
@@ -6547,6 +7873,7 @@ class HudScene extends Phaser.Scene {
     this.setOverlay(false); this.tweens.killTweensOf(this.call); this.call.setAlpha(0);
     this.t0 = this.time.now; this.hurtA = 0; this.healA = 0; this.flashA = 0; this.hmT = 0; this.splats = [];
     this.tweens.killTweensOf(this.lblCombo); this.lblCombo.setAlpha(0);
+    this.dirs = []; this.wcT = 0; this.setPause(false);
   }
   onHp(hp, dmg) {
     if (hp < this.hp) { this.hurtA = Math.min(1, this.hurtA + 0.45 + dmg / 40); this.panelShake = 0.25; } else if (hp > this.hp) this.healA = 1;
@@ -6586,7 +7913,7 @@ class HudScene extends Phaser.Scene {
     [this.lblMines, this.lblSentry].forEach(o => o.setVisible(!on));   // they sit inside the results strip
   }
   update(time, delta) {
-    const dt = Math.min(delta, 50) / 1000;
+    const dt = Math.min(delta, 50) / 1000; this.hudFrame++;
     const gsr = this.scene.get('Game');
     if (gsr && gsr.sys.isActive()) {                                     // sentry status + rampage timer, read from the game
       const st = gsr.sentry ? 'T SENTRY ' + Math.ceil(gsr.sentry.t) + 'S' : gsr.time.now >= gsr.sentryReadyAt ? 'T SENTRY READY' : 'T SENTRY ' + Math.ceil((gsr.sentryReadyAt - gsr.time.now) / 1000);
@@ -6597,9 +7924,16 @@ class HudScene extends Phaser.Scene {
     this.dispHp = this.dispHp > this.hp ? Math.max(this.hp, this.dispHp - 30 * dt) : this.hp;
     this.hurtA = Math.max(0, this.hurtA - dt * 1.8); this.healA = Math.max(0, this.healA - dt * 2);
     this.flashA = Math.max(0, this.flashA - dt * 2.2); this.panelShake = Math.max(0, this.panelShake - dt);
+    if (gsr && !this.pauseOn) {                                          // hit-direction markers fade; dash meter refills
+      for (let i = this.dirs.length - 1; i >= 0; i--) if ((this.dirs[i].t -= dt) <= 0) this.dirs.splice(i, 1);
+      this.dashK = clamp(1 - ((gsr.dashReady || 0) - gsr.time.now) / (TUNE.DASH.cd * 1000), 0, 1);
+    }
     this.draw(time);
     this.drawSplats(dt);
     this.drawBoss(dt);
+    this.drawWaveCard(dt);
+    this.drawIndicators(gsr, time);
+    if (this.pauseOn) this.drawPause(time);
     // hit marker: four ticks round the crosshair; red + wider on a kill, yellow ring on a headshot
     const hg = this.hmG; hg.clear();
     if (this.hmT > 0 && this.aimMode === 'mouse') {
@@ -6615,6 +7949,19 @@ class HudScene extends Phaser.Scene {
       if (this.hmHead) { hg.lineStyle(2, 0xffe14a, Math.min(1, this.hmT * 4)); hg.strokeCircle(cx, cy, 20 + (0.32 - this.hmT) * 30); }
     } else { this.hmT = Math.max(0, this.hmT - dt); }
     if (this.hmT <= 0) this.hmHead = false;
+    if (gsr && gsr.sys.isActive() && this.aimMode === 'mouse' && gsr.state !== 'dead') {   // crosshair readouts: lance charge ring, hornet lock pips
+      const p = this.input.activePointer, cx = Math.round(p.x), cy = Math.round(p.y), wid = WEAPONS[gsr.weapon].id;
+      if (wid === 'lance' && gsr.lanceOn) {
+        const c = gsr.lanceCharge, n = 16, lit = Math.round(n * c), full = c >= 1, blink = full && Math.floor(time / 70) % 2;
+        for (let i = 0; i < n; i++) {
+          const a = -Math.PI / 2 + i / n * Math.PI * 2, x = Math.round(cx + Math.cos(a) * 18), y = Math.round(cy + Math.sin(a) * 18);
+          hg.fillStyle(0x000000, 0.6).fillRect(x - 2, y - 2, 4, 4);
+          hg.fillStyle(i < lit ? (blink ? 0xffffff : full ? 0xffe080 : 0xff8a20) : 0x3a2010, 1).fillRect(x - 1, y - 1, 2, 2);
+        }
+      } else if (wid === 'hornet' && (gsr.locks.length || gsr.hornetHeld)) {
+        for (let i = 0; i < TUNE.HORNET.maxLocks; i++) { const x = cx - 17 + i * 6, y = cy + 16; hg.fillStyle(0x000000, 0.7).fillRect(x - 1, y - 1, 6, 6); hg.fillStyle(i < gsr.locks.length ? 0xff5a2a : 0x3a2a24, 1).fillRect(x, y, 4, 4); }
+      }
+    }
     // style rank: read straight from the game scene
     const gs = this.scene.get('Game'), st = gs && gs.style;
     if (st) {
@@ -6685,10 +8032,14 @@ class HudScene extends Phaser.Scene {
       g.fillStyle(c, 1); g.fillRect(x, y, 12, 20);
       if (c === col) { g.fillStyle(0xffffff, 0.28); g.fillRect(x, y, 12, 4); g.fillStyle(0x000000, 0.25); g.fillRect(x, y + 16, 12, 4); }
     }
+    const dk = this.dashK;                                              // dash meter under the health bar
+    g.fillStyle(0x1a1d22, 1); g.fillRect(26, 65, 278, 4);
+    g.fillStyle(dk >= 1 ? 0x46e6ff : 0x2a6a80, 1); g.fillRect(26, 65, Math.round(278 * dk), 4);
+    if (dk >= 1) { g.fillStyle(0xffffff, 0.35); g.fillRect(26, 65, 278, 1); }
     WEAPONS.forEach((w, i) => {
-      const x = 14 + i * 52, y = 82, sel = i === this.weapon;
-      g.fillStyle(sel ? 0x2a1806 : 0x06070a, sel ? 0.9 : 0.6); g.fillRect(x, y, 48, 52);
-      g.lineStyle(2, sel ? 0xff8a1f : 0x2a2f37, 1); g.strokeRect(x + 1, y + 1, 46, 50);
+      const x = 14 + i * 40, y = 82, sel = i === this.weapon;
+      g.fillStyle(sel ? 0x2a1806 : 0x06070a, sel ? 0.9 : 0.6); g.fillRect(x, y, 38, 46);
+      g.lineStyle(2, sel ? 0xff8a1f : 0x2a2f37, 1); g.strokeRect(x + 1, y + 1, 36, 44);
     });
     panel(756, 10, 190, 76);
     if (this.styleA > 0.02) {                                           // progress toward the next style rank
@@ -6732,7 +8083,11 @@ window.game = new Phaser.Game({
 });
 // A hidden tab stops the game loop but not our own Web Audio graph: without this the music, the hum and any
 // weapon loop that was running (hose, arc, cryo, minigun motor) keep playing over a frozen game.
-game.events.on('hidden', () => { if (Sfx.ctx && Sfx.ctx.state === 'running') Sfx.ctx.suspend().catch(() => {}); });
+game.events.on('hidden', () => {
+  const gs = game.scene.getScene('Game');                              // a hidden tab pauses the run; coming back waits on the menu
+  if (gs && gs.sys.isActive() && gs.state === 'play' && !gs.paused) gs.pauseGame();
+  if (Sfx.ctx && Sfx.ctx.state === 'running') Sfx.ctx.suspend().catch(() => {});
+});
 game.events.on('visible', () => { if (Sfx.ctx && Sfx.ctx.state === 'suspended') Sfx.ctx.resume().catch(() => {}); });
 </script>
 </body>

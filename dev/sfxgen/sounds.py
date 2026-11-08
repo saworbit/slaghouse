@@ -16,8 +16,11 @@ Fields:
   on    onset threshold in dB below the loudest point (default -12 = start on the main hit; swells use -24)
 
 Sounds NOT listed here stay procedural on purpose: UI blips/jingles (beep, confirm, chirp, ding,
-rankUp, pickup, ui, win, lose), mine arm/trigger beeps, laser/charge tones, prismBounce, the
-minigun motor whine (pitch follows spin), and the music.
+rankUp, pickup, ui, win, lose, plus the overdrive round's lockOn and dodge), mine arm/trigger beeps,
+laser/charge tones, prismBounce, the minigun motor whine (pitch follows spin), and the music.
+
+New entries go at the END: each sound's seed is 1000 + its position here, so inserting one in the
+middle reseeds (and changes) every take listed after it.
 """
 
 SOUNDS = {
@@ -106,4 +109,29 @@ SOUNDS = {
     'cryoLoop': dict(p='a high pressure jet of freezing gas spraying continuously, steady hiss', d=4.0, max=2.0, mode='loop', air=0.9),
     'arcLoop': dict(p='electricity arcing continuously, crackling high voltage buzz', d=4.0, max=2.0, mode='loop', air=0.8),
     'humLoop': dict(p='low industrial factory ambience, distant heavy machinery drone', d=8.0, max=6.0, mode='loop', air=0.2, hp=25),
+
+    # ------------------------------------------------------------------ overdrive round (appended so earlier seeds stay put)
+    'dash': dict(p=['a fast powerful whoosh of air', 'a short burst of a jet thruster, quick whoosh'], d=1.0, max=0.3, keep=2, n=8, air=0.7, on=-24),
+    'hornet': dict(p=['a small model rocket launching, sharp fizzing whoosh', 'a firework rocket shooting up into the sky, whistling whoosh'],
+                   d=1.5, max=0.45, keep=3, n=8, air=0.7, on=-20),
+    'lanceFire': dict(p=['a powerful plasma cannon blast, deep roaring energy beam', 'a huge electric arc discharge with a deep boom and sizzle'],
+                      d=2.0, max=1.0, keep=2, n=8, air=0.6),
+    'lanceLoop': dict(p='a high voltage electrical transformer humming loudly with crackling', d=4.0, max=1.5, mode='loop', air=0.7),
+    'ripperLoop': dict(p='a chainsaw engine revving at full throttle continuously', d=4.0, max=1.5, mode='loop', air=0.6),
+    'ripperBite': dict(p='a chainsaw cutting through a thick log continuously', d=4.0, max=1.5, mode='loop', air=0.6),
+    'glaive': dict(p=['a metal disc thrown spinning through the air, sharp whoosh', 'a sword swinging fast through the air with a metallic ring'],
+                   d=1.0, max=0.35, keep=2, n=8, air=0.8, on=-20),
+    'glaiveCatch': dict(p='catching a heavy metal disc with a metal glove, solid metallic clack', d=1.0, max=0.25, keep=2, air=0.7),
+    'whirr': dict(p=['a helicopter rotor spinning, fast rhythmic whooshing', 'a rope being swung around quickly in circles, repeated whooshing'],
+                  d=2.5, max=0.16, keep=4, n=8, mode='slice', air=0.7),          # the game plays it as rapid pulses: one whoosh each
+    'sizzle': dict(p='water splashed onto red hot metal, loud sizzling hiss', d=1.5, max=0.4, keep=2, air=0.9),
+    'splat': dict(p=['a thick wet glob of mud splatting on the ground', 'molten lava splashing and sizzling'], d=1.0, max=0.35, keep=3, n=8, air=0.6),
+    'rumble': dict(p='a deep underground rumble, the ground shaking', d=2.0, max=0.5, keep=2, air=0.2, hp=25, on=-24),
+    'erupt': dict(p=['rocks and dirt exploding out of the ground with a deep crunch', 'a giant creature bursting up through a concrete floor, rubble crashing'],
+                  d=2.0, max=0.9, keep=2, n=8, air=0.5),
+    'dig': dict(p='a shovel digging quickly into gravel, scraping crunch', d=1.5, max=0.4, keep=2, air=0.6),
+    'chain': dict(p=['a heavy iron chain pulled fast through a metal ring, loud rattling', 'a heavy metal chain dropped on a concrete floor'],
+                  d=1.5, max=0.3, keep=2, n=8, air=0.8),
+    'linkOn': dict(p='a sci-fi energy shield switching on, rising electric hum', d=1.5, max=0.45, air=0.7, on=-24),
+    'buzz': dict(p='a loud electric buzz from a high voltage power line', d=1.5, max=0.14, keep=3, air=0.8, on=-20),
 }

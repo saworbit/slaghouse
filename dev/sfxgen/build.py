@@ -6,8 +6,13 @@ Picks: picks.json {name: [candidate ids]} if present (export it from review.html
 top `keep` candidates by CLAP score. Gains: each sound is matched to the K-weighted loudness of the
 procedural version it replaces (calib.json, measured in the browser by calib.js), times MASTER, but never
 peaks more than PEAK_CAP x above that synth version.
+
+Rebuilds only re-encode what changed: out/bank_src.json records each sound's picked ids, a hash of their
+processed WAVs and the bitrate, and a sound whose record still matches keeps its Opus data from the current
+sfx_bank.js. New encodes are bit-exact (no random Ogg serial), so the same input gives the same bytes. That
+way adding one sound doesn't rewrite the whole bank in git. Delete out/bank_src.json to force a full re-encode.
 """
-import os, sys, json, base64, subprocess, tempfile
+import os, re, sys, json, base64, hashlib, subprocess, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import numpy as np, soundfile as sf
@@ -47,24 +52,42 @@ def opus(y):
         src, dst = os.path.join(td, 'a.wav'), os.path.join(td, 'a.ogg')
         sf.write(src, y, 48000, subtype='PCM_16')
         subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-c:a', 'libopus', '-b:a', BITRATE,
-                        '-application', 'audio', '-map_metadata', '-1', dst], check=True)
+                        '-application', 'audio', '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:a', '+bitexact', dst], check=True)
         return open(dst, 'rb').read()
 
 
-bank, total, used = {}, 0, {}
+def previous_bank():                            # name -> [base64 takes] from the sfx_bank.js being replaced
+    prev = {}
+    if os.path.exists(OUT):
+        for line in open(OUT, encoding='utf-8'):
+            m = re.match(r"\s+(\w+): \{ g: [\d.]+, j: [\d.]+, d: \[(.*)\] \},?$", line.rstrip('\n'))
+            if m:
+                prev[m.group(1)] = re.findall(r"'([^']*)'", m.group(2))
+    return prev
+
+
+SRC_JSON = os.path.join(HERE, 'out', 'bank_src.json')
+prev_data, prev_src = previous_bank(), (json.load(open(SRC_JSON)) if os.path.exists(SRC_JSON) else {})
+bank, total, used, src, reused = {}, 0, {}, {}, 0
 for name, spec in SOUNDS.items():
     if name not in cands or name not in calib:
         print(f'skip {name} (no candidates or calibration)'); continue
     loop = spec.get('mode') == 'loop'
     used[name] = choose(name, spec)
-    ys = [sf.read(os.path.join(PROC, name, f'{cid}.wav'), dtype='float32')[0] for cid in used[name]]
+    paths = [os.path.join(PROC, name, f'{cid}.wav') for cid in used[name]]
+    ys = [sf.read(p, dtype='float32')[0] for p in paths]
     louds = [loudness(y, 48000, loop=loop) for y in ys]
     common = min(min(l * 0.99 / (np.max(np.abs(y)) + 1e-9) for y, l in zip(ys, louds)), min(louds) * 1.5)
-    data = []
-    for y, l in zip(ys, louds):
-        b = opus((y * (common / l)).astype(np.float32))
-        total += len(b)
-        data.append(base64.b64encode(b).decode())
+    src[name] = {'ids': used[name], 'wav': [hashlib.sha1(open(p, 'rb').read()).hexdigest()[:16] for p in paths], 'rate': BITRATE}
+    if prev_src.get(name) == src[name] and len(prev_data.get(name, [])) == len(ys):
+        data = prev_data[name]; reused += 1      # same picks, same source audio: keep the existing encode
+        total += sum(len(base64.b64decode(d)) for d in data)
+    else:
+        data = []
+        for y, l in zip(ys, louds):
+            b = opus((y * (common / l)).astype(np.float32))
+            total += len(b)
+            data.append(base64.b64encode(b).decode())
     target, synth_peak = calib[name]
     g = MASTER * target / common
     peak = max(float(np.max(np.abs(y * (common / l)))) for y, l in zip(ys, louds))
@@ -83,4 +106,5 @@ with open(OUT, 'w', newline='\n') as f:
     f.write('};\n')
 json.dump(used, open(os.path.join(HERE, 'out', 'picks_used.json'), 'w'), indent=1)       # for review.html
 json.dump({k: v.get('keep', 1) for k, v in SOUNDS.items()}, open(os.path.join(HERE, 'out', 'keep.json'), 'w'))
-print(f'wrote {OUT}: {len(bank)} sounds, {total / 1024:.0f} KB opus, {os.path.getsize(OUT) / 1024:.0f} KB file')
+json.dump(src, open(SRC_JSON, 'w', newline='\n'), indent=1)
+print(f'wrote {OUT}: {len(bank)} sounds ({reused} reused, {len(bank) - reused} encoded), {total / 1024:.0f} KB opus, {os.path.getsize(OUT) / 1024:.0f} KB file')

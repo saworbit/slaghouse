@@ -1,7 +1,8 @@
 // Measures the game's procedural Sfx sounds so AudioGen samples can be dropped in at matching levels.
 // Load into slaghouse.html BEFORE clicking into the game (so nothing else is using Sfx), then:
-//   await slagCalib()   -> { name: [loudness, peak], ... }   (K-weighted loudness as loud.py, plus raw peak)
-window.slagCalib = async function () {
+//   await slagCalib()            -> { name: [loudness, peak], ... }   (K-weighted loudness as loud.py, plus raw peak)
+//   await slagCalib(['dash'])    -> just these sounds (merge the result into calib.json by hand)
+window.slagCalib = async function (only) {
   const SR = 48000;
   // ITU-R BS.1770 K-weighting at 48 kHz (same coefficients as loud.py)
   const BQ = [[[1.53512485958697, -2.69169618940638, 1.19839281085285], [-1.69065929318241, 0.73248077421585]],
@@ -45,12 +46,20 @@ window.slagCalib = async function () {
     singOpen: one(() => S.singOpen()), warp: one(() => S.warp()), decloak: one(() => S.decloak()),
     flameLoop: [() => S.flameSet(true), 1.6, true, 0.4], cryoLoop: [() => S.cryoSet(true), 1.6, true, 0.4],
     arcLoop: [() => S.arcSet(true), 1.6, true, 0.4], humLoop: [() => S.startHum(), 3, true, 0.5],
+    // overdrive round: each measured at the setting where the game plays its sample at full gain
+    dash: one(() => S.dash()), hornet: one(() => S.hornet()), lanceFire: one(() => S.lanceFire(1)), glaive: one(() => S.glaive()),
+    glaiveCatch: one(() => S.glaiveCatch()), whirr: one(() => S.whirr(1)), sizzle: one(() => S.sizzle()), splat: one(() => S.splat(1)),
+    rumble: one(() => S.rumble(1)), erupt: one(() => S.erupt()), dig: one(() => S.dig()), chain: one(() => S.chain()),
+    linkOn: one(() => S.linkOn()), buzz: one(() => S.buzz()),
+    lanceLoop: [() => S.lanceSet(1), 1.6, true, 0.4], ripperLoop: [() => S.ripperSet(0.55), 1.6, true, 0.4],
+    ripperBite: [() => S.ripperSet(1), 1.6, true, 0.4],
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
-    hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode };
+    hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode };
   const res = {};
   try {
     for (const [name, [fn, secs, loop, skip]] of Object.entries(L)) {
+      if (only && !only.includes(name)) continue;
       const oc = new OfflineAudioContext(1, Math.round(SR * secs), SR);
       S.ctx = oc; S.out = oc.createGain(); S.out.connect(oc.destination);
       S.crunch = oc.createWaveShaper();
@@ -59,7 +68,7 @@ window.slagCalib = async function () {
       S.crunch.curve = curve; S.crunch.connect(S.out);
       const len = (SR * 1.5) | 0; S.noiseBuf = oc.createBuffer(1, len, SR);
       const d = S.noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-      S.last = {}; S.muted = false; S.useBank = false; S.hum = S.humSynth = S.flameNode = S.arcNode = S.cryoNode = null;
+      S.last = {}; S.muted = false; S.useBank = false; S.hum = S.humSynth = S.flameNode = S.arcNode = S.cryoNode = S.lanceNode = S.ripNode = null;
       fn();
       const buf = await oc.startRendering();
       const x = buf.getChannelData(0).subarray(Math.round(skip * SR));

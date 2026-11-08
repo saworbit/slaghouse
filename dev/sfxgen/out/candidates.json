@@ -4370,5 +4370,1095 @@
    "clap": 0.1334,
    "score": 0.1334
   }
+ ],
+ "dash": [
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.332888,
+   "prompt": "a fast powerful whoosh of air",
+   "clap": 0.3203,
+   "score": 0.3203
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.382676,
+   "prompt": "a short burst of a jet thruster, quick whoosh",
+   "clap": 0.2932,
+   "score": 0.2932
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.272032,
+   "prompt": "a short burst of a jet thruster, quick whoosh",
+   "clap": 0.2847,
+   "score": 0.2847
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.392308,
+   "prompt": "a short burst of a jet thruster, quick whoosh",
+   "clap": 0.2589,
+   "score": 0.2589
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.285337,
+   "prompt": "a fast powerful whoosh of air",
+   "clap": 0.1812,
+   "score": 0.1812
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.476133,
+   "prompt": "a fast powerful whoosh of air",
+   "clap": 0.1586,
+   "score": 0.1586
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.376484,
+   "prompt": "a fast powerful whoosh of air",
+   "clap": 0.1164,
+   "score": 0.1164
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.273937,
+   "prompt": "a short burst of a jet thruster, quick whoosh",
+   "clap": 0.0674,
+   "score": 0.0674
+  }
+ ],
+ "hornet": [
+  {
+   "id": "6",
+   "dur": 0.45,
+   "loud": 0.280867,
+   "prompt": "a small model rocket launching, sharp fizzing whoosh",
+   "clap": 0.2322,
+   "score": 0.2322
+  },
+  {
+   "id": "7",
+   "dur": 0.45,
+   "loud": 0.21961,
+   "prompt": "a firework rocket shooting up into the sky, whistling whoosh",
+   "clap": 0.2062,
+   "score": 0.2062
+  },
+  {
+   "id": "5",
+   "dur": 0.45,
+   "loud": 0.292456,
+   "prompt": "a firework rocket shooting up into the sky, whistling whoosh",
+   "clap": 0.1564,
+   "score": 0.1564
+  },
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.293574,
+   "prompt": "a small model rocket launching, sharp fizzing whoosh",
+   "clap": 0.0915,
+   "score": 0.0915
+  },
+  {
+   "id": "0",
+   "dur": 0.45,
+   "loud": 0.333688,
+   "prompt": "a small model rocket launching, sharp fizzing whoosh",
+   "clap": 0.0832,
+   "score": 0.0832
+  },
+  {
+   "id": "3",
+   "dur": 0.45,
+   "loud": 0.22794,
+   "prompt": "a firework rocket shooting up into the sky, whistling whoosh",
+   "clap": 0.0721,
+   "score": 0.0721
+  },
+  {
+   "id": "2",
+   "dur": 0.45,
+   "loud": 0.300784,
+   "prompt": "a small model rocket launching, sharp fizzing whoosh",
+   "clap": 0.0706,
+   "score": 0.0706
+  },
+  {
+   "id": "1",
+   "dur": 0.06,
+   "loud": 0.185957,
+   "prompt": "a firework rocket shooting up into the sky, whistling whoosh",
+   "clap": -0.098,
+   "score": -0.178
+  }
+ ],
+ "lanceFire": [
+  {
+   "id": "6",
+   "dur": 1.0,
+   "loud": 0.33056,
+   "prompt": "a powerful plasma cannon blast, deep roaring energy beam",
+   "clap": 0.45,
+   "score": 0.45
+  },
+  {
+   "id": "2",
+   "dur": 0.497,
+   "loud": 0.423401,
+   "prompt": "a powerful plasma cannon blast, deep roaring energy beam",
+   "clap": 0.3575,
+   "score": 0.3575
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.262646,
+   "prompt": "a powerful plasma cannon blast, deep roaring energy beam",
+   "clap": 0.3565,
+   "score": 0.3565
+  },
+  {
+   "id": "1",
+   "dur": 1.0,
+   "loud": 0.375412,
+   "prompt": "a huge electric arc discharge with a deep boom and sizzle",
+   "clap": 0.2632,
+   "score": 0.2632
+  },
+  {
+   "id": "3",
+   "dur": 1.0,
+   "loud": 0.294393,
+   "prompt": "a huge electric arc discharge with a deep boom and sizzle",
+   "clap": 0.2465,
+   "score": 0.2465
+  },
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.319858,
+   "prompt": "a huge electric arc discharge with a deep boom and sizzle",
+   "clap": 0.2241,
+   "score": 0.2241
+  },
+  {
+   "id": "7",
+   "dur": 1.0,
+   "loud": 0.427685,
+   "prompt": "a huge electric arc discharge with a deep boom and sizzle",
+   "clap": 0.2239,
+   "score": 0.2239
+  },
+  {
+   "id": "4",
+   "dur": 0.047,
+   "loud": 0.303807,
+   "prompt": "a powerful plasma cannon blast, deep roaring energy beam",
+   "clap": -0.0614,
+   "score": -0.1414
+  }
+ ],
+ "lanceLoop": [
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.208858,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.4552,
+   "score": 0.4552
+  },
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.099199,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.3705,
+   "score": 0.3705
+  },
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.241094,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.338,
+   "score": 0.338
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.256153,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.3114,
+   "score": 0.3114
+  },
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.194004,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.2987,
+   "score": 0.2987
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.24066,
+   "prompt": "a high voltage electrical transformer humming loudly with crackling",
+   "clap": 0.22,
+   "score": 0.22
+  }
+ ],
+ "ripperLoop": [
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.248996,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.4563,
+   "score": 0.4563
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.272193,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.4154,
+   "score": 0.4154
+  },
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.268029,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.4138,
+   "score": 0.4138
+  },
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.213765,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.3534,
+   "score": 0.3534
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.294254,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.2213,
+   "score": 0.2213
+  },
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.192097,
+   "prompt": "a chainsaw engine revving at full throttle continuously",
+   "clap": 0.1709,
+   "score": 0.1709
+  }
+ ],
+ "ripperBite": [
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.220506,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.3678,
+   "score": 0.3678
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.221426,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.3408,
+   "score": 0.3408
+  },
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.219782,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.267,
+   "score": 0.267
+  },
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.169505,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.2508,
+   "score": 0.2508
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.255292,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.2435,
+   "score": 0.2435
+  },
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.308355,
+   "prompt": "a chainsaw cutting through a thick log continuously",
+   "clap": 0.2152,
+   "score": 0.2152
+  }
+ ],
+ "glaive": [
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.349948,
+   "prompt": "a metal disc thrown spinning through the air, sharp whoosh",
+   "clap": 0.2147,
+   "score": 0.2147
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.34618,
+   "prompt": "a metal disc thrown spinning through the air, sharp whoosh",
+   "clap": 0.1877,
+   "score": 0.1877
+  },
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.288263,
+   "prompt": "a metal disc thrown spinning through the air, sharp whoosh",
+   "clap": 0.1281,
+   "score": 0.1281
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.390633,
+   "prompt": "a sword swinging fast through the air with a metallic ring",
+   "clap": 0.1144,
+   "score": 0.1144
+  },
+  {
+   "id": "7",
+   "dur": 0.35,
+   "loud": 0.315112,
+   "prompt": "a sword swinging fast through the air with a metallic ring",
+   "clap": 0.1022,
+   "score": 0.1022
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.273268,
+   "prompt": "a sword swinging fast through the air with a metallic ring",
+   "clap": 0.102,
+   "score": 0.102
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.431767,
+   "prompt": "a metal disc thrown spinning through the air, sharp whoosh",
+   "clap": 0.1018,
+   "score": 0.1018
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.242714,
+   "prompt": "a sword swinging fast through the air with a metallic ring",
+   "clap": 0.0903,
+   "score": 0.0903
+  }
+ ],
+ "glaiveCatch": [
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.16838,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": 0.1794,
+   "score": 0.1794
+  },
+  {
+   "id": "5",
+   "dur": 0.192,
+   "loud": 0.294782,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": 0.1663,
+   "score": 0.1663
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.300027,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": 0.0796,
+   "score": 0.0796
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.177234,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": 0.0636,
+   "score": 0.0636
+  },
+  {
+   "id": "2",
+   "dur": 0.25,
+   "loud": 0.22086,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": 0.0338,
+   "score": 0.0338
+  },
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.194771,
+   "prompt": "catching a heavy metal disc with a metal glove, solid metallic clack",
+   "clap": -0.011,
+   "score": -0.011
+  }
+ ],
+ "whirr": [
+  {
+   "id": "3-4",
+   "dur": 0.16,
+   "loud": 0.34583,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.2319,
+   "score": 0.2319
+  },
+  {
+   "id": "3-1",
+   "dur": 0.16,
+   "loud": 0.314034,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.1967,
+   "score": 0.1967
+  },
+  {
+   "id": "1-2",
+   "dur": 0.16,
+   "loud": 0.279016,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.1591,
+   "score": 0.1591
+  },
+  {
+   "id": "3-3",
+   "dur": 0.16,
+   "loud": 0.320689,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.098,
+   "score": 0.098
+  },
+  {
+   "id": "3-0",
+   "dur": 0.16,
+   "loud": 0.415881,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.0864,
+   "score": 0.0864
+  },
+  {
+   "id": "1-1",
+   "dur": 0.16,
+   "loud": 0.322637,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.0799,
+   "score": 0.0799
+  },
+  {
+   "id": "3-2",
+   "dur": 0.058,
+   "loud": 0.400375,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.1304,
+   "score": 0.0504
+  },
+  {
+   "id": "3-5",
+   "dur": 0.116,
+   "loud": 0.332942,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.0449,
+   "score": 0.0449
+  },
+  {
+   "id": "7-0",
+   "dur": 0.16,
+   "loud": 0.210989,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": 0.0382,
+   "score": 0.0382
+  },
+  {
+   "id": "6-0",
+   "dur": 0.068,
+   "loud": 0.139102,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": 0.0318,
+   "score": 0.0318
+  },
+  {
+   "id": "6-1",
+   "dur": 0.064,
+   "loud": 0.185528,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": -0.0007,
+   "score": -0.0007
+  },
+  {
+   "id": "6-5",
+   "dur": 0.112,
+   "loud": 0.204156,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": -0.0067,
+   "score": -0.0067
+  },
+  {
+   "id": "5-4",
+   "dur": 0.16,
+   "loud": 0.277594,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.0077,
+   "score": -0.0077
+  },
+  {
+   "id": "5-0",
+   "dur": 0.16,
+   "loud": 0.285007,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.0271,
+   "score": -0.0271
+  },
+  {
+   "id": "6-2",
+   "dur": 0.106,
+   "loud": 0.204522,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": -0.0284,
+   "score": -0.0284
+  },
+  {
+   "id": "5-5",
+   "dur": 0.16,
+   "loud": 0.231568,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.0424,
+   "score": -0.0424
+  },
+  {
+   "id": "5-1",
+   "dur": 0.128,
+   "loud": 0.272198,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.0653,
+   "score": -0.0653
+  },
+  {
+   "id": "5-2",
+   "dur": 0.16,
+   "loud": 0.249156,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.0887,
+   "score": -0.0887
+  },
+  {
+   "id": "6-4",
+   "dur": 0.04,
+   "loud": 0.18295,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": -0.0164,
+   "score": -0.0964
+  },
+  {
+   "id": "6-3",
+   "dur": 0.04,
+   "loud": 0.19381,
+   "prompt": "a helicopter rotor spinning, fast rhythmic whooshing",
+   "clap": -0.0247,
+   "score": -0.1047
+  },
+  {
+   "id": "1-0",
+   "dur": 0.16,
+   "loud": 0.307617,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.1067,
+   "score": -0.1067
+  },
+  {
+   "id": "5-3",
+   "dur": 0.09,
+   "loud": 0.2143,
+   "prompt": "a rope being swung around quickly in circles, repeated whooshing",
+   "clap": -0.1256,
+   "score": -0.1256
+  }
+ ],
+ "sizzle": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.361801,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.2804,
+   "score": 0.2804
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.337207,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.2699,
+   "score": 0.2699
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.332271,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.2231,
+   "score": 0.2231
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.35603,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.1614,
+   "score": 0.1614
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.353827,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.1311,
+   "score": 0.1311
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.289728,
+   "prompt": "water splashed onto red hot metal, loud sizzling hiss",
+   "clap": 0.0863,
+   "score": 0.0863
+  }
+ ],
+ "splat": [
+  {
+   "id": "0",
+   "dur": 0.275,
+   "loud": 0.329361,
+   "prompt": "a thick wet glob of mud splatting on the ground",
+   "clap": 0.159,
+   "score": 0.159
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.238803,
+   "prompt": "a thick wet glob of mud splatting on the ground",
+   "clap": 0.1271,
+   "score": 0.1271
+  },
+  {
+   "id": "6",
+   "dur": 0.127,
+   "loud": 0.125054,
+   "prompt": "a thick wet glob of mud splatting on the ground",
+   "clap": 0.1297,
+   "score": 0.0497
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.313079,
+   "prompt": "molten lava splashing and sizzling",
+   "clap": 0.0433,
+   "score": 0.0433
+  },
+  {
+   "id": "4",
+   "dur": 0.221,
+   "loud": 0.115353,
+   "prompt": "a thick wet glob of mud splatting on the ground",
+   "clap": 0.0284,
+   "score": 0.0284
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.257119,
+   "prompt": "molten lava splashing and sizzling",
+   "clap": -0.0455,
+   "score": -0.0455
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.368843,
+   "prompt": "molten lava splashing and sizzling",
+   "clap": -0.1292,
+   "score": -0.1292
+  },
+  {
+   "id": "7",
+   "dur": 0.131,
+   "loud": 0.175323,
+   "prompt": "molten lava splashing and sizzling",
+   "clap": -0.0647,
+   "score": -0.1447
+  }
+ ],
+ "rumble": [
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.320562,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1968,
+   "score": 0.1968
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.319974,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1906,
+   "score": 0.1906
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.381949,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1884,
+   "score": 0.1884
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.257577,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1815,
+   "score": 0.1815
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.282147,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1808,
+   "score": 0.1808
+  },
+  {
+   "id": "4",
+   "dur": 0.152,
+   "loud": 0.286215,
+   "prompt": "a deep underground rumble, the ground shaking",
+   "clap": 0.1163,
+   "score": 0.0363
+  }
+ ],
+ "erupt": [
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.181784,
+   "prompt": "a giant creature bursting up through a concrete floor, rubble crashing",
+   "clap": 0.3344,
+   "score": 0.3344
+  },
+  {
+   "id": "5",
+   "dur": 0.504,
+   "loud": 0.263513,
+   "prompt": "a giant creature bursting up through a concrete floor, rubble crashing",
+   "clap": 0.2694,
+   "score": 0.2694
+  },
+  {
+   "id": "0",
+   "dur": 0.377,
+   "loud": 0.217864,
+   "prompt": "rocks and dirt exploding out of the ground with a deep crunch",
+   "clap": 0.2196,
+   "score": 0.2196
+  },
+  {
+   "id": "6",
+   "dur": 0.809,
+   "loud": 0.136686,
+   "prompt": "rocks and dirt exploding out of the ground with a deep crunch",
+   "clap": 0.2192,
+   "score": 0.2192
+  },
+  {
+   "id": "7",
+   "dur": 0.9,
+   "loud": 0.32577,
+   "prompt": "a giant creature bursting up through a concrete floor, rubble crashing",
+   "clap": 0.1965,
+   "score": 0.1965
+  },
+  {
+   "id": "4",
+   "dur": 0.396,
+   "loud": 0.253057,
+   "prompt": "rocks and dirt exploding out of the ground with a deep crunch",
+   "clap": 0.1067,
+   "score": 0.1067
+  },
+  {
+   "id": "2",
+   "dur": 0.661,
+   "loud": 0.27602,
+   "prompt": "rocks and dirt exploding out of the ground with a deep crunch",
+   "clap": 0.0823,
+   "score": 0.0823
+  },
+  {
+   "id": "3",
+   "dur": 0.329,
+   "loud": 0.183367,
+   "prompt": "a giant creature bursting up through a concrete floor, rubble crashing",
+   "clap": 0.1454,
+   "score": 0.0654
+  }
+ ],
+ "dig": [
+  {
+   "id": "4",
+   "dur": 0.332,
+   "loud": 0.298595,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": 0.2775,
+   "score": 0.2775
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.249329,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": 0.2769,
+   "score": 0.2769
+  },
+  {
+   "id": "5",
+   "dur": 0.171,
+   "loud": 0.406239,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": 0.2505,
+   "score": 0.2505
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.238669,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": 0.1194,
+   "score": 0.1194
+  },
+  {
+   "id": "2",
+   "dur": 0.107,
+   "loud": 0.196121,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": 0.0142,
+   "score": -0.0658
+  },
+  {
+   "id": "0",
+   "dur": 0.051,
+   "loud": 0.214959,
+   "prompt": "a shovel digging quickly into gravel, scraping crunch",
+   "clap": -0.0094,
+   "score": -0.0894
+  }
+ ],
+ "chain": [
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.217865,
+   "prompt": "a heavy metal chain dropped on a concrete floor",
+   "clap": 0.2492,
+   "score": 0.2492
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.213172,
+   "prompt": "a heavy metal chain dropped on a concrete floor",
+   "clap": 0.1728,
+   "score": 0.1728
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.301532,
+   "prompt": "a heavy metal chain dropped on a concrete floor",
+   "clap": 0.1281,
+   "score": 0.1281
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.171204,
+   "prompt": "a heavy iron chain pulled fast through a metal ring, loud rattling",
+   "clap": 0.1272,
+   "score": 0.1272
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.275534,
+   "prompt": "a heavy iron chain pulled fast through a metal ring, loud rattling",
+   "clap": 0.08,
+   "score": 0.08
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.331799,
+   "prompt": "a heavy iron chain pulled fast through a metal ring, loud rattling",
+   "clap": 0.0596,
+   "score": 0.0596
+  },
+  {
+   "id": "0",
+   "dur": 0.19,
+   "loud": 0.298642,
+   "prompt": "a heavy iron chain pulled fast through a metal ring, loud rattling",
+   "clap": 0.0142,
+   "score": 0.0142
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.33549,
+   "prompt": "a heavy metal chain dropped on a concrete floor",
+   "clap": -0.0729,
+   "score": -0.0729
+  }
+ ],
+ "linkOn": [
+  {
+   "id": "0",
+   "dur": 0.45,
+   "loud": 0.307931,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": 0.2934,
+   "score": 0.2934
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.27341,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": 0.1533,
+   "score": 0.1533
+  },
+  {
+   "id": "3",
+   "dur": 0.45,
+   "loud": 0.394665,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": 0.1464,
+   "score": 0.1464
+  },
+  {
+   "id": "5",
+   "dur": 0.45,
+   "loud": 0.237105,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": 0.0893,
+   "score": 0.0893
+  },
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.151626,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": -0.0379,
+   "score": -0.0379
+  },
+  {
+   "id": "2",
+   "dur": 0.11,
+   "loud": 0.219627,
+   "prompt": "a sci-fi energy shield switching on, rising electric hum",
+   "clap": 0.0173,
+   "score": -0.0627
+  }
+ ],
+ "buzz": [
+  {
+   "id": "0",
+   "dur": 0.14,
+   "loud": 0.304548,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": 0.0823,
+   "score": 0.0823
+  },
+  {
+   "id": "1",
+   "dur": 0.14,
+   "loud": 0.30538,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": 0.0806,
+   "score": 0.0806
+  },
+  {
+   "id": "5",
+   "dur": 0.14,
+   "loud": 0.25103,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": 0.0718,
+   "score": 0.0718
+  },
+  {
+   "id": "4",
+   "dur": 0.14,
+   "loud": 0.386126,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": 0.0551,
+   "score": 0.0551
+  },
+  {
+   "id": "2",
+   "dur": 0.14,
+   "loud": 0.236612,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": 0.0424,
+   "score": 0.0424
+  },
+  {
+   "id": "3",
+   "dur": 0.045,
+   "loud": 0.230617,
+   "prompt": "a loud electric buzz from a high voltage power line",
+   "clap": -0.0068,
+   "score": -0.0868
+  }
  ]
 }

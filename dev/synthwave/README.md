@@ -26,7 +26,9 @@ level against the SFX.
 | `render.py [names]` | renders tracks to `out/<name>.wav` (48 kHz stereo) and prints each stem's loudness relative to the mix |
 | `build.py` | gain-matches the tracks and encodes them to 64 kbps stereo Opus -> `../../music_bank.js` |
 
-Run with the sfxgen venv (numpy, scipy, numba, soundfile; `ffmpeg` with libopus on PATH):
+Run with the sfxgen venv (numpy, scipy, numba, soundfile; `ffmpeg` with libopus on PATH). numba comes in with
+librosa in the sfxgen setup (tested with numba 0.68.1, numpy 1.26.4, scipy 1.17.1). `build.py` and `render.py`
+also import `loud.py` from `../sfxgen`.
 
 ```
 ../sfxgen/.venv/Scripts/python render.py
