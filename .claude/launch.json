@@ -24,6 +24,19 @@
         "127.0.0.1"
       ],
       "port": 8771
+    },
+    {
+      "name": "static-test",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8781",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 8781,
+      "autoPort": false
     }
   ]
 }

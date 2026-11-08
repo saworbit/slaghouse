@@ -2221,7 +2221,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
     this.state = 'play'; this.overShown = false; this.needReset = true;
     this.stats = { t0: this.time.now, shots: 0, hits: 0, kills: 0 };
-    this.weapon = 0; this.nextFire = 0; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
+    this.weapon = 0; this.nextFire = 0; this.wNext = []; this.escUntil = 0; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
     this.hp = T.PLAYER_HP; this.invulnUntil = 0; this.dropUntil = 0;
     this.lastGround = -1e9; this.jumpBuffer = -1e9; this.jumpCuttable = false; this.wasGround = false; this.lastVy = 0;
     this.runT = 0; this.idleT = 0; this.stepIdx = 0; this.recoil = 0; this.look = { x: 0, y: 0 }; this.sqx = 1; this.sqy = 1;
@@ -2622,7 +2622,8 @@ class GameScene extends Phaser.Scene {
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', Music.toggle() ? 'SAMPLED MUSIC' : 'SYNTH MUSIC');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); BUS.emit('callout', Sfx.useBank ? 'SAMPLED SFX' : 'SYNTH SFX'); }
     if (this.jd.R || (this.overShown && this.jd.ENTER)) { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); this.scene.restart(); return; }
-    if (this.jd.ESC) { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); return; }
+    if (this.jd.ESC && this.state === 'play' && now > this.escUntil) { this.escUntil = now + 1600; BUS.emit('callout', 'ESC AGAIN: QUIT'); }   // mid-run Esc asks first
+    else if (this.jd.ESC) { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); return; }
     if (this.jd.J) this.aimMode = 'keys';
 
     if (this.state !== 'dead') { this.updatePlayer(dt, now); this.updateHook(dt); } else if (this.hook) this.hook = null;
@@ -2778,8 +2779,9 @@ class GameScene extends Phaser.Scene {
   }
   setWeapon(i) {
     if (i === this.weapon || this.state === 'dead') return;
+    this.wNext[this.weapon] = this.nextFire;                          // each gun keeps its own cooldown: swapping off a slow gun
     this.weapon = i; this.applyGunTexture(); this.swapT = 0.14; this.arcActiveUntil = 0; this.flameActiveUntil = 0; this.cryoActiveUntil = 0;   // gun dips and comes back up
-    this.nextFire = Math.max(this.nextFire, this.time.now + 120);
+    this.nextFire = Math.max(this.wNext[i] || 0, this.time.now + 120);   // never locks the next one out
     Sfx.swap(); BUS.emit('weapon', i);
   }
   cycleWeapon(d) { this.setWeapon((this.weapon + d + WEAPONS.length) % WEAPONS.length); }
@@ -6581,6 +6583,7 @@ class HudScene extends Phaser.Scene {
       g.fillStyle(0xff8a1f, 1); g.fillRect(0, 168, VIEW_W, 2); g.fillRect(0, 392, VIEW_W, 2);
     }
     [this.ovTitle, this.ovStat1, this.ovStat2, this.ovStat3, this.ovPrompt, this.ovSub].forEach(o => o.setVisible(on));
+    [this.lblMines, this.lblSentry].forEach(o => o.setVisible(!on));   // they sit inside the results strip
   }
   update(time, delta) {
     const dt = Math.min(delta, 50) / 1000;
@@ -6590,7 +6593,7 @@ class HudScene extends Phaser.Scene {
       if (st !== this.sentTxt) { this.sentTxt = st; this.lblSentry.setStyle({ color: gsr.sentry ? '#46e6ff' : st.endsWith('READY') ? '#5cff7a' : '#7d8896' }).setText(st); }
       this.rampA = Math.max(0, (gsr.rampageUntil || 0) - gsr.time.now);
     } else this.rampA = 0;
-    this.lblRamp.setVisible(this.rampA > 0).setAlpha(Math.floor(time / 150) % 2 ? 1 : 0.55);
+    this.lblRamp.setVisible(this.rampA > 0 && !this.overOn).setAlpha(Math.floor(time / 150) % 2 ? 1 : 0.55);
     this.dispHp = this.dispHp > this.hp ? Math.max(this.hp, this.dispHp - 30 * dt) : this.hp;
     this.hurtA = Math.max(0, this.hurtA - dt * 1.8); this.healA = Math.max(0, this.healA - dt * 2);
     this.flashA = Math.max(0, this.flashA - dt * 2.2); this.panelShake = Math.max(0, this.panelShake - dt);
@@ -6617,12 +6620,12 @@ class HudScene extends Phaser.Scene {
     if (st) {
       const r = st.rank, R = STYLE_RANKS[r];
       if (r !== this.shownRank) { this.shownRank = r; this.lblRank.setStyle({ color: R.c }).setText(R.n); }
-      this.styleA += ((st.pts > 4 ? 1 : 0) - this.styleA) * Math.min(1, dt * 5);
+      this.styleA += ((st.pts > 4 && !this.overOn ? 1 : 0) - this.styleA) * Math.min(1, dt * 5);
       this.rankPop = Math.max(0, this.rankPop - dt);
       this.lblRank.setAlpha(this.styleA).setScale(6 + this.rankPop * 10); this.lblStyleT.setAlpha(this.styleA * 0.9);
       this.styleFrac = r + 1 < STYLE_RANKS.length ? clamp((st.pts - R.t) / (STYLE_RANKS[r + 1].t - R.t), 0, 1) : 1;
     }
-    const age = (time - this.t0) / 1000, ha = age < 10 ? 0.9 : Math.max(0.3, 0.9 - (age - 10) * 0.3);
+    const age = (time - this.t0) / 1000, ha = age < 10 ? 0.9 : Math.max(0, 0.9 - (age - 10) * 0.3);   // gone after 13 s: the strip sits right over the floor you fight on
     this.hint1.setAlpha(ha); this.hint2.setAlpha(ha);
     const p = this.input.activePointer;
     this.xhair.setVisible(this.aimMode === 'mouse').setPosition(Math.round(p.x), Math.round(p.y));
@@ -6692,7 +6695,7 @@ class HudScene extends Phaser.Scene {
       g.fillStyle(0x06070a, 0.7 * this.styleA); g.fillRect(850, 190, 94, 6);
       g.fillStyle(Phaser.Display.Color.HexStringToColor(STYLE_RANKS[Math.max(0, this.shownRank)].c).color, this.styleA); g.fillRect(851, 191, Math.round(92 * (this.styleFrac || 0)), 4);
     }
-    if (this.rampA > 0) { g.fillStyle(0x06070a, 0.7); g.fillRect(850, 226, 94, 6); g.fillStyle(0xff7a2a, 1); g.fillRect(851, 227, Math.round(92 * this.rampA / TUNE.RAMPAGE.time), 4); }
+    if (this.rampA > 0 && !this.overOn) { g.fillStyle(0x06070a, 0.7); g.fillRect(850, 226, 94, 6); g.fillStyle(0xff7a2a, 1); g.fillRect(851, 227, Math.round(92 * this.rampA / TUNE.RAMPAGE.time), 4); }
     g.fillStyle(0x000000, 0.55 * this.hint1.alpha); g.fillRect(0, 494, VIEW_W, 38);   // backing strip for the control hints
     const fg = this.flashG; fg.clear();
     let red = this.hurtA * 0.6;
@@ -6727,6 +6730,10 @@ window.game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   scene: [BootScene, TitleScene, GameScene, HudScene],
 });
+// A hidden tab stops the game loop but not our own Web Audio graph: without this the music, the hum and any
+// weapon loop that was running (hose, arc, cryo, minigun motor) keep playing over a frozen game.
+game.events.on('hidden', () => { if (Sfx.ctx && Sfx.ctx.state === 'running') Sfx.ctx.suspend().catch(() => {}); });
+game.events.on('visible', () => { if (Sfx.ctx && Sfx.ctx.state === 'suspended') Sfx.ctx.resume().catch(() => {}); });
 </script>
 </body>
 </html>
