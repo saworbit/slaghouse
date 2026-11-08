@@ -5460,5 +5460,727 @@
    "clap": -0.0068,
    "score": -0.0868
   }
+ ],
+ "execute": [
+  {
+   "id": "2",
+   "dur": 0.214,
+   "loud": 0.261855,
+   "prompt": "a brutal bone crunching punch with a wet splatter",
+   "clap": 0.396,
+   "score": 0.396
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.180968,
+   "prompt": "a brutal bone crunching punch with a wet splatter",
+   "clap": 0.3414,
+   "score": 0.3414
+  },
+  {
+   "id": "6",
+   "dur": 0.185,
+   "loud": 0.19309,
+   "prompt": "a brutal bone crunching punch with a wet splatter",
+   "clap": 0.3745,
+   "score": 0.2945
+  },
+  {
+   "id": "4",
+   "dur": 0.199,
+   "loud": 0.272511,
+   "prompt": "a brutal bone crunching punch with a wet splatter",
+   "clap": 0.3426,
+   "score": 0.2626
+  },
+  {
+   "id": "3",
+   "dur": 0.453,
+   "loud": 0.402043,
+   "prompt": "a heavy body slam with bones breaking",
+   "clap": 0.0954,
+   "score": 0.0954
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.306848,
+   "prompt": "a heavy body slam with bones breaking",
+   "clap": 0.0539,
+   "score": 0.0539
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.309334,
+   "prompt": "a heavy body slam with bones breaking",
+   "clap": 0.0075,
+   "score": 0.0075
+  },
+  {
+   "id": "7",
+   "dur": 0.171,
+   "loud": 0.342066,
+   "prompt": "a heavy body slam with bones breaking",
+   "clap": 0.028,
+   "score": -0.052
+  }
+ ],
+ "hammerSlam": [
+  {
+   "id": "7",
+   "dur": 0.8,
+   "loud": 0.246549,
+   "prompt": "a heavy iron weight dropped on concrete, massive thud with rumble",
+   "clap": 0.445,
+   "score": 0.445
+  },
+  {
+   "id": "3",
+   "dur": 0.701,
+   "loud": 0.249312,
+   "prompt": "a heavy iron weight dropped on concrete, massive thud with rumble",
+   "clap": 0.3887,
+   "score": 0.3887
+  },
+  {
+   "id": "5",
+   "dur": 0.8,
+   "loud": 0.216298,
+   "prompt": "a heavy iron weight dropped on concrete, massive thud with rumble",
+   "clap": 0.3131,
+   "score": 0.3131
+  },
+  {
+   "id": "6",
+   "dur": 0.655,
+   "loud": 0.277222,
+   "prompt": "a huge sledgehammer smashing into a metal floor, deep boom",
+   "clap": 0.1323,
+   "score": 0.1323
+  },
+  {
+   "id": "2",
+   "dur": 0.412,
+   "loud": 0.2162,
+   "prompt": "a huge sledgehammer smashing into a metal floor, deep boom",
+   "clap": 0.1252,
+   "score": 0.1252
+  },
+  {
+   "id": "1",
+   "dur": 0.302,
+   "loud": 0.291662,
+   "prompt": "a heavy iron weight dropped on concrete, massive thud with rumble",
+   "clap": 0.1961,
+   "score": 0.1161
+  },
+  {
+   "id": "4",
+   "dur": 0.551,
+   "loud": 0.378137,
+   "prompt": "a huge sledgehammer smashing into a metal floor, deep boom",
+   "clap": 0.0711,
+   "score": 0.0711
+  },
+  {
+   "id": "0",
+   "dur": 0.276,
+   "loud": 0.191906,
+   "prompt": "a huge sledgehammer smashing into a metal floor, deep boom",
+   "clap": 0.0845,
+   "score": 0.0045
+  }
+ ],
+ "flak": [
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.344897,
+   "prompt": "a large caliber shotgun blast with a deep thump",
+   "clap": 0.3406,
+   "score": 0.3406
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.296921,
+   "prompt": "a large caliber shotgun blast with a deep thump",
+   "clap": 0.3118,
+   "score": 0.3118
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.307942,
+   "prompt": "a heavy cannon firing, deep boom",
+   "clap": 0.2371,
+   "score": 0.2371
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.34888,
+   "prompt": "a large caliber shotgun blast with a deep thump",
+   "clap": 0.2335,
+   "score": 0.2335
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.285887,
+   "prompt": "a large caliber shotgun blast with a deep thump",
+   "clap": 0.1991,
+   "score": 0.1991
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.292127,
+   "prompt": "a heavy cannon firing, deep boom",
+   "clap": 0.1901,
+   "score": 0.1901
+  },
+  {
+   "id": "6",
+   "dur": 0.29,
+   "loud": 0.263083,
+   "prompt": "a heavy cannon firing, deep boom",
+   "clap": -0.0953,
+   "score": -0.0953
+  }
+ ],
+ "flakBurst": [
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.406998,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": 0.0268,
+   "score": 0.0268
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.321892,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": 0.012,
+   "score": 0.012
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.370668,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": -0.0323,
+   "score": -0.0323
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.356636,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": -0.0394,
+   "score": -0.0394
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.362238,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": -0.0694,
+   "score": -0.0694
+  },
+  {
+   "id": "1",
+   "dur": 0.031,
+   "loud": 0.290951,
+   "prompt": "shrapnel scattering, a small metal burst with fragments rattling",
+   "clap": -0.1348,
+   "score": -0.2148
+  }
+ ],
+ "coilBoom": [
+  {
+   "id": "6",
+   "dur": 0.5,
+   "loud": 0.251089,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.3038,
+   "score": 0.3038
+  },
+  {
+   "id": "7",
+   "dur": 0.5,
+   "loud": 0.390598,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.1757,
+   "score": 0.1757
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.183815,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.168,
+   "score": 0.168
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.259573,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.1214,
+   "score": 0.1214
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.329659,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.0751,
+   "score": 0.0751
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.22005,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.0697,
+   "score": 0.0697
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.26745,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.0353,
+   "score": 0.0353
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.333178,
+   "prompt": "a loud electrical explosion, high voltage short circuit bang with crackling",
+   "clap": 0.0308,
+   "score": 0.0308
+  }
+ ],
+ "gnatPop": [
+  {
+   "id": "2-4",
+   "dur": 0.048,
+   "loud": 0.091918,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.2405,
+   "score": 0.2405
+  },
+  {
+   "id": "4-0",
+   "dur": 0.094,
+   "loud": 0.244011,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1868,
+   "score": 0.1868
+  },
+  {
+   "id": "0-0",
+   "dur": 0.054,
+   "loud": 0.122758,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.158,
+   "score": 0.158
+  },
+  {
+   "id": "0-5",
+   "dur": 0.098,
+   "loud": 0.088452,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1443,
+   "score": 0.1443
+  },
+  {
+   "id": "2-5",
+   "dur": 0.042,
+   "loud": 0.16843,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1273,
+   "score": 0.1273
+  },
+  {
+   "id": "5-2",
+   "dur": 0.1,
+   "loud": 0.140838,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1207,
+   "score": 0.1207
+  },
+  {
+   "id": "3-0",
+   "dur": 0.04,
+   "loud": 0.141183,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.189,
+   "score": 0.109
+  },
+  {
+   "id": "0-3",
+   "dur": 0.05,
+   "loud": 0.136094,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1061,
+   "score": 0.1061
+  },
+  {
+   "id": "1-0",
+   "dur": 0.1,
+   "loud": 0.159477,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0976,
+   "score": 0.0976
+  },
+  {
+   "id": "4-1",
+   "dur": 0.04,
+   "loud": 0.158469,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1735,
+   "score": 0.0935
+  },
+  {
+   "id": "5-4",
+   "dur": 0.042,
+   "loud": 0.131641,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0853,
+   "score": 0.0853
+  },
+  {
+   "id": "0-2",
+   "dur": 0.054,
+   "loud": 0.153563,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0803,
+   "score": 0.0803
+  },
+  {
+   "id": "5-1",
+   "dur": 0.04,
+   "loud": 0.101639,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1583,
+   "score": 0.0783
+  },
+  {
+   "id": "3-1",
+   "dur": 0.04,
+   "loud": 0.179321,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.154,
+   "score": 0.074
+  },
+  {
+   "id": "5-5",
+   "dur": 0.1,
+   "loud": 0.127829,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0713,
+   "score": 0.0713
+  },
+  {
+   "id": "0-4",
+   "dur": 0.04,
+   "loud": 0.166171,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1466,
+   "score": 0.0666
+  },
+  {
+   "id": "0-1",
+   "dur": 0.052,
+   "loud": 0.179863,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0649,
+   "score": 0.0649
+  },
+  {
+   "id": "3-4",
+   "dur": 0.084,
+   "loud": 0.158796,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0585,
+   "score": 0.0585
+  },
+  {
+   "id": "5-0",
+   "dur": 0.052,
+   "loud": 0.210092,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0581,
+   "score": 0.0581
+  },
+  {
+   "id": "3-2",
+   "dur": 0.04,
+   "loud": 0.11333,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.1332,
+   "score": 0.0532
+  },
+  {
+   "id": "4-2",
+   "dur": 0.1,
+   "loud": 0.1456,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0516,
+   "score": 0.0516
+  },
+  {
+   "id": "2-3",
+   "dur": 0.068,
+   "loud": 0.188487,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0342,
+   "score": 0.0342
+  },
+  {
+   "id": "3-3",
+   "dur": 0.062,
+   "loud": 0.182892,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0264,
+   "score": 0.0264
+  },
+  {
+   "id": "3-5",
+   "dur": 0.042,
+   "loud": 0.207068,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0251,
+   "score": 0.0251
+  },
+  {
+   "id": "2-1",
+   "dur": 0.07,
+   "loud": 0.217428,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0217,
+   "score": 0.0217
+  },
+  {
+   "id": "1-1",
+   "dur": 0.058,
+   "loud": 0.291048,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0131,
+   "score": 0.0131
+  },
+  {
+   "id": "4-3",
+   "dur": 0.1,
+   "loud": 0.236154,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0125,
+   "score": 0.0125
+  },
+  {
+   "id": "5-3",
+   "dur": 0.048,
+   "loud": 0.146355,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": 0.0034,
+   "score": 0.0034
+  },
+  {
+   "id": "2-2",
+   "dur": 0.072,
+   "loud": 0.251901,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": -0.0154,
+   "score": -0.0154
+  },
+  {
+   "id": "2-0",
+   "dur": 0.1,
+   "loud": 0.281963,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": -0.0561,
+   "score": -0.0561
+  },
+  {
+   "id": "4-4",
+   "dur": 0.078,
+   "loud": 0.22162,
+   "prompt": "a bug being squashed, tiny wet pop",
+   "clap": -0.0633,
+   "score": -0.0633
+  }
+ ],
+ "stitch": [
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.345073,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.2418,
+   "score": 0.2418
+  },
+  {
+   "id": "0",
+   "dur": 0.235,
+   "loud": 0.394178,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.23,
+   "score": 0.23
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.28368,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.203,
+   "score": 0.203
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.279041,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.1932,
+   "score": 0.1932
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.299409,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.1874,
+   "score": 0.1874
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.379723,
+   "prompt": "an eerie electric hum, a sci-fi energy beam pulsing",
+   "clap": 0.1676,
+   "score": 0.1676
+  }
+ ],
+ "revive": [
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.339463,
+   "prompt": "a zombie groaning as it rises, eerie whoosh",
+   "clap": 0.3509,
+   "score": 0.3509
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.284705,
+   "prompt": "a ghostly rising whoosh with a monster groan",
+   "clap": 0.2756,
+   "score": 0.2756
+  },
+  {
+   "id": "7",
+   "dur": 0.7,
+   "loud": 0.369849,
+   "prompt": "a ghostly rising whoosh with a monster groan",
+   "clap": 0.2589,
+   "score": 0.2589
+  },
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.288846,
+   "prompt": "a zombie groaning as it rises, eerie whoosh",
+   "clap": 0.258,
+   "score": 0.258
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.320891,
+   "prompt": "a zombie groaning as it rises, eerie whoosh",
+   "clap": 0.2459,
+   "score": 0.2459
+  },
+  {
+   "id": "1",
+   "dur": 0.7,
+   "loud": 0.363268,
+   "prompt": "a ghostly rising whoosh with a monster groan",
+   "clap": 0.1829,
+   "score": 0.1829
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.357367,
+   "prompt": "a ghostly rising whoosh with a monster groan",
+   "clap": 0.1556,
+   "score": 0.1556
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.291853,
+   "prompt": "a zombie groaning as it rises, eerie whoosh",
+   "clap": -0.0689,
+   "score": -0.0689
+  }
+ ],
+ "swarmLoop": [
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.242944,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.4731,
+   "score": 0.4731
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.24391,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.4626,
+   "score": 0.4626
+  },
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.208584,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.4578,
+   "score": 0.4578
+  },
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.098436,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.4337,
+   "score": 0.4337
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.159287,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.425,
+   "score": 0.425
+  },
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.196853,
+   "prompt": "a swarm of angry bees buzzing loudly",
+   "clap": 0.4097,
+   "score": 0.4097
+  }
  ]
 }

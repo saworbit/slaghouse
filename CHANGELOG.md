@@ -6,6 +6,24 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Crucible round: three more weapons.** Forge hammer (**,**): tap to swing; hold and release on the ground to
+  slam, sending shockwaves along the floor that launch everything on it; release in the air to dive and
+  ground-pound. Storm coil (**.**): sticky tesla coils (up to 3) that zap nearby enemies and link into lightning
+  fences; hold fire to overload them all. Flak cannon (**/**): a slag shell that bursts into nine shards that
+  ricochet twice.
+- **Four more enemies.** Mirror knight: a bulwark whose prism shield reflects your shots back until it breaks.
+  Hive: a floating sac that keeps a flocking gnat swarm going (gnats sting and die). Stitcher: a drone that raises
+  corpses as revenants, so gibbing bodies now matters. **Slag Wyrm**: a 9-segment worm mini-boss in wave 5 that
+  bursts out of the floor in breaches and low skims, takes 60% damage through its body, spits slag below half
+  health and blows apart segment by segment.
+- **Executions:** enemies under 20% health pulse orange; kick them to burst them with slow-mo for 2-3 homing health
+  orbs. Kick kills sometimes drop an orb.
+- **Weapon wheel** (hold **Tab**): all 21 guns in a ring, at 1/6 speed while it's open.
+- **Results screen:** stats count up row by row, then a grade (S-D) and a score stamp in; the best score is saved
+  and shown on the title screen.
+- **Screen shake setting** in the pause menu (100 / 50 / 0 %, remembered).
+- AudioGen takes for the new sounds (execute, hammer slam, flak shot and burst, coil overload, gnat pop, stitch,
+  revive, swarm drone loop); the orb pickup stays synth. The bank grows to 88 sounds.
 - **Overdrive round: four new weapons.** Ripper (**]**), a held chain blade that pins and shreds what it chews,
   cuts crates, eats enemy shots and heals you 6 HP per kill. Hornet pod (`\`): hold to paint up to six lock-ons
   near the crosshair, release to launch a seeker per lock. Magma lance (**;**): hold to charge, release a molten
@@ -48,7 +66,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 - **Esc** mid-run opens the pause menu. It replaces the earlier double-press confirm (`ESC AGAIN: QUIT`).
-- The weapon bar holds 18 compact slots, and the control hints list the new keys.
+- The weapon bar holds 21 compact slots, and the control hints list the new keys.
+- Wave 2 swaps a bulwark for a mirror knight, wave 3 a grunt for a stitcher, wave 4 a sapper for a hive, and
+  wave 5 a burrower for the Slag Wyrm.
 - Damage numbers step aside from numbers still rising nearby, so rapid hits stay readable.
 - The control hints fade out completely after about 13 s instead of staying on screen at 30%.
 

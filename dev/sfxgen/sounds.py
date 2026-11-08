@@ -134,4 +134,16 @@ SOUNDS = {
                   d=1.5, max=0.3, keep=2, n=8, air=0.8),
     'linkOn': dict(p='a sci-fi energy shield switching on, rising electric hum', d=1.5, max=0.45, air=0.7, on=-24),
     'buzz': dict(p='a loud electric buzz from a high voltage power line', d=1.5, max=0.14, keep=3, air=0.8, on=-20),
+
+    # ------------------------------------------------------------------ crucible round (appended so earlier seeds stay put)
+    'execute': dict(p=['a brutal bone crunching punch with a wet splatter', 'a heavy body slam with bones breaking'], d=1.5, max=0.5, keep=2, n=8, air=0.5),
+    'hammerSlam': dict(p=['a huge sledgehammer smashing into a metal floor, deep boom', 'a heavy iron weight dropped on concrete, massive thud with rumble'],
+                       d=2.0, max=0.8, keep=2, n=8, air=0.4),
+    'flak': dict(p=['a heavy cannon firing, deep boom', 'a large caliber shotgun blast with a deep thump'], d=1.5, max=0.6, keep=2, n=8, air=0.5),
+    'flakBurst': dict(p='shrapnel scattering, a small metal burst with fragments rattling', d=1.0, max=0.3, keep=2, air=0.8),
+    'coilBoom': dict(p='a loud electrical explosion, high voltage short circuit bang with crackling', d=1.5, max=0.5, keep=2, n=8, air=0.8),
+    'gnatPop': dict(p='a bug being squashed, tiny wet pop', d=1.0, max=0.1, keep=3, mode='slice', air=0.7),
+    'stitch': dict(p='an eerie electric hum, a sci-fi energy beam pulsing', d=1.5, max=0.35, keep=2, air=0.6, on=-20),
+    'revive': dict(p=['a zombie groaning as it rises, eerie whoosh', 'a ghostly rising whoosh with a monster groan'], d=1.5, max=0.7, n=8, air=0.5, on=-20),
+    'swarmLoop': dict(p='a swarm of angry bees buzzing loudly', d=4.0, max=1.5, mode='loop', air=0.7),
 }

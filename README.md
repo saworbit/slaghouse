@@ -1,7 +1,7 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 18 weapons, 26 enemy types and six waves that end in a boss
+pixel art, ragdolls and gibs, destructible terrain, 21 weapons, 31 enemy types and six waves that end in a boss
 fight. The game runs in a browser with no build step.
 
 ## Play
@@ -26,11 +26,12 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Jump / drop through a platform | **Space** or **W** / **S + Space** |
 | Dash (8-way, i-frames) | **Shift** (kick straight out of a dash for a dropkick) |
 | Aim and fire | mouse + left click (**J** fires when playing on the keyboard) |
-| Kick / parry | **F** or right click |
+| Kick / parry / execute (enemies pulsing orange) | **F** or right click |
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'** |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/** |
+| Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, quit to title) | **Esc** or **P** |
 | Restart run | **R** |
@@ -50,20 +51,25 @@ automatically. Both are optional; without them the game uses its built-in proced
 | 7 | Saw launcher | [ | Prism laser |
 | ] | Ripper (held chain blade; kills heal you) | `\` | Hornet pod (hold to lock on, release to launch) |
 | ; | Magma lance (hold to charge, release to fire) | ' | Glaive (thrown ring that comes back; hold to grind) |
+| , | Forge hammer (tap to swing; hold for a shockwave slam, or a ground-pound in the air) | . | Storm coil (sticky tesla coils that link into fences; hold to overload) |
+| / | Flak cannon (bursts into ricocheting shrapnel) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
 ## Waves
 
 1. 10 placed enemies.
-2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up.
-3. 17 enemies under **SLAG RAIN**, with a pyro, a harpooner and the gunship mini-boss.
-4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones.
+2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
+   mirror knight that reflects your shots.
+3. 17 enemies under **SLAG RAIN**, with a pyro, a harpooner, a corpse-raising stitcher and the gunship mini-boss.
+4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones and a hive
+   that keeps a gnat swarm going.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. Slaglings, burrowers, harpooners and linkers.
+   time, about every 25 s. Slaglings, a burrower, harpooners, linkers and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss.
 
-Medkits restock between waves.
+Medkits restock between waves. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
+orbs. The results screen grades the run (S-D) and keeps your best score.
 
 ## Project layout
 

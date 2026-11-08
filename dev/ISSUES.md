@@ -139,6 +139,11 @@ The overdrive round adds to this: harpooners in wave 3, a linker pair in wave 4,
 (slag tide, slaglings, burrowers). None of it has been played at real speed either. Knobs: `TUNE.HARPOON`,
 `TUNE.LINKER`, `TUNE.BURROWER`, `TUNE.SLAGLING`, `TUNE.TIDE`.
 
+The crucible round adds a mirror knight to wave 2, a stitcher to wave 3, a hive to wave 4 and the Slag Wyrm
+mini-boss to wave 5, plus executions and health orbs (a new source of healing). Knobs: `TUNE.MIRROR`, `TUNE.HIVE`,
+`TUNE.GNAT`, `TUNE.STITCH`, `TUNE.WYRM`, `TUNE.EXECUTE`. The results-screen grade weights (in `showOver`) are a
+first guess too.
+
 **Proposed fix / acceptance**
 - Someone plays waves 2-4 at real speed and notes each death and its cause.
 - Every big hit (cloaker strike, gunship volley, firebomb) has a tell a player can react to, and the blackout still

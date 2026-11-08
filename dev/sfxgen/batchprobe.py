@@ -48,6 +48,16 @@ PROBES = {
  'chain': ['a metal chain rattling', 'coins jingling', 'a bell', 'static noise'],
  'linkOn': ['an electric power up hum', 'a siren', 'an engine', 'static noise'],
  'buzz': ['an electric buzz', 'a bee buzzing', 'an engine', 'static noise'],
+ # crucible round
+ 'execute': ['a bone crunching punch', 'an explosion', 'a gunshot', 'a door slam'],
+ 'hammerSlam': ['a heavy hammer slam on metal', 'an explosion', 'a gunshot', 'thunder'],
+ 'flak': ['a cannon blast', 'an explosion', 'a door slam', 'thunder'],
+ 'flakBurst': ['metal fragments scattering', 'glass breaking', 'a gunshot', 'static noise'],
+ 'coilBoom': ['an electrical explosion with crackling', 'an explosion', 'a gunshot', 'fireworks'],
+ 'gnatPop': ['a tiny wet pop', 'a gunshot', 'a footstep', 'static noise'],
+ 'stitch': ['an eerie electric hum', 'an engine', 'a siren', 'static noise'],
+ 'revive': ['a zombie groan', 'a man screaming', 'wind', 'an engine'],
+ 'swarmLoop': ['a swarm of bees buzzing', 'an engine', 'an electric hum', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))
