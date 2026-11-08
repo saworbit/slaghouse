@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLAGHOUSE SFX Review</title>
+<style>
+  :root { --bg: #14110f; --panel: #1e1a17; --ink: #e8e2da; --dim: #8f877d; --hot: #ff8a1f; --pick: #3fbf6f; --line: #2e2823; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 ui-monospace, Consolas, monospace; }
+  header { position: sticky; top: 0; z-index: 2; background: var(--bg); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 16px; margin: 0 12px 0 0; color: var(--hot); letter-spacing: 1px; }
+  header .hint { color: var(--dim); font-size: 12px; flex: 1; min-width: 240px; }
+  button { font: inherit; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+  button:hover { border-color: var(--hot); }
+  main { padding: 8px 16px 40px; max-width: 1200px; }
+  .row { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .name { color: var(--hot); font-weight: bold; min-width: 110px; }
+  .prompt { color: var(--dim); font-size: 12px; }
+  .keep { font-size: 12px; color: var(--dim); margin-left: auto; }
+  .keep.bad { color: #ff5a5a; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; user-select: none; font-size: 12px; }
+  .chip.on { border-color: var(--pick); box-shadow: inset 0 0 0 1px var(--pick); }
+  .chip.playing { background: #3a2a18; }
+  .chip .s { color: var(--dim); }
+  .chip input { margin: 0; accent-color: var(--pick); }
+  #toast { position: fixed; bottom: 16px; right: 16px; background: var(--pick); color: #000; padding: 8px 12px; border-radius: 4px; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SLAGHOUSE SFX</h1>
+  <span class="hint">Click a take to play it. Tick takes to ship them (green = picked; the game picks one at random per play). Then save picks.json into dev/sfxgen/ and run build.py.</span>
+  <button id="copy">Copy picks.json</button>
+  <button id="save">Download picks.json</button>
+</header>
+<main id="list">Loading candidates...</main>
+<div id="toast"></div>
+<script>
+(async () => {
+  const cands = await (await fetch('out/candidates.json', { cache: 'no-store' })).json();
+  let used = {};
+  try { used = await (await fetch('out/picks_used.json', { cache: 'no-store' })).json(); } catch (e) {}
+  const keepN = {};
+  try { Object.assign(keepN, await (await fetch('out/keep.json', { cache: 'no-store' })).json()); } catch (e) {}
+  const picks = {};
+  const list = document.getElementById('list'); list.textContent = '';
+  let audio = null, playingChip = null;
+  const play = (name, id, chip) => {
+    if (audio) audio.pause();
+    if (playingChip) playingChip.classList.remove('playing');
+    audio = new Audio(`out/proc/${name}/${id}.wav`); audio.play();
+    playingChip = chip; chip.classList.add('playing');
+    audio.onended = () => chip.classList.remove('playing');
+  };
+  for (const [name, cs] of Object.entries(cands)) {
+    picks[name] = new Set(used[name] || []);
+    const row = document.createElement('div'); row.className = 'row';
+    const head = document.createElement('div'); head.className = 'head';
+    const prompts = [...new Set(cs.map(c => c.prompt))].join('  |  ');
+    head.innerHTML = `<span class="name"></span><span class="prompt"></span><span class="keep"></span>`;
+    head.children[0].textContent = name; head.children[1].textContent = prompts;
+    const keepEl = head.children[2];
+    const upd = () => { const n = picks[name].size, k = keepN[name] || 1; keepEl.textContent = `${n} picked (default ${k})`; keepEl.classList.toggle('bad', n === 0); };
+    const chips = document.createElement('div'); chips.className = 'chips';
+    cs.forEach(c => {
+      const chip = document.createElement('label'); chip.className = 'chip' + (picks[name].has(c.id) ? ' on' : '');
+      const box = document.createElement('input'); box.type = 'checkbox'; box.checked = picks[name].has(c.id);
+      box.addEventListener('click', ev => ev.stopPropagation());
+      box.addEventListener('change', () => { box.checked ? picks[name].add(c.id) : picks[name].delete(c.id); chip.classList.toggle('on', box.checked); upd(); });
+      const txt = document.createElement('span'); txt.innerHTML = `${c.id} <span class="s">${(c.clap ?? 0).toFixed(2)} · ${c.dur.toFixed(2)}s</span>`;
+      chip.append(box, txt);
+      chip.addEventListener('click', ev => { ev.preventDefault(); play(name, c.id, chip); });
+      chips.appendChild(chip);
+    });
+    upd();
+    row.append(head, chips); list.appendChild(row);
+  }
+  const json = () => JSON.stringify(Object.fromEntries(Object.entries(picks).filter(([, s]) => s.size).map(([k, s]) => [k, [...s]])), null, 1);
+  const toast = m => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1800); };
+  document.getElementById('copy').onclick = async () => { try { await navigator.clipboard.writeText(json()); toast('picks.json copied'); } catch (e) { toast('copy failed - use Download'); } };
+  document.getElementById('save').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json()], { type: 'application/json' })); a.download = 'picks.json'; a.click(); };
+})();
+</script>
+</body>
+</html>

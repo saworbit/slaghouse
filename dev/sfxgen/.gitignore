@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+out/raw/
+out/proc/
+out/sheets/

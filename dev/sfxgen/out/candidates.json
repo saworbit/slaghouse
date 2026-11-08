@@ -1,0 +1,4374 @@
+{
+ "nail": [
+  {
+   "id": "5-2",
+   "dur": 0.22,
+   "loud": 0.144797,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.2497,
+   "score": 0.2497
+  },
+  {
+   "id": "5-1",
+   "dur": 0.22,
+   "loud": 0.105733,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.2204,
+   "score": 0.2204
+  },
+  {
+   "id": "3-0",
+   "dur": 0.09,
+   "loud": 0.10516,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1628,
+   "score": 0.1628
+  },
+  {
+   "id": "5-3",
+   "dur": 0.22,
+   "loud": 0.09155,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1487,
+   "score": 0.1487
+  },
+  {
+   "id": "5-4",
+   "dur": 0.22,
+   "loud": 0.111735,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1468,
+   "score": 0.1468
+  },
+  {
+   "id": "1-2",
+   "dur": 0.174,
+   "loud": 0.12909,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1434,
+   "score": 0.1434
+  },
+  {
+   "id": "1-0",
+   "dur": 0.22,
+   "loud": 0.101537,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1381,
+   "score": 0.1381
+  },
+  {
+   "id": "1-4",
+   "dur": 0.22,
+   "loud": 0.142154,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.1228,
+   "score": 0.1228
+  },
+  {
+   "id": "3-1",
+   "dur": 0.054,
+   "loud": 0.10522,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.198,
+   "score": 0.118
+  },
+  {
+   "id": "3-3",
+   "dur": 0.098,
+   "loud": 0.135572,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0914,
+   "score": 0.0914
+  },
+  {
+   "id": "5-5",
+   "dur": 0.22,
+   "loud": 0.142757,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0789,
+   "score": 0.0789
+  },
+  {
+   "id": "2-2",
+   "dur": 0.22,
+   "loud": 0.238589,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0746,
+   "score": 0.0746
+  },
+  {
+   "id": "3-2",
+   "dur": 0.22,
+   "loud": 0.135793,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.066,
+   "score": 0.066
+  },
+  {
+   "id": "1-1",
+   "dur": 0.22,
+   "loud": 0.086356,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0654,
+   "score": 0.0654
+  },
+  {
+   "id": "0-3",
+   "dur": 0.22,
+   "loud": 0.107422,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0632,
+   "score": 0.0632
+  },
+  {
+   "id": "5-0",
+   "dur": 0.22,
+   "loud": 0.085397,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0561,
+   "score": 0.0561
+  },
+  {
+   "id": "2-1",
+   "dur": 0.22,
+   "loud": 0.239523,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0392,
+   "score": 0.0392
+  },
+  {
+   "id": "2-0",
+   "dur": 0.22,
+   "loud": 0.210174,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.034,
+   "score": 0.034
+  },
+  {
+   "id": "0-1",
+   "dur": 0.04,
+   "loud": 0.132354,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.1124,
+   "score": 0.0324
+  },
+  {
+   "id": "4-0",
+   "dur": 0.22,
+   "loud": 0.154185,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0188,
+   "score": 0.0188
+  },
+  {
+   "id": "3-5",
+   "dur": 0.046,
+   "loud": 0.147605,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0806,
+   "score": 0.0006
+  },
+  {
+   "id": "0-5",
+   "dur": 0.164,
+   "loud": 0.127567,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0005,
+   "score": 0.0005
+  },
+  {
+   "id": "1-5",
+   "dur": 0.04,
+   "loud": 0.197437,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.076,
+   "score": -0.004
+  },
+  {
+   "id": "4-3",
+   "dur": 0.22,
+   "loud": 0.170241,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": -0.007,
+   "score": -0.007
+  },
+  {
+   "id": "4-1",
+   "dur": 0.22,
+   "loud": 0.214068,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": -0.0073,
+   "score": -0.0073
+  },
+  {
+   "id": "1-3",
+   "dur": 0.04,
+   "loud": 0.116336,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": 0.0718,
+   "score": -0.0082
+  },
+  {
+   "id": "3-4",
+   "dur": 0.15,
+   "loud": 0.165801,
+   "prompt": "a nail gun shooting, sharp pneumatic clacks",
+   "clap": -0.0285,
+   "score": -0.0285
+  },
+  {
+   "id": "4-2",
+   "dur": 0.22,
+   "loud": 0.21149,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": -0.0375,
+   "score": -0.0375
+  },
+  {
+   "id": "0-2",
+   "dur": 0.044,
+   "loud": 0.080521,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": 0.0277,
+   "score": -0.0523
+  },
+  {
+   "id": "0-0",
+   "dur": 0.22,
+   "loud": 0.14286,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": -0.1061,
+   "score": -0.1061
+  },
+  {
+   "id": "0-4",
+   "dur": 0.062,
+   "loud": 0.150244,
+   "prompt": "a pneumatic nail gun firing nails rapidly",
+   "clap": -0.0661,
+   "score": -0.1461
+  }
+ ],
+ "shotgun": [
+  {
+   "id": "0",
+   "dur": 1.1,
+   "loud": 0.117677,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.3137,
+   "score": 0.3137
+  },
+  {
+   "id": "5",
+   "dur": 1.1,
+   "loud": 0.203345,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.2794,
+   "score": 0.2794
+  },
+  {
+   "id": "3",
+   "dur": 1.1,
+   "loud": 0.233555,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.2502,
+   "score": 0.2502
+  },
+  {
+   "id": "2",
+   "dur": 1.1,
+   "loud": 0.153712,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.2447,
+   "score": 0.2447
+  },
+  {
+   "id": "1",
+   "dur": 1.1,
+   "loud": 0.121909,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.2384,
+   "score": 0.2384
+  },
+  {
+   "id": "4",
+   "dur": 1.1,
+   "loud": 0.23737,
+   "prompt": "a loud pump action shotgun blast followed by the pump being racked",
+   "clap": 0.1124,
+   "score": 0.1124
+  }
+ ],
+ "explosion": [
+  {
+   "id": "5",
+   "dur": 1.8,
+   "loud": 0.04098,
+   "prompt": "a bomb exploding, massive blast and rumble",
+   "clap": 0.4339,
+   "score": 0.4339
+  },
+  {
+   "id": "3",
+   "dur": 1.8,
+   "loud": 0.11666,
+   "prompt": "a bomb exploding, massive blast and rumble",
+   "clap": 0.3719,
+   "score": 0.3719
+  },
+  {
+   "id": "1",
+   "dur": 1.8,
+   "loud": 0.037856,
+   "prompt": "a bomb exploding, massive blast and rumble",
+   "clap": 0.3472,
+   "score": 0.3472
+  },
+  {
+   "id": "2",
+   "dur": 1.8,
+   "loud": 0.143316,
+   "prompt": "a huge explosion, loud boom with debris",
+   "clap": 0.2804,
+   "score": 0.2804
+  },
+  {
+   "id": "4",
+   "dur": 1.8,
+   "loud": 0.092524,
+   "prompt": "a huge explosion, loud boom with debris",
+   "clap": 0.2552,
+   "score": 0.2552
+  },
+  {
+   "id": "0",
+   "dur": 1.8,
+   "loud": 0.131094,
+   "prompt": "a huge explosion, loud boom with debris",
+   "clap": 0.2144,
+   "score": 0.2144
+  }
+ ],
+ "tink": [
+  {
+   "id": "5-0",
+   "dur": 0.12,
+   "loud": 0.056592,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.1499,
+   "score": 0.1499
+  },
+  {
+   "id": "0-4",
+   "dur": 0.12,
+   "loud": 0.079535,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.1044,
+   "score": 0.1044
+  },
+  {
+   "id": "3-2",
+   "dur": 0.114,
+   "loud": 0.102633,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.1044,
+   "score": 0.1044
+  },
+  {
+   "id": "3-3",
+   "dur": 0.12,
+   "loud": 0.09174,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0633,
+   "score": 0.0633
+  },
+  {
+   "id": "0-2",
+   "dur": 0.06,
+   "loud": 0.060184,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0607,
+   "score": 0.0607
+  },
+  {
+   "id": "5-2",
+   "dur": 0.04,
+   "loud": 0.096418,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.1401,
+   "score": 0.0601
+  },
+  {
+   "id": "4-1",
+   "dur": 0.12,
+   "loud": 0.13718,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0374,
+   "score": 0.0374
+  },
+  {
+   "id": "5-4",
+   "dur": 0.04,
+   "loud": 0.085648,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.1148,
+   "score": 0.0348
+  },
+  {
+   "id": "3-4",
+   "dur": 0.066,
+   "loud": 0.126395,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0304,
+   "score": 0.0304
+  },
+  {
+   "id": "3-0",
+   "dur": 0.112,
+   "loud": 0.137294,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0205,
+   "score": 0.0205
+  },
+  {
+   "id": "5-3",
+   "dur": 0.12,
+   "loud": 0.111716,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0076,
+   "score": 0.0076
+  },
+  {
+   "id": "0-5",
+   "dur": 0.062,
+   "loud": 0.08961,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0027,
+   "score": -0.0027
+  },
+  {
+   "id": "3-1",
+   "dur": 0.12,
+   "loud": 0.121983,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0217,
+   "score": -0.0217
+  },
+  {
+   "id": "5-1",
+   "dur": 0.046,
+   "loud": 0.058761,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0577,
+   "score": -0.0223
+  },
+  {
+   "id": "5-5",
+   "dur": 0.12,
+   "loud": 0.117543,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0375,
+   "score": -0.0375
+  },
+  {
+   "id": "0-1",
+   "dur": 0.12,
+   "loud": 0.084184,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0613,
+   "score": -0.0613
+  },
+  {
+   "id": "2-0",
+   "dur": 0.12,
+   "loud": 0.140112,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0647,
+   "score": -0.0647
+  },
+  {
+   "id": "3-5",
+   "dur": 0.04,
+   "loud": 0.166427,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": 0.0089,
+   "score": -0.0711
+  },
+  {
+   "id": "1-0",
+   "dur": 0.12,
+   "loud": 0.102624,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0712,
+   "score": -0.0712
+  },
+  {
+   "id": "0-0",
+   "dur": 0.078,
+   "loud": 0.079939,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0759,
+   "score": -0.0759
+  },
+  {
+   "id": "0-3",
+   "dur": 0.12,
+   "loud": 0.103712,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0797,
+   "score": -0.0797
+  },
+  {
+   "id": "4-0",
+   "dur": 0.06,
+   "loud": 0.125691,
+   "prompt": "brass bullet casings dropping and bouncing on a metal floor",
+   "clap": -0.0905,
+   "score": -0.0905
+  }
+ ],
+ "rocket": [
+  {
+   "id": "3",
+   "dur": 0.9,
+   "loud": 0.0854,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.2191,
+   "score": 0.2191
+  },
+  {
+   "id": "0",
+   "dur": 0.9,
+   "loud": 0.101431,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.2169,
+   "score": 0.2169
+  },
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.071799,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.1827,
+   "score": 0.1827
+  },
+  {
+   "id": "4",
+   "dur": 0.9,
+   "loud": 0.044949,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.1638,
+   "score": 0.1638
+  },
+  {
+   "id": "5",
+   "dur": 0.9,
+   "loud": 0.103884,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.1271,
+   "score": 0.1271
+  },
+  {
+   "id": "2",
+   "dur": 0.9,
+   "loud": 0.056017,
+   "prompt": "a rocket launcher firing, loud whoosh of a rocket taking off",
+   "clap": 0.0923,
+   "score": 0.0923
+  }
+ ],
+ "grenade": [
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.245076,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": 0.2017,
+   "score": 0.2017
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.153939,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": 0.2012,
+   "score": 0.2012
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.129883,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": 0.1687,
+   "score": 0.1687
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.189589,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": 0.1318,
+   "score": 0.1318
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.162493,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": 0.1005,
+   "score": 0.1005
+  },
+  {
+   "id": "3",
+   "dur": 0.074,
+   "loud": 0.156654,
+   "prompt": "a grenade launcher firing, hollow metallic thump",
+   "clap": -0.0703,
+   "score": -0.1503
+  }
+ ],
+ "stake": [
+  {
+   "id": "0",
+   "dur": 0.55,
+   "loud": 0.155409,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.2165,
+   "score": 0.2165
+  },
+  {
+   "id": "3",
+   "dur": 0.55,
+   "loud": 0.230756,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.1845,
+   "score": 0.1845
+  },
+  {
+   "id": "1",
+   "dur": 0.55,
+   "loud": 0.188711,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.1541,
+   "score": 0.1541
+  },
+  {
+   "id": "5",
+   "dur": 0.55,
+   "loud": 0.200286,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.1466,
+   "score": 0.1466
+  },
+  {
+   "id": "2",
+   "dur": 0.55,
+   "loud": 0.151358,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.1206,
+   "score": 0.1206
+  },
+  {
+   "id": "4",
+   "dur": 0.55,
+   "loud": 0.205292,
+   "prompt": "a heavy pneumatic piston firing a steel spike, loud thump and hiss of air",
+   "clap": 0.0828,
+   "score": 0.0828
+  }
+ ],
+ "rivet": [
+  {
+   "id": "2-5",
+   "dur": 0.12,
+   "loud": 0.089824,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.1594,
+   "score": 0.1594
+  },
+  {
+   "id": "4-2",
+   "dur": 0.12,
+   "loud": 0.122123,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.1305,
+   "score": 0.1305
+  },
+  {
+   "id": "3-0",
+   "dur": 0.12,
+   "loud": 0.153653,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": 0.1285,
+   "score": 0.1285
+  },
+  {
+   "id": "6-3",
+   "dur": 0.12,
+   "loud": 0.126598,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.1225,
+   "score": 0.1225
+  },
+  {
+   "id": "2-2",
+   "dur": 0.106,
+   "loud": 0.108168,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.0947,
+   "score": 0.0947
+  },
+  {
+   "id": "7-4",
+   "dur": 0.12,
+   "loud": 0.110117,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": 0.0904,
+   "score": 0.0904
+  },
+  {
+   "id": "2-3",
+   "dur": 0.12,
+   "loud": 0.149388,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.0876,
+   "score": 0.0876
+  },
+  {
+   "id": "0-0",
+   "dur": 0.12,
+   "loud": 0.076104,
+   "prompt": "an assault rifle firing single shots",
+   "clap": 0.0546,
+   "score": 0.0546
+  },
+  {
+   "id": "7-0",
+   "dur": 0.12,
+   "loud": 0.121028,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": 0.0085,
+   "score": 0.0085
+  },
+  {
+   "id": "1-1",
+   "dur": 0.064,
+   "loud": 0.082207,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": 0.008,
+   "score": 0.008
+  },
+  {
+   "id": "2-4",
+   "dur": 0.078,
+   "loud": 0.156718,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0026,
+   "score": -0.0026
+  },
+  {
+   "id": "7-1",
+   "dur": 0.062,
+   "loud": 0.121205,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.0028,
+   "score": -0.0028
+  },
+  {
+   "id": "7-2",
+   "dur": 0.12,
+   "loud": 0.099245,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.0069,
+   "score": -0.0069
+  },
+  {
+   "id": "7-3",
+   "dur": 0.118,
+   "loud": 0.161696,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.0092,
+   "score": -0.0092
+  },
+  {
+   "id": "1-3",
+   "dur": 0.12,
+   "loud": 0.197168,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.0155,
+   "score": -0.0155
+  },
+  {
+   "id": "2-0",
+   "dur": 0.06,
+   "loud": 0.124004,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.03,
+   "score": -0.03
+  },
+  {
+   "id": "4-1",
+   "dur": 0.12,
+   "loud": 0.144325,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0416,
+   "score": -0.0416
+  },
+  {
+   "id": "1-0",
+   "dur": 0.12,
+   "loud": 0.129639,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.0505,
+   "score": -0.0505
+  },
+  {
+   "id": "6-0",
+   "dur": 0.12,
+   "loud": 0.173263,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0524,
+   "score": -0.0524
+  },
+  {
+   "id": "2-1",
+   "dur": 0.064,
+   "loud": 0.133799,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0554,
+   "score": -0.0554
+  },
+  {
+   "id": "4-0",
+   "dur": 0.12,
+   "loud": 0.117692,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0761,
+   "score": -0.0761
+  },
+  {
+   "id": "6-1",
+   "dur": 0.12,
+   "loud": 0.170538,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.1178,
+   "score": -0.1178
+  },
+  {
+   "id": "1-2",
+   "dur": 0.12,
+   "loud": 0.042442,
+   "prompt": "a rifle firing single shots in a row",
+   "clap": -0.1339,
+   "score": -0.1339
+  },
+  {
+   "id": "6-2",
+   "dur": 0.044,
+   "loud": 0.137097,
+   "prompt": "an assault rifle firing single shots",
+   "clap": -0.0708,
+   "score": -0.1508
+  }
+ ],
+ "mortar": [
+  {
+   "id": "5",
+   "dur": 0.8,
+   "loud": 0.075517,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.2642,
+   "score": 0.2642
+  },
+  {
+   "id": "3",
+   "dur": 0.8,
+   "loud": 0.12942,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.2577,
+   "score": 0.2577
+  },
+  {
+   "id": "1",
+   "dur": 0.8,
+   "loud": 0.208631,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.256,
+   "score": 0.256
+  },
+  {
+   "id": "0",
+   "dur": 0.8,
+   "loud": 0.024043,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.2418,
+   "score": 0.2418
+  },
+  {
+   "id": "4",
+   "dur": 0.68,
+   "loud": 0.08735,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.2296,
+   "score": 0.2296
+  },
+  {
+   "id": "2",
+   "dur": 0.8,
+   "loud": 0.049175,
+   "prompt": "a mortar round fired from a metal tube, deep hollow boom",
+   "clap": 0.2144,
+   "score": 0.2144
+  }
+ ],
+ "sawLaunch": [
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.180877,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.2273,
+   "score": 0.2273
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.243385,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.1872,
+   "score": 0.1872
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.216058,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.1801,
+   "score": 0.1801
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.209234,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.1555,
+   "score": 0.1555
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.205833,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.1492,
+   "score": 0.1492
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.220367,
+   "prompt": "a circular saw blade spinning up fast, metallic whine",
+   "clap": 0.1013,
+   "score": 0.1013
+  }
+ ],
+ "rail": [
+  {
+   "id": "4",
+   "dur": 0.951,
+   "loud": 0.086607,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.3315,
+   "score": 0.3315
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.088211,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.3127,
+   "score": 0.3127
+  },
+  {
+   "id": "1",
+   "dur": 0.925,
+   "loud": 0.137508,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.2728,
+   "score": 0.2728
+  },
+  {
+   "id": "5",
+   "dur": 0.91,
+   "loud": 0.099033,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.2609,
+   "score": 0.2609
+  },
+  {
+   "id": "2",
+   "dur": 0.755,
+   "loud": 0.125595,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.2598,
+   "score": 0.2598
+  },
+  {
+   "id": "3",
+   "dur": 0.545,
+   "loud": 0.113769,
+   "prompt": "a powerful electric railgun shot, sharp electric crack and deep boom",
+   "clap": 0.2552,
+   "score": 0.2552
+  }
+ ],
+ "clusterPop": [
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.073523,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.346,
+   "score": 0.346
+  },
+  {
+   "id": "0",
+   "dur": 0.58,
+   "loud": 0.094852,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.3209,
+   "score": 0.3209
+  },
+  {
+   "id": "3",
+   "dur": 0.415,
+   "loud": 0.109376,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.3014,
+   "score": 0.3014
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.050318,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.2796,
+   "score": 0.2796
+  },
+  {
+   "id": "1",
+   "dur": 0.496,
+   "loud": 0.060574,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.2696,
+   "score": 0.2696
+  },
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.137782,
+   "prompt": "a firework shell bursting in the air, sharp pop",
+   "clap": 0.2072,
+   "score": 0.2072
+  }
+ ],
+ "mineThrow": [
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.197872,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.25,
+   "score": 0.25
+  },
+  {
+   "id": "5",
+   "dur": 0.205,
+   "loud": 0.115121,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.2428,
+   "score": 0.2428
+  },
+  {
+   "id": "2",
+   "dur": 0.228,
+   "loud": 0.113423,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.1618,
+   "score": 0.1618
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.208288,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.1514,
+   "score": 0.1514
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.142299,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.1262,
+   "score": 0.1262
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.112646,
+   "prompt": "a small metal object tossed onto a concrete floor, clank",
+   "clap": 0.1078,
+   "score": 0.1078
+  }
+ ],
+ "hookFire": [
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.148995,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.2827,
+   "score": 0.2827
+  },
+  {
+   "id": "0",
+   "dur": 0.45,
+   "loud": 0.166842,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.2712,
+   "score": 0.2712
+  },
+  {
+   "id": "3",
+   "dur": 0.408,
+   "loud": 0.170286,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.241,
+   "score": 0.241
+  },
+  {
+   "id": "2",
+   "dur": 0.238,
+   "loud": 0.109357,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.1906,
+   "score": 0.1906
+  },
+  {
+   "id": "5",
+   "dur": 0.414,
+   "loud": 0.100404,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.1328,
+   "score": 0.1328
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.146581,
+   "prompt": "a grappling hook launched, metal chain rattling out fast",
+   "clap": 0.1219,
+   "score": 0.1219
+  }
+ ],
+ "hookHit": [
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.110945,
+   "prompt": "a heavy metal hook slamming into meat, wet clank",
+   "clap": 0.1718,
+   "score": 0.1718
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.200892,
+   "prompt": "a heavy metal hook slamming into meat, wet clank",
+   "clap": 0.0505,
+   "score": 0.0505
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.175931,
+   "prompt": "a heavy metal hook slamming into meat, wet clank",
+   "clap": -0.0009,
+   "score": -0.0009
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.206968,
+   "prompt": "a heavy metal hook slamming into meat, wet clank",
+   "clap": -0.0178,
+   "score": -0.0178
+  },
+  {
+   "id": "5",
+   "dur": 0.125,
+   "loud": 0.190277,
+   "prompt": "a heavy metal hook slamming into meat, wet clank",
+   "clap": -0.0591,
+   "score": -0.0591
+  }
+ ],
+ "prism": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.190379,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": 0.2762,
+   "score": 0.2762
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.177703,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": 0.058,
+   "score": 0.058
+  },
+  {
+   "id": "1",
+   "dur": 0.37,
+   "loud": 0.123718,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": 0.0525,
+   "score": 0.0525
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.230729,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": 0.0472,
+   "score": 0.0472
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.1418,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": -0.0341,
+   "score": -0.0341
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.243584,
+   "prompt": "a sci-fi laser gun shot, high pitched electric zap",
+   "clap": -0.0361,
+   "score": -0.0361
+  }
+ ],
+ "zap": [
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.148093,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.3513,
+   "score": 0.3513
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.17538,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.2885,
+   "score": 0.2885
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.21445,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.2271,
+   "score": 0.2271
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.227316,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.141,
+   "score": 0.141
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.347901,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.1386,
+   "score": 0.1386
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.201542,
+   "prompt": "an electric spark zap, short circuit",
+   "clap": 0.1294,
+   "score": 0.1294
+  }
+ ],
+ "eshot": [
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.128822,
+   "prompt": "a single gunshot from a handgun",
+   "clap": 0.3704,
+   "score": 0.3704
+  },
+  {
+   "id": "5",
+   "dur": 0.318,
+   "loud": 0.246516,
+   "prompt": "a single gunshot from a handgun",
+   "clap": 0.2887,
+   "score": 0.2887
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.138535,
+   "prompt": "a single pistol gunshot",
+   "clap": 0.2474,
+   "score": 0.2474
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.197416,
+   "prompt": "a single gunshot from a handgun",
+   "clap": 0.2366,
+   "score": 0.2366
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.230873,
+   "prompt": "a single pistol gunshot",
+   "clap": 0.1824,
+   "score": 0.1824
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.12784,
+   "prompt": "a single pistol gunshot",
+   "clap": 0.1691,
+   "score": 0.1691
+  }
+ ],
+ "snipe": [
+  {
+   "id": "2",
+   "dur": 1.1,
+   "loud": 0.23638,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.3771,
+   "score": 0.3771
+  },
+  {
+   "id": "3",
+   "dur": 1.1,
+   "loud": 0.20476,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.3474,
+   "score": 0.3474
+  },
+  {
+   "id": "4",
+   "dur": 1.1,
+   "loud": 0.232316,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.3301,
+   "score": 0.3301
+  },
+  {
+   "id": "0",
+   "dur": 1.1,
+   "loud": 0.244519,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.3156,
+   "score": 0.3156
+  },
+  {
+   "id": "5",
+   "dur": 1.1,
+   "loud": 0.253351,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.2417,
+   "score": 0.2417
+  },
+  {
+   "id": "1",
+   "dur": 1.1,
+   "loud": 0.134819,
+   "prompt": "a single loud sniper rifle shot with echo",
+   "clap": 0.2371,
+   "score": 0.2371
+  }
+ ],
+ "whistle": [
+  {
+   "id": "4",
+   "dur": 0.8,
+   "loud": 0.414858,
+   "prompt": "a bomb falling with a descending whistle",
+   "clap": 0.2085,
+   "score": 0.2085
+  },
+  {
+   "id": "7",
+   "dur": 0.701,
+   "loud": 0.102143,
+   "prompt": "a mortar shell whistling as it falls",
+   "clap": 0.1539,
+   "score": 0.1539
+  },
+  {
+   "id": "6",
+   "dur": 0.8,
+   "loud": 0.311699,
+   "prompt": "a bomb falling with a descending whistle",
+   "clap": 0.0372,
+   "score": 0.0372
+  },
+  {
+   "id": "0",
+   "dur": 0.8,
+   "loud": 0.191519,
+   "prompt": "a bomb falling with a descending whistle",
+   "clap": 0.0213,
+   "score": 0.0213
+  },
+  {
+   "id": "1",
+   "dur": 0.8,
+   "loud": 0.106592,
+   "prompt": "a mortar shell whistling as it falls",
+   "clap": 0.0151,
+   "score": 0.0151
+  },
+  {
+   "id": "3",
+   "dur": 0.15,
+   "loud": 0.209641,
+   "prompt": "a mortar shell whistling as it falls",
+   "clap": 0.0532,
+   "score": -0.0268
+  },
+  {
+   "id": "2",
+   "dur": 0.8,
+   "loud": 0.180561,
+   "prompt": "a bomb falling with a descending whistle",
+   "clap": -0.0387,
+   "score": -0.0387
+  },
+  {
+   "id": "5",
+   "dur": 0.8,
+   "loud": 0.089423,
+   "prompt": "a mortar shell whistling as it falls",
+   "clap": -0.0831,
+   "score": -0.0831
+  }
+ ],
+ "radio": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.246922,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.4565,
+   "score": 0.4565
+  },
+  {
+   "id": "2",
+   "dur": 0.175,
+   "loud": 0.372038,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.3004,
+   "score": 0.3004
+  },
+  {
+   "id": "1",
+   "dur": 0.369,
+   "loud": 0.273553,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.2483,
+   "score": 0.2483
+  },
+  {
+   "id": "4",
+   "dur": 0.312,
+   "loud": 0.289044,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.1225,
+   "score": 0.1225
+  },
+  {
+   "id": "5",
+   "dur": 0.18,
+   "loud": 0.38005,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.1137,
+   "score": 0.1137
+  },
+  {
+   "id": "3",
+   "dur": 0.065,
+   "loud": 0.402766,
+   "prompt": "a walkie talkie radio squelch with static",
+   "clap": 0.0061,
+   "score": -0.0739
+  }
+ ],
+ "killcam": [
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.034976,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.3338,
+   "score": 0.3338
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.0607,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.2827,
+   "score": 0.2827
+  },
+  {
+   "id": "3",
+   "dur": 0.872,
+   "loud": 0.029456,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.2781,
+   "score": 0.2781
+  },
+  {
+   "id": "2",
+   "dur": 0.642,
+   "loud": 0.021009,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.2649,
+   "score": 0.2649
+  },
+  {
+   "id": "5",
+   "dur": 0.97,
+   "loud": 0.018176,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.252,
+   "score": 0.252
+  },
+  {
+   "id": "4",
+   "dur": 1.375,
+   "loud": 0.017216,
+   "prompt": "a deep cinematic boom impact with a long reverb tail",
+   "clap": 0.2394,
+   "score": 0.2394
+  }
+ ],
+ "stomp": [
+  {
+   "id": "4",
+   "dur": 1.0,
+   "loud": 0.052956,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": 0.4474,
+   "score": 0.4474
+  },
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.042551,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": 0.3555,
+   "score": 0.3555
+  },
+  {
+   "id": "3",
+   "dur": 1.0,
+   "loud": 0.032484,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": 0.273,
+   "score": 0.273
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.086107,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": 0.1829,
+   "score": 0.1829
+  },
+  {
+   "id": "2",
+   "dur": 1.0,
+   "loud": 0.106114,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": -0.0938,
+   "score": -0.0938
+  },
+  {
+   "id": "1",
+   "dur": 1.0,
+   "loud": 0.206973,
+   "prompt": "a giant robot stomping on a metal floor, heavy boom and rumble",
+   "clap": -0.1069,
+   "score": -0.1069
+  }
+ ],
+ "rampage": [
+  {
+   "id": "1",
+   "dur": 1.0,
+   "loud": 0.075083,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.3335,
+   "score": 0.3335
+  },
+  {
+   "id": "3",
+   "dur": 1.0,
+   "loud": 0.088052,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.3113,
+   "score": 0.3113
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.264826,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.2293,
+   "score": 0.2293
+  },
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.090101,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.2145,
+   "score": 0.2145
+  },
+  {
+   "id": "2",
+   "dur": 1.0,
+   "loud": 0.125508,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.1937,
+   "score": 0.1937
+  },
+  {
+   "id": "4",
+   "dur": 1.0,
+   "loud": 0.155696,
+   "prompt": "a deep distorted cinematic horn blast with a heavy impact",
+   "clap": 0.1721,
+   "score": 0.1721
+  }
+ ],
+ "clang": [
+  {
+   "id": "0",
+   "dur": 0.248,
+   "loud": 0.225385,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.2851,
+   "score": 0.2851
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.188069,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.2407,
+   "score": 0.2407
+  },
+  {
+   "id": "5",
+   "dur": 0.373,
+   "loud": 0.192602,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.2399,
+   "score": 0.2399
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.210961,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.2071,
+   "score": 0.2071
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.206618,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.118,
+   "score": 0.118
+  },
+  {
+   "id": "3",
+   "dur": 0.21,
+   "loud": 0.085137,
+   "prompt": "a bullet ricocheting off a steel plate, loud metallic clang",
+   "clap": 0.008,
+   "score": 0.008
+  }
+ ],
+ "clunk": [
+  {
+   "id": "4-5",
+   "dur": 0.2,
+   "loud": 0.209196,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.2171,
+   "score": 0.2171
+  },
+  {
+   "id": "1-3",
+   "dur": 0.2,
+   "loud": 0.232,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.1896,
+   "score": 0.1896
+  },
+  {
+   "id": "0-1",
+   "dur": 0.2,
+   "loud": 0.182131,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.105,
+   "score": 0.105
+  },
+  {
+   "id": "4-4",
+   "dur": 0.13,
+   "loud": 0.123129,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.1042,
+   "score": 0.1042
+  },
+  {
+   "id": "1-4",
+   "dur": 0.2,
+   "loud": 0.198531,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0878,
+   "score": 0.0878
+  },
+  {
+   "id": "1-0",
+   "dur": 0.148,
+   "loud": 0.150154,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0822,
+   "score": 0.0822
+  },
+  {
+   "id": "1-2",
+   "dur": 0.2,
+   "loud": 0.137725,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0797,
+   "score": 0.0797
+  },
+  {
+   "id": "5-0",
+   "dur": 0.2,
+   "loud": 0.145661,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0716,
+   "score": 0.0716
+  },
+  {
+   "id": "4-0",
+   "dur": 0.158,
+   "loud": 0.204471,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0715,
+   "score": 0.0715
+  },
+  {
+   "id": "2-0",
+   "dur": 0.2,
+   "loud": 0.188854,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0434,
+   "score": 0.0434
+  },
+  {
+   "id": "2-3",
+   "dur": 0.062,
+   "loud": 0.078201,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.1222,
+   "score": 0.0422
+  },
+  {
+   "id": "1-5",
+   "dur": 0.178,
+   "loud": 0.219894,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0372,
+   "score": 0.0372
+  },
+  {
+   "id": "0-0",
+   "dur": 0.2,
+   "loud": 0.177907,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0356,
+   "score": 0.0356
+  },
+  {
+   "id": "2-2",
+   "dur": 0.072,
+   "loud": 0.082384,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.1096,
+   "score": 0.0296
+  },
+  {
+   "id": "2-1",
+   "dur": 0.2,
+   "loud": 0.068231,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": 0.0104,
+   "score": 0.0104
+  },
+  {
+   "id": "1-1",
+   "dur": 0.114,
+   "loud": 0.204596,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0229,
+   "score": -0.0229
+  },
+  {
+   "id": "4-3",
+   "dur": 0.166,
+   "loud": 0.189425,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0258,
+   "score": -0.0258
+  },
+  {
+   "id": "3-0",
+   "dur": 0.2,
+   "loud": 0.174988,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0594,
+   "score": -0.0594
+  },
+  {
+   "id": "4-2",
+   "dur": 0.06,
+   "loud": 0.122463,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0243,
+   "score": -0.1043
+  },
+  {
+   "id": "2-4",
+   "dur": 0.04,
+   "loud": 0.115128,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0507,
+   "score": -0.1307
+  },
+  {
+   "id": "3-1",
+   "dur": 0.054,
+   "loud": 0.097308,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0558,
+   "score": -0.1358
+  },
+  {
+   "id": "2-5",
+   "dur": 0.044,
+   "loud": 0.152405,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0593,
+   "score": -0.1393
+  },
+  {
+   "id": "4-1",
+   "dur": 0.074,
+   "loud": 0.099222,
+   "prompt": "a metal gas canister bouncing on a concrete floor",
+   "clap": -0.0794,
+   "score": -0.1594
+  }
+ ],
+ "smash": [
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.218777,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.2121,
+   "score": 0.2121
+  },
+  {
+   "id": "5",
+   "dur": 0.392,
+   "loud": 0.130718,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.1127,
+   "score": 0.1127
+  },
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.119252,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.1118,
+   "score": 0.1118
+  },
+  {
+   "id": "2",
+   "dur": 0.242,
+   "loud": 0.10292,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.0951,
+   "score": 0.0951
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.137956,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.0328,
+   "score": 0.0328
+  },
+  {
+   "id": "1",
+   "dur": 0.191,
+   "loud": 0.156069,
+   "prompt": "a wooden crate smashed into pieces",
+   "clap": 0.0192,
+   "score": -0.0608
+  }
+ ],
+ "smashMetal": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.196046,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.2069,
+   "score": 0.2069
+  },
+  {
+   "id": "3",
+   "dur": 0.476,
+   "loud": 0.271243,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.1626,
+   "score": 0.1626
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.177326,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.1596,
+   "score": 0.1596
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.185949,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.1483,
+   "score": 0.1483
+  },
+  {
+   "id": "5",
+   "dur": 0.58,
+   "loud": 0.182708,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.1166,
+   "score": 0.1166
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.216231,
+   "prompt": "a metal grate breaking and clattering to the floor",
+   "clap": 0.0933,
+   "score": 0.0933
+  }
+ ],
+ "creak": [
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.156071,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.1638,
+   "score": 0.1638
+  },
+  {
+   "id": "2",
+   "dur": 1.0,
+   "loud": 0.212124,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.1232,
+   "score": 0.1232
+  },
+  {
+   "id": "0",
+   "dur": 0.855,
+   "loud": 0.211407,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.0758,
+   "score": 0.0758
+  },
+  {
+   "id": "4",
+   "dur": 1.0,
+   "loud": 0.261142,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.0324,
+   "score": 0.0324
+  },
+  {
+   "id": "3",
+   "dur": 0.355,
+   "loud": 0.244858,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.1089,
+   "score": 0.0289
+  },
+  {
+   "id": "1",
+   "dur": 0.365,
+   "loud": 0.181683,
+   "prompt": "a huge steel beam groaning and creaking under stress",
+   "clap": 0.1074,
+   "score": 0.0274
+  }
+ ],
+ "snap": [
+  {
+   "id": "1",
+   "dur": 0.213,
+   "loud": 0.089794,
+   "prompt": "a steel cable snapping",
+   "clap": 0.1541,
+   "score": 0.1541
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.094382,
+   "prompt": "a metal chain breaking with a sharp snap",
+   "clap": 0.1206,
+   "score": 0.1206
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.067339,
+   "prompt": "a steel cable snapping",
+   "clap": 0.1161,
+   "score": 0.1161
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.092762,
+   "prompt": "a metal chain breaking with a sharp snap",
+   "clap": 0.1101,
+   "score": 0.1101
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.118338,
+   "prompt": "a steel cable snapping",
+   "clap": 0.0895,
+   "score": 0.0895
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.175013,
+   "prompt": "a metal chain breaking with a sharp snap",
+   "clap": 0.0679,
+   "score": 0.0679
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.223983,
+   "prompt": "a metal chain breaking with a sharp snap",
+   "clap": 0.0433,
+   "score": 0.0433
+  },
+  {
+   "id": "7",
+   "dur": 0.109,
+   "loud": 0.11036,
+   "prompt": "a steel cable snapping",
+   "clap": 0.0658,
+   "score": -0.0142
+  }
+ ],
+ "pin": [
+  {
+   "id": "3",
+   "dur": 0.391,
+   "loud": 0.130774,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.3553,
+   "score": 0.3553
+  },
+  {
+   "id": "5",
+   "dur": 0.197,
+   "loud": 0.132478,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.3465,
+   "score": 0.3465
+  },
+  {
+   "id": "1",
+   "dur": 0.265,
+   "loud": 0.134682,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.3228,
+   "score": 0.3228
+  },
+  {
+   "id": "0",
+   "dur": 0.348,
+   "loud": 0.133033,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.3212,
+   "score": 0.3212
+  },
+  {
+   "id": "2",
+   "dur": 0.269,
+   "loud": 0.098883,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.2867,
+   "score": 0.2867
+  },
+  {
+   "id": "4",
+   "dur": 0.287,
+   "loud": 0.12701,
+   "prompt": "a steel spike hammered into a wooden wall, heavy thunk",
+   "clap": 0.2323,
+   "score": 0.2323
+  }
+ ],
+ "shieldHit": [
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.123259,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": 0.2123,
+   "score": 0.2123
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.079791,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": 0.2008,
+   "score": 0.2008
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.098982,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": 0.1455,
+   "score": 0.1455
+  },
+  {
+   "id": "2",
+   "dur": 0.25,
+   "loud": 0.12571,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": 0.0495,
+   "score": 0.0495
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.193929,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": -0.0065,
+   "score": -0.0065
+  },
+  {
+   "id": "3",
+   "dur": 0.095,
+   "loud": 0.099513,
+   "prompt": "a bullet hitting an electric force field, buzzing ping",
+   "clap": 0.0704,
+   "score": -0.0096
+  }
+ ],
+ "freeze": [
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.088756,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.3335,
+   "score": 0.3335
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.071972,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.287,
+   "score": 0.287
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.102212,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.2445,
+   "score": 0.2445
+  },
+  {
+   "id": "0",
+   "dur": 0.154,
+   "loud": 0.101246,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.1742,
+   "score": 0.0942
+  },
+  {
+   "id": "1",
+   "dur": 0.159,
+   "loud": 0.097471,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.0462,
+   "score": -0.0338
+  },
+  {
+   "id": "4",
+   "dur": 0.064,
+   "loud": 0.126924,
+   "prompt": "water freezing instantly into ice, crackling",
+   "clap": 0.0107,
+   "score": -0.0693
+  }
+ ],
+ "crack": [
+  {
+   "id": "2",
+   "dur": 0.25,
+   "loud": 0.07681,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.318,
+   "score": 0.318
+  },
+  {
+   "id": "4",
+   "dur": 0.16,
+   "loud": 0.098744,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.1889,
+   "score": 0.1889
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.065131,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.1028,
+   "score": 0.1028
+  },
+  {
+   "id": "5",
+   "dur": 0.134,
+   "loud": 0.06697,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.0772,
+   "score": 0.0772
+  },
+  {
+   "id": "3",
+   "dur": 0.193,
+   "loud": 0.095802,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.0378,
+   "score": 0.0378
+  },
+  {
+   "id": "0",
+   "dur": 0.092,
+   "loud": 0.063714,
+   "prompt": "ice cracking, a single sharp crack",
+   "clap": 0.0863,
+   "score": 0.0063
+  }
+ ],
+ "shatter": [
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.158421,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.3661,
+   "score": 0.3661
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.107186,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.331,
+   "score": 0.331
+  },
+  {
+   "id": "0",
+   "dur": 0.258,
+   "loud": 0.107521,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.2235,
+   "score": 0.2235
+  },
+  {
+   "id": "4",
+   "dur": 0.338,
+   "loud": 0.073076,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.2196,
+   "score": 0.2196
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.083994,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.0985,
+   "score": 0.0985
+  },
+  {
+   "id": "1",
+   "dur": 0.155,
+   "loud": 0.147788,
+   "prompt": "a block of ice shattering into pieces",
+   "clap": 0.0349,
+   "score": -0.0451
+  }
+ ],
+ "hit": [
+  {
+   "id": "4",
+   "dur": 0.133,
+   "loud": 0.074008,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.4468,
+   "score": 0.4468
+  },
+  {
+   "id": "2",
+   "dur": 0.142,
+   "loud": 0.061074,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.3979,
+   "score": 0.3979
+  },
+  {
+   "id": "5",
+   "dur": 0.12,
+   "loud": 0.05169,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.381,
+   "score": 0.381
+  },
+  {
+   "id": "1",
+   "dur": 0.114,
+   "loud": 0.058436,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.3791,
+   "score": 0.3791
+  },
+  {
+   "id": "0",
+   "dur": 0.15,
+   "loud": 0.113384,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.274,
+   "score": 0.274
+  },
+  {
+   "id": "3",
+   "dur": 0.123,
+   "loud": 0.067195,
+   "prompt": "a punch hitting flesh, short wet thwack",
+   "clap": 0.1961,
+   "score": 0.1961
+  }
+ ],
+ "kickHit": [
+  {
+   "id": "1",
+   "dur": 0.166,
+   "loud": 0.068567,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.4011,
+   "score": 0.4011
+  },
+  {
+   "id": "3",
+   "dur": 0.166,
+   "loud": 0.079225,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.3768,
+   "score": 0.3768
+  },
+  {
+   "id": "2",
+   "dur": 0.155,
+   "loud": 0.054645,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.3649,
+   "score": 0.3649
+  },
+  {
+   "id": "5",
+   "dur": 0.193,
+   "loud": 0.082311,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.3595,
+   "score": 0.3595
+  },
+  {
+   "id": "4",
+   "dur": 0.12,
+   "loud": 0.079255,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.314,
+   "score": 0.314
+  },
+  {
+   "id": "0",
+   "dur": 0.23,
+   "loud": 0.089084,
+   "prompt": "a heavy kick hitting a body, hard punch impact",
+   "clap": 0.2225,
+   "score": 0.2225
+  }
+ ],
+ "squish": [
+  {
+   "id": "6",
+   "dur": 0.18,
+   "loud": 0.141444,
+   "prompt": "squishing wet mud",
+   "clap": 0.1672,
+   "score": 0.1672
+  },
+  {
+   "id": "8",
+   "dur": 0.18,
+   "loud": 0.102302,
+   "prompt": "a wet slap of raw meat",
+   "clap": 0.1286,
+   "score": 0.1286
+  },
+  {
+   "id": "3",
+   "dur": 0.18,
+   "loud": 0.177342,
+   "prompt": "squishing wet mud",
+   "clap": 0.0674,
+   "score": 0.0674
+  },
+  {
+   "id": "1",
+   "dur": 0.18,
+   "loud": 0.13795,
+   "prompt": "stepping on raw meat, wet squelch",
+   "clap": 0.0589,
+   "score": 0.0589
+  },
+  {
+   "id": "5",
+   "dur": 0.131,
+   "loud": 0.145154,
+   "prompt": "a wet slap of raw meat",
+   "clap": 0.0482,
+   "score": 0.0482
+  },
+  {
+   "id": "7",
+   "dur": 0.18,
+   "loud": 0.18071,
+   "prompt": "stepping on raw meat, wet squelch",
+   "clap": 0.0321,
+   "score": 0.0321
+  },
+  {
+   "id": "2",
+   "dur": 0.18,
+   "loud": 0.166977,
+   "prompt": "a wet slap of raw meat",
+   "clap": 0.0121,
+   "score": 0.0121
+  },
+  {
+   "id": "4",
+   "dur": 0.18,
+   "loud": 0.138423,
+   "prompt": "stepping on raw meat, wet squelch",
+   "clap": -0.0201,
+   "score": -0.0201
+  }
+ ],
+ "gib": [
+  {
+   "id": "0",
+   "dur": 0.388,
+   "loud": 0.103426,
+   "prompt": "a gory wet splatter of flesh and guts",
+   "clap": 0.2724,
+   "score": 0.2724
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.069646,
+   "prompt": "a gory wet splatter of flesh and guts",
+   "clap": 0.244,
+   "score": 0.244
+  },
+  {
+   "id": "4",
+   "dur": 0.471,
+   "loud": 0.060846,
+   "prompt": "a gory wet splatter of flesh and guts",
+   "clap": 0.1556,
+   "score": 0.1556
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.198764,
+   "prompt": "a body bursting apart, wet splatter",
+   "clap": 0.1136,
+   "score": 0.1136
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.163864,
+   "prompt": "a body bursting apart, wet splatter",
+   "clap": 0.0368,
+   "score": 0.0368
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.149611,
+   "prompt": "a body bursting apart, wet splatter",
+   "clap": 0.0082,
+   "score": 0.0082
+  }
+ ],
+ "splatWall": [
+  {
+   "id": "5",
+   "dur": 0.185,
+   "loud": 0.241489,
+   "prompt": "a heavy wet splat",
+   "clap": 0.0015,
+   "score": 0.0015
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.169936,
+   "prompt": "a wet body slam against a wall",
+   "clap": -0.0024,
+   "score": -0.0024
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.176405,
+   "prompt": "a wet body slam against a wall",
+   "clap": -0.0134,
+   "score": -0.0134
+  },
+  {
+   "id": "6",
+   "dur": 0.397,
+   "loud": 0.159494,
+   "prompt": "a wet body slam against a wall",
+   "clap": -0.0372,
+   "score": -0.0372
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.210206,
+   "prompt": "a heavy wet splat",
+   "clap": -0.0728,
+   "score": -0.0728
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.207166,
+   "prompt": "a heavy wet splat",
+   "clap": -0.0765,
+   "score": -0.0765
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.226711,
+   "prompt": "a heavy wet splat",
+   "clap": -0.0889,
+   "score": -0.0889
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.163133,
+   "prompt": "a wet body slam against a wall",
+   "clap": -0.187,
+   "score": -0.187
+  }
+ ],
+ "step": [
+  {
+   "id": "4-4",
+   "dur": 0.05,
+   "loud": 0.087813,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": 0.0466,
+   "score": 0.0466
+  },
+  {
+   "id": "5-1",
+   "dur": 0.12,
+   "loud": 0.09622,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": 0.0461,
+   "score": 0.0461
+  },
+  {
+   "id": "2-2",
+   "dur": 0.12,
+   "loud": 0.105175,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": 0.0083,
+   "score": 0.0083
+  },
+  {
+   "id": "2-0",
+   "dur": 0.12,
+   "loud": 0.080516,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": 0.0031,
+   "score": 0.0031
+  },
+  {
+   "id": "2-5",
+   "dur": 0.12,
+   "loud": 0.153344,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0089,
+   "score": -0.0089
+  },
+  {
+   "id": "2-1",
+   "dur": 0.12,
+   "loud": 0.141093,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0315,
+   "score": -0.0315
+  },
+  {
+   "id": "4-3",
+   "dur": 0.064,
+   "loud": 0.116446,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0431,
+   "score": -0.0431
+  },
+  {
+   "id": "1-2",
+   "dur": 0.12,
+   "loud": 0.094747,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0557,
+   "score": -0.0557
+  },
+  {
+   "id": "1-4",
+   "dur": 0.12,
+   "loud": 0.123865,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0576,
+   "score": -0.0576
+  },
+  {
+   "id": "2-4",
+   "dur": 0.12,
+   "loud": 0.142696,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0722,
+   "score": -0.0722
+  },
+  {
+   "id": "2-3",
+   "dur": 0.12,
+   "loud": 0.114621,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0731,
+   "score": -0.0731
+  },
+  {
+   "id": "3-2",
+   "dur": 0.08,
+   "loud": 0.155148,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0761,
+   "score": -0.0761
+  },
+  {
+   "id": "5-0",
+   "dur": 0.12,
+   "loud": 0.083347,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.077,
+   "score": -0.077
+  },
+  {
+   "id": "3-1",
+   "dur": 0.12,
+   "loud": 0.115354,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.0998,
+   "score": -0.0998
+  },
+  {
+   "id": "5-4",
+   "dur": 0.076,
+   "loud": 0.104439,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1002,
+   "score": -0.1002
+  },
+  {
+   "id": "1-0",
+   "dur": 0.12,
+   "loud": 0.08951,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1129,
+   "score": -0.1129
+  },
+  {
+   "id": "5-3",
+   "dur": 0.12,
+   "loud": 0.094081,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.119,
+   "score": -0.119
+  },
+  {
+   "id": "5-2",
+   "dur": 0.12,
+   "loud": 0.151587,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1231,
+   "score": -0.1231
+  },
+  {
+   "id": "4-5",
+   "dur": 0.056,
+   "loud": 0.137367,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1276,
+   "score": -0.1276
+  },
+  {
+   "id": "5-5",
+   "dur": 0.12,
+   "loud": 0.076179,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1421,
+   "score": -0.1421
+  },
+  {
+   "id": "0-0",
+   "dur": 0.12,
+   "loud": 0.157761,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1468,
+   "score": -0.1468
+  },
+  {
+   "id": "4-0",
+   "dur": 0.1,
+   "loud": 0.143037,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1512,
+   "score": -0.1512
+  },
+  {
+   "id": "3-4",
+   "dur": 0.102,
+   "loud": 0.175566,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1654,
+   "score": -0.1654
+  },
+  {
+   "id": "0-1",
+   "dur": 0.12,
+   "loud": 0.18453,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1659,
+   "score": -0.1659
+  },
+  {
+   "id": "4-1",
+   "dur": 0.12,
+   "loud": 0.143495,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1748,
+   "score": -0.1748
+  },
+  {
+   "id": "3-5",
+   "dur": 0.12,
+   "loud": 0.190001,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1766,
+   "score": -0.1766
+  },
+  {
+   "id": "3-0",
+   "dur": 0.12,
+   "loud": 0.098606,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1827,
+   "score": -0.1827
+  },
+  {
+   "id": "3-3",
+   "dur": 0.12,
+   "loud": 0.146848,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.2048,
+   "score": -0.2048
+  },
+  {
+   "id": "1-5",
+   "dur": 0.044,
+   "loud": 0.138346,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1503,
+   "score": -0.2303
+  },
+  {
+   "id": "4-2",
+   "dur": 0.12,
+   "loud": 0.221127,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.2318,
+   "score": -0.2318
+  },
+  {
+   "id": "1-3",
+   "dur": 0.046,
+   "loud": 0.112615,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1536,
+   "score": -0.2336
+  },
+  {
+   "id": "1-1",
+   "dur": 0.044,
+   "loud": 0.080909,
+   "prompt": "footsteps of heavy boots walking on a metal grating",
+   "clap": -0.1614,
+   "score": -0.2414
+  }
+ ],
+ "land": [
+  {
+   "id": "3",
+   "dur": 0.22,
+   "loud": 0.132608,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.2541,
+   "score": 0.2541
+  },
+  {
+   "id": "0",
+   "dur": 0.22,
+   "loud": 0.11898,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.1838,
+   "score": 0.1838
+  },
+  {
+   "id": "1",
+   "dur": 0.22,
+   "loud": 0.107515,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.164,
+   "score": 0.164
+  },
+  {
+   "id": "5",
+   "dur": 0.22,
+   "loud": 0.102787,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.1303,
+   "score": 0.1303
+  },
+  {
+   "id": "2",
+   "dur": 0.22,
+   "loud": 0.131612,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.1072,
+   "score": 0.1072
+  },
+  {
+   "id": "4",
+   "dur": 0.216,
+   "loud": 0.108595,
+   "prompt": "a heavy boot landing on a metal floor, thud",
+   "clap": 0.1018,
+   "score": 0.1018
+  }
+ ],
+ "jump": [
+  {
+   "id": "6",
+   "dur": 0.18,
+   "loud": 0.13753,
+   "prompt": "a quick cloth swish",
+   "clap": 0.1469,
+   "score": 0.1469
+  },
+  {
+   "id": "0",
+   "dur": 0.18,
+   "loud": 0.188375,
+   "prompt": "a quick cloth swish",
+   "clap": 0.0905,
+   "score": 0.0905
+  },
+  {
+   "id": "4",
+   "dur": 0.18,
+   "loud": 0.152421,
+   "prompt": "a quick cloth swish",
+   "clap": -0.0008,
+   "score": -0.0008
+  },
+  {
+   "id": "2",
+   "dur": 0.18,
+   "loud": 0.174371,
+   "prompt": "a quick cloth swish",
+   "clap": -0.0031,
+   "score": -0.0031
+  },
+  {
+   "id": "5",
+   "dur": 0.18,
+   "loud": 0.197713,
+   "prompt": "a boot scuffing quickly on a metal floor",
+   "clap": -0.0622,
+   "score": -0.0622
+  },
+  {
+   "id": "1",
+   "dur": 0.18,
+   "loud": 0.088443,
+   "prompt": "a boot scuffing quickly on a metal floor",
+   "clap": -0.0721,
+   "score": -0.0721
+  },
+  {
+   "id": "3",
+   "dur": 0.18,
+   "loud": 0.143665,
+   "prompt": "a boot scuffing quickly on a metal floor",
+   "clap": -0.1007,
+   "score": -0.1007
+  },
+  {
+   "id": "7",
+   "dur": 0.18,
+   "loud": 0.176641,
+   "prompt": "a boot scuffing quickly on a metal floor",
+   "clap": -0.1089,
+   "score": -0.1089
+  }
+ ],
+ "swap": [
+  {
+   "id": "4",
+   "dur": 0.14,
+   "loud": 0.107178,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": 0.1749,
+   "score": 0.1749
+  },
+  {
+   "id": "3",
+   "dur": 0.122,
+   "loud": 0.136858,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": 0.117,
+   "score": 0.117
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.164223,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": 0.0906,
+   "score": 0.0906
+  },
+  {
+   "id": "1",
+   "dur": 0.136,
+   "loud": 0.129166,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": -0.0146,
+   "score": -0.0146
+  },
+  {
+   "id": "0",
+   "dur": 0.095,
+   "loud": 0.164468,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": 0.0321,
+   "score": -0.0479
+  },
+  {
+   "id": "2",
+   "dur": 0.085,
+   "loud": 0.125608,
+   "prompt": "a gun being cocked, mechanical metal clicks",
+   "clap": -0.0322,
+   "score": -0.1122
+  }
+ ],
+ "whoosh": [
+  {
+   "id": "3",
+   "dur": 0.167,
+   "loud": 0.074211,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.3853,
+   "score": 0.3853
+  },
+  {
+   "id": "2",
+   "dur": 0.287,
+   "loud": 0.116814,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.1622,
+   "score": 0.1622
+  },
+  {
+   "id": "5",
+   "dur": 0.149,
+   "loud": 0.1307,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.1392,
+   "score": 0.1392
+  },
+  {
+   "id": "0",
+   "dur": 0.206,
+   "loud": 0.130493,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.1287,
+   "score": 0.1287
+  },
+  {
+   "id": "4",
+   "dur": 0.131,
+   "loud": 0.155513,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.1108,
+   "score": 0.1108
+  },
+  {
+   "id": "1",
+   "dur": 0.171,
+   "loud": 0.074299,
+   "prompt": "a fast swing whoosh through the air",
+   "clap": 0.083,
+   "score": 0.083
+  }
+ ],
+ "hurt": [
+  {
+   "id": "8",
+   "dur": 0.389,
+   "loud": 0.090779,
+   "prompt": "a man says ugh in pain",
+   "clap": 0.2633,
+   "score": 0.2633
+  },
+  {
+   "id": "2",
+   "dur": 0.375,
+   "loud": 0.108439,
+   "prompt": "a man says ugh in pain",
+   "clap": 0.2101,
+   "score": 0.2101
+  },
+  {
+   "id": "5",
+   "dur": 0.402,
+   "loud": 0.126224,
+   "prompt": "a man says ugh in pain",
+   "clap": 0.1749,
+   "score": 0.1749
+  },
+  {
+   "id": "11",
+   "dur": 0.45,
+   "loud": 0.153777,
+   "prompt": "a man says ugh in pain",
+   "clap": 0.1174,
+   "score": 0.1174
+  },
+  {
+   "id": "10",
+   "dur": 0.45,
+   "loud": 0.113557,
+   "prompt": "a man grunts loudly",
+   "clap": 0.0755,
+   "score": 0.0755
+  },
+  {
+   "id": "0",
+   "dur": 0.375,
+   "loud": 0.0864,
+   "prompt": "a man grunting in pain",
+   "clap": 0.0665,
+   "score": 0.0665
+  },
+  {
+   "id": "9",
+   "dur": 0.315,
+   "loud": 0.125275,
+   "prompt": "a man grunting in pain",
+   "clap": 0.0367,
+   "score": 0.0367
+  },
+  {
+   "id": "6",
+   "dur": 0.263,
+   "loud": 0.079424,
+   "prompt": "a man grunting in pain",
+   "clap": -0.0139,
+   "score": -0.0139
+  },
+  {
+   "id": "7",
+   "dur": 0.45,
+   "loud": 0.107949,
+   "prompt": "a man grunts loudly",
+   "clap": -0.0658,
+   "score": -0.0658
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.089272,
+   "prompt": "a man grunts loudly",
+   "clap": -0.0982,
+   "score": -0.0982
+  },
+  {
+   "id": "3",
+   "dur": 0.12,
+   "loud": 0.2884,
+   "prompt": "a man grunting in pain",
+   "clap": -0.0259,
+   "score": -0.1059
+  },
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.101751,
+   "prompt": "a man grunts loudly",
+   "clap": -0.1581,
+   "score": -0.1581
+  }
+ ],
+ "heart": [
+  {
+   "id": "3-1",
+   "dur": 0.288,
+   "loud": 0.026669,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.2766,
+   "score": 0.2766
+  },
+  {
+   "id": "1-2",
+   "dur": 0.208,
+   "loud": 0.03497,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1943,
+   "score": 0.1943
+  },
+  {
+   "id": "5-4",
+   "dur": 0.056,
+   "loud": 0.012651,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.217,
+   "score": 0.137
+  },
+  {
+   "id": "1-3",
+   "dur": 0.112,
+   "loud": 0.027718,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1996,
+   "score": 0.1196
+  },
+  {
+   "id": "1-1",
+   "dur": 0.094,
+   "loud": 0.036514,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1935,
+   "score": 0.1135
+  },
+  {
+   "id": "1-4",
+   "dur": 0.092,
+   "loud": 0.037583,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1799,
+   "score": 0.0999
+  },
+  {
+   "id": "2-0",
+   "dur": 0.074,
+   "loud": 0.031407,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1783,
+   "score": 0.0983
+  },
+  {
+   "id": "4-1",
+   "dur": 0.086,
+   "loud": 0.036809,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1742,
+   "score": 0.0942
+  },
+  {
+   "id": "3-3",
+   "dur": 0.04,
+   "loud": 0.013824,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1722,
+   "score": 0.0922
+  },
+  {
+   "id": "3-5",
+   "dur": 0.048,
+   "loud": 0.020961,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1665,
+   "score": 0.0865
+  },
+  {
+   "id": "2-2",
+   "dur": 0.078,
+   "loud": 0.021905,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1567,
+   "score": 0.0767
+  },
+  {
+   "id": "3-2",
+   "dur": 0.076,
+   "loud": 0.032412,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1511,
+   "score": 0.0711
+  },
+  {
+   "id": "5-3",
+   "dur": 0.04,
+   "loud": 0.012284,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1496,
+   "score": 0.0696
+  },
+  {
+   "id": "5-2",
+   "dur": 0.056,
+   "loud": 0.022316,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1474,
+   "score": 0.0674
+  },
+  {
+   "id": "5-0",
+   "dur": 0.45,
+   "loud": 0.119611,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.0633,
+   "score": 0.0633
+  },
+  {
+   "id": "0-2",
+   "dur": 0.052,
+   "loud": 0.019652,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1405,
+   "score": 0.0605
+  },
+  {
+   "id": "4-0",
+   "dur": 0.054,
+   "loud": 0.031236,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1397,
+   "score": 0.0597
+  },
+  {
+   "id": "0-1",
+   "dur": 0.04,
+   "loud": 0.020129,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1386,
+   "score": 0.0586
+  },
+  {
+   "id": "2-3",
+   "dur": 0.052,
+   "loud": 0.024689,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1386,
+   "score": 0.0586
+  },
+  {
+   "id": "1-5",
+   "dur": 0.058,
+   "loud": 0.034593,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1382,
+   "score": 0.0582
+  },
+  {
+   "id": "0-3",
+   "dur": 0.044,
+   "loud": 0.012702,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1356,
+   "score": 0.0556
+  },
+  {
+   "id": "0-4",
+   "dur": 0.044,
+   "loud": 0.019558,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1339,
+   "score": 0.0539
+  },
+  {
+   "id": "2-5",
+   "dur": 0.074,
+   "loud": 0.027657,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1256,
+   "score": 0.0456
+  },
+  {
+   "id": "2-1",
+   "dur": 0.058,
+   "loud": 0.030255,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1213,
+   "score": 0.0413
+  },
+  {
+   "id": "0-0",
+   "dur": 0.054,
+   "loud": 0.017633,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1204,
+   "score": 0.0404
+  },
+  {
+   "id": "5-5",
+   "dur": 0.078,
+   "loud": 0.020341,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1198,
+   "score": 0.0398
+  },
+  {
+   "id": "4-4",
+   "dur": 0.086,
+   "loud": 0.032283,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1186,
+   "score": 0.0386
+  },
+  {
+   "id": "3-0",
+   "dur": 0.04,
+   "loud": 0.029591,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1157,
+   "score": 0.0357
+  },
+  {
+   "id": "4-2",
+   "dur": 0.04,
+   "loud": 0.017089,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1143,
+   "score": 0.0343
+  },
+  {
+   "id": "2-4",
+   "dur": 0.07,
+   "loud": 0.023411,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.113,
+   "score": 0.033
+  },
+  {
+   "id": "4-3",
+   "dur": 0.052,
+   "loud": 0.026941,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1069,
+   "score": 0.0269
+  },
+  {
+   "id": "1-0",
+   "dur": 0.048,
+   "loud": 0.024497,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.1031,
+   "score": 0.0231
+  },
+  {
+   "id": "0-5",
+   "dur": 0.046,
+   "loud": 0.021273,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.0988,
+   "score": 0.0188
+  },
+  {
+   "id": "3-4",
+   "dur": 0.05,
+   "loud": 0.037351,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.0944,
+   "score": 0.0144
+  },
+  {
+   "id": "4-5",
+   "dur": 0.052,
+   "loud": 0.036475,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.0551,
+   "score": -0.0249
+  },
+  {
+   "id": "5-1",
+   "dur": 0.04,
+   "loud": 0.018114,
+   "prompt": "a slow loud heartbeat",
+   "clap": 0.0422,
+   "score": -0.0378
+  }
+ ],
+ "roar": [
+  {
+   "id": "0",
+   "dur": 1.4,
+   "loud": 0.154299,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.3886,
+   "score": 0.3886
+  },
+  {
+   "id": "4",
+   "dur": 1.4,
+   "loud": 0.093447,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.3666,
+   "score": 0.3666
+  },
+  {
+   "id": "2",
+   "dur": 1.4,
+   "loud": 0.191553,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.3654,
+   "score": 0.3654
+  },
+  {
+   "id": "5",
+   "dur": 1.4,
+   "loud": 0.09583,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.3533,
+   "score": 0.3533
+  },
+  {
+   "id": "1",
+   "dur": 0.935,
+   "loud": 0.118078,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.34,
+   "score": 0.34
+  },
+  {
+   "id": "3",
+   "dur": 1.14,
+   "loud": 0.070915,
+   "prompt": "a huge monster roaring, deep and menacing",
+   "clap": 0.2591,
+   "score": 0.2591
+  }
+ ],
+ "growl": [
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.105641,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.4227,
+   "score": 0.4227
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.133835,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.3771,
+   "score": 0.3771
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.077295,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.3426,
+   "score": 0.3426
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.164169,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.3395,
+   "score": 0.3395
+  },
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.213285,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.316,
+   "score": 0.316
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.110734,
+   "prompt": "a large beast growling aggressively",
+   "clap": 0.0731,
+   "score": 0.0731
+  }
+ ],
+ "snort": [
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.170915,
+   "prompt": "an angry bull snorting loudly",
+   "clap": 0.292,
+   "score": 0.292
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.110734,
+   "prompt": "an angry bull snorting loudly",
+   "clap": 0.1064,
+   "score": 0.1064
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.171821,
+   "prompt": "an angry bull snorting loudly",
+   "clap": 0.0812,
+   "score": 0.0812
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.164469,
+   "prompt": "an angry bull snorting loudly",
+   "clap": 0.0487,
+   "score": 0.0487
+  },
+  {
+   "id": "5",
+   "dur": 0.325,
+   "loud": 0.078948,
+   "prompt": "an angry bull snorting loudly",
+   "clap": -0.0402,
+   "score": -0.0402
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.067481,
+   "prompt": "an angry bull snorting loudly",
+   "clap": -0.0547,
+   "score": -0.0547
+  }
+ ],
+ "scream": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.243901,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.3723,
+   "score": 0.3723
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.215426,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.3351,
+   "score": 0.3351
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.246343,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.3034,
+   "score": 0.3034
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.22164,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.261,
+   "score": 0.261
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.310503,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.1551,
+   "score": 0.1551
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.332033,
+   "prompt": "a shrill alien creature screeching",
+   "clap": 0.1223,
+   "score": 0.1223
+  }
+ ],
+ "hiss": [
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.201573,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.3041,
+   "score": 0.3041
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.215186,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.3021,
+   "score": 0.3021
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.21217,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.2174,
+   "score": 0.2174
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.19375,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.2003,
+   "score": 0.2003
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.190853,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.1646,
+   "score": 0.1646
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.237963,
+   "prompt": "a creature hissing aggressively like a snake",
+   "clap": 0.0097,
+   "score": 0.0097
+  }
+ ],
+ "ignite": [
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.14757,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.2946,
+   "score": 0.2946
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.188434,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.2486,
+   "score": 0.2486
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.213796,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.2009,
+   "score": 0.2009
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.104463,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.1513,
+   "score": 0.1513
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.184483,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.1265,
+   "score": 0.1265
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.217767,
+   "prompt": "a gas burner igniting with a whoosh of flame",
+   "clap": 0.1071,
+   "score": 0.1071
+  }
+ ],
+ "gasHiss": [
+  {
+   "id": "4",
+   "dur": 0.2,
+   "loud": 0.182792,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.3193,
+   "score": 0.3193
+  },
+  {
+   "id": "2",
+   "dur": 0.2,
+   "loud": 0.095211,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.2835,
+   "score": 0.2835
+  },
+  {
+   "id": "1",
+   "dur": 0.2,
+   "loud": 0.178441,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.2348,
+   "score": 0.2348
+  },
+  {
+   "id": "0",
+   "dur": 0.2,
+   "loud": 0.201604,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.2325,
+   "score": 0.2325
+  },
+  {
+   "id": "5",
+   "dur": 0.2,
+   "loud": 0.221857,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.1872,
+   "score": 0.1872
+  },
+  {
+   "id": "3",
+   "dur": 0.2,
+   "loud": 0.209086,
+   "prompt": "pressurized gas leaking from a valve, sharp hiss",
+   "clap": 0.1869,
+   "score": 0.1869
+  }
+ ],
+ "sputter": [
+  {
+   "id": "4-0",
+   "dur": 0.12,
+   "loud": 0.193755,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": 0.0803,
+   "score": 0.0803
+  },
+  {
+   "id": "1-0",
+   "dur": 0.12,
+   "loud": 0.094921,
+   "prompt": "gas spitting from a punctured tank in short bursts",
+   "clap": 0.0743,
+   "score": 0.0743
+  },
+  {
+   "id": "4-2",
+   "dur": 0.12,
+   "loud": 0.066813,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": 0.0534,
+   "score": 0.0534
+  },
+  {
+   "id": "5-1",
+   "dur": 0.12,
+   "loud": 0.215718,
+   "prompt": "gas spitting from a punctured tank in short bursts",
+   "clap": 0.0336,
+   "score": 0.0336
+  },
+  {
+   "id": "4-1",
+   "dur": 0.12,
+   "loud": 0.090254,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": 0.0222,
+   "score": 0.0222
+  },
+  {
+   "id": "1-1",
+   "dur": 0.12,
+   "loud": 0.109131,
+   "prompt": "gas spitting from a punctured tank in short bursts",
+   "clap": 0.0049,
+   "score": 0.0049
+  },
+  {
+   "id": "2-2",
+   "dur": 0.12,
+   "loud": 0.123314,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0063,
+   "score": -0.0063
+  },
+  {
+   "id": "0-5",
+   "dur": 0.054,
+   "loud": 0.133079,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0257,
+   "score": -0.0257
+  },
+  {
+   "id": "0-1",
+   "dur": 0.054,
+   "loud": 0.115328,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0336,
+   "score": -0.0336
+  },
+  {
+   "id": "0-3",
+   "dur": 0.048,
+   "loud": 0.115661,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0377,
+   "score": -0.0377
+  },
+  {
+   "id": "2-4",
+   "dur": 0.12,
+   "loud": 0.130713,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0386,
+   "score": -0.0386
+  },
+  {
+   "id": "0-4",
+   "dur": 0.05,
+   "loud": 0.121043,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0439,
+   "score": -0.0439
+  },
+  {
+   "id": "2-1",
+   "dur": 0.12,
+   "loud": 0.175515,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0524,
+   "score": -0.0524
+  },
+  {
+   "id": "2-3",
+   "dur": 0.12,
+   "loud": 0.16212,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0539,
+   "score": -0.0539
+  },
+  {
+   "id": "5-0",
+   "dur": 0.12,
+   "loud": 0.195139,
+   "prompt": "gas spitting from a punctured tank in short bursts",
+   "clap": -0.0673,
+   "score": -0.0673
+  },
+  {
+   "id": "2-0",
+   "dur": 0.076,
+   "loud": 0.115912,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0801,
+   "score": -0.0801
+  },
+  {
+   "id": "0-0",
+   "dur": 0.042,
+   "loud": 0.135581,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0012,
+   "score": -0.0812
+  },
+  {
+   "id": "0-2",
+   "dur": 0.046,
+   "loud": 0.115667,
+   "prompt": "a small engine backfiring and sputtering",
+   "clap": -0.0301,
+   "score": -0.1101
+  }
+ ],
+ "singOpen": [
+  {
+   "id": "3",
+   "dur": 1.3,
+   "loud": 0.01856,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.3457,
+   "score": 0.3457
+  },
+  {
+   "id": "2",
+   "dur": 1.3,
+   "loud": 0.044907,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.3069,
+   "score": 0.3069
+  },
+  {
+   "id": "1",
+   "dur": 1.3,
+   "loud": 0.020866,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.2742,
+   "score": 0.2742
+  },
+  {
+   "id": "0",
+   "dur": 1.3,
+   "loud": 0.070642,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.2684,
+   "score": 0.2684
+  },
+  {
+   "id": "5",
+   "dur": 1.3,
+   "loud": 0.022902,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.2563,
+   "score": 0.2563
+  },
+  {
+   "id": "4",
+   "dur": 1.3,
+   "loud": 0.024698,
+   "prompt": "a deep sci-fi vortex opening, low rumble and swirling wind",
+   "clap": 0.24,
+   "score": 0.24
+  }
+ ],
+ "warp": [
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.135545,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": 0.303,
+   "score": 0.303
+  },
+  {
+   "id": "3",
+   "dur": 0.9,
+   "loud": 0.174905,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": 0.2796,
+   "score": 0.2796
+  },
+  {
+   "id": "5",
+   "dur": 0.9,
+   "loud": 0.244763,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": 0.2456,
+   "score": 0.2456
+  },
+  {
+   "id": "0",
+   "dur": 0.9,
+   "loud": 0.041189,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": 0.2102,
+   "score": 0.2102
+  },
+  {
+   "id": "4",
+   "dur": 0.9,
+   "loud": 0.124358,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": 0.1552,
+   "score": 0.1552
+  },
+  {
+   "id": "2",
+   "dur": 0.295,
+   "loud": 0.016038,
+   "prompt": "a sci-fi teleport, rising shimmering whoosh",
+   "clap": -0.0352,
+   "score": -0.1152
+  }
+ ],
+ "decloak": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.089042,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": 0.23,
+   "score": 0.23
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.210641,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": 0.1595,
+   "score": 0.1595
+  },
+  {
+   "id": "3",
+   "dur": 0.239,
+   "loud": 0.083896,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": 0.0905,
+   "score": 0.0905
+  },
+  {
+   "id": "2",
+   "dur": 0.193,
+   "loud": 0.054814,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": 0.0102,
+   "score": 0.0102
+  },
+  {
+   "id": "1",
+   "dur": 0.187,
+   "loud": 0.091259,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": 0.0096,
+   "score": 0.0096
+  },
+  {
+   "id": "5",
+   "dur": 0.161,
+   "loud": 0.147429,
+   "prompt": "a sci-fi cloaking device switching off, shimmering whoosh",
+   "clap": -0.0996,
+   "score": -0.0996
+  }
+ ],
+ "flameLoop": [
+  {
+   "id": "4",
+   "dur": 2.0,
+   "loud": 0.14509,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.505,
+   "score": 0.505
+  },
+  {
+   "id": "1",
+   "dur": 2.0,
+   "loud": 0.072323,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.421,
+   "score": 0.421
+  },
+  {
+   "id": "2",
+   "dur": 2.0,
+   "loud": 0.1397,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.4176,
+   "score": 0.4176
+  },
+  {
+   "id": "0",
+   "dur": 2.0,
+   "loud": 0.068313,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.4039,
+   "score": 0.4039
+  },
+  {
+   "id": "3",
+   "dur": 2.0,
+   "loud": 0.127024,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.3274,
+   "score": 0.3274
+  },
+  {
+   "id": "5",
+   "dur": 2.0,
+   "loud": 0.13119,
+   "prompt": "a flamethrower spraying fire continuously, roaring flames",
+   "clap": 0.2766,
+   "score": 0.2766
+  }
+ ],
+ "cryoLoop": [
+  {
+   "id": "0",
+   "dur": 2.0,
+   "loud": 0.164849,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.4873,
+   "score": 0.4873
+  },
+  {
+   "id": "2",
+   "dur": 2.0,
+   "loud": 0.138838,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.4519,
+   "score": 0.4519
+  },
+  {
+   "id": "4",
+   "dur": 2.0,
+   "loud": 0.124115,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.4429,
+   "score": 0.4429
+  },
+  {
+   "id": "1",
+   "dur": 2.0,
+   "loud": 0.125847,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.4069,
+   "score": 0.4069
+  },
+  {
+   "id": "5",
+   "dur": 2.0,
+   "loud": 0.15696,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.4049,
+   "score": 0.4049
+  },
+  {
+   "id": "3",
+   "dur": 2.0,
+   "loud": 0.079841,
+   "prompt": "a high pressure jet of freezing gas spraying continuously, steady hiss",
+   "clap": 0.3431,
+   "score": 0.3431
+  }
+ ],
+ "arcLoop": [
+  {
+   "id": "4",
+   "dur": 2.0,
+   "loud": 0.066865,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.4896,
+   "score": 0.4896
+  },
+  {
+   "id": "0",
+   "dur": 2.0,
+   "loud": 0.060022,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.4286,
+   "score": 0.4286
+  },
+  {
+   "id": "1",
+   "dur": 2.0,
+   "loud": 0.091364,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.4157,
+   "score": 0.4157
+  },
+  {
+   "id": "3",
+   "dur": 2.0,
+   "loud": 0.064045,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.3938,
+   "score": 0.3938
+  },
+  {
+   "id": "2",
+   "dur": 2.0,
+   "loud": 0.120359,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.3923,
+   "score": 0.3923
+  },
+  {
+   "id": "5",
+   "dur": 2.0,
+   "loud": 0.101823,
+   "prompt": "electricity arcing continuously, crackling high voltage buzz",
+   "clap": 0.3619,
+   "score": 0.3619
+  }
+ ],
+ "humLoop": [
+  {
+   "id": "3",
+   "dur": 6.0,
+   "loud": 0.063436,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.2229,
+   "score": 0.2229
+  },
+  {
+   "id": "2",
+   "dur": 6.0,
+   "loud": 0.043968,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.2225,
+   "score": 0.2225
+  },
+  {
+   "id": "5",
+   "dur": 6.0,
+   "loud": 0.055007,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.2161,
+   "score": 0.2161
+  },
+  {
+   "id": "0",
+   "dur": 6.0,
+   "loud": 0.020384,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.1754,
+   "score": 0.1754
+  },
+  {
+   "id": "4",
+   "dur": 6.0,
+   "loud": 0.091507,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.1681,
+   "score": 0.1681
+  },
+  {
+   "id": "1",
+   "dur": 6.0,
+   "loud": 0.032041,
+   "prompt": "low industrial factory ambience, distant heavy machinery drone",
+   "clap": 0.1334,
+   "score": 0.1334
+  }
+ ]
+}
