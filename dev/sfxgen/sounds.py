@@ -202,4 +202,10 @@ SOUNDS = {
     'shrink': dict(p=['a retro sci-fi ray gun zap with a descending warble', 'a cartoon shrinking sound, quick falling whistle'], d=1.0, max=0.35, keep=2, n=8, air=0.8),
     'sonic': dict(p=['a deep sonic boom blast', 'a massive bass thump shockwave'], d=1.5, max=0.5, keep=2, n=8, air=0.4),
     'laser': dict(p='a sustained sci-fi laser beam firing, buzzing hum', d=2.0, max=1.2, keep=2, air=0.7),
+    # ------------------------------------------------------------------ finale round
+    'gravPulse': dict(p=['a deep sci-fi gravity pulse, a reversed whoomp', 'a low sci-fi energy implosion'], d=1.5, max=0.6, keep=2, n=8, air=0.6),
+    'pinball': dict(p=['a heavy steel ball bouncing off metal, a sharp ping', 'a pinball bumper hit, metallic ding'], d=1.0, max=0.2, keep=2, n=8, air=0.9),
+    'wail': dict(p=['a ghostly wail, a short eerie shriek', 'a ghost screaming, spooky high moan'], d=1.5, max=0.7, keep=2, n=8, air=0.7),
+    'iceForm': dict(p=['ice cracking and freezing, crystalline crackle', 'a sheet of ice forming with a crackle'], d=1.0, max=0.4, keep=2, n=8, air=0.9),
+    'warhorn': dict(p='a war horn blast, a deep brass horn call', d=2.0, max=1.0, keep=2, air=0.6),
 }

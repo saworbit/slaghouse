@@ -113,9 +113,16 @@
                           takes x1.5 damage, bites for half and can be squished by landing on it. 700 ms cooldown.
     Sonic blaster ....... (wheel) a 110 px, 60 degree cone of sound: 10 to everything in it, a huge shove (wall
                           splats) and a 0.6 s stun; enemy shots in the cone are blown away. 900 ms cooldown.
+    Grav bomb ........... (wheel) a lobbed violet charge (bounces, 0.9 s fuse, pops on a foe). No blast: every grounded
+                          foe within 90 px floats up helpless for 1.4 s (6), then slams down for 30. Corpses, gibs
+                          and drums go up too; fliers and bosses don't. 1 s cooldown.
+    Pinball cannon ...... (wheel) a heavy steel ball (560 px/s, light gravity) that bounces off everything for 5 s: 16 a
+                          hit, +6 per bounce so far (10 max), scaled by its speed, caroming off foes as it glows
+                          hotter. Three out at most. 700 ms cooldown.
     Weapon swap ......... 1-9 0 - = BKSP [ ] \ ; ' , . / Z X K L U I O Y H or Q/E / wheel; 120 ms draw. Each gun keeps its own fire
                           cooldown, so swapping off a slow gun (Singularity, railgun) never delays the next one.
-    Weapon wheel (Tab) .. hold for a ring of all 39 guns at 1/6 speed; point (or Q/E) and let go to switch. Gold pips
+    Weapon wheel (Tab) .. hold for a ring of all 41 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
+                          under the name says what the gun does. Gold pips
                           under each gun show its mastery stars.
     Executions .......... an enemy under 20% health (30+ max HP, no bosses) pulses orange: kick it (or hammer-swing
                           it) and it bursts with slow-mo and drops 2-3 health orbs (+5 each) that home in on you.
@@ -308,6 +315,15 @@
     Strider 150 HP ...... a long-legged walker. Every ~4 s it plants, aims a red sight at you for 0.8 s, then sweeps a
                           laser +/-0.5 rad over 1.2 s from its head (12 a touch; it cuts other foes too). Duck it,
                           jump it or dash through.
+    Wraith 70 HP ........ a shroud that drifts straight at you through walls and floors (50 px/s), faint while inside
+                          them. In the open and within 85 px it shrieks (0.45 s), lunges (300 px/s, 14 on a touch)
+                          and fades back for 1.4 s. Shoot it when it comes out.
+    Chiller 80 HP ....... a cryo trooper that keeps 140-240 px off and lobs a frost ball at your feet every ~2.8 s:
+                          it ices a 74 px stretch of floor for 8 s (6 and a 1.5 s chill if it lands on you). On ice
+                          you're slow to get going and slower to stop. Fire melts it; its tank ices the floor when
+                          it dies.
+    Warhorn 110 HP ...... a tracked bot with a brass horn that hangs back 170-320 px. Every ~7 s it winds up (0.7 s)
+                          and blasts: every other foe within 230 px takes half damage for 6 s (gold chevrons).
     THE SMELTER (boss) .. 900 HP, 4 phases (66% / 33% / 15%), rage speeds it up; at 15% it OVERHEATS (armour blows
                           off, x1.8 speed, a fan of ten slag shells every 4 s); slag mortars (3-5 shells,
                           landing markers, burning puddles), leap slams that send ground shockwaves,
@@ -327,13 +343,13 @@
                           and fling you out, and set alight any foe, corpse, drum or tar up there.
     Waves ............... wave 1 = 10 placed enemies; wave 2 = 17 in a BLACKOUT (vision shrinks to a pool round
                           you, enemy eyes and lasers glow, gunfire strobes it wider) with cloakers, a mirror knight,
-                          a tar spitter, a mimic, a gasbag, a creeper and three sparkers; wave 3 = 17 under SLAG
+                          a wraith, a tar spitter, a mimic, a gasbag, a creeper and three sparkers; wave 3 = 17 under SLAG
                           RAIN with a scrap golem, a pyro, a harpooner, a stitcher, a duelist, a roller, a buzzsaw,
                           a lugger, a mimic, a gasbag and the gunship; wave 4 = 16 in LOW GRAVITY led by the
                           juggernaut, with a linker pair, a hive, a buzzsaw, a claw, a magnetron, a blinker, a
-                          howitzer, a welder, a blimp and a jammer; wave 5 = 15 (27 with
+                          howitzer, a welder, a blimp, a chiller and a jammer; wave 5 = 15 (27 with
                           splits) in MELTDOWN with slaglings, a burrower, harpooners, linkers, a duelist, a strider,
-                          a magnetron, a tar spitter, a blinker and the slag wyrm;
+                          a warhorn, a tar spitter, a blinker and the slag wyrm;
                           wave 6 = the boss. Each wave opens with a title card. Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad): HOLLOW POINTS +20%
                           damage, HAIR TRIGGER 20% faster fire, VAMPIRE 3 HP a kill, IRON BOOTS double kick damage
@@ -346,17 +362,19 @@
     Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
                           bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
                           New pipes every wave.
-    Medals .............. 16 to earn in a run (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
+    Medals .............. 17 to earn in a run (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
                           kills, 5 crush kills, 3 shock combos, 3 supercombines, 5 wall splats, kills with 15 guns, 3
-                          rampages, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
+                          rampages, a 6-kill chain, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
                           Brutal win). A gold toast pops when one lands; the results list the run's medals and the
                           title counts the collection (localStorage).
     Last-kill cam ....... the final kill of each wave: 0.9 s of slow-mo, a zoom punch, an impact frame and the camera
                           on the body.
+    Multikills .......... kills under 650 ms apart chain: DOUBLE KILL, TRIPLE, QUAD, PENTA, then MASSACRE, punched in
+                          under the callouts with a rising sting, style for each and a beat of hit-stop from three.
     OVERTIME ............ endless mode (E on the title screen, Y on a pad): no placed wave; 8 foes a wave, +2 each
                           (22 max), tougher kinds mixing in, a mini-boss every 3rd of 6 waves and the Smelter every
                           6th, enemy HP +7% a wave, a random modifier 45% of the time, a perk after every wave and a
-                          new arena every 3. It ends when you die; the best wave reached is kept and shown on the title.
+                          new arena every 3. Every foe type but the bosses can turn up. It ends when you die; the best wave reached is kept and shown on the title.
     Supply drops ........ ~22 s into a wave and every 40 s after, a crate floats down on a chute near you; touch it for a
                           power-up. Elites (150+ HP) drop a capsule 30% of the time. OVERDRIVE (x2 damage, 10 s),
                           HASTE (x1.5 fire rate, +25% run speed, 10 s), AEGIS (soaks the next 60 damage), MEDPACK
@@ -401,7 +419,7 @@
     Results ............. stats count up, then a grade (S-D from completion, accuracy, best style and damage taken)
                           and a score (x the difficulty's multiplier); the best score is kept in localStorage and
                           shown on the title screen with its difficulty.
-    HUD ................. 39 weapon slots (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
+    HUD ................. 41 weapon slots (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
                           came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
                           (and to a boss); lance charge ring and hornet lock pips at the crosshair. Damage numbers
                           step aside from ones still rising nearby.
@@ -595,6 +613,13 @@ const TUNE = {
   BLIMP:   { speed: 40, alt: 80, bombCd: 1.2 },
   STRIDER: { speed: 30, cd: 4, tellMs: 800, sweep: 1.2, arc: 0.5, dmg: 12 },
   MASTERY: [25, 100, 250],
+  // ---- finale round ----
+  GRAV:    { cooldown: 1000, speed: 360, lift: 90, fuse: 0.9, radius: 90, float: 1.4, rise: 120, slam: 640, slamDmg: 30, dmg: 6 },
+  PINBALL: { cooldown: 700, speed: 560, life: 5, bounce: 0.84, dmg: 16, perBounce: 6, maxBounce: 10 },
+  WRAITH:  { speed: 50, strikeAt: 85, tellMs: 450, lunge: 300, lungeMs: 380, fadeMs: 1400, dmg: 14 },
+  CHILLER: { speed: 50, cd: 2.8, keep: [140, 240], ice: 74, iceT: 8, grip: 0.3, slide: 0.06, chill: 1.5, dmg: 6 },
+  WARHORN: { speed: 45, cd: 7, tellMs: 700, radius: 230, time: 6, take: 0.5 },
+  MULTI:   { window: 650 },
 };
 const DIFFS = [                                        // title screen: left / right picks one
   { name: 'EASY', dmg: 0.6, hp: 0.8, score: 0.7 },
@@ -643,6 +668,7 @@ const MEDALS = [
   { id: 'decor', name: 'INTERIOR DECORATOR', d: '5 WALL SPLATS' },
   { id: 'arsenal', name: 'ARSENAL', d: 'KILLS WITH 15 GUNS' },
   { id: 'rampager', name: 'RAMPAGER', d: '3 RAMPAGES IN A RUN' },
+  { id: 'massacre', name: 'MASSACRE', d: 'A 6-KILL CHAIN' },
   { id: 'ghost', name: 'GHOST STEP', d: '10 DASH DODGES' },
   { id: 'demo', name: 'DEMOLITION', d: 'DETONATE 4 LIMPETS AT ONCE' },
   { id: 'slayer', name: 'SLAG SLAYER', d: 'BEAT THE SMELTER' },
@@ -725,6 +751,9 @@ const CODEX = [
   ['lugger', 'LUGGER', 'w0', 'THROWS THE ARENA\'S DRUMS AT YOU. SHOOT THE ONE IT CARRIES.'],
   ['blimp', 'BLIMP', 'b0', 'BOMBER AIRSHIP. CRASHES IN FLAMES WHEN IT GOES DOWN.'],
   ['strider', 'STRIDER', 'w0', 'TALL WALKER. A SWEEPING LASER AT HEAD HEIGHT: DUCK OR JUMP IT.'],
+  ['wraith', 'WRAITH', 'f0', 'DRIFTS THROUGH WALLS. SHRIEKS, THEN LUNGES. SHOOT IT IN THE OPEN.'],
+  ['chiller', 'CHILLER', 'w0', 'LOBS FROST THAT ICES THE FLOOR. ON ICE YOU SLIDE. FIRE MELTS IT.'],
+  ['warhorn', 'WARHORN', 'w0', 'ITS HORN RALLIES FOES: HALF DAMAGE FOR 6 S. SILENCE IT FIRST.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
 ];
 const loadSeen = () => { try { const a = JSON.parse(localStorage.getItem('slaghouse.seen') || '[]'); return Array.isArray(a) ? a : []; } catch (err) { return []; } };
@@ -780,8 +809,27 @@ const WEAPONS = [
   Object.assign({ id: 'whip', name: 'LASER WHIP', gun: 'whip' }, TUNE.WHIP),
   Object.assign({ id: 'shrink', name: 'SHRINK RAY', gun: 'shrink' }, TUNE.SHRINK),
   Object.assign({ id: 'sonic', name: 'SONIC BLASTER', gun: 'sonic' }, TUNE.SONIC),
+  Object.assign({ id: 'grav', name: 'GRAV BOMB', gun: 'grav' }, TUNE.GRAV),
+  Object.assign({ id: 'pinball', name: 'PINBALL CANNON', gun: 'pinball' }, TUNE.PINBALL),
 ];
-const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'", ',', '.', '/', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];   // HUD labels (< = backspace; the flail has no key: wheel or Q/E)
+// one line per gun for the weapon wheel
+const BLURBS = {
+  nail: 'FAST NAILS. THE OLD RELIABLE.', shotgun: '5 PELLETS. BEST UP CLOSE.', grenade: 'BOUNCING LOBS ON A 1.4 S FUSE.',
+  rocket: 'BIG BLAST. ROCKET-JUMP ON IT.', arc: 'A LIGHTNING BEAM THAT CHAINS.', rail: 'PIERCES EVERY BODY ON THE LINE.',
+  saw: 'BLADES THAT RICOCHET 4 TIMES.', flame: 'SHORT CONE. SETS FOES ALIGHT.', sing: 'AN ORB THAT OPENS A GRAVITY WELL.',
+  mini: 'SPIN IT UP, THEN HOSE THEM DOWN.', cluster: 'AIRBURSTS INTO BOMBLETS.', stake: 'HEAVY STAKES PIN FOES TO WALLS.',
+  cryo: 'CHILLS, THEN FREEZES INTO STATUES.', prism: 'A BEAM THAT BOUNCES OFF WALLS.', ripper: 'A HELD CHAIN BLADE. 90 DPS.',
+  hornet: 'HOLD TO LOCK ON, LET GO: MISSILES.', lance: 'CHARGE A MOLTEN BEAM. UP TO 170.', glaive: 'A RING THAT FLIES OUT AND BACK.',
+  hammer: 'SWING, OR HOLD TO SLAM THE FLOOR.', coil: 'STICKY TESLA COILS THAT ARC.', flak: 'A SHELL THAT BURSTS INTO SHARDS.',
+  tractor: 'GRAB DRUMS AND FOES. THROW THEM.', acid: 'ACID CONE. CORRODED FOES TAKE MORE.', shock: 'TAP AN ORB, HOLD A BEAM: COMBO.',
+  needler: 'HOMING NEEDLES THAT SUPERCOMBINE.', drill: 'BORES THROUGH CRATES AND GIRDERS.', revolver: 'SIX ROUNDS. HOLD TO FAN THE HAMMER.',
+  flare: 'STICKS AND BURNS. LIGHTS THE DARK.', limpet: 'STICKY BOMBS. HOLD TO SET OFF ALL.', net: 'TANGLES EVERYTHING IT CATCHES.',
+  flail: 'HOLD: A SPIKED BALL WHIRLS ROUND.', orbital: 'PAINT A SPOT. A BEAM FROM ABOVE.', cutter: 'A FLAT PLASMA BLADE. CUTS ROWS.',
+  spider: 'MINES THAT SCUTTLE AT FOES.', napalm: 'FUEL CANS THAT SPLASH FIRE.', bees: 'A HIVE POD OF HOMING STINGERS.',
+  whip: 'A LONG CRACK THAT DRAGS FOES IN.', shrink: 'SHRINK A FOE. LAND ON IT: SQUISH.', sonic: 'A CONE OF SOUND. SHOVES AND STUNS.',
+  grav: 'FLOATS FOES UP, THEN SLAMS THEM.', pinball: 'BOUNCES. HITS HARDER EVERY BOUNCE.',
+};
+const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'", ',', '.', '/', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];   // HUD labels (< = backspace; the flail has no key: wheel or Q/E)
 const ENEMY = {
   grunt: { key: 'grunt', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
            gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15] },
@@ -879,6 +927,9 @@ const ENEMY = {
   lugger: { key: 'lugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
   blimp: { key: 'blimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
   strider: { key: 'strider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
+  wraith: { key: 'wraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
+  chiller: { key: 'chiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
+  warhorn: { key: 'warhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
   tarspit: { key: 'tarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
 };
@@ -887,7 +938,7 @@ const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind =
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
-const FLIERS = new Set(['drone', 'mender', 'wasp', 'jet', 'screamer', 'warden', 'gunship', 'linker', 'hive', 'gnat', 'stitcher', 'wyrm', 'wyrmseg', 'buzzsaw', 'magnet', 'blinker', 'gasbag', 'jammer', 'creeper', 'claw', 'echo', 'pilferer', 'beacon', 'leech', 'blimp']);
+const FLIERS = new Set(['drone', 'mender', 'wasp', 'jet', 'screamer', 'warden', 'gunship', 'linker', 'hive', 'gnat', 'stitcher', 'wyrm', 'wyrmseg', 'buzzsaw', 'magnet', 'blinker', 'gasbag', 'jammer', 'creeper', 'claw', 'echo', 'pilferer', 'beacon', 'leech', 'blimp', 'wraith']);
 const WAVE_MODS = [null, 'dark', 'slag', 'lowg', 'melt', null];      // wave 2 blacks out, 3 rains slag, 4 is low gravity, 5 floods with slag
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
 const POSTFX = { on: (() => { try { return localStorage.getItem('slaghouse.postfx') !== '0'; } catch (err) { return true; } })() };   // V toggles bloom / warp / grading
@@ -1318,6 +1369,18 @@ const Sfx = {
     const t = this.ctx.currentTime;
     if (v <= 0.02) { this.swarmNode = null; n.g.gain.setTargetAtTime(0.0001, t, 0.15); for (const s of n.nodes) s.stop(t + 0.8); return; }
     n.g.gain.setTargetAtTime((n.bank ? this.bankGain.swarmLoop : 0.05) * v, t, 0.1);
+  },
+  // ---- finale round ----
+  gravPulse() { if (!this.ok('grav', 0.1)) return; if (this.smp('gravPulse')) return; this.tone({ type: 'sine', f0: 60, f1: 220, dur: 0.4, vol: 0.4 }); this.tone({ type: 'triangle', f0: 900, f1: 200, dur: 0.3, vol: 0.06 }); },
+  pinball(k = 0) { if (!this.ok('pinb', 0.04)) return; const r = 1 + Math.min(k, 10) * 0.05; if (this.smp('pinball', 1, { rate: r })) return; this.tone({ type: 'triangle', f0: 1200 * r, f1: 900 * r, dur: 0.12, vol: 0.12 }); this.tone({ type: 'square', f0: 300, dur: 0.05, vol: 0.05 }); },
+  wail(v = 1) { if (!this.ok('wail', 0.3)) return; if (this.smp('wail', v)) return; this.tone({ type: 'sine', f0: 500, f1: 1300, dur: 0.5, vol: 0.08 * v }); this.tone({ type: 'sine', f0: 520, f1: 1240, dur: 0.5, vol: 0.06 * v }); },
+  iceForm() { if (!this.ok('ice', 0.08)) return; if (this.smp('iceForm')) return; this.noise({ filter: 'highpass', f0: 4000, dur: 0.3, vol: 0.12 }); this.tone({ type: 'triangle', f0: 2400, f1: 3200, dur: 0.15, vol: 0.04 }); },
+  warhorn() { if (!this.ok('horn', 0.5)) return; if (this.smp('warhorn')) return; this.tone({ type: 'sawtooth', f0: 110, f1: 116, dur: 0.9, vol: 0.12 }); this.tone({ type: 'sawtooth', f0: 165, f1: 172, dur: 0.9, vol: 0.06 }); },
+  multi(n) {                                                // multikill sting: climbs a step for every kill in the chain
+    if (!this.ok('multi', 0.08)) return;
+    const f = 330 * Math.pow(1.122, Math.min(n, 8));
+    this.tone({ type: 'square', f0: f, f1: f * 1.5, dur: 0.12, vol: 0.06 }); this.tone({ type: 'sawtooth', f0: f / 2, dur: 0.2, vol: 0.05, delay: 0.03 });
+    if (n >= 4) this.noise({ filter: 'highpass', f0: 3000, dur: 0.25, vol: 0.05 });
   },
   // ---- mastery round ----
   shrink() { if (!this.ok('shrnk', 0.08)) return; if (this.smp('shrink')) return; this.tone({ type: 'sine', f0: 1800, f1: 400, dur: 0.25, vol: 0.12 }); this.tone({ type: 'square', f0: 900, f1: 200, dur: 0.2, vol: 0.04 }); },
@@ -2503,6 +2566,35 @@ function drawStrider(ctx, frame) {                   // 20x36 strider: a sensor 
   R(ctx, Ld, 4, 2 + top, 13, 10); R(ctx, M, 5, 2 + top, 11, 8); R(ctx, H, 5, 2 + top, 6, 1);                          // head
   R(ctx, '#0a0a0c', 11, 5 + top, 5, 3); R(ctx, '#ff3020', 13, 6 + top, 2, 1);                                         // the eye
 }
+// ---- finale round: new enemies --------------------------------------------------------
+function drawWraith(ctx, frame) {                    // 18x22 wraith: a hooded shroud trailing wisps, two cold eyes
+  const f = frame === 'f1' ? 1 : 0, t = frame === 'tell';
+  const C = '#b8a8e8', Cd = '#6a5aa8', Cl = '#e8e0ff', K = '#140c24', E = t ? '#ffffff' : '#a0f0ff';
+  R(ctx, Cd, 4, 2, 10, 4); R(ctx, Cd, 3, 5, 12, 9); R(ctx, C, 4, 3, 10, 9); R(ctx, Cl, 5, 3, 4, 1);                    // hood
+  R(ctx, K, 6, 6, 6, 5); R(ctx, E, 7, 8, 1, 1); R(ctx, E, 10, 8, 1, 1);                                                // the dark under it, eyes
+  R(ctx, C, 3, 13, 12, 3); R(ctx, Cd, 3, 16, 3 + f, 3); R(ctx, Cd, 8, 16, 2, 4 - f); R(ctx, Cd, 12 - f, 16, 3, 3 + f);   // trailing hem
+  R(ctx, Cd, 4 + f, 19, 2, 2); R(ctx, Cd, 11, 19 + f, 2, 2);
+  if (t) { R(ctx, C, 0, 7, 3, 2); R(ctx, C, 15, 7, 3, 2); R(ctx, Cl, 0, 9, 2, 2); R(ctx, Cl, 16, 9, 2, 2); }            // claws out
+  else { R(ctx, C, 1, 9, 2, 4); R(ctx, C, 15, 9, 2, 4); }
+}
+function drawChiller(ctx, frame) {                   // 18x24 chiller: a cryo trooper in a frosted suit, a tank on its back
+  const s = frame === 'w1' ? 1 : 0, th = frame === 'throw';
+  const S = '#4a6a8a', Sd = '#2a3a50', Sh = '#8ab0d0', I = '#c8f0ff', K = '#141a22';
+  R(ctx, Sd, 5 - s, 17, 3, 7); R(ctx, Sd, 10 + s, 17, 3, 7); R(ctx, K, 4 - s, 23, 5, 1); R(ctx, K, 9 + s, 23, 5, 1);   // legs
+  R(ctx, '#3a4450', 1, 8, 4, 9); R(ctx, I, 2, 9, 2, 6); R(ctx, '#ffffff', 2, 9, 1, 2);                                 // the cryo tank
+  R(ctx, Sd, 4, 8, 10, 10); R(ctx, S, 5, 8, 8, 9); R(ctx, Sh, 5, 8, 4, 1); R(ctx, I, 5, 13, 8, 1);                      // body, frost belt
+  R(ctx, Sd, 6, 1, 7, 7); R(ctx, S, 7, 1, 5, 6); R(ctx, I, 9, 3, 3, 2); R(ctx, '#ffffff', 10, 3, 1, 1);                  // helmet + visor
+  if (th) { R(ctx, Sd, 13, 2, 3, 7); R(ctx, I, 13, 0, 3, 3); }                                                          // arm up with a frost ball
+  else { R(ctx, Sd, 13, 9, 3, 7); R(ctx, Sh, 13, 15, 3, 2); }
+}
+function drawWarhorn(ctx, frame) {                   // 20x20 warhorn: a squat tracked bot hauling a great brass horn
+  const s = frame === 'w1' ? 1 : 0, bl = frame === 'blow';
+  const M = '#4b535e', Md = '#2a2e35', B = '#c8a040', Bd = '#8a6a20', Bl = '#ffe080';
+  R(ctx, Md, 2, 15, 16, 5); for (let i = 0; i < 4; i++) R(ctx, '#5a636e', 3 + i * 4 + s, 16, 2, 3);                  // tracks
+  R(ctx, Md, 4, 7, 12, 9); R(ctx, M, 5, 7, 10, 7); R(ctx, '#8a94a0', 5, 7, 5, 1); R(ctx, '#ff3020', 12, 11, 2, 1);      // hull + eye (under the bell, facing the way it blows)
+  R(ctx, Bd, 9, 3, 3, 5); R(ctx, B, 10, 3, 2, 4);                                                                       // horn neck
+  R(ctx, Bd, 12, 0, 2, 8); R(ctx, B, 14, bl ? 0 : 1, 2, bl ? 9 : 7); R(ctx, B, 16, bl ? 0 : 2, 3, bl ? 10 : 5); R(ctx, Bl, 18, bl ? 1 : 3, 1, bl ? 8 : 3);   // the bell, flared when it blows
+}
 const RAG = {
   grunt:    { up: false, hp: 35, fw: 20, fh: 18, body: x => drawGrunt(x, 1, false), head: [12, 5, 6, 6], torso: [3, 2, 9, 10],
               leg: x => { for (let y = 12; y < 16; y++) R(x, EP.f, 10, y, 2, 1); R(x, EP.m, 10, 16, 3, 1); R(x, EP.bone, 13, 16); }, thigh: [10, 12, 2, 2], shin: [10, 14, 4, 3] },
@@ -2722,6 +2814,16 @@ const GUNS = {
     R(ctx, '#4b535e', 15, 4, 10, 3); R(ctx, '#8a94a0', 15, 4, 10, 1);
     for (let i = 0; i < 3; i++) { R(ctx, '#2a8ad0', 16 + i * 3, 3, 2, 5); R(ctx, '#9ae8ff', 16 + i * 3, 3, 1, 1); }
     R(ctx, '#c8f4ff', 25, 5, 1, 1);
+  } },
+  grav: { w: 22, h: 12, py: 5, muzzle: 20, draw(ctx, arm) {                   // grav bomb: a stubby launcher with a violet core
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 3, 13, 6); R(ctx, '#6a7380', 5, 3, 13, 1); R(ctx, '#2a2e35', 6, 9, 3, 3);
+    R(ctx, '#7a40d0', 10, 4, 4, 4); R(ctx, '#d8b0ff', 11, 5, 2, 2); R(ctx, '#22262c', 18, 2, 3, 8);
+  } },
+  pinball: { w: 24, h: 12, py: 5, muzzle: 22, draw(ctx, arm) {                // pinball cannon: a fat barrel, a steel ball in the breech
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 2, 17, 8); R(ctx, '#6a7380', 5, 2, 17, 1); R(ctx, '#2a2e35', 6, 10, 3, 2);
+    R(ctx, '#c8d0da', 8, 4, 4, 4); R(ctx, '#ffffff', 9, 4, 1, 1); R(ctx, '#e8b422', 15, 3, 1, 6); R(ctx, '#22262c', 21, 1, 3, 10);
   } },
   shrink: { w: 22, h: 12, py: 5, muzzle: 20, draw(ctx, arm) {                 // shrink ray: a retro ray gun with rings
     if (arm) drawArm(ctx, 5);
@@ -2987,13 +3089,13 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 const WAVES = [
   SPAWNS.enemies,
   [['bulwark', 'G'], ['mirror', 'G'], ['mender', 'A'], ['enforcer', 'G'], ['sniper', 'G'], ['stalker', 'G'], ['creeper', 'A'], ['grenadier', 'G'], ['mimic', 'G'], ['tarspit', 'G'],
-   ['rocketeer', 'G'], ['sparker', 'G'], ['sparker', 'G'], ['sparker', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['cloaker', 'G']],
+   ['wraith', 'A'], ['sparker', 'G'], ['sparker', 'G'], ['sparker', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['cloaker', 'G']],
   [['golem', 'G'], ['roller', 'G'], ['lugger', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['wasp', 'A'], ['stitcher', 'A'], ['harpooner', 'G'], ['duelist', 'G'],
    ['pilferer', 'A'], ['buzzsaw', 'A'], ['jet', 'A'], ['beacon', 'A'], ['leech', 'A'], ['gasbag', 'A'], ['pyro', 'G'], ['gunship', 'A']],
-  [['blinker', 'A'], ['blimp', 'A'], ['howitzer', 'G'], ['hive', 'A'], ['pogo', 'G'], ['buzzsaw', 'A'], ['claw', 'A'], ['jammer', 'A'], ['bulwark', 'G'], ['welder', 'G'],
+  [['blinker', 'A'], ['blimp', 'A'], ['howitzer', 'G'], ['hive', 'A'], ['pogo', 'G'], ['buzzsaw', 'A'], ['claw', 'A'], ['jammer', 'A'], ['chiller', 'G'], ['welder', 'G'],
    ['magnet', 'A'], ['jugg', 'G'], ['linker', 'A'], ['linker', 'A'], ['spikeball', 'G'], ['slug', 'G']],
   [['slagling', 'G'], ['burrower', 'G'], ['linker', 'A'], ['linker', 'A'], ['harpooner', 'G'], ['strider', 'G'], ['echo', 'G'], ['slagling', 'G'],
-   ['para', 'A'], ['magnet', 'A'], ['beacon', 'A'], ['para', 'A'], ['wyrm', 'G'], ['tarspit', 'G'], ['blinker', 'A']],
+   ['para', 'A'], ['warhorn', 'G'], ['beacon', 'A'], ['para', 'A'], ['wyrm', 'G'], ['tarspit', 'G'], ['blinker', 'A']],
   [['boss', 'B']],
 ];
 const WAVE_POINTS = {
@@ -3404,6 +3506,9 @@ function genTextures(scene) {
   addTex(scene, 'ebomb', makeSprite(8, 6, c => { R(c, '#a02018', 2, 1, 5, 4); R(c, '#d04030', 2, 1, 5, 1); R(c, '#e8b422', 4, 1, 1, 4); R(c, '#3a3f47', 0, 1, 2, 1); R(c, '#3a3f47', 0, 4, 2, 1); R(c, '#3a3f47', 1, 2, 1, 2); }));
   addTex(scene, 'cshell', makeSprite(9, 7, c => { R(c, '#5a4a2a', 1, 1, 7, 5); R(c, '#8a7040', 2, 1, 5, 1); R(c, '#e8b422', 3, 3, 3, 1); R(c, '#2a2216', 1, 5, 7, 1); }));
   addTex(scene, 'bomblet', makeSprite(5, 5, c => { R(c, '#c03010', 1, 1, 3, 3); R(c, '#ffb040', 2, 1, 1, 1); }));
+  addTex(scene, 'gravbomb', makeSprite(7, 7, c => { R(c, '#3a1a6a', 1, 0, 5, 7); R(c, '#3a1a6a', 0, 1, 7, 5); R(c, '#9a60ff', 1, 1, 5, 5); R(c, '#e0c8ff', 2, 2, 2, 2); }));
+  addTex(scene, 'pinball', makeSprite(8, 8, c => { R(c, '#5a636e', 2, 0, 4, 8); R(c, '#5a636e', 0, 2, 8, 4); R(c, '#5a636e', 1, 1, 6, 6); R(c, '#c8d0da', 2, 1, 4, 5); R(c, '#ffffff', 2, 2, 2, 1); }));
+  addTex(scene, 'frostball', makeSprite(6, 6, c => { R(c, '#4a8ab0', 1, 0, 4, 6); R(c, '#4a8ab0', 0, 1, 6, 4); R(c, '#c8f0ff', 1, 1, 4, 4); R(c, '#ffffff', 2, 1, 1, 1); }));
   addTex(scene, 'rivet', makeSprite(6, 3, c => { R(c, '#b07030', 0, 1, 2, 1); R(c, '#ffd27a', 2, 1, 3, 1); R(c, '#ffffff', 5, 1); R(c, '#ff9a3a', 2, 0, 3, 1); R(c, '#ff9a3a', 2, 2, 3, 1); }, null));
   addTex(scene, 'gun_mini2', makeSprite(GUNS.mini.w, GUNS.mini.h, x => GUNS.mini.draw(x, true, true)));
   addTex(scene, 'fb_x', makeSprite(16, 16, c => drawCrate(c, 0, 0, 1), null));          // falling-block versions of the tiles
@@ -3584,6 +3689,9 @@ function genTextures(scene) {
                             { name: 'o1', c: makeSprite(14, 18, x => drawMimic(x, 'o', 1)) }, { name: 'bite', c: makeSprite(14, 18, x => drawMimic(x, 'bite', 0)) }], 14, 18, true);
   addSheet(scene, 'howitzer', ['w0', 'w1', 'plant', 'fire'].map(f => ({ name: f, c: makeSprite(26, 22, x => drawHowitzer(x, f)) })), 26, 22, true);
   addSheet(scene, 'blinker', ['b0', 'b1', 'dash'].map(f => ({ name: f, c: makeSprite(16, 20, x => drawBlinker(x, f)) })), 16, 20, true);
+  addSheet(scene, 'wraith', ['f0', 'f1', 'tell'].map(f => ({ name: f, c: makeSprite(18, 22, x => drawWraith(x, f)) })), 18, 22, true);
+  addSheet(scene, 'chiller', ['w0', 'w1', 'throw'].map(f => ({ name: f, c: makeSprite(18, 24, x => drawChiller(x, f)) })), 18, 24, true);
+  addSheet(scene, 'warhorn', ['w0', 'w1', 'blow'].map(f => ({ name: f, c: makeSprite(20, 20, x => drawWarhorn(x, f)) })), 20, 20, true);
   addSheet(scene, 'lugger', ['w0', 'w1', 'carry', 'throw'].map(f => ({ name: f, c: makeSprite(22, 26, x => drawLugger(x, f)) })), 22, 26, true);
   addSheet(scene, 'blimp', ['b0', 'b1'].map(f => ({ name: f, c: makeSprite(34, 20, x => drawBlimp(x, f)) })), 34, 20, true);
   addSheet(scene, 'strider', ['w0', 'w1', 'fire'].map(f => ({ name: f, c: makeSprite(20, 36, x => drawStrider(x, f)) })), 20, 36, true);
@@ -3782,8 +3890,8 @@ class TitleScene extends Phaser.Scene {
     this.subTitle = new PixelLabel(this, 480, 64, 'title_subt', { maxChars: 10, scale: 4, rows: CALL_ROWS, shadow: sh, originY: 0.5 }).setDepth(21);
     this.subHint = new PixelLabel(this, 480, 514, 'title_subh', { maxChars: 56, scale: 2, color: '#6a7380', shadow: sh, originY: 0.5 }).setDepth(21);
     this.codexImgs = CODEX.map(([kind, name, fr], i) => {
-      const D = ENEMY[kind], col = i % 10, row = Math.floor(i / 10), sc = Math.min(2, 40 / D.fh, 64 / D.fw);
-      const img = this.add.image(120 + col * 80, 122 + row * 58, D.key, fr).setScale(sc).setDepth(21);
+      const D = ENEMY[kind], col = i % 11, row = Math.floor(i / 11), sc = Math.min(2, 38 / D.fh, 60 / D.fw);
+      const img = this.add.image(480 + (col - 5) * 72, 122 + row * 54, D.key, fr).setScale(sc).setDepth(21);
       if (!SEEN.has(kind)) { img.setTint(0x2a2e35); if (img.setTintMode && Phaser.TintModes) img.setTintMode(Phaser.TintModes.FILL); } else if (kind === 'echo') img.setTint(0x70e8ff);   // unmet: a flat grey silhouette
       return img;
     });
@@ -3827,7 +3935,7 @@ class TitleScene extends Phaser.Scene {
     if (!a) return;
     if (a === 'back') { Sfx.ui(); this.showSub(null); return; }
     if (this.sub === 'codex') {
-      const N = CODEX.length, d = { left: -1, right: 1, up: -10, down: 10 }[a];
+      const N = CODEX.length, d = { left: -1, right: 1, up: -11, down: 11 }[a];
       if (d) { this.subSel = (this.subSel + d + N) % N; Sfx.swap(); this.refreshSub(); }
       return;
     }
@@ -3868,7 +3976,7 @@ class TitleScene extends Phaser.Scene {
   onTitlePointer(p, click) {
     if (this.started) return;
     if (this.sub === 'codex') {
-      const i = this.codexImgs.findIndex(o => Math.abs(p.x - o.x) < 38 && Math.abs(p.y - o.y) < 28);
+      const i = this.codexImgs.findIndex(o => Math.abs(p.x - o.x) < 35 && Math.abs(p.y - o.y) < 26);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
       if (click && i < 0) this.subKey('back');
       return;
@@ -3892,7 +4000,7 @@ class TitleScene extends Phaser.Scene {
     const sg = this.subG; sg.clear();
     if (!this.sub) return;
     sg.fillStyle(0x05060a, 1); sg.fillRect(30, 30, 900, 500); sg.fillStyle(0xff8a1f, 1); sg.fillRect(30, 30, 900, 2); sg.fillRect(30, 528, 900, 2);
-    if (this.sub === 'codex') { const o = this.codexImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 36, o.y - 26, 72, 52); }
+    if (this.sub === 'codex') { const o = this.codexImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 34, o.y - 25, 68, 50); }
     if (this.sub === 'medals') for (const r of this.medalRows) { sg.fillStyle(r.on ? 0xffd040 : 0x2a2e35, 1); sg.fillTriangle(r.x, r.y + 4, r.x + 8, r.y - 10, r.x + 16, r.y + 4); sg.fillTriangle(r.x, r.y - 4, r.x + 16, r.y - 4, r.x + 8, r.y + 10); }
   }
   update(time, delta) {
@@ -3975,6 +4083,9 @@ class GameScene extends Phaser.Scene {
     this.supplyG = this.add.graphics().setDepth(6.6); this.auraImg = this.add.image(0, 0, 'glow').setBlendMode(ADD).setDepth(18).setVisible(false);
     // mastery round: the shrink ray's zaps, sonic waves
     this.zaps = []; this.sonics = [];
+    // finale round: ice sheets, horn blasts, grav pulses, the multikill chain
+    this.ices = []; this.horns = []; this.gravFx = []; this.onIce = false; this.chillT = 0; this.mkN = 0; this.mkLast = -1e9;
+    this.iceG = this.add.graphics().setDepth(4.96);
     { const onPick = id => this.onPerkPick(id); BUS.on('perkpick', onPick); this.events.once('shutdown', () => BUS.off('perkpick', onPick)); }
     this.grid = this.A.grid.map(r => r.slice()); NAV = buildNav(this.grid);   // a fresh breakable copy every run
 
@@ -4062,6 +4173,8 @@ class GameScene extends Phaser.Scene {
     };
     [this.bullets, this.bulletList] = mk(90, 'nail', false);
     [this.rockets, this.rocketList] = mk(10, 'rocket', false);
+    [this.balls, this.ballList] = mk(3, 'pinball', true);
+    this.ballList.forEach(o => o.setDepth(9));
     [this.grenades, this.grenadeList] = mk(40, 'grenade', true);
     [this.ebullets, this.ebulletList] = mk(40, 'ebullet', false);
     this.ebulletList.forEach(b => b.setDepth(9).setBlendMode(ADD));
@@ -4166,7 +4279,7 @@ class GameScene extends Phaser.Scene {
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
     const f0 = { drone: 'd0', mender: 'm0', enforcer: 'idle0', bulwark: 'idle0', sniper: 'idle0', rocketeer: 'idle0', stalker: 'idle', tick: 'k0', boss: 'w0', wasp: 'p0', jet: 'j0', sapper: 'idle', brood: 'w0', screamer: 's0', warden: 'v0', jugg: 's0w0', cloaker: 'idle', pyro: 'idle', gunship: 'g0',
                  slagling: 'a', slagmid: 'a', slagbit: 'a', burrower: 'sw0', harpooner: 'idle', linker: 'l0',
-                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0' }[kind] || 'w0';
+                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0', wraith: 'f0', chiller: 'w0', warhorn: 'w0' }[kind] || 'w0';
     markSeen(kind);
     const e = this.enemies.create(x, y, D.key, f0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
@@ -4277,6 +4390,14 @@ class GameScene extends Phaser.Scene {
     } else if (kind === 'strider') {
       Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), stepK: 0, a0: 0, beamA: 0, hitT: 0, lastStep: 0 });
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+    } else if (kind === 'wraith') {
+      e.body.setAllowGravity(false);
+      Object.assign(e, { ai: 'drift', inWall: false, strikeOk: 0 });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9a70ff).setScale(0.4).setAlpha(0.7).setDepth(18);
+    } else if (kind === 'chiller') {
+      Object.assign(e, { ai: 'walk', cd: rand(1.5, 2.5), stepK: 0 });
+    } else if (kind === 'warhorn') {
+      Object.assign(e, { ai: 'roll', cd: rand(2.5, 4), stepK: 0 });
     } else if (kind === 'spikeball') {
       Object.assign(e, { ai: 'roll', spinA: 0, rage: false });
     } else if (kind === 'para') {                                        // starts high above the floor under its chute
@@ -4386,6 +4507,8 @@ class GameScene extends Phaser.Scene {
     P.add.collider(this.grenades, this.solids);
     P.add.collider(this.grenades, this.oneways);
     P.add.overlap(this.grenades, this.enemies, this.onGrenadeHit, null, this);
+    P.add.collider(this.balls, this.solids); P.add.collider(this.balls, this.oneways);
+    P.add.overlap(this.balls, this.enemies, this.onBallHit, null, this);
     // single sprite first: Arcade then always passes (sprite, groupChild) to the callback
     P.add.overlap(this.player, this.bolts, this.onBoltHit, null, this);
     P.add.overlap(this.player, this.enemies, this.onTouchEnemy, null, this);
@@ -4556,7 +4679,7 @@ class GameScene extends Phaser.Scene {
     this.updateNets(dt, now); this.updateFlail(dt, now); this.updateBelts(dt, now); this.updatePresses(dt, now); this.updateSparkLinks(dt, now);
     this.updateSky(dt, now); this.updateBlades(dt, now);
     this.updateSpiders(dt, now); this.updateNapalms(dt, now); this.updateAcids(dt, now);
-    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now);
+    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt);
     if (this.state !== 'dead') { this.hist.push({ t: now, x: this.player.x, y: this.player.y, fire: now - this.lastShotT < 140, fr: this.pFrame, face: this.facing }); while (this.hist.length && now - this.hist[0].t > 3000) this.hist.shift(); }
     if (this.revAmmo <= 0 && now >= this.revReloadUntil) { this.revAmmo = TUNE.REVOLVER.rounds; Sfx.revClick(); }
     this.updateHarpoons(dt, now); this.updateLinkBeams(dt, now);
@@ -4620,10 +4743,11 @@ class GameScene extends Phaser.Scene {
     if (jumpPressed) this.jumpBuffer = now;
 
     // horizontal: snappy accel on ground, softer in air, rocket-jump momentum decays slowly
-    const tarK = (this.tarT > 0 ? T.TARSPIT.slow : 1) * (this.leechN > 0 ? T.LEECH.slow : 1) * (now < this.hasteUntil ? 1.25 : 1);   // wading through tar; leeches drag on you; HASTE
+    const tarK = (this.tarT > 0 ? T.TARSPIT.slow : 1) * (this.leechN > 0 ? T.LEECH.slow : 1) * (now < this.hasteUntil ? 1.25 : 1) * (this.chillT > 0 ? 0.7 : 1);   // wading through tar; leeches drag on you; HASTE; chilled
     const dir = (right ? 1 : 0) - (left ? 1 : 0), target = dir * T.RUN_SPEED * (1 - 0.4 * this.spin) * tarK;   // a spun-up minigun slows you
     let vx = b.velocity.x;
-    if (onGround) vx = approach(vx, target, (dir !== 0 && Math.sign(vx) !== -dir ? T.GROUND_ACCEL : T.GROUND_DECEL) * dt);
+    const speedUp = dir !== 0 && Math.sign(vx) !== -dir;
+    if (onGround) vx = approach(vx, target, (speedUp ? T.GROUND_ACCEL : T.GROUND_DECEL) * dt * (this.onIce ? (speedUp ? T.CHILLER.grip : T.CHILLER.slide) : 1));   // ice: slow to get going, slower to stop or turn
     else if (Math.abs(vx) > T.RUN_SPEED && (dir === 0 || dir === Math.sign(vx))) vx = approach(vx, Math.sign(vx) * T.RUN_SPEED, T.AIR_MOMENTUM_DECAY * dt);
     else vx = approach(vx, target, (dir ? T.AIR_ACCEL : T.AIR_DECEL) * dt);
     if (now >= this.wallLockUntil) b.setVelocityX(vx);                  // a wall jump owns your sideways speed for a moment
@@ -4956,6 +5080,11 @@ class GameScene extends Phaser.Scene {
       this.fireShrink(now, ox, oy, a, mx, my);
     } else if (W.id === 'sonic') {
       this.fireSonic(now, a, mx, my);
+    } else if (W.id === 'grav') {
+      this.stats.shots++; this.spawnGrenade(ox, oy, a, 'grav');
+      this.recoil = 4; Sfx.mineThrow(); this.muzzle(mx, my, a, 0.8, 50); this.spawnLight(mx, my, 'glow', 0x9a60ff, 0.6, 1.2, 0.8, 0.1); this.addKick(-ca * 2, -sa * 2);
+    } else if (W.id === 'pinball') {
+      this.firePinball(now, ox, oy, a, mx, my);
     } else if (W.id === 'whip') {
       this.crackWhip(now, a, mx, my);
     } else if (W.id === 'napalm') {
@@ -5615,14 +5744,14 @@ class GameScene extends Phaser.Scene {
   }
   spawnGrenade(x, y, a, kind = 'grenade') {                        // kind: grenade | cluster (mortar shell) | bomb (bomblet)
     const g = this.grenades.getFirstDead(false); if (!g) return null;
-    const W = TUNE.GRENADE, C = TUNE.CLUSTER, cl = kind === 'cluster', fk = kind === 'flak', sp = cl ? C.speed : fk ? TUNE.FLAK.speed : W.speed;
-    g.setTexture(cl ? 'cshell' : kind === 'bomb' ? 'bomblet' : fk ? 'slag' : 'grenade');
+    const W = TUNE.GRENADE, C = TUNE.CLUSTER, cl = kind === 'cluster', fk = kind === 'flak', gv = kind === 'grav', sp = cl ? C.speed : fk ? TUNE.FLAK.speed : gv ? TUNE.GRAV.speed : W.speed;
+    g.setTexture(cl ? 'cshell' : kind === 'bomb' ? 'bomblet' : fk ? 'slag' : gv ? 'gravbomb' : 'grenade');
     g.enableBody(true, x, y, true, true);
     g.body.setSize(6, 6, true); g.body.setAllowGravity(true); g.body.setBounce(cl ? 0.2 : W.bounce, cl ? 0.2 : W.bounce);
-    g.setVelocity(Math.cos(a) * sp + this.player.body.velocity.x * 0.3, Math.sin(a) * sp - (cl ? C.lift : fk ? 0 : W.lift));   // lobbed, inherits some run speed
+    g.setVelocity(Math.cos(a) * sp + this.player.body.velocity.x * 0.3, Math.sin(a) * sp - (cl ? C.lift : fk ? 0 : gv ? TUNE.GRAV.lift : W.lift));   // lobbed, inherits some run speed
     g.body.setAngularVelocity(rand(500, 900) * (Math.cos(a) >= 0 ? 1 : -1));
-    Object.assign(g, { fuse: cl ? 4 : kind === 'bomb' ? rand(0.35, 0.8) : fk ? TUNE.FLAK.fuse : W.fuse, blinkT: 0, blinkOn: false, prevV: 0, gk: kind, age: 0 });
-    g.glow.setVisible(true).setPosition(x, y).setTint(cl ? 0xffc040 : fk ? 0xff8a20 : 0xff3020);
+    Object.assign(g, { fuse: cl ? 4 : kind === 'bomb' ? rand(0.35, 0.8) : fk ? TUNE.FLAK.fuse : gv ? TUNE.GRAV.fuse : W.fuse, blinkT: 0, blinkOn: false, prevV: 0, gk: kind, age: 0 });
+    g.glow.setVisible(true).setPosition(x, y).setTint(cl ? 0xffc040 : fk ? 0xff8a20 : gv ? 0x9a60ff : 0xff3020);
     return g;
   }
   detonate(g) {
@@ -5630,6 +5759,7 @@ class GameScene extends Phaser.Scene {
     g.disableBody(true, true); g.glow.setVisible(false);
     if (k === 'cluster') { this.clusterBurst(x, y, vx, vy); return; }
     if (k === 'flak') { this.flakBurst(x, y, vx, vy); return; }
+    if (k === 'grav') { this.gravPulse(x, y); return; }
     this.explode(x, y, k === 'bomb' ? TUNE.CLUSTER.bomb : TUNE.GRENADE);
   }
   onGrenadeHit(g, e) {                                                 // contact with meat = instant pop (a flak shell hits hard first)
@@ -5930,6 +6060,7 @@ class GameScene extends Phaser.Scene {
     if (e.corrodeT > 0 && src !== 'acid' && src !== 'burn') dmg *= TUNE.ACID.bonus;   // corroded metal and flesh give way
     if (src !== 'burn' && src !== 'gas') { if (this.perks.hollow) dmg *= 1.2; if (this.perks.adren && this.hp <= 35) dmg *= 1.5; if (this.time.now < this.dmgUntil) dmg *= 2; dmg *= 1 + 0.05 * masteryStars(WEAPONS[this.weapon].id); }   // perks + OVERDRIVE + mastery
     if (e.shrunkT > 0 && src !== 'burn') dmg *= TUNE.SHRINK.take;        // shrunk: a soft target
+    if (e.rallyT > this.time.now) dmg *= TUNE.WARHORN.take;               // rallied by a warhorn: half damage
     if (e.kind === 'cloaker') e.revealT = 1.5;                           // getting hit lights a cloaker up
     if (e.kind === 'mimic' && e.ai === 'hide') this.mimicReveal(e, this.time.now);   // shoot the "drum" and it bares its teeth
     e.hp -= dmg; e.flashT = 0.08; e.aggro = true; e.aggroT = 5; e.lastHs = !!hs;
@@ -5998,6 +6129,7 @@ class GameScene extends Phaser.Scene {
       return;
     }
     this.flushDmg(e, e.lastHs ? 'Y' : 'R');
+    if (!e.summoned && e.kind !== 'wyrmseg') this.multiKill(now0);
     const grounded = b.blocked.down || b.touching.down, playerAir = !(this.player.body.blocked.down || this.player.body.touching.down);
     let style = 60 + (e.lastHs ? 50 : 0) + (!grounded && e.kind !== 'drone' && e.kind !== 'mender' ? 40 : 0) + (playerAir ? 25 : 0);
     const wid = WEAPONS[this.weapon].id;
@@ -6050,6 +6182,9 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'claw' && e.grab) this.clawRelease(e, false);
     if (e.kind === 'lugger' && e.carry) { if (e.carryImg) e.carryImg.destroy(); this.time.delayedCall(40, () => this.explode(cx, cy - 16, TUNE.LUGGER.barrel)); }   // the drum it held goes up
     if (e.kind === 'blimp') this.blimpCrash(e, cx, cy);
+    if (e.kind === 'chiller') { this.spawnIce(cx, b.bottom - 2, 96); this.fx.emit(cx, cy, { n: 22, speed: [40, 180], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x6ab0e0], add: true, g: 300 }); Sfx.iceForm(); }   // the tank bursts: frost everywhere
+    if (e.kind === 'wraith') { this.fx.emit(cx, cy, { n: 26, speed: [30, 140], life: [0.4, 0.9], size: [3, 1], cols: [0xffffff, 0xd8c8ff, 0x8a6ad0], add: true, g: -80 }); this.spawnLight(cx, cy, 'glow', 0xb090ff, 1.2, 0.3, 0.8, 0.3); Sfx.wail(0.6); }
+    if (e.gravT > 0 || e.gravSlam) { e.gravT = 0; e.gravSlam = false; b.setAllowGravity(true); e.rotation = 0; }
     if (e.kind === 'leech' && e.ai === 'latched') this.leechN = Math.max(0, (this.leechN || 0) - 1);
     if (e.kind === 'slug') for (let i = 0; i < 3; i++) this.acids.push({ x: cx + rand(-12, 12), y: e.body.bottom, w: 18, t: TUNE.SLUG.pool * 1.5 });
     if (e.kind === 'echo') { this.fx.emit(cx, cy, { n: 30, speed: [30, 160], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0x9af0ff, 0x46b8f0], add: true }); this.spawnLight(cx, cy, 'player', 0x60e0ff, 1, 1.4, 0.6, 0.3, e.fr, e.dir < 0); }
@@ -6580,16 +6715,23 @@ class GameScene extends Phaser.Scene {
   // Slow enough to read: shoot them down, kick them back, or just get out of the splash.
   spawnEProj(kind, x, y, vx, vy) {
     const p = this.eprojs.getFirstDead(false); if (!p) return null;
-    p.setTexture(kind === 'bomb' || kind === 'shell' ? 'ebomb' : kind === 'fire' ? 'firebomb' : kind === 'tar' ? 'tarblob' : kind === 'scrap' ? 'scrap' : kind === 'acid' ? 'acidglob' : kind === 'nade' ? 'enade' : kind === 'drum' ? 'barrel' : 'erocket').enableBody(true, x, y, true, true);
+    p.setTexture(kind === 'bomb' || kind === 'shell' ? 'ebomb' : kind === 'fire' ? 'firebomb' : kind === 'tar' ? 'tarblob' : kind === 'scrap' ? 'scrap' : kind === 'acid' ? 'acidglob' : kind === 'nade' ? 'enade' : kind === 'drum' ? 'barrel' : kind === 'frost' ? 'frostball' : 'erocket').enableBody(true, x, y, true, true);
     p.body.setSize(5, 5, true); p.body.setAllowGravity(kind !== 'rocket');
     p.setVelocity(vx, vy); p.setRotation(Math.atan2(vy, vx));
     Object.assign(p, { pk: kind, life: kind === 'rocket' ? 3.5 : 4, px: x, py: y });
-    p.glow.setVisible(kind !== 'tar' && kind !== 'scrap' && kind !== 'nade' && kind !== 'drum').setPosition(x, y).setTint(kind === 'acid' ? 0x9aff4a : 0xffffff).setTint(kind === 'bomb' ? 0xff3020 : kind === 'fire' ? 0xff8a20 : 0xffa040);
+    p.glow.setVisible(kind !== 'tar' && kind !== 'scrap' && kind !== 'nade' && kind !== 'drum').setPosition(x, y).setTint(kind === 'acid' ? 0x9aff4a : 0xffffff).setTint(kind === 'bomb' ? 0xff3020 : kind === 'fire' ? 0xff8a20 : kind === 'frost' ? 0x80e0ff : 0xffa040);
     return p;
   }
   popEProj(p, x = p.x, y = p.y) {
     if (p.pk === 'shell') { p.disableBody(true, true); p.glow.setVisible(false); this.explode(x, y, TUNE.HOWITZER.blast); return; }
     if (p.pk === 'nade') { p.disableBody(true, true); p.glow.setVisible(false); this.explode(x, y, TUNE.GRENADIER.blast); return; }
+    if (p.pk === 'frost') {                                               // frost: shatters into a sheet of ice on the floor
+      p.disableBody(true, true); p.glow.setVisible(false);
+      const pb = this.player.body;
+      if (this.state !== 'dead' && x > pb.left - 8 && x < pb.right + 8 && y > pb.top - 8 && y < pb.bottom + 8) { this.hurtPlayer(TUNE.CHILLER.dmg, x, { knock: false, srcY: y }); this.chillT = TUNE.CHILLER.chill; }
+      this.fx.emit(x, y, { n: 14, speed: [40, 160], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x6ab0e0], add: true, g: 400, mode: 1 });
+      this.spawnIce(x, y, TUNE.CHILLER.ice); Sfx.iceForm(); return;
+    }
     if (p.pk === 'drum') { p.disableBody(true, true); p.glow.setVisible(false); this.explode(x, y, TUNE.LUGGER.barrel); for (let i = 0; i < 4; i++) this.spawnGib('g_barrel', x, y, rand(-220, 220), rand(-340, -140), 'metal'); return; }
     if (p.pk === 'acid') {
       p.disableBody(true, true); p.glow.setVisible(false);
@@ -9376,6 +9518,223 @@ class GameScene extends Phaser.Scene {
     for (const Q of this.tars.slice()) if (Math.abs(Q.y - P.y) < 6 && Math.abs(Q.x - P.x) < (Q.w + P.w) / 2 + 10) this.time.delayedCall(140, () => this.igniteTar(Q));   // runs along touching tar
   }
 
+  // ================================================================== finale round ====
+  // ---------------------------------------------------------------- multikills ----
+  // Kills less than 650 ms apart chain: DOUBLE KILL, TRIPLE, QUAD, PENTA, then MASSACRE. Style for each, a little
+  // hit-stop from three up, and the MASSACRE medal for six.
+  multiKill(now) {
+    this.mkN = now - this.mkLast < TUNE.MULTI.window ? this.mkN + 1 : 1; this.mkLast = now;
+    const n = this.mkN; if (n < 2) return;
+    BUS.emit('multikill', ['', '', 'DOUBLE KILL', 'TRIPLE KILL', 'QUAD KILL', 'PENTA KILL'][n] || 'MASSACRE', n);
+    this.addStyle(25 * n); Sfx.multi(n);
+    if (n >= 3) this.hitStop(20 + n * 8);
+    if (n >= 6) this.award('massacre');
+  }
+
+  // ---------------------------------------------------------------- grav bomb ----
+  // A lobbed violet charge (bounces, 0.9 s fuse, pops on a foe). It doesn't blow: every grounded foe within 90 px
+  // floats up helpless for 1.4 s, then gravity comes back hard: 30 when it hits the floor. Corpses, gibs and drums
+  // go up too. Fliers, bosses and things in the walls are immune.
+  gravPulse(x, y) {
+    const T = TUNE.GRAV; let n = 0;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.noClip || e.frozen > 0 || e.netT > 0 || (e.kind === 'para' && e.ai === 'drop')) continue;
+      if (['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'turret'].includes(e.kind)) continue;
+      const b = e.body; if (Math.hypot(b.center.x - x, b.center.y - y) > T.radius + b.halfWidth) continue;
+      e.gravT = T.float; e.gravSlam = false; b.setAllowGravity(false); b.setVelocity(b.velocity.x * 0.2 + (b.center.x - x) * 0.4, -T.rise);
+      this.damageEnemy(e, T.dmg, 0, -1, 'kick'); n++;
+    }
+    for (const rd of this.ragdolls) if (Math.hypot(rd.pts[2].x - x, rd.pts[2].y - y) < T.radius) for (const q of rd.pts) q.vy = -rand(260, 360);
+    for (const g2 of this.gibList) if (g2.active && Math.hypot(g2.x - x, g2.y - y) < T.radius) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.y = -rand(250, 420); }
+    for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < T.radius) { k.body.velocity.y = -360; k.kicked = true; }
+    this.gravFx.push({ x, y, t: 0 });
+    Sfx.gravPulse(); this.warpPulse(0.5); this.shake(120, 0.005); this.spawnLight(x, y, 'glow', 0x9a60ff, 1.6, 0.4, 0.9, 0.3);
+    this.fx.emit(x, y, { n: 24, speed: [40, 160], life: [0.4, 0.8], size: [2, 1], cols: [0xe0c8ff, 0x9a60ff, 0x5a20c0], add: true, g: -120 });
+    if (n >= 3) { BUS.emit('callout', 'LIFTOFF'); this.addStyle(40); }
+  }
+  updateGravved(e, dt, now) {                                           // floating helpless, then slammed back down
+    const b = e.body;
+    if (e.gravT > 0) {
+      e.gravT -= dt; b.velocity.y *= Math.pow(0.15, dt); b.velocity.x *= Math.pow(0.3, dt); e.rotation += dt * 2 * (e.dir || 1);
+      if (Math.random() < 0.3) this.fx.emit(b.center.x + rand(-4, 4), b.bottom, { n: 1, angle: Math.PI / 2, spread: 0.3, speed: [10, 30], life: [0.2, 0.4], size: [2, 1], cols: [0x9a60ff, 0xe0c8ff], add: true });
+      if (e.gravT <= 0) { e.gravT = 0; b.setAllowGravity(true); b.setVelocityY(TUNE.GRAV.slam); e.gravSlam = true; e.slamT = 1.2; }
+      return;
+    }
+    e.slamT -= dt;
+    if (b.blocked.down || b.touching.down || e.slamT <= 0) {
+      e.gravSlam = false; e.rotation = 0;
+      if (e.slamT > 0) {
+        this.fxDust(b.center.x, b.bottom, 8); this.shake(90, 0.006); Sfx.stomp(); this.paintSplatAround(b.center.x, b.bottom - 1, 6);
+        this.damageEnemy(e, TUNE.GRAV.slamDmg, 0, 1, 'crush');
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- pinball cannon ----
+  // A heavy steel ball (560 px/s, light gravity) that bounces off everything for 5 s. 16 a hit, +6 for every bounce
+  // so far (10 max), scaled by its speed; it caroms off foes too and glows hotter as the count climbs. Three out at
+  // most: a fourth recycles the oldest. 700 ms.
+  firePinball(now, ox, oy, a, mx, my) {
+    const T = TUNE.PINBALL;
+    let ball = this.balls.getFirstDead(false);
+    if (!ball) { ball = this.ballList.filter(o => o.active).sort((p, q) => p.born - q.born)[0]; if (!ball) return; }
+    this.stats.shots++;
+    ball.enableBody(true, ox, oy, true, true);
+    ball.body.setCircle(4); ball.body.setAllowGravity(true); ball.body.setGravityY(-this.physics.world.gravity.y * 0.45); ball.body.setBounce(T.bounce, T.bounce);
+    ball.setVelocity(Math.cos(a) * T.speed, Math.sin(a) * T.speed);
+    Object.assign(ball, { born: now, life: T.life, bounces: 0, hitMap: new Map(), pvx: Math.cos(a) * T.speed, pvy: Math.sin(a) * T.speed, slowT: 0, called: false });
+    ball.setTint(0xffffff);
+    Sfx.pinball(0); this.recoil = 6; this.muzzle(mx, my, a, 1.1, 60); this.fxSparks(mx, my, 5, a, 0.6, [60, 200]); this.shake(70, 0.004); this.addKick(-Math.cos(a) * 4, -Math.sin(a) * 4);
+  }
+  onBallHit(ball, e) {
+    if (!ball.active || !e.alive || e.under) return;
+    const now = this.time.now, T = TUNE.PINBALL; if ((ball.hitMap.get(e) || 0) > now) return; ball.hitMap.set(e, now + 220);
+    const v = ball.body.velocity, sp = Math.hypot(v.x, v.y) || 1, ux = v.x / sp, uy = v.y / sp;
+    this.damageEnemy(e, (T.dmg + T.perBounce * ball.bounces) * clamp(sp / 420, 0.5, 1.3), ux, uy, 'pellet');
+    if (e.alive && e.def.kb > 0 && e.kind !== 'boss') { e.body.velocity.x += ux * 260 * e.def.kb; e.body.velocity.y -= 120 * e.def.kb; }
+    const b = e.body, nx0 = ball.x - b.center.x, ny0 = ball.y - b.center.y, nl = Math.hypot(nx0, ny0) || 1, nx = nx0 / nl, ny = ny0 / nl;   // carom off it
+    const dot = v.x * nx + v.y * ny; if (dot < 0) { v.x -= 2 * dot * nx; v.y -= 2 * dot * ny; }
+    v.x *= 0.9; v.y *= 0.9; ball.pvx = v.x; ball.pvy = v.y;
+    ball.bounces = Math.min(T.maxBounce, ball.bounces + 1);
+    Sfx.pinball(ball.bounces); this.hitStop(25); this.fxSparks(ball.x, ball.y, 5, Math.atan2(ny, nx), 1, [80, 220]);
+    if (ball.bounces >= 6 && !ball.called) { ball.called = true; BUS.emit('callout', 'BUMPER x' + ball.bounces); this.addStyle(30); }
+  }
+  updateBalls(dt, now) {
+    const T = TUNE.PINBALL;
+    for (const ball of this.ballList) {
+      if (!ball.active) continue;
+      ball.life -= dt;
+      const b = ball.body, v = b.velocity, sp = Math.hypot(v.x, v.y), onG = b.blocked.down || b.touching.down;
+      const flipX = Math.sign(v.x) !== Math.sign(ball.pvx) && Math.abs(ball.pvx) > 80, flipY = Math.sign(v.y) !== Math.sign(ball.pvy) && Math.abs(ball.pvy) > 80;
+      if (flipX || flipY) { ball.bounces = Math.min(T.maxBounce, ball.bounces + 1); Sfx.pinball(ball.bounces); this.fxSparks(ball.x, ball.y, 3, flipY ? (v.y < 0 ? -Math.PI / 2 : Math.PI / 2) : (v.x < 0 ? Math.PI : 0), 1.2, [40, 140]); }
+      ball.pvx = v.x; ball.pvy = v.y;
+      if (onG) v.x *= Math.pow(0.5, dt);                                  // it rolls to a stop on the floor
+      ball.slowT = sp < 40 && onG ? ball.slowT + dt : 0;
+      if (ball.life <= 0 || ball.slowT > 0.6) { this.fx.emit(ball.x, ball.y, { n: 6, speed: [20, 80], life: [0.2, 0.4], size: [2, 1], cols: [0xc8d0da, 0xffffff], add: true }); ball.disableBody(true, true); continue; }
+      ball.rotation += v.x * dt * 0.08;
+      const heat = ball.bounces / T.maxBounce;                              // hotter with every bounce: steel, orange, white-hot
+      ball.setTint(Phaser.Display.Color.GetColor(255, Math.round(255 - 130 * heat), Math.round(255 - 230 * heat)));
+      if (sp > 120 && Math.random() < 0.6) this.fx.emit(ball.x, ball.y, { n: 1, speed: [0, 0], life: [0.08, 0.16], size: [3, 1], cols: heat > 0.5 ? [0xffa030, 0xff5a1a] : [0xc8d0da, 0x8a94a0], add: true });
+      for (const k of this.barrelList) if (k.active && Math.abs(k.x - ball.x) < 8 && Math.abs(k.y - ball.y) < 10 && !(ball.hitMap.get(k) > now)) { ball.hitMap.set(k, now + 300); this.damageBarrel(k, 20 + 6 * ball.bounces); }
+    }
+  }
+
+  // ---------------------------------------------------------------- wraith ----
+  // A shroud that drifts straight at you through walls and floors (50 px/s), faint while it's inside them. In the
+  // open and within 85 px it shrieks (0.45 s), then lunges (300 px/s, 14 on a touch) and fades back for 1.4 s.
+  updateWraith(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.WRAITH, b = e.body;
+    e.aggro = true; e.inWall = this.solidAt(b.center.x, b.center.y);
+    if (e.ai === 'tell') {
+      b.setVelocity(b.velocity.x * 0.8, b.velocity.y * 0.8); e.fr = 'tell';
+      if (now >= e.aiUntil) { const a = Math.atan2(dy, dx); b.setVelocity(Math.cos(a) * T.lunge, Math.sin(a) * T.lunge); e.ai = 'lunge'; e.aiUntil = now + T.lungeMs; }
+      return;
+    }
+    if (e.ai === 'lunge') { e.fr = 'tell'; if (now >= e.aiUntil) { e.ai = 'fade'; e.aiUntil = now + T.fadeMs; } return; }
+    e.fr = Math.floor(now / 160) % 2 ? 'f1' : 'f0';
+    if (e.stunT > 0) { b.setVelocity(b.velocity.x * 0.9, b.velocity.y * 0.9); return; }
+    const away = e.ai === 'fade', a = Math.atan2(dy, dx) + Math.sin(e.t * 1.7) * 0.5, sp = away ? -T.speed * 1.3 : alive ? T.speed : -T.speed * 0.5;
+    b.velocity.x += (Math.cos(a) * sp - b.velocity.x) * Math.min(1, dt * 2); b.velocity.y += (Math.sin(a) * sp + Math.sin(e.t * 3) * 14 - b.velocity.y) * Math.min(1, dt * 2);
+    e.dir = dx >= 0 ? 1 : -1;
+    if ((b.center.x < 16 && b.velocity.x < 0) || (b.center.x > LW - 16 && b.velocity.x > 0)) b.velocity.x = 0;   // it stays in the arena
+    if ((b.center.y < 24 && b.velocity.y < 0) || (b.center.y > LH - 24 && b.velocity.y > 0)) b.velocity.y = 0;
+    if (away) { if (now >= e.aiUntil) e.ai = 'drift'; return; }
+    if (alive && !e.inWall && dist < T.strikeAt && now >= e.strikeOk) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.strikeOk = now + 2500; Sfx.wail(); }
+  }
+
+  // ---------------------------------------------------------------- chiller + ice ----
+  // A cryo trooper. It keeps 140-240 px off, and every ~2.8 s lobs a frost ball at your feet: it shatters into a
+  // 74 px sheet of ice for 8 s (6 and a 1.5 s chill if it lands on you). On ice you slide (a tenth of the grip);
+  // fire melts it. When it dies its tank bursts and ices the floor round it.
+  updateChiller(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.CHILLER, b = e.body, onG = b.blocked.down || b.touching.down, pb = this.player.body;
+    if (alive && !e.aggro && (e.sees || dist < 220) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    if (e.ai === 'throw') { b.velocity.x = 0; e.fr = 'throw'; if (now >= e.aiUntil) e.ai = 'walk'; return; }
+    if (e.stunT > 0) return;
+    e.cd -= dt;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
+      let want = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
+      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+      b.velocity.x = want * T.speed;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if (e.cd <= 0 && (e.sees || dist < 260) && dist < 320) {           // a lob: it doesn't need a clear line
+        e.cd = T.cd * rand(0.85, 1.15); e.ai = 'throw'; e.aiUntil = now + 420;
+        this.time.delayedCall(180, () => {
+          if (!e.alive || this.state === 'dead') return;
+          const sx = e.x + e.dir * 6, sy = b.top - 2, G = this.physics.world.gravity.y, ddx = pb.center.x - sx, ddy = pb.bottom - 4 - sy, FT = clamp(Math.hypot(ddx, ddy) / 240, 0.5, 1.1);
+          this.spawnEProj('frost', sx, sy, ddx / FT, (ddy - 0.5 * G * FT * FT) / FT); Sfx.whoosh();
+        });
+        return;
+      }
+    } else { b.velocity.x = e.dir * T.speed * 0.6; if (b.blocked.left || b.blocked.right || !this.standAt(b.center.x + e.dir * 10, b.bottom + 4)) e.dir *= -1; }
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 5; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+  spawnIce(x, y, w) {
+    const fy = this.floorBelow(x, y - 4); if (fy === null || fy - y > 70) return;
+    for (const I of this.ices) if (Math.abs(I.y - fy) < 4 && Math.abs(I.x - x) < (I.w + w) / 2 - 10) { I.x = (I.x + x) / 2; I.w = Math.min(160, Math.max(I.w, w) + 20); I.t = TUNE.CHILLER.iceT; return; }   // joins a sheet it lands on
+    this.ices.push({ x, y: fy, w, t: TUNE.CHILLER.iceT, grow: 0, glint: rand(0, 6) });
+  }
+  updateIces(dt, now) {
+    this.chillT = Math.max(0, this.chillT - dt);
+    const pb = this.player.body, g = this.iceG; g.clear(); let on = false;
+    for (let i = this.ices.length - 1; i >= 0; i--) {
+      const I = this.ices[i]; I.t -= dt; I.grow = Math.min(1, I.grow + dt * 6);
+      let melt = I.t <= 0;
+      if (!melt) for (const Q of this.puddles) if (Q.fire && Math.abs(Q.y - I.y) < 6 && Math.abs(Q.x - I.x) < (Q.w + I.w) / 2) { melt = true; break; }
+      if (melt) {                                                         // fire (or time) turns it to steam
+        this.fx.emit(I.x, I.y - 2, { n: 10, angle: -Math.PI / 2, spread: 0.8, speed: [10, 50], life: [0.4, 0.9], size: [3, 6], cols: [0xe8f4ff, 0xb8d0e0], alpha: [0.5, 0], g: -40, drag: 2 });
+        if (I.t > 0) Sfx.sizzle();
+        this.ices.splice(i, 1); continue;
+      }
+      const half = I.w / 2 * I.grow, a = Math.min(1, I.t / 0.6);
+      if (this.state !== 'dead' && Math.abs(pb.center.x - I.x) < half + 2 && Math.abs(pb.bottom - I.y) < 4) on = true;
+      g.fillStyle(0xc8f0ff, 0.55 * a).fillRect(I.x - half, I.y - 2, half * 2, 3);
+      g.fillStyle(0xffffff, 0.8 * a).fillRect(I.x - half, I.y - 2, half * 2, 1);
+      const gx = I.x - half + ((now / 12 + I.glint * 40) % (half * 2 + 30)) - 15;   // a glint sliding along
+      if (gx > I.x - half && gx < I.x + half - 2) g.fillStyle(0xffffff, a).fillRect(gx, I.y - 3, 2, 1);
+    }
+    if (on && !this.onIce) Sfx.tink();
+    this.onIce = on;
+    if (on && Math.abs(pb.velocity.x) > 60 && Math.random() < 0.3) this.fx.emit(pb.center.x, pb.bottom - 1, { n: 1, angle: -Math.PI / 2, spread: 1.2, speed: [10, 40], life: [0.15, 0.3], size: [2, 1], cols: [0xffffff, 0xc8f0ff], add: true });
+    if (this.chillT > 0 && Math.random() < 0.3) this.fx.emit(pb.center.x + rand(-4, 4), pb.center.y + rand(-8, 8), { n: 1, angle: Math.PI / 2, spread: 0.5, speed: [5, 20], life: [0.3, 0.5], size: [2, 1], cols: [0xffffff, 0x9adcff], add: true });
+  }
+
+  // ---------------------------------------------------------------- warhorn ----
+  // A squat tracked bot with a brass horn. It hangs back (170-320 px), and every ~7 s winds up (0.7 s) and blasts:
+  // every other foe within 230 px is rallied for 6 s, taking half damage (gold chevrons over them). Kill it first.
+  updateWarhorn(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.WARHORN, b = e.body, onG = b.blocked.down || b.touching.down;
+    if (alive && !e.aggro && (e.sees || dist < 260) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'roll';
+    if (e.ai === 'tell') { b.velocity.x = 0; e.fr = 'blow'; if (now >= e.aiUntil) { e.ai = 'roll'; this.hornBlast(e); } return; }
+    if (e.stunT > 0) return;
+    e.cd -= dt;
+    if (e.aggro) {
+      if (e.cd <= 0) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.cd = T.cd * rand(0.9, 1.1); Sfx.charge(0.4); return; }
+      e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
+      let want = ax < 170 ? -e.dir : ax > 320 ? e.dir : 0;                 // it backs off facing you
+      if (want && !this.standAt(b.center.x + want * 12, b.bottom + 4)) want = 0;
+      b.velocity.x = want * T.speed;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -220;
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+  hornBlast(e) {
+    const T = TUNE.WARHORN, now = this.time.now, cx = e.body.center.x, cy = e.body.center.y; let n = 0;
+    for (const o of this.enemies.getChildren()) {
+      if (!o.alive || o === e || o.kind === 'warhorn' || o.def.tiny || Math.hypot(o.body.center.x - cx, o.body.center.y - cy) > T.radius) continue;
+      if (!(o.rallyT > now)) n++;
+      o.rallyT = now + T.time * 1000;
+      this.spawnLight(o.body.center.x, o.body.center.y, 'ring', 0xffd040, 0.2, 0.9, 0.8, 0.2);
+    }
+    this.horns.push({ x: cx + e.dir * 8, y: cy - 4, t: 0 });
+    Sfx.warhorn(); this.shake(160, 0.004);
+    if (n >= 2 && Math.hypot(this.player.body.center.x - cx, this.player.body.center.y - cy) < 500) BUS.emit('callout', 'RALLIED');
+  }
+  updateHorns(dt) { for (let i = this.horns.length - 1; i >= 0; i--) if ((this.horns[i].t += dt) > 0.6) this.horns.splice(i, 1); }
+
   // ================================================================== mastery round ====
   // ---------------------------------------------------------------- shrink ray ----
   // A wobbling ray (hitscan, 380 px). The foe it hits shrinks to half size for 8 s: it takes x1.5, bites for half, and
@@ -9879,9 +10238,10 @@ class GameScene extends Phaser.Scene {
   endlessWave(i) {
     const E = TUNE.ENDLESS, n = Math.min(E.base + i * E.per, E.max), t2 = Math.min(0.7, 0.15 + i * 0.06), out = [];
     const rnd = this.daily ? seeded(dayKey() * 131 + i * 7919) : Math.random, pk = a => a[Math.floor(rnd() * a.length)];
-    const T1 = ['grunt', 'drone', 'stalker', 'enforcer', 'tick', 'heavy', 'sniper', 'mender', 'slagling', 'gasbag', 'sparker', 'mimic', 'creeper', 'pogo'];
+    const T1 = ['grunt', 'drone', 'stalker', 'enforcer', 'tick', 'heavy', 'sniper', 'mender', 'slagling', 'gasbag', 'sparker', 'mimic', 'creeper', 'pogo', 'grenadier', 'spikeball', 'slug'];
     const T2 = ['bulwark', 'rocketeer', 'wasp', 'sapper', 'screamer', 'cloaker', 'pyro', 'harpooner', 'tarspit', 'buzzsaw', 'roller', 'duelist', 'blinker', 'magnet',
-                'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker'];
+                'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker',
+                'para', 'lugger', 'blimp', 'strider', 'beacon', 'leech', 'wraith', 'chiller', 'warhorn'];
     while (out.length < n) {
       const kind = pk(rnd() < t2 ? T2 : T1);
       if (kind === 'linker') { out.push(['linker', 'A'], ['linker', 'A']); continue; }
@@ -10115,7 +10475,7 @@ class GameScene extends Phaser.Scene {
         for (let k = 0; k < 10; k++) { const th = k / 10 * Math.PI * 2; this.fx.emit(x, y, { n: 1, angle: th, spread: 0.1, speed: [80, 120], life: [0.15, 0.25], size: [2, 1], cols: [0xc8c0a8, 0x8a8070] }); }
         let caught = 0;
         for (const o of this.enemies.getChildren()) {
-          if (!o.alive || o.under || o.kind === 'wyrmseg') continue;
+          if (!o.alive || o.under || o.kind === 'wyrmseg' || o.kind === 'wraith') continue;
           if (Math.hypot(o.body.center.x - x, o.body.center.y - y) > W.radius + Math.max(o.body.halfWidth, o.body.halfHeight)) continue;
           const boss = o.kind === 'boss' || o.kind === 'jugg' || o.kind === 'gunship' || o.kind === 'wyrm';
           o.netT = boss ? W.hold * 0.4 : W.hold; o.netTick = 0; caught++;
@@ -11289,6 +11649,7 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'pilferer') { if (e.ai === 'seek') this.pilfer(e); return; }
     if (e.kind === 'leech') { if (e.ai === 'seek') this.latchLeech(e); return; }
     if (e.kind === 'blimp') return;
+    if (e.kind === 'wraith') { if (e.ai === 'lunge' && this.hurtPlayer(TUNE.WRAITH.dmg, e.x, { srcY: e.y })) { e.ai = 'fade'; e.aiUntil = this.time.now + TUNE.WRAITH.fadeMs; Sfx.slash(); } return; }   // it only hurts on the lunge
     if (e.shrunkT > 0) { if (this.hurtPlayer(Math.round(e.def.touch * 0.5), e.body.center.x)) { e.stunT = 0.5; } return; }   // shrunk: half a bite
     if (e.kind === 'spikeball') { if (this.hurtPlayer(TUNE.SPIKEBALL.dmg, e.x, { srcY: e.y })) { this.fxBlood(p.body.center.x, p.body.center.y, 8, 0, Math.PI * 2); Sfx.squish(); } return; }
     if (e.kind === 'beacon') return;
@@ -11437,6 +11798,7 @@ class GameScene extends Phaser.Scene {
       }
       if (e.frozen > 0) this.updateFrozen(e, dt);
       else if (e.netT > 0) this.updateNetted(e, dt, now);
+      else if (e.gravT > 0 || e.gravSlam) this.updateGravved(e, dt, now);
       else if (e.kind === 'buzzsaw') this.updateBuzzsaw(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'mimic') this.updateMimic(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'gasbag') this.updateGasbag(e, dt, now, dx, dy, dist, alive);
@@ -11448,6 +11810,9 @@ class GameScene extends Phaser.Scene {
       else if (e.kind === 'lugger') this.updateLugger(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'blimp') this.updateBlimp(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'strider') this.updateStrider(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'wraith') this.updateWraith(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'chiller') this.updateChiller(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'warhorn') this.updateWarhorn(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'para') this.updatePara(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'slug') this.updateSlug(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'leech') this.updateLeech(e, dt, now, dx, dy, dist, alive);
@@ -12229,6 +12594,15 @@ class GameScene extends Phaser.Scene {
       const S = this.sonics[i]; S.t += this.game.loop.delta / 1000; const k = S.t / 0.22; if (k >= 1) { this.sonics.splice(i, 1); continue; }
       for (let j = 0; j < 3; j++) { const r = (k + j * 0.15) * TUNE.SONIC.range; if (r > TUNE.SONIC.range) continue; g.lineStyle(2, 0xc8e0ff, (1 - k) * 0.7); g.beginPath(); g.arc(S.x, S.y, r, S.a - TUNE.SONIC.cone, S.a + TUNE.SONIC.cone); g.strokePath(); }
     }
+    for (let i = this.gravFx.length - 1; i >= 0; i--) {                  // grav pulse: a violet ring collapsing inward
+      const F = this.gravFx[i]; F.t += this.game.loop.delta / 1000; const k = F.t / 0.35; if (k >= 1) { this.gravFx.splice(i, 1); continue; }
+      g.lineStyle(3, 0x9a60ff, (1 - k) * 0.8); g.strokeCircle(F.x, F.y, TUNE.GRAV.radius * (1 - k));
+      g.lineStyle(1, 0xe0c8ff, 1 - k); g.strokeCircle(F.x, F.y, TUNE.GRAV.radius * (1 - k) * 0.6);
+    }
+    for (const H of this.horns) {                                        // warhorn blast: gold rings rolling out
+      const k = H.t / 0.6;
+      for (let j = 0; j < 2; j++) { const r = (k + j * 0.2) * TUNE.WARHORN.radius; if (r > TUNE.WARHORN.radius) continue; g.lineStyle(3 - j, 0xffd040, (1 - k) * 0.6); g.strokeCircle(H.x, H.y, r); }
+    }
     for (const B of this.bees) { g.fillStyle(0xffe040, 1).fillRect(Math.round(B.x), Math.round(B.y), 2, 1); g.fillStyle(0xffffff, 0.8).fillRect(Math.round(B.x), Math.round(B.y) - 1, 1, 1); }
     if (this.whipFx) {                                                   // the whip's crack: a bright arc that fades fast
       const W = this.whipFx, a = 1 - W.t / 0.14;
@@ -12268,6 +12642,10 @@ class GameScene extends Phaser.Scene {
       if (e.needleAngs && e.needleAngs.length) {                         // needles stuck in it, pulsing harder as it nears supercombine
         const cx = e.body.center.x, cy = e.body.center.y, r = Math.min(e.body.halfWidth, e.body.halfHeight) * 0.7, k = e.needles / TUNE.NEEDLE.stick, fl = 0.55 + 0.45 * Math.sin(now / (60 - 35 * k));
         for (const an of e.needleAngs) { const x0 = cx + Math.cos(an) * r, y0 = cy + Math.sin(an) * r; g.lineStyle(2, 0xff60d0, 0.5 * fl).lineBetween(x0, y0, x0 + Math.cos(an) * 5, y0 + Math.sin(an) * 5); g.lineStyle(1, 0xffe0f8, fl).lineBetween(x0, y0, x0 + Math.cos(an) * 4, y0 + Math.sin(an) * 4); }
+      }
+      if (e.rallyT > now) {                                              // rallied: a gold chevron bobbing over its head
+        const tx = e.body.center.x, ty = e.body.top - 5 + Math.sin(now / 150);
+        g.fillStyle(0xffd040, Math.floor(now / 90) % 4 ? 0.95 : 0.5); g.fillTriangle(tx - 3, ty - 3, tx + 3, ty - 3, tx, ty); g.fillRect(tx - 3, ty - 5, 6, 1);
       }
       if (e.def.molten) { e.glow.setPosition(e.x, e.y + 2).setScale((0.5 + e.def.tier * 0.35) * (0.9 + Math.sin(now / 120 + e.x) * 0.1)); continue; }
       if (e.kind === 'burrower') {
@@ -12352,6 +12730,14 @@ class GameScene extends Phaser.Scene {
       if (e.kind === 'echo') { e.setAlpha(0.45 + Math.random() * 0.25); e.glow.setPosition(e.x, e.y); continue; }
       if (e.kind === 'grenadier') { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 5 : 2), e.y - 8).setScale(w ? 0.5 : 0.25); continue; }
       if (e.kind === 'spikeball') { e.rotation = e.spinA; continue; }
+      if (e.kind === 'wraith') {
+        const st = e.ai === 'tell' || e.ai === 'lunge';
+        e.setAlpha(e.inWall ? 0.22 : e.ai === 'fade' ? 0.45 : st ? 1 : 0.72 + Math.sin(now / 200) * 0.1);
+        e.glow.setPosition(e.x, e.y - 2).setScale(st ? 0.8 + Math.random() * 0.2 : 0.4).setAlpha(e.inWall ? 0.3 : 0.75);
+        if (e.ai === 'lunge' || Math.random() < 0.15) this.fx.emit(e.x + rand(-4, 4), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.6, speed: [5, 25], life: [0.3, 0.6], size: [2, 1], cols: [0xd8c8ff, 0x8a6ad0], alpha: [0.6, 0], add: true });
+        continue;
+      }
+      if (e.kind === 'chiller') { if (Math.random() < 0.12) this.fx.emit(e.x - e.dir * 6, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [5, 20], life: [0.3, 0.6], size: [2, 3], cols: [0xe8f8ff, 0xb8e0f0], alpha: [0.5, 0], g: -10 }); continue; }
       if (e.kind === 'lugger') { if (e.carryImg) e.carryImg.setPosition(e.x + e.dir * 2, e.body.top - 8); continue; }
       if (e.kind === 'blimp') { e.glow.setPosition(e.x + e.dir * 4, e.body.bottom + 3).setScale(e.bombT < 0.3 ? 0.6 : 0.3); if (e.crash) e.rotation = Math.min(0.8, (e.rotation || 0) + 0.02); continue; }
       if (e.kind === 'strider') {
@@ -12610,6 +12996,7 @@ class HudScene extends Phaser.Scene {
     this.pItems = ['RESUME', 'RESTART', 'POST FX: ON', 'SHAKE: 100%', 'MUSIC: 100%', 'SFX: 100%', 'QUIT TO TITLE'].map((t, i) => new PixelLabel(this, 480, 206 + i * 30, 'hud_pi' + i, { maxChars: 14, text: t, scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
     this.wheelG = this.add.graphics().setDepth(11.5);                   // Tab: weapon wheel
     this.wheelIcons = WEAPONS.map(w => this.add.image(0, 0, 'icon_' + w.gun).setDepth(12).setVisible(false));
+    this.wheelBlurb = new PixelLabel(this, 480, 328, 'hud_wb', { maxChars: 40, scale: 1, color: '#c8d0da', originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelName = new PixelLabel(this, 480, 282, 'hud_wn', { maxChars: 16, scale: 3, color: '#ffb347', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelKey = new PixelLabel(this, 480, 306, 'hud_wk', { maxChars: 12, scale: 2, color: '#8f9bab', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
     this.pHint = new PixelLabel(this, 480, 416, 'hud_ph', { text: 'W/S PICK  :  A/D CHANGE  :  ESC BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
@@ -12628,6 +13015,7 @@ class HudScene extends Phaser.Scene {
     this.hmG = this.add.graphics().setDepth(21);
     this.hint1 = new PixelLabel(this, 480, 500, 'hud_hint1', { maxChars: 80, text: HINT1, scale: 2, color: '#9aa6b4', shadow }).setDepth(3);
     this.hint2 = new PixelLabel(this, 480, 518, 'hud_hint2', { maxChars: 80, text: HINT2, scale: 2, color: '#9aa6b4', shadow }).setDepth(3);
+    this.mkLbl = new PixelLabel(this, 480, 216, 'hud_mk', { maxChars: 12, scale: 3, color: '#ffe14a', shadow, originY: 0.5 }).setDepth(5).setAlpha(0);
     this.call = new PixelLabel(this, 480, 176, 'hud_call', { maxChars: 16, scale: 5, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(5).setAlpha(0);
     this.ovG = this.add.graphics().setDepth(8);
     this.ovTitle = new PixelLabel(this, 480, 164, 'hud_ovt', { maxChars: 16, scale: 7, rows: WIN_ROWS, shadow, originY: 0.5 }).setDepth(9);
@@ -12672,7 +13060,7 @@ class HudScene extends Phaser.Scene {
     this.lblCount.setText(String(this.count));
     const on = (ev, fn) => { BUS.on(ev, fn, this); this.events.once('shutdown', () => BUS.off(ev, fn, this)); };
     on('reset', this.onReset); on('hp', this.onHp); on('weapon', this.applyWeapon); on('enemies', this.onCount);
-    on('callout', this.callout); on('over', this.showOver); on('aim', this.onAim);
+    on('callout', this.callout); on('multikill', this.showMulti); on('over', this.showOver); on('aim', this.onAim);
     on('combo', this.onCombo); on('hitmark', this.onHitmark); on('flash', this.onFlash);
     on('wave', this.onWave); on('mines', this.onMines); on('minibar', this.onMinibar); on('splat', this.onSplat); on('rankup', this.onRankUp); on('boss', this.onBoss);
     on('dmgdir', this.onDmgDir); on('wavecard', this.onWaveCard); on('pause', this.onPause);
@@ -12782,7 +13170,7 @@ class HudScene extends Phaser.Scene {
   }
   drawWheel(gs) {                                                      // radial weapon picker (hold Tab): time crawls while it's open
     const on = !!(gs && gs.sys.isActive() && gs.wheelOn), g = this.wheelG; g.clear();
-    this.wheelIcons.forEach(o => o.setVisible(on)); this.wheelName.setVisible(on); this.wheelKey.setVisible(on);
+    this.wheelIcons.forEach(o => o.setVisible(on)); this.wheelName.setVisible(on); this.wheelKey.setVisible(on); this.wheelBlurb.setVisible(on);
     if (!on) return;
     const cx = VIEW_W / 2, cy = VIEW_H / 2 + 10, N = WEAPONS.length, R0 = 206, sel = gs.wheelSel;
     g.fillStyle(0x000000, 0.45); g.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -12797,7 +13185,7 @@ class HudScene extends Phaser.Scene {
       this.wheelIcons[i].setPosition(x, y).setScale((s2 ? 1.5 : 1) * Math.min(1, 26 / GUNS[WEAPONS[i].gun].w)).setAlpha(s2 ? 1 : i === gs.weapon ? 0.9 : gs.locked && gs.locked.has(i) ? 0.15 : 0.5);
       const st = masteryStars(WEAPONS[i].id); for (let k = 0; k < st; k++) { g.fillStyle(0xffd040, 1); g.fillRect(x - 5 + k * 4, y + 11, 2, 2); }   // mastery pips
     }
-    this.wheelName.setText(WEAPONS[sel].name);
+    this.wheelName.setText(WEAPONS[sel].name); this.wheelBlurb.setText(BLURBS[WEAPONS[sel].id] || '');
     const ms = masteryStars(WEAPONS[sel].id); this.wheelKey.setText((SLOT_KEYS[sel].trim() ? 'KEY ' + SLOT_KEYS[sel] : 'WHEEL') + '  ' + '*'.repeat(ms) + '-'.repeat(3 - ms));
   }
   drawWaveCard(dt) {
@@ -12893,6 +13281,13 @@ class HudScene extends Phaser.Scene {
     this.weapon = i;
     this.lblWeapon.setText(WEAPONS[i].name);
     this.slotIcons.forEach((ic, j) => ic.setAlpha(j === i ? 1 : 0.4));
+  }
+  showMulti(name, n) {                                                  // DOUBLE KILL ... MASSACRE: punches in under the callout
+    if (this.overOn) return;
+    this.tweens.killTweensOf(this.mkLbl);
+    this.mkLbl.setStyle({ color: ['#ffe14a', '#ffe14a', '#ffe14a', '#ffb347', '#ff7a2a', '#ff4a2a'][n] || '#ff3040' }).setText(name).setAlpha(1).setScale(4.6).setAngle(rand(-5, 5));
+    this.tweens.add({ targets: this.mkLbl, scale: 3, angle: 0, duration: 180, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: this.mkLbl, alpha: 0, delay: 900, duration: 350 });
   }
   callout(txt) {
     if (this.overOn) return;

@@ -1473,5 +1473,60 @@
    "6cbd2db9a78e0c5c"
   ],
   "rate": "40k"
+ },
+ "gravPulse": {
+  "ids": [
+   "3",
+   "4"
+  ],
+  "wav": [
+   "9c210592e44983ba",
+   "0c40e6e2996bd75a"
+  ],
+  "rate": "40k"
+ },
+ "pinball": {
+  "ids": [
+   "3",
+   "0"
+  ],
+  "wav": [
+   "ee34df32d7ad6dfe",
+   "6e24a5646b1872e4"
+  ],
+  "rate": "40k"
+ },
+ "wail": {
+  "ids": [
+   "2",
+   "3"
+  ],
+  "wav": [
+   "54f8e63a280efd10",
+   "8df39629e67d34b7"
+  ],
+  "rate": "40k"
+ },
+ "iceForm": {
+  "ids": [
+   "1",
+   "2"
+  ],
+  "wav": [
+   "1047e46b62ade4fe",
+   "e1a4161ab01ecb9f"
+  ],
+  "rate": "40k"
+ },
+ "warhorn": {
+  "ids": [
+   "4",
+   "5"
+  ],
+  "wav": [
+   "ac46e20464edbe32",
+   "abeda1de063fe31c"
+  ],
+  "rate": "40k"
  }
 }

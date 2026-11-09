@@ -9398,5 +9398,319 @@
    "clap": 0.0224,
    "score": -0.0576
   }
+ ],
+ "gravPulse": [
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.344721,
+   "prompt": "a low sci-fi energy implosion",
+   "clap": 0.4583,
+   "score": 0.4583
+  },
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.374765,
+   "prompt": "a deep sci-fi gravity pulse, a reversed whoomp",
+   "clap": 0.418,
+   "score": 0.418
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.306669,
+   "prompt": "a deep sci-fi gravity pulse, a reversed whoomp",
+   "clap": 0.3667,
+   "score": 0.3667
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.369915,
+   "prompt": "a deep sci-fi gravity pulse, a reversed whoomp",
+   "clap": 0.3591,
+   "score": 0.3591
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.458542,
+   "prompt": "a low sci-fi energy implosion",
+   "clap": 0.3441,
+   "score": 0.3441
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.342362,
+   "prompt": "a deep sci-fi gravity pulse, a reversed whoomp",
+   "clap": 0.3218,
+   "score": 0.3218
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.209659,
+   "prompt": "a low sci-fi energy implosion",
+   "clap": 0.0398,
+   "score": 0.0398
+  },
+  {
+   "id": "5",
+   "dur": 0.219,
+   "loud": 0.156081,
+   "prompt": "a low sci-fi energy implosion",
+   "clap": -0.0698,
+   "score": -0.1498
+  }
+ ],
+ "pinball": [
+  {
+   "id": "4",
+   "dur": 0.2,
+   "loud": 0.211877,
+   "prompt": "a heavy steel ball bouncing off metal, a sharp ping",
+   "clap": 0.2173,
+   "score": 0.2173
+  },
+  {
+   "id": "3",
+   "dur": 0.2,
+   "loud": 0.217918,
+   "prompt": "a pinball bumper hit, metallic ding",
+   "clap": 0.1525,
+   "score": 0.1525
+  },
+  {
+   "id": "0",
+   "dur": 0.2,
+   "loud": 0.458414,
+   "prompt": "a heavy steel ball bouncing off metal, a sharp ping",
+   "clap": 0.1076,
+   "score": 0.1076
+  },
+  {
+   "id": "7",
+   "dur": 0.2,
+   "loud": 0.251076,
+   "prompt": "a pinball bumper hit, metallic ding",
+   "clap": 0.1002,
+   "score": 0.1002
+  },
+  {
+   "id": "5",
+   "dur": 0.2,
+   "loud": 0.234732,
+   "prompt": "a pinball bumper hit, metallic ding",
+   "clap": 0.0962,
+   "score": 0.0962
+  },
+  {
+   "id": "6",
+   "dur": 0.2,
+   "loud": 0.314979,
+   "prompt": "a heavy steel ball bouncing off metal, a sharp ping",
+   "clap": 0.0046,
+   "score": 0.0046
+  },
+  {
+   "id": "2",
+   "dur": 0.2,
+   "loud": 0.379657,
+   "prompt": "a heavy steel ball bouncing off metal, a sharp ping",
+   "clap": -0.0064,
+   "score": -0.0064
+  },
+  {
+   "id": "1",
+   "dur": 0.2,
+   "loud": 0.365987,
+   "prompt": "a pinball bumper hit, metallic ding",
+   "clap": -0.0498,
+   "score": -0.0498
+  }
+ ],
+ "wail": [
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.314207,
+   "prompt": "a ghostly wail, a short eerie shriek",
+   "clap": 0.2313,
+   "score": 0.2313
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.573688,
+   "prompt": "a ghost screaming, spooky high moan",
+   "clap": 0.1638,
+   "score": 0.1638
+  },
+  {
+   "id": "7",
+   "dur": 0.7,
+   "loud": 0.465925,
+   "prompt": "a ghost screaming, spooky high moan",
+   "clap": 0.143,
+   "score": 0.143
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.524887,
+   "prompt": "a ghostly wail, a short eerie shriek",
+   "clap": 0.1379,
+   "score": 0.1379
+  },
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.448044,
+   "prompt": "a ghostly wail, a short eerie shriek",
+   "clap": 0.1159,
+   "score": 0.1159
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.34819,
+   "prompt": "a ghost screaming, spooky high moan",
+   "clap": 0.1025,
+   "score": 0.1025
+  },
+  {
+   "id": "1",
+   "dur": 0.7,
+   "loud": 0.495275,
+   "prompt": "a ghost screaming, spooky high moan",
+   "clap": 0.0736,
+   "score": 0.0736
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.48711,
+   "prompt": "a ghostly wail, a short eerie shriek",
+   "clap": 0.0604,
+   "score": 0.0604
+  }
+ ],
+ "iceForm": [
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.303879,
+   "prompt": "a sheet of ice forming with a crackle",
+   "clap": 0.1395,
+   "score": 0.1395
+  },
+  {
+   "id": "2",
+   "dur": 0.22,
+   "loud": 0.149763,
+   "prompt": "ice cracking and freezing, crystalline crackle",
+   "clap": 0.0938,
+   "score": 0.0938
+  },
+  {
+   "id": "7",
+   "dur": 0.225,
+   "loud": 0.135932,
+   "prompt": "a sheet of ice forming with a crackle",
+   "clap": 0.088,
+   "score": 0.088
+  },
+  {
+   "id": "0",
+   "dur": 0.122,
+   "loud": 0.129658,
+   "prompt": "ice cracking and freezing, crystalline crackle",
+   "clap": 0.1421,
+   "score": 0.0621
+  },
+  {
+   "id": "3",
+   "dur": 0.29,
+   "loud": 0.202072,
+   "prompt": "a sheet of ice forming with a crackle",
+   "clap": 0.0558,
+   "score": 0.0558
+  },
+  {
+   "id": "6",
+   "dur": 0.238,
+   "loud": 0.115798,
+   "prompt": "ice cracking and freezing, crystalline crackle",
+   "clap": 0.0113,
+   "score": 0.0113
+  },
+  {
+   "id": "5",
+   "dur": 0.14,
+   "loud": 0.165342,
+   "prompt": "a sheet of ice forming with a crackle",
+   "clap": 0.0759,
+   "score": -0.0041
+  },
+  {
+   "id": "4",
+   "dur": 0.102,
+   "loud": 0.121564,
+   "prompt": "ice cracking and freezing, crystalline crackle",
+   "clap": 0.038,
+   "score": -0.042
+  }
+ ],
+ "warhorn": [
+  {
+   "id": "4",
+   "dur": 1.0,
+   "loud": 0.35844,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.2549,
+   "score": 0.2549
+  },
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.467053,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.2456,
+   "score": 0.2456
+  },
+  {
+   "id": "3",
+   "dur": 1.0,
+   "loud": 0.309229,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.2289,
+   "score": 0.2289
+  },
+  {
+   "id": "1",
+   "dur": 1.0,
+   "loud": 0.348959,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.2251,
+   "score": 0.2251
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.418749,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.1016,
+   "score": 0.1016
+  },
+  {
+   "id": "2",
+   "dur": 0.383,
+   "loud": 0.515039,
+   "prompt": "a war horn blast, a deep brass horn call",
+   "clap": 0.0458,
+   "score": -0.0342
+  }
  ]
 }

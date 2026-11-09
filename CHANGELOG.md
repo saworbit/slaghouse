@@ -6,6 +6,18 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Finale round: multikills and a clearer arsenal.** Kills in quick succession chain into DOUBLE KILL, TRIPLE, QUAD,
+  PENTA and MASSACRE, punched in under the callouts with a rising sting and a beat of hit-stop. A new MASSACRE medal
+  is for a 6-kill chain. The weapon wheel shows a one-line description of the selected gun. OVERTIME now draws on
+  every enemy type, the newer ones included. The codex fits 11 to a row.
+- **Two more weapons** (wheel / Q/E). Grav bomb: a lobbed charge that floats every grounded foe nearby up into the
+  air, then slams them down. Pinball cannon: a heavy steel ball that bounces around the arena, hitting harder with
+  every bounce.
+- **Three more enemies.** Wraith: drifts through walls and floors, then shrieks and lunges. Chiller: lobs frost
+  that ices the floor, where you slide (fire melts it). Warhorn: blasts a horn that makes nearby enemies take half
+  damage for 6 s.
+- AudioGen takes for the grav pulse, pinball bounce, wraith wail, ice crackle and war horn. The bank grows to 140
+  sounds.
 - **Mastery round: weapon mastery and a daily run.** Kills with each gun count toward its mastery for good: 25, 100
   and 250 kills earn three stars, each +5% damage with that gun, shown as gold pips on the weapon wheel. **DAILY** on
   the title menu is an OVERTIME run seeded by the date (arena, two starting perks, waves and modifiers), with its own

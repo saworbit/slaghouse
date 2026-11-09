@@ -115,6 +115,12 @@ PROBES = {
  'shrink': ['a ray gun zap', 'a gunshot', 'a door slam', 'static noise'],
  'sonic': ['a deep boom', 'a gunshot', 'glass breaking', 'static noise'],
  'laser': ['a laser beam hum', 'an engine', 'rain', 'music'],
+ # finale round
+ 'gravPulse': ['a deep whoomp', 'a gunshot', 'glass breaking', 'static noise'],
+ 'pinball': ['a metal ping', 'a gunshot', 'a door slam', 'static noise'],
+ 'wail': ['a ghostly wail', 'a dog barking', 'an engine', 'static noise'],
+ 'iceForm': ['ice cracking', 'a gunshot', 'rain', 'static noise'],
+ 'warhorn': ['a horn blast', 'an engine', 'a gunshot', 'music'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

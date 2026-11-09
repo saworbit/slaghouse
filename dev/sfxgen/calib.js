@@ -80,6 +80,8 @@ window.slagCalib = async function (only) {
     powerup: one(() => S.powerup()), whip: one(() => S.whip()), bees: one(() => S.bees()),
     // mastery round
     shrink: one(() => S.shrink()), sonic: one(() => S.sonic()), laser: one(() => S.laser()),
+    // finale round
+    gravPulse: one(() => S.gravPulse()), pinball: one(() => S.pinball(0)), wail: one(() => S.wail()), iceForm: one(() => S.iceForm()), warhorn: one(() => S.warhorn()),
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };
