@@ -25,5 +25,9 @@
  "hammerSlam": ["6", "4"],
  "coilBoom": ["6", "3"],
  "ricochet": ["4", "0", "6"],
- "shockOrb": ["6", "7"]
+ "shockOrb": ["6", "7"],
+ "drillFire": ["2"],
+ "gasPop": ["4", "7"],
+ "gasBoom": ["4", "3"],
+ "slash": ["1", "2", "7"]
 }

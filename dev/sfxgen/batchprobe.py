@@ -76,6 +76,15 @@ PROBES = {
  'supercombine': ['glass shattering', 'an explosion', 'a gunshot', 'static noise'],
  'blink': ['a sci-fi teleport shimmer', 'a gunshot', 'a door slam', 'static noise'],
  'chomp': ['a monster biting', 'a door slam', 'a footstep', 'static noise'],
+ # slagforge round
+ 'drill': ['a power drill', 'a gunshot', 'a footstep', 'static noise'],
+ 'drillFire': ['a whirring launcher', 'an explosion', 'a door slam', 'static noise'],
+ 'revolver': ['a pistol gunshot', 'an explosion', 'a door slam', 'a hand clap'],
+ 'revReload': ['a gun cylinder clicking', 'a footstep', 'a bell', 'static noise'],
+ 'gasPop': ['gas hissing out', 'a gunshot', 'rain', 'static noise'],
+ 'gasBoom': ['a fiery explosion', 'thunder', 'a door slam', 'static noise'],
+ 'weld': ['electric welding crackle', 'rain', 'an engine', 'a bird'],
+ 'slash': ['a sword swish', 'a gunshot', 'wind', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

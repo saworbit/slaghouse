@@ -161,6 +161,14 @@ to wave 5, moves waves 4-6 into the second arena, and adds a difficulty select. 
 Knobs: `TUNE.BUZZSAW`, `TUNE.MAGNET`, `TUNE.TARSPIT`, `TUNE.TRACTOR`, `TUNE.ACID`, and `DIFFS` for the difficulty
 multipliers.
 
+The shockworks and slagforge rounds add the mimic, howitzer and blinker, the gasbag, welder (with turrets) and
+duelist, the furnace fire jets, and a perk pick after each wave. Points to check:
+- The duelist was tuned against a bot with perfect aim (it lasts 1-2 s against a held nailgun). A human may find
+  its sidestep too slippery; `dodge`, `dodgeCd` and the 0.25 s slip window are the knobs.
+- Perks stack: hollow points + adrenaline is x1.8 damage under 35 HP, and volatile can chain. None of it has
+  been played for real. Knobs: `PERKS`, `TUNE.VOLATILE`.
+- The fire jets fling you sideways after one tick; check you can't be juggled between two columns.
+
 **Proposed fix / acceptance**
 - Someone plays waves 2-4 at real speed and notes each death and its cause.
 - Every big hit (cloaker strike, gunship volley, firebomb) has a tell a player can react to, and the blackout still

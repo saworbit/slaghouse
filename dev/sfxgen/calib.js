@@ -64,6 +64,9 @@ window.slagCalib = async function (only) {
     // shockworks round
     shockOrb: one(() => S.shockOrb()), shockBeam: one(() => S.shockBeam()), shockCombo: one(() => S.shockCombo()), needle: one(() => S.needle()),
     supercombine: one(() => S.supercombine()), blink: one(() => S.blink()), chomp: one(() => S.chomp()),
+    // slagforge round
+    drill: one(() => S.drill()), drillFire: one(() => S.drillFire()), revolver: one(() => S.revolver()), revReload: one(() => S.revReload()),
+    gasPop: one(() => S.gasPop()), gasBoom: one(() => S.gasBoom()), weld: one(() => S.weld()), slash: one(() => S.slash()),
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };

@@ -6,6 +6,21 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Slagforge round: perk draft.** After every wave but the last you pick one of three perks (keys 1-3, click or the
+  pad) from twelve: hollow points, hair trigger, vampire, iron boots, double jump, blast shield, afterburner,
+  scavenger, showboat, volatile, adrenaline and barbed plate. They last the run, ride the lift into ARENA 02 and
+  show on the HUD.
+- **Wall slide and wall jump:** push into a wall while falling to slide down it slowly, and jump to kick off it.
+- **Last-kill cam:** the final kill of each wave gets slow-mo, a zoom punch, an impact frame and the camera on the
+  body.
+- **Two more weapons.** Drill launcher (**U**): a drill bolt that bores through crates and girders, grinds into
+  the first body it meets and then blows. Trick revolver (**I**): six hitscan rounds, fan the hammer by holding the
+  trigger, and wall shots ricochet into the nearest foe for a TRICK SHOT.
+- **Four more enemies.** Gasbag: a drifting sac that bursts into a toxic cloud, which goes up in a fireball if any
+  fire or blast reaches it. Welder: a support bot that repairs damaged machines and builds mini turrets (the
+  fourth new type). Duelist: a fencer that reads your aim, sidesteps your shots and chains up to three cuts.
+- AudioGen takes for the drill (shot and grind), revolver (shot and reload), gas pop and gas fireball, welding
+  crackle and sword slash. The bank grows to 112 sounds.
 - **Shockworks round: gamepad support.** Twin-stick play on any standard-mapping pad (left stick moves, right stick
   aims with its own crosshair, triggers fire and mine, face buttons jump / dash / kick / hook, hold LB for the
   weapon wheel), with rumble that follows the screen-shake setting. The title screen, pause menu and results screen

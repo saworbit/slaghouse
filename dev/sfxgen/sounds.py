@@ -164,4 +164,13 @@ SOUNDS = {
     'supercombine': dict(p=['crystal glass shattering with a sharp pop', 'a burst of glass shards with a small explosion'], d=1.5, max=0.6, keep=2, n=8, air=0.9),
     'blink': dict(p='a sci-fi teleport sound, a quick rising shimmer', d=1.0, max=0.35, keep=2, air=0.8),
     'chomp': dict(p=['a monster biting down hard, wet chomp', 'a big beast snapping its jaws shut'], d=1.0, max=0.3, keep=2, n=8, air=0.5),
+    # ------------------------------------------------------------------ slagforge round
+    'drill': dict(p='a power drill grinding into metal, short burst', d=1.0, max=0.25, keep=3, n=8, air=0.8),
+    'drillFire': dict(p=['a heavy bolt launched with a whirring motor', 'a pneumatic launcher firing with a spinning whine'], d=1.0, max=0.4, keep=2, n=8, air=0.7),
+    'revolver': dict(p=['a revolver gunshot, sharp loud crack', 'a magnum pistol firing'], d=1.0, max=0.45, keep=3, n=8, air=0.7),
+    'revReload': dict(p='a revolver cylinder spinning and clicking, then snapping shut', d=1.5, max=0.9, keep=2, air=0.8),
+    'gasPop': dict(p=['a balloon popping with a hiss of gas escaping', 'a pressurized gas canister bursting with a hiss'], d=1.5, max=0.6, keep=2, n=8, air=0.8),
+    'gasBoom': dict(p=['a gas explosion, a huge whoosh of flame with a deep boom', 'a fireball erupting with a roar'], d=2.0, max=1.1, keep=2, n=8, air=0.5),
+    'weld': dict(p='an arc welder crackling and buzzing', d=1.5, max=0.2, keep=3, mode='slice', air=0.9),
+    'slash': dict(p=['a sword slashing through the air, sharp swish', 'a blade swung fast with a metallic ring'], d=1.0, max=0.3, keep=3, n=8, air=0.8),
 }

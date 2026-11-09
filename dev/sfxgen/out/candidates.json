@@ -7254,5 +7254,741 @@
    "clap": -0.1323,
    "score": -0.1323
   }
+ ],
+ "drill": [
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.357984,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.1768,
+   "score": 0.1768
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.306294,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.1698,
+   "score": 0.1698
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.388247,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.1173,
+   "score": 0.1173
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.389967,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.1129,
+   "score": 0.1129
+  },
+  {
+   "id": "2",
+   "dur": 0.25,
+   "loud": 0.307394,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.107,
+   "score": 0.107
+  },
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.416354,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.0598,
+   "score": 0.0598
+  },
+  {
+   "id": "6",
+   "dur": 0.25,
+   "loud": 0.395803,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.0235,
+   "score": 0.0235
+  },
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.375158,
+   "prompt": "a power drill grinding into metal, short burst",
+   "clap": 0.0099,
+   "score": 0.0099
+  }
+ ],
+ "drillFire": [
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.256863,
+   "prompt": "a pneumatic launcher firing with a spinning whine",
+   "clap": 0.1929,
+   "score": 0.1929
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.295382,
+   "prompt": "a heavy bolt launched with a whirring motor",
+   "clap": 0.1794,
+   "score": 0.1794
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.35949,
+   "prompt": "a heavy bolt launched with a whirring motor",
+   "clap": 0.0986,
+   "score": 0.0986
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.308803,
+   "prompt": "a pneumatic launcher firing with a spinning whine",
+   "clap": 0.0584,
+   "score": 0.0584
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.28462,
+   "prompt": "a heavy bolt launched with a whirring motor",
+   "clap": 0.0528,
+   "score": 0.0528
+  },
+  {
+   "id": "0",
+   "dur": 0.163,
+   "loud": 0.086793,
+   "prompt": "a heavy bolt launched with a whirring motor",
+   "clap": 0.0134,
+   "score": 0.0134
+  },
+  {
+   "id": "3",
+   "dur": 0.36,
+   "loud": 0.270288,
+   "prompt": "a pneumatic launcher firing with a spinning whine",
+   "clap": 0.005,
+   "score": 0.005
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.332812,
+   "prompt": "a pneumatic launcher firing with a spinning whine",
+   "clap": -0.0671,
+   "score": -0.0671
+  }
+ ],
+ "revolver": [
+  {
+   "id": "0",
+   "dur": 0.445,
+   "loud": 0.26938,
+   "prompt": "a revolver gunshot, sharp loud crack",
+   "clap": 0.3239,
+   "score": 0.3239
+  },
+  {
+   "id": "2",
+   "dur": 0.45,
+   "loud": 0.201034,
+   "prompt": "a revolver gunshot, sharp loud crack",
+   "clap": 0.3124,
+   "score": 0.3124
+  },
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.319066,
+   "prompt": "a revolver gunshot, sharp loud crack",
+   "clap": 0.3016,
+   "score": 0.3016
+  },
+  {
+   "id": "7",
+   "dur": 0.45,
+   "loud": 0.164334,
+   "prompt": "a magnum pistol firing",
+   "clap": 0.2802,
+   "score": 0.2802
+  },
+  {
+   "id": "6",
+   "dur": 0.45,
+   "loud": 0.336675,
+   "prompt": "a revolver gunshot, sharp loud crack",
+   "clap": 0.2641,
+   "score": 0.2641
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.125662,
+   "prompt": "a magnum pistol firing",
+   "clap": 0.242,
+   "score": 0.242
+  },
+  {
+   "id": "3",
+   "dur": 0.382,
+   "loud": 0.168232,
+   "prompt": "a magnum pistol firing",
+   "clap": 0.2412,
+   "score": 0.2412
+  },
+  {
+   "id": "5",
+   "dur": 0.273,
+   "loud": 0.179523,
+   "prompt": "a magnum pistol firing",
+   "clap": 0.2257,
+   "score": 0.2257
+  }
+ ],
+ "revReload": [
+  {
+   "id": "0",
+   "dur": 0.609,
+   "loud": 0.244642,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.2608,
+   "score": 0.2608
+  },
+  {
+   "id": "1",
+   "dur": 0.379,
+   "loud": 0.213242,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.2553,
+   "score": 0.2553
+  },
+  {
+   "id": "2",
+   "dur": 0.15,
+   "loud": 0.225595,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.3001,
+   "score": 0.2201
+  },
+  {
+   "id": "4",
+   "dur": 0.045,
+   "loud": 0.159351,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.21,
+   "score": 0.13
+  },
+  {
+   "id": "5",
+   "dur": 0.345,
+   "loud": 0.177204,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.2095,
+   "score": 0.1295
+  },
+  {
+   "id": "3",
+   "dur": 0.344,
+   "loud": 0.160104,
+   "prompt": "a revolver cylinder spinning and clicking, then snapping shut",
+   "clap": 0.0982,
+   "score": 0.0182
+  }
+ ],
+ "gasPop": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.369196,
+   "prompt": "a balloon popping with a hiss of gas escaping",
+   "clap": 0.3303,
+   "score": 0.3303
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.233682,
+   "prompt": "a balloon popping with a hiss of gas escaping",
+   "clap": 0.2903,
+   "score": 0.2903
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.378021,
+   "prompt": "a pressurized gas canister bursting with a hiss",
+   "clap": 0.2633,
+   "score": 0.2633
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.361204,
+   "prompt": "a pressurized gas canister bursting with a hiss",
+   "clap": 0.2452,
+   "score": 0.2452
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.412019,
+   "prompt": "a pressurized gas canister bursting with a hiss",
+   "clap": 0.2184,
+   "score": 0.2184
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.350797,
+   "prompt": "a balloon popping with a hiss of gas escaping",
+   "clap": 0.2058,
+   "score": 0.2058
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.393184,
+   "prompt": "a pressurized gas canister bursting with a hiss",
+   "clap": 0.1197,
+   "score": 0.1197
+  },
+  {
+   "id": "2",
+   "dur": 0.05,
+   "loud": 0.176063,
+   "prompt": "a balloon popping with a hiss of gas escaping",
+   "clap": 0.062,
+   "score": -0.018
+  }
+ ],
+ "gasBoom": [
+  {
+   "id": "4",
+   "dur": 1.1,
+   "loud": 0.327803,
+   "prompt": "a gas explosion, a huge whoosh of flame with a deep boom",
+   "clap": 0.4435,
+   "score": 0.4435
+  },
+  {
+   "id": "6",
+   "dur": 1.1,
+   "loud": 0.358939,
+   "prompt": "a gas explosion, a huge whoosh of flame with a deep boom",
+   "clap": 0.4075,
+   "score": 0.4075
+  },
+  {
+   "id": "2",
+   "dur": 1.1,
+   "loud": 0.225574,
+   "prompt": "a gas explosion, a huge whoosh of flame with a deep boom",
+   "clap": 0.4015,
+   "score": 0.4015
+  },
+  {
+   "id": "0",
+   "dur": 1.1,
+   "loud": 0.251355,
+   "prompt": "a gas explosion, a huge whoosh of flame with a deep boom",
+   "clap": 0.3853,
+   "score": 0.3853
+  },
+  {
+   "id": "5",
+   "dur": 1.1,
+   "loud": 0.335947,
+   "prompt": "a fireball erupting with a roar",
+   "clap": 0.3092,
+   "score": 0.3092
+  },
+  {
+   "id": "7",
+   "dur": 1.1,
+   "loud": 0.413622,
+   "prompt": "a fireball erupting with a roar",
+   "clap": 0.2637,
+   "score": 0.2637
+  },
+  {
+   "id": "1",
+   "dur": 1.1,
+   "loud": 0.258503,
+   "prompt": "a fireball erupting with a roar",
+   "clap": 0.2569,
+   "score": 0.2569
+  },
+  {
+   "id": "3",
+   "dur": 1.1,
+   "loud": 0.315088,
+   "prompt": "a fireball erupting with a roar",
+   "clap": 0.2376,
+   "score": 0.2376
+  }
+ ],
+ "weld": [
+  {
+   "id": "0-0",
+   "dur": 0.2,
+   "loud": 0.149407,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.3813,
+   "score": 0.3813
+  },
+  {
+   "id": "1-4",
+   "dur": 0.19,
+   "loud": 0.139398,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.2883,
+   "score": 0.2883
+  },
+  {
+   "id": "5-1",
+   "dur": 0.186,
+   "loud": 0.132527,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.2491,
+   "score": 0.2491
+  },
+  {
+   "id": "1-2",
+   "dur": 0.116,
+   "loud": 0.150255,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.2152,
+   "score": 0.2152
+  },
+  {
+   "id": "0-5",
+   "dur": 0.116,
+   "loud": 0.227446,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1889,
+   "score": 0.1889
+  },
+  {
+   "id": "1-5",
+   "dur": 0.098,
+   "loud": 0.168811,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1749,
+   "score": 0.1749
+  },
+  {
+   "id": "0-1",
+   "dur": 0.15,
+   "loud": 0.199981,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1707,
+   "score": 0.1707
+  },
+  {
+   "id": "4-2",
+   "dur": 0.118,
+   "loud": 0.198268,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1543,
+   "score": 0.1543
+  },
+  {
+   "id": "5-2",
+   "dur": 0.12,
+   "loud": 0.250274,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1502,
+   "score": 0.1502
+  },
+  {
+   "id": "3-4",
+   "dur": 0.106,
+   "loud": 0.134024,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1109,
+   "score": 0.1109
+  },
+  {
+   "id": "3-0",
+   "dur": 0.2,
+   "loud": 0.16353,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1081,
+   "score": 0.1081
+  },
+  {
+   "id": "1-3",
+   "dur": 0.076,
+   "loud": 0.117223,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.179,
+   "score": 0.099
+  },
+  {
+   "id": "3-2",
+   "dur": 0.04,
+   "loud": 0.138578,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.172,
+   "score": 0.092
+  },
+  {
+   "id": "5-4",
+   "dur": 0.064,
+   "loud": 0.204176,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1531,
+   "score": 0.0731
+  },
+  {
+   "id": "2-4",
+   "dur": 0.05,
+   "loud": 0.237786,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1476,
+   "score": 0.0676
+  },
+  {
+   "id": "0-3",
+   "dur": 0.054,
+   "loud": 0.183249,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1349,
+   "score": 0.0549
+  },
+  {
+   "id": "5-0",
+   "dur": 0.054,
+   "loud": 0.110131,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1143,
+   "score": 0.0343
+  },
+  {
+   "id": "2-5",
+   "dur": 0.04,
+   "loud": 0.111533,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1053,
+   "score": 0.0253
+  },
+  {
+   "id": "2-1",
+   "dur": 0.044,
+   "loud": 0.133992,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1042,
+   "score": 0.0242
+  },
+  {
+   "id": "0-2",
+   "dur": 0.048,
+   "loud": 0.157371,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.1033,
+   "score": 0.0233
+  },
+  {
+   "id": "1-0",
+   "dur": 0.066,
+   "loud": 0.181848,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0822,
+   "score": 0.0022
+  },
+  {
+   "id": "2-2",
+   "dur": 0.046,
+   "loud": 0.128543,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0755,
+   "score": -0.0045
+  },
+  {
+   "id": "2-3",
+   "dur": 0.07,
+   "loud": 0.22865,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0614,
+   "score": -0.0186
+  },
+  {
+   "id": "3-5",
+   "dur": 0.068,
+   "loud": 0.112141,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0613,
+   "score": -0.0187
+  },
+  {
+   "id": "3-1",
+   "dur": 0.078,
+   "loud": 0.10203,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.059,
+   "score": -0.021
+  },
+  {
+   "id": "5-5",
+   "dur": 0.088,
+   "loud": 0.308418,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": -0.0227,
+   "score": -0.0227
+  },
+  {
+   "id": "4-4",
+   "dur": 0.042,
+   "loud": 0.237139,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0482,
+   "score": -0.0318
+  },
+  {
+   "id": "3-3",
+   "dur": 0.074,
+   "loud": 0.125973,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.048,
+   "score": -0.032
+  },
+  {
+   "id": "1-1",
+   "dur": 0.044,
+   "loud": 0.185964,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.046,
+   "score": -0.034
+  },
+  {
+   "id": "2-0",
+   "dur": 0.044,
+   "loud": 0.149377,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0388,
+   "score": -0.0412
+  },
+  {
+   "id": "4-0",
+   "dur": 0.04,
+   "loud": 0.136801,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0378,
+   "score": -0.0422
+  },
+  {
+   "id": "4-3",
+   "dur": 0.042,
+   "loud": 0.141414,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0366,
+   "score": -0.0434
+  },
+  {
+   "id": "4-5",
+   "dur": 0.078,
+   "loud": 0.145293,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0278,
+   "score": -0.0522
+  },
+  {
+   "id": "5-3",
+   "dur": 0.044,
+   "loud": 0.195524,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0196,
+   "score": -0.0604
+  },
+  {
+   "id": "0-4",
+   "dur": 0.048,
+   "loud": 0.198775,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0132,
+   "score": -0.0668
+  },
+  {
+   "id": "4-1",
+   "dur": 0.05,
+   "loud": 0.181268,
+   "prompt": "an arc welder crackling and buzzing",
+   "clap": 0.0095,
+   "score": -0.0705
+  }
+ ],
+ "slash": [
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.343471,
+   "prompt": "a sword slashing through the air, sharp swish",
+   "clap": 0.2079,
+   "score": 0.2079
+  },
+  {
+   "id": "4",
+   "dur": 0.165,
+   "loud": 0.378256,
+   "prompt": "a sword slashing through the air, sharp swish",
+   "clap": 0.1524,
+   "score": 0.1524
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.200292,
+   "prompt": "a sword slashing through the air, sharp swish",
+   "clap": 0.1472,
+   "score": 0.1472
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.351148,
+   "prompt": "a blade swung fast with a metallic ring",
+   "clap": 0.1146,
+   "score": 0.1146
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.442855,
+   "prompt": "a blade swung fast with a metallic ring",
+   "clap": 0.031,
+   "score": 0.031
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.383082,
+   "prompt": "a blade swung fast with a metallic ring",
+   "clap": 0.0217,
+   "score": 0.0217
+  },
+  {
+   "id": "0",
+   "dur": 0.14,
+   "loud": 0.306003,
+   "prompt": "a sword slashing through the air, sharp swish",
+   "clap": 0.0141,
+   "score": 0.0141
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.378574,
+   "prompt": "a blade swung fast with a metallic ring",
+   "clap": -0.0168,
+   "score": -0.0168
+  }
  ]
 }
