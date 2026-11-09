@@ -1,8 +1,8 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 33 weapons, 50 enemy types, three arenas and six waves that
-end in a boss fight (plus an endless OVERTIME mode), a perk pick after every wave and 16 medals to collect, on Easy, Normal or Brutal, with keyboard
+pixel art, ragdolls and gibs, destructible terrain, 35 weapons, 53 enemy types (with an in-game codex), three
+arenas and six waves that end in a boss fight (plus an endless OVERTIME mode), a perk pick after every wave and 16 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -14,8 +14,9 @@ The game loads Phaser 4.2.1 from the jsDelivr CDN, so it needs an internet conne
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then go to <http://localhost:8765/slaghouse.html>, click the game, pick a difficulty with **A / D** and press
-**Enter** for the campaign or **E** for OVERTIME, the endless mode.
+Then go to <http://localhost:8765/slaghouse.html> and click the game. The title menu has CAMPAIGN, OVERTIME (the
+endless mode), CODEX (every enemy you've met), MEDALS and OPTIONS; **W / S** to choose, **Enter** to pick, **A / D**
+to change the difficulty, **E** to jump straight into OVERTIME.
 
 `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
 automatically. Both are optional; without them the game uses its built-in procedural audio.
@@ -32,7 +33,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator and plasma cutter have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines and napalm launcher have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -65,7 +66,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | I | Trick revolver (six rounds; wall shots ricochet into the nearest foe) | O | Flare gun (sticky flares that burn and light foes up in the dark) |
 | Y | Limpet launcher (tap: sticky bomb; hold: set them all off) | H | Net gun (tangles foes for 3 s; fliers drop) |
 | wheel | Chain flail (hold: whirl it round you; release: hurl it) | wheel | Orbital designator (hold to paint a spot; a sky laser follows) |
-| wheel | Plasma cutter (piercing plasma blades that slice crates) | | |
+| wheel | Plasma cutter (piercing plasma blades that slice crates) | wheel | Spider mines (crawling bombs that hunt the nearest foe) |
+| wheel | Napalm launcher (fuel cans that splash fire across the floor) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -81,15 +83,15 @@ down on a tell. Clearing an arena takes you down the lift with your health, gun,
    hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
    drops off the ceiling and a pack of sparkers that link up with live arcs.
 3. 17 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
-   (kick it back), a mimic, a gasbag, a duelist that sidesteps your shots, an armoured roller and the gunship
-   mini-boss.
+   (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a gasbag, a
+   duelist that sidesteps your shots, an armoured roller and the gunship mini-boss.
 4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a buzzsaw, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
-   EMP ring jams your gun. The furnace's fire vents go off every few seconds.
+   EMP ring jams your gun, a pogo and an acid slug. The furnace's fire vents go off every few seconds.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, an echo, a roller, a magnetron, a tar
-   spitter, a blinker and the Slag Wyrm mini-boss.
+   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, an echo, a roller, a magnetron, a beacon,
+   a tar spitter, a blinker and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,

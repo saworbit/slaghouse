@@ -6,6 +6,21 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Codex round: a title menu.** CAMPAIGN, OVERTIME, CODEX, MEDALS and OPTIONS, driven by keyboard, mouse or pad.
+  The **codex** lists all 53 enemies, each a grey silhouette until you've met it, then its sprite, name and a line
+  on how it fights (met foes are remembered). **Medals** is the gallery, earned ones in gold. **Options** sets
+  difficulty, music, SFX, screen shake and post FX.
+- **Two more weapons** (wheel / Q/E). Spider mines: little bots that land and scuttle along the floor to the nearest
+  foe before blowing. Napalm launcher: fuel cans that splash fire patches across the floor and light everything
+  near the impact.
+- **Three more enemies.** Beacon: a pylon that calls in two reinforcements unless you kill it within 3 s. Slug: an
+  acid grub whose trail and spit corrode you (you take +25% damage and glow green). Leech: latches on, drains you
+  and slows you until a dash or kick shakes it off.
+- AudioGen takes for the beacon's alarm, the slug's squelch and the leech's slurp. The bank grows to 129 sounds.
+
+### Fixed
+- Several per-run values (leech count, a claw's grip, the corrosion tint) could survive a restart, because Phaser
+  keeps a scene's properties when it restarts; they're now reset at the start of every run.
 - **Overtime round: OVERTIME, an endless mode** (E on the title screen, Y on a pad). Random waves that grow by
   two each time and get tougher (enemy HP +7% a wave), harder enemy types mixing in, a mini-boss every few waves,
   the Smelter every sixth, a random modifier now and then, a perk after every wave and a new arena every three.

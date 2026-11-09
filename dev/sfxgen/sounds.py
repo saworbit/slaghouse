@@ -190,4 +190,8 @@ SOUNDS = {
     'cutter': dict(p=['a sci-fi energy blade fired, sharp electric zing', 'a laser cutter slicing with a high pitched zip'], d=1.0, max=0.3, keep=2, n=8, air=0.9),
     'boing': dict(p='a big metal spring bouncing, a loud boing', d=1.0, max=0.4, keep=2, air=0.6),
     'snatch': dict(p=['something snatched quickly with a whoosh', 'a quick grab and a mechanical whirr'], d=1.0, max=0.35, keep=2, n=8, air=0.7),
+    # ------------------------------------------------------------------ codex round
+    'alarm': dict(p='an industrial alarm klaxon, two-tone warning siren', d=1.5, max=0.6, keep=2, air=0.6),
+    'squelch': dict(p=['a wet slimy squelch', 'a slug squishing through mud'], d=1.0, max=0.3, keep=2, n=8, air=0.6),
+    'suck': dict(p='a wet sucking slurp', d=1.0, max=0.35, keep=2, air=0.6),
 }

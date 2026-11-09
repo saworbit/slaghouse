@@ -122,6 +122,12 @@ It caught the weapon-swap cooldown bug and confirmed a full 61/61 run.
   - To test the second arena directly, restart the scene with `{ arena: 1, carry: {...} }` (see `descend()`).
   - Placing test enemies by tile needs care: several floor tiles hold crates ('x'), and an enemy spawned inside one
     never moves.
+- Notes from the later rounds (shockworks to codex):
+  - Phaser reuses the scene object across `scene.restart()`, so anything a test assigns on it (`g.startWave = () => {}`)
+    survives into the next run. Reload the page between tests that stub methods. The game itself had the same
+    trap with per-run fields (`leechN`, `clawBy`); `create()` now resets them.
+  - Keys need `_justDown` set as well as `isDown` for `JustDown` checks (jumps, weapon keys) to fire.
+  - A fake pad is easy: `navigator.getGamepads = () => [{ connected: true, buttons: [...], axes: [0, 0, 0, 0] }]`.
 
 ---
 

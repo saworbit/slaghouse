@@ -8868,5 +8868,171 @@
    "clap": 0.022,
    "score": 0.022
   }
+ ],
+ "alarm": [
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.529579,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.3547,
+   "score": 0.3547
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.59079,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.3373,
+   "score": 0.3373
+  },
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.633591,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.2284,
+   "score": 0.2284
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.570752,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.1973,
+   "score": 0.1973
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.611075,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.1682,
+   "score": 0.1682
+  },
+  {
+   "id": "0",
+   "dur": 0.17,
+   "loud": 0.698545,
+   "prompt": "an industrial alarm klaxon, two-tone warning siren",
+   "clap": 0.1689,
+   "score": 0.0889
+  }
+ ],
+ "squelch": [
+  {
+   "id": "0",
+   "dur": 0.203,
+   "loud": 0.179058,
+   "prompt": "a wet slimy squelch",
+   "clap": 0.2883,
+   "score": 0.2883
+  },
+  {
+   "id": "6",
+   "dur": 0.251,
+   "loud": 0.149576,
+   "prompt": "a wet slimy squelch",
+   "clap": 0.2295,
+   "score": 0.2295
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.137176,
+   "prompt": "a wet slimy squelch",
+   "clap": 0.2246,
+   "score": 0.2246
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.113901,
+   "prompt": "a slug squishing through mud",
+   "clap": 0.1593,
+   "score": 0.1593
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.213035,
+   "prompt": "a wet slimy squelch",
+   "clap": 0.1204,
+   "score": 0.1204
+  },
+  {
+   "id": "1",
+   "dur": 0.211,
+   "loud": 0.152002,
+   "prompt": "a slug squishing through mud",
+   "clap": 0.0905,
+   "score": 0.0905
+  },
+  {
+   "id": "7",
+   "dur": 0.27,
+   "loud": 0.228193,
+   "prompt": "a slug squishing through mud",
+   "clap": 0.0392,
+   "score": 0.0392
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.241281,
+   "prompt": "a slug squishing through mud",
+   "clap": -0.0426,
+   "score": -0.0426
+  }
+ ],
+ "suck": [
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.247656,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.248,
+   "score": 0.248
+  },
+  {
+   "id": "4",
+   "dur": 0.211,
+   "loud": 0.151199,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.1586,
+   "score": 0.1586
+  },
+  {
+   "id": "2",
+   "dur": 0.144,
+   "loud": 0.191812,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.1412,
+   "score": 0.1412
+  },
+  {
+   "id": "0",
+   "dur": 0.265,
+   "loud": 0.251257,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.1358,
+   "score": 0.1358
+  },
+  {
+   "id": "5",
+   "dur": 0.105,
+   "loud": 0.124922,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.161,
+   "score": 0.081
+  },
+  {
+   "id": "1",
+   "dur": 0.075,
+   "loud": 0.162543,
+   "prompt": "a wet sucking slurp",
+   "clap": 0.1168,
+   "score": 0.0368
+  }
  ]
 }
