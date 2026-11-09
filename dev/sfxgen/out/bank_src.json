@@ -956,5 +956,102 @@
    "992ef9b335a50990"
   ],
   "rate": "40k"
+ },
+ "tractorGrab": {
+  "ids": [
+   "6",
+   "4"
+  ],
+  "wav": [
+   "5ded8a95a048e35c",
+   "ad5589b28321af69"
+  ],
+  "rate": "40k"
+ },
+ "tractorThrow": {
+  "ids": [
+   "4",
+   "2"
+  ],
+  "wav": [
+   "174742ed4170e003",
+   "52faafeb51ac6743"
+  ],
+  "rate": "40k"
+ },
+ "tractorLoop": {
+  "ids": [
+   "3"
+  ],
+  "wav": [
+   "3f7387d83ad4f090"
+  ],
+  "rate": "40k"
+ },
+ "acidLoop": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "8b31b531368e42fb"
+  ],
+  "rate": "40k"
+ },
+ "ricochet": {
+  "ids": [
+   "4",
+   "0",
+   "6"
+  ],
+  "wav": [
+   "82d512f284cd1a9b",
+   "5b419b59cb7a098e",
+   "597ef9848151de44"
+  ],
+  "rate": "40k"
+ },
+ "magTell": {
+  "ids": [
+   "4",
+   "2"
+  ],
+  "wav": [
+   "95026a38b41f8b8a",
+   "f2b8c29be1dcf4ec"
+  ],
+  "rate": "40k"
+ },
+ "magPulse": {
+  "ids": [
+   "1",
+   "3"
+  ],
+  "wav": [
+   "d242c88372676f5c",
+   "4ed06cdca6c00079"
+  ],
+  "rate": "40k"
+ },
+ "gurgle": {
+  "ids": [
+   "5",
+   "3"
+  ],
+  "wav": [
+   "669487b1eb370971",
+   "c129b5725eb045ef"
+  ],
+  "rate": "40k"
+ },
+ "tarIgnite": {
+  "ids": [
+   "3",
+   "5"
+  ],
+  "wav": [
+   "a3ea41ad9eef3680",
+   "ff1dd3f40bf847e5"
+  ],
+  "rate": "40k"
  }
 }

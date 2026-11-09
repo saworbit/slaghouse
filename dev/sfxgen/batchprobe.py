@@ -58,6 +58,16 @@ PROBES = {
  'stitch': ['an eerie electric hum', 'an engine', 'a siren', 'static noise'],
  'revive': ['a zombie groan', 'a man screaming', 'wind', 'an engine'],
  'swarmLoop': ['a swarm of bees buzzing', 'an engine', 'an electric hum', 'static noise'],
+ # furnace round
+ 'tractorGrab': ['an electric power up whoop', 'a gunshot', 'a door slam', 'static noise'],
+ 'tractorThrow': ['a heavy whoosh and thump', 'a gunshot', 'glass breaking', 'static noise'],
+ 'tractorLoop': ['an electrical hum', 'an engine running', 'wind', 'static noise'],
+ 'acidLoop': ['a hissing liquid spray', 'rain', 'an engine', 'static noise'],
+ 'ricochet': ['a bullet ricochet', 'a gunshot', 'a bell', 'static noise'],
+ 'magTell': ['an electric charging whine', 'a siren', 'an engine', 'static noise'],
+ 'magPulse': ['a deep electric pulse blast', 'an explosion', 'a gunshot', 'thunder'],
+ 'gurgle': ['liquid gurgling', 'a man speaking', 'an engine', 'static noise'],
+ 'tarIgnite': ['fire igniting with a whoosh', 'an explosion', 'wind', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

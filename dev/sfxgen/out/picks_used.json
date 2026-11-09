@@ -345,5 +345,40 @@
  ],
  "swarmLoop": [
   "2"
+ ],
+ "tractorGrab": [
+  "6",
+  "4"
+ ],
+ "tractorThrow": [
+  "4",
+  "2"
+ ],
+ "tractorLoop": [
+  "3"
+ ],
+ "acidLoop": [
+  "0"
+ ],
+ "ricochet": [
+  "4",
+  "0",
+  "6"
+ ],
+ "magTell": [
+  "4",
+  "2"
+ ],
+ "magPulse": [
+  "1",
+  "3"
+ ],
+ "gurgle": [
+  "5",
+  "3"
+ ],
+ "tarIgnite": [
+  "3",
+  "5"
  ]
 }

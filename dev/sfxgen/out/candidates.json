@@ -6182,5 +6182,527 @@
    "clap": 0.4097,
    "score": 0.4097
   }
+ ],
+ "tractorGrab": [
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.305841,
+   "prompt": "a sci-fi tractor beam locking on, rising electric whoop",
+   "clap": 0.2204,
+   "score": 0.2204
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.251697,
+   "prompt": "a sci-fi tractor beam locking on, rising electric whoop",
+   "clap": 0.1845,
+   "score": 0.1845
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.321496,
+   "prompt": "a sci-fi tractor beam locking on, rising electric whoop",
+   "clap": 0.1606,
+   "score": 0.1606
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.202478,
+   "prompt": "a sci-fi tractor beam locking on, rising electric whoop",
+   "clap": 0.1369,
+   "score": 0.1369
+  },
+  {
+   "id": "3",
+   "dur": 0.159,
+   "loud": 0.158221,
+   "prompt": "a magnetic clamp snapping onto metal with an electric hum",
+   "clap": 0.073,
+   "score": 0.073
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.148117,
+   "prompt": "a magnetic clamp snapping onto metal with an electric hum",
+   "clap": 0.0598,
+   "score": 0.0598
+  },
+  {
+   "id": "7",
+   "dur": 0.293,
+   "loud": 0.211753,
+   "prompt": "a magnetic clamp snapping onto metal with an electric hum",
+   "clap": 0.05,
+   "score": 0.05
+  },
+  {
+   "id": "1",
+   "dur": 0.214,
+   "loud": 0.11701,
+   "prompt": "a magnetic clamp snapping onto metal with an electric hum",
+   "clap": 0.0181,
+   "score": 0.0181
+  }
+ ],
+ "tractorThrow": [
+  {
+   "id": "4",
+   "dur": 0.45,
+   "loud": 0.33393,
+   "prompt": "a powerful whoosh launching a heavy object, deep thump",
+   "clap": 0.3455,
+   "score": 0.3455
+  },
+  {
+   "id": "2",
+   "dur": 0.45,
+   "loud": 0.334759,
+   "prompt": "a powerful whoosh launching a heavy object, deep thump",
+   "clap": 0.3205,
+   "score": 0.3205
+  },
+  {
+   "id": "0",
+   "dur": 0.45,
+   "loud": 0.275275,
+   "prompt": "a powerful whoosh launching a heavy object, deep thump",
+   "clap": 0.2127,
+   "score": 0.2127
+  },
+  {
+   "id": "7",
+   "dur": 0.45,
+   "loud": 0.281993,
+   "prompt": "a sci-fi gravity gun firing, heavy air blast",
+   "clap": 0.1291,
+   "score": 0.1291
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.307209,
+   "prompt": "a sci-fi gravity gun firing, heavy air blast",
+   "clap": 0.0865,
+   "score": 0.0865
+  },
+  {
+   "id": "5",
+   "dur": 0.36,
+   "loud": 0.268215,
+   "prompt": "a sci-fi gravity gun firing, heavy air blast",
+   "clap": -0.0127,
+   "score": -0.0127
+  },
+  {
+   "id": "3",
+   "dur": 0.069,
+   "loud": 0.230196,
+   "prompt": "a sci-fi gravity gun firing, heavy air blast",
+   "clap": 0.0212,
+   "score": -0.0588
+  }
+ ],
+ "tractorLoop": [
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.253833,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.3424,
+   "score": 0.3424
+  },
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.241259,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.2776,
+   "score": 0.2776
+  },
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.288434,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.2685,
+   "score": 0.2685
+  },
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.183604,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.2684,
+   "score": 0.2684
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.157989,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.2416,
+   "score": 0.2416
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.211319,
+   "prompt": "a sci-fi energy beam humming steadily, low electric drone",
+   "clap": 0.2107,
+   "score": 0.2107
+  }
+ ],
+ "acidLoop": [
+  {
+   "id": "0",
+   "dur": 1.5,
+   "loud": 0.282141,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.3904,
+   "score": 0.3904
+  },
+  {
+   "id": "3",
+   "dur": 1.5,
+   "loud": 0.252942,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.363,
+   "score": 0.363
+  },
+  {
+   "id": "4",
+   "dur": 1.5,
+   "loud": 0.315229,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.3397,
+   "score": 0.3397
+  },
+  {
+   "id": "2",
+   "dur": 1.5,
+   "loud": 0.276253,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.3094,
+   "score": 0.3094
+  },
+  {
+   "id": "1",
+   "dur": 1.5,
+   "loud": 0.212918,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.2761,
+   "score": 0.2761
+  },
+  {
+   "id": "5",
+   "dur": 1.5,
+   "loud": 0.216395,
+   "prompt": "a pressure washer spraying liquid, loud hissing spray",
+   "clap": 0.2713,
+   "score": 0.2713
+  }
+ ],
+ "ricochet": [
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.186271,
+   "prompt": "a bullet ricochet off metal, sharp ping",
+   "clap": 0.1803,
+   "score": 0.1803
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.234855,
+   "prompt": "a bullet ricochet off metal, sharp ping",
+   "clap": 0.0514,
+   "score": 0.0514
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.354514,
+   "prompt": "a metal saw blade glancing off steel with a screech",
+   "clap": 0.0001,
+   "score": 0.0001
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.407841,
+   "prompt": "a bullet ricochet off metal, sharp ping",
+   "clap": -0.0007,
+   "score": -0.0007
+  },
+  {
+   "id": "2",
+   "dur": 0.057,
+   "loud": 0.482057,
+   "prompt": "a bullet ricochet off metal, sharp ping",
+   "clap": 0.0645,
+   "score": -0.0155
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.326711,
+   "prompt": "a metal saw blade glancing off steel with a screech",
+   "clap": -0.0668,
+   "score": -0.0668
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.353019,
+   "prompt": "a metal saw blade glancing off steel with a screech",
+   "clap": -0.0802,
+   "score": -0.0802
+  },
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.408988,
+   "prompt": "a metal saw blade glancing off steel with a screech",
+   "clap": -0.0848,
+   "score": -0.0848
+  }
+ ],
+ "magTell": [
+  {
+   "id": "4",
+   "dur": 0.55,
+   "loud": 0.341722,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.3173,
+   "score": 0.3173
+  },
+  {
+   "id": "2",
+   "dur": 0.55,
+   "loud": 0.706135,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.2316,
+   "score": 0.2316
+  },
+  {
+   "id": "5",
+   "dur": 0.55,
+   "loud": 0.303195,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.1888,
+   "score": 0.1888
+  },
+  {
+   "id": "3",
+   "dur": 0.55,
+   "loud": 0.324093,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.1339,
+   "score": 0.1339
+  },
+  {
+   "id": "0",
+   "dur": 0.55,
+   "loud": 0.409274,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.1053,
+   "score": 0.1053
+  },
+  {
+   "id": "1",
+   "dur": 0.55,
+   "loud": 0.467461,
+   "prompt": "a sci-fi energy weapon charging up, rising electric whine",
+   "clap": 0.0105,
+   "score": 0.0105
+  }
+ ],
+ "magPulse": [
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.407623,
+   "prompt": "a sci-fi shockwave thump with electric crackle",
+   "clap": 0.3038,
+   "score": 0.3038
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.308392,
+   "prompt": "a sci-fi shockwave thump with electric crackle",
+   "clap": 0.2949,
+   "score": 0.2949
+  },
+  {
+   "id": "6",
+   "dur": 0.5,
+   "loud": 0.382277,
+   "prompt": "a deep electromagnetic pulse blast, heavy whump",
+   "clap": 0.2922,
+   "score": 0.2922
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.374899,
+   "prompt": "a deep electromagnetic pulse blast, heavy whump",
+   "clap": 0.2689,
+   "score": 0.2689
+  },
+  {
+   "id": "4",
+   "dur": 0.416,
+   "loud": 0.305737,
+   "prompt": "a deep electromagnetic pulse blast, heavy whump",
+   "clap": 0.2264,
+   "score": 0.2264
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.182908,
+   "prompt": "a sci-fi shockwave thump with electric crackle",
+   "clap": 0.2156,
+   "score": 0.2156
+  },
+  {
+   "id": "2",
+   "dur": 0.253,
+   "loud": 0.26377,
+   "prompt": "a deep electromagnetic pulse blast, heavy whump",
+   "clap": 0.1614,
+   "score": 0.1614
+  },
+  {
+   "id": "7",
+   "dur": 0.341,
+   "loud": 0.674458,
+   "prompt": "a sci-fi shockwave thump with electric crackle",
+   "clap": 0.0251,
+   "score": 0.0251
+  }
+ ],
+ "gurgle": [
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.258345,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": 0.3138,
+   "score": 0.3138
+  },
+  {
+   "id": "3",
+   "dur": 0.372,
+   "loud": 0.216336,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": 0.2581,
+   "score": 0.2581
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.201065,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": 0.0643,
+   "score": 0.0643
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.255835,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": 0.0067,
+   "score": 0.0067
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.378353,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": 0.0033,
+   "score": 0.0033
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.353547,
+   "prompt": "thick liquid gurgling and bubbling up a pipe",
+   "clap": -0.026,
+   "score": -0.026
+  }
+ ],
+ "tarIgnite": [
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.11734,
+   "prompt": "flammable liquid igniting, a big whoomp of flames",
+   "clap": 0.3109,
+   "score": 0.3109
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.266862,
+   "prompt": "flammable liquid igniting, a big whoomp of flames",
+   "clap": 0.255,
+   "score": 0.255
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.33828,
+   "prompt": "a pool of gasoline catching fire with a loud whoosh",
+   "clap": 0.2058,
+   "score": 0.2058
+  },
+  {
+   "id": "7",
+   "dur": 0.7,
+   "loud": 0.197393,
+   "prompt": "flammable liquid igniting, a big whoomp of flames",
+   "clap": 0.1916,
+   "score": 0.1916
+  },
+  {
+   "id": "1",
+   "dur": 0.7,
+   "loud": 0.336914,
+   "prompt": "flammable liquid igniting, a big whoomp of flames",
+   "clap": 0.1446,
+   "score": 0.1446
+  },
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.354565,
+   "prompt": "a pool of gasoline catching fire with a loud whoosh",
+   "clap": 0.1397,
+   "score": 0.1397
+  },
+  {
+   "id": "2",
+   "dur": 0.034,
+   "loud": 0.172121,
+   "prompt": "a pool of gasoline catching fire with a loud whoosh",
+   "clap": -0.0674,
+   "score": -0.1474
+  },
+  {
+   "id": "0",
+   "dur": 0.038,
+   "loud": 0.195164,
+   "prompt": "a pool of gasoline catching fire with a loud whoosh",
+   "clap": -0.1385,
+   "score": -0.2185
+  }
  ]
 }

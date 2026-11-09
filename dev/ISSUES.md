@@ -115,6 +115,13 @@ It caught the weapon-swap cooldown bug and confirmed a full 61/61 run.
   - `renderer.snapshot()` only resolves after a rendered frame, so step at least one frame before awaiting it.
   - A hidden preview pane fires `visibilitychange`, which now pauses the run; stub `pauseGame` while testing.
   - A full six-wave bot run (all 18 weapons, dash, kicks) finished 88/88 with no errors.
+- Notes from the furnace-round session:
+  - A naive bot (aim at the nearest foe, walk toward it, jump when blocked) gets stuck behind ARENA 02's pillar and
+    the arena 1 plateau. It needs an unstick rule: after 5 s with no line of sight to any enemy, teleport to an open
+    tile with floor near the nearest one. With that, a run with all 23 weapons cleared both arenas, 88/88, no errors.
+  - To test the second arena directly, restart the scene with `{ arena: 1, carry: {...} }` (see `descend()`).
+  - Placing test enemies by tile needs care: several floor tiles hold crates ('x'), and an enemy spawned inside one
+    never moves.
 
 ---
 
@@ -143,6 +150,16 @@ The crucible round adds a mirror knight to wave 2, a stitcher to wave 3, a hive 
 mini-boss to wave 5, plus executions and health orbs (a new source of healing). Knobs: `TUNE.MIRROR`, `TUNE.HIVE`,
 `TUNE.GNAT`, `TUNE.STITCH`, `TUNE.WYRM`, `TUNE.EXECUTE`. The results-screen grade weights (in `showOver`) are a
 first guess too.
+
+The furnace round adds a tar spitter to wave 2, buzzsaws to waves 3-4, magnetrons to waves 4-5 and a tar spitter
+to wave 5, moves waves 4-6 into the second arena, and adds a difficulty select. Points to check at real speed:
+- In a low pocket (under a girder) a hostile buzzsaw hit the player 6 times in 3 s before it got a 0.8 s daze and a
+  1.2 s re-hit window after each hit. Check it is now fair, and that kicking it back is easy to time.
+- The magnetron's field makes every bullet weapon miss (bend 22 rad/s at the centre). That is the intent (use beams,
+  blasts, the kick or a thrown object), but check that players read it; a SHOTS DEFLECTED callout fires once.
+- Tar (x0.5 run speed, x0.72 jump) combined with the BLACKOUT on wave 2 may be harsh.
+Knobs: `TUNE.BUZZSAW`, `TUNE.MAGNET`, `TUNE.TARSPIT`, `TUNE.TRACTOR`, `TUNE.ACID`, and `DIFFS` for the difficulty
+multipliers.
 
 **Proposed fix / acceptance**
 - Someone plays waves 2-4 at real speed and notes each death and its cause.

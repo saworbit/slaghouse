@@ -57,9 +57,13 @@ window.slagCalib = async function (only) {
     execute: one(() => S.execute()), hammerSlam: one(() => S.hammerSlam(1)), flak: one(() => S.flak()), flakBurst: one(() => S.flakBurst()),
     coilBoom: one(() => S.coilBoom()), gnatPop: one(() => S.gnatPop()), stitch: one(() => S.stitch()), revive: one(() => S.revive()),
     swarmLoop: [() => S.swarmSet(1), 1.6, true, 0.4],
+    // furnace round
+    tractorGrab: one(() => S.tractorGrab()), tractorThrow: one(() => S.tractorThrow()), ricochet: one(() => S.ricochet(1)), magTell: one(() => S.magTell()),
+    magPulse: one(() => S.magPulse()), gurgle: one(() => S.gurgle()), tarIgnite: one(() => S.tarIgnite()),
+    tractorLoop: [() => S.tractorSet(1), 1.6, true, 0.4], acidLoop: [() => S.acidSet(true), 1.6, true, 0.4],
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
-    hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode };
+    hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };
   const res = {};
   try {
     for (const [name, [fn, secs, loop, skip]] of Object.entries(L)) {
@@ -72,7 +76,7 @@ window.slagCalib = async function (only) {
       S.crunch.curve = curve; S.crunch.connect(S.out);
       const len = (SR * 1.5) | 0; S.noiseBuf = oc.createBuffer(1, len, SR);
       const d = S.noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-      S.last = {}; S.muted = false; S.useBank = false; S.hum = S.humSynth = S.flameNode = S.arcNode = S.cryoNode = S.lanceNode = S.ripNode = S.swarmNode = null;
+      S.last = {}; S.muted = false; S.useBank = false; S.hum = S.humSynth = S.flameNode = S.arcNode = S.cryoNode = S.lanceNode = S.ripNode = S.swarmNode = S.tractorNode = S.acidNode = null;
       fn();
       const buf = await oc.startRendering();
       const x = buf.getChannelData(0).subarray(Math.round(skip * SR));

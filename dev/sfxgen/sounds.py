@@ -146,4 +146,14 @@ SOUNDS = {
     'stitch': dict(p='an eerie electric hum, a sci-fi energy beam pulsing', d=1.5, max=0.35, keep=2, air=0.6, on=-20),
     'revive': dict(p=['a zombie groaning as it rises, eerie whoosh', 'a ghostly rising whoosh with a monster groan'], d=1.5, max=0.7, n=8, air=0.5, on=-20),
     'swarmLoop': dict(p='a swarm of angry bees buzzing loudly', d=4.0, max=1.5, mode='loop', air=0.7),
+    # ------------------------------------------------------------------ furnace round
+    'tractorGrab': dict(p=['a sci-fi tractor beam locking on, rising electric whoop', 'a magnetic clamp snapping onto metal with an electric hum'], d=1.0, max=0.35, keep=2, n=8, air=0.7),
+    'tractorThrow': dict(p=['a powerful whoosh launching a heavy object, deep thump', 'a sci-fi gravity gun firing, heavy air blast'], d=1.0, max=0.45, keep=2, n=8, air=0.6),
+    'tractorLoop': dict(p='a sci-fi energy beam humming steadily, low electric drone', d=4.0, max=1.5, mode='loop', air=0.6),
+    'acidLoop': dict(p='a pressure washer spraying liquid, loud hissing spray', d=4.0, max=1.5, mode='loop', air=0.9),
+    'ricochet': dict(p=['a bullet ricochet off metal, sharp ping', 'a metal saw blade glancing off steel with a screech'], d=1.0, max=0.3, keep=3, n=8, air=0.9),
+    'magTell': dict(p='a sci-fi energy weapon charging up, rising electric whine', d=1.5, max=0.55, keep=2, air=0.7, on=-20),
+    'magPulse': dict(p=['a deep electromagnetic pulse blast, heavy whump', 'a sci-fi shockwave thump with electric crackle'], d=1.5, max=0.5, keep=2, n=8, air=0.6),
+    'gurgle': dict(p='thick liquid gurgling and bubbling up a pipe', d=1.5, max=0.4, keep=2, air=0.5),
+    'tarIgnite': dict(p=['a pool of gasoline catching fire with a loud whoosh', 'flammable liquid igniting, a big whoomp of flames'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
 }

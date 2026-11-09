@@ -6,6 +6,28 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Furnace round: a second arena.** Clearing wave 3 drops you down the lift (rumble, i-frames, fade) into
+  **ARENA 02 :: THE FURNACE** for waves 4-6: a furnace block with a glowing grate in the middle, a tall pillar,
+  girder decks, warmer light and embers everywhere. Health, gun, stats, style and kills carry over, and the new
+  arena opens with its own title card.
+- **Difficulty select** on the title screen (**A / D**, remembered): Easy (x0.6 damage taken, x0.8 enemy HP, x0.7
+  score), Normal, Brutal (x1.4 damage taken, x1.25 enemy HP, x1.5 score). The results screen and the best-run
+  record show the difficulty.
+- **Music and SFX volume** in the pause menu (0-100% in quarter steps, **A / D** or **Enter**, remembered), on
+  separate buses under the master mute.
+- **Two more weapons.** Tractor (**Z**): a gravity gun. Hold to catch the nearest drum, satchel, gas can, gib, corpse
+  or light enemy and carry it at the muzzle (held enemies get crushed), then release to hurl it: drums and satchels
+  explode on impact, gas cans become rockets, bodies bowl through a crowd. Corroder (**X**): an acid cone whose
+  corrosion makes enemies take +40% from everything else for 5 s; it melts riot and mirror shields for good (new
+  slagged-shield bulwark sprite) and eats crates.
+- **Three more enemies.** Buzzsaw: a saw-blade drone that ricochets round the room curving toward you and carves
+  anything it crosses, its own side included; kick it and it's yours for 2 s, seeking the nearest foe, and when it
+  dies its blade spins free as one of your saws. Magnetron: a hovering drone whose field turns your bullets,
+  rockets and saws away, with a pulse that yanks you in and zaps you up close. Tar spitter: lobs tar that halves
+  your run speed and saps your jump; any fire lights the tar into a long burn that runs along touching puddles.
+- Sounds for all of the above. `sfx_bank.js` gains AudioGen takes for the tractor grab, throw and hum, the
+  corroder spray loop, saw ricochets, the magnetron tell and pulse, the tar spitter's gurgle and tar ignition. The
+  bank grows to 97 sounds.
 - **Crucible round: three more weapons.** Forge hammer (**,**): tap to swing; hold and release on the ground to
   slam, sending shockwaves along the floor that launch everything on it; release in the air to dive and
   ground-pound. Storm coil (**.**): sticky tesla coils (up to 3) that zap nearby enemies and link into lightning
