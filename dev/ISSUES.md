@@ -359,7 +359,10 @@ calls `vibrationActuator.playEffect`. No real pad has been plugged in yet.
 **Things to check**
 - An Xbox pad and a DualSense on Chrome and Firefox (Firefox maps some pads non-standard; `gp.mapping` should be
   `'standard'`).
-- The 0.22 dead zone and the 0.35 / 0.6 move and drop thresholds feel right; aim isn't twitchy at the stick's edge.
+- The 0.22 radial dead zone and the 0.35 / 0.6 move and drop thresholds feel right; aim isn't twitchy at the
+  stick's edge. (The first version used a per-axis dead zone, which flattened shallow aim angles; fixed in the
+  ironclad round.)
+- Aim assist (`TUNE.AIMASSIST`: 60% pull within 0.2 rad and 260 px) helps without feeling like it steals the aim.
 - Rumble strength (`shake()` intensity x 90) is pleasant and never stuck on.
 - Holding LB for the wheel while steering with the right stick picks the slot you expect.
 

@@ -173,4 +173,11 @@ SOUNDS = {
     'gasBoom': dict(p=['a gas explosion, a huge whoosh of flame with a deep boom', 'a fireball erupting with a roar'], d=2.0, max=1.1, keep=2, n=8, air=0.5),
     'weld': dict(p='an arc welder crackling and buzzing', d=1.5, max=0.2, keep=3, mode='slice', air=0.9),
     'slash': dict(p=['a sword slashing through the air, sharp swish', 'a blade swung fast with a metallic ring'], d=1.0, max=0.3, keep=3, n=8, air=0.8),
+    # ------------------------------------------------------------------ ironclad round
+    'flare': dict(p=['a signal flare fired with a whoosh and fizzing', 'a firework rocket launched with a hiss'], d=1.0, max=0.45, keep=2, n=8, air=0.8),
+    'limpet': dict(p=['a grenade launcher thump, hollow and short', 'a compressed air cannon firing a small can'], d=1.0, max=0.3, keep=2, n=8, air=0.6),
+    'steam': dict(p='a steam pipe bursting, loud hissing jet of steam', d=2.0, max=1.2, keep=2, air=0.9),
+    'emp': dict(p=['an electromagnetic pulse discharge, electric whoomp with crackle', 'a sci-fi power surge blast'], d=1.5, max=0.6, keep=2, n=8, air=0.7),
+    'jammed': dict(p='electronic static glitch, crackling interference', d=1.5, max=0.7, keep=2, air=0.9),
+    'roll': dict(p='a heavy metal ball rolling on concrete, rumbling', d=1.5, max=0.4, keep=2, air=0.4),
 }

@@ -1,9 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 27 weapons, 41 enemy types, two arenas and six waves that end
-in a boss fight, a perk pick after every wave, on Easy, Normal or Brutal, with keyboard and mouse or a gamepad. The
-game runs in a browser with no build step.
+pixel art, ragdolls and gibs, destructible terrain, 29 weapons, 44 enemy types, two arenas and six waves that end
+in a boss fight, a perk pick after every wave and 16 medals to collect, on Easy, Normal or Brutal, with keyboard
+and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
 
@@ -32,7 +32,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I** |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y** |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -62,7 +62,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | / | Flak cannon (bursts into ricocheting shrapnel) | Z | Tractor (hold to grab drums, corpses or light enemies; release to throw) |
 | X | Corroder (acid cone; corroded enemies take +40% damage, shields melt) | K | Shock rifle (tap: plasma orb; hold: beam; beam an orb for a combo) |
 | L | Needler (homing needles; seven in one target supercombine) | U | Drill launcher (bores through scenery, grinds into a body, then blows) |
-| I | Trick revolver (six rounds; wall shots ricochet into the nearest foe) | | |
+| I | Trick revolver (six rounds; wall shots ricochet into the nearest foe) | O | Flare gun (sticky flares that burn and light foes up in the dark) |
+| Y | Limpet launcher (tap: sticky bomb; hold: set them all off) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -74,20 +75,23 @@ THE FURNACE** for the rest of the run, with your health, gun and stats carried o
 1. 10 placed enemies.
 2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a tar spitter whose puddles slow you (and burn when lit), a mimic
-   hiding among the drums and a gasbag whose toxic cloud goes up in a fireball if you light it.
+   hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, and a creeper that
+   drops off the ceiling.
 3. 17 enemies under **SLAG RAIN**, with a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
-   (kick it back), a mimic, a gasbag, a duelist that sidesteps your shots and the gunship mini-boss.
+   (kick it back), a mimic, a gasbag, a duelist that sidesteps your shots, an armoured roller and the gunship
+   mini-boss.
 4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a buzzsaw, a magnetron whose field bends your shots away, a teleporting blinker
-   a howitzer that shells you from range and a welder that repairs the machines and builds turrets. The furnace's
-   fire vents go off every few seconds.
+   a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
+   EMP ring jams your gun. The furnace's fire vents go off every few seconds.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, a duelist, a magnetron, a tar spitter, a
-   blinker and the Slag Wyrm mini-boss.
+   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, a duelist, a roller, a magnetron, a tar
+   spitter, a blinker and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss.
 
 Medkits restock between waves, and after each wave you pick one of three perks for the rest of the run (more
-damage, faster fire, life steal, a double jump, exploding kills and so on). Kicking an enemy that's pulsing orange (under 20% health) executes it for health
+damage, faster fire, life steal, a double jump, exploding kills and so on). Steam pipes on the walls burst into
+scalding jets when shot. Medals pop up as you earn them, and the title screen counts your collection. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
 orbs. The results screen grades the run (S-D) and keeps your best score.
 
 ## Project layout

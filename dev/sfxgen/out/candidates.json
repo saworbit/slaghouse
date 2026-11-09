@@ -7990,5 +7990,403 @@
    "clap": -0.0168,
    "score": -0.0168
   }
+ ],
+ "flare": [
+  {
+   "id": "7",
+   "dur": 0.45,
+   "loud": 0.155962,
+   "prompt": "a firework rocket launched with a hiss",
+   "clap": 0.2167,
+   "score": 0.2167
+  },
+  {
+   "id": "1",
+   "dur": 0.45,
+   "loud": 0.241118,
+   "prompt": "a firework rocket launched with a hiss",
+   "clap": 0.1765,
+   "score": 0.1765
+  },
+  {
+   "id": "3",
+   "dur": 0.45,
+   "loud": 0.32486,
+   "prompt": "a firework rocket launched with a hiss",
+   "clap": 0.1402,
+   "score": 0.1402
+  },
+  {
+   "id": "6",
+   "dur": 0.45,
+   "loud": 0.24538,
+   "prompt": "a signal flare fired with a whoosh and fizzing",
+   "clap": 0.0641,
+   "score": 0.0641
+  },
+  {
+   "id": "4",
+   "dur": 0.36,
+   "loud": 0.239206,
+   "prompt": "a signal flare fired with a whoosh and fizzing",
+   "clap": 0.0205,
+   "score": 0.0205
+  },
+  {
+   "id": "5",
+   "dur": 0.45,
+   "loud": 0.287275,
+   "prompt": "a firework rocket launched with a hiss",
+   "clap": 0.0152,
+   "score": 0.0152
+  },
+  {
+   "id": "2",
+   "dur": 0.36,
+   "loud": 0.262468,
+   "prompt": "a signal flare fired with a whoosh and fizzing",
+   "clap": 0.006,
+   "score": 0.006
+  },
+  {
+   "id": "0",
+   "dur": 0.45,
+   "loud": 0.355707,
+   "prompt": "a signal flare fired with a whoosh and fizzing",
+   "clap": -0.0147,
+   "score": -0.0147
+  }
+ ],
+ "limpet": [
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.266981,
+   "prompt": "a grenade launcher thump, hollow and short",
+   "clap": 0.1861,
+   "score": 0.1861
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.204641,
+   "prompt": "a compressed air cannon firing a small can",
+   "clap": 0.1654,
+   "score": 0.1654
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.298212,
+   "prompt": "a grenade launcher thump, hollow and short",
+   "clap": 0.163,
+   "score": 0.163
+  },
+  {
+   "id": "3",
+   "dur": 0.141,
+   "loud": 0.326152,
+   "prompt": "a compressed air cannon firing a small can",
+   "clap": 0.1285,
+   "score": 0.1285
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.217193,
+   "prompt": "a grenade launcher thump, hollow and short",
+   "clap": 0.0689,
+   "score": 0.0689
+  },
+  {
+   "id": "1",
+   "dur": 0.156,
+   "loud": 0.196021,
+   "prompt": "a compressed air cannon firing a small can",
+   "clap": 0.0415,
+   "score": 0.0415
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.317804,
+   "prompt": "a grenade launcher thump, hollow and short",
+   "clap": 0.0334,
+   "score": 0.0334
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.313067,
+   "prompt": "a compressed air cannon firing a small can",
+   "clap": -0.0348,
+   "score": -0.0348
+  }
+ ],
+ "steam": [
+  {
+   "id": "1",
+   "dur": 1.2,
+   "loud": 0.357086,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.3665,
+   "score": 0.3665
+  },
+  {
+   "id": "5",
+   "dur": 1.2,
+   "loud": 0.324166,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.3519,
+   "score": 0.3519
+  },
+  {
+   "id": "3",
+   "dur": 1.2,
+   "loud": 0.383983,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.342,
+   "score": 0.342
+  },
+  {
+   "id": "4",
+   "dur": 1.2,
+   "loud": 0.343397,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.3176,
+   "score": 0.3176
+  },
+  {
+   "id": "0",
+   "dur": 1.2,
+   "loud": 0.365279,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.3108,
+   "score": 0.3108
+  },
+  {
+   "id": "2",
+   "dur": 0.819,
+   "loud": 0.325623,
+   "prompt": "a steam pipe bursting, loud hissing jet of steam",
+   "clap": 0.2316,
+   "score": 0.2316
+  }
+ ],
+ "emp": [
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.272962,
+   "prompt": "an electromagnetic pulse discharge, electric whoomp with crackle",
+   "clap": 0.4714,
+   "score": 0.4714
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.293049,
+   "prompt": "an electromagnetic pulse discharge, electric whoomp with crackle",
+   "clap": 0.3889,
+   "score": 0.3889
+  },
+  {
+   "id": "4",
+   "dur": 0.553,
+   "loud": 0.373893,
+   "prompt": "an electromagnetic pulse discharge, electric whoomp with crackle",
+   "clap": 0.3523,
+   "score": 0.3523
+  },
+  {
+   "id": "0",
+   "dur": 0.41,
+   "loud": 0.190697,
+   "prompt": "an electromagnetic pulse discharge, electric whoomp with crackle",
+   "clap": 0.3366,
+   "score": 0.3366
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.434145,
+   "prompt": "a sci-fi power surge blast",
+   "clap": 0.1952,
+   "score": 0.1952
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.376573,
+   "prompt": "a sci-fi power surge blast",
+   "clap": 0.1661,
+   "score": 0.1661
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.399835,
+   "prompt": "a sci-fi power surge blast",
+   "clap": 0.1572,
+   "score": 0.1572
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.417297,
+   "prompt": "a sci-fi power surge blast",
+   "clap": 0.1375,
+   "score": 0.1375
+  }
+ ],
+ "jammed": [
+  {
+   "id": "2",
+   "dur": 0.515,
+   "loud": 0.121528,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.4008,
+   "score": 0.4008
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.203466,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.374,
+   "score": 0.374
+  },
+  {
+   "id": "4",
+   "dur": 0.275,
+   "loud": 0.206317,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.4149,
+   "score": 0.3349
+  },
+  {
+   "id": "1",
+   "dur": 0.145,
+   "loud": 0.225523,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.3688,
+   "score": 0.2888
+  },
+  {
+   "id": "0",
+   "dur": 0.242,
+   "loud": 0.273319,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.3616,
+   "score": 0.2816
+  },
+  {
+   "id": "3",
+   "dur": 0.136,
+   "loud": 0.145146,
+   "prompt": "electronic static glitch, crackling interference",
+   "clap": 0.3573,
+   "score": 0.2773
+  }
+ ],
+ "roll": [
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.263537,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": 0.1776,
+   "score": 0.1776
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.151547,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": 0.1383,
+   "score": 0.1383
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.304414,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": 0.0664,
+   "score": 0.0664
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.339209,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": 0.0097,
+   "score": 0.0097
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.305097,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": -0.003,
+   "score": -0.003
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.392146,
+   "prompt": "a heavy metal ball rolling on concrete, rumbling",
+   "clap": -0.0424,
+   "score": -0.0424
+  }
+ ],
+ "skitter": [
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.399259,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": 0.1581,
+   "score": 0.1581
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.132415,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": 0.0951,
+   "score": 0.0951
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.307233,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": -0.0236,
+   "score": -0.0236
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.295029,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": -0.0251,
+   "score": -0.0251
+  },
+  {
+   "id": "4",
+   "dur": 0.3,
+   "loud": 0.268593,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": -0.0275,
+   "score": -0.0275
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.34078,
+   "prompt": "a large insect skittering, clicking legs on metal",
+   "clap": -0.0861,
+   "score": -0.0861
+  }
  ]
 }

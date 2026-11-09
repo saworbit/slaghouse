@@ -6,6 +6,25 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Ironclad round: medals.** Sixteen run achievements (an untouched wave, trick shots, a x20 combo, executions,
+  burning kills, crush kills, shock combos, supercombines, wall splats, kills with 15 guns, rampages, dodges, a
+  four-limpet detonation, beating the Smelter, a sub-10-minute win, a Brutal win). A gold toast pops as each one
+  lands, the results screen lists the run's medals, and the title screen counts the collection.
+- **Gamepad aim assist** (the aim leans onto a foe close to the stick's line) and a radial stick dead zone, so
+  shallow angles no longer snap flat.
+- **Steam pipes** on the walls of both arenas: shoot or blast a valve and it bursts into a scalding steam jet that
+  hurts and shoves anything in it. New pipes every wave.
+- **Two more weapons.** Flare gun (**O**): sticky flares that burn whatever they hit, light nearby foes, tar and
+  gas, and reveal enemies through the BLACKOUT. Limpet launcher (**Y**): sticky bombs; hold the trigger to set them
+  all off in a ripple.
+- **Three more enemies.** Creeper: a spider that crawls along ceilings and drops on you. Roller: an armoured grub
+  that curls up and bowls at you, bouncing off walls until it knocks itself dizzy. Jammer: an EMP drone whose ring
+  jams your gun (with a glitching HUD) and shorts out your sentry unless you dash through it.
+- AudioGen takes for the flare shot, limpet launch, steam burst, EMP pulse, jam static and roller rumble (the
+  creeper's skitter stays synth: no take sounded right). The bank grows to 118 sounds.
+
+### Fixed
+- The results screen no longer shows the perk list or a medal toast through its panel.
 - **Slagforge round: perk draft.** After every wave but the last you pick one of three perks (keys 1-3, click or the
   pad) from twelve: hollow points, hair trigger, vampire, iron boots, double jump, blast shield, afterburner,
   scavenger, showboat, volatile, adrenaline and barbed plate. They last the run, ride the lift into ARENA 02 and
