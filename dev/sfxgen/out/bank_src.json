@@ -1053,5 +1053,84 @@
    "ff1dd3f40bf847e5"
   ],
   "rate": "40k"
+ },
+ "shockOrb": {
+  "ids": [
+   "6",
+   "7"
+  ],
+  "wav": [
+   "8651d52a81b74fbc",
+   "0112eb6b498bb9cb"
+  ],
+  "rate": "40k"
+ },
+ "shockBeam": {
+  "ids": [
+   "3",
+   "7"
+  ],
+  "wav": [
+   "71098e27cfbb1559",
+   "775c0805d77ae2b7"
+  ],
+  "rate": "40k"
+ },
+ "shockCombo": {
+  "ids": [
+   "7",
+   "0"
+  ],
+  "wav": [
+   "e83fae30ccfe08c3",
+   "635b0bc22570aff0"
+  ],
+  "rate": "40k"
+ },
+ "needle": {
+  "ids": [
+   "0-0",
+   "7-0",
+   "1-1"
+  ],
+  "wav": [
+   "bbee4dbbbea0aa29",
+   "e7809b3061205116",
+   "6a2456ca64190371"
+  ],
+  "rate": "40k"
+ },
+ "supercombine": {
+  "ids": [
+   "3",
+   "4"
+  ],
+  "wav": [
+   "8eecbe7668966450",
+   "49b921c8ee8c9611"
+  ],
+  "rate": "40k"
+ },
+ "blink": {
+  "ids": [
+   "0",
+   "2"
+  ],
+  "wav": [
+   "d23ac785a56febc1",
+   "faa8ac5d189349af"
+  ],
+  "rate": "40k"
+ },
+ "chomp": {
+  "ids": [
+   "0",
+   "6"
+  ],
+  "wav": [
+   "ee2a2f155cd7ece1",
+   "7fc70fa5b38dc3a9"
+  ],
+  "rate": "40k"
  }
 }

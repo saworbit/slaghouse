@@ -6704,5 +6704,555 @@
    "clap": -0.1385,
    "score": -0.2185
   }
+ ],
+ "shockOrb": [
+  {
+   "id": "1",
+   "dur": 0.253,
+   "loud": 0.360879,
+   "prompt": "a low electric zap with a humming whoosh",
+   "clap": 0.1765,
+   "score": 0.1765
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.26698,
+   "prompt": "a sci-fi plasma ball launched with an electric warble",
+   "clap": 0.1737,
+   "score": 0.1737
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.34751,
+   "prompt": "a low electric zap with a humming whoosh",
+   "clap": 0.1222,
+   "score": 0.1222
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.307132,
+   "prompt": "a sci-fi plasma ball launched with an electric warble",
+   "clap": 0.1199,
+   "score": 0.1199
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.30346,
+   "prompt": "a low electric zap with a humming whoosh",
+   "clap": 0.0145,
+   "score": 0.0145
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.280133,
+   "prompt": "a sci-fi plasma ball launched with an electric warble",
+   "clap": -0.0136,
+   "score": -0.0136
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.336685,
+   "prompt": "a low electric zap with a humming whoosh",
+   "clap": -0.035,
+   "score": -0.035
+  },
+  {
+   "id": "0",
+   "dur": 0.339,
+   "loud": 0.373168,
+   "prompt": "a sci-fi plasma ball launched with an electric warble",
+   "clap": -0.0413,
+   "score": -0.0413
+  }
+ ],
+ "shockBeam": [
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.153017,
+   "prompt": "a powerful electric zap with a crackling snap",
+   "clap": 0.3045,
+   "score": 0.3045
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.135562,
+   "prompt": "a powerful electric zap with a crackling snap",
+   "clap": 0.1834,
+   "score": 0.1834
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.310983,
+   "prompt": "a sci-fi lightning rifle firing, sharp electric crack",
+   "clap": 0.1072,
+   "score": 0.1072
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.344294,
+   "prompt": "a powerful electric zap with a crackling snap",
+   "clap": 0.0858,
+   "score": 0.0858
+  },
+  {
+   "id": "4",
+   "dur": 0.27,
+   "loud": 0.146136,
+   "prompt": "a sci-fi lightning rifle firing, sharp electric crack",
+   "clap": 0.0721,
+   "score": 0.0721
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.3562,
+   "prompt": "a powerful electric zap with a crackling snap",
+   "clap": 0.0547,
+   "score": 0.0547
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.401519,
+   "prompt": "a sci-fi lightning rifle firing, sharp electric crack",
+   "clap": 0.0175,
+   "score": 0.0175
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.334971,
+   "prompt": "a sci-fi lightning rifle firing, sharp electric crack",
+   "clap": -0.0709,
+   "score": -0.0709
+  }
+ ],
+ "shockCombo": [
+  {
+   "id": "7",
+   "dur": 1.0,
+   "loud": 0.41855,
+   "prompt": "a massive plasma blast with a rolling electric rumble",
+   "clap": 0.3187,
+   "score": 0.3187
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.384651,
+   "prompt": "a huge electrical explosion with a deep boom and crackling",
+   "clap": 0.316,
+   "score": 0.316
+  },
+  {
+   "id": "3",
+   "dur": 1.0,
+   "loud": 0.442834,
+   "prompt": "a massive plasma blast with a rolling electric rumble",
+   "clap": 0.3044,
+   "score": 0.3044
+  },
+  {
+   "id": "2",
+   "dur": 1.0,
+   "loud": 0.353049,
+   "prompt": "a huge electrical explosion with a deep boom and crackling",
+   "clap": 0.2856,
+   "score": 0.2856
+  },
+  {
+   "id": "5",
+   "dur": 1.0,
+   "loud": 0.409018,
+   "prompt": "a massive plasma blast with a rolling electric rumble",
+   "clap": 0.2847,
+   "score": 0.2847
+  },
+  {
+   "id": "1",
+   "dur": 1.0,
+   "loud": 0.34649,
+   "prompt": "a massive plasma blast with a rolling electric rumble",
+   "clap": 0.2652,
+   "score": 0.2652
+  },
+  {
+   "id": "6",
+   "dur": 1.0,
+   "loud": 0.370617,
+   "prompt": "a huge electrical explosion with a deep boom and crackling",
+   "clap": 0.2252,
+   "score": 0.2252
+  },
+  {
+   "id": "4",
+   "dur": 1.0,
+   "loud": 0.434735,
+   "prompt": "a huge electrical explosion with a deep boom and crackling",
+   "clap": 0.2027,
+   "score": 0.2027
+  }
+ ],
+ "needle": [
+  {
+   "id": "0-0",
+   "dur": 0.15,
+   "loud": 0.437438,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.3751,
+   "score": 0.3751
+  },
+  {
+   "id": "7-0",
+   "dur": 0.15,
+   "loud": 0.241007,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2967,
+   "score": 0.2967
+  },
+  {
+   "id": "1-1",
+   "dur": 0.15,
+   "loud": 0.373433,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2932,
+   "score": 0.2932
+  },
+  {
+   "id": "2-1",
+   "dur": 0.072,
+   "loud": 0.422148,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2893,
+   "score": 0.2893
+  },
+  {
+   "id": "4-0",
+   "dur": 0.138,
+   "loud": 0.527775,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2535,
+   "score": 0.2535
+  },
+  {
+   "id": "1-0",
+   "dur": 0.054,
+   "loud": 0.229483,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.3267,
+   "score": 0.2467
+  },
+  {
+   "id": "3-3",
+   "dur": 0.15,
+   "loud": 0.413942,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2353,
+   "score": 0.2353
+  },
+  {
+   "id": "5-0",
+   "dur": 0.15,
+   "loud": 0.389883,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2264,
+   "score": 0.2264
+  },
+  {
+   "id": "3-0",
+   "dur": 0.104,
+   "loud": 0.307123,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2169,
+   "score": 0.2169
+  },
+  {
+   "id": "4-3",
+   "dur": 0.15,
+   "loud": 0.189898,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1729,
+   "score": 0.1729
+  },
+  {
+   "id": "2-0",
+   "dur": 0.116,
+   "loud": 0.308709,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1571,
+   "score": 0.1571
+  },
+  {
+   "id": "7-1",
+   "dur": 0.15,
+   "loud": 0.243443,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1448,
+   "score": 0.1448
+  },
+  {
+   "id": "6-0",
+   "dur": 0.15,
+   "loud": 0.67063,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1434,
+   "score": 0.1434
+  },
+  {
+   "id": "6-1",
+   "dur": 0.046,
+   "loud": 0.227392,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.2147,
+   "score": 0.1347
+  },
+  {
+   "id": "3-4",
+   "dur": 0.052,
+   "loud": 0.353755,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1966,
+   "score": 0.1166
+  },
+  {
+   "id": "3-2",
+   "dur": 0.144,
+   "loud": 0.604525,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1112,
+   "score": 0.1112
+  },
+  {
+   "id": "2-3",
+   "dur": 0.044,
+   "loud": 0.252964,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.185,
+   "score": 0.105
+  },
+  {
+   "id": "2-2",
+   "dur": 0.15,
+   "loud": 0.351731,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.0989,
+   "score": 0.0989
+  },
+  {
+   "id": "4-1",
+   "dur": 0.04,
+   "loud": 0.247279,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1504,
+   "score": 0.0704
+  },
+  {
+   "id": "3-1",
+   "dur": 0.05,
+   "loud": 0.485981,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.1439,
+   "score": 0.0639
+  },
+  {
+   "id": "4-2",
+   "dur": 0.04,
+   "loud": 0.313833,
+   "prompt": "a small crystal shard fired, quick high glassy ping",
+   "clap": 0.0446,
+   "score": -0.0354
+  }
+ ],
+ "supercombine": [
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.349493,
+   "prompt": "a burst of glass shards with a small explosion",
+   "clap": 0.3009,
+   "score": 0.3009
+  },
+  {
+   "id": "4",
+   "dur": 0.565,
+   "loud": 0.349581,
+   "prompt": "crystal glass shattering with a sharp pop",
+   "clap": 0.1962,
+   "score": 0.1962
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.353386,
+   "prompt": "a burst of glass shards with a small explosion",
+   "clap": 0.1681,
+   "score": 0.1681
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.34477,
+   "prompt": "a burst of glass shards with a small explosion",
+   "clap": 0.1521,
+   "score": 0.1521
+  },
+  {
+   "id": "0",
+   "dur": 0.48,
+   "loud": 0.292392,
+   "prompt": "crystal glass shattering with a sharp pop",
+   "clap": 0.1435,
+   "score": 0.1435
+  },
+  {
+   "id": "2",
+   "dur": 0.571,
+   "loud": 0.28977,
+   "prompt": "crystal glass shattering with a sharp pop",
+   "clap": 0.1413,
+   "score": 0.1413
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.325569,
+   "prompt": "a burst of glass shards with a small explosion",
+   "clap": 0.0946,
+   "score": 0.0946
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.382682,
+   "prompt": "crystal glass shattering with a sharp pop",
+   "clap": 0.0376,
+   "score": 0.0376
+  }
+ ],
+ "blink": [
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.280375,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": 0.1561,
+   "score": 0.1561
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.288834,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": 0.1375,
+   "score": 0.1375
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.434507,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": 0.0907,
+   "score": 0.0907
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.347225,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": 0.074,
+   "score": 0.074
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.346346,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": -0.0016,
+   "score": -0.0016
+  },
+  {
+   "id": "4",
+   "dur": 0.049,
+   "loud": 0.322725,
+   "prompt": "a sci-fi teleport sound, a quick rising shimmer",
+   "clap": 0.0622,
+   "score": -0.0178
+  }
+ ],
+ "chomp": [
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.293417,
+   "prompt": "a monster biting down hard, wet chomp",
+   "clap": 0.3236,
+   "score": 0.3236
+  },
+  {
+   "id": "6",
+   "dur": 0.181,
+   "loud": 0.206815,
+   "prompt": "a monster biting down hard, wet chomp",
+   "clap": 0.3104,
+   "score": 0.3104
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.272439,
+   "prompt": "a monster biting down hard, wet chomp",
+   "clap": 0.291,
+   "score": 0.291
+  },
+  {
+   "id": "4",
+   "dur": 0.208,
+   "loud": 0.184535,
+   "prompt": "a monster biting down hard, wet chomp",
+   "clap": 0.2667,
+   "score": 0.2667
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.329029,
+   "prompt": "a big beast snapping its jaws shut",
+   "clap": 0.0963,
+   "score": 0.0963
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.141212,
+   "prompt": "a big beast snapping its jaws shut",
+   "clap": 0.0722,
+   "score": 0.0722
+  },
+  {
+   "id": "3",
+   "dur": 0.223,
+   "loud": 0.242326,
+   "prompt": "a big beast snapping its jaws shut",
+   "clap": 0.027,
+   "score": 0.027
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.194828,
+   "prompt": "a big beast snapping its jaws shut",
+   "clap": -0.1323,
+   "score": -0.1323
+  }
  ]
 }

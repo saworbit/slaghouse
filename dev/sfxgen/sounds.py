@@ -156,4 +156,12 @@ SOUNDS = {
     'magPulse': dict(p=['a deep electromagnetic pulse blast, heavy whump', 'a sci-fi shockwave thump with electric crackle'], d=1.5, max=0.5, keep=2, n=8, air=0.6),
     'gurgle': dict(p='thick liquid gurgling and bubbling up a pipe', d=1.5, max=0.4, keep=2, air=0.5),
     'tarIgnite': dict(p=['a pool of gasoline catching fire with a loud whoosh', 'flammable liquid igniting, a big whoomp of flames'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
+    # ------------------------------------------------------------------ shockworks round
+    'shockOrb': dict(p=['a sci-fi plasma ball launched with an electric warble', 'a low electric zap with a humming whoosh'], d=1.0, max=0.4, keep=2, n=8, air=0.7),
+    'shockBeam': dict(p=['a sci-fi lightning rifle firing, sharp electric crack', 'a powerful electric zap with a crackling snap'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    'shockCombo': dict(p=['a huge electrical explosion with a deep boom and crackling', 'a massive plasma blast with a rolling electric rumble'], d=2.0, max=1.0, keep=2, n=8, air=0.6),
+    'needle': dict(p='a small crystal shard fired, quick high glassy ping', d=1.0, max=0.15, keep=3, n=8, mode='slice', air=0.9),
+    'supercombine': dict(p=['crystal glass shattering with a sharp pop', 'a burst of glass shards with a small explosion'], d=1.5, max=0.6, keep=2, n=8, air=0.9),
+    'blink': dict(p='a sci-fi teleport sound, a quick rising shimmer', d=1.0, max=0.35, keep=2, air=0.8),
+    'chomp': dict(p=['a monster biting down hard, wet chomp', 'a big beast snapping its jaws shut'], d=1.0, max=0.3, keep=2, n=8, air=0.5),
 }

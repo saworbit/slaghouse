@@ -6,6 +6,23 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Shockworks round: gamepad support.** Twin-stick play on any standard-mapping pad (left stick moves, right stick
+  aims with its own crosshair, triggers fire and mine, face buttons jump / dash / kick / hook, hold LB for the
+  weapon wheel), with rumble that follows the screen-shake setting. The title screen, pause menu and results screen
+  all work from the pad, and the HUD hints switch to pad buttons.
+- **Fire jets** in ARENA 02: the furnace's grate flares, then three vents on its top fire in sequence, burning and
+  flinging you and lighting any enemy, corpse, drum or tar standing up there.
+- **Impact frames:** two or three stark black-and-white frames on executions, kill-cams, shock combos,
+  supercombines and mini-boss deaths.
+- **Two more weapons.** Shock rifle (**K**): tap for a slow plasma orb, hold and release for a hitscan beam, and
+  beam one of your own orbs for a SHOCK COMBO. Needler (**L**): homing crystal needles that stick; the seventh in
+  one target sets off a SUPERCOMBINE.
+- **Three more enemies.** Mimic: an explosive drum that bares its teeth when you get close, chases you down and
+  still blows like a drum when it dies. Howitzer: an artillery tripod that keeps its distance and lobs three-shell
+  barrages with red landing rings. Blinker: teleports in behind you after a violet shimmer, dashes through you,
+  then hangs exposed before blinking away.
+- AudioGen takes for the shock orb, beam and combo, the needle shot and supercombine, the blink and the mimic's
+  chomp. The bank grows to 104 sounds.
 - **Furnace round: a second arena.** Clearing wave 3 drops you down the lift (rumble, i-frames, fade) into
   **ARENA 02 :: THE FURNACE** for waves 4-6: a furnace block with a glowing grate in the middle, a tall pillar,
   girder decks, warmer light and embers everywhere. Health, gun, stats, style and kills carry over, and the new

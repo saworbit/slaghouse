@@ -1,8 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 23 weapons, 34 enemy types, two arenas and six waves that end
-in a boss fight, on Easy, Normal or Brutal. The game runs in a browser with no build step.
+pixel art, ragdolls and gibs, destructible terrain, 25 weapons, 37 enemy types, two arenas and six waves that end
+in a boss fight, on Easy, Normal or Brutal, with keyboard and mouse or a gamepad. The game runs in a browser with no
+build step.
 
 ## Play
 
@@ -31,13 +32,18 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X** |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L** |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
 | Restart run | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
+
+On a gamepad: left stick moves (down + **A** drops through a platform), right stick aims, **RT** fires, **LT** throws a
+mine, **A** jumps, **B** dashes, **X** kicks, **Y** fires the hook, **RB** drops the sentry, hold **LB** for the weapon
+wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses. Menus take the D-pad or left stick,
+**A** and **B**.
 
 ## Weapons
 
@@ -54,7 +60,8 @@ automatically. Both are optional; without them the game uses its built-in proced
 | ; | Magma lance (hold to charge, release to fire) | ' | Glaive (thrown ring that comes back; hold to grind) |
 | , | Forge hammer (tap to swing; hold for a shockwave slam, or a ground-pound in the air) | . | Storm coil (sticky tesla coils that link into fences; hold to overload) |
 | / | Flak cannon (bursts into ricocheting shrapnel) | Z | Tractor (hold to grab drums, corpses or light enemies; release to throw) |
-| X | Corroder (acid cone; corroded enemies take +40% damage, shields melt) | | |
+| X | Corroder (acid cone; corroded enemies take +40% damage, shields melt) | K | Shock rifle (tap: plasma orb; hold: beam; beam an orb for a combo) |
+| L | Needler (homing needles; seven in one target supercombine) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -65,14 +72,16 @@ THE FURNACE** for the rest of the run, with your health, gun and stats carried o
 
 1. 10 placed enemies.
 2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
-   mirror knight that reflects your shots and a tar spitter whose puddles slow you (and burn when lit).
+   mirror knight that reflects your shots, a tar spitter whose puddles slow you (and burn when lit) and a mimic
+   hiding among the drums.
 3. 17 enemies under **SLAG RAIN**, with a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
-   (kick it back) and the gunship mini-boss.
+   (kick it back), a mimic and the gunship mini-boss.
 4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
-   that keeps a gnat swarm going, a buzzsaw and a magnetron whose field bends your shots away.
+   that keeps a gnat swarm going, a buzzsaw, a magnetron whose field bends your shots away, a teleporting blinker
+   and a howitzer that shells you from range. The furnace's fire vents go off every few seconds.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, a magnetron, a tar spitter and the Slag
-   Wyrm mini-boss.
+   time, about every 25 s. Slaglings, a burrower, harpooners, linkers, a magnetron, a tar spitter, a blinker and
+   the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss.
 
 Medkits restock between waves. Kicking an enemy that's pulsing orange (under 20% health) executes it for health

@@ -24,5 +24,6 @@
  "buzz": ["4", "0", "1"],
  "hammerSlam": ["6", "4"],
  "coilBoom": ["6", "3"],
- "ricochet": ["4", "0", "6"]
+ "ricochet": ["4", "0", "6"],
+ "shockOrb": ["6", "7"]
 }

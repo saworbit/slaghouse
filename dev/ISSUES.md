@@ -335,3 +335,24 @@ the AudioGen takes at synth quality.
   entry reseeds every sound listed after it.
 - Route each one-shot through `this.smp(name)` first (and the two loops through `loopNode`), keeping the synth
   version as the fallback.
+
+---
+
+## 15. [Input] Test the gamepad layer on real controllers
+
+**Labels:** testing
+
+**Context**
+The shockworks round added gamepad support (`PAD` in `slaghouse.html`), read straight from `navigator.getGamepads()`
+with the standard button mapping. It was only tested against a stubbed gamepad object in the browser console: title
+start and difficulty, stick movement and aim, trigger fire, D-pad weapon cycling, the pause menu, and that rumble
+calls `vibrationActuator.playEffect`. No real pad has been plugged in yet.
+
+**Things to check**
+- An Xbox pad and a DualSense on Chrome and Firefox (Firefox maps some pads non-standard; `gp.mapping` should be
+  `'standard'`).
+- The 0.22 dead zone and the 0.35 / 0.6 move and drop thresholds feel right; aim isn't twitchy at the stick's edge.
+- Rumble strength (`shake()` intensity x 90) is pleasant and never stuck on.
+- Holding LB for the wheel while steering with the right stick picks the slot you expect.
+
+**Done when.** Each pad has been played through a full run and any mapping fixes are in.

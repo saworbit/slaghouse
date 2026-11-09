@@ -68,6 +68,14 @@ PROBES = {
  'magPulse': ['a deep electric pulse blast', 'an explosion', 'a gunshot', 'thunder'],
  'gurgle': ['liquid gurgling', 'a man speaking', 'an engine', 'static noise'],
  'tarIgnite': ['fire igniting with a whoosh', 'an explosion', 'wind', 'static noise'],
+ # shockworks round
+ 'shockOrb': ['an electric zap', 'a gunshot', 'a door slam', 'static noise'],
+ 'shockBeam': ['an electric zap', 'a gunshot', 'glass breaking', 'static noise'],
+ 'shockCombo': ['an electrical explosion', 'a gunshot', 'thunder', 'static noise'],
+ 'needle': ['a glassy ping', 'a gunshot', 'a footstep', 'static noise'],
+ 'supercombine': ['glass shattering', 'an explosion', 'a gunshot', 'static noise'],
+ 'blink': ['a sci-fi teleport shimmer', 'a gunshot', 'a door slam', 'static noise'],
+ 'chomp': ['a monster biting', 'a door slam', 'a footstep', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))
