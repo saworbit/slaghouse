@@ -194,4 +194,8 @@ SOUNDS = {
     'alarm': dict(p='an industrial alarm klaxon, two-tone warning siren', d=1.5, max=0.6, keep=2, air=0.6),
     'squelch': dict(p=['a wet slimy squelch', 'a slug squishing through mud'], d=1.0, max=0.3, keep=2, n=8, air=0.6),
     'suck': dict(p='a wet sucking slurp', d=1.0, max=0.35, keep=2, air=0.6),
+    # ------------------------------------------------------------------ supply round
+    'powerup': dict(p=['a sci-fi power up sound, rising shimmering chime', 'an energy pickup with a bright sparkle'], d=1.5, max=0.6, keep=2, n=8, air=0.9),
+    'whip': dict(p=['a whip crack, sharp and loud', 'an electric whip lash crack'], d=1.0, max=0.25, keep=2, n=8, air=0.9),
+    'bees': dict(p='a small swarm of bees buzzing', d=1.5, max=0.4, keep=2, air=0.7),
 }

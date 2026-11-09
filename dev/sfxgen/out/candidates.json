@@ -9034,5 +9034,187 @@
    "clap": 0.1168,
    "score": 0.0368
   }
+ ],
+ "powerup": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.516663,
+   "prompt": "a sci-fi power up sound, rising shimmering chime",
+   "clap": 0.2314,
+   "score": 0.2314
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.451161,
+   "prompt": "a sci-fi power up sound, rising shimmering chime",
+   "clap": 0.2051,
+   "score": 0.2051
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.29414,
+   "prompt": "an energy pickup with a bright sparkle",
+   "clap": 0.0767,
+   "score": 0.0767
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.378605,
+   "prompt": "an energy pickup with a bright sparkle",
+   "clap": 0.0615,
+   "score": 0.0615
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.342949,
+   "prompt": "an energy pickup with a bright sparkle",
+   "clap": 0.0474,
+   "score": 0.0474
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.329593,
+   "prompt": "a sci-fi power up sound, rising shimmering chime",
+   "clap": 0.003,
+   "score": 0.003
+  },
+  {
+   "id": "0",
+   "dur": 0.207,
+   "loud": 0.415397,
+   "prompt": "a sci-fi power up sound, rising shimmering chime",
+   "clap": 0.0828,
+   "score": 0.0028
+  },
+  {
+   "id": "5",
+   "dur": 0.225,
+   "loud": 0.299844,
+   "prompt": "an energy pickup with a bright sparkle",
+   "clap": 0.0157,
+   "score": -0.0643
+  }
+ ],
+ "whip": [
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.28763,
+   "prompt": "an electric whip lash crack",
+   "clap": 0.3949,
+   "score": 0.3949
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.181337,
+   "prompt": "an electric whip lash crack",
+   "clap": 0.2984,
+   "score": 0.2984
+  },
+  {
+   "id": "3",
+   "dur": 0.136,
+   "loud": 0.345094,
+   "prompt": "an electric whip lash crack",
+   "clap": 0.2563,
+   "score": 0.2563
+  },
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.297419,
+   "prompt": "an electric whip lash crack",
+   "clap": 0.2499,
+   "score": 0.2499
+  },
+  {
+   "id": "2",
+   "dur": 0.25,
+   "loud": 0.193558,
+   "prompt": "a whip crack, sharp and loud",
+   "clap": 0.1685,
+   "score": 0.1685
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.309313,
+   "prompt": "a whip crack, sharp and loud",
+   "clap": 0.1582,
+   "score": 0.1582
+  },
+  {
+   "id": "0",
+   "dur": 0.19,
+   "loud": 0.201978,
+   "prompt": "a whip crack, sharp and loud",
+   "clap": 0.1151,
+   "score": 0.1151
+  },
+  {
+   "id": "6",
+   "dur": 0.185,
+   "loud": 0.16266,
+   "prompt": "a whip crack, sharp and loud",
+   "clap": 0.0823,
+   "score": 0.0823
+  }
+ ],
+ "bees": [
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.38781,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": 0.1591,
+   "score": 0.1591
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.323781,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": 0.1297,
+   "score": 0.1297
+  },
+  {
+   "id": "4",
+   "dur": 0.301,
+   "loud": 0.259738,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": 0.0124,
+   "score": 0.0124
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.351803,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": -0.0409,
+   "score": -0.0409
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.287087,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": -0.043,
+   "score": -0.043
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.371629,
+   "prompt": "a small swarm of bees buzzing",
+   "clap": -0.1306,
+   "score": -0.1306
+  }
  ]
 }

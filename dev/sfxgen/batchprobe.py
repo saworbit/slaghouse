@@ -107,6 +107,10 @@ PROBES = {
  'alarm': ['an alarm siren', 'a bird', 'music', 'static noise'],
  'squelch': ['a wet squelch', 'a gunshot', 'a footstep', 'static noise'],
  'suck': ['a wet slurp', 'a gunshot', 'wind', 'static noise'],
+ # supply round
+ 'powerup': ['a shimmering chime', 'a gunshot', 'a door slam', 'static noise'],
+ 'whip': ['a whip crack', 'a gunshot', 'a door slam', 'static noise'],
+ 'bees': ['bees buzzing', 'an engine', 'rain', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

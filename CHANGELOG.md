@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Supply round: supply drops and power-ups.** A crate floats down on a chute near you about 22 s into each wave
+  and every 40 s after, and elite enemies sometimes drop a capsule: OVERDRIVE (double damage), HASTE (faster fire
+  and movement), AEGIS (a shield that soaks 60 damage) or MEDPACK (+40 HP). An aura and a HUD timer show what's
+  running.
+- **Reduced flashes** option (title screen OPTIONS): drops the impact frames and dims screen flashes.
+- **Two more weapons** (wheel / Q/E). Bee swarm: a pod that bursts into six homing bees that sting whatever they
+  find. Laser whip: a long crack of plasma that hits everything along it and drags them toward you.
+- **Three more enemies.** Grenadier: lobs bouncing grenades on a fuse (kick them back). Spikeball: a spiked ball
+  that rolls its platform and rages when hurt. Paratrooper: floats down under a chute shooting; shoot the canopy
+  and it falls to its death.
+- AudioGen takes for the power-up pickup, whip crack and bee buzz. The bank grows to 132 sounds.
 - **Codex round: a title menu.** CAMPAIGN, OVERTIME, CODEX, MEDALS and OPTIONS, driven by keyboard, mouse or pad.
   The **codex** lists all 53 enemies, each a grey silhouette until you've met it, then its sprite, name and a line
   on how it fights (met foes are remembered). **Medals** is the gallery, earned ones in gold. **Options** sets
