@@ -6,6 +6,19 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Overtime round: OVERTIME, an endless mode** (E on the title screen, Y on a pad). Random waves that grow by
+  two each time and get tougher (enemy HP +7% a wave), harder enemy types mixing in, a mini-boss every few waves,
+  the Smelter every sixth, a random modifier now and then, a perk after every wave and a new arena every three.
+  The best wave reached is saved and shown on the title screen.
+- **The Smelter's OVERHEAT phase:** below 15% health its armour blows off, it speeds up and fans slag shells
+  everywhere. Its death now holds the camera on it through a longer chain of blasts and debris, with a VICTORY card.
+- **Two more weapons** (on the wheel / Q/E; the keyboard is out of letters). Orbital designator: hold to paint a
+  spot, then a sky laser comes down on it. Plasma cutter: flat plasma blades that slice through every body and
+  crate in their path.
+- **Three more enemies.** Echo: a hologram that walks your path 1.5 s behind you and shoots at you whenever you
+  were shooting. Pilferer: a thief drone that steals the gun in your hands (the slot greys out) until you kill it.
+  Pogo: a spring bot that bounces in big arcs and slams down on your head.
+- AudioGen takes for the orbital strike, cutter blade, pogo spring and pilferer snatch. The bank grows to 126 sounds.
 - **Sorting Line round: a third arena.** ARENA 03 :: THE SORTING LINE, with conveyor belts on the floor and upper
   decks that carry you, enemies, drums, gibs and corpses, and three crusher presses that slam down on a tell
   (40 to you, 200 to enemies, so luring them under one pays). The run now spends two waves in each arena, and the

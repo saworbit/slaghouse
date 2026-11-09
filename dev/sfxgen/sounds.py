@@ -185,4 +185,9 @@ SOUNDS = {
     'press': dict(p=['a hydraulic press slamming down on metal, massive crunch', 'a giant industrial stamping machine slam'], d=2.0, max=0.8, keep=2, n=8, air=0.4),
     'clank': dict(p='a heavy metal claw clamping shut, mechanical clank', d=1.0, max=0.35, keep=2, air=0.7),
     'golem': dict(p=['a huge metal monster groaning, grinding scrap metal', 'a giant robot groan with creaking metal'], d=2.0, max=0.9, keep=2, n=8, air=0.4),
+    # ------------------------------------------------------------------ overtime round
+    'orbital': dict(p=['a massive sci-fi laser beam firing from the sky, roaring energy blast', 'a huge plasma cannon beam with a deep rumble'], d=2.0, max=1.2, keep=2, n=8, air=0.6),
+    'cutter': dict(p=['a sci-fi energy blade fired, sharp electric zing', 'a laser cutter slicing with a high pitched zip'], d=1.0, max=0.3, keep=2, n=8, air=0.9),
+    'boing': dict(p='a big metal spring bouncing, a loud boing', d=1.0, max=0.4, keep=2, air=0.6),
+    'snatch': dict(p=['something snatched quickly with a whoosh', 'a quick grab and a mechanical whirr'], d=1.0, max=0.35, keep=2, n=8, air=0.7),
 }

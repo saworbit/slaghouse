@@ -98,6 +98,11 @@ PROBES = {
  'press': ['a hydraulic press slam', 'thunder', 'a gunshot', 'static noise'],
  'clank': ['a metal clank', 'a gunshot', 'a bell', 'static noise'],
  'golem': ['a metal monster groan', 'a man speaking', 'wind', 'static noise'],
+ # overtime round
+ 'orbital': ['a huge energy beam blast', 'thunder', 'a gunshot', 'static noise'],
+ 'cutter': ['an electric zing', 'a gunshot', 'a bell', 'static noise'],
+ 'boing': ['a spring boing', 'a gunshot', 'a door slam', 'static noise'],
+ 'snatch': ['a quick whoosh grab', 'a gunshot', 'a footstep', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))
