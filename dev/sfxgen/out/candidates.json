@@ -9216,5 +9216,187 @@
    "clap": -0.1306,
    "score": -0.1306
   }
+ ],
+ "shrink": [
+  {
+   "id": "5",
+   "dur": 0.207,
+   "loud": 0.61377,
+   "prompt": "a cartoon shrinking sound, quick falling whistle",
+   "clap": 0.3924,
+   "score": 0.3924
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.546661,
+   "prompt": "a cartoon shrinking sound, quick falling whistle",
+   "clap": 0.2807,
+   "score": 0.2807
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.497727,
+   "prompt": "a cartoon shrinking sound, quick falling whistle",
+   "clap": 0.2015,
+   "score": 0.2015
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.394586,
+   "prompt": "a retro sci-fi ray gun zap with a descending warble",
+   "clap": 0.1341,
+   "score": 0.1341
+  },
+  {
+   "id": "7",
+   "dur": 0.212,
+   "loud": 0.450934,
+   "prompt": "a cartoon shrinking sound, quick falling whistle",
+   "clap": 0.0792,
+   "score": 0.0792
+  },
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.293013,
+   "prompt": "a retro sci-fi ray gun zap with a descending warble",
+   "clap": 0.0612,
+   "score": 0.0612
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.397683,
+   "prompt": "a retro sci-fi ray gun zap with a descending warble",
+   "clap": -0.035,
+   "score": -0.035
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.396172,
+   "prompt": "a retro sci-fi ray gun zap with a descending warble",
+   "clap": -0.0986,
+   "score": -0.0986
+  }
+ ],
+ "sonic": [
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.44308,
+   "prompt": "a massive bass thump shockwave",
+   "clap": 0.2791,
+   "score": 0.2791
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.457056,
+   "prompt": "a massive bass thump shockwave",
+   "clap": 0.2735,
+   "score": 0.2735
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.310703,
+   "prompt": "a deep sonic boom blast",
+   "clap": 0.262,
+   "score": 0.262
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.479272,
+   "prompt": "a massive bass thump shockwave",
+   "clap": 0.2521,
+   "score": 0.2521
+  },
+  {
+   "id": "7",
+   "dur": 0.5,
+   "loud": 0.452455,
+   "prompt": "a massive bass thump shockwave",
+   "clap": 0.2118,
+   "score": 0.2118
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.354382,
+   "prompt": "a deep sonic boom blast",
+   "clap": 0.205,
+   "score": 0.205
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.457566,
+   "prompt": "a deep sonic boom blast",
+   "clap": 0.1923,
+   "score": 0.1923
+  },
+  {
+   "id": "6",
+   "dur": 0.5,
+   "loud": 0.392876,
+   "prompt": "a deep sonic boom blast",
+   "clap": 0.136,
+   "score": 0.136
+  }
+ ],
+ "laser": [
+  {
+   "id": "1",
+   "dur": 0.823,
+   "loud": 0.13692,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": 0.1737,
+   "score": 0.1737
+  },
+  {
+   "id": "5",
+   "dur": 0.265,
+   "loud": 0.284519,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": 0.1231,
+   "score": 0.0431
+  },
+  {
+   "id": "2",
+   "dur": 0.918,
+   "loud": 0.168862,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": 0.0284,
+   "score": 0.0284
+  },
+  {
+   "id": "0",
+   "dur": 0.693,
+   "loud": 0.361815,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": -0.0451,
+   "score": -0.0451
+  },
+  {
+   "id": "4",
+   "dur": 1.2,
+   "loud": 0.29417,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": -0.0507,
+   "score": -0.0507
+  },
+  {
+   "id": "3",
+   "dur": 0.251,
+   "loud": 0.101746,
+   "prompt": "a sustained sci-fi laser beam firing, buzzing hum",
+   "clap": 0.0224,
+   "score": -0.0576
+  }
  ]
 }

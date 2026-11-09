@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Mastery round: weapon mastery and a daily run.** Kills with each gun count toward its mastery for good: 25, 100
+  and 250 kills earn three stars, each +5% damage with that gun, shown as gold pips on the weapon wheel. **DAILY** on
+  the title menu is an OVERTIME run seeded by the date (arena, two starting perks, waves and modifiers), with its own
+  best wave for the day.
+- **Two more weapons** (wheel / Q/E). Shrink ray: shrinks a foe to half size for 8 s; it takes x1.5 damage, bites
+  for half, and you can squish it by landing on it. Sonic blaster: a cone of sound that shoves and stuns everything
+  in front of you and blows enemy shots away.
+- **Three more enemies.** Lugger: picks up the arena's drums and hurls them (shoot the one it's carrying). Blimp: a
+  bomber airship that drops bombs when you're below it and crashes in flames. Strider: a stilt walker that sweeps a
+  laser across the room after a red-sight tell.
+- AudioGen takes for the shrink ray, sonic blast and strider laser. The bank grows to 135 sounds.
 - **Supply round: supply drops and power-ups.** A crate floats down on a chute near you about 22 s into each wave
   and every 40 s after, and elite enemies sometimes drop a capsule: OVERDRIVE (double damage), HASTE (faster fire
   and movement), AEGIS (a shield that soaks 60 damage) or MEDPACK (+40 HP). An aura and a HUD timer show what's

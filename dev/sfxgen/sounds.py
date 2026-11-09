@@ -198,4 +198,8 @@ SOUNDS = {
     'powerup': dict(p=['a sci-fi power up sound, rising shimmering chime', 'an energy pickup with a bright sparkle'], d=1.5, max=0.6, keep=2, n=8, air=0.9),
     'whip': dict(p=['a whip crack, sharp and loud', 'an electric whip lash crack'], d=1.0, max=0.25, keep=2, n=8, air=0.9),
     'bees': dict(p='a small swarm of bees buzzing', d=1.5, max=0.4, keep=2, air=0.7),
+    # ------------------------------------------------------------------ mastery round
+    'shrink': dict(p=['a retro sci-fi ray gun zap with a descending warble', 'a cartoon shrinking sound, quick falling whistle'], d=1.0, max=0.35, keep=2, n=8, air=0.8),
+    'sonic': dict(p=['a deep sonic boom blast', 'a massive bass thump shockwave'], d=1.5, max=0.5, keep=2, n=8, air=0.4),
+    'laser': dict(p='a sustained sci-fi laser beam firing, buzzing hum', d=2.0, max=1.2, keep=2, air=0.7),
 }
