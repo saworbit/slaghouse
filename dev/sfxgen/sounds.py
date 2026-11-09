@@ -180,4 +180,9 @@ SOUNDS = {
     'emp': dict(p=['an electromagnetic pulse discharge, electric whoomp with crackle', 'a sci-fi power surge blast'], d=1.5, max=0.6, keep=2, n=8, air=0.7),
     'jammed': dict(p='electronic static glitch, crackling interference', d=1.5, max=0.7, keep=2, air=0.9),
     'roll': dict(p='a heavy metal ball rolling on concrete, rumbling', d=1.5, max=0.4, keep=2, air=0.4),
+    # ------------------------------------------------------------------ sorting line round
+    'net': dict(p=['a net launcher firing, a soft pneumatic thump', 'a compressed air gun firing with a whoosh'], d=1.0, max=0.35, keep=2, n=8, air=0.6),
+    'press': dict(p=['a hydraulic press slamming down on metal, massive crunch', 'a giant industrial stamping machine slam'], d=2.0, max=0.8, keep=2, n=8, air=0.4),
+    'clank': dict(p='a heavy metal claw clamping shut, mechanical clank', d=1.0, max=0.35, keep=2, air=0.7),
+    'golem': dict(p=['a huge metal monster groaning, grinding scrap metal', 'a giant robot groan with creaking metal'], d=2.0, max=0.9, keep=2, n=8, air=0.4),
 }

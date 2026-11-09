@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Sorting Line round: a third arena.** ARENA 03 :: THE SORTING LINE, with conveyor belts on the floor and upper
+  decks that carry you, enemies, drums, gibs and corpses, and three crusher presses that slam down on a tell
+  (40 to you, 200 to enemies, so luring them under one pays). The run now spends two waves in each arena, and the
+  lift drops you into whichever comes next.
+- **Two more weapons.** Net gun (**H**): a net shell that tangles everything it catches for 3 s (fliers drop,
+  tangled enemies take extra damage). Chain flail (wheel / Q/E): hold to whirl a spiked ball round you that swats
+  enemy shots, release to hurl it through a crowd and yank it back.
+- **Three more enemies.** Claw: a crane claw on a roof trolley that grabs you, hauls you up and flings you (kick,
+  dash or hurt it to break free). Sparker: little hoppers that link up with live arcs. Scrap golem: a junk brute
+  that lobs scrap over cover, slams the floor and dies in a shrapnel blast.
+- AudioGen takes for the net shot, press slam, claw clank and golem groan. The bank grows to 122 sounds.
 - **Ironclad round: medals.** Sixteen run achievements (an untouched wave, trick shots, a x20 combo, executions,
   burning kills, crush kills, shock combos, supercombines, wall splats, kills with 15 guns, rampages, dodges, a
   four-limpet detonation, beating the Smelter, a sub-10-minute win, a Brutal win). A gold toast pops as each one

@@ -169,6 +169,13 @@ duelist, the furnace fire jets, and a perk pick after each wave. Points to check
   been played for real. Knobs: `PERKS`, `TUNE.VOLATILE`.
 - The fire jets fling you sideways after one tick; check you can't be juggled between two columns.
 
+The ironclad and sorting line rounds add the creeper, roller, jammer, claw, sparkers and scrap golem, the steam
+pipes, and ARENA 03 with belts and crusher presses (the run is now two waves per arena). Points to check:
+- The claw only drops through clear lanes from the roof; ARENA 03's catwalk covers the middle, so it only appears
+  in wave 4 (ARENA 02). Check it gets enough chances there to matter.
+- A belt can carry you into a press mid-slam (40 damage). The tell is 0.6 s; check that reads in a busy fight.
+- Three sparkers in the BLACKOUT wave: their arcs glow, but check they're readable in the dark.
+
 **Proposed fix / acceptance**
 - Someone plays waves 2-4 at real speed and notes each death and its cause.
 - Every big hit (cloaker strike, gunship volley, firebomb) has a tell a player can react to, and the blackout still

@@ -1,8 +1,8 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 29 weapons, 44 enemy types, two arenas and six waves that end
-in a boss fight, a perk pick after every wave and 16 medals to collect, on Easy, Normal or Brutal, with keyboard
+pixel art, ragdolls and gibs, destructible terrain, 31 weapons, 47 enemy types, three arenas and six waves that
+end in a boss fight, a perk pick after every wave and 16 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -32,7 +32,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y** |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail has no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -63,25 +63,27 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | X | Corroder (acid cone; corroded enemies take +40% damage, shields melt) | K | Shock rifle (tap: plasma orb; hold: beam; beam an orb for a combo) |
 | L | Needler (homing needles; seven in one target supercombine) | U | Drill launcher (bores through scenery, grinds into a body, then blows) |
 | I | Trick revolver (six rounds; wall shots ricochet into the nearest foe) | O | Flare gun (sticky flares that burn and light foes up in the dark) |
-| Y | Limpet launcher (tap: sticky bomb; hold: set them all off) | | |
+| Y | Limpet launcher (tap: sticky bomb; hold: set them all off) | H | Net gun (tangles foes for 3 s; fliers drop) |
+| wheel | Chain flail (hold: whirl it round you; release: hurl it) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
 ## Waves
 
-Waves 1-3 are fought in **ARENA 01 :: THE MELT FLOOR**. Clearing wave 3 takes you down the lift to **ARENA 02 ::
-THE FURNACE** for the rest of the run, with your health, gun and stats carried over.
+Each arena holds two waves: **ARENA 01 :: THE MELT FLOOR** (waves 1-2), **ARENA 02 :: THE FURNACE** (waves 3-4)
+and **ARENA 03 :: THE SORTING LINE** (waves 5-6), where conveyor belts carry everything and crusher presses slam
+down on a tell. Clearing an arena takes you down the lift with your health, gun, perks and stats carried over.
 
 1. 10 placed enemies.
 2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a tar spitter whose puddles slow you (and burn when lit), a mimic
-   hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, and a creeper that
-   drops off the ceiling.
-3. 17 enemies under **SLAG RAIN**, with a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
+   hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
+   drops off the ceiling and a pack of sparkers that link up with live arcs.
+3. 17 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
    (kick it back), a mimic, a gasbag, a duelist that sidesteps your shots, an armoured roller and the gunship
    mini-boss.
 4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
-   that keeps a gnat swarm going, a buzzsaw, a magnetron whose field bends your shots away, a teleporting blinker
+   that keeps a gnat swarm going, a buzzsaw, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
    EMP ring jams your gun. The furnace's fire vents go off every few seconds.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a

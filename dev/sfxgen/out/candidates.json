@@ -8388,5 +8388,253 @@
    "clap": -0.0861,
    "score": -0.0861
   }
+ ],
+ "net": [
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.308947,
+   "prompt": "a net launcher firing, a soft pneumatic thump",
+   "clap": 0.171,
+   "score": 0.171
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.320961,
+   "prompt": "a compressed air gun firing with a whoosh",
+   "clap": 0.1398,
+   "score": 0.1398
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.399573,
+   "prompt": "a compressed air gun firing with a whoosh",
+   "clap": 0.1269,
+   "score": 0.1269
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.261872,
+   "prompt": "a compressed air gun firing with a whoosh",
+   "clap": 0.0315,
+   "score": 0.0315
+  },
+  {
+   "id": "7",
+   "dur": 0.35,
+   "loud": 0.264423,
+   "prompt": "a compressed air gun firing with a whoosh",
+   "clap": 0.023,
+   "score": 0.023
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.265312,
+   "prompt": "a net launcher firing, a soft pneumatic thump",
+   "clap": 0.0192,
+   "score": 0.0192
+  },
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.257118,
+   "prompt": "a net launcher firing, a soft pneumatic thump",
+   "clap": 0.0148,
+   "score": 0.0148
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.319497,
+   "prompt": "a net launcher firing, a soft pneumatic thump",
+   "clap": -0.0015,
+   "score": -0.0015
+  }
+ ],
+ "press": [
+  {
+   "id": "2",
+   "dur": 0.8,
+   "loud": 0.327443,
+   "prompt": "a hydraulic press slamming down on metal, massive crunch",
+   "clap": 0.2932,
+   "score": 0.2932
+  },
+  {
+   "id": "7",
+   "dur": 0.8,
+   "loud": 0.181184,
+   "prompt": "a giant industrial stamping machine slam",
+   "clap": 0.1778,
+   "score": 0.1778
+  },
+  {
+   "id": "6",
+   "dur": 0.8,
+   "loud": 0.277298,
+   "prompt": "a hydraulic press slamming down on metal, massive crunch",
+   "clap": 0.075,
+   "score": 0.075
+  },
+  {
+   "id": "1",
+   "dur": 0.8,
+   "loud": 0.343453,
+   "prompt": "a giant industrial stamping machine slam",
+   "clap": 0.0206,
+   "score": 0.0206
+  },
+  {
+   "id": "0",
+   "dur": 0.8,
+   "loud": 0.237436,
+   "prompt": "a hydraulic press slamming down on metal, massive crunch",
+   "clap": 0.0133,
+   "score": 0.0133
+  },
+  {
+   "id": "3",
+   "dur": 0.8,
+   "loud": 0.273114,
+   "prompt": "a giant industrial stamping machine slam",
+   "clap": -0.0052,
+   "score": -0.0052
+  },
+  {
+   "id": "4",
+   "dur": 0.8,
+   "loud": 0.318488,
+   "prompt": "a hydraulic press slamming down on metal, massive crunch",
+   "clap": -0.0084,
+   "score": -0.0084
+  },
+  {
+   "id": "5",
+   "dur": 0.8,
+   "loud": 0.287484,
+   "prompt": "a giant industrial stamping machine slam",
+   "clap": -0.0677,
+   "score": -0.0677
+  }
+ ],
+ "clank": [
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.309351,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": 0.1694,
+   "score": 0.1694
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.198105,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": 0.154,
+   "score": 0.154
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.227188,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": 0.1278,
+   "score": 0.1278
+  },
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.269608,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": 0.0999,
+   "score": 0.0999
+  },
+  {
+   "id": "2",
+   "dur": 0.319,
+   "loud": 0.207754,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": 0.0929,
+   "score": 0.0929
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.266669,
+   "prompt": "a heavy metal claw clamping shut, mechanical clank",
+   "clap": -0.0004,
+   "score": -0.0004
+  }
+ ],
+ "golem": [
+  {
+   "id": "6",
+   "dur": 0.9,
+   "loud": 0.375162,
+   "prompt": "a huge metal monster groaning, grinding scrap metal",
+   "clap": 0.3441,
+   "score": 0.3441
+  },
+  {
+   "id": "2",
+   "dur": 0.9,
+   "loud": 0.327467,
+   "prompt": "a huge metal monster groaning, grinding scrap metal",
+   "clap": 0.2762,
+   "score": 0.2762
+  },
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.331261,
+   "prompt": "a giant robot groan with creaking metal",
+   "clap": 0.1931,
+   "score": 0.1931
+  },
+  {
+   "id": "4",
+   "dur": 0.9,
+   "loud": 0.371878,
+   "prompt": "a huge metal monster groaning, grinding scrap metal",
+   "clap": 0.1848,
+   "score": 0.1848
+  },
+  {
+   "id": "0",
+   "dur": 0.9,
+   "loud": 0.309854,
+   "prompt": "a huge metal monster groaning, grinding scrap metal",
+   "clap": 0.1725,
+   "score": 0.1725
+  },
+  {
+   "id": "3",
+   "dur": 0.9,
+   "loud": 0.433479,
+   "prompt": "a giant robot groan with creaking metal",
+   "clap": 0.1206,
+   "score": 0.1206
+  },
+  {
+   "id": "7",
+   "dur": 0.9,
+   "loud": 0.337735,
+   "prompt": "a giant robot groan with creaking metal",
+   "clap": 0.0906,
+   "score": 0.0906
+  },
+  {
+   "id": "5",
+   "dur": 0.9,
+   "loud": 0.443154,
+   "prompt": "a giant robot groan with creaking metal",
+   "clap": 0.0882,
+   "score": 0.0882
+  }
  ]
 }
