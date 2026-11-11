@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Armory round: an ARMORY page.** The title menu has a new ARMORY: every gun, 12 to a row with three mastery pips
+  under each, and the picked one's name, line, key, kills and the kills to its next star. A new POPCORN medal is
+  for 5 microwave pops in a run.
+- **Two more weapons** (wheel / Q/E). Stasis grenade: a bubble of stopped time; hits on frozen foes are stored and
+  land all at once (+25%) when time restarts, and enemy shots hang in the air. Microwave: a beam that cooks a foe
+  until it swells and pops.
+- **Three more enemies.** Vortex: a turbine drone that drags you in and shreds you up close. Arc pylon: a tesla tower
+  that charges, then throws lightning at you if it can see you. Scavenger: a ghoul that eats corpses to heal and
+  grow.
+- AudioGen takes for the stasis field opening and closing, the microwave hum and pop, the vortex, the pylon's charge
+  and bolt, and the scavenger's chomp. The bank grows to 167 sounds.
 - **Wrecking-yard round: ARENA 04.** OVERTIME and DAILY now rotate through a fourth arena, THE WRECKING YARD: junk
   heaps of crates, a raised dais, and a wrecking ball swinging across the middle that flings foes, knocks you aside,
   smashes crates and lights drums. A new WRECKING CREW medal is for 3 kills with it in a run.

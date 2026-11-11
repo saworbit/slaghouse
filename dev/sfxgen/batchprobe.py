@@ -148,6 +148,15 @@ PROBES = {
  'decoy': ['a sci-fi shimmer', 'an engine', 'music', 'static noise'],
  'discThrow': ['a whirring whoosh', 'a gunshot', 'an engine', 'static noise'],
  'sporePuff': ['a soft puff', 'a gunshot', 'glass breaking', 'static noise'],
+ # armory round
+ 'stasis': ['a sci-fi warp whoosh', 'a gunshot', 'a dog barking', 'static noise'],
+ 'stasisEnd': ['a rising whoosh snap', 'a gunshot', 'rain', 'static noise'],
+ 'microwave': ['an electric hum', 'a dog barking', 'rain', 'music'],
+ 'mwPop': ['a wet pop', 'a gunshot', 'glass breaking', 'static noise'],
+ 'vortexSpin': ['a whirling turbine', 'a dog barking', 'rain', 'music'],
+ 'pylonCharge': ['a crackling electric buzz', 'a dog barking', 'rain', 'music'],
+ 'pylonZap': ['an electric crack', 'a gunshot', 'a door slam', 'static noise'],
+ 'chomp': ['a wet chomping bite', 'a gunshot', 'an engine', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

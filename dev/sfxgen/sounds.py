@@ -235,4 +235,13 @@ SOUNDS = {
     'decoy': dict(p='a hologram projector powering on, a sci-fi shimmer', d=1.5, max=0.6, keep=1, air=0.9),
     'discThrow': dict(p=['a metal frisbee whooshing through the air', 'a spinning blade whirring past'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
     'sporePuff': dict(p=['a soft puff of spores, a squishy release of air', 'a mushroom releasing a cloud of spores'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
+    # ------------------------------------------------------------------ armory round
+    'stasis': dict(p=['a sci-fi time freeze, a deep reversed whoosh with a glassy ring', 'time stopping sound effect, a low warp'], d=1.5, max=0.6, keep=2, n=8, air=0.8),
+    'stasisEnd': dict(p=['a sci-fi time snap back, a quick rising whoosh', 'a sudden release of energy, a sharp snap'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    'microwave': dict(p='a microwave oven humming, an electric buzz', d=1.5, max=0.4, keep=1, air=0.6),
+    'mwPop': dict(p=['a wet balloon popping, a squishy burst', 'a gory wet pop'], d=1.0, max=0.35, keep=2, n=8, air=0.6),
+    'vortexSpin': dict(p=['a turbine spinning up, a rising whirl of wind', 'a jet engine spooling up, a whooshing whirl'], d=2.0, max=1.2, keep=1, air=0.6, on=-24),
+    'pylonCharge': dict(p='an electrical transformer charging up, rising crackling buzz', d=2.0, max=1.2, keep=1, air=0.8, on=-24),
+    'pylonZap': dict(p=['a lightning bolt strike, a sharp electric crack', 'a tesla coil discharge, a loud zap'], d=1.0, max=0.5, keep=2, n=8, air=0.9),
+    'chomp': dict(p=['a monster chomping meat, a wet bite', 'a creature eating flesh, chewing'], d=1.0, max=0.3, keep=2, n=8, air=0.6),
 }

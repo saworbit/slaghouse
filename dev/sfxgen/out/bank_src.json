@@ -1126,12 +1126,12 @@
  },
  "chomp": {
   "ids": [
-   "0",
-   "6"
+   "6",
+   "4"
   ],
   "wav": [
-   "ee2a2f155cd7ece1",
-   "7fc70fa5b38dc3a9"
+   "8418a9a4147c2aab",
+   "cd684aee1e857875"
   ],
   "rate": "40k"
  },
@@ -1757,6 +1757,68 @@
   ],
   "wav": [
    "4e6fb3b1c5cae1de"
+  ],
+  "rate": "40k"
+ },
+ "stasis": {
+  "ids": [
+   "4",
+   "6"
+  ],
+  "wav": [
+   "01f5dab3a4318e08",
+   "3b679e4b49a0c6bd"
+  ],
+  "rate": "40k"
+ },
+ "stasisEnd": {
+  "ids": [
+   "0",
+   "6"
+  ],
+  "wav": [
+   "74a22405fedf655d",
+   "fd7404e787a5ad9e"
+  ],
+  "rate": "40k"
+ },
+ "microwave": {
+  "ids": [
+   "1"
+  ],
+  "wav": [
+   "347d000af3cf4f9a"
+  ],
+  "rate": "40k"
+ },
+ "mwPop": {
+  "ids": [
+   "7",
+   "2"
+  ],
+  "wav": [
+   "faad24676141e593",
+   "f06f991d778f4de7"
+  ],
+  "rate": "40k"
+ },
+ "pylonCharge": {
+  "ids": [
+   "5"
+  ],
+  "wav": [
+   "95f1193ce6d9343d"
+  ],
+  "rate": "40k"
+ },
+ "pylonZap": {
+  "ids": [
+   "1",
+   "2"
+  ],
+  "wav": [
+   "aefb97f1429d7373",
+   "41fda9caf5b97dc6"
   ],
   "rate": "40k"
  }

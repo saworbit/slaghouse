@@ -7191,68 +7191,68 @@
  ],
  "chomp": [
   {
-   "id": "0",
-   "dur": 0.3,
-   "loud": 0.293417,
-   "prompt": "a monster biting down hard, wet chomp",
-   "clap": 0.3236,
-   "score": 0.3236
-  },
-  {
    "id": "6",
-   "dur": 0.181,
-   "loud": 0.206815,
-   "prompt": "a monster biting down hard, wet chomp",
-   "clap": 0.3104,
-   "score": 0.3104
-  },
-  {
-   "id": "2",
    "dur": 0.3,
-   "loud": 0.272439,
-   "prompt": "a monster biting down hard, wet chomp",
-   "clap": 0.291,
-   "score": 0.291
+   "loud": 0.230609,
+   "prompt": "a monster chomping meat, a wet bite",
+   "clap": 0.2888,
+   "score": 0.2888
   },
   {
    "id": "4",
-   "dur": 0.208,
-   "loud": 0.184535,
-   "prompt": "a monster biting down hard, wet chomp",
-   "clap": 0.2667,
-   "score": 0.2667
+   "dur": 0.3,
+   "loud": 0.217084,
+   "prompt": "a monster chomping meat, a wet bite",
+   "clap": 0.2797,
+   "score": 0.2797
   },
   {
    "id": "7",
    "dur": 0.3,
-   "loud": 0.329029,
-   "prompt": "a big beast snapping its jaws shut",
-   "clap": 0.0963,
-   "score": 0.0963
+   "loud": 0.205545,
+   "prompt": "a creature eating flesh, chewing",
+   "clap": 0.1816,
+   "score": 0.1816
   },
   {
-   "id": "5",
+   "id": "2",
    "dur": 0.3,
-   "loud": 0.141212,
-   "prompt": "a big beast snapping its jaws shut",
-   "clap": 0.0722,
-   "score": 0.0722
-  },
-  {
-   "id": "3",
-   "dur": 0.223,
-   "loud": 0.242326,
-   "prompt": "a big beast snapping its jaws shut",
-   "clap": 0.027,
-   "score": 0.027
+   "loud": 0.256754,
+   "prompt": "a monster chomping meat, a wet bite",
+   "clap": 0.175,
+   "score": 0.175
   },
   {
    "id": "1",
    "dur": 0.3,
-   "loud": 0.194828,
-   "prompt": "a big beast snapping its jaws shut",
-   "clap": -0.1323,
-   "score": -0.1323
+   "loud": 0.231626,
+   "prompt": "a creature eating flesh, chewing",
+   "clap": 0.127,
+   "score": 0.127
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.344381,
+   "prompt": "a monster chomping meat, a wet bite",
+   "clap": 0.0887,
+   "score": 0.0887
+  },
+  {
+   "id": "3",
+   "dur": 0.236,
+   "loud": 0.175882,
+   "prompt": "a creature eating flesh, chewing",
+   "clap": 0.049,
+   "score": 0.049
+  },
+  {
+   "id": "5",
+   "dur": 0.253,
+   "loud": 0.175632,
+   "prompt": "a creature eating flesh, chewing",
+   "clap": 0.0378,
+   "score": 0.0378
   }
  ],
  "drill": [
@@ -11133,6 +11133,412 @@
    "prompt": "a mushroom releasing a cloud of spores",
    "clap": 0.026,
    "score": -0.054
+  }
+ ],
+ "stasis": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.282448,
+   "prompt": "a sci-fi time freeze, a deep reversed whoosh with a glassy ring",
+   "clap": 0.271,
+   "score": 0.271
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.340799,
+   "prompt": "a sci-fi time freeze, a deep reversed whoosh with a glassy ring",
+   "clap": 0.221,
+   "score": 0.221
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.318527,
+   "prompt": "a sci-fi time freeze, a deep reversed whoosh with a glassy ring",
+   "clap": 0.1378,
+   "score": 0.1378
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.300455,
+   "prompt": "a sci-fi time freeze, a deep reversed whoosh with a glassy ring",
+   "clap": 0.1126,
+   "score": 0.1126
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.346008,
+   "prompt": "time stopping sound effect, a low warp",
+   "clap": 0.0301,
+   "score": 0.0301
+  },
+  {
+   "id": "7",
+   "dur": 0.067,
+   "loud": 0.136347,
+   "prompt": "time stopping sound effect, a low warp",
+   "clap": -0.0524,
+   "score": -0.1324
+  },
+  {
+   "id": "5",
+   "dur": 0.091,
+   "loud": 0.195712,
+   "prompt": "time stopping sound effect, a low warp",
+   "clap": -0.0687,
+   "score": -0.1487
+  }
+ ],
+ "stasisEnd": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.278566,
+   "prompt": "a sci-fi time snap back, a quick rising whoosh",
+   "clap": 0.343,
+   "score": 0.343
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.281446,
+   "prompt": "a sci-fi time snap back, a quick rising whoosh",
+   "clap": 0.3157,
+   "score": 0.3157
+  },
+  {
+   "id": "4",
+   "dur": 0.186,
+   "loud": 0.327918,
+   "prompt": "a sci-fi time snap back, a quick rising whoosh",
+   "clap": 0.274,
+   "score": 0.274
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.244343,
+   "prompt": "a sci-fi time snap back, a quick rising whoosh",
+   "clap": 0.2671,
+   "score": 0.2671
+  },
+  {
+   "id": "1",
+   "dur": 0.353,
+   "loud": 0.164169,
+   "prompt": "a sudden release of energy, a sharp snap",
+   "clap": 0.072,
+   "score": 0.072
+  },
+  {
+   "id": "3",
+   "dur": 0.178,
+   "loud": 0.294623,
+   "prompt": "a sudden release of energy, a sharp snap",
+   "clap": -0.0392,
+   "score": -0.0392
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.324909,
+   "prompt": "a sudden release of energy, a sharp snap",
+   "clap": -0.0673,
+   "score": -0.0673
+  },
+  {
+   "id": "7",
+   "dur": 0.049,
+   "loud": 0.271459,
+   "prompt": "a sudden release of energy, a sharp snap",
+   "clap": 0.0121,
+   "score": -0.0679
+  }
+ ],
+ "microwave": [
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.257001,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": 0.2593,
+   "score": 0.2593
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.312361,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": 0.2036,
+   "score": 0.2036
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.371057,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": 0.175,
+   "score": 0.175
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.307596,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": 0.1481,
+   "score": 0.1481
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.271401,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": -0.008,
+   "score": -0.008
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.367254,
+   "prompt": "a microwave oven humming, an electric buzz",
+   "clap": -0.059,
+   "score": -0.059
+  }
+ ],
+ "mwPop": [
+  {
+   "id": "7",
+   "dur": 0.286,
+   "loud": 0.264275,
+   "prompt": "a gory wet pop",
+   "clap": 0.2357,
+   "score": 0.2357
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.143844,
+   "prompt": "a wet balloon popping, a squishy burst",
+   "clap": 0.2031,
+   "score": 0.2031
+  },
+  {
+   "id": "3",
+   "dur": 0.265,
+   "loud": 0.291244,
+   "prompt": "a gory wet pop",
+   "clap": 0.1969,
+   "score": 0.1969
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.215767,
+   "prompt": "a gory wet pop",
+   "clap": 0.1941,
+   "score": 0.1941
+  },
+  {
+   "id": "5",
+   "dur": 0.195,
+   "loud": 0.204046,
+   "prompt": "a gory wet pop",
+   "clap": 0.1662,
+   "score": 0.1662
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.323057,
+   "prompt": "a wet balloon popping, a squishy burst",
+   "clap": 0.1238,
+   "score": 0.1238
+  },
+  {
+   "id": "4",
+   "dur": 0.264,
+   "loud": 0.087493,
+   "prompt": "a wet balloon popping, a squishy burst",
+   "clap": 0.1025,
+   "score": 0.1025
+  },
+  {
+   "id": "6",
+   "dur": 0.081,
+   "loud": 0.206655,
+   "prompt": "a wet balloon popping, a squishy burst",
+   "clap": -0.0041,
+   "score": -0.0841
+  }
+ ],
+ "vortexSpin": [
+  {
+   "id": "1",
+   "dur": 1.2,
+   "loud": 0.311448,
+   "prompt": "a jet engine spooling up, a whooshing whirl",
+   "clap": 0.0796,
+   "score": 0.0796
+  },
+  {
+   "id": "2",
+   "dur": 1.2,
+   "loud": 0.255141,
+   "prompt": "a turbine spinning up, a rising whirl of wind",
+   "clap": 0.0333,
+   "score": 0.0333
+  },
+  {
+   "id": "3",
+   "dur": 1.2,
+   "loud": 0.317006,
+   "prompt": "a jet engine spooling up, a whooshing whirl",
+   "clap": 0.0118,
+   "score": 0.0118
+  },
+  {
+   "id": "4",
+   "dur": 1.2,
+   "loud": 0.253539,
+   "prompt": "a turbine spinning up, a rising whirl of wind",
+   "clap": 0.0093,
+   "score": 0.0093
+  },
+  {
+   "id": "5",
+   "dur": 1.2,
+   "loud": 0.33734,
+   "prompt": "a jet engine spooling up, a whooshing whirl",
+   "clap": 0.0091,
+   "score": 0.0091
+  },
+  {
+   "id": "0",
+   "dur": 1.2,
+   "loud": 0.339326,
+   "prompt": "a turbine spinning up, a rising whirl of wind",
+   "clap": -0.0312,
+   "score": -0.0312
+  }
+ ],
+ "pylonCharge": [
+  {
+   "id": "5",
+   "dur": 1.2,
+   "loud": 0.195705,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.3984,
+   "score": 0.3984
+  },
+  {
+   "id": "2",
+   "dur": 1.2,
+   "loud": 0.205044,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.3302,
+   "score": 0.3302
+  },
+  {
+   "id": "3",
+   "dur": 1.2,
+   "loud": 0.246749,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.298,
+   "score": 0.298
+  },
+  {
+   "id": "4",
+   "dur": 1.2,
+   "loud": 0.227605,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.2682,
+   "score": 0.2682
+  },
+  {
+   "id": "0",
+   "dur": 1.2,
+   "loud": 0.160644,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.2375,
+   "score": 0.2375
+  },
+  {
+   "id": "1",
+   "dur": 1.2,
+   "loud": 0.312095,
+   "prompt": "an electrical transformer charging up, rising crackling buzz",
+   "clap": 0.2343,
+   "score": 0.2343
+  }
+ ],
+ "pylonZap": [
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.221492,
+   "prompt": "a tesla coil discharge, a loud zap",
+   "clap": 0.3528,
+   "score": 0.3528
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.322712,
+   "prompt": "a lightning bolt strike, a sharp electric crack",
+   "clap": 0.2218,
+   "score": 0.2218
+  },
+  {
+   "id": "7",
+   "dur": 0.5,
+   "loud": 0.252405,
+   "prompt": "a tesla coil discharge, a loud zap",
+   "clap": 0.1924,
+   "score": 0.1924
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.27243,
+   "prompt": "a lightning bolt strike, a sharp electric crack",
+   "clap": 0.1874,
+   "score": 0.1874
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.394861,
+   "prompt": "a tesla coil discharge, a loud zap",
+   "clap": 0.15,
+   "score": 0.15
+  },
+  {
+   "id": "3",
+   "dur": 0.5,
+   "loud": 0.272324,
+   "prompt": "a tesla coil discharge, a loud zap",
+   "clap": 0.0578,
+   "score": 0.0578
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.163006,
+   "prompt": "a lightning bolt strike, a sharp electric crack",
+   "clap": 0.0398,
+   "score": 0.0398
+  },
+  {
+   "id": "6",
+   "dur": 0.5,
+   "loud": 0.292848,
+   "prompt": "a lightning bolt strike, a sharp electric crack",
+   "clap": 0.0083,
+   "score": 0.0083
   }
  ]
 }
