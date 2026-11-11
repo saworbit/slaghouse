@@ -256,4 +256,10 @@ SOUNDS = {
     'axeChop': dict(p=['a huge axe chopping into stone, a heavy thunk', 'an executioner axe slamming down'], d=1.0, max=0.5, keep=2, n=8, air=0.6),
     'berserk': dict(p=['a monster roaring in rage', 'an enraged beast bellow'], d=1.5, max=0.8, keep=2, n=8, air=0.5),
     'hardlight': dict(p=['an energy shield powering up, a rising hum', 'a force field activating'], d=1.0, max=0.5, keep=2, n=8, air=0.8),
+    # ------------------------------------------------------------------ debrief round
+    'bubble': dict(p=['a soap bubble blown, a soft bloop', 'a bubble gun firing, a wet blip'], d=1.0, max=0.25, keep=2, n=8, air=0.8),
+    'bubblePop': dict(p=['a soap bubble popping, a tiny pop', 'a bubble bursting'], d=1.0, max=0.15, keep=3, n=8, air=0.9),
+    'zealotCast': dict(p=['a choir chanting a short holy note', 'a monk chant, a low sung tone'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
+    'soul': dict(p=['a ghostly whoosh rising, an ethereal swish', 'a spirit flying past'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    'squeak': dict(p=['a rat squeaking', 'a small mouse squeak'], d=1.0, max=0.2, keep=3, n=8, air=0.9),
 }

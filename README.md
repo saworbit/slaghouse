@@ -1,9 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 53 weapons (each with mastery stars to earn), 81 enemy types
+pixel art, ragdolls and gibs, destructible terrain, 55 weapons (each with mastery stars to earn), 85 enemy types
 (with an in-game codex), power-up supply drops, three
-arenas (four in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 23 medals to collect, on Easy, Normal or Brutal, with keyboard
+arenas (four in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 24 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -34,7 +34,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire and drone pod have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher and bubble gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -77,7 +77,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Decoy launcher (a hologram of you that draws foes in, then blows up) | wheel | Stasis grenade (stops time in a bubble; hits stack up and land together) |
 | wheel | Microwave (cooks a foe until it pops) | wheel | Rocket gauntlet (a thruster punch that carries you into them) |
 | wheel | Marksman rifle (laser-sighted, pierces, triple-damage headshots) | wheel | Tripwire (a laser beam that zaps whatever crosses it) |
-| wheel | Drone pod (two gun drones orbit you for 10 s) | | |
+| wheel | Drone pod (two gun drones orbit you for 10 s) | wheel | Gas launcher (a cloud of your own gas; light it for a fireball) |
+| wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -91,16 +92,16 @@ down on a tell. Clearing an arena takes you down the lift with your health, gun,
 2. 19 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a wraith that drifts through walls, a tar spitter whose puddles slow you (and burn when lit), a mimic
    hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
-   drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a grenadier and a pack of sparkers that link up with live arcs.
+   drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a soul-drinking zealot, a grenadier and a pack of sparkers that link up with live arcs.
 3. 19 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a shellback you have to flip, a pyro, a torcher with a flamethrower (get behind it), a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
    (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a spotter whose red eye marks you for every foe, a
    duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, a bastion behind a hard-light wall, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
 4. 19 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a pair of pouncing hounds, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a vortex drone that drags you in, a thundercloud that drops lightning on you, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
-   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores and an acid slug. The furnace's fire vents go off every few seconds.
-5. 17 enemies (29 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. Slaglings, a burrower, a scavenger that eats the dead to grow, linkers, an echo, a laser strider, a warhorn that rallies the rest, a wall-leaping shinobi, a beacon,
+   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines and an acid slug. The furnace's fire vents go off every few seconds.
+5. 17 enemies (23 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
+   time, about every 25 s. A slagling, a rat king that bursts into ratbots, a burrower, a scavenger that eats the dead to grow, linkers, an echo, a laser strider, a warhorn that rallies the rest, a wall-leaping shinobi, a beacon,
    a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
 
@@ -119,7 +120,8 @@ damage, faster fire, life steal, a double jump, exploding kills and so on). Stea
 scalding jets when shot. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. From wave 2, a few foes warp in as **elites**
 (armored, shielded, volatile or regenerating, marked by a coloured diamond) that drop health when they die. Medals pop up as you earn them, and the title screen counts your collection. Supply
 crates float down mid-wave with a power-up: OVERDRIVE (double damage), HASTE, an AEGIS shield or a MEDPACK. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
-orbs. The results screen grades the run (S-D) and keeps your best score.
+orbs. The results screen lists your top guns, your biggest hit and what killed you, grades the run (S-D) and
+keeps your best score.
 
 ## Project layout
 

@@ -12184,5 +12184,335 @@
    "clap": -0.0907,
    "score": -0.1707
   }
+ ],
+ "bubble": [
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.182815,
+   "prompt": "a soap bubble blown, a soft bloop",
+   "clap": 0.1683,
+   "score": 0.1683
+  },
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.163455,
+   "prompt": "a bubble gun firing, a wet blip",
+   "clap": 0.1262,
+   "score": 0.1262
+  },
+  {
+   "id": "2",
+   "dur": 0.122,
+   "loud": 0.195055,
+   "prompt": "a soap bubble blown, a soft bloop",
+   "clap": 0.1162,
+   "score": 0.1162
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.292033,
+   "prompt": "a bubble gun firing, a wet blip",
+   "clap": 0.0366,
+   "score": 0.0366
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.240774,
+   "prompt": "a soap bubble blown, a soft bloop",
+   "clap": 0.0121,
+   "score": 0.0121
+  },
+  {
+   "id": "1",
+   "dur": 0.184,
+   "loud": 0.213774,
+   "prompt": "a bubble gun firing, a wet blip",
+   "clap": -0.0023,
+   "score": -0.0023
+  },
+  {
+   "id": "6",
+   "dur": 0.158,
+   "loud": 0.48478,
+   "prompt": "a soap bubble blown, a soft bloop",
+   "clap": -0.0041,
+   "score": -0.0041
+  },
+  {
+   "id": "5",
+   "dur": 0.068,
+   "loud": 0.195272,
+   "prompt": "a bubble gun firing, a wet blip",
+   "clap": 0.0417,
+   "score": -0.0383
+  }
+ ],
+ "bubblePop": [
+  {
+   "id": "1",
+   "dur": 0.15,
+   "loud": 0.356596,
+   "prompt": "a bubble bursting",
+   "clap": 0.078,
+   "score": 0.078
+  },
+  {
+   "id": "5",
+   "dur": 0.15,
+   "loud": 0.421798,
+   "prompt": "a bubble bursting",
+   "clap": 0.0716,
+   "score": 0.0716
+  },
+  {
+   "id": "3",
+   "dur": 0.15,
+   "loud": 0.296854,
+   "prompt": "a bubble bursting",
+   "clap": 0.0697,
+   "score": 0.0697
+  },
+  {
+   "id": "0",
+   "dur": 0.055,
+   "loud": 0.144079,
+   "prompt": "a soap bubble popping, a tiny pop",
+   "clap": 0.1318,
+   "score": 0.0518
+  },
+  {
+   "id": "7",
+   "dur": 0.15,
+   "loud": 0.22314,
+   "prompt": "a bubble bursting",
+   "clap": 0.0206,
+   "score": 0.0206
+  },
+  {
+   "id": "4",
+   "dur": 0.15,
+   "loud": 0.269162,
+   "prompt": "a soap bubble popping, a tiny pop",
+   "clap": 0.0149,
+   "score": 0.0149
+  },
+  {
+   "id": "6",
+   "dur": 0.15,
+   "loud": 0.152184,
+   "prompt": "a soap bubble popping, a tiny pop",
+   "clap": -0.0157,
+   "score": -0.0157
+  },
+  {
+   "id": "2",
+   "dur": 0.15,
+   "loud": 0.392729,
+   "prompt": "a soap bubble popping, a tiny pop",
+   "clap": -0.0518,
+   "score": -0.0518
+  }
+ ],
+ "zealotCast": [
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.295954,
+   "prompt": "a choir chanting a short holy note",
+   "clap": 0.184,
+   "score": 0.184
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.324372,
+   "prompt": "a choir chanting a short holy note",
+   "clap": 0.1496,
+   "score": 0.1496
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.339636,
+   "prompt": "a choir chanting a short holy note",
+   "clap": 0.1172,
+   "score": 0.1172
+  },
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.317173,
+   "prompt": "a choir chanting a short holy note",
+   "clap": 0.0597,
+   "score": 0.0597
+  },
+  {
+   "id": "1",
+   "dur": 0.7,
+   "loud": 0.411108,
+   "prompt": "a monk chant, a low sung tone",
+   "clap": -0.0071,
+   "score": -0.0071
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.363482,
+   "prompt": "a monk chant, a low sung tone",
+   "clap": -0.0144,
+   "score": -0.0144
+  },
+  {
+   "id": "7",
+   "dur": 0.7,
+   "loud": 0.372379,
+   "prompt": "a monk chant, a low sung tone",
+   "clap": -0.0367,
+   "score": -0.0367
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.382518,
+   "prompt": "a monk chant, a low sung tone",
+   "clap": -0.061,
+   "score": -0.061
+  }
+ ],
+ "soul": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.341871,
+   "prompt": "a ghostly whoosh rising, an ethereal swish",
+   "clap": 0.145,
+   "score": 0.145
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.282189,
+   "prompt": "a ghostly whoosh rising, an ethereal swish",
+   "clap": 0.106,
+   "score": 0.106
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.310185,
+   "prompt": "a ghostly whoosh rising, an ethereal swish",
+   "clap": 0.0643,
+   "score": 0.0643
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.424659,
+   "prompt": "a ghostly whoosh rising, an ethereal swish",
+   "clap": 0.0451,
+   "score": 0.0451
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.30131,
+   "prompt": "a spirit flying past",
+   "clap": -0.0107,
+   "score": -0.0107
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.323472,
+   "prompt": "a spirit flying past",
+   "clap": -0.0563,
+   "score": -0.0563
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.3397,
+   "prompt": "a spirit flying past",
+   "clap": -0.0785,
+   "score": -0.0785
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.292749,
+   "prompt": "a spirit flying past",
+   "clap": -0.1125,
+   "score": -0.1125
+  }
+ ],
+ "squeak": [
+  {
+   "id": "1",
+   "dur": 0.128,
+   "loud": 0.293697,
+   "prompt": "a small mouse squeak",
+   "clap": -0.0196,
+   "score": -0.0196
+  },
+  {
+   "id": "0",
+   "dur": 0.2,
+   "loud": 0.20364,
+   "prompt": "a rat squeaking",
+   "clap": -0.0211,
+   "score": -0.0211
+  },
+  {
+   "id": "4",
+   "dur": 0.2,
+   "loud": 0.33214,
+   "prompt": "a rat squeaking",
+   "clap": -0.0218,
+   "score": -0.0218
+  },
+  {
+   "id": "6",
+   "dur": 0.2,
+   "loud": 0.412439,
+   "prompt": "a rat squeaking",
+   "clap": -0.0628,
+   "score": -0.0628
+  },
+  {
+   "id": "7",
+   "dur": 0.2,
+   "loud": 0.325063,
+   "prompt": "a small mouse squeak",
+   "clap": -0.1325,
+   "score": -0.1325
+  },
+  {
+   "id": "5",
+   "dur": 0.2,
+   "loud": 0.239172,
+   "prompt": "a small mouse squeak",
+   "clap": -0.1502,
+   "score": -0.1502
+  },
+  {
+   "id": "2",
+   "dur": 0.2,
+   "loud": 0.310611,
+   "prompt": "a rat squeaking",
+   "clap": -0.1612,
+   "score": -0.1612
+  },
+  {
+   "id": "3",
+   "dur": 0.2,
+   "loud": 0.16395,
+   "prompt": "a small mouse squeak",
+   "clap": -0.1662,
+   "score": -0.1662
+  }
  ]
 }

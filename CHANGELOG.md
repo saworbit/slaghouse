@@ -6,6 +6,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Debrief round: a fuller results screen.** The results now show your top three guns by kills, the biggest single
+  hit of the run and, if you died, what killed you. A new PEST CONTROL medal is for 15 ratbots in a run.
+- **Two more weapons** (wheel / Q/E). Gas launcher: a cloud of your own gas that spares you, eats metal and meat
+  alike, and goes up in a fireball if you light it. Bubble gun: floats foes up in soap bubbles; pop one to drop its
+  foe.
+- **Three more enemies** (and a fourth that comes with one). Zealot: drinks the souls of foes dying near it and grows
+  stronger. Mine layer: a drone that seeds the floor with proximity mines. Rat king: a knot of ratbots that sheds them
+  as it goes and bursts into more when it dies.
+- AudioGen takes for the bubbles, the zealot's chant and the souls, and the ratbots' squeak. The bank grows to 181
+  sounds.
 - **Mutator round: run mutators.** OPTIONS has a MUTATOR row (one at a time, remembered, shown on the title):
   GLASS CANNON, SWARM, MOON BOOTS, LIGHTS OUT and VAMPIRE. A new MUTANT medal is for winning the campaign with one on.
 - **Two more weapons** (wheel / Q/E). Tripwire: a sticky emitter whose laser zaps anything that crosses it. Drone
@@ -274,6 +284,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   `dev/synthwave` (offline synth engine and score).
 
 ### Changed
+- The painted level (blood, scorch marks, bullet holes) is now shown as 16 tiles, and only the tiles that were painted
+  are re-uploaded to the GPU, instead of the whole 1600 x 432 texture several times a second during heavy gore.
 - **Esc** mid-run opens the pause menu. It replaces the earlier double-press confirm (`ESC AGAIN: QUIT`).
 - The weapon bar holds 21 compact slots, and the control hints list the new keys.
 - Wave 2 swaps a bulwark for a mirror knight, wave 3 a grunt for a stitcher, wave 4 a sapper for a hive, and

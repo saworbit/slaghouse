@@ -169,6 +169,12 @@ PROBES = {
  'axeChop': ['a heavy axe thunk', 'a gunshot', 'glass breaking', 'static noise'],
  'berserk': ['a monster roar', 'a gunshot', 'an engine', 'music'],
  'hardlight': ['a rising energy hum', 'a dog barking', 'rain', 'static noise'],
+ # debrief round
+ 'bubble': ['a soft bubble bloop', 'a gunshot', 'an engine', 'static noise'],
+ 'bubblePop': ['a tiny pop', 'a gunshot', 'glass breaking', 'static noise'],
+ 'zealotCast': ['a choir chant', 'a dog barking', 'an engine', 'static noise'],
+ 'soul': ['an ethereal whoosh', 'a gunshot', 'a dog barking', 'static noise'],
+ 'squeak': ['a rat squeak', 'a gunshot', 'an engine', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))
