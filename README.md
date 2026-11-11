@@ -157,10 +157,11 @@ keeps your best score.
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks and checks the script tags; CI runs
   it on every push to `main` and every pull request.
-- **Testing:** there are no automated gameplay tests yet. Playtesting has been done by driving the game from the
-  browser console; saving that as a smoke test is an open issue.
+- **Testing:** there are no automated gameplay tests yet. `dev/playtest/` has the in-page harness used for
+  playtesting: it steps the game from the browser console and has a bot that plays the campaign.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
-  need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU.
+  need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
+  venv comes from `dev/synthwave/requirements.txt`.
 - **History:** see [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing and security
