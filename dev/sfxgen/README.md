@@ -32,6 +32,10 @@ the result into `calib.json`. Every sound's noise is random, so re-measuring eve
 slightly. A loop is measured at the setting where the game plays its sample at full gain (e.g. the lance
 loop at full charge).
 
+A sound in `sounds.py` with no `calib.json` entry is left out of the bank: `build.py` prints
+`skip <name> (no candidates or calibration)` and the game plays that sound's synth version. So calibrate every
+new sound before building, and check the build output for `skip` lines.
+
 ## Rebuilding from a fresh clone
 
 Only `out/candidates.json`, `out/picks_used.json`, `out/keep.json` and `out/bank_src.json` are committed. The processed WAVs that

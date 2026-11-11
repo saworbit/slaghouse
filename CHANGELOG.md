@@ -83,8 +83,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - **Three more enemies.** Vortex: a turbine drone that drags you in and shreds you up close. Arc pylon: a tesla tower
   that charges, then throws lightning at you if it can see you. Scavenger: a ghoul that eats corpses to heal and
   grow.
-- AudioGen takes for the stasis field opening and closing, the microwave hum and pop, the vortex, the pylon's charge
-  and bolt, and the scavenger's chomp. The bank grows to 167 sounds.
+- AudioGen takes for the stasis field opening and closing, the microwave hum and pop, the pylon's charge and bolt,
+  and the scavenger's chomp. The bank grows to 167 sounds. (The vortex's spin-up was generated but never
+  calibrated, so it still plays synth: [#15](https://github.com/saworbit/slaghouse/issues/15).)
 - **Wrecking-yard round: ARENA 04.** OVERTIME and DAILY now rotate through a fourth arena, THE WRECKING YARD: junk
   heaps of crates, a raised dais, and a wrecking ball swinging across the middle that flings foes, knocks you aside,
   smashes crates and lights drums. A new WRECKING CREW medal is for 3 kills with it in a run.
@@ -93,8 +94,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - **Three more enemies.** Torcher: a fireproof heavy that sweeps a flamethrower; its fuel tank blows if you shoot
   it from behind. Discus: throws a disc that comes back to its hand (kick it to send it back). Spore pod: a rooted
   fungus that puffs homing spores and bursts into a toxic cloud.
-- AudioGen takes for the wrecking ball (swing, crash, chain creak), the splitter's zap and forks, the decoy, the
-  discus throw and the spore puff. The bank grows to 161 sounds.
+- AudioGen takes for the wrecking ball (swing, crash, chain creak), the splitter's zap and forks, the discus throw
+  and the spore puff. The bank grows to 161 sounds. (The decoy was generated but never calibrated, so it still
+  plays synth: [#15](https://github.com/saworbit/slaghouse/issues/15).)
 - **Elite round: elite foes.** From wave 2 a few foes in each wave (more as OVERTIME climbs) warp in as elites with
   extra health, a coloured aura, a diamond over the head and one trait: ARMORED (double health), SHIELDED (a
   recharging bubble), VOLATILE (blows up when it dies) or REGEN (heals when left alone). Each drops two health
