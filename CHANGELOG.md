@@ -37,6 +37,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,
   the pause menu holds every timer, hazards are named as your killer, and the last few foes come looking for you.
 - The README no longer shows a release badge; shields.io can't read the private repository.
+- The README and CONTRIBUTING.md list `dev/audiolib/`, the release workflow and `dev/check.mjs`'s missing-sound note.
 - Soundtrack tracks decode when they're about to be needed (the title set at boot, then this wave's track, the
   next one and the jingles), and tracks a run no longer needs are let go. Decoded music drops from about 85 MB to
   under 50 MB. (#22)

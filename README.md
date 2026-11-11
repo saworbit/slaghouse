@@ -150,26 +150,29 @@ keeps your best score.
 | `versions/` | Snapshots of `slaghouse.html` taken before each update round (`slaghouse.before-<round>.html`). |
 | `dev/sfxgen/` | AudioGen pipeline for the SFX bank; see its README. |
 | `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
+| `dev/audiolib/` | `loud.py`, the K-weighted loudness both audio pipelines level against. |
 | `dev/build/` | One-off scripts and code snippets that applied each update round to `slaghouse.html`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
 | `dev/playtest/` | In-page test harness: step the game by hand, a bot, arena storms and a timed campaign run; see its README. |
 | `dev/screenshots/` | Screenshots from playtesting. |
 | `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
 | `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |
 | `docs/` | Images for this README. |
-| `.github/` | CI workflow, Dependabot, issue and pull request templates, CODEOWNERS. |
+| `.github/` | CI and release workflows, Dependabot, issue and pull request templates, CODEOWNERS. |
 | `.claude/launch.json` | Local preview-server configs for Claude Code. |
 
 ## Development notes
 
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
-- **Checks:** `node dev/check.mjs` compiles the game script and both audio banks and checks the script tags; CI runs
-  it on every push to `main` and every pull request.
+- **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
+  any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
+  request.
 - **Testing:** CI runs static checks. Use the [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check)
   for progression changes and the [in-page harness](dev/playtest/README.md) for combat and arena tests.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
   venv comes from `dev/synthwave/requirements.txt`.
-- **History:** see [CHANGELOG.md](CHANGELOG.md).
+- **History:** see [CHANGELOG.md](CHANGELOG.md). Pushing a `vX.Y.Z` tag builds the release and its playable zip
+  (`.github/workflows/release.yml`); the steps are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing and security
 
