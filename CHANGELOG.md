@@ -43,6 +43,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Lifetime kills, runs, deaths, play time, weapon mastery and codex sightings read the stored value again before
+  saving and add this tab's progress to it, so a second tab no longer erases the first one's. (#51)
+- **New Campaign** makes its run the owner of the campaign save. A run left open in another tab keeps playing, but
+  its lift rides and its win no longer replace the newer run's checkpoint. `dev/playtest/twotab.js` checks both
+  fixes. (#38)
 - Dead foes leave the enemy group 3 s after they die, so the per-frame loops stop walking every corpse sprite until
   the arena changes. In a 10-minute OVERTIME run under SWARM the group peaked at 28 sprites, down from 104. (#14)
 - `dev/sfxgen/build.py` stops with a clear message, before writing anything, when processed takes are missing (as
