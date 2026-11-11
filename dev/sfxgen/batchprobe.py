@@ -121,6 +121,16 @@ PROBES = {
  'wail': ['a ghostly wail', 'a dog barking', 'an engine', 'static noise'],
  'iceForm': ['ice cracking', 'a gunshot', 'rain', 'static noise'],
  'warhorn': ['a horn blast', 'an engine', 'a gunshot', 'music'],
+ # arsenal round
+ 'firework': ['a firework whistle', 'a gunshot', 'an engine', 'static noise'],
+ 'fireworkPop': ['a firework bang', 'a door slam', 'rain', 'static noise'],
+ 'crackle': ['crackling sparks', 'rain', 'an engine', 'static noise'],
+ 'katana': ['a sword whoosh', 'a gunshot', 'a door slam', 'static noise'],
+ 'slashHit': ['a blade slicing', 'a gunshot', 'glass breaking', 'static noise'],
+ 'swapTell': ['a sci-fi hum', 'an engine', 'music', 'static noise'],
+ 'swapZap': ['a teleport zap', 'a gunshot', 'a dog barking', 'static noise'],
+ 'scorch': ['a burst of fire', 'an engine', 'rain', 'static noise'],
+ 'plateBreak': ['a metal clang', 'a gunshot', 'glass breaking', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

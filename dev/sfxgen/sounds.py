@@ -208,4 +208,14 @@ SOUNDS = {
     'wail': dict(p=['a ghostly wail, a short eerie shriek', 'a ghost screaming, spooky high moan'], d=1.5, max=0.7, keep=2, n=8, air=0.7),
     'iceForm': dict(p=['ice cracking and freezing, crystalline crackle', 'a sheet of ice forming with a crackle'], d=1.0, max=0.4, keep=2, n=8, air=0.9),
     'warhorn': dict(p='a war horn blast, a deep brass horn call', d=2.0, max=1.0, keep=2, air=0.6),
+    # ------------------------------------------------------------------ arsenal round
+    'firework': dict(p=['a firework rocket launching with a rising whistle', 'a bottle rocket firework taking off, whoosh and whistle'], d=1.5, max=0.5, keep=2, n=8, air=0.8, on=-18),
+    'fireworkPop': dict(p=['a firework exploding in the sky, a big bang', 'a firework shell bursting, loud boom'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
+    'crackle': dict(p='firework crackles, many tiny sparkling pops', d=2.0, max=0.8, keep=2, air=0.9, on=-20),
+    'katana': dict(p=['a sword swinging fast through the air, a sharp whoosh', 'a katana slash swish'], d=1.0, max=0.25, keep=3, n=8, air=0.9),
+    'slashHit': dict(p=['a sword slicing into flesh, a wet slash', 'a blade cutting through meat'], d=1.0, max=0.25, keep=2, n=8, air=0.7),
+    'swapTell': dict(p='a rising sci-fi teleporter charge hum', d=1.5, max=0.9, keep=1, air=0.7, on=-24),
+    'swapZap': dict(p=['a sci-fi teleport zap, a quick warping whoosh', 'a teleporter beam sound effect'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    'scorch': dict(p='a flamethrower whoosh, a roaring burst of fire', d=1.5, max=0.7, keep=2, air=0.5),
+    'plateBreak': dict(p=['a metal plate snapping off and clanging', 'a heavy steel panel breaking with a clang'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
 }

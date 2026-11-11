@@ -1,9 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 41 weapons (each with mastery stars to earn), 62 enemy types
+pixel art, ragdolls and gibs, destructible terrain, 43 weapons (each with mastery stars to earn), 65 enemy types
 (with an in-game codex), power-up supply drops, three
-arenas and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 17 medals to collect, on Easy, Normal or Brutal, with keyboard
+arenas and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 18 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -34,7 +34,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb and pinball cannon have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher and plasma katana have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -71,7 +71,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Napalm launcher (fuel cans that splash fire across the floor) | wheel | Bee swarm (a pod of homing stingers) |
 | wheel | Laser whip (a long crack that drags foes in) | wheel | Shrink ray (shrinks a foe; land on it to squish it) |
 | wheel | Sonic blaster (a cone of sound that shoves and stuns) | wheel | Grav bomb (floats foes up, then slams them down) |
-| wheel | Pinball cannon (a steel ball that hits harder every bounce) | | |
+| wheel | Pinball cannon (a steel ball that hits harder every bounce) | wheel | Firework launcher (wild rockets that burst into burning stars) |
+| wheel | Plasma katana (a slash that bats enemy shots back; slash out of a dash for a dash cut) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -85,17 +86,17 @@ down on a tell. Clearing an arena takes you down the lift with your health, gun,
 2. 17 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a wraith that drifts through walls, a tar spitter whose puddles slow you (and burn when lit), a mimic
    hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
-   drops off the ceiling, a grenadier and a pack of sparkers that link up with live arcs.
+   drops off the ceiling, a scorcher that sprints trailing fire, a grenadier and a pack of sparkers that link up with live arcs.
 3. 17 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a pyro, a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
    (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a gasbag, a
-   duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums and the gunship mini-boss.
+   duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
 4. 16 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a buzzsaw, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
    EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor and an acid slug. The furnace's fire vents go off every few seconds.
 5. 15 enemies (27 once the slaglings split) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
    time, about every 25 s. Slaglings, a burrower, a harpooner, linkers, an echo, a laser strider, a warhorn that rallies the rest, a beacon,
-   paratroopers, a tar spitter, a blinker and the Slag Wyrm mini-boss.
+   a paratrooper, a swapper that trades places with you, a tar spitter, a blinker and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,

@@ -1528,5 +1528,95 @@
    "abeda1de063fe31c"
   ],
   "rate": "40k"
+ },
+ "firework": {
+  "ids": [
+   "3",
+   "7"
+  ],
+  "wav": [
+   "97044c3e1f38763e",
+   "bc1e450a17332750"
+  ],
+  "rate": "40k"
+ },
+ "fireworkPop": {
+  "ids": [
+   "5",
+   "0"
+  ],
+  "wav": [
+   "b9b10913c8560a87",
+   "d136f7a1d3c437db"
+  ],
+  "rate": "40k"
+ },
+ "crackle": {
+  "ids": [
+   "2",
+   "4"
+  ],
+  "wav": [
+   "f25a7c81ce7d2d6b",
+   "5d91ccc4430b72c5"
+  ],
+  "rate": "40k"
+ },
+ "katana": {
+  "ids": [
+   "7",
+   "0",
+   "6"
+  ],
+  "wav": [
+   "3fe3ce3316d22bea",
+   "bbb2ed08eb874c37",
+   "5dec1636fd7b8186"
+  ],
+  "rate": "40k"
+ },
+ "slashHit": {
+  "ids": [
+   "3",
+   "4"
+  ],
+  "wav": [
+   "83577df987f8246c",
+   "43d01ca91e976036"
+  ],
+  "rate": "40k"
+ },
+ "swapZap": {
+  "ids": [
+   "0",
+   "3"
+  ],
+  "wav": [
+   "81ea5afa93db0692",
+   "037dad89c72f3a3c"
+  ],
+  "rate": "40k"
+ },
+ "scorch": {
+  "ids": [
+   "4",
+   "0"
+  ],
+  "wav": [
+   "dafdc3ed2cf1442f",
+   "ca63943183909202"
+  ],
+  "rate": "40k"
+ },
+ "plateBreak": {
+  "ids": [
+   "5",
+   "7"
+  ],
+  "wav": [
+   "a253407460ad0746",
+   "8a8bb3210d4cddba"
+  ],
+  "rate": "40k"
  }
 }

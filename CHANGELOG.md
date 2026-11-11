@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Arsenal round: a weapon ribbon and codex pages.** The HUD's strip of 41 tiny slots is now a ribbon of nine: the
+  gun in hand in the middle, four either side, sliding the short way round as you swap, with a pop on the new pick.
+  The codex holds 66 foes a page and Q/E turns the pages. A new BLADEMASTER medal is for 8 katana deflects in a run.
+- **Two more weapons** (wheel / Q/E). Firework launcher: a wandering rocket that bursts into coloured stars that
+  fall and burn. Plasma katana: a fast slash that bats enemy shots back at the nearest foe and cuts rockets in two;
+  slash out of a dash for a DASH CUT.
+- **Three more enemies.** Orbiter: a flying core whose three spinning plates eat your shots; fire through the gaps.
+  Swapper: a phase bot that trades places with you after a violet tether (hit it to break the tell). Scorcher: a
+  fireproof sprinter that leaves a trail of fire and stands winded afterwards.
+- AudioGen takes for the firework launch, burst and crackle, the katana swing and hit, the swapper's zap, the
+  scorcher's roar and a plate breaking off. The bank grows to 148 sounds.
 - **Finale round: multikills and a clearer arsenal.** Kills in quick succession chain into DOUBLE KILL, TRIPLE, QUAD,
   PENTA and MASSACRE, punched in under the callouts with a rising sting and a beat of hit-stop. A new MASSACRE medal
   is for a 6-kill chain. The weapon wheel shows a one-line description of the selected gun. OVERTIME now draws on
@@ -53,6 +64,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - AudioGen takes for the beacon's alarm, the slug's squelch and the leech's slurp. The bank grows to 129 sounds.
 
 ### Fixed
+- The blimp could jam against the pillars that hold up the furnace arena's catwalk and hang there out of reach,
+  stalling wave 4; it now sails through scenery.
 - Several per-run values (leech count, a claw's grip, the corrosion tint) could survive a restart, because Phaser
   keeps a scene's properties when it restarts; they're now reset at the start of every run.
 - **Overtime round: OVERTIME, an endless mode** (E on the title screen, Y on a pad). Random waves that grow by

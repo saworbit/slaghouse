@@ -9712,5 +9712,543 @@
    "clap": 0.0458,
    "score": -0.0342
   }
+ ],
+ "firework": [
+  {
+   "id": "3",
+   "dur": 0.475,
+   "loud": 0.513689,
+   "prompt": "a bottle rocket firework taking off, whoosh and whistle",
+   "clap": 0.365,
+   "score": 0.365
+  },
+  {
+   "id": "6",
+   "dur": 0.5,
+   "loud": 0.221926,
+   "prompt": "a firework rocket launching with a rising whistle",
+   "clap": 0.2076,
+   "score": 0.2076
+  },
+  {
+   "id": "2",
+   "dur": 0.5,
+   "loud": 0.271476,
+   "prompt": "a firework rocket launching with a rising whistle",
+   "clap": 0.1682,
+   "score": 0.1682
+  },
+  {
+   "id": "0",
+   "dur": 0.5,
+   "loud": 0.266293,
+   "prompt": "a firework rocket launching with a rising whistle",
+   "clap": 0.1562,
+   "score": 0.1562
+  },
+  {
+   "id": "1",
+   "dur": 0.5,
+   "loud": 0.288059,
+   "prompt": "a bottle rocket firework taking off, whoosh and whistle",
+   "clap": 0.1373,
+   "score": 0.1373
+  },
+  {
+   "id": "4",
+   "dur": 0.5,
+   "loud": 0.365007,
+   "prompt": "a firework rocket launching with a rising whistle",
+   "clap": 0.1272,
+   "score": 0.1272
+  },
+  {
+   "id": "7",
+   "dur": 0.253,
+   "loud": 0.429446,
+   "prompt": "a bottle rocket firework taking off, whoosh and whistle",
+   "clap": 0.1065,
+   "score": 0.1065
+  },
+  {
+   "id": "5",
+   "dur": 0.5,
+   "loud": 0.231362,
+   "prompt": "a bottle rocket firework taking off, whoosh and whistle",
+   "clap": 0.0181,
+   "score": 0.0181
+  }
+ ],
+ "fireworkPop": [
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.185915,
+   "prompt": "a firework shell bursting, loud boom",
+   "clap": 0.3926,
+   "score": 0.3926
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.224782,
+   "prompt": "a firework exploding in the sky, a big bang",
+   "clap": 0.3297,
+   "score": 0.3297
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.20046,
+   "prompt": "a firework shell bursting, loud boom",
+   "clap": 0.2839,
+   "score": 0.2839
+  },
+  {
+   "id": "1",
+   "dur": 0.419,
+   "loud": 0.189861,
+   "prompt": "a firework shell bursting, loud boom",
+   "clap": 0.2834,
+   "score": 0.2834
+  },
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.181805,
+   "prompt": "a firework exploding in the sky, a big bang",
+   "clap": 0.2711,
+   "score": 0.2711
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.262501,
+   "prompt": "a firework exploding in the sky, a big bang",
+   "clap": 0.2237,
+   "score": 0.2237
+  },
+  {
+   "id": "7",
+   "dur": 0.7,
+   "loud": 0.260531,
+   "prompt": "a firework shell bursting, loud boom",
+   "clap": 0.1774,
+   "score": 0.1774
+  },
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.179202,
+   "prompt": "a firework exploding in the sky, a big bang",
+   "clap": 0.15,
+   "score": 0.15
+  }
+ ],
+ "crackle": [
+  {
+   "id": "2",
+   "dur": 0.8,
+   "loud": 0.204002,
+   "prompt": "firework crackles, many tiny sparkling pops",
+   "clap": 0.2968,
+   "score": 0.2968
+  },
+  {
+   "id": "4",
+   "dur": 0.602,
+   "loud": 0.173876,
+   "prompt": "firework crackles, many tiny sparkling pops",
+   "clap": 0.2614,
+   "score": 0.2614
+  },
+  {
+   "id": "0",
+   "dur": 0.357,
+   "loud": 0.252352,
+   "prompt": "firework crackles, many tiny sparkling pops",
+   "clap": 0.2032,
+   "score": 0.2032
+  },
+  {
+   "id": "1",
+   "dur": 0.337,
+   "loud": 0.17721,
+   "prompt": "firework crackles, many tiny sparkling pops",
+   "clap": 0.1359,
+   "score": 0.1359
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.138336,
+   "prompt": "firework crackles, many tiny sparkling pops",
+   "clap": 0.0615,
+   "score": 0.0615
+  }
+ ],
+ "katana": [
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.410711,
+   "prompt": "a katana slash swish",
+   "clap": 0.3262,
+   "score": 0.3262
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.336386,
+   "prompt": "a katana slash swish",
+   "clap": 0.1233,
+   "score": 0.1233
+  },
+  {
+   "id": "1",
+   "dur": 0.175,
+   "loud": 0.254669,
+   "prompt": "a katana slash swish",
+   "clap": 0.1013,
+   "score": 0.1013
+  },
+  {
+   "id": "2",
+   "dur": 0.171,
+   "loud": 0.273737,
+   "prompt": "a sword swinging fast through the air, a sharp whoosh",
+   "clap": 0.0454,
+   "score": 0.0454
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.159687,
+   "prompt": "a katana slash swish",
+   "clap": 0.028,
+   "score": 0.028
+  },
+  {
+   "id": "6",
+   "dur": 0.25,
+   "loud": 0.331005,
+   "prompt": "a sword swinging fast through the air, a sharp whoosh",
+   "clap": -0.0225,
+   "score": -0.0225
+  },
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.409435,
+   "prompt": "a sword swinging fast through the air, a sharp whoosh",
+   "clap": -0.0577,
+   "score": -0.0577
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.320832,
+   "prompt": "a sword swinging fast through the air, a sharp whoosh",
+   "clap": -0.0889,
+   "score": -0.0889
+  }
+ ],
+ "slashHit": [
+  {
+   "id": "6",
+   "dur": 0.168,
+   "loud": 0.229511,
+   "prompt": "a sword slicing into flesh, a wet slash",
+   "clap": 0.2156,
+   "score": 0.2156
+  },
+  {
+   "id": "2",
+   "dur": 0.234,
+   "loud": 0.241203,
+   "prompt": "a sword slicing into flesh, a wet slash",
+   "clap": 0.1277,
+   "score": 0.1277
+  },
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.21658,
+   "prompt": "a sword slicing into flesh, a wet slash",
+   "clap": 0.0831,
+   "score": 0.0831
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.288626,
+   "prompt": "a blade cutting through meat",
+   "clap": 0.0635,
+   "score": 0.0635
+  },
+  {
+   "id": "4",
+   "dur": 0.209,
+   "loud": 0.12252,
+   "prompt": "a sword slicing into flesh, a wet slash",
+   "clap": 0.0328,
+   "score": 0.0328
+  },
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.245107,
+   "prompt": "a blade cutting through meat",
+   "clap": -0.0415,
+   "score": -0.0415
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.285136,
+   "prompt": "a blade cutting through meat",
+   "clap": -0.0486,
+   "score": -0.0486
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.14259,
+   "prompt": "a blade cutting through meat",
+   "clap": -0.0506,
+   "score": -0.0506
+  }
+ ],
+ "swapTell": [
+  {
+   "id": "5",
+   "dur": 0.9,
+   "loud": 0.534724,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": 0.1735,
+   "score": 0.1735
+  },
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.369943,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": 0.1063,
+   "score": 0.1063
+  },
+  {
+   "id": "4",
+   "dur": 0.502,
+   "loud": 0.279422,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": 0.0921,
+   "score": 0.0921
+  },
+  {
+   "id": "3",
+   "dur": 0.9,
+   "loud": 0.370979,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": 0.078,
+   "score": 0.078
+  },
+  {
+   "id": "2",
+   "dur": 0.9,
+   "loud": 0.312368,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": 0.0751,
+   "score": 0.0751
+  },
+  {
+   "id": "0",
+   "dur": 0.9,
+   "loud": 0.32505,
+   "prompt": "a rising sci-fi teleporter charge hum",
+   "clap": -0.0244,
+   "score": -0.0244
+  }
+ ],
+ "swapZap": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.346778,
+   "prompt": "a sci-fi teleport zap, a quick warping whoosh",
+   "clap": 0.1524,
+   "score": 0.1524
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.315075,
+   "prompt": "a teleporter beam sound effect",
+   "clap": 0.1308,
+   "score": 0.1308
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.317722,
+   "prompt": "a sci-fi teleport zap, a quick warping whoosh",
+   "clap": 0.1222,
+   "score": 0.1222
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.366345,
+   "prompt": "a sci-fi teleport zap, a quick warping whoosh",
+   "clap": 0.1184,
+   "score": 0.1184
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.442285,
+   "prompt": "a teleporter beam sound effect",
+   "clap": 0.1091,
+   "score": 0.1091
+  },
+  {
+   "id": "5",
+   "dur": 0.157,
+   "loud": 0.458524,
+   "prompt": "a teleporter beam sound effect",
+   "clap": 0.1525,
+   "score": 0.0725
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.213921,
+   "prompt": "a sci-fi teleport zap, a quick warping whoosh",
+   "clap": 0.0496,
+   "score": 0.0496
+  },
+  {
+   "id": "1",
+   "dur": 0.17,
+   "loud": 0.320173,
+   "prompt": "a teleporter beam sound effect",
+   "clap": 0.0346,
+   "score": 0.0346
+  }
+ ],
+ "scorch": [
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.368876,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.4507,
+   "score": 0.4507
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.390748,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.3718,
+   "score": 0.3718
+  },
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.330337,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.3663,
+   "score": 0.3663
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.385626,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.3575,
+   "score": 0.3575
+  },
+  {
+   "id": "1",
+   "dur": 0.355,
+   "loud": 0.467308,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.3286,
+   "score": 0.3286
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.278131,
+   "prompt": "a flamethrower whoosh, a roaring burst of fire",
+   "clap": 0.2804,
+   "score": 0.2804
+  }
+ ],
+ "plateBreak": [
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.475263,
+   "prompt": "a heavy steel panel breaking with a clang",
+   "clap": 0.194,
+   "score": 0.194
+  },
+  {
+   "id": "7",
+   "dur": 0.216,
+   "loud": 0.309359,
+   "prompt": "a heavy steel panel breaking with a clang",
+   "clap": 0.1469,
+   "score": 0.1469
+  },
+  {
+   "id": "2",
+   "dur": 0.358,
+   "loud": 0.281716,
+   "prompt": "a metal plate snapping off and clanging",
+   "clap": 0.1351,
+   "score": 0.1351
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.373496,
+   "prompt": "a metal plate snapping off and clanging",
+   "clap": 0.0344,
+   "score": 0.0344
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.352598,
+   "prompt": "a metal plate snapping off and clanging",
+   "clap": 0.0294,
+   "score": 0.0294
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.18749,
+   "prompt": "a metal plate snapping off and clanging",
+   "clap": -0.0012,
+   "score": -0.0012
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.367508,
+   "prompt": "a heavy steel panel breaking with a clang",
+   "clap": -0.0428,
+   "score": -0.0428
+  },
+  {
+   "id": "1",
+   "dur": 0.36,
+   "loud": 0.258717,
+   "prompt": "a heavy steel panel breaking with a clang",
+   "clap": -0.0577,
+   "score": -0.0577
+  }
  ]
 }
