@@ -1,9 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 55 weapons (each with mastery stars to earn), 85 enemy types
+pixel art, ragdolls and gibs, destructible terrain, 57 weapons (each with mastery stars to earn), 88 enemy types
 (with an in-game codex), power-up supply drops, three
-arenas (four in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 24 medals to collect, on Easy, Normal or Brutal, with keyboard
+arenas (four in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 25 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -16,7 +16,7 @@ python -m http.server 8765 --bind 127.0.0.1
 ```
 
 Then go to <http://localhost:8765/slaghouse.html> and click the game. The title menu has CAMPAIGN, OVERTIME (the
-endless mode), DAILY (today's seeded OVERTIME run), CODEX (every enemy you've met), ARMORY (every gun, its kills and mastery stars), MEDALS and OPTIONS (including run **mutators**: glass cannon, swarm, moon boots, lights out, vampire); **W / S** to choose, **Enter** to pick, **A / D**
+endless mode), DAILY (today's seeded OVERTIME run), BOSS RUSH (all five bosses back to back), CODEX (every enemy you've met), ARMORY (every gun, its kills and mastery stars), MEDALS and OPTIONS (including run **mutators**: glass cannon, swarm, moon boots, lights out, vampire); **W / S** to choose, **Enter** to pick, **A / D**
 to change the difficulty, **E** to jump straight into OVERTIME.
 
 `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
@@ -34,7 +34,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher and bubble gun have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield and glue gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -78,7 +78,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Microwave (cooks a foe until it pops) | wheel | Rocket gauntlet (a thruster punch that carries you into them) |
 | wheel | Marksman rifle (laser-sighted, pierces, triple-damage headshots) | wheel | Tripwire (a laser beam that zaps whatever crosses it) |
 | wheel | Drone pod (two gun drones orbit you for 10 s) | wheel | Gas launcher (a cloud of your own gas; light it for a fireball) |
-| wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | | |
+| wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | wheel | Riot shield (hold to block and reflect shots, let go to bash) |
+| wheel | Glue gun (gums foes up so they crawl) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -89,20 +90,20 @@ and **ARENA 03 :: THE SORTING LINE** (waves 5-6), where conveyor belts carry eve
 down on a tell. Clearing an arena takes you down the lift with your health, gun, perks and stats carried over.
 
 1. 10 placed enemies.
-2. 19 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
+2. 20 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a wraith that drifts through walls, a tar spitter whose puddles slow you (and burn when lit), a mimic
    hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
    drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a soul-drinking zealot, a grenadier and a pack of sparkers that link up with live arcs.
-3. 19 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a shellback you have to flip, a pyro, a torcher with a flamethrower (get behind it), a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
+3. 20 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a shellback you have to flip, a pyro, a torcher with a flamethrower (get behind it), a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
    (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a spotter whose red eye marks you for every foe, a
-   duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, a bastion behind a hard-light wall, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
-4. 19 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
+   duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, a bastion behind a hard-light wall, a porcupine that answers every hit with quills, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
+4. 21 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a pair of pouncing hounds, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a vortex drone that drags you in, a thundercloud that drops lightning on you, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
-   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines and an acid slug. The furnace's fire vents go off every few seconds.
-5. 17 enemies (23 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
+   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines, a sponge that soaks up bullets and spits them back and an acid slug. The furnace's fire vents go off every few seconds.
+5. 18 enemies (24 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
    time, about every 25 s. A slagling, a rat king that bursts into ratbots, a burrower, a scavenger that eats the dead to grow, linkers, an echo, a laser strider, a warhorn that rallies the rest, a wall-leaping shinobi, a beacon,
-   a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman and the Slag Wyrm mini-boss.
+   a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman, a leaper that lands where you stood and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,

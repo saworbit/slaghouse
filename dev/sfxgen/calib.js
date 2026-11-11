@@ -100,6 +100,8 @@ window.slagCalib = async function (only) {
     tripSet: one(() => S.tripSet()), dronePod: one(() => S.dronePod()), axeChop: one(() => S.axeChop()), berserk: one(() => S.berserk()), hardlight: one(() => S.hardlight()),
     // debrief round
     bubble: one(() => S.bubble()), bubblePop: one(() => S.bubblePop()), zealotCast: one(() => S.zealotCast()), soul: one(() => S.soul()), squeak: one(() => S.squeak()),
+    // rush round
+    shieldBlock: one(() => S.shieldBlock()), glue: one(() => S.glue()), quills: one(() => S.quills()), spit: one(() => S.spit()), leap: one(() => S.leap()),
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };

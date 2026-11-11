@@ -262,4 +262,10 @@ SOUNDS = {
     'zealotCast': dict(p=['a choir chanting a short holy note', 'a monk chant, a low sung tone'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
     'soul': dict(p=['a ghostly whoosh rising, an ethereal swish', 'a spirit flying past'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
     'squeak': dict(p=['a rat squeaking', 'a small mouse squeak'], d=1.0, max=0.2, keep=3, n=8, air=0.9),
+    # ------------------------------------------------------------------ rush round
+    'shieldBlock': dict(p=['a bullet ricocheting off a riot shield, a sharp metallic ping', 'a projectile deflected off a metal shield'], d=1.0, max=0.25, keep=3, n=8, air=0.9),
+    'glue': dict(p=['a wet glue splat, a sticky squelch', 'a blob of goo hitting a surface'], d=1.0, max=0.25, keep=2, n=8, air=0.6),
+    'quills': dict(p=['a burst of spikes shooting out, a quick volley of darts', 'many small darts firing at once'], d=1.0, max=0.35, keep=2, n=8, air=0.8),
+    'spit': dict(p=['a monster spitting out a wet blast', 'a creature vomiting a spray'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
+    'leap': dict(p=['a robot leaping with a hydraulic launch, a whoosh', 'a mechanical spring jump'], d=1.0, max=0.35, keep=2, n=8, air=0.7),
 }

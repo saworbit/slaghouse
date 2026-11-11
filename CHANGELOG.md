@@ -6,6 +6,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Rush round: BOSS RUSH.** A new title mode: the Juggernaut, the Gunship, the Slag Wyrm, the Foreman and the Smelter
+  back to back across the three arenas, with a perk between each and its own best record. A new RUSHER medal is for
+  beating it.
+- **Two more weapons** (wheel / Q/E). Riot shield: hold to block and reflect enemy shots, let go to bash. Glue gun:
+  gums foes up so they crawl, and leaves sticky puddles.
+- **Three more enemies.** Porcupine: answers every 40 damage with a burst of quills. Sponge: soaks up bullets and
+  spits them back (blast, burn or beam it instead). Leaper: marks where you stand and leaps onto it with a shockwave.
+- AudioGen takes for the shield deflection, the glue, the quill burst, the sponge's spit and the leaper's jump. The
+  bank grows to 186 sounds.
 - **Debrief round: a fuller results screen.** The results now show your top three guns by kills, the biggest single
   hit of the run and, if you died, what killed you. A new PEST CONTROL medal is for 15 ratbots in a run.
 - **Two more weapons** (wheel / Q/E). Gas launcher: a cloud of your own gas that spares you, eats metal and meat

@@ -12514,5 +12514,335 @@
    "clap": -0.1662,
    "score": -0.1662
   }
+ ],
+ "shieldBlock": [
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.265637,
+   "prompt": "a bullet ricocheting off a riot shield, a sharp metallic ping",
+   "clap": 0.1899,
+   "score": 0.1899
+  },
+  {
+   "id": "6",
+   "dur": 0.25,
+   "loud": 0.182654,
+   "prompt": "a bullet ricocheting off a riot shield, a sharp metallic ping",
+   "clap": 0.1682,
+   "score": 0.1682
+  },
+  {
+   "id": "2",
+   "dur": 0.033,
+   "loud": 0.321969,
+   "prompt": "a bullet ricocheting off a riot shield, a sharp metallic ping",
+   "clap": 0.1949,
+   "score": 0.1149
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.309532,
+   "prompt": "a bullet ricocheting off a riot shield, a sharp metallic ping",
+   "clap": 0.0746,
+   "score": 0.0746
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.300175,
+   "prompt": "a projectile deflected off a metal shield",
+   "clap": 0.0705,
+   "score": 0.0705
+  },
+  {
+   "id": "7",
+   "dur": 0.142,
+   "loud": 0.319046,
+   "prompt": "a projectile deflected off a metal shield",
+   "clap": 0.0366,
+   "score": 0.0366
+  },
+  {
+   "id": "1",
+   "dur": 0.25,
+   "loud": 0.327862,
+   "prompt": "a projectile deflected off a metal shield",
+   "clap": 0.0313,
+   "score": 0.0313
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.305099,
+   "prompt": "a projectile deflected off a metal shield",
+   "clap": -0.0402,
+   "score": -0.0402
+  }
+ ],
+ "glue": [
+  {
+   "id": "6",
+   "dur": 0.155,
+   "loud": 0.254294,
+   "prompt": "a wet glue splat, a sticky squelch",
+   "clap": 0.2642,
+   "score": 0.2642
+  },
+  {
+   "id": "1",
+   "dur": 0.18,
+   "loud": 0.102112,
+   "prompt": "a blob of goo hitting a surface",
+   "clap": 0.1877,
+   "score": 0.1877
+  },
+  {
+   "id": "4",
+   "dur": 0.203,
+   "loud": 0.195181,
+   "prompt": "a wet glue splat, a sticky squelch",
+   "clap": 0.1774,
+   "score": 0.1774
+  },
+  {
+   "id": "0",
+   "dur": 0.238,
+   "loud": 0.117379,
+   "prompt": "a wet glue splat, a sticky squelch",
+   "clap": 0.1614,
+   "score": 0.1614
+  },
+  {
+   "id": "5",
+   "dur": 0.25,
+   "loud": 0.164967,
+   "prompt": "a blob of goo hitting a surface",
+   "clap": 0.1104,
+   "score": 0.1104
+  },
+  {
+   "id": "2",
+   "dur": 0.089,
+   "loud": 0.109222,
+   "prompt": "a wet glue splat, a sticky squelch",
+   "clap": 0.0832,
+   "score": 0.0032
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.304197,
+   "prompt": "a blob of goo hitting a surface",
+   "clap": -0.0385,
+   "score": -0.0385
+  },
+  {
+   "id": "7",
+   "dur": 0.201,
+   "loud": 0.1941,
+   "prompt": "a blob of goo hitting a surface",
+   "clap": -0.0658,
+   "score": -0.0658
+  }
+ ],
+ "quills": [
+  {
+   "id": "3",
+   "dur": 0.221,
+   "loud": 0.279715,
+   "prompt": "many small darts firing at once",
+   "clap": 0.1979,
+   "score": 0.1979
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.14699,
+   "prompt": "many small darts firing at once",
+   "clap": 0.1756,
+   "score": 0.1756
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.22584,
+   "prompt": "a burst of spikes shooting out, a quick volley of darts",
+   "clap": 0.1535,
+   "score": 0.1535
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.114727,
+   "prompt": "many small darts firing at once",
+   "clap": 0.151,
+   "score": 0.151
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.265629,
+   "prompt": "a burst of spikes shooting out, a quick volley of darts",
+   "clap": -0.0267,
+   "score": -0.0267
+  },
+  {
+   "id": "7",
+   "dur": 0.147,
+   "loud": 0.272243,
+   "prompt": "many small darts firing at once",
+   "clap": -0.0332,
+   "score": -0.0332
+  },
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.307504,
+   "prompt": "a burst of spikes shooting out, a quick volley of darts",
+   "clap": -0.037,
+   "score": -0.037
+  },
+  {
+   "id": "2",
+   "dur": 0.047,
+   "loud": 0.258267,
+   "prompt": "a burst of spikes shooting out, a quick volley of darts",
+   "clap": -0.0014,
+   "score": -0.0814
+  }
+ ],
+ "spit": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.421741,
+   "prompt": "a monster spitting out a wet blast",
+   "clap": 0.1127,
+   "score": 0.1127
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.423676,
+   "prompt": "a monster spitting out a wet blast",
+   "clap": 0.0812,
+   "score": 0.0812
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.373361,
+   "prompt": "a monster spitting out a wet blast",
+   "clap": 0.0725,
+   "score": 0.0725
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.286108,
+   "prompt": "a creature vomiting a spray",
+   "clap": 0.0534,
+   "score": 0.0534
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.301012,
+   "prompt": "a creature vomiting a spray",
+   "clap": 0.0527,
+   "score": 0.0527
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.328457,
+   "prompt": "a monster spitting out a wet blast",
+   "clap": 0.0309,
+   "score": 0.0309
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.230902,
+   "prompt": "a creature vomiting a spray",
+   "clap": -0.0488,
+   "score": -0.0488
+  },
+  {
+   "id": "5",
+   "dur": 0.22,
+   "loud": 0.296934,
+   "prompt": "a creature vomiting a spray",
+   "clap": -0.0812,
+   "score": -0.0812
+  }
+ ],
+ "leap": [
+  {
+   "id": "3",
+   "dur": 0.35,
+   "loud": 0.117284,
+   "prompt": "a mechanical spring jump",
+   "clap": 0.179,
+   "score": 0.179
+  },
+  {
+   "id": "2",
+   "dur": 0.35,
+   "loud": 0.176289,
+   "prompt": "a robot leaping with a hydraulic launch, a whoosh",
+   "clap": 0.0506,
+   "score": 0.0506
+  },
+  {
+   "id": "5",
+   "dur": 0.35,
+   "loud": 0.234105,
+   "prompt": "a mechanical spring jump",
+   "clap": 0.0408,
+   "score": 0.0408
+  },
+  {
+   "id": "1",
+   "dur": 0.35,
+   "loud": 0.281798,
+   "prompt": "a mechanical spring jump",
+   "clap": 0.0061,
+   "score": 0.0061
+  },
+  {
+   "id": "7",
+   "dur": 0.35,
+   "loud": 0.28797,
+   "prompt": "a mechanical spring jump",
+   "clap": -0.0233,
+   "score": -0.0233
+  },
+  {
+   "id": "4",
+   "dur": 0.35,
+   "loud": 0.331313,
+   "prompt": "a robot leaping with a hydraulic launch, a whoosh",
+   "clap": -0.0347,
+   "score": -0.0347
+  },
+  {
+   "id": "6",
+   "dur": 0.35,
+   "loud": 0.3692,
+   "prompt": "a robot leaping with a hydraulic launch, a whoosh",
+   "clap": -0.0364,
+   "score": -0.0364
+  },
+  {
+   "id": "0",
+   "dur": 0.35,
+   "loud": 0.326244,
+   "prompt": "a robot leaping with a hydraulic launch, a whoosh",
+   "clap": -0.0561,
+   "score": -0.0561
+  }
  ]
 }
