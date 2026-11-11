@@ -28,8 +28,9 @@ much hotter a sample may peak than the sound it replaces.
 `slaghouse.html`. Before clicking into the game, paste `calib.js` into the devtools console. Then run
 `copy(JSON.stringify(await slagCalib()))` and paste the result over `calib.json`. To measure only some
 sounds (for example ones you just added), pass their names: `await slagCalib(['dash', 'erupt'])`, and merge
-the result into `calib.json`. Every sound's noise is random, so re-measuring everything shifts the old values
-slightly. A loop is measured at the setting where the game plays its sample at full gain (e.g. the lance
+the result into `calib.json`. `slagCalib` seeds the random noise and jitter from each sound's name, so measuring
+unchanged code twice gives the same numbers. Entries measured before seeding (all of them at the time) move once on
+their first seeded measure, so re-measure everything in one pass rather than a few at a time. A loop is measured at the setting where the game plays its sample at full gain (e.g. the lance
 loop at full charge).
 
 A sound in `sounds.py` with no `calib.json` entry is left out of the bank: `build.py` prints
@@ -40,7 +41,10 @@ Each entry is `[loudness, peak, fingerprint]`. The fingerprint hashes the source
 measurement played and the `Sfx` methods it calls. `build.py` first runs `calibcheck.mjs` (needs node), which
 recomputes the fingerprints from the current `slaghouse.html` and lists every entry whose procedural sound has
 changed since it was measured, so you know what to re-measure. `node calibcheck.mjs --strict` exits 1 when
-anything is stale.
+anything is stale. `slagCalib` renders through `Sfx.buildShared`, the same noise buffer and crunch curve the game
+builds in `init`, and every sound that uses `this.crunch` or `this.noiseBuf` has `buildShared` in its fingerprint,
+so a change there marks those entries stale. When that code moved out of `init` (#48), the fingerprints were
+recomputed without re-measuring, since the curve and noise themselves didn't change.
 
 ## Rebuilding from a fresh clone
 
