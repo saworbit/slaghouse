@@ -148,9 +148,14 @@
                           (wall splats), anything else within 34 px takes 15, and you bounce back. 700 ms.
     Marksman rifle ...... (wheel) a laser-sighted hitscan round (900 px): 80, x3 on a headshot, punching through the
                           first body into one more (60%). A headshot kill buys a beat of slow-mo. 1 s between shots.
+    Tripwire ............ (wheel) a thrown emitter that sticks to the first surface it hits and projects a laser straight
+                          out from it (to the next wall, 400 px at most): anything crossing it is zapped (25, a 0.5 s
+                          stun); four zaps and it blows. Two can be set; a third sets off the oldest.
+    Drone pod ........... (wheel) two little gun drones orbit you for 10 s, each firing a nail (8) at the nearest foe it
+                          can see within 260 px every 0.4 s. Firing again while they're up tops their timer back up.
     Weapon swap ......... 1-9 0 - = BKSP [ ] \ ; ' , . / Z X K L U I O Y H or Q/E / wheel; 120 ms draw. Each gun keeps its own fire
                           cooldown, so swapping off a slow gun (Singularity, railgun) never delays the next one.
-    Weapon wheel (Tab) .. hold for a ring of all 51 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
+    Weapon wheel (Tab) .. hold for a ring of all 53 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
                           under the name says what the gun does. Gold pips
                           under each gun show its mastery stars.
     Executions .......... an enemy under 20% health (30+ max HP, no bosses) pulses orange: kick it (or hammer-swing
@@ -387,6 +392,14 @@
     Thundercloud 70 HP .. a storm drone 120 px over you that drifts after you (60 px/s). Every ~3.2 s, once it's roughly
                           over you, it charges (0.8 s, a flickering line marks the strike) and drops a bolt straight
                           down: 16 to you, 20 to any foe in the column, drums lit. Keep moving.
+    Headsman 200 HP ..... a hooded executioner. In reach (44 px) it raises its axe (0.8 s, a red box marks where it'll
+                          land), then chops: 30 to you, 40 to any foe in the box, and a crack runs along the floor
+                          ahead of it (jump it). The axe sticks for 0.9 s: hit it then (x1.5).
+    Berserker 100 HP .... a wiry brute with a saw-blade arm: walks at you (70 px/s) and swings in close (12, every 0.9 s).
+                          Below half health it goes BERSERK for good: 150 px/s and a swing every 0.45 s, but x1.25.
+    Bastion 120 HP ...... a squat bot that keeps 120-220 px off and plinks at you. Every ~6 s it throws up a hard-light
+                          wall in front of it (40 px tall, 4 s, 60 HP) that stops your bullets; beams, blasts and
+                          blades get through. Shoot it down or go round.
     Wraith 70 HP ........ a shroud that drifts straight at you through walls and floors (50 px/s), faint while inside
                           them. In the open and within 85 px it shrieks (0.45 s), lunges (300 px/s, 14 on a touch)
                           and fades back for 1.4 s. Shoot it when it comes out.
@@ -423,15 +436,15 @@
     Fire jets ........... ARENA 02: three vents on the furnace top. Every ~9 s the grate flares (1.1 s tell), then they
                           fire left to right (1.3 s each, 0.3 s apart): 76 px columns that burn you for 9 per 0.25 s
                           and fling you out, and set alight any foe, corpse, drum or tar up there.
-    Waves ............... wave 1 = 10 placed enemies; wave 2 = 18 in a BLACKOUT (vision shrinks to a pool round
+    Waves ............... wave 1 = 10 placed enemies; wave 2 = 19 in a BLACKOUT (vision shrinks to a pool round
                           you, enemy eyes and lasers glow, gunfire strobes it wider) with a cloaker, a scorcher, a mirror knight,
-                          a wraith, a tar spitter, a mimic, a gasbag, a creeper, a discus, an arc pylon and two sparkers; wave 3 = 18 under SLAG
+                          a wraith, a tar spitter, a mimic, a gasbag, a creeper, a discus, an arc pylon, a berserker and two sparkers; wave 3 = 19 under SLAG
                           RAIN with a scrap golem, a shellback, a pyro, a torcher, a harpooner, a stitcher, a duelist, a roller, a buzzsaw,
-                          an orbiter, a lugger, a mimic, a spotter and the gunship; wave 4 = 19 in LOW GRAVITY led by the
+                          an orbiter, a lugger, a mimic, a spotter, a bastion and the gunship; wave 4 = 19 in LOW GRAVITY led by the
                           juggernaut, with a linker pair, a hive, two hounds, a claw, a magnetron, a vortex, a thundercloud, a blinker, a
-                          howitzer, a welder, a blimp, a chiller, a spore pod and a jammer; wave 5 = 16 (28 with
+                          howitzer, a welder, a blimp, a chiller, a spore pod and a jammer; wave 5 = 17 (29 with
                           splits) in MELTDOWN with slaglings, a burrower, a scavenger, linkers, a duelist, a strider,
-                          a warhorn, a shinobi, a swapper, a tar spitter, a grappler and the slag wyrm;
+                          a warhorn, a shinobi, a swapper, a tar spitter, a grappler, a headsman and the slag wyrm;
                           wave 6 = the boss. Each wave opens with a title card. Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad): HOLLOW POINTS +20%
                           damage, HAIR TRIGGER 20% faster fire, VAMPIRE 3 HP a kill, IRON BOOTS double kick damage
@@ -444,9 +457,9 @@
     Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
                           bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
                           New pipes every wave.
-    Medals .............. 22 to earn in a run (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
+    Medals .............. 23 to earn in a run (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
                           kills, 5 crush kills, 3 shock combos, 3 supercombines, 5 wall splats, kills with 15 guns, 3
-                          rampages, a 6-kill chain, 8 katana deflects, 6 elites, 3 wrecking-ball kills, 5 microwave pops, beating the Foreman, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
+                          rampages, a 6-kill chain, 8 katana deflects, 6 elites, 3 wrecking-ball kills, 5 microwave pops, beating the Foreman, a win with a mutator on, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
                           Brutal win). A gold toast pops when one lands; the results list the run's medals and the
                           title counts the collection (localStorage).
     Last-kill cam ....... the final kill of each wave: 0.9 s of slow-mo, a zoom punch, an impact frame and the camera
@@ -475,7 +488,7 @@
     Title menu .......... CAMPAIGN, OVERTIME, DAILY, CODEX, ARMORY (every gun with its line, key, kills and mastery
                           pips), MEDALS, OPTIONS. CODEX: every foe, a grey silhouette until you've met it, with a line on
                           each; 66 to a page, Q/E turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS (difficulty, music, SFX, shake, post
-                          FX, flashes: FULL or REDUCED, which drops impact frames and dims screen flashes). Keyboard, mouse or pad; Esc / B backs out. Met foes are kept in localStorage.
+                          FX, mutator, flashes: FULL or REDUCED, which drops impact frames and dims screen flashes). Keyboard, mouse or pad; Esc / B backs out. Met foes are kept in localStorage.
     Gamepad ............. standard-mapping pads: LS move (down + A drops), RS aim (crosshair rides 70 px out), RT fire,
                           LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB for the wheel (RS picks), D-pad
                           up/down cycle, Start pause. Menus: D-pad / LS, A pick, B back. Rumble follows screen shake.
@@ -484,6 +497,10 @@
                           mini-boss deaths (a white flash with post FX off).
     Difficulty .......... picked on the title screen (A/D, remembered): EASY (you take x0.6, enemies have x0.8
                           HP, score x0.7), NORMAL, BRUTAL (x1.4 damage taken, x1.25 enemy HP, score x1.5).
+    Mutators ............ OPTIONS > MUTATOR (one at a time, remembered, shown on the title): GLASS CANNON (you deal and
+                          take double), SWARM (each wave half again as big, foes a third weaker), MOON BOOTS (low
+                          gravity every wave), LIGHTS OUT (every wave in the dark), VAMPIRE (every kill heals 4, no
+                          medkits). The MUTANT medal is for winning the campaign with one on.
     Meltdown tide ....... wave 5: every ~11 s the floor seams glow for 2.2 s, then slag floods the ground floor
                           28 px deep (3 s rise, 6 s hold, 3 s drain). Wading burns 5 per 0.4 s; it ignites
                           anything not fireproof, sets off ticks and drums, and melts gibs.
@@ -744,6 +761,13 @@ const TUNE = {
   SHELLBACK: { speed: 40, front: 0.2, flipT: 3, bashAt: 60, tellMs: 400, bash: 230, bashMs: 320 },
   SHINOBI:   { run: 120, leapCd: 1.6, leapY: 380, leapX: 220, starSpeed: 320, starDmg: 7, cling: 0.5 },
   THUNDER:   { speed: 60, alt: 120, cd: 3.2, charge: 0.8, dmg: 16, edmg: 20, w: 12 },
+  // ---- mutator round ----
+  TRIPWIRE:  { cooldown: 900, speed: 320, max: 2, zap: 25, trips: 4, len: 400,
+               boom: { radius: 44, maxDamage: 50, minDamage: 15, selfDamage: 10, push: 320, maxRise: 400 } },
+  DRONEPOD:  { cooldown: 4000, n: 2, life: 10, rate: 0.4, dmg: 8, range: 260, orbit: 26 },
+  HEADSMAN:  { speed: 40, reach: 44, tellMs: 800, dmg: 30, edmg: 40, crackT: 1.0, recoverMs: 900, take: 1.5 },
+  BERSERKER: { speed: 70, rageSpeed: 150, swingAt: 28, swingCd: 0.9, rageCd: 0.45, dmg: 12, take: 1.25 },
+  BASTION:   { speed: 40, keep: [120, 220], cd: 6, wallT: 4, wallHp: 60, wallH: 40, fireCd: 1.6 },
   FOREMAN:   { speed: 40, rage: 62, cd: 2.2, slamTell: 700, slamDmg: 22, spray: 3, magnet: 1.6, pull: 110, maxHounds: 4, core: 1.3 },
 };
 const DIFFS = [                                        // title screen: left / right picks one
@@ -752,7 +776,17 @@ const DIFFS = [                                        // title screen: left / r
   { name: 'BRUTAL', dmg: 1.4, hp: 1.25, score: 1.5 },
 ];
 const optNum = (key, def, lo, hi) => { try { const v = parseFloat(localStorage.getItem('slaghouse.' + key)); return v >= lo && v <= hi ? v : def; } catch (err) { return def; } };
-const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1) };   // pause menu / title options, remembered
+const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1), mut: optNum('mut', 0, 0, 5) | 0 };
+// run mutators (OPTIONS): one at a time, remembered
+const MUTATORS = [
+  { id: 'none', name: 'NONE', d: 'THE FOUNDRY AS IT COMES.' },
+  { id: 'glass', name: 'GLASS CANNON', d: 'YOU DEAL DOUBLE AND TAKE DOUBLE.' },
+  { id: 'swarm', name: 'SWARM', d: 'HALF AGAIN AS MANY FOES, A THIRD WEAKER.' },
+  { id: 'lowg', name: 'MOON BOOTS', d: 'LOW GRAVITY EVERY WAVE.' },
+  { id: 'dark', name: 'LIGHTS OUT', d: 'EVERY WAVE IN THE DARK.' },
+  { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
+];
+const MUT = () => MUTATORS[OPTS.mut].id;   // pause menu / title options, remembered
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
 //  D-pad up/down cycle weapons, Start pause. Menus: D-pad / LS, A pick, B back.
@@ -799,6 +833,7 @@ const MEDALS = [
   { id: 'wrecker', name: 'WRECKING CREW', d: '3 WRECKING-BALL KILLS IN A RUN' },
   { id: 'popcorn', name: 'POPCORN', d: '5 MICROWAVE POPS IN A RUN' },
   { id: 'unionbuster', name: 'UNION BUSTER', d: 'BRING DOWN THE FOREMAN' },
+  { id: 'mutant', name: 'MUTANT', d: 'WIN THE CAMPAIGN WITH A MUTATOR ON' },
   { id: 'ghost', name: 'GHOST STEP', d: '10 DASH DODGES' },
   { id: 'demo', name: 'DEMOLITION', d: 'DETONATE 4 LIMPETS AT ONCE' },
   { id: 'slayer', name: 'SLAG SLAYER', d: 'BEAT THE SMELTER' },
@@ -899,6 +934,9 @@ const CODEX = [
   ['shellback', 'SHELLBACK', 'w0', 'ITS SHELL SHRUGS OFF SHOTS FROM THE FRONT. KICK OR BLAST IT OVER.'],
   ['shinobi', 'SHINOBI', 'w0', 'LEAPS WALL TO WALL, THROWING STARS AT THE TOP OF EVERY JUMP.'],
   ['thundercloud', 'THUNDERCLOUD', 'c0', 'HANGS OVER YOU AND DROPS LIGHTNING. KEEP MOVING.'],
+  ['headsman', 'HEADSMAN', 'w0', 'A SLOW AXE THAT SPLITS THE FLOOR. ITS AXE STICKS: HIT IT THEN.'],
+  ['berserker', 'BERSERKER', 'w0', 'HALF DEAD, IT GOES BERSERK: TWICE AS FAST, BUT SOFTER.'],
+  ['bastion', 'BASTION', 'w0', 'THROWS UP A HARD-LIGHT WALL THAT STOPS BULLETS. GO ROUND.'],
   ['foreman', 'THE FOREMAN', 'w0', 'OVERTIME BOSS. SLAMS, SPRAYS RIVETS, MAGNETS YOU IN, CALLS HOUNDS.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
 ];
@@ -967,6 +1005,8 @@ const WEAPONS = [
   Object.assign({ id: 'microwave', name: 'MICROWAVE', gun: 'microwave' }, TUNE.MICROWAVE),
   Object.assign({ id: 'gauntlet', name: 'ROCKET GAUNTLET', gun: 'gauntlet' }, TUNE.GAUNTLET),
   Object.assign({ id: 'marksman', name: 'MARKSMAN RIFLE', gun: 'marksman' }, TUNE.MARKSMAN),
+  Object.assign({ id: 'tripwire', name: 'TRIPWIRE', gun: 'tripwire' }, TUNE.TRIPWIRE),
+  Object.assign({ id: 'dronepod', name: 'DRONE POD', gun: 'dronepod' }, TUNE.DRONEPOD),
 ];
 // one line per gun for the weapon wheel
 const BLURBS = {
@@ -989,6 +1029,7 @@ const BLURBS = {
   splitter: 'A BOLT THAT SPLITS IN TWO ON IMPACT.', decoy: 'A HOLO YOU. FOES GO FOR IT. IT BLOWS.',
   stasis: 'A FIELD THAT STOPS TIME. HITS STACK.', microwave: 'COOK A FOE UNTIL IT POPS.',
   gauntlet: 'A ROCKET PUNCH. YOU GO WITH IT.', marksman: 'SCOPED. PIERCES. HEADSHOTS X3.',
+  tripwire: 'STICKS ANYWHERE. ITS BEAM ZAPS FOES.', dronepod: 'TWO GUN DRONES ORBIT YOU FOR 10 S.',
 };
 const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'", ',', '.', '/', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];   // HUD labels (< = backspace; the flail has no key: wheel or Q/E)
 while (SLOT_KEYS.length < WEAPONS.length) SLOT_KEYS.push(' ');      // wheel-only guns have no key
@@ -1093,6 +1134,9 @@ const ENEMY = {
   lugger: { key: 'lugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
   blimp: { key: 'blimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
   strider: { key: 'strider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
+  headsman: { key: 'headsman', fw: 24, fh: 28, bw: 14, bh: 24, hp: 200, speed: 40, sight: 360, touch: 12, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [14, 18] },
+  berserker: { key: 'berserker', fw: 18, fh: 24, bw: 12, bh: 20, hp: 100, speed: 70, sight: 380, touch: 10, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [10, 13] },
+  bastion: { key: 'bastion', fw: 18, fh: 22, bw: 12, bh: 18, hp: 120, speed: 40, sight: 400, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [8, 11] },
   shellback: { key: 'shellback', fw: 22, fh: 16, bw: 18, bh: 12, hp: 110, speed: 40, sight: 360, touch: 12, kb: 0.3, gibs: ['g_flesh1', 'g_chunk', 'g_plate', 'g_shard'], gibN: [9, 12] },
   shinobi: { key: 'shinobi', fw: 16, fh: 22, bw: 10, bh: 18, hp: 55, speed: 120, sight: 460, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
   thundercloud: { key: 'thundercloud', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
@@ -1552,6 +1596,12 @@ const Sfx = {
     if (v <= 0.02) { this.swarmNode = null; n.g.gain.setTargetAtTime(0.0001, t, 0.15); for (const s of n.nodes) s.stop(t + 0.8); return; }
     n.g.gain.setTargetAtTime((n.bank ? this.bankGain.swarmLoop : 0.05) * v, t, 0.1);
   },
+  // ---- mutator round ----
+  tripSet() { if (!this.ok('trs', 0.1)) return; if (this.smp('tripSet')) return; this.tone({ type: 'square', f0: 900, f1: 1800, dur: 0.12, vol: 0.05 }); this.tone({ type: 'sine', f0: 1800, f1: 1800, dur: 0.2, vol: 0.03, delay: 0.12 }); },
+  dronePod() { if (!this.ok('drp', 0.3)) return; if (this.smp('dronePod')) return; this.tone({ type: 'sawtooth', f0: 200, f1: 600, dur: 0.4, vol: 0.06 }); this.noise({ filter: 'bandpass', f0: 1200, q: 2, dur: 0.4, vol: 0.08 }); },
+  axeChop() { if (!this.ok('axc', 0.1)) return; if (this.smp('axeChop')) return; this.noise({ filter: 'lowpass', f0: 2200, f1: 150, dur: 0.4, vol: 0.55 }); this.tone({ type: 'sine', f0: 90, f1: 40, dur: 0.3, vol: 0.4 }); },
+  berserk() { if (!this.ok('brs', 0.5)) return; if (this.smp('berserk')) return; this.tone({ type: 'sawtooth', f0: 160, f1: 90, dur: 0.6, vol: 0.12 }); this.noise({ filter: 'bandpass', f0: 600, q: 1, dur: 0.6, vol: 0.15 }); },
+  hardlight() { if (!this.ok('hlt', 0.3)) return; if (this.smp('hardlight')) return; this.tone({ type: 'sine', f0: 300, f1: 1200, dur: 0.3, vol: 0.06 }); this.tone({ type: 'triangle', f0: 1200, f1: 1200, dur: 0.3, vol: 0.03, delay: 0.25 }); },
   // ---- foreman round ----
   gauntlet() { if (!this.ok('gnt', 0.1)) return; if (this.smp('gauntlet')) return; this.noise({ filter: 'bandpass', f0: 600, f1: 2200, q: 1, dur: 0.25, vol: 0.3 }); this.tone({ type: 'sawtooth', f0: 120, f1: 260, dur: 0.2, vol: 0.06 }); },
   punchHit() { if (!this.ok('pnh', 0.08)) return; if (this.smp('punchHit')) return; this.noise({ filter: 'lowpass', f0: 1800, f1: 150, dur: 0.3, vol: 0.55 }); this.tone({ type: 'sine', f0: 110, f1: 40, dur: 0.25, vol: 0.45 }); },
@@ -2791,6 +2841,35 @@ function drawStrider(ctx, frame) {                   // 20x36 strider: a sensor 
   R(ctx, '#0a0a0c', 11, 5 + top, 5, 3); R(ctx, '#ff3020', 13, 6 + top, 2, 1);                                         // the eye
 }
 // ---- finale round: new enemies --------------------------------------------------------
+// ---- mutator round: new enemies --------------------------------------------------------
+function drawHeadsman(ctx, frame) {                  // 24x28 headsman: a hooded executioner with a great axe
+  const s = frame === 'w1' ? 1 : 0, rs = frame === 'raise', ch = frame === 'chop' || frame === 'stuck';
+  const S = '#7a5a48', Sd = '#4a3428', K = '#141010', H = '#1e1a1e', A = '#9aa4b0', Ad = '#5a636e';
+  R(ctx, Sd, 7 - s, 19, 4, 9); R(ctx, Sd, 13 + s, 19, 4, 9); R(ctx, K, 6 - s, 27, 6, 1); R(ctx, K, 12 + s, 27, 6, 1);      // legs
+  R(ctx, Sd, 5, 9, 14, 11); R(ctx, S, 6, 9, 12, 10); R(ctx, K, 6, 14, 12, 2);                                              // bare torso, belt
+  R(ctx, H, 8, 1, 8, 9); R(ctx, H, 7, 3, 10, 6); R(ctx, '#ff3020', 13, 5, 1, 1); R(ctx, '#ff3020', 15, 5, 1, 1);          // the hood, eyes
+  if (rs) { R(ctx, '#5a3a20', 15, 0, 2, 12); R(ctx, Ad, 12, 0, 9, 5); R(ctx, A, 13, 0, 8, 3); }                           // axe raised high
+  else if (ch) { R(ctx, '#5a3a20', 15, 14, 8, 2); R(ctx, Ad, 19, 15, 5, 12); R(ctx, A, 20, 16, 4, 10); }                  // axe down in the floor
+  else { R(ctx, '#5a3a20', 4, 6, 2, 16); R(ctx, Ad, 0, 3, 6, 7); R(ctx, A, 0, 4, 4, 5); }                                // axe on the shoulder
+}
+function drawBerserker(ctx, frame) {                 // 18x24 berserker: a wiry brute with a saw-blade arm, veins standing out
+  const s = frame === 'w1' ? 1 : 0, sw = frame === 'swing';
+  const S = '#a06a54', Sd = '#6a3a2a', K = '#1a0e0a', B = '#c8d0da';
+  R(ctx, Sd, 5 - s, 16, 3, 8); R(ctx, Sd, 10 + s, 16, 3, 8); R(ctx, K, 4 - s, 23, 5, 1); R(ctx, K, 9 + s, 23, 5, 1);
+  R(ctx, Sd, 4, 7, 10, 10); R(ctx, S, 5, 7, 8, 9); R(ctx, '#c02020', 6, 9, 1, 4); R(ctx, '#c02020', 10, 8, 1, 5);          // torso, veins
+  R(ctx, Sd, 6, 1, 6, 6); R(ctx, S, 7, 2, 4, 4); R(ctx, '#ffe040', 9, 3, 2, 1); R(ctx, K, 8, 5, 3, 1);                     // head, wild eyes, snarl
+  if (sw) { R(ctx, Sd, 13, 6, 3, 3); R(ctx, B, 14, 2, 4, 4); R(ctx, '#ffffff', 15, 3, 2, 2); }                            // saw raised
+  else { R(ctx, Sd, 13, 9, 3, 5); R(ctx, B, 13, 13, 5, 5); R(ctx, '#5a636e', 15, 15, 1, 1); }                              // saw at the hip
+  R(ctx, Sd, 2, 9, 2, 6);
+}
+function drawBastion(ctx, frame) {                   // 18x22 bastion: a squat bot with a hard-light projector on its arm
+  const s = frame === 'w1' ? 1 : 0, cast = frame === 'cast';
+  const M = '#4b535e', Md = '#2a2e35', Ml = '#8a94a0', C = cast ? '#ffffff' : '#46e6ff';
+  R(ctx, Md, 4 - s, 15, 4, 7); R(ctx, Md, 10 + s, 15, 4, 7); R(ctx, '#141618', 3 - s, 21, 6, 1); R(ctx, '#141618', 9 + s, 21, 6, 1);
+  R(ctx, Md, 3, 5, 12, 11); R(ctx, M, 4, 5, 10, 10); R(ctx, Ml, 4, 5, 5, 1); R(ctx, '#e8b422', 4, 11, 10, 1);              // body, stripe
+  R(ctx, Md, 6, 0, 6, 5); R(ctx, M, 7, 1, 4, 3); R(ctx, C, 9, 2, 2, 1);                                                    // head, visor
+  R(ctx, Md, 14, 6, 4, 6); R(ctx, C, 16, 7, 2, 4); if (cast) R(ctx, '#d0f8ff', 17, 5, 1, 8);                               // the projector
+}
 // ---- foreman round: new enemies --------------------------------------------------------
 function drawShellback(ctx, frame) {                 // 22x16 shellback: a crab-tortoise under a riveted shell, peering out front
   const s = frame === 'w1' ? 1 : 0, fl = frame === 'flip' || frame === 'flip2', t = frame === 'tell';
@@ -3186,6 +3265,15 @@ const GUNS = {
     for (let i = 0; i < 3; i++) { R(ctx, '#2a8ad0', 16 + i * 3, 3, 2, 5); R(ctx, '#9ae8ff', 16 + i * 3, 3, 1, 1); }
     R(ctx, '#c8f4ff', 25, 5, 1, 1);
   } },
+  tripwire: { w: 20, h: 12, py: 5, muzzle: 18, draw(ctx, arm) {               // tripwire: a stubby launcher with a red emitter loaded
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 3, 12, 6); R(ctx, '#6a7380', 5, 3, 12, 1); R(ctx, '#2a2e35', 6, 9, 3, 3); R(ctx, '#22262c', 15, 2, 3, 8); R(ctx, '#ff3020', 17, 5, 2, 2); R(ctx, '#ffffff', 17, 5, 1, 1);
+  } },
+  dronepod: { w: 22, h: 12, py: 5, muzzle: 20, draw(ctx, arm) {               // drone pod: a launcher with two little drones nested in it
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 3, 15, 7); R(ctx, '#6a7380', 5, 3, 15, 1); R(ctx, '#2a2e35', 6, 10, 3, 2);
+    R(ctx, '#8a94a0', 9, 4, 4, 2); R(ctx, '#46e6ff', 12, 4, 1, 1); R(ctx, '#8a94a0', 14, 7, 4, 2); R(ctx, '#46e6ff', 17, 7, 1, 1);
+  } },
   gauntlet: { w: 18, h: 14, py: 6, muzzle: 16, draw(ctx, arm) {               // rocket gauntlet: a huge armoured fist with thrusters
     if (arm) drawArm(ctx, 6);
     R(ctx, '#3a3f47', 5, 2, 9, 10); R(ctx, '#6a7380', 5, 2, 9, 1); R(ctx, '#e8b422', 6, 5, 7, 1);
@@ -3510,13 +3598,13 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 const WAVES = [
   SPAWNS.enemies,
   [['bulwark', 'G'], ['mirror', 'G'], ['mender', 'A'], ['enforcer', 'G'], ['sniper', 'G'], ['stalker', 'G'], ['creeper', 'A'], ['grenadier', 'G'], ['mimic', 'G'], ['tarspit', 'G'],
-   ['wraith', 'A'], ['sparker', 'G'], ['sparker', 'G'], ['discus', 'G'], ['pylon', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['scorcher', 'G']],
+   ['wraith', 'A'], ['sparker', 'G'], ['sparker', 'G'], ['discus', 'G'], ['pylon', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['scorcher', 'G'], ['berserker', 'G']],
   [['golem', 'G'], ['roller', 'G'], ['shellback', 'G'], ['lugger', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['orbiter', 'A'], ['stitcher', 'A'], ['harpooner', 'G'], ['duelist', 'G'],
-   ['pilferer', 'A'], ['buzzsaw', 'A'], ['jet', 'A'], ['torcher', 'G'], ['leech', 'A'], ['spotter', 'A'], ['pyro', 'G'], ['gunship', 'A']],
+   ['pilferer', 'A'], ['buzzsaw', 'A'], ['jet', 'A'], ['torcher', 'G'], ['leech', 'A'], ['spotter', 'A'], ['bastion', 'G'], ['pyro', 'G'], ['gunship', 'A']],
   [['blinker', 'A'], ['blimp', 'A'], ['howitzer', 'G'], ['hive', 'A'], ['pogo', 'G'], ['hound', 'G'], ['hound', 'G'], ['claw', 'A'], ['jammer', 'A'], ['chiller', 'G'], ['welder', 'G'],
    ['magnet', 'A'], ['vortex', 'A'], ['thundercloud', 'A'], ['jugg', 'G'], ['linker', 'A'], ['linker', 'A'], ['sporepod', 'G'], ['slug', 'G']],
   [['slagling', 'G'], ['burrower', 'G'], ['linker', 'A'], ['linker', 'A'], ['scavenger', 'G'], ['strider', 'G'], ['echo', 'G'], ['slagling', 'G'],
-   ['para', 'A'], ['shinobi', 'G'], ['warhorn', 'G'], ['beacon', 'A'], ['swapper', 'G'], ['wyrm', 'G'], ['tarspit', 'G'], ['grappler', 'G']],
+   ['para', 'A'], ['shinobi', 'G'], ['warhorn', 'G'], ['beacon', 'A'], ['swapper', 'G'], ['wyrm', 'G'], ['tarspit', 'G'], ['grappler', 'G'], ['headsman', 'G']],
   [['boss', 'B']],
 ];
 const WAVE_POINTS = {
@@ -4153,6 +4241,9 @@ function genTextures(scene) {
                             { name: 'o1', c: makeSprite(14, 18, x => drawMimic(x, 'o', 1)) }, { name: 'bite', c: makeSprite(14, 18, x => drawMimic(x, 'bite', 0)) }], 14, 18, true);
   addSheet(scene, 'howitzer', ['w0', 'w1', 'plant', 'fire'].map(f => ({ name: f, c: makeSprite(26, 22, x => drawHowitzer(x, f)) })), 26, 22, true);
   addSheet(scene, 'blinker', ['b0', 'b1', 'dash'].map(f => ({ name: f, c: makeSprite(16, 20, x => drawBlinker(x, f)) })), 16, 20, true);
+  addSheet(scene, 'headsman', ['w0', 'w1', 'raise', 'chop', 'stuck'].map(f => ({ name: f, c: makeSprite(24, 28, x => drawHeadsman(x, f)) })), 24, 28, true);
+  addSheet(scene, 'berserker', ['w0', 'w1', 'swing'].map(f => ({ name: f, c: makeSprite(18, 24, x => drawBerserker(x, f)) })), 18, 24, true);
+  addSheet(scene, 'bastion', ['w0', 'w1', 'cast'].map(f => ({ name: f, c: makeSprite(18, 22, x => drawBastion(x, f)) })), 18, 22, true);
   addSheet(scene, 'shellback', ['w0', 'w1', 'tell', 'flip', 'flip2'].map(f => ({ name: f, c: makeSprite(22, 16, x => drawShellback(x, f)) })), 22, 16, true);
   addSheet(scene, 'shinobi', ['w0', 'w1', 'air', 'cling'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawShinobi(x, f)) })), 16, 22, true);
   addSheet(scene, 'thundercloud', ['c0', 'c1'].map(f => ({ name: f, c: makeSprite(26, 14, x => drawThunder(x, f)) })), 26, 14, true);
@@ -4343,6 +4434,7 @@ class TitleScene extends Phaser.Scene {
     const stepDiff = d => { if (this.started) return; OPTS.diff = (OPTS.diff + d + 3) % 3; saveOpt('diff'); Sfx.init(); Sfx.swap(); showDiff(); this.tweens.add({ targets: dl, scale: { from: 3.5, to: 3 }, duration: 160 }); };
     showDiff();
     this.stepDiff = stepDiff;
+    this.mutLbl = new PixelLabel(this, 480, 292, 'title_mut', { maxChars: 30, scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 }).setText(OPTS.mut ? 'MUTATOR: ' + MUTATORS[OPTS.mut].name : '');
     this.fx = new FX(this, 300, 5);
     const start = () => {
       if (this.started) return;
@@ -4392,7 +4484,8 @@ class TitleScene extends Phaser.Scene {
     this.armDesc = new PixelLabel(this, 480, 436, 'title_ard', { maxChars: 40, scale: 2, color: '#d8dee6', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armStat = new PixelLabel(this, 480, 464, 'title_ars', { maxChars: 52, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.optLbls = [0, 1, 2, 3, 4, 5, 6].map(i => new PixelLabel(this, 480, 140 + i * 42, 'title_op' + i, { maxChars: 22, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
+    this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
+    this.optLbls = [0, 1, 2, 3, 4, 5, 6, 7].map(i => new PixelLabel(this, 480, 132 + i * 40, 'title_op' + i, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
     this.showSub(null);
   }
   showSub(name) {
@@ -4404,7 +4497,8 @@ class TitleScene extends Phaser.Scene {
     this.subHint.setVisible(!!name).setText(cx ? 'ARROWS BROWSE   Q/E PAGE   ESC BACK' : ar ? 'ARROWS BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC BACK');
     this.codexImgs.forEach(o => o.setVisible(cx)); this.codexName.setVisible(cx); this.codexDesc.setVisible(cx); this.codexCount.setVisible(cx).setText('MET ' + CODEX.filter(c => SEEN.has(c[0])).length + '/' + CODEX.length);
     this.medalRows.forEach(r => { r.name.setVisible(md); r.desc.setVisible(md); }); this.medalCount.setVisible(md);
-    this.optLbls.forEach(o => o.setVisible(op));
+    this.optLbls.forEach(o => o.setVisible(op)); this.mutDesc.setVisible(op);
+    if (this.mutLbl) this.mutLbl.setText(OPTS.mut ? 'MUTATOR: ' + MUTATORS[OPTS.mut].name : '');
     this.menuItems.forEach(o => o.setVisible(!name)); this.menuHint.setVisible(!name);
     if (!name) this.subG.clear();
     this.refreshSub();
@@ -4421,8 +4515,9 @@ class TitleScene extends Phaser.Scene {
       this.armStat.setText((key ? 'KEY ' + (key === '<' ? 'BKSP' : key) : 'WHEEL') + '   KILLS ' + k + '   ' + (nx ? 'NEXT STAR AT ' + nx : 'MASTERED'));
     } else if (this.sub === 'options') {
       const pc = v => Math.round(v * 100) + '%';
-      ['DIFFICULTY  ' + DIFFS[OPTS.diff].name, 'MUSIC  ' + pc(OPTS.music), 'SFX  ' + pc(OPTS.sfx), 'SHAKE  ' + pc(OPTS.shake), 'POST FX  ' + (POSTFX.on ? 'ON' : 'OFF'), 'FLASHES  ' + (OPTS.flash ? 'FULL' : 'REDUCED'), 'BACK']
-        .forEach((t, i) => this.optLbls[i].setText(i === this.subSel ? '< ' + t + ' >' : t).setStyle({ color: i === this.subSel ? '#ffe46a' : '#8f9bab' }));
+      ['DIFFICULTY  ' + DIFFS[OPTS.diff].name, 'MUSIC  ' + pc(OPTS.music), 'SFX  ' + pc(OPTS.sfx), 'SHAKE  ' + pc(OPTS.shake), 'POST FX  ' + (POSTFX.on ? 'ON' : 'OFF'),         'FLASHES  ' + (OPTS.flash ? 'FULL' : 'REDUCED'), 'MUTATOR  ' + MUTATORS[OPTS.mut].name, 'BACK']
+        .forEach((t, i) => this.optLbls[i].setText(i === this.subSel ? '< ' + t + ' >' : t).setStyle({ color: i === this.subSel ? '#ffe46a' : i === 6 && OPTS.mut ? '#c8a0ff' : '#8f9bab' }));
+      this.mutDesc.setText(this.subSel === 6 || OPTS.mut ? MUTATORS[OPTS.mut].d : '');
     }
   }
   subKey(a) {
@@ -4440,13 +4535,14 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'options') {
-      if (a === 'up' || a === 'down') { this.subSel = (this.subSel + (a === 'up' ? 6 : 1)) % 7; Sfx.swap(); }
+      if (a === 'up' || a === 'down') { this.subSel = (this.subSel + (a === 'up' ? 7 : 1)) % 8; Sfx.swap(); }
       else if (a === 'left' || a === 'right' || a === 'ok') {
         const dir = a === 'left' ? -1 : 1, i = this.subSel;
         if (i === 0) this.stepDiff(dir);
         else if (i >= 1 && i <= 3) { const key = ['music', 'sfx', 'shake'][i - 1]; let v = Math.round(OPTS[key] * 4) + (a === 'ok' ? -1 : dir); if (a === 'ok' && v < 0) v = 4; OPTS[key] = clamp(v, 0, 4) / 4; saveOpt(key); if (key !== 'shake') Sfx.applyVolume(); Sfx.ui(); }
         else if (i === 4) { POSTFX.on = !POSTFX.on; try { localStorage.setItem('slaghouse.postfx', POSTFX.on ? '1' : '0'); } catch (err) { /* private mode */ } Sfx.ui(); }
         else if (i === 5) { OPTS.flash = OPTS.flash ? 0 : 1; saveOpt('flash'); Sfx.ui(); }
+        else if (i === 6) { OPTS.mut = (OPTS.mut + (a === 'left' ? -1 : 1) + MUTATORS.length) % MUTATORS.length; saveOpt('mut'); Sfx.ui(); }
         else if (a === 'ok') { Sfx.ui(); this.showSub(null); return; }
       }
       this.refreshSub();
@@ -4490,7 +4586,7 @@ class TitleScene extends Phaser.Scene {
     if (this.sub === 'options') {
       const i = this.optLbls.findIndex(o => Math.abs(p.y - o.y) < 18 && Math.abs(p.x - 480) < 220);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
-      if (click) { if (i >= 0) this.subKey(i === 6 ? 'ok' : p.x < 480 ? 'left' : 'right'); else this.subKey('back'); }
+      if (click) { if (i >= 0) this.subKey(i === 7 ? 'ok' : p.x < 480 ? 'left' : 'right'); else this.subKey('back'); }
       return;
     }
     if (this.sub) { if (click) this.subKey('back'); return; }
@@ -4607,6 +4703,8 @@ class GameScene extends Phaser.Scene {
     this.stasisFields = []; this.mwFx = null; this.pylonZaps = [];
     // foreman round: the rocket punch
     this.punchUntil = 0; this.punchHit = false; this.punchDir = [1, 0];
+    // mutator round: tripwires, ally drones, hard-light walls
+    this.trips = []; this.allies = []; this.bwalls = [];
     { const onPick = id => this.onPerkPick(id); BUS.on('perkpick', onPick); this.events.once('shutdown', () => BUS.off('perkpick', onPick)); }
     this.grid = this.A.grid.map(r => r.slice()); NAV = buildNav(this.grid);   // a fresh breakable copy every run
 
@@ -4795,6 +4893,7 @@ class GameScene extends Phaser.Scene {
       return { x, y, ph: Math.random() * 6, taken: false, img: this.add.image(x, y, 'medkit').setDepth(4),
                glow: this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40ff70).setScale(1.3).setAlpha(0.4).setDepth(17) };
     });
+    if (MUT() === 'vamp') for (const k of this.pickups) { k.taken = true; k.img.setVisible(false); k.glow.setVisible(false); }   // VAMPIRE: no medkits
   }
 
   spawnEnemy(kind, cx, cy) {
@@ -4802,7 +4901,7 @@ class GameScene extends Phaser.Scene {
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
     const f0 = { drone: 'd0', mender: 'm0', enforcer: 'idle0', bulwark: 'idle0', sniper: 'idle0', rocketeer: 'idle0', stalker: 'idle', tick: 'k0', boss: 'w0', wasp: 'p0', jet: 'j0', sapper: 'idle', brood: 'w0', screamer: 's0', warden: 'v0', jugg: 's0w0', cloaker: 'idle', pyro: 'idle', gunship: 'g0',
                  slagling: 'a', slagmid: 'a', slagbit: 'a', burrower: 'sw0', harpooner: 'idle', linker: 'l0',
-                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0', wraith: 'f0', chiller: 'w0', warhorn: 'w0', orbiter: 'o0', swapper: 'w0', scorcher: 'r0', grappler: 'w0', spotter: 's0', hound: 'r0', torcher: 'w0', discus: 'w0', sporepod: 'p0', vortex: 'v0', pylon: 'p0', scavenger: 'w0', shellback: 'w0', shinobi: 'w0', thundercloud: 'c0', foreman: 'w0' }[kind] || 'w0';
+                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0', wraith: 'f0', chiller: 'w0', warhorn: 'w0', orbiter: 'o0', swapper: 'w0', scorcher: 'r0', grappler: 'w0', spotter: 's0', hound: 'r0', torcher: 'w0', discus: 'w0', sporepod: 'p0', vortex: 'v0', pylon: 'p0', scavenger: 'w0', shellback: 'w0', shinobi: 'w0', thundercloud: 'c0', foreman: 'w0', headsman: 'w0', berserker: 'w0', bastion: 'w0' }[kind] || 'w0';
     markSeen(kind);
     const e = this.enemies.create(x, y, D.key, f0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
@@ -4913,6 +5012,13 @@ class GameScene extends Phaser.Scene {
     } else if (kind === 'strider') {
       Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), stepK: 0, a0: 0, beamA: 0, hitT: 0, lastStep: 0 });
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+    } else if (kind === 'headsman') {
+      Object.assign(e, { ai: 'walk', stepK: 0, chopOk: 0 });
+    } else if (kind === 'berserker') {
+      Object.assign(e, { ai: 'walk', stepK: 0, rage: false, swingCd: 0 });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2020).setScale(0.6).setAlpha(0).setDepth(4.9);
+    } else if (kind === 'bastion') {
+      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), wall: null });
     } else if (kind === 'shellback') {
       Object.assign(e, { ai: 'walk', stepK: 0, bashOk: 0, flipped: false });
     } else if (kind === 'shinobi') {
@@ -5244,7 +5350,7 @@ class GameScene extends Phaser.Scene {
     this.updateNets(dt, now); this.updateFlail(dt, now); this.updateBelts(dt, now); this.updatePresses(dt, now); this.updateSparkLinks(dt, now);
     this.updateSky(dt, now); this.updateBlades(dt, now);
     this.updateSpiders(dt, now); this.updateNapalms(dt, now); this.updateAcids(dt, now);
-    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt); this.updateFireworks(dt, now); this.updateHunt(dt, now); this.updateWreck(dt, now); this.updateSplits(dt); this.updateDecoy(dt, now); this.updateDiscs(dt, now); this.updateSpores(dt, now); this.updateStasisFields(dt, now); this.updatePunch(dt, now);
+    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt); this.updateFireworks(dt, now); this.updateHunt(dt, now); this.updateWreck(dt, now); this.updateSplits(dt); this.updateDecoy(dt, now); this.updateDiscs(dt, now); this.updateSpores(dt, now); this.updateStasisFields(dt, now); this.updatePunch(dt, now); this.updateTrips(dt, now); this.updateAllies(dt, now); this.updateWalls(dt, now);
     if (this.state !== 'dead') { this.hist.push({ t: now, x: this.player.x, y: this.player.y, fire: now - this.lastShotT < 140, fr: this.pFrame, face: this.facing }); while (this.hist.length && now - this.hist[0].t > 3000) this.hist.shift(); }
     if (this.revAmmo <= 0 && now >= this.revReloadUntil) { this.revAmmo = TUNE.REVOLVER.rounds; Sfx.revClick(); }
     this.updateHarpoons(dt, now); this.updateLinkBeams(dt, now);
@@ -5660,6 +5766,12 @@ class GameScene extends Phaser.Scene {
     } else if (W.id === 'splitter') {
       this.stats.shots++; this.splits.push({ x: ox, y: oy, px: ox, py: oy, vx: Math.cos(a) * TUNE.SPLITTER.speed, vy: Math.sin(a) * TUNE.SPLITTER.speed, gen: 0, t: TUNE.SPLITTER.life, hit: new Set() });
       this.recoil = 4; Sfx.split(); this.muzzle(mx, my, a, 0.8, 45); this.spawnLight(mx, my, 'glow', 0x9af4ff, 0.8, 1.6, 0.8, 0.1); this.addKick(-ca * 2.5, -sa * 2.5); this.shake(50, 0.0025);
+    } else if (W.id === 'tripwire') {
+      this.stats.shots++; this.trips.push({ x: ox, y: oy, vx: Math.cos(a) * TUNE.TRIPWIRE.speed, vy: Math.sin(a) * TUNE.TRIPWIRE.speed - 60, st: 'fly', n: 0, hitT: new Map(), t: 0 });
+      const set = this.trips.filter(q => q.st === 'set'); if (set.length > TUNE.TRIPWIRE.max) { const old = set[0]; this.explode(old.x, old.y, TUNE.TRIPWIRE.boom); this.trips.splice(this.trips.indexOf(old), 1); }
+      this.recoil = 3; Sfx.mineThrow(); this.addKick(-ca * 1.5, -sa * 1.5);
+    } else if (W.id === 'dronepod') {
+      this.fireDronePod(now, mx, my);
     } else if (W.id === 'gauntlet') {
       this.rocketPunch(now, a, ca, sa);
     } else if (W.id === 'marksman') {
@@ -6680,6 +6792,9 @@ class GameScene extends Phaser.Scene {
     if (e.corrodeT > 0 && src !== 'acid' && src !== 'burn') dmg *= TUNE.ACID.bonus;   // corroded metal and flesh give way
     if (src !== 'burn' && src !== 'gas') { if (this.perks.hollow) dmg *= 1.2; if (this.perks.adren && this.hp <= 35) dmg *= 1.5; if (this.time.now < this.dmgUntil) dmg *= 2; dmg *= 1 + 0.05 * masteryStars(WEAPONS[this.weapon].id); }   // perks + OVERDRIVE + mastery
     if (e.shrunkT > 0 && src !== 'burn') dmg *= TUNE.SHRINK.take;        // shrunk: a soft target
+    if (MUT() === 'glass') dmg *= 2;                                      // GLASS CANNON
+    if (e.kind === 'berserker' && e.rage) dmg *= TUNE.BERSERKER.take;
+    if (e.kind === 'headsman' && e.ai === 'stuck') dmg *= TUNE.HEADSMAN.take;
     if (e.rallyT > this.time.now) dmg *= TUNE.WARHORN.take;               // rallied by a warhorn: half damage
     if (e.kind === 'cloaker') e.revealT = 1.5;                           // getting hit lights a cloaker up
     if (e.kind === 'mimic' && e.ai === 'hide') this.mimicReveal(e, this.time.now);   // shoot the "drum" and it bares its teeth
@@ -6906,6 +7021,7 @@ class GameScene extends Phaser.Scene {
     if (src === 'crush' && ++this.ms.crushKills >= 5) this.award('bully');
     if (this.combo >= 20) this.award('chain');
     if (Object.keys(this.stats.wk).length >= 15) this.award('arsenal');
+    if (MUT() === 'vamp' && !D.tiny && this.state !== 'dead' && this.hp < TUNE.PLAYER_HP) { this.hp = Math.min(TUNE.PLAYER_HP, this.hp + 4); BUS.emit('hp', this.hp, 0); }   // VAMPIRE
     if (this.perks.vampire && this.state !== 'dead' && this.hp < TUNE.PLAYER_HP) { this.hp = Math.min(TUNE.PLAYER_HP, this.hp + 3); BUS.emit('hp', this.hp, 0); }
     if (this.perks.scav && Math.random() < 0.15) this.dropOrbs(e.body.center.x, e.body.center.y, 1);
     if (e.def.hp >= TUNE.SUPPLY.eliteHp && !e.summoned && e.kind !== 'boss' && Math.random() < TUNE.SUPPLY.eliteChance) this.dropCapsule(e.body.center.x, e.body.center.y);   // elites sometimes drop a power-up
@@ -10157,6 +10273,163 @@ class GameScene extends Phaser.Scene {
     for (const Q of this.tars.slice()) if (Math.abs(Q.y - P.y) < 6 && Math.abs(Q.x - P.x) < (Q.w + P.w) / 2 + 10) this.time.delayedCall(140, () => this.igniteTar(Q));   // runs along touching tar
   }
 
+  // ================================================================== mutator round ====
+  // ---------------------------------------------------------------- tripwire ----
+  // A thrown emitter (320 px/s, falling) that sticks to the first surface it hits and projects a laser straight out
+  // from it (to the next wall, 400 px at most). Anything crossing the beam is zapped (25, a 0.5 s stun); four zaps
+  // and it blows. Two can be set at once: a third sets off the oldest.
+  updateTrips(dt, now) {
+    const T = TUNE.TRIPWIRE;
+    for (let i = this.trips.length - 1; i >= 0; i--) {
+      const W = this.trips[i];
+      if (W.st === 'fly') {
+        W.t += dt; W.vy += 600 * dt; const nx = W.x + W.vx * dt, ny = W.y + W.vy * dt;
+        if (W.t > 3 || ny > LH) { this.trips.splice(i, 1); continue; }
+        if (!this.solidAt(nx, ny)) { W.x = nx; W.y = ny; continue; }
+        const hx = this.solidAt(nx, W.y), hy = this.solidAt(W.x, ny);
+        W.ux = hx && !hy ? -Math.sign(W.vx) : 0; W.uy = W.ux ? 0 : -(Math.sign(W.vy) || 1);   // the beam points out of the face it stuck to
+        let ex = W.x, ey = W.y; for (let d = 4; d < T.len; d += 3) { ex = W.x + W.ux * d; ey = W.y + W.uy * d; if (this.solidAt(ex, ey)) break; }
+        W.x1 = ex; W.y1 = ey; W.st = 'set'; Sfx.tripSet(); this.spawnLight(W.x, W.y, 'glow', 0xff3020, 0.6, 1.2, 0.8, 0.15);
+        continue;
+      }
+      let gone = false;
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || (W.hitT.get(e) || 0) > now) continue;
+        const b = e.body;
+        const cross = W.ux ? (b.top < W.y && b.bottom > W.y && b.right > Math.min(W.x, W.x1) && b.left < Math.max(W.x, W.x1))
+                           : (b.left < W.x && b.right > W.x && b.bottom > Math.min(W.y, W.y1) && b.top < Math.max(W.y, W.y1));
+        if (!cross) continue;
+        W.hitT.set(e, now + 700); W.n++;
+        const zx = W.ux ? b.center.x : W.x, zy = W.ux ? W.y : b.center.y;
+        this.damageEnemy(e, T.zap, 0, -1, 'arc'); if (e.alive) e.stunT = Math.max(e.stunT, 0.5);
+        this.fxSparks(zx, zy, 8); this.pylonZaps.push({ x0: W.x, y0: W.y, x1: zx, y1: zy, t: now }); Sfx.pylonZap();
+        if (W.n >= T.trips) { this.explode(W.x, W.y, T.boom); this.trips.splice(i, 1); gone = true; break; }
+      }
+      if (gone) continue;
+    }
+  }
+
+  // ---------------------------------------------------------------- drone pod ----
+  // Two little gun drones that orbit you for 10 s, each firing a nail (8) at the nearest foe it can see within 260 px
+  // every 0.4 s. Firing it again while they're up tops their timer back up.
+  fireDronePod(now, mx, my) {
+    const T = TUNE.DRONEPOD;
+    this.stats.shots++; Sfx.dronePod(); this.recoil = 3; this.spawnLight(mx, my, 'glow', 0x46e6ff, 0.6, 1.4, 0.8, 0.15);
+    if (this.allies.length) { for (const A of this.allies) A.t = T.life; return; }
+    for (let k = 0; k < T.n; k++) this.allies.push({ ang: k * Math.PI, t: T.life, fireT: 0.3 + k * 0.2, x: mx, y: my, face: 1 });
+    this.fx.emit(mx, my, { n: 10, speed: [40, 120], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0x46e6ff], add: true });
+  }
+  updateAllies(dt, now) {
+    const T = TUNE.DRONEPOD;
+    for (let i = this.allies.length - 1; i >= 0; i--) {
+      const A = this.allies[i]; A.t -= dt; A.ang += dt * 2.4;
+      if (A.t <= 0 || this.state === 'dead') { this.fx.emit(A.x, A.y, { n: 8, speed: [30, 100], life: [0.2, 0.4], size: [2, 1], cols: [0xc8d0da, 0x46e6ff], add: true }); this.allies.splice(i, 1); continue; }
+      const px = this.player.x + Math.cos(A.ang) * T.orbit, py = this.player.y - 18 + Math.sin(A.ang) * 10, k = Math.min(1, dt * 8);
+      A.x += (px - A.x) * k; A.y += (py - A.y) * k;
+      if ((A.fireT -= dt) > 0) continue;
+      let tgt = null, bd = T.range;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - A.x, e.body.center.y - A.y); if (d < bd && this.los(A.x, A.y, e.body.center.x, e.body.center.y)) { bd = d; tgt = e; } }
+      if (!tgt) { A.fireT = 0.15; continue; }
+      A.fireT = T.rate; const a = Math.atan2(tgt.body.center.y - A.y, tgt.body.center.x - A.x); A.face = Math.cos(a) >= 0 ? 1 : -1;
+      this.spawnBullet('nail', A.x, A.y, a, 520, T.dmg, 0.8); this.spawnLight(A.x, A.y, 'glow', 0xffc060, 0.3, 0.8, 0.7, 0.06);
+      if (Math.random() < 0.5) Sfx.tink(0.25);
+    }
+  }
+
+  // ---------------------------------------------------------------- headsman ----
+  // A hooded executioner (200 HP) with a great axe. In reach (44 px) it raises it (0.8 s, a red box marks where it'll
+  // land), then chops: 30 to you and 40 to any foe in the box, and a crack runs along the floor ahead of it (jump
+  // it). The axe sticks for 0.9 s: hit it then (x1.5).
+  updateHeadsman(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.HEADSMAN, b = e.body, onG = b.blocked.down || b.touching.down, pb = this.player.body;
+    if (alive && !e.aggro && (e.sees || dist < 200) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    if (e.ai === 'raise') {
+      b.velocity.x = 0; e.fr = 'raise';
+      if (now >= e.aiUntil) {                                             // the chop
+        const x0 = e.x + e.dir * 20 - 22, x1 = x0 + 44, y0 = b.top - 4, y1 = b.bottom + 4;
+        if (alive && this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > y0 && pb.top < y1) this.hurtPlayer(T.dmg, e.x, { srcY: e.y });
+        for (const o of this.enemies.getChildren()) if (o.alive && o !== e && o.body.right > x0 && o.body.left < x1 && o.body.bottom > y0 && o.body.top < y1) this.damageEnemy(o, T.edmg, e.dir, -0.5, 'crush');
+        this.shockwaves.push({ x: e.x + e.dir * 30, y: b.bottom, dir: e.dir, t: T.crackT, hit: false });
+        this.shake(220, 0.01); this.fxDust(e.x + e.dir * 22, b.bottom, 10); this.fxSparks(e.x + e.dir * 22, b.bottom - 2, 8, -Math.PI / 2, 1.2, [60, 200]); Sfx.axeChop(); this.paintSplatAround(e.x + e.dir * 22, b.bottom - 1, 3);
+        e.ai = 'stuck'; e.aiUntil = now + T.recoverMs;
+      }
+      return;
+    }
+    if (e.ai === 'stuck') { b.velocity.x = 0; e.fr = 'stuck'; if (now >= e.aiUntil) { e.ai = 'walk'; e.chopOk = now + 600; } return; }
+    if (e.stunT > 0) return;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1;
+      b.velocity.x = Math.abs(dx) > 26 ? e.dir * T.speed : 0;
+      if ((e.dir < 0 ? b.blocked.left : b.blocked.right) && onG) b.velocity.y = -260;
+      if (onG && Math.abs(dx) < T.reach && Math.abs(dy) < 34 && now >= e.chopOk) { e.ai = 'raise'; e.aiUntil = now + T.tellMs; Sfx.charge(0.3); return; }
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 4; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+
+  // ---------------------------------------------------------------- berserker ----
+  // A wiry brute (100 HP) with a saw-blade arm: walks at you (70 px/s) and swings in close (12, every 0.9 s). Below
+  // half health it goes BERSERK for good: 150 px/s, a swing every 0.45 s, a red haze, but it takes x1.25.
+  updateBerserker(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.BERSERKER, b = e.body, onG = b.blocked.down || b.touching.down, pb = this.player.body;
+    if (alive && !e.aggro && (e.sees || dist < 200) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    if (!e.rage && e.hp < e.def.hp * 0.5 && e.alive) { e.rage = true; Sfx.berserk(); this.spawnLight(e.x, e.y, 'ring', 0xff3030, 0.3, 1.6, 0.9, 0.3); if (dist < 400) BUS.emit('callout', 'BERSERK'); }
+    if (e.ai === 'swing') { b.velocity.x *= 0.8; e.fr = 'swing'; if (now >= e.aiUntil) e.ai = 'walk'; return; }
+    if (e.stunT > 0 && !e.rage) return;
+    e.swingCd -= dt;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1;
+      b.velocity.x = Math.abs(dx) > 14 ? e.dir * (e.rage ? T.rageSpeed : T.speed) : 0;
+      if ((e.dir < 0 ? b.blocked.left : b.blocked.right) && onG) b.velocity.y = -270;
+      if (Math.abs(dx) < T.swingAt && Math.abs(dy) < 24 && e.swingCd <= 0 && this.state !== 'dead') {
+        e.swingCd = e.rage ? T.rageCd : T.swingCd; e.ai = 'swing'; e.aiUntil = now + 200; Sfx.katana();
+        this.time.delayedCall(90, () => { if (e.alive && this.state !== 'dead' && Math.abs(pb.center.x - (e.x + e.dir * 10)) < 18 && Math.abs(pb.center.y - e.y) < 24) { this.hurtPlayer(T.dmg, e.x, { srcY: e.y }); this.fxBlood(pb.center.x, pb.center.y, 5); } });
+        return;
+      }
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * (e.rage ? 12 : 6); e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+
+  // ---------------------------------------------------------------- bastion ----
+  // A squat bot (120 HP) that keeps 120-220 px off and plinks at you. Every ~6 s it throws up a hard-light wall 26 px
+  // in front of it (40 px tall, 4 s, 60 HP) that stops your bullets (beams, blasts and blades get through). Shoot the
+  // wall down or go round it.
+  updateBastion(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.BASTION, b = e.body, onG = b.blocked.down || b.touching.down;
+    if (alive && !e.aggro && (e.sees || dist < 220) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    if (e.ai === 'cast') { b.velocity.x = 0; e.fr = 'cast'; if (now >= e.aiUntil) e.ai = 'walk'; return; }
+    if (e.stunT > 0) return;
+    e.cd -= dt; e.fireCd = (e.fireCd || 1) - dt;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
+      let want = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
+      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+      b.velocity.x = want * T.speed;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if (e.cd <= 0 && onG && (!e.wall || !this.bwalls.includes(e.wall))) {
+        e.cd = T.cd * rand(0.9, 1.1); e.ai = 'cast'; e.aiUntil = now + 400;
+        const wx = e.x + e.dir * 26; if (!this.solidAt(wx, b.bottom - 8)) { e.wall = { x: wx, y0: b.bottom - T.wallH, y1: b.bottom, hp: T.wallHp, t: T.wallT, hitT: 0, owner: e }; this.bwalls.push(e.wall); Sfx.hardlight(); this.spawnLight(wx, b.bottom - 20, 'glow', 0x46e6ff, 0.6, 1.4, 0.8, 0.2); }
+        return;
+      }
+      if (e.sees && e.fireCd <= 0) { e.fireCd = T.fireCd * rand(0.9, 1.1); const a = Math.atan2(dy, dx); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 5; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+  updateWalls(dt, now) {
+    for (let i = this.bwalls.length - 1; i >= 0; i--) {
+      const W = this.bwalls[i]; W.t -= dt;
+      if (W.t <= 0 || W.hp <= 0 || !W.owner.alive) {
+        if (W.hp <= 0) { this.fx.emit(W.x, (W.y0 + W.y1) / 2, { n: 16, speed: [40, 160], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0x9af4ff, 0x46e6ff], add: true }); Sfx.shieldPop(); }
+        this.bwalls.splice(i, 1); continue;
+      }
+      for (const bl of this.bulletList) if (bl.active && Math.abs(bl.x - W.x) < 5 && bl.y > W.y0 && bl.y < W.y1) {   // your bullets stop dead
+        W.hp -= bl.dmg || 8; W.hitT = now; this.fxSparks(bl.x, bl.y, 3, bl.body.velocity.x > 0 ? Math.PI : 0, 1.2, [40, 140]); bl.disableBody(true, true);
+      }
+    }
+  }
+
   // ================================================================== foreman round ====
   // ---------------------------------------------------------------- rocket gauntlet ----
   // A thruster punch: you rocket forward along your aim (a dash, half again as far, with its i-frames, but it doesn't
@@ -11905,7 +12178,7 @@ class GameScene extends Phaser.Scene {
     const T2 = ['bulwark', 'rocketeer', 'wasp', 'sapper', 'screamer', 'cloaker', 'pyro', 'harpooner', 'tarspit', 'buzzsaw', 'roller', 'duelist', 'blinker', 'magnet',
                 'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker',
                 'para', 'lugger', 'blimp', 'strider', 'beacon', 'leech', 'wraith', 'chiller', 'warhorn',
-                'orbiter', 'swapper', 'scorcher', 'grappler', 'spotter', 'hound', 'torcher', 'discus', 'sporepod', 'vortex', 'pylon', 'scavenger', 'shellback', 'shinobi', 'thundercloud'];
+                'orbiter', 'swapper', 'scorcher', 'grappler', 'spotter', 'hound', 'torcher', 'discus', 'sporepod', 'vortex', 'pylon', 'scavenger', 'shellback', 'shinobi', 'thundercloud', 'headsman', 'berserker', 'bastion'];
     while (out.length < n) {
       const kind = pk(rnd() < t2 ? T2 : T1);
       if (kind === 'linker') { out.push(['linker', 'A'], ['linker', 'A']); continue; }
@@ -13169,18 +13442,19 @@ class GameScene extends Phaser.Scene {
   }
   startWave(i) {
     this.wave = i;
-    const list = this.endless ? this.endlessWave(i) : WAVES[i], used = new Set(), PTS = this.A.points;
+    const list0 = this.endless ? this.endlessWave(i) : WAVES[i], used = new Set(), PTS = this.A.points;
+    const list = MUT() === 'swarm' ? list0.concat(list0.filter(([k]) => !['boss', 'foreman', 'jugg', 'wyrm', 'gunship'].includes(k) && Math.random() < 0.5)) : list0;   // SWARM: half again as many
     const mr = this.daily ? seeded(dayKey() * 31 + i) : Math.random;
     const mod = this.endless ? (i % 6 === 5 ? null : mr() < 0.45 ? ['dark', 'slag', 'lowg', 'melt'][Math.floor(mr() * 4)] : null) : WAVE_MODS[i];
     this.enemiesLeft = list.length; if (this.endless) this.totalEnemies += list.length;
     BUS.emit('wave', i + 1, this.endless ? 0 : WAVES.length); BUS.emit('enemies', this.enemiesLeft);
     if (this.endless) BUS.emit('wavecard', 'OVERTIME ' + (i + 1), i % 6 === 5 ? 'THE SMELTER RETURNS' : MOD_CARDS[mod] || 'HOSTILES INBOUND');
     else BUS.emit('wavecard', i === WAVES.length - 1 ? 'FINAL WAVE' : 'WAVE ' + (i + 1), i === WAVES.length - 1 ? 'THE SMELTER WAKES' : MOD_CARDS[WAVE_MODS[i]] || 'HOSTILES INBOUND');
-    this.spawnBarrels(true); this.spawnCanisters(true); this.applyMod(mod);
+    this.spawnBarrels(true); this.spawnCanisters(true); this.applyMod(mod || (MUT() === 'lowg' ? 'lowg' : MUT() === 'dark' ? 'dark' : null));   // MOON BOOTS / LIGHTS OUT
     for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }   // fresh pipes every wave
     this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery();
     Sfx.warp(); Music.track(WAVE_MUSIC[Math.min(i, WAVE_MUSIC.length - 1)]);
-    for (const k of this.pickups) if (k.taken) {                       // restock medkits between waves
+    for (const k of this.pickups) if (k.taken && MUT() !== 'vamp') {   // restock medkits between waves (not for a VAMPIRE)
       k.taken = false; k.img.setVisible(true); k.glow.setVisible(true);
       this.fx.emit(k.x, k.y, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x7dff8a], add: true, g: -40 });
     }
@@ -13211,6 +13485,7 @@ class GameScene extends Phaser.Scene {
       const e = this.spawnEnemy(kind, cx, cy), now = this.time.now;
       e.aggro = true; e.aggroT = 6;
       if (this.endless && this.wave > 0) { const k = 1 + TUNE.ENDLESS.hpPer * this.wave; e.def = Object.assign({}, e.def, { hp: e.def.hp * k }); e.hp = e.def.hp; }   // OVERTIME: tougher every wave
+      if (MUT() === 'swarm' && !['boss', 'foreman'].includes(kind)) { e.def = Object.assign({}, e.def, { hp: e.def.hp * 0.67 }); e.hp = e.def.hp; }
       if (elite) this.makeElite(e, elite);
       if (isHumanoid(e)) { e.lkx = this.player.x; e.lky = this.player.y; e.lkT = now; this.alertHumanoid(e, now, false); }
       if (big) { this.boss = e; BUS.emit('boss', 'THE SMELTER', 'FOUNDRY WARDEN'); BUS.emit('flash', 0.35); this.shake(500, 0.012); }
@@ -13227,7 +13502,7 @@ class GameScene extends Phaser.Scene {
   hurtPlayer(dmg, srcX, opts = {}) {
     if (this.state === 'dead') return false;
     const now = this.time.now, soft = opts.self || opts.burn;
-    if (!opts.self) dmg *= DIFFS[OPTS.diff].dmg;                         // difficulty
+    if (!opts.self) dmg *= DIFFS[OPTS.diff].dmg * (MUT() === 'glass' ? 2 : 1);   // difficulty; GLASS CANNON
     if (!opts.self && this.pCorrodeT > 0) dmg *= 1.25;                  // slug acid: corroded, you give way
     if (!opts.self && now < this.markedUntil) dmg *= TUNE.SPOTTER.take;   // a spotter has you marked
     if (!opts.self && this.aegis > 0 && !(opts.iframes !== false && now < this.invulnUntil)) {   // AEGIS soaks hits first
@@ -13269,7 +13544,7 @@ class GameScene extends Phaser.Scene {
     this.state = 'won';
     this.slowmoUntil = this.time.now + 700;
     const runT = (this.time.now - this.stats.t0) / 1000;
-    this.award('slayer'); if (runT < 600) this.award('speed'); if (OPTS.diff === 2) this.award('ironclad');
+    this.award('slayer'); if (runT < 600) this.award('speed'); if (OPTS.diff === 2) this.award('ironclad'); if (OPTS.mut) this.award('mutant');
     BUS.emit('callout', 'ARENA CLEARED');
     if (!Music.jingle('win', 'title')) Sfx.win();
     this.time.delayedCall(1500, () => this.showOver(true));
@@ -13500,6 +13775,9 @@ class GameScene extends Phaser.Scene {
       else if (e.kind === 'pylon') this.updatePylon(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'scavenger') this.updateScavenger(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'shellback') this.updateShellback(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'headsman') this.updateHeadsman(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'berserker') this.updateBerserker(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'bastion') this.updateBastion(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'shinobi') this.updateShinobi(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'thundercloud') this.updateThunder(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'foreman') this.updateForeman(e, dt, now, dx, dy, dist, alive);
@@ -14315,6 +14593,22 @@ class GameScene extends Phaser.Scene {
         g.lineStyle(3, 0x8a1020, 0.5).lineBetween(qx, qy, x2, y2); g.lineStyle(1, S.e ? 0xff6a7a : 0xc84050, 1).lineBetween(qx, qy, x2, y2); qx = x2; qy = y2;
       }
     }
+    for (const W of this.trips) {                                         // tripwires: the emitter, and a live beam once it's set
+      g.fillStyle(0xff3020, 1).fillRect(Math.round(W.x) - 2, Math.round(W.y) - 2, 4, 4); g.fillStyle(0xffffff, 0.9).fillRect(Math.round(W.x) - 1, Math.round(W.y) - 1, 2, 2);
+      if (W.st === 'set') { g.lineStyle(3, 0xff3020, 0.18).lineBetween(W.x, W.y, W.x1, W.y1); g.lineStyle(1, 0xff6050, 0.55 + 0.35 * Math.random()).lineBetween(W.x, W.y, W.x1, W.y1); }
+    }
+    for (const A of this.allies) {                                        // ally drones
+      if (A.x === undefined) continue;
+      g.fillStyle(0x8a94a0, 1).fillRect(Math.round(A.x) - 3, Math.round(A.y) - 2, 6, 4); g.fillStyle(0x46e6ff, 1).fillRect(Math.round(A.x) + (A.face > 0 ? 1 : -2), Math.round(A.y) - 1, 1, 1);
+      g.lineStyle(1, 0xc8d0da, 0.4 + 0.4 * Math.random()).lineBetween(A.x - 5, A.y - 4, A.x + 5, A.y - 4);
+      if (A.t < 2 && Math.floor(now / 100) % 2) g.lineStyle(1, 0xff5040, 0.6).strokeCircle(A.x, A.y, 5);
+    }
+    for (const W of this.bwalls) {                                        // hard-light walls
+      const a = Math.min(1, W.t / 0.3), h = W.y1 - W.y0;
+      g.fillStyle(0x46e6ff, 0.12 * a).fillRect(W.x - 3, W.y0, 6, h); g.lineStyle(1, 0xd0f8ff, 0.8 * a).lineBetween(W.x - 3, W.y0, W.x - 3, W.y1); g.lineStyle(1, 0xd0f8ff, 0.8 * a).lineBetween(W.x + 3, W.y0, W.x + 3, W.y1);
+      for (let y = W.y0 + ((now / 30) % 6); y < W.y1; y += 6) g.lineStyle(1, 0x9af4ff, 0.35 * a).lineBetween(W.x - 3, y, W.x + 3, y);
+      if (now - W.hitT < 80) g.fillStyle(0xffffff, 0.4).fillRect(W.x - 3, W.y0, 6, h);
+    }
     for (const F of this.stasisFields) {                                 // stasis: a pale dome with a clock face ticking round
       const k = Math.min(1, (TUNE.STASIS.time - F.t) / 0.15), r = TUNE.STASIS.radius * k, fade = Math.min(1, F.t / 0.3);
       g.fillStyle(0x9ab8ff, 0.06 * fade).fillCircle(F.x, F.y, r); g.lineStyle(2, 0xc8e8ff, 0.6 * fade).strokeCircle(F.x, F.y, r);
@@ -14486,6 +14780,8 @@ class GameScene extends Phaser.Scene {
         if (e.cook <= 0) e.setScale((e.shrunkOn ? 0.5 : 1) * (e.growS || 1));
       }
       if (e.stasisT > 0) { g.lineStyle(1, 0xc8e8ff, 0.8); g.strokeRect(e.body.left - 2, e.body.top - 2, e.body.width + 4, e.body.height + 4); }
+      if (e.kind === 'berserker') { e.glow.setPosition(e.x, e.y).setAlpha(e.rage ? 0.55 + 0.2 * Math.sin(now / 80) : 0); if (e.rage && Math.random() < 0.3) this.fx.emit(e.x + rand(-4, 4), e.body.top, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.3, 0.6], size: [2, 4], cols: [0xff6060, 0xc02020], alpha: [0.5, 0], g: -20 }); continue; }
+      if (e.kind === 'headsman' && e.ai === 'raise' && Math.floor(now / 90) % 2) { g.lineStyle(1, 0xff3020, 0.7); g.strokeRect(e.x + e.dir * 20 - 22, e.body.top - 4, 44, e.body.height + 8); }
       if (e.kind === 'thundercloud') {                                   // while it charges, a flickering line to the floor where it'll strike
         if (e.ai === 'charge') for (let y = e.body.bottom; y < e.strikeY; y += 8) this.laserG.lineStyle(1, 0xa0c8ff, 0.2 + 0.4 * Math.random()).lineBetween(e.x, y, e.x, y + 4);
         if (Math.random() < 0.12) this.fx.emit(e.x + rand(-10, 10), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [80, 120], life: [0.3, 0.5], size: [1, 1], cols: [0x80a8d0], alpha: [0.6, 0] });

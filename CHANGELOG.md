@@ -6,6 +6,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Mutator round: run mutators.** OPTIONS has a MUTATOR row (one at a time, remembered, shown on the title):
+  GLASS CANNON, SWARM, MOON BOOTS, LIGHTS OUT and VAMPIRE. A new MUTANT medal is for winning the campaign with one on.
+- **Two more weapons** (wheel / Q/E). Tripwire: a sticky emitter whose laser zaps anything that crosses it. Drone
+  pod: two little gun drones that orbit you and shoot for 10 s.
+- **Three more enemies.** Headsman: a slow axe that splits the floor and sticks after each chop. Berserker: goes
+  berserk at half health, twice as fast. Bastion: throws up hard-light walls that stop your bullets.
+- AudioGen takes for the tripwire arming, the drone pod, the headsman's chop and the berserker's roar. The bank
+  grows to 176 sounds.
 - **Foreman round: a second boss.** OVERTIME's boss waves now alternate between the Smelter and THE FOREMAN, a
   four-legged crane walker with a letterbox intro and its own bar: it slams shockwaves along the floor, sprays
   rivets, and below 60% rips its armour off to drag you in with a magnet and call in hounds; below 25% its core is

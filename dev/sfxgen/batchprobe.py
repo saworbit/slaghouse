@@ -163,6 +163,12 @@ PROBES = {
  'marksman': ['a sniper rifle shot', 'a door slam', 'an engine', 'static noise'],
  'shuriken': ['a sharp swish', 'a gunshot', 'an engine', 'static noise'],
  'thunder': ['a thunder crack', 'a gunshot', 'an engine', 'music'],
+ # mutator round
+ 'tripSet': ['an electronic chirp', 'a gunshot', 'a dog barking', 'static noise'],
+ 'dronePod': ['a buzzing drone', 'a gunshot', 'rain', 'static noise'],
+ 'axeChop': ['a heavy axe thunk', 'a gunshot', 'glass breaking', 'static noise'],
+ 'berserk': ['a monster roar', 'a gunshot', 'an engine', 'music'],
+ 'hardlight': ['a rising energy hum', 'a dog barking', 'rain', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

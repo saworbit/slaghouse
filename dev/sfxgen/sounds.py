@@ -250,4 +250,10 @@ SOUNDS = {
     'marksman': dict(p=['a sniper rifle shot, a loud sharp crack with echo', 'a high powered rifle firing'], d=2.0, max=0.9, keep=2, n=8, air=0.7),
     'shuriken': dict(p=['throwing stars whooshing, a sharp swish', 'a ninja star thrown, a quick whistle'], d=1.0, max=0.25, keep=2, n=8, air=0.9),
     'thunder': dict(p=['a lightning strike, a close loud thunder crack', 'a thunderbolt crash with rumble'], d=2.0, max=1.2, keep=2, n=8, air=0.6),
+    # ------------------------------------------------------------------ mutator round
+    'tripSet': dict(p=['a laser tripwire arming, an electronic chirp and hum', 'a sci-fi device locking into place with a beep'], d=1.0, max=0.4, keep=2, n=8, air=0.9),
+    'dronePod': dict(p=['small drones taking off, a buzzing whir', 'a quadcopter drone launching'], d=1.5, max=0.6, keep=2, n=8, air=0.7),
+    'axeChop': dict(p=['a huge axe chopping into stone, a heavy thunk', 'an executioner axe slamming down'], d=1.0, max=0.5, keep=2, n=8, air=0.6),
+    'berserk': dict(p=['a monster roaring in rage', 'an enraged beast bellow'], d=1.5, max=0.8, keep=2, n=8, air=0.5),
+    'hardlight': dict(p=['an energy shield powering up, a rising hum', 'a force field activating'], d=1.0, max=0.5, keep=2, n=8, air=0.8),
 }

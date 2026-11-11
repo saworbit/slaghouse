@@ -96,6 +96,8 @@ window.slagCalib = async function (only) {
     pylonCharge: one(() => S.pylonCharge()), pylonZap: one(() => S.pylonZap()), chomp: one(() => S.chomp()),
     // foreman round
     gauntlet: one(() => S.gauntlet()), punchHit: one(() => S.punchHit()), marksman: one(() => S.marksman()), shuriken: one(() => S.shuriken()), thunder: one(() => S.thunder()),
+    // mutator round
+    tripSet: one(() => S.tripSet()), dronePod: one(() => S.dronePod()), axeChop: one(() => S.axeChop()), berserk: one(() => S.berserk()), hardlight: one(() => S.hardlight()),
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };
