@@ -73,9 +73,18 @@ async function open(ctx, files) {
     page._errs = [];
     page.on('pageerror', e => page._errs.push('page error: ' + (e.stack || e.message).split('\n').slice(0, 3).join(' | ')));
     page.on('console', m => { if (m.type() === 'error') page._errs.push('console error: ' + m.text()); });
+    page._pending = new Map();                                          // request -> start time, so a stuck load can say what it's waiting on
+    page.on('request', r => page._pending.set(r, Date.now()));
+    for (const ev of ['requestfinished', 'requestfailed']) page.on(ev, r => page._pending.delete(r));
   }
-  await page.goto(url);
-  await page.waitForFunction(() => window.game && game.scene && game.scene.getScene('Title') && game.scene.getScene('Title').sys.isActive(), null, { timeout: 60000 });
+  const stuck = err => {
+    const open = [...page._pending].map(([r, t]) => `${r.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '').slice(0, 70)} (${((Date.now() - t) / 1000).toFixed(0)}s)`);
+    return new Error(`${String(err.message).split('\n')[0]}; requests still open: ${open.join(', ') || 'none'}`);
+  };
+  // the game only needs its scripts (all parser-blocking, so DOMContentLoaded waits for them) and then its title screen
+  try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }); } catch (err) { throw stuck(err); }
+  try { await page.waitForFunction(() => window.game && game.scene && game.scene.getScene('Title') && game.scene.getScene('Title').sys.isActive(), null, { timeout: 60000 }); }
+  catch (err) { throw stuck(err); }
   for (const f of ['harness', ...files]) await page.evaluate(src => { (0, eval)(src); }, scripts[f]);
   return page;
 }
