@@ -16,7 +16,7 @@ window.T = (() => {
   T.setup = (arena, keepWaves) => {
     const gs = T.g();
     // explicit data every time: a bare restart reuses the last run's arena and carry (arena 0 used to land there)
-    gs.scene.restart(arena ? { arena: arena === true ? 1 : arena, carry: { hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} }, style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, totalEnemies: 50, wave: 3 } } : { arena: 0, carry: null });
+    gs.scene.restart(arena ? { arena: arena === true ? 1 : arena, carry: { hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} }, style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, totalEnemies: 50, wave: 3, diff: OPTS.diff, mut: OPTS.mut } } : { arena: 0, carry: null });
     T.run(50);
     const g = T.g(); g.pauseGame = () => {}; if (!keepWaves) g.startWave = () => {};
     const hp0 = g.hurtPlayer.bind(g); g.hurtPlayer = (d, x, o) => { const r = hp0(d, x, o); T.dmgLog.push(Math.round(d)); g.hp = 100; return r; };
@@ -43,6 +43,12 @@ T.bot = async (opts = {}) => {
     if (g.wave !== lastWave) { lastWave = g.wave; log.push('wave ' + (g.wave + 1) + ' @' + t.toFixed(0) + 's'); }
     if (g.state !== 'play') { log.push('state ' + g.state + ' @' + t.toFixed(0)); break; }
     if (g.perkOffer) { const id = g.perkOffer[Math.floor(Math.random() * g.perkOffer.length)]; log.push('perk ' + id); g.onPerkPick(id); }
+    const st = g.campaign && g.campaignRoute && g.campaignRoute[0];
+    if (st) {                                                        // campaign lift or coolant valve: stand on it until it fires
+      if (Math.abs(g.player.x - st.x) > 8 || Math.abs(g.player.body.bottom - st.y) > 6) { T.tp(Math.floor(st.x / 16), st.y / 16 - 1); log.push('route ' + st.label + ' @' + t.toFixed(0)); }
+      const k = K(); k.A.isDown = k.D.isDown = false; T.trig(false);
+      T.run(50); t += 0.05; continue;
+    }
     const p = g.player; let best = null, bd = 1e9;
     for (const e of g.enemies.getChildren()) { if (!e.alive || e.under) continue; seenKinds.add(e.kind); const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = e; } }
     if ((wT -= 0.05) <= 0) { wT = opts.wSecs || 3; wi = (wi + 1) % WEAPONS.length; g.setWeapon(wi); }

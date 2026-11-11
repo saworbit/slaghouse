@@ -8,7 +8,7 @@ automatically.
 | --- | --- |
 | `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.setup(arena)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
-| `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to ARENA CLEARED and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
+| `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
 ## Running it
 
@@ -20,8 +20,9 @@ RUNMODE = 'campaign'; T.boot(); T.run(300);
 const r = await VB.campaign(900);   // { waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts, errs }
 ```
 
-`state: 'won'` and an empty `errs` is a pass. `T.setup(1)` restarts in ARENA 02 (index 1) with a wave 4 carry, no
-waves and a god-mode player, which is the quickest way to stage a fight by hand.
+`state: 'won'` and an empty `errs` is a pass. The bot stands on the campaign's lift and coolant-valve markers when
+they open. `T.setup(1)` restarts in ARENA 02 (index 1) with a wave 4 carry, no waves and a god-mode player, which is
+the quickest way to stage a fight by hand.
 
 ## Things that bite
 
