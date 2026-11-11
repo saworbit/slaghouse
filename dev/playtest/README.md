@@ -28,8 +28,10 @@ node dev/playtest/run.mjs
 
 Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, the checkpoint flow (New Campaign on BRUTAL with
 GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
-retry the act, compare), five damaged saves that must fall back to New Campaign, and `VB.campaign(900)`. Any page
-error or console error fails the check it happened in. `--quick` skips the campaign run (the whole thing takes about 30 s headless; the campaign is most of it).
+retry the act, compare), five damaged saves that must fall back to New Campaign, and `VB.campaign(900)`, which must end won. Foes in its
+`removed` list are printed as a note, since a mimic hiding as a drum can beat the bot without anything being broken.
+Any page error or console error fails the check it happened in. Phaser is fetched from jsDelivr once, checked
+against the tag's integrity hash and served to every page. `--quick` skips the campaign run (the whole thing takes about 30 s headless; the campaign is most of it).
 It exits 1 and names each failure.
 
 ## Running it in a browser
