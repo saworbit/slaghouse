@@ -881,7 +881,6 @@ const MUTATORS = [
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
 const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship']);   // SWARM never doubles (or thins) a boss
-const CLOCK_KEYS = new Set(['punchUntil', 'offUntil', 'acidActiveUntil', 'acidPaintT', 'aiUntil', 'aimStart', 'arcActiveUntil', 'arcUntil', 'bashOk', 'bounceT', 'bubbleUntil', 'chopOk', 'clingOk', 'cookT', 'cryoActiveUntil', 'dashIUntil', 'dashReady', 'dashUntil', 'dmgFlushAt', 'dmgUntil', 'dropUntil', 'flameActiveUntil', 'flareLit', 'grabOk', 'hasteUntil', 'healCheckT', 'healFlushAt', 'hitP', 'hitStopUntil', 'hitT', 'hookReady', 'hustleT', 'invulnUntil', 'jamUntil', 'jumpBuffer', 'kickReady', 'kickT', 'kickUntil', 'killCamUntil', 'laserT', 'lastGround', 'lastHitT', 'lastKillT', 'lastSeenT', 'lastShotT', 'leapOk', 'leapT', 'lkT', 'lockT', 'lvlRefreshAt', 'markedUntil', 'mflashUntil', 'mineReady', 'mkLast', 'navAirT', 'nextFire', 'noiseT', 'pHitT', 'rallyT', 'rampageUntil', 'revLastT', 'revReloadUntil', 'ripperBiteUntil', 'ripperUntil', 'rollHitT', 'rumbleAt', 'runEnd', 'scorchT', 'searchUntil', 'sentryReadyAt', 'shakeUntil', 'shieldBlockT', 'shieldHit', 'shieldT', 'shieldUntil', 'sipShowAt', 'siphonUntil', 'slipUntil', 'slowmoUntil', 'sparkHitT', 'sparkT', 'sprayOk', 'strikeOk', 't0', 'tankHitT', 'tetherFlashT', 'tetherT', 'tgtSince', 'thrownUntil', 'until', 'wallLockUntil', 'wallT', 'wheelT']);   // fields holding a scene-clock timestamp (moved on when the pause menu closes)
 const dailyArena = () => Math.floor(seeded(dayKey())() * ARENAS.length);   // the DAILY's arena: the same for everyone today
 const MUT = () => (RUNMODE === 'daily' ? 'none' : MUTATORS[OPTS.mut].id);   // DAILY is the same run for everyone: no mutators
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
@@ -5019,6 +5018,11 @@ class GameScene extends Phaser.Scene {
 
   create(data) {
     const T = TUNE;
+    if (this.gt === undefined) {                       // gameplay clock: this scene's time only runs while the scene does, so the pause menu stops every timer
+      this.gt = this.game.loop.time; const step = this.sys.step;
+      this.sys.step = (time, delta) => step.call(this.sys, (this.gt += delta), delta);
+    }
+    this.time.now = this.gt;
     this.A = ARENAS[(data && data.arena) || 0]; this.carry = (data && data.carry) || null; this.descending = false; this.endless = RUNMODE === 'endless' || RUNMODE === 'daily'; this.daily = RUNMODE === 'daily'; this.bossrush = RUNMODE === 'bossrush';   // which arena; run state carried down the lift
     this.physics.world.timeScale = 1;
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
@@ -5121,13 +5125,13 @@ class GameScene extends Phaser.Scene {
     this.camX = this.player.x; this.camY = this.player.y;
     this.applyCamera(0);
     this.initPostFx();
-    this.events.on('resume', () => {                                   // back from the pause menu: no stale presses, no stray shot
-      const pd = this.pauseAt ? this.game.loop.time - this.pauseAt : 0; this.pauseAt = 0;
-      if (pd > 0) this.shiftClock(pd);                                   // nothing ran out while the game was paused
+    const onResume = () => {                                           // back from the pause menu: no stale presses, no stray shot
       this.paused = false; Music.paused = false; this.input.keyboard.resetKeys();
-      this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.game.loop.time + 220); this.kickQueued = false; this.mineQueued = false;
+      this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.time.now + 220); this.kickQueued = false; this.mineQueued = false;
       this.lanceOn = false; this.lanceCharge = 0; this.hornetHeld = false; this.locks = [];
-    });
+    };
+    this.events.on('resume', onResume);
+    this.events.once('shutdown', () => this.events.off('resume', onResume));
 
     // Visuals are synced after Arcade's post-update so camera, sprite and gun never disagree by a frame.
     this.events.on('postupdate', this.syncVisuals, this);
@@ -9152,16 +9156,9 @@ class GameScene extends Phaser.Scene {
   stopLoops() { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); }
   restartRun() { this.stopLoops(); Music.paused = false; this.scene.restart({ arena: this.daily ? dailyArena() : 0, carry: null }); }   // back to the first arena, nothing carried over
   quitToTitle() { this.stopLoops(); Music.paused = false; Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); }
-  shiftClock(d) {                                                       // the scene clock jumps ahead by the paused time: move every timestamp with it
-    const bump = o => { if (!o || typeof o !== 'object') return; for (const k of Object.keys(o)) if (CLOCK_KEYS.has(k) && typeof o[k] === 'number' && o[k] > 1000) o[k] += d; };
-    bump(this); bump(this.stats); bump(this.tb); bump(this.hook); bump(this.decoy); bump(this.camFocus); bump(this.sentry);
-    for (const e of this.enemies.getChildren()) bump(e);
-    for (const k of Object.keys(this)) { const v = this[k]; if (Array.isArray(v)) for (const it of v) if (it && typeof it === 'object' && !it.scene) bump(it); }
-    if (Array.isArray(this.wNext)) this.wNext = this.wNext.map(t => (t > 1000 ? t + d : t));
-  }
   pauseGame() {
     if (this.paused || this.state !== 'play') return;
-    this.paused = true; this.pauseAt = this.game.loop.time; this.stopLoops(); Music.paused = true;
+    this.paused = true; this.stopLoops(); Music.paused = true;
     if (this.pfx && POSTFX.on) { const m = this.pfx.cm.colorMatrix; m.reset(); m.saturate(-0.75); m.brightness(0.55, true); this.pfx.key = 'pause'; }
     this.input.setDefaultCursor('default');
     BUS.emit('pause', true);
