@@ -22,7 +22,9 @@ node dev/check.mjs
 ```
 
 This compiles the game script and both audio banks, checks that local scripts exist and that CDN scripts are pinned
-to an exact version. CI runs the same script on every push to `main` and on every pull request.
+to an exact version. It also notes any sampled sound name the game asks for that `sfx_bank.js` doesn't have (a
+note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
+request.
 
 There are no automated gameplay tests yet; play the modes you touched (campaign, OVERTIME, DAILY, BOSS RUSH) and
 watch the browser console for errors. [`dev/playtest/`](dev/playtest/README.md) has an in-page harness that can step
