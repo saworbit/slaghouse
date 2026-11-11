@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the playable zip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Compile the game script and audio banks
+        run: node dev/check.mjs
+      - name: Build the zip
+        run: |
+          mkdir -p dist/slaghouse
+          cp slaghouse.html sfx_bank.js music_bank.js LICENSE README.md CHANGELOG.md dist/slaghouse/
+          (cd dist && zip -r -X "slaghouse-${GITHUB_REF_NAME}.zip" slaghouse)
+      - name: Pull this version's notes from the changelog
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v h="## [$v]" 'index($0, h) == 1 { on = 1; next } on && (/^## \[/ || /^\[[^]]*\]: /) { exit } on' CHANGELOG.md > dist/notes.md
+          test -s dist/notes.md || echo "See CHANGELOG.md." > dist/notes.md
+      - name: Create the release, or add the zip to the one already there
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="dist/slaghouse-${GITHUB_REF_NAME}.zip"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$zip" --title "SLAGHOUSE $GITHUB_REF_NAME" --notes-file dist/notes.md --verify-tag
+          fi

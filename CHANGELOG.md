@@ -8,6 +8,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ### Added
 - The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
   the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
+- `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
+  `VB.campaign()` for a timed full campaign run that reports kills, errors and step cost), with a README. (#4)
+- `dev/check.mjs` lists any sampled sound name the game asks for that `sfx_bank.js` doesn't have. (#4)
+- A `Release` workflow: pushing a `vX.Y.Z` tag runs the checks, builds the playable zip and publishes the release
+  with that version's changelog notes. CONTRIBUTING.md's release steps shrink to match. (#20)
 
 ### Changed
 - Best records (campaign, BOSS RUSH, OVERTIME) store the mutator that was on, and the title screen shows it next to
@@ -22,6 +27,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- `.claude/launch.json` keeps only the preview config that works (`static-test` on 8781); the two that came up dead
+  or served a stale copy are gone. (#3)
 - OVERTIME and DAILY play the stage loops again after wave 6; the boss theme now comes back only on boss waves
   (6, 12, 18 ...). A BOSS RUSH lift ride keeps the boss theme instead of a stage loop. (#25)
 - **N** now swaps the ambient hum along with the other sounds, with a crossfade, instead of leaving the old drone
