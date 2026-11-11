@@ -48,6 +48,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - **New Campaign** makes its run the owner of the campaign save. A run left open in another tab keeps playing, but
   its lift rides and its win no longer replace the newer run's checkpoint. `dev/playtest/twotab.js` checks both
   fixes. (#38)
+- Phaser loads with a Subresource Integrity hash, so a changed or tampered `phaser.min.js` doesn't run and the
+  page shows its "could not be loaded" message. `dev/check.mjs` fails if a CDN script loses its hash. (#55)
+- `dev/build/recv.py` only writes plain `.png` / `.jpg` names, only for pages served from this machine, and only up
+  to 16 MB, and it no longer sends `Access-Control-Allow-Origin: *`. Before, any open web page could overwrite the
+  scripts beside it. It now listens on 8767 by default, the port `T.snap` posts to. (#54)
 - Dead foes leave the enemy group 3 s after they die, so the per-frame loops stop walking every corpse sprite until
   the arena changes. In a 10-minute OVERTIME run under SWARM the group peaked at 28 sprites, down from 104. (#14)
 - `dev/sfxgen/build.py` stops with a clear message, before writing anything, when processed takes are missing (as
