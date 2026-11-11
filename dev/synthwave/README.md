@@ -7,12 +7,13 @@ flips between the two.
 | track | game use | key / tempo / length |
 | --- | --- | --- |
 | `title` SLAGHOUSE | title screen, and under the results screen after a jingle | F minor, 96 BPM, 16 bars (40 s) |
-| `stage1` MELT FLOOR | campaign waves 1-2; OVERTIME / DAILY waves 1-2 | A minor, 118 BPM, 32 bars (65 s) |
-| `stage2` SLAG RAIN | campaign waves 3-5; OVERTIME / DAILY waves 3-5 | D minor, 126 BPM, 32 bars (61 s) |
-| `boss` THE SMELTER | campaign wave 6 (the Smelter); every BOSS RUSH fight; OVERTIME / DAILY wave 6 onward | E minor / phrygian, 140 BPM, 32 bars (55 s) |
+| `stage1` MELT FLOOR | campaign waves 1-2; OVERTIME / DAILY waves 1-2 of every six | A minor, 118 BPM, 32 bars (65 s) |
+| `stage2` SLAG RAIN | campaign waves 3-5; OVERTIME / DAILY waves 3-5 of every six | D minor, 126 BPM, 32 bars (61 s) |
+| `boss` THE SMELTER | campaign wave 6 (the Smelter); every BOSS RUSH fight; OVERTIME / DAILY waves 6, 12, 18 ... | E minor / phrygian, 140 BPM, 32 bars (55 s) |
 | `win` / `lose` | ARENA CLEARED fanfare / YOU GOT GIBBED tape-stop | 6.5 s / 5.3 s |
 
-Waves pick their track from `WAVE_MUSIC` in `slaghouse.html` (the last entry covers every later wave).
+Waves pick their track from `WAVE_MUSIC` in `slaghouse.html` (`waveTrack`): the campaign's last entry covers any later
+wave, and OVERTIME and DAILY go round all six.
 Stage loops are muffled (low-pass, quieter) until an enemy notices you and open up as the fight heats up
 (`Music.shade`); title, boss and jingles always play full, and the pause menu muffles everything. `Music.LEVEL` sets
 the base music level against the SFX, and the pause menu's music volume (`OPTS.music`) scales it.

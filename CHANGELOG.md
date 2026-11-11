@@ -19,6 +19,18 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,
   the pause menu holds every timer, hazards are named as your killer, and the last few foes come looking for you.
 - The README no longer shows a release badge; shields.io can't read the private repository.
+- Soundtrack tracks decode when they're about to be needed (the title set at boot, then this wave's track, the
+  next one and the jingles), and tracks a run no longer needs are let go. Decoded music drops from about 85 MB to
+  under 50 MB. (#22)
+
+### Fixed
+- OVERTIME and DAILY play the stage loops again after wave 6; the boss theme now comes back only on boss waves
+  (6, 12, 18 ...). A BOSS RUSH lift ride keeps the boss theme instead of a stage loop. (#25)
+- **N** now swaps the ambient hum along with the other sounds, with a crossfade, instead of leaving the old drone
+  running. (#10)
+- Sample bank decode failures are no longer silent: the console gets one warning with the count, **N** says
+  `SFX BANK UNAVAILABLE` when nothing decoded, and a music track that fails to decode hands over to the procedural
+  loop (and **B** says so) instead of playing nothing. (#11)
 
 ## [0.1.0] - 2026-11-11
 

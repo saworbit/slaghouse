@@ -1337,8 +1337,8 @@ const numCss = n => cssCache[n] || (cssCache[n] = '#' + n.toString(16).padStart(
 //  procedural synth version as the fallback, and N flips between the two in game.
 // =============================================================================
 const Sfx = {
-  ctx: null, out: null, crunch: null, noiseBuf: null, muted: false, last: {}, hum: null, humSynth: null,
-  bank: {}, bankGain: {}, bankJit: {}, bankLast: {}, bankLoading: false, useBank: true,
+  ctx: null, out: null, crunch: null, noiseBuf: null, muted: false, last: {}, hum: null,
+  bank: {}, bankGain: {}, bankJit: {}, bankLast: {}, bankLoading: false, bankDone: false, useBank: true,
   init() {
     try {
       if (!this.ctx) {
@@ -1368,20 +1368,28 @@ const Sfx = {
     if (gap && this.last[name] !== undefined && t - this.last[name] < gap) return false;
     this.last[name] = t; return true;
   },
+  decode(b64) {                                    // base64 Ogg -> AudioBuffer promise; bad base64 rejects too (older Safari only has the callback form)
+    return new Promise((res, rej) => {
+      const bin = atob(b64), u = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      const p = this.ctx.decodeAudioData(u.buffer, res, rej); if (p && p.then) p.then(res, rej);
+    });
+  },
   loadBank() {                                     // decode every take in sfx_bank.js (async; synth covers the gap)
     const B = window.SLAG_SFX; if (!B || this.bankLoading) return;
     this.bankLoading = true;
-    const jobs = [];
+    const jobs = []; let bad = 0;
     for (const name in B) {
       const s = B[name]; this.bankGain[name] = s.g; this.bankJit[name] = s.j;
-      for (const b64 of s.d) {
-        const bin = atob(b64), u = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-        jobs.push(this.ctx.decodeAudioData(u.buffer).then(buf => { (this.bank[name] || (this.bank[name] = [])).push(buf); }, () => {}));
-      }
+      for (const b64 of s.d) jobs.push(this.decode(b64).then(buf => { (this.bank[name] || (this.bank[name] = [])).push(buf); }, () => { bad++; }));
     }
-    Promise.all(jobs).then(() => { if (this.humSynth && this.bank.humLoop) this.swapHum(); });
+    Promise.all(jobs).then(() => {
+      this.bankDone = true;
+      if (bad) console.warn(`SLAGHOUSE: ${bad} of ${jobs.length} SFX takes failed to decode; ${this.bankOk() ? 'those sounds play' : 'every sound plays'} the synth version`);
+      this.swapHum();
+    });
   },
+  bankOk() { return !this.bankDone || Object.keys(this.bank).length > 0; },   // false once decoding is over and nothing came through
   smp(name, v = 1, o) {                            // one-shot from the bank; false = not available, caller synthesizes
     const set = this.useBank && this.bank[name];
     if (!set || !set.length) return false;
@@ -1920,21 +1928,24 @@ const Sfx = {
   ui() { if (!this.ok('ui', 0.05)) return; this.tone({ type: 'square', f0: 330, f1: 990, dur: 0.14, vol: 0.08 }); this.noise({ filter: 'highpass', f0: 3000, dur: 0.06, vol: 0.08 }); },
   win() { if (!this.ok('win')) return; [392, 523, 659, 784, 1046].forEach((f, i) => this.tone({ type: 'square', f0: f, dur: 0.18, vol: 0.07, delay: 0.15 + i * 0.1 })); },
   lose() { if (!this.ok('lose')) return; [330, 262, 196, 131].forEach((f, i) => this.tone({ type: 'sawtooth', f0: f, f1: f * 0.94, dur: 0.26, vol: 0.09, delay: 0.35 + i * 0.18 })); },
-  startHum() {                                     // low industrial drone under everything
+  startHum(fade) {                                 // low industrial drone under everything; this.hum = { g, nodes, bank }
     if (!this.ctx || this.hum) return;
-    const L = this.loopNode('humLoop', 1.2); if (L) { this.hum = L.g; return; }
-    const c = this.ctx, g = c.createGain(); g.gain.value = 0.035;
+    const L = this.loopNode('humLoop', 1.2); if (L) { this.hum = Object.assign(L, { bank: true }); return; }
+    const c = this.ctx, g = c.createGain(); g.gain.value = fade ? 0.0001 : 0.035;
+    if (fade) g.gain.setTargetAtTime(0.035, c.currentTime, fade);
     const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 170; f.Q.value = 3;
     const o1 = c.createOscillator(), o2 = c.createOscillator(), lfo = c.createOscillator(), lg = c.createGain();
     o1.type = o2.type = 'sawtooth'; o1.frequency.value = 46; o2.frequency.value = 46.7;
     lfo.frequency.value = 0.13; lg.gain.value = 60; lfo.connect(lg); lg.connect(f.frequency);
     o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.out);
-    o1.start(); o2.start(); lfo.start(); this.hum = g; this.humSynth = { g, nodes: [o1, o2, lfo] };
+    o1.start(); o2.start(); lfo.start(); this.hum = { g, nodes: [o1, o2, lfo], bank: false };
   },
-  swapHum() {                                      // the bank finished decoding after the synth drone started: crossfade
-    const h = this.humSynth, t = this.ctx.currentTime; this.humSynth = null; this.hum = null;
-    h.g.gain.setTargetAtTime(0.0001, t, 0.6); h.nodes.forEach(n => n.stop(t + 4));
-    this.startHum();
+  swapHum() {                                      // crossfade the drone to the version now selected (bank decoded late, or N flipped it)
+    const h = this.hum; if (!h) return;
+    if (h.bank === !!(this.useBank && this.bank.humLoop && this.bank.humLoop.length)) return;
+    const t = this.ctx.currentTime; this.hum = null;
+    h.g.gain.cancelScheduledValues(t); h.g.gain.setTargetAtTime(0.0001, t, 0.6); h.nodes.forEach(n => n.stop(t + 4));
+    this.startHum(1.2);
   },
   toggleMute() {
     this.muted = !this.muted;
@@ -1952,7 +1963,8 @@ const Sfx = {
 const WAVE_MUSIC = ['stage1', 'stage1', 'stage2', 'stage2', 'stage2', 'boss'];
 const Music = {
   intensity: 0, step: 0, nextT: 0, timer: null, out: null,
-  LEVEL: 0.2, bank: {}, bankLoading: false, useBank: true, bus: null, lp: null, cur: null, want: null, shownI: -1,
+  LEVEL: 0.2, bank: {}, pend: {}, failed: {}, useBank: true, bus: null, lp: null, cur: null, want: null, shownI: -1,
+  TITLE_SET: ['title', 'stage1', 'boss'],         // the title theme plus the first track of every mode, so any start is gapless
   start() {
     if (!Sfx.ctx || this.timer) return;
     const c = Sfx.ctx;
@@ -1962,23 +1974,36 @@ const Music = {
     this.lp.connect(this.bus); this.bus.connect(Sfx.master);
     this.nextT = c.currentTime + 0.1;
     this.timer = setInterval(() => this.pump(), 25);
-    this.loadBank();
+    this.keep(this.TITLE_SET);
     if (this.want) this.track(this.want, true);
   },
-  loadBank() {                                     // decode every track (async); a track asked for early starts once ready
-    const B = window.SLAG_MUSIC; if (!B || this.bankLoading) return;
-    this.bankLoading = true;
-    for (const name in B) {
-      const s = B[name], bin = atob(s.d), u = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-      Sfx.ctx.decodeAudioData(u.buffer).then(buf => {
-        const ls = s.ls || 0;                       // loops carry 100 ms of their own wrap either side: play [ls, ls + len]
-        this.bank[name] = { buf, loop: s.loop, ls, len: Math.min(s.len, buf.duration - ls) };
-        if (this.want === name && !this.cur) this.track(name, true);
-      }, () => {});
-    }
+  need(name) {                                     // decode one track (async) unless it's ready, on its way or broken; a wanted track starts once ready
+    const s = window.SLAG_MUSIC && window.SLAG_MUSIC[name];
+    if (!s || !Sfx.ctx || this.bank[name] || this.pend[name] || this.failed[name]) return;
+    const tok = this.pend[name] = {};
+    Sfx.decode(s.d).then(buf => {
+      if (this.pend[name] !== tok) return;          // dropped by keep() while it decoded
+      delete this.pend[name];
+      const ls = s.ls || 0;                       // loops carry 100 ms of their own wrap either side: play [ls, ls + len]
+      this.bank[name] = { buf, loop: s.loop, ls, len: Math.min(s.len, buf.duration - ls) };
+      if (this.want === name && !this.cur) this.track(name, true);
+    }, () => {
+      if (this.pend[name] !== tok) return;
+      delete this.pend[name]; this.failed[name] = true;
+      console.warn(`SLAGHOUSE: music track "${name}" failed to decode; the procedural loop plays in its place`);
+      if (this.want === name) this.track(name, true);
+    });
   },
-  sampled() { return this.useBank && !!window.SLAG_MUSIC; },
+  keep(names) {                                    // decode these ahead and drop every other decoded track (but never the one playing or wanted)
+    for (const n of names) this.need(n);
+    const hold = new Set(names); if (this.cur) hold.add(this.cur.name); if (this.want) hold.add(this.want);
+    for (const n of Object.keys(this.bank)) if (!hold.has(n)) delete this.bank[n];
+    for (const n of Object.keys(this.pend)) if (!hold.has(n)) delete this.pend[n];
+  },
+  sampled() {                                      // bank on, and the wanted track decoded or decoding (one that failed falls back to the procedural loop)
+    const B = window.SLAG_MUSIC;
+    return this.useBank && !!B && (!this.want || (!!B[this.want] && !this.failed[this.want]));
+  },
   voice(name) {                                    // start a bank track now, behind its own gain
     const c = Sfx.ctx, t = this.bank[name], src = c.createBufferSource(), g = c.createGain();
     src.buffer = t.buf;
@@ -1995,15 +2020,17 @@ const Music = {
   },
   track(name, restart) {                           // switch the looping track; the same one keeps playing unless restart
     this.want = name;
-    if (!this.bus || !this.sampled()) return;
+    if (!this.bus) return;
+    if (!this.sampled()) { this.fadeOut(0.2); return; }   // B is on synth, or this track failed: the procedural loop takes over
+    this.need(name);
     if (!restart && this.cur && this.cur.name === name) return;
     this.fadeOut(restart ? 0.05 : 0.7);
     if (this.bank[name]) this.cur = this.voice(name);
   },
-  jingle(name, then) {                             // one-shot, then loop `then`; false = not in the bank (caller synthesizes)
-    if (!this.bus || !this.sampled() || !this.bank[name]) return false;
+  jingle(name, then) {                             // one-shot, then loop `then`; false = not decoded (caller synthesizes)
+    if (!this.bus || !this.useBank || !this.bank[name]) return false;
     this.fadeOut(0.12);
-    this.want = then || null;
+    this.want = then || null; if (then) this.need(then);   // `then` decodes while the jingle plays
     const v = this.cur = this.voice(name);
     v.src.onended = () => { if (this.cur === v) { this.cur = null; if (this.want) this.track(this.want); } };
     return true;
@@ -2027,7 +2054,7 @@ const Music = {
   pump() {
     const c = Sfx.ctx, spb = 60 / 132 / 4;                        // 16th notes at 132 BPM
     if (!c) return;
-    if (this.sampled()) { this.shade(); return; }
+    if (this.cur || this.sampled()) { this.shade(); return; }
     if (this.nextT < c.currentTime - 0.5) this.nextT = c.currentTime + 0.05;   // tab slept: skip the backlog
     while (this.nextT < c.currentTime + 0.12) { this.play(this.step, this.nextT); this.nextT += spb; this.step++; }
   },
@@ -4805,7 +4832,7 @@ class TitleScene extends Phaser.Scene {
     this.started = false;
     this.input.setDefaultCursor('default');
     // title theme: plays at once if the browser already allows audio, otherwise from the first key / click
-    Sfx.init(); Music.start(); Music.track('title');
+    Sfx.init(); Music.start(); Music.track('title'); Music.keep(Music.TITLE_SET);
     this.input.keyboard.on('keydown', () => Sfx.init());
     const far = this.add.image(0, -40, 'bgFar').setOrigin(0).setScale(2);
     const mid = this.add.image(0, -60, 'bgMid').setOrigin(0).setScale(2);
@@ -5890,13 +5917,13 @@ class GameScene extends Phaser.Scene {
         this.stats.t0 = now;
         const act = CAMPAIGN_ACTS[this.A.id - 1];
         BUS.emit('wavecard', 'ACT 0' + this.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
-        Music.track(WAVE_MUSIC[act.first], !c);
+        Music.track(this.waveTrack(act.first), !c);
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(act.first); });
       } else if (c) {                                                        // arrived down the lift: arena card, then the next wave
-        BUS.emit('wavecard', this.A.name, this.A.sub); Music.track(WAVE_MUSIC[Math.min(c.wave, WAVE_MUSIC.length - 1)]);
+        BUS.emit('wavecard', this.A.name, this.A.sub); Music.track(this.waveTrack(c.wave));
         this.time.delayedCall(2000, () => { if (this.state === 'play') this.startWave(c.wave); });
       } else if (this.bossrush) {                                      // BOSS RUSH: straight into the first boss
-        BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(WAVE_MUSIC[WAVE_MUSIC.length - 1], true);
+        BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(this.waveTrack(0), true);
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
       } else if (this.endless) {                                       // OVERTIME: no placed wave, it starts straight in
         if (this.daily) {                                                // DAILY: two seeded starting perks
@@ -5904,13 +5931,14 @@ class GameScene extends Phaser.Scene {
           for (let k = 0; k < 2; k++) this.perks[pool.splice(Math.floor(r() * pool.length), 1)[0].id] = true;
           BUS.emit('perklist', Object.keys(this.perks));
         }
-        BUS.emit('wavecard', this.daily ? 'DAILY ' + dayKey() : 'OVERTIME', this.daily ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(WAVE_MUSIC[1], true);
+        BUS.emit('wavecard', this.daily ? 'DAILY ' + dayKey() : 'OVERTIME', this.daily ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(this.waveTrack(0), true);
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
       }
+      this.musicAhead(c?.wave ?? 0);
     }
     if (this.jd.M) Sfx.toggleMute();
-    if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', Music.toggle() ? 'SAMPLED MUSIC' : 'SYNTH MUSIC');
-    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); BUS.emit('callout', Sfx.useBank ? 'SAMPLED SFX' : 'SYNTH SFX'); }
+    if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
+    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
     if ((this.jd.R && (this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
@@ -14790,6 +14818,11 @@ class GameScene extends Phaser.Scene {
     }
   }
   activeHostiles() { return this.enemiesLeft - this.campaignReserve; }
+  waveTrack(i) {                                                        // campaign: one track per wave; OVERTIME and DAILY go round the six-wave cycle
+    if (this.bossrush) return WAVE_MUSIC[WAVE_MUSIC.length - 1];
+    return WAVE_MUSIC[this.endless ? i % 6 : Math.min(i, WAVE_MUSIC.length - 1)];   // endless boss waves are i % 6 === 5
+  }
+  musicAhead(i) { Music.keep([this.waveTrack(i), this.waveTrack(i + 1), 'win', 'lose']); }   // decode this wave's track, the next one and the jingles; drop the rest
   startWave(i) {
     this.wave = i;
     const op = this.campaign ? CAMPAIGN[i] : null;
@@ -14815,8 +14848,8 @@ class GameScene extends Phaser.Scene {
     this.applyMod(mod || (this.mutator === 'lowg' ? 'lowg' : this.mutator === 'dark' ? 'dark' : null));
     for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }
     this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery(); saveLife();
-    Sfx.warp(); Music.track(WAVE_MUSIC[this.bossrush ? WAVE_MUSIC.length - 1 : Math.min(i, WAVE_MUSIC.length - 1)]);
-    for (const k of this.pickups) if (k.taken && this.mutator !== 'vamp') {
+    Sfx.warp(); Music.track(this.waveTrack(i)); this.musicAhead(i);
+    for (const k of this.pickups) if (k.taken && this.mutator !== 'vamp') {   // restock medkits between waves
       k.taken = false; k.img.setVisible(true); k.glow.setVisible(true);
       this.fx.emit(k.x, k.y, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x7dff8a], add: true, g: -40 });
     }
@@ -14927,7 +14960,7 @@ class GameScene extends Phaser.Scene {
     p.disableBody(true, true);
     this.pv.setVisible(false); this.gun.setVisible(false); this.visor.setVisible(false); this.mflash.setVisible(false);
     this.lanceGlow.setVisible(false); this.lanceOn = false; this.locks = []; this.hornetHeld = false; this.reeledBy = null; this.stopLoops();
-    Sfx.gib(1.6); if (!Music.jingle('lose', 'title')) Sfx.lose(); Sfx.arcSet(false); Sfx.flameSet(false); BUS.emit('splat', 9);
+    Sfx.gib(1.6); if (!Music.jingle('lose', 'title')) Sfx.lose(); Music.need(this.waveTrack(0)); Sfx.arcSet(false); Sfx.flameSet(false); BUS.emit('splat', 9);
     this.shake(320, 0.014); this.slowmoUntil = this.time.now + 900;
     this.time.delayedCall(1300, () => this.showOver(false));
   }
@@ -14944,6 +14977,7 @@ class GameScene extends Phaser.Scene {
     if (this.bossrush) this.award('rusher');
     BUS.emit('callout', this.campaign ? 'FOUNDRY DOWN' : 'ARENA CLEARED');
     if (!Music.jingle('win', 'title')) Sfx.win();
+    Music.need(this.waveTrack(0));                                       // ready for R on the results screen
     this.time.delayedCall(1500, () => this.showOver(true));
   }
   showOver(won) {
