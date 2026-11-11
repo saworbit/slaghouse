@@ -7,7 +7,7 @@ Only the latest commit on `main` (and the latest release) gets fixes.
 ## Scope
 
 SLAGHOUSE runs entirely in the browser. It has no server or accounts, and keeps only settings, records and medals
-in `localStorage`. It loads Phaser from the jsDelivr CDN with a pinned version. Relevant reports include anything
+in `localStorage`. It loads Phaser from the jsDelivr CDN with a pinned version and a Subresource Integrity hash. Relevant reports include anything
 that lets a crafted page, save value or asset run unexpected code, and problems with how third-party code is loaded.
 
 ## Reporting a vulnerability

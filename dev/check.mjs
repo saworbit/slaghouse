@@ -1,7 +1,7 @@
 // Static checks for the single-file game, run locally (`node dev/check.mjs`) and in CI.
 // - every inline <script> in slaghouse.html compiles
 // - the optional audio banks compile
-// - every local <script src> exists, and CDN scripts are pinned to an exact version
+// - every local <script src> exists, and CDN scripts are pinned to an exact version with an integrity hash
 // - notes any sampled sound name the game asks for that sfx_bank.js doesn't have (the synth plays instead)
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -27,11 +27,13 @@ inline.forEach((code, i) => {
   if (compile(code, `slaghouse.html <script #${i + 1}>`)) ok(`slaghouse.html inline script #${i + 1} compiles (${(code.length / 1024).toFixed(0)} KB)`);
 });
 
-for (const m of html.matchAll(/<script[^>]*\bsrc="([^"]+)"/g)) {
+for (const m of html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*>/g)) {
   const src = m[1];
   if (/^https?:\/\//.test(src)) {
     if (/@\d+\.\d+\.\d+\//.test(src)) ok(`CDN script pinned: ${src}`);
     else fail(`CDN script is not pinned to an exact version: ${src}`);
+    if (/\bintegrity="sha(256|384|512)-[A-Za-z0-9+/]+={0,2}"/.test(m[0]) && /\bcrossorigin="anonymous"/.test(m[0])) ok(`CDN script has an integrity hash: ${src}`);
+    else fail(`CDN script needs integrity="sha384-..." and crossorigin="anonymous": ${src}`);
   } else if (existsSync(join(root, src))) {
     ok(`local script present: ${src}`);
   } else {

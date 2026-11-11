@@ -611,7 +611,7 @@
   canvas { image-rendering: pixelated; display: block; }
   .nophaser { color: #ddd; font: 16px monospace; padding: 2em; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" integrity="sha384-kyUQ5+cxc6+X89xEG6DhcXLcDU9T3Z+o/45VdT6pgAwtG6gxtAzYTEn0Wwj/BKZd" crossorigin="anonymous"></script>  <!-- SRI: a changed file won't run; re-hash on a version bump -->
 <script src="sfx_bank.js"></script>  <!-- optional AudioGen sample bank (dev/sfxgen); synth fallback without it -->
 <script src="music_bank.js"></script>  <!-- optional synthwave soundtrack (dev/synthwave); procedural loop without it -->
 </head>
@@ -620,7 +620,7 @@
 <script>
 'use strict';
 if (!window.Phaser) {
-  document.getElementById('game').innerHTML = '<p class="nophaser">Phaser could not be loaded from the CDN. This prototype needs an internet connection to fetch phaser.min.js.</p>';
+  document.getElementById('game').innerHTML = '<p class="nophaser">Phaser could not be loaded from the CDN. This prototype needs an internet connection to fetch phaser.min.js, and the file must match its integrity hash.</p>';
   throw new Error('Phaser missing');
 }
 

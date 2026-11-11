@@ -41,7 +41,8 @@ reload, retry and the valve meter's pause behavior.
 - Keys need `_justDown` as well as `isDown` for `JustDown` checks (jumps, weapon keys, N, B) to fire.
 - A fake pad: `navigator.getGamepads = () => [{ connected: true, mapping: 'standard', buttons: [...], axes: [0, 0, 0, 0] }]`.
 - `game.renderer.snapshot()` only resolves after a rendered frame, so step at least one frame before awaiting it.
-  `T.snap(name)` posts the image to `dev/build/recv.py` on port 8767.
+  `T.snap(name)` posts the image to `dev/build/recv.py` on port 8767 (start it with `python dev/build/recv.py`). The name
+  must be a plain `.png` or `.jpg` file name.
 - Long runs block the page while they step. Start them with `setTimeout` and check a global from short calls rather
   than awaiting them in one call. `CH.arenaStorm` and `VB.campaign` turn rendering off while they run.
 - Placing enemies by tile needs care: several floor tiles hold crates (`x`), and an enemy spawned inside one never moves.
