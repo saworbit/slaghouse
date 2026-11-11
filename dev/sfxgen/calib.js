@@ -91,7 +91,8 @@ window.slagCalibList = S => {
 };
 
 // Which version of a procedural sound a measurement belongs to: an FNV-1a hash of the call itself plus the source of
-// every Sfx method it reaches through this.<method>(...), leaving out the bank and plumbing helpers.
+// every Sfx method it reaches through this.<method>(...), leaving out the bank and plumbing helpers. A method that
+// uses this.crunch or this.noiseBuf also brings in buildShared, which makes them.
 window.slagFingerprint = (S, call) => {
   const skip = new Set(['ok', 'smp', 'loopNode', 'init', 'loadBank', 'decode', 'bankOk', 'toggleMute', 'applyVolume', 'swapHum']);
   const seen = new Set(), todo = [...String(call).matchAll(/\bS\.(\w+)\(/g)].map(m => m[1]);
@@ -100,6 +101,7 @@ window.slagFingerprint = (S, call) => {
     if (seen.has(m) || skip.has(m) || typeof S[m] !== 'function') continue;
     seen.add(m);
     for (const c of String(S[m]).matchAll(/\bthis\.(\w+)\(/g)) todo.push(c[1]);
+    if (/\bthis\.(crunch|noiseBuf)\b/.test(String(S[m]))) todo.push('buildShared');
   }
   let h = 0x811c9dc5;
   for (const part of [String(call), ...[...seen].sort().map(m => m + ':' + String(S[m]))]) {
@@ -132,7 +134,13 @@ window.slagCalib = async function (only) {
     for (let s = 0; s + w <= y.length; s += h) best = Math.max(best, c[s + w] - c[s]);
     return Math.sqrt(best / w);
   };
-  const S = Sfx, L = window.slagCalibList(S);
+  // seeded from the sound's name, so the noise buffer and every rand() jitter repeat and a sound's numbers only move
+  // when its code does
+  const seeded = name => {
+    let h = 0x811c9dc5; for (const ch of name) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193);
+    return () => { h = (h + 0x6D2B79F5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  const S = Sfx, L = window.slagCalibList(S), random = Math.random;
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };
   const res = {};
@@ -140,13 +148,9 @@ window.slagCalib = async function (only) {
     for (const [name, [fn, secs, loop, skip]] of Object.entries(L)) {
       if (only && !only.includes(name)) continue;
       const oc = new OfflineAudioContext(1, Math.round(SR * secs), SR);
+      Math.random = seeded(name);
       S.ctx = oc; S.out = oc.createGain(); S.out.connect(oc.destination);
-      S.crunch = oc.createWaveShaper();
-      const n = 1024, curve = new Float32Array(n);
-      for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; curve[i] = Math.tanh(x * 3.2); }
-      S.crunch.curve = curve; S.crunch.connect(S.out);
-      const len = (SR * 1.5) | 0; S.noiseBuf = oc.createBuffer(1, len, SR);
-      const d = S.noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      S.buildShared(oc);                                                 // the game's own noise and crunch, not a copy of them
       S.last = {}; S.muted = false; S.useBank = false; S.hum = S.flameNode = S.arcNode = S.cryoNode = S.lanceNode = S.ripNode = S.swarmNode = S.tractorNode = S.acidNode = null;
       fn();
       const buf = await oc.startRendering();
@@ -154,6 +158,6 @@ window.slagCalib = async function (only) {
       let pk = 0; for (const v of x) pk = Math.max(pk, Math.abs(v));
       res[name] = [+loud(x, loop).toFixed(6), +pk.toFixed(4), window.slagFingerprint(S, fn)];
     }
-  } finally { Object.assign(S, keep); }
+  } finally { Object.assign(S, keep); Math.random = random; }
   return res;
 };

@@ -1364,6 +1364,16 @@ const numCss = n => cssCache[n] || (cssCache[n] = '#' + n.toString(16).padStart(
 const Sfx = {
   ctx: null, out: null, crunch: null, noiseBuf: null, muted: false, last: {}, hum: null,
   bank: {}, bankGain: {}, bankJit: {}, bankLast: {}, bankLoading: false, bankDone: false, useBank: true,
+  buildShared(c) {                                 // the noise buffer and soft-clip every booming sound uses; dev/sfxgen/calib.js builds its renders with this too
+    const len = (c.sampleRate * 1.5) | 0;
+    this.noiseBuf = c.createBuffer(1, len, c.sampleRate);
+    const d = this.noiseBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.crunch = c.createWaveShaper();                       // soft-clip for gritty booms
+    const n = 1024, curve = new Float32Array(n);
+    for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; curve[i] = Math.tanh(x * 3.2); }
+    this.crunch.curve = curve; this.crunch.connect(this.out);
+  },
   init() {
     try {
       if (!this.ctx) {
@@ -1374,14 +1384,7 @@ const Sfx = {
         comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.2;
         this.master = c.createGain(); this.master.gain.value = 0.55; this.master.connect(comp); comp.connect(c.destination);
         this.out = c.createGain(); this.out.gain.value = OPTS.sfx; this.out.connect(this.master);   // every effect goes through here (SFX volume)
-        const len = (c.sampleRate * 1.5) | 0;
-        this.noiseBuf = c.createBuffer(1, len, c.sampleRate);
-        const d = this.noiseBuf.getChannelData(0);
-        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-        this.crunch = c.createWaveShaper();                       // soft-clip for gritty booms
-        const n = 1024, curve = new Float32Array(n);
-        for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; curve[i] = Math.tanh(x * 3.2); }
-        this.crunch.curve = curve; this.crunch.connect(this.out);
+        this.buildShared(c);
         this.loadBank();
       }
       if (this.ctx.state === 'suspended') this.ctx.resume();

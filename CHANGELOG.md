@@ -53,6 +53,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The play-test bot's teleport picks a tile that can see the foe, skips the spot that just failed, and falls back to
   the foe's own row, so `VB.campaign` no longer loops forever under a foe it can't see in ARENA 02. As a backstop,
   `VB.campaign` removes a foe hidden for 30 s with five or fewer left and lists it in `removed`. (#46)
+- `dev/sfxgen/calib.js` renders through the game's own noise buffer and crunch curve (`Sfx.buildShared`, which
+  `Sfx.init` calls) instead of a copy, and sounds that use them carry `buildShared` in their fingerprint. A change to
+  the curve or noise now marks those entries stale. The 170 affected fingerprints were moved without re-measuring.
+  (#48)
+- `slagCalib()` seeds its random noise and jitter from each sound's name, so measuring the same code twice gives
+  the same numbers. (#37)
 - Lifetime kills, runs, deaths, play time, weapon mastery and codex sightings read the stored value again before
   saving and add this tab's progress to it, so a second tab no longer erases the first one's. (#51)
 - **New Campaign** makes its run the owner of the campaign save. A run left open in another tab keeps playing, but
