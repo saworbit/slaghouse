@@ -116,7 +116,7 @@ run stats.
 
 Choose **Campaign → Continue** to return to the saved act after quitting or reloading. Keep the same browser
 profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the
-campaign clears it.
+campaign clears it. A campaign left running in another tab keeps playing but stops saving once you start a new one.
 
 Press **R** during play or after defeat to retry the saved act. In Act I or after victory, **R** starts a fresh
 run. The pause menu shows **Retry Act** when a checkpoint is available. Speedrunner requires a clear under
