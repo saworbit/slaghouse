@@ -74,6 +74,14 @@ The `Release` workflow (`.github/workflows/release.yml`) takes it from there: it
 publishes the release with that version's changelog section as its notes. If the release already exists, it attaches
 the zip to it. Edit the notes on GitHub afterwards to add highlights or how to play.
 
+To try the workflow without a tag, run it by hand (Actions, Release, Run workflow, or the command below). The dry run
+builds the same zip and notes from the branch you pick, takes the notes from the changelog section you name
+(`Unreleased` by default), and uploads them as the `slaghouse-dry-run` artifact. It doesn't create or change a release.
+
+```bash
+gh workflow run release.yml --ref main -f version=Unreleased
+```
+
 ## Audio
 
 The sound banks are optional; every sampled sound has a synth fallback in the game. To regenerate them, follow

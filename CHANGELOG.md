@@ -23,6 +23,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `dev/sfxgen/calibcheck.mjs`: `calib.json` entries carry a fingerprint of the synth code they measured, and
   `build.py` lists any whose procedural sound has changed since. Existing entries got the fingerprint of the
   version they were measured against, taken from git history. (#9)
+- The `Release` workflow has a dry run: run it by hand and it builds the zip and notes from the chosen branch and
+  uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 
 ### Changed
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
