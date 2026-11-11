@@ -28,6 +28,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The ranged keepers (discus, chiller, bastion, howitzer) hop high enough to climb back up the 3-tile steps they
   are allowed to step down, so they hold high ground over a long wave. The howitzer only leaves its perch to hunt
   you once you're out of its lob range. (#19)
+- The pause menu now stops the game's clock itself, so every timer holds while paused, including the ones the old
+  timestamp shifting missed (per-target cooldowns, kill-time lists, local timers). (#18)
+- The Game scene no longer adds another `resume` listener on every restart. (#17)
 
 ## [0.1.0] - 2026-11-11
 
