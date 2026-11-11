@@ -7,11 +7,11 @@
 
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
-A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 61 weapons (each with mastery stars to earn, and gold plating at three), 94 enemy types
-(with an in-game codex), power-up supply drops, three
-arenas (five in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode, a seeded DAILY run and a BOSS RUSH), a perk pick after every wave and 27 medals to collect, on Easy, Normal or Brutal, with keyboard
-and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
+A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
+ragdolls, destructible terrain, 61 weapons with mastery stars, 94 enemy types and 27 medals. The three-act
+campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
+Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
+with no build step.
 
 ## Play
 
@@ -22,7 +22,7 @@ The game loads Phaser 4.2.1 from the jsDelivr CDN, so it needs an internet conne
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then go to <http://localhost:8765/slaghouse.html> and click the game. The title menu has CAMPAIGN, OVERTIME (the
+Then go to <http://localhost:8765/slaghouse.html> and click the game. The title menu has CAMPAIGN (new game or continue from a checkpoint), OVERTIME (the
 endless mode), DAILY (today's seeded OVERTIME run), BOSS RUSH (all five bosses back to back), CODEX (every enemy you've met), ARMORY (every gun, its kills and mastery stars), MEDALS and OPTIONS (including run **mutators**: glass cannon, swarm, moon boots, lights out, vampire); **W / S** to choose, **Enter** to pick, **A / D**
 to change the difficulty, **E** to jump straight into OVERTIME.
 
@@ -45,7 +45,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
-| Restart run (mid-run, or once the results are up) | **R** |
+| Retry the current campaign act or restart the run (mid-run, or once the results are up) | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
 
@@ -92,28 +92,23 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
-## Waves
+## Campaign
 
-Each arena holds two waves: **ARENA 01 :: THE MELT FLOOR** (waves 1-2), **ARENA 02 :: THE FURNACE** (waves 3-4)
-and **ARENA 03 :: THE SORTING LINE** (waves 5-6), where conveyor belts carry everything and crusher presses slam
-down on a tell. Clearing an arena takes you down the lift with your health, gun, perks and stats carried over.
+The campaign descends through three acts. Each has two operations. The HUD shows the active squad and marks route
+objectives in cyan. Reinforcements arrive as the current squad thins out. The Gunship, Juggernaut and Slag Wyrm
+enter after their escorts fall.
 
-1. 10 placed enemies.
-2. 22 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
-   mirror knight that reflects your shots, a wraith that drifts through walls, a tar spitter whose puddles slow you (and burn when lit), a mimic
-   hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
-   drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a soul-drinking zealot, a jellyfish trailing shock tendrils, a burning cinder wheel (kick it back), a grenadier and a pack of sparkers that link up with live arcs.
-3. 21 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a shellback you have to flip, a pyro, a torcher with a flamethrower (get behind it), a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
-   (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a spotter whose red eye marks you for every foe, a
-   duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, a bastion behind a hard-light wall, a porcupine that answers every hit with quills, a bulldozer that plows everything ahead of it, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
-4. 22 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
-   that keeps a gnat swarm going, a pair of pouncing hounds, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a vortex drone that drags you in, a thundercloud that drops lightning on you, a teleporting blinker
-   a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
-   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines, a sponge that soaks up bullets and spits them back, a banner bearer that heals everything near it and an acid slug. The furnace's fire vents go off every few seconds.
-5. 20 enemies (26 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
-   time, about every 25 s. A slagling, a rat king that bursts into ratbots, a burrower, a scavenger that eats the dead to grow, linkers, an echo, a laser strider, a warhorn that rallies the rest, a wall-leaping shinobi, a beacon,
-   a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman, a leaper that lands where you stood, a copycat that copies your gun, a gatling that hoses the room and the Slag Wyrm mini-boss.
-6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
+| Act | Operations | Objective |
+| --- | --- | --- |
+| I · The Melt Floor | **Lockdown**, **Blackout** | Start against a small grunt patrol, then face the floor security team. Gunfire lights the blackout. After both operations, enter the marked Furnace lift. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
+| III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at both coolant valves in order to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
+
+Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.
+The two lifts save your weapon, perks, stats, difficulty and mutator. Entering the Furnace brings your health up
+to at least 60 HP, and entering the Sorting Line brings it up to at least 75 HP. The Vampire mutator skips this
+recovery. Continue from the campaign screen after quitting, or press **R** to retry from the start of the current
+act. The Speedrunner medal requires a clear in one run.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
 a boss every sixth (the Smelter and THE FOREMAN, a four-legged crane walker, take turns), a perk after each wave and a new arena every three, including THE WRECKING YARD,

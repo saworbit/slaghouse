@@ -5,7 +5,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+- **Three-act campaign.** Six named operations deploy authored squads with solo mini-boss encounters. Follow the
+  marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
+- **Campaign checkpoints.** Continue from either lift with your weapon, perks, stats and difficulty intact, or
+  retry your current act after a death. The campaign screen shows the route and current checkpoint.
+
 ### Changed
+- Lockdown starts with a grunt patrol and offers a choice of damage, sustain or mobility in the first perk draft.
+- The Speedrunner medal requires a clear in one run.
 - CONTRIBUTING.md has a release runbook (changelog, tag, playable zip, GitHub release) and points to GitHub issues
   for open work.
 - The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,
