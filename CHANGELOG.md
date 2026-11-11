@@ -36,6 +36,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Dead foes leave the enemy group 3 s after they die, so the per-frame loops stop walking every corpse sprite until
+  the arena changes. In a 10-minute OVERTIME run under SWARM the group peaked at 28 sprites, down from 104. (#14)
 - `dev/sfxgen/build.py` stops with a clear message, before writing anything, when processed takes are missing (as
   on a fresh clone) instead of crashing in soundfile, and ends with a note listing the sounds it skipped. (part of
   #8 and #15)
