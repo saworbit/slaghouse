@@ -23,6 +23,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - Sample bank decode failures are no longer silent: the console gets one warning with the count, **N** says
   `SFX BANK UNAVAILABLE` when nothing decoded, and a music track that fails to decode hands over to the procedural
   loop (and **B** says so) instead of playing nothing. (#11)
+- When five or fewer foes are left, a walker stuck against a wall it can't climb (ARENA 02's side pockets) warps
+  out to the ground spawn point nearest you after a few seconds, so the wave finishes without hooking in. (#16)
+- The ranged keepers (discus, chiller, bastion, howitzer) hop high enough to climb back up the 3-tile steps they
+  are allowed to step down, so they hold high ground over a long wave. The howitzer only leaves its perch to hunt
+  you once you're out of its lob range. (#19)
 
 ## [0.1.0] - 2026-11-11
 
