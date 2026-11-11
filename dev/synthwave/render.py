@@ -5,6 +5,8 @@
 Loops are rendered once with a few seconds of tail (reverb, delay, releases) and the tail is folded back onto
 the start, so the file plays exactly as if it had been looping forever: no seam to hide. Time-based effects
 (sidechain pump, compressor, chorus LFO) are computed periodically over the loop for the same reason.
+Each loop is then checked (seam_check): every stem has died away before the render ends, and the reverb and delay
+don't drop across the wrap. A loop that fails isn't written, and the script exits 1 naming it.
 """
 import os, sys, zlib, time
 import numpy as np
@@ -41,6 +43,38 @@ def gated_loud(x):
     p = np.mean(y[:nb * B].reshape(nb, B) ** 2, axis=1)
     keep = p > max(p.max() * 10 ** (-30 / 10), 1e-14)
     return float(np.mean(p[keep])) if keep.any() else 1e-14
+
+
+# What the fold has to guarantee, checked on every loop (#41). A step baked into a loop comes from one of two faults:
+# a stem still ringing when the render ends, so the fold cuts it short and leaves a step TAIL seconds in, or a tail
+# that isn't folded onto the start, so the reverb and delay drop out across the wrap.
+TAIL_END = 0.05            # s: how much of the very end of each unfolded stem the tail check reads
+TAIL_MAX_DB = -60          # that end has to be this far below the stem's peak (current loops: -79 or lower)
+WRAP = 0.25                # s: either side of the wrap, for the wet stems
+WRAP_MIN_DB = 6            # just after the wrap may be at most this much quieter than just before it (dB)
+WET = ('hall', 'delay')    # current loops: within 2.2 dB; with the fold skipped, 11.5 dB or more (drum_rev follows
+                           # whichever hits sit at the wrap, so it moves up to 6 dB on a good loop and is left out)
+SEAMS = {}                 # track name -> (tail dB per stem, wrap dB per wet stem, problems), filled by render()
+
+
+def _db(a, b):
+    return 20 * np.log10((a + 1e-12) / (b + 1e-12))
+
+
+def _rms(x):
+    return float(np.sqrt(np.mean(np.square(x))))
+
+
+def seam_check(raw, folded):
+    """raw: unfolded stems (L + TAIL long); folded: the same stems after fold(). Returns (tails, wraps, problems)."""
+    e, w = int(TAIL_END * SR), int(WRAP * SR)
+    tails = {k: _db(_rms(v[..., -e:]), float(np.max(np.abs(v)))) for k, v in raw.items() if np.any(v)}
+    wraps = {k: _db(_rms(folded[k][..., :w]), _rms(folded[k][..., -w:])) for k in WET if k in folded and np.any(folded[k])}
+    problems = [f'{k} is still at {d:+.0f} dB of its peak when the render ends, so the fold cuts its tail '
+                f'(raise TAIL)' for k, d in tails.items() if d > TAIL_MAX_DB]
+    problems += [f'{k} drops {-d:.0f} dB across the wrap, so its tail is not folded onto the start'
+                 for k, d in wraps.items() if d < -WRAP_MIN_DB]
+    return tails, wraps, problems
 
 
 def sc_curve(kicks, n, L, depth, att=0.005, rel=0.15):
@@ -138,7 +172,10 @@ def render(t, verbose=True):
     stems.update(snare_room=snare_room, drum_rev=drum_rev, hall=hall, delay=dwet * 0.5)
     n = L if t.loop else total
     if t.loop:
+        raw = stems
         stems = {k: fold(v, L) for k, v in stems.items()}
+        SEAMS[t.name] = seam_check(raw, stems)
+        del raw                                   # the unfolded stems are about as big as the folded ones; let them go
     bal = dict(BALANCE, **t.master.get('bal', {}))
     ref = gated_loud(stems['drum_k'])
     for k in stems:
@@ -175,6 +212,16 @@ def render(t, verbose=True):
 
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
+    bad = []
     for name in (sys.argv[1:] or TRACKS):
         y = render(TRACKS[name])
+        problems = SEAMS.get(name, ({}, {}, []))[2]
+        if problems:                              # don't leave a broken loop in out/ for build.py to encode
+            bad.append(name)
+            print(f'{name}: seam check failed, out/{name}.wav not written')
+            for p in problems:
+                print('          ' + p)
+            continue
         sf.write(os.path.join(OUT, f'{name}.wav'), y.T, SR, subtype='FLOAT')
+    if bad:
+        sys.exit(f'seam check failed: {" ".join(bad)}')
