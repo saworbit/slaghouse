@@ -157,6 +157,12 @@ PROBES = {
  'pylonCharge': ['a crackling electric buzz', 'a dog barking', 'rain', 'music'],
  'pylonZap': ['an electric crack', 'a gunshot', 'a door slam', 'static noise'],
  'chomp': ['a wet chomping bite', 'a gunshot', 'an engine', 'static noise'],
+ # foreman round
+ 'gauntlet': ['a fiery thruster whoosh', 'a gunshot', 'a dog barking', 'static noise'],
+ 'punchHit': ['a heavy punch thud', 'a gunshot', 'glass breaking', 'static noise'],
+ 'marksman': ['a sniper rifle shot', 'a door slam', 'an engine', 'static noise'],
+ 'shuriken': ['a sharp swish', 'a gunshot', 'an engine', 'static noise'],
+ 'thunder': ['a thunder crack', 'a gunshot', 'an engine', 'music'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

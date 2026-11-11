@@ -1821,5 +1821,60 @@
    "41fda9caf5b97dc6"
   ],
   "rate": "40k"
+ },
+ "gauntlet": {
+  "ids": [
+   "0",
+   "4"
+  ],
+  "wav": [
+   "f14fe20a7f266a8f",
+   "3f384728dbbe52ea"
+  ],
+  "rate": "40k"
+ },
+ "punchHit": {
+  "ids": [
+   "4",
+   "2"
+  ],
+  "wav": [
+   "06970004df82e47c",
+   "b7db5aca523300e8"
+  ],
+  "rate": "40k"
+ },
+ "marksman": {
+  "ids": [
+   "6",
+   "0"
+  ],
+  "wav": [
+   "54f5c90d87da63aa",
+   "76d0bfe22c3d0c0d"
+  ],
+  "rate": "40k"
+ },
+ "shuriken": {
+  "ids": [
+   "7",
+   "3"
+  ],
+  "wav": [
+   "c8e1bd355b7d727c",
+   "4287626e1a78862c"
+  ],
+  "rate": "40k"
+ },
+ "thunder": {
+  "ids": [
+   "0",
+   "5"
+  ],
+  "wav": [
+   "885080b57749cd81",
+   "e4efc854d3e19061"
+  ],
+  "rate": "40k"
  }
 }

@@ -94,6 +94,8 @@ window.slagCalib = async function (only) {
     // armory round
     stasis: one(() => S.stasis()), stasisEnd: one(() => S.stasisEnd()), microwave: one(() => S.microwave()), mwPop: one(() => S.mwPop()), vortexSpin: one(() => S.vortexSpin()),
     pylonCharge: one(() => S.pylonCharge()), pylonZap: one(() => S.pylonZap()), chomp: one(() => S.chomp()),
+    // foreman round
+    gauntlet: one(() => S.gauntlet()), punchHit: one(() => S.punchHit()), marksman: one(() => S.marksman()), shuriken: one(() => S.shuriken()), thunder: one(() => S.thunder()),
   };
   const keep = { ctx: S.ctx, out: S.out, crunch: S.crunch, noiseBuf: S.noiseBuf, last: S.last, muted: S.muted, useBank: S.useBank,
     hum: S.hum, humSynth: S.humSynth, flameNode: S.flameNode, arcNode: S.arcNode, cryoNode: S.cryoNode, lanceNode: S.lanceNode, ripNode: S.ripNode, swarmNode: S.swarmNode, tractorNode: S.tractorNode, acidNode: S.acidNode };

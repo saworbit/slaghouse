@@ -6,6 +6,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Foreman round: a second boss.** OVERTIME's boss waves now alternate between the Smelter and THE FOREMAN, a
+  four-legged crane walker with a letterbox intro and its own bar: it slams shockwaves along the floor, sprays
+  rivets, and below 60% rips its armour off to drag you in with a magnet and call in hounds; below 25% its core is
+  exposed and it rages. A new UNION BUSTER medal is for bringing it down.
+- **Two more weapons** (wheel / Q/E). Rocket gauntlet: a thruster punch that carries you into a foe and launches it.
+  Marksman rifle: a laser-sighted rifle whose rounds pierce and do triple damage on headshots.
+- **Three more enemies.** Shellback: armoured from the front; kick or blast it onto its back. Shinobi: leaps wall to
+  wall, throwing stars at the top of each jump. Thundercloud: hangs over you and drops lightning.
+- AudioGen takes for the gauntlet's thruster and punch, the rifle crack, the thrown stars and the thunder. The
+  bank grows to 172 sounds.
 - **Armory round: an ARMORY page.** The title menu has a new ARMORY: every gun, 12 to a row with three mastery pips
   under each, and the picked one's name, line, key, kills and the kills to its next star. A new POPCORN medal is
   for 5 microwave pops in a run.

@@ -244,4 +244,10 @@ SOUNDS = {
     'pylonCharge': dict(p='an electrical transformer charging up, rising crackling buzz', d=2.0, max=1.2, keep=1, air=0.8, on=-24),
     'pylonZap': dict(p=['a lightning bolt strike, a sharp electric crack', 'a tesla coil discharge, a loud zap'], d=1.0, max=0.5, keep=2, n=8, air=0.9),
     'chomp': dict(p=['a monster chomping meat, a wet bite', 'a creature eating flesh, chewing'], d=1.0, max=0.3, keep=2, n=8, air=0.6),
+    # ------------------------------------------------------------------ foreman round
+    'gauntlet': dict(p=['a rocket thruster burst, a quick fiery whoosh', 'a jet booster firing briefly'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
+    'punchHit': dict(p=['a massive punch impact, a heavy thud with crunch', 'a giant fist hitting metal, a booming hit'], d=1.0, max=0.4, keep=2, n=8, air=0.5),
+    'marksman': dict(p=['a sniper rifle shot, a loud sharp crack with echo', 'a high powered rifle firing'], d=2.0, max=0.9, keep=2, n=8, air=0.7),
+    'shuriken': dict(p=['throwing stars whooshing, a sharp swish', 'a ninja star thrown, a quick whistle'], d=1.0, max=0.25, keep=2, n=8, air=0.9),
+    'thunder': dict(p=['a lightning strike, a close loud thunder crack', 'a thunderbolt crash with rumble'], d=2.0, max=1.2, keep=2, n=8, air=0.6),
 }

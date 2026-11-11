@@ -11540,5 +11540,335 @@
    "clap": 0.0083,
    "score": 0.0083
   }
+ ],
+ "gauntlet": [
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.307082,
+   "prompt": "a rocket thruster burst, a quick fiery whoosh",
+   "clap": 0.4005,
+   "score": 0.4005
+  },
+  {
+   "id": "4",
+   "dur": 0.4,
+   "loud": 0.477416,
+   "prompt": "a rocket thruster burst, a quick fiery whoosh",
+   "clap": 0.301,
+   "score": 0.301
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.345033,
+   "prompt": "a jet booster firing briefly",
+   "clap": 0.2249,
+   "score": 0.2249
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.358026,
+   "prompt": "a jet booster firing briefly",
+   "clap": 0.213,
+   "score": 0.213
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.267787,
+   "prompt": "a rocket thruster burst, a quick fiery whoosh",
+   "clap": 0.1714,
+   "score": 0.1714
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.302678,
+   "prompt": "a rocket thruster burst, a quick fiery whoosh",
+   "clap": 0.146,
+   "score": 0.146
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.316299,
+   "prompt": "a jet booster firing briefly",
+   "clap": 0.1389,
+   "score": 0.1389
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.357727,
+   "prompt": "a jet booster firing briefly",
+   "clap": 0.1228,
+   "score": 0.1228
+  }
+ ],
+ "punchHit": [
+  {
+   "id": "4",
+   "dur": 0.31,
+   "loud": 0.29075,
+   "prompt": "a massive punch impact, a heavy thud with crunch",
+   "clap": 0.2955,
+   "score": 0.2955
+  },
+  {
+   "id": "2",
+   "dur": 0.203,
+   "loud": 0.290514,
+   "prompt": "a massive punch impact, a heavy thud with crunch",
+   "clap": 0.2615,
+   "score": 0.2615
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.43981,
+   "prompt": "a giant fist hitting metal, a booming hit",
+   "clap": 0.1822,
+   "score": 0.1822
+  },
+  {
+   "id": "6",
+   "dur": 0.131,
+   "loud": 0.341053,
+   "prompt": "a massive punch impact, a heavy thud with crunch",
+   "clap": 0.2437,
+   "score": 0.1637
+  },
+  {
+   "id": "0",
+   "dur": 0.211,
+   "loud": 0.36246,
+   "prompt": "a massive punch impact, a heavy thud with crunch",
+   "clap": 0.1606,
+   "score": 0.1606
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.376859,
+   "prompt": "a giant fist hitting metal, a booming hit",
+   "clap": 0.137,
+   "score": 0.137
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.348283,
+   "prompt": "a giant fist hitting metal, a booming hit",
+   "clap": 0.1175,
+   "score": 0.1175
+  },
+  {
+   "id": "3",
+   "dur": 0.372,
+   "loud": 0.312039,
+   "prompt": "a giant fist hitting metal, a booming hit",
+   "clap": 0.0359,
+   "score": 0.0359
+  }
+ ],
+ "marksman": [
+  {
+   "id": "6",
+   "dur": 0.9,
+   "loud": 0.323106,
+   "prompt": "a sniper rifle shot, a loud sharp crack with echo",
+   "clap": 0.3971,
+   "score": 0.3971
+  },
+  {
+   "id": "0",
+   "dur": 0.771,
+   "loud": 0.181094,
+   "prompt": "a sniper rifle shot, a loud sharp crack with echo",
+   "clap": 0.3574,
+   "score": 0.3574
+  },
+  {
+   "id": "4",
+   "dur": 0.501,
+   "loud": 0.167577,
+   "prompt": "a sniper rifle shot, a loud sharp crack with echo",
+   "clap": 0.3278,
+   "score": 0.3278
+  },
+  {
+   "id": "5",
+   "dur": 0.9,
+   "loud": 0.314918,
+   "prompt": "a high powered rifle firing",
+   "clap": 0.314,
+   "score": 0.314
+  },
+  {
+   "id": "2",
+   "dur": 0.9,
+   "loud": 0.378468,
+   "prompt": "a sniper rifle shot, a loud sharp crack with echo",
+   "clap": 0.301,
+   "score": 0.301
+  },
+  {
+   "id": "7",
+   "dur": 0.9,
+   "loud": 0.363159,
+   "prompt": "a high powered rifle firing",
+   "clap": 0.2301,
+   "score": 0.2301
+  },
+  {
+   "id": "1",
+   "dur": 0.9,
+   "loud": 0.298576,
+   "prompt": "a high powered rifle firing",
+   "clap": 0.2223,
+   "score": 0.2223
+  },
+  {
+   "id": "3",
+   "dur": 0.9,
+   "loud": 0.412581,
+   "prompt": "a high powered rifle firing",
+   "clap": 0.1569,
+   "score": 0.1569
+  }
+ ],
+ "shuriken": [
+  {
+   "id": "7",
+   "dur": 0.25,
+   "loud": 0.425037,
+   "prompt": "a ninja star thrown, a quick whistle",
+   "clap": 0.2953,
+   "score": 0.2953
+  },
+  {
+   "id": "3",
+   "dur": 0.25,
+   "loud": 0.519621,
+   "prompt": "a ninja star thrown, a quick whistle",
+   "clap": 0.2624,
+   "score": 0.2624
+  },
+  {
+   "id": "1",
+   "dur": 0.095,
+   "loud": 0.463943,
+   "prompt": "a ninja star thrown, a quick whistle",
+   "clap": 0.1772,
+   "score": 0.0972
+  },
+  {
+   "id": "5",
+   "dur": 0.139,
+   "loud": 0.652092,
+   "prompt": "a ninja star thrown, a quick whistle",
+   "clap": 0.0787,
+   "score": 0.0787
+  },
+  {
+   "id": "0",
+   "dur": 0.25,
+   "loud": 0.362469,
+   "prompt": "throwing stars whooshing, a sharp swish",
+   "clap": 0.0114,
+   "score": 0.0114
+  },
+  {
+   "id": "6",
+   "dur": 0.25,
+   "loud": 0.377249,
+   "prompt": "throwing stars whooshing, a sharp swish",
+   "clap": 0.0008,
+   "score": 0.0008
+  },
+  {
+   "id": "2",
+   "dur": 0.146,
+   "loud": 0.200524,
+   "prompt": "throwing stars whooshing, a sharp swish",
+   "clap": -0.0227,
+   "score": -0.0227
+  },
+  {
+   "id": "4",
+   "dur": 0.25,
+   "loud": 0.287031,
+   "prompt": "throwing stars whooshing, a sharp swish",
+   "clap": -0.0516,
+   "score": -0.0516
+  }
+ ],
+ "thunder": [
+  {
+   "id": "0",
+   "dur": 1.2,
+   "loud": 0.340305,
+   "prompt": "a lightning strike, a close loud thunder crack",
+   "clap": 0.2487,
+   "score": 0.2487
+  },
+  {
+   "id": "5",
+   "dur": 1.2,
+   "loud": 0.377758,
+   "prompt": "a thunderbolt crash with rumble",
+   "clap": 0.2297,
+   "score": 0.2297
+  },
+  {
+   "id": "3",
+   "dur": 1.2,
+   "loud": 0.310214,
+   "prompt": "a thunderbolt crash with rumble",
+   "clap": 0.1715,
+   "score": 0.1715
+  },
+  {
+   "id": "2",
+   "dur": 1.2,
+   "loud": 0.366385,
+   "prompt": "a lightning strike, a close loud thunder crack",
+   "clap": 0.1684,
+   "score": 0.1684
+  },
+  {
+   "id": "7",
+   "dur": 1.2,
+   "loud": 0.379794,
+   "prompt": "a thunderbolt crash with rumble",
+   "clap": 0.1661,
+   "score": 0.1661
+  },
+  {
+   "id": "1",
+   "dur": 1.2,
+   "loud": 0.351881,
+   "prompt": "a thunderbolt crash with rumble",
+   "clap": 0.1547,
+   "score": 0.1547
+  },
+  {
+   "id": "4",
+   "dur": 0.915,
+   "loud": 0.278909,
+   "prompt": "a lightning strike, a close loud thunder crack",
+   "clap": 0.1535,
+   "score": 0.1535
+  },
+  {
+   "id": "6",
+   "dur": 1.2,
+   "loud": 0.385458,
+   "prompt": "a lightning strike, a close loud thunder crack",
+   "clap": 0.1414,
+   "score": 0.1414
+  }
  ]
 }
