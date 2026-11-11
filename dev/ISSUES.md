@@ -4,7 +4,7 @@ These issues came out of the play-test session (fixes landed in commit 41c8e75 o
 They aren't filed because the local repo has no GitHub remote and saworbit has no matching repository.
 Labels use GitHub's defaults (`bug`, `enhancement`), which a new repo starts with.
 Issues 1-5 come from the play-test session, 6-8 from the session that built the game, 9-13 from the SFX
-session, and 14 from the overdrive round. They were checked against each other for duplicates.
+session, 14 from the overdrive round, and 16 from the red-team pass after round 20. They were checked against each other for duplicates.
 
 ---
 
@@ -380,3 +380,24 @@ calls `vibrationActuator.playEffect`. No real pad has been plugged in yet.
 - Holding LB for the wheel while steering with the right stick picks the slot you expect.
 
 **Done when.** Each pad has been played through a full run and any mapping fixes are in.
+
+---
+
+## 16. [Perf] Dead enemies stay in the enemy group until the arena changes
+
+**Labels:** enhancement
+
+**Context**
+Found in the red-team pass after round 20. `spawnEnemy` creates a new sprite for every spawn, and `killEnemy` only
+disables it, so `this.enemies.getChildren()` keeps every corpse sprite until the scene restarts (a new arena or a
+new run). Hives, rat kings, welders and the Foreman's hounds keep adding to it, and the many per-frame loops over the
+group skip the dead ones but still walk them. In an OVERTIME run the group held about 36 sprites by wave 5, so this
+isn't hurting yet; a long stay in one arena (the campaign's last two waves, or an OVERTIME arena under SWARM) is where
+it would grow.
+
+**Proposed fix / acceptance**
+- Reuse dead enemy sprites (a pool keyed by texture), or destroy them a few seconds after death.
+- Destroying them is the riskier option: check every array that can still hold an enemy reference
+  (`tethered`, `souls`, `discs`, `allies`, the tractor beam, decoys, `grabbedBy`, `owner`/`mother` links) for code that
+  reads `body` without checking `alive` first.
+- A 10-minute OVERTIME run under SWARM keeps the group under roughly 60 sprites.

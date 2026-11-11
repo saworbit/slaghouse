@@ -113,7 +113,7 @@ a boss every sixth (the Smelter and THE FOREMAN, a four-legged crane walker, tak
 with a wrecking ball swinging across the middle, and THE POWERHOUSE, whose floor rails go live in turns. Your best wave is kept. Every enemy
 type can turn up, from echoes (holograms that replay your path and shots) to wraiths and warhorns.
 **DAILY** is an OVERTIME run seeded by the date: the same arena, starting perks, waves and modifiers for everyone
-that day.
+that day (mutators are switched off for it).
 
 Every kill counts toward that gun's **mastery** (three stars gold-plate it): 25, 100 and 250 kills earn its three stars, each +5% damage with
 it. The weapon wheel shows each gun's stars.

@@ -365,8 +365,8 @@
     Lugger 140 HP ....... a brute that walks to the nearest drum, lifts it overhead and hurls it at you from 220 px
                           (it blows on impact). Shoot the drum it's carrying and it goes off in its hands. No drums
                           in reach: it throws scrap.
-    Blimp 220 HP ........ a bomber airship cruising the top of the arena at 40 px/s, swapping sides (it sails through
-                          pillars and catwalks); it drops a bomb whenever you're roughly below it. Brought down, it falls burning and blows where it lands.
+    Blimp 220 HP ........ a bomber airship cruising 120 px over you (70 once it's the last foe left) at 40 px/s, swapping
+                          sides (it sails through pillars and catwalks); it drops a bomb whenever you're below it. Brought down, it falls burning and blows where it lands.
     Strider 150 HP ...... a long-legged walker. Every ~4 s it plants, aims a red sight at you for 0.8 s, then sweeps a
                           laser +/-0.5 rad over 1.2 s from its head (12 a touch; it cuts other foes too). Duck it,
                           jump it or dash through.
@@ -591,7 +591,8 @@
     HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
                           as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
                           came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
-                          (and to a boss); lance charge ring and hornet lock pips at the crosshair. Damage numbers
+                          (and to a boss), and those last few stop lurking and come looking for you; lance charge
+                          ring and hornet lock pips at the crosshair. Damage numbers
                           step aside from ones still rising nearby.
   =============================================================================
 -->
@@ -866,7 +867,7 @@ const DIFFS = [                                        // title screen: left / r
   { name: 'BRUTAL', dmg: 1.4, hp: 1.25, score: 1.5 },
 ];
 const optNum = (key, def, lo, hi) => { try { const v = parseFloat(localStorage.getItem('slaghouse.' + key)); return v >= lo && v <= hi ? v : def; } catch (err) { return def; } };
-const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1), mut: optNum('mut', 0, 0, 5) | 0 };
+const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1), mut: optNum('mut', 0, 0, 5) | 0 };   // pause menu / title options, remembered
 // run mutators (OPTIONS): one at a time, remembered
 const MUTATORS = [
   { id: 'none', name: 'NONE', d: 'THE FOUNDRY AS IT COMES.' },
@@ -876,7 +877,10 @@ const MUTATORS = [
   { id: 'dark', name: 'LIGHTS OUT', d: 'EVERY WAVE IN THE DARK.' },
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
-const MUT = () => MUTATORS[OPTS.mut].id;   // pause menu / title options, remembered
+const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship']);   // SWARM never doubles (or thins) a boss
+const CLOCK_KEYS = new Set(['punchUntil', 'offUntil', 'acidActiveUntil', 'acidPaintT', 'aiUntil', 'aimStart', 'arcActiveUntil', 'arcUntil', 'bashOk', 'bounceT', 'bubbleUntil', 'chopOk', 'clingOk', 'cookT', 'cryoActiveUntil', 'dashIUntil', 'dashReady', 'dashUntil', 'dmgFlushAt', 'dmgUntil', 'dropUntil', 'flameActiveUntil', 'flareLit', 'grabOk', 'hasteUntil', 'healCheckT', 'healFlushAt', 'hitP', 'hitStopUntil', 'hitT', 'hookReady', 'hustleT', 'invulnUntil', 'jamUntil', 'jumpBuffer', 'kickReady', 'kickT', 'kickUntil', 'killCamUntil', 'laserT', 'lastGround', 'lastHitT', 'lastKillT', 'lastSeenT', 'lastShotT', 'leapOk', 'leapT', 'lkT', 'lockT', 'lvlRefreshAt', 'markedUntil', 'mflashUntil', 'mineReady', 'mkLast', 'navAirT', 'nextFire', 'noiseT', 'pHitT', 'rallyT', 'rampageUntil', 'revLastT', 'revReloadUntil', 'ripperBiteUntil', 'ripperUntil', 'rollHitT', 'rumbleAt', 'runEnd', 'scorchT', 'searchUntil', 'sentryReadyAt', 'shakeUntil', 'shieldBlockT', 'shieldHit', 'shieldT', 'shieldUntil', 'sipShowAt', 'siphonUntil', 'slipUntil', 'slowmoUntil', 'sparkHitT', 'sparkT', 'sprayOk', 'strikeOk', 't0', 'tankHitT', 'tetherFlashT', 'tetherT', 'tgtSince', 'thrownUntil', 'until', 'wallLockUntil', 'wallT', 'wheelT']);   // fields holding a scene-clock timestamp (moved on when the pause menu closes)
+const dailyArena = () => Math.floor(seeded(dayKey())() * ARENAS.length);   // the DAILY's arena: the same for everyone today
+const MUT = () => (RUNMODE === 'daily' ? 'none' : MUTATORS[OPTS.mut].id);   // DAILY is the same run for everyone: no mutators
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
 //  D-pad up/down cycle weapons, Start pause. Menus: D-pad / LS, A pick, B back.
@@ -934,6 +938,7 @@ const MEDALS = [
   { id: 'speed', name: 'SPEEDRUNNER', d: 'WIN IN UNDER 10 MINUTES' },
   { id: 'ironclad', name: 'IRONCLAD', d: 'WIN ON BRUTAL' },
 ];
+const loadRec = key => { try { const o = JSON.parse(localStorage.getItem(key) || 'null'); return o && typeof o === 'object' && isFinite(o.score) ? o : null; } catch (err) { return null; } };   // a saved record, or null if it's missing or mangled
 const loadMedals = () => { try { const a = JSON.parse(localStorage.getItem('slaghouse.medals') || '[]'); return Array.isArray(a) ? a : []; } catch (err) { return []; } };
 // ---- perks: after each wave you pick one of three (they stay for the run) ----
 const PERKS = [
@@ -4768,10 +4773,10 @@ class TitleScene extends Phaser.Scene {
     // text
     new PixelLabel(this, 480, 92, 'title_logo', { text: 'SLAGHOUSE', scale: 10, rows: LOGO_ROWS, shadow: '#000000', originY: 0.5 });
     new PixelLabel(this, 480, 160, 'title_sub',{ text: 'THE MELT FLOOR  >  THE FURNACE  >  THE SORTING LINE', scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });
-    let best = null; try { best = JSON.parse(localStorage.getItem('slaghouse.best') || 'null'); } catch (err) { best = null; }
+    let best = loadRec('slaghouse.best');
     const medN = loadMedals().length;
     if (best || medN) new PixelLabel(this, 480, 186, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
-    let otb = null; try { otb = JSON.parse(localStorage.getItem('slaghouse.bestEndless') || 'null'); } catch (err) { otb = null; }
+    let otb = loadRec('slaghouse.bestEndless');
     if (otb) new PixelLabel(this, 480, 203, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score, scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
     this.buildMenu();
     new PixelLabel(this, 480, 138, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
@@ -4792,7 +4797,7 @@ class TitleScene extends Phaser.Scene {
       this.started = true;
       Sfx.init(); Sfx.startHum(); Sfx.ui(); Music.start();
       this.cameras.main.fadeOut(240, 0, 0, 0);
-      this.time.delayedCall(260, () => { this.scene.start('Game', RUNMODE === 'daily' ? { arena: Math.floor(seeded(dayKey())() * ARENAS.length) } : undefined); this.scene.launch('Hud'); });
+      this.time.delayedCall(260, () => { this.scene.start('Game', { arena: RUNMODE === 'daily' ? dailyArena() : 0, carry: null }); this.scene.launch('Hud'); });   // explicit data: a bare start would reuse the last run's arena and carry
     };
     this.startRun = start;
     this.input.keyboard.on('keydown', ev => this.onTitleKey(ev.keyCode));
@@ -4805,8 +4810,8 @@ class TitleScene extends Phaser.Scene {
     this.menuSel = 0; this.sub = null; this.subSel = 0;
     this.menuG = this.add.graphics().setDepth(5);
     this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS'].map((t, i) => new PixelLabel(this, 480, 400 + i * 17, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
-    let dly = null; try { dly = JSON.parse(localStorage.getItem('slaghouse.daily') || 'null'); } catch (err) { dly = null; }
-    let rsh = null; try { rsh = JSON.parse(localStorage.getItem('slaghouse.bestRush') || 'null'); } catch (err) { rsh = null; }
+    let dly = loadRec('slaghouse.daily');
+    let rsh = loadRec('slaghouse.bestRush');
     if (rsh && rsh.won) new PixelLabel(this, 650, 451, 'title_rsh', { text: 'CLEARED ' + rsh.grade, align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
     if (dly && dly.date === dayKey()) new PixelLabel(this, 650, 434, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
     this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { text: 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   M MUTE', scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
@@ -5061,7 +5066,7 @@ class GameScene extends Phaser.Scene {
     // mutator round: tripwires, ally drones, hard-light walls
     this.trips = []; this.allies = []; this.bwalls = [];
     // debrief round: bubbles, holy orbs, souls, mines, and who killed you
-    this.shieldUntil = 0; this.shieldBlockT = 0; this.globs = []; this.gluePuds = []; this.leapMarks = [];
+    this.shieldUntil = 0; this.shieldBlockT = 0; this.shieldHeld = false; this.hustleT = 0; this.lastMod = null; this.globs = []; this.gluePuds = []; this.leapMarks = [];
     this.nukes = [];                                                     // powerhouse round: mini-nuke shells
     this.seeds = []; this.shrooms = []; this.pspores = []; this.tethered = []; this.sharing = false; this.linkCalled = false;   // gold round
     this.bubbles = []; this.horbs = []; this.souls = []; this.emines = []; this.killer = null; this.bubbled = false; this.empowerSeen = false;
@@ -5086,8 +5091,10 @@ class GameScene extends Phaser.Scene {
     this.applyCamera(0);
     this.initPostFx();
     this.events.on('resume', () => {                                   // back from the pause menu: no stale presses, no stray shot
+      const pd = this.pauseAt ? this.game.loop.time - this.pauseAt : 0; this.pauseAt = 0;
+      if (pd > 0) this.shiftClock(pd);                                   // nothing ran out while the game was paused
       this.paused = false; Music.paused = false; this.input.keyboard.resetKeys();
-      this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.time.now + 220); this.kickQueued = false; this.mineQueued = false;
+      this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.game.loop.time + 220); this.kickQueued = false; this.mineQueued = false;
       this.lanceOn = false; this.lanceCharge = 0; this.hornetHeld = false; this.locks = [];
     });
 
@@ -5611,6 +5618,7 @@ class GameScene extends Phaser.Scene {
     if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) return true;
     const c = this.grid[ty][tx]; return c === '#' || c === 'x' || c === 'g';
   }
+  stepOk(x, feet) { for (let d = 4; d <= 52; d += 16) if (this.standAt(x, feet + d)) return true; return false; }   // ground ahead, or a drop of 3 tiles at most
   standAt(x, y) {
     const tx = Math.floor(x / TS), ty = Math.floor(y / TS);
     if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) return true;
@@ -5753,9 +5761,9 @@ class GameScene extends Phaser.Scene {
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', Music.toggle() ? 'SAMPLED MUSIC' : 'SYNTH MUSIC');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); BUS.emit('callout', Sfx.useBank ? 'SAMPLED SFX' : 'SYNTH SFX'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
-    if (this.jd.R || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }
+    if ((this.jd.R && (this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
-    else if (this.jd.ESC || (this.overShown && PAD.jd(1))) { this.quitToTitle(); return; }
+    else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
 
     if (this.state !== 'dead') { this.updatePlayer(dt, now); this.updateHook(dt); } else if (this.hook) this.hook = null;
@@ -6050,7 +6058,7 @@ class GameScene extends Phaser.Scene {
     if (i === this.weapon || this.state === 'dead') return;
     if (this.locked && this.locked.has(i)) { Sfx.tink(0.6); BUS.emit('callout', 'STOLEN!'); return; }   // a pilferer has it
     this.wNext[this.weapon] = this.nextFire;                          // each gun keeps its own cooldown: swapping off a slow gun
-    this.weapon = i; this.applyGunTexture(); this.swapT = 0.14; this.arcActiveUntil = 0; this.flameActiveUntil = 0; this.cryoActiveUntil = 0;   // gun dips and comes back up
+    this.weapon = i; this.shieldHeld = false; this.applyGunTexture(); this.swapT = 0.14; this.arcActiveUntil = 0; this.flameActiveUntil = 0; this.cryoActiveUntil = 0;   // gun dips and comes back up
     this.locks = []; this.hornetHeld = false; this.lanceOn = false; this.lanceCharge = 0; this.lanceFullT = 0; this.ripperUntil = 0; this.hammerOn = false; this.hammerCharge = 0; this.coilHeld = false;   // swapping drops locks and charge
     if (this.tb) this.tractorDrop(); this.tbOn = false; this.acidActiveUntil = 0; this.shockHeld = false; this.shockReady = false; this.limpetHeld = false;
     if (this.sky.st === 'paint') this.sky.st = 'idle';
@@ -6209,7 +6217,7 @@ class GameScene extends Phaser.Scene {
       this.recoil = 1.5; Sfx.bubble(); this.addKick(-ca, -sa);
     } else if (W.id === 'tripwire') {
       this.stats.shots++; this.trips.push({ x: ox, y: oy, vx: Math.cos(a) * TUNE.TRIPWIRE.speed, vy: Math.sin(a) * TUNE.TRIPWIRE.speed - 60, st: 'fly', n: 0, hitT: new Map(), t: 0 });
-      const set = this.trips.filter(q => q.st === 'set'); if (set.length > TUNE.TRIPWIRE.max) { const old = set[0]; this.explode(old.x, old.y, TUNE.TRIPWIRE.boom); this.trips.splice(this.trips.indexOf(old), 1); }
+      while (this.trips.length > TUNE.TRIPWIRE.max) { const old = this.trips.find(q => q.st === 'set') || this.trips[0]; this.explode(old.x, old.y, TUNE.TRIPWIRE.boom); this.trips.splice(this.trips.indexOf(old), 1); }   // two at most: the oldest goes off
       this.recoil = 3; Sfx.mineThrow(); this.addKick(-ca * 1.5, -sa * 1.5);
     } else if (W.id === 'dronepod') {
       this.fireDronePod(now, mx, my);
@@ -6540,7 +6548,7 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'boss') t *= 0.5;
     if (e.burnT <= 0) {
       Sfx.ignite();
-      if (!['boss', 'drone', 'mender', 'bulwark', 'rammer', 'wasp', 'jet', 'brood', 'screamer', 'warden', 'jugg', 'burrower', 'linker', 'gunship'].includes(e.kind)) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
+      if (!['boss', 'foreman', 'bulwark', 'rammer', 'brood', 'jugg', 'burrower', 'turret', 'mimic'].includes(e.kind) && !FLIERS.has(e.kind) && e.def.speed !== 0 && e.def.kb > 0) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
     }
     e.burnT = Math.max(e.burnT, t);
   }
@@ -7174,6 +7182,7 @@ class GameScene extends Phaser.Scene {
   // ---------------------------------------------------------------- damage ----
   damageEnemy(e, dmg, dx, dy, src, hs) {
     if (!e.alive || e.under) return;                                     // a burrowed worm can't be touched
+    const dmg0 = dmg;                                                    // the raw hit: what a tether passes on (the linked foe runs its own modifiers)
     if (e.kind === 'wyrmseg') {                                          // wyrm body: its armour passes 60% on to the head
       e.flashT = 0.08;
       if (e.head && e.head.alive) this.damageEnemy(e.head, dmg * TUNE.WYRM.segTake, dx, dy, src, false);
@@ -7257,10 +7266,11 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'mimic' && e.ai === 'hide') this.mimicReveal(e, this.time.now);   // shoot the "drum" and it bares its teeth
     if (e.tetherT > this.time.now && !this.sharing && src !== 'tether') {   // tethered: the others take a share
       this.sharing = true;
-      for (const o of this.tethered) if (o !== e && o.alive && o.tetherT > this.time.now) { this.damageEnemy(o, dmg * TUNE.TETHER.share, 0, 0, 'tether'); this.tetherFlashT = this.time.now; }
+      for (const o of this.tethered) if (o !== e && o.alive && o.tetherT > this.time.now) { this.damageEnemy(o, dmg0 * TUNE.TETHER.share, 0, 0, 'tether'); this.tetherFlashT = this.time.now; }
       this.sharing = false;
+      if (!e.alive) return;                                              // a shared hit set off something (a jelly nova) that finished it
     }
-    if (dmg > (this.stats.big || 0)) this.stats.big = dmg;                 // the biggest single hit of the run
+    if (dmg0 < 999 && dmg > (this.stats.big || 0)) this.stats.big = dmg;   // (scripted 999 kills don't count)                 // the biggest single hit of the run
     e.hp -= dmg; e.flashT = 0.08; e.aggro = true; e.aggroT = 5; e.lastHs = !!hs;
     e.dmgAcc += dmg; if (hs) e.dmgHead = true; if (!e.dmgFlushAt) e.dmgFlushAt = this.time.now + (src === 'burn' || src === 'flame' || src === 'acid' || src === 'crush' || src === 'needle' || src === 'drill' || src === 'gas' || src === 'siphon' || src === 'microwave' ? 420 : 90);   // batched damage numbers (streams batch longer)
     this.addStyle(dmg * 0.25);
@@ -7315,6 +7325,7 @@ class GameScene extends Phaser.Scene {
     s.rank = r; s.best = Math.max(s.best, r);
   }
   killEnemy(e, dx, dy, src) {
+    if (!e.alive) return;                                               // already dead (a chain reaction got there first)
     e.alive = false;
     const b = e.body, cx = b.center.x, cy = b.center.y, D = e.def, now0 = this.time.now;
     if (D.tiny) {                                                       // swarm gnats: a little pop, none of the heavy kill feedback
@@ -8457,7 +8468,7 @@ class GameScene extends Phaser.Scene {
     }
     if (e.aggro && alive) {
       e.dir = dx > 0 ? 1 : -1; e.ai = 'crawl';
-      const ground = this.standAt(b.center.x + e.dir * (b.halfWidth + 4), b.bottom + 4);
+      const ground = this.stepOk(b.center.x + e.dir * (b.halfWidth + 4), b.bottom) || (e.blindT > 3 && dy > 40);   // short drops are fine; a big one only to find you
       b.velocity.x = approach(b.velocity.x, ground && Math.abs(dx) > 30 ? e.dir * T.speed : 0, 200 * dt);
       const mine = this.enemies.getChildren().filter(o => o.alive && o.mother === e).length;
       if (onGround && e.atkCd <= 0 && mine < T.max) { e.ai = 'birth'; e.aiUntil = now + T.tellMs; Sfx.growl(true); }
@@ -9107,11 +9118,18 @@ class GameScene extends Phaser.Scene {
 
   // ------------------------------------------------------------- run control ----
   stopLoops() { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); }
-  restartRun() { this.stopLoops(); Music.paused = false; this.scene.restart(); }
+  restartRun() { this.stopLoops(); Music.paused = false; this.scene.restart({ arena: this.daily ? dailyArena() : 0, carry: null }); }   // back to the first arena, nothing carried over
   quitToTitle() { this.stopLoops(); Music.paused = false; Music.intensity = 0; this.scene.stop('Hud'); this.scene.start('Title'); }
+  shiftClock(d) {                                                       // the scene clock jumps ahead by the paused time: move every timestamp with it
+    const bump = o => { if (!o || typeof o !== 'object') return; for (const k of Object.keys(o)) if (CLOCK_KEYS.has(k) && typeof o[k] === 'number' && o[k] > 1000) o[k] += d; };
+    bump(this); bump(this.stats); bump(this.tb); bump(this.hook); bump(this.decoy); bump(this.camFocus); bump(this.sentry);
+    for (const e of this.enemies.getChildren()) bump(e);
+    for (const k of Object.keys(this)) { const v = this[k]; if (Array.isArray(v)) for (const it of v) if (it && typeof it === 'object' && !it.scene) bump(it); }
+    if (Array.isArray(this.wNext)) this.wNext = this.wNext.map(t => (t > 1000 ? t + d : t));
+  }
   pauseGame() {
     if (this.paused || this.state !== 'play') return;
-    this.paused = true; this.stopLoops(); Music.paused = true;
+    this.paused = true; this.pauseAt = this.game.loop.time; this.stopLoops(); Music.paused = true;
     if (this.pfx && POSTFX.on) { const m = this.pfx.cm.colorMatrix; m.reset(); m.saturate(-0.75); m.brightness(0.55, true); this.pfx.key = 'pause'; }
     this.input.setDefaultCursor('default');
     BUS.emit('pause', true);
@@ -10337,11 +10355,12 @@ class GameScene extends Phaser.Scene {
     this.time.delayedCall(2200, () => {
       if (this.state !== 'play') return;
       this.stopLoops();
-      this.scene.restart({ arena: this.A.id % ARENAS.length, carry: { hp: this.hp, weapon: this.weapon, stats: this.stats, style: Object.assign({}, this.style), headshots: this.headshots,
-        bestCombo: this.bestCombo, totalEnemies: this.totalEnemies, wave: this.wave + 1, perks: Object.assign({}, this.perks), medals: [...this.medals], ms: Object.assign({}, this.ms) } });
+      this.scene.restart({ arena: this.A.id % ARENAS.length, carry: { hp: this.hp, weapon: this.weapon, stats: Object.assign({}, this.stats, { wk: Object.assign({}, this.stats.wk) }), style: Object.assign({}, this.style), headshots: this.headshots,
+        bestCombo: this.bestCombo, totalEnemies: this.totalEnemies, wave: this.wave + 1, perks: Object.assign({}, this.perks), medals: [...this.medals], ms: Object.assign({}, this.ms), lastMod: this.lastMod } });
     });
   }
   applyCarry(c) {
+    this.lastMod = c.lastMod || null;
     Object.assign(this, { hp: c.hp, stats: c.stats, style: c.style, headshots: c.headshots, bestCombo: c.bestCombo, totalEnemies: c.totalEnemies, wave: c.wave - 1, perks: c.perks || {} });
     this.medals = new Set(c.medals || []); if (c.ms) this.ms = c.ms; this.waveTaken = this.stats.taken;
     this.weapon = c.weapon; this.applyGunTexture();
@@ -10376,7 +10395,9 @@ class GameScene extends Phaser.Scene {
     return H.o.active ? H.o : null;
   }
   tbRelease(H) {
-    if (H.kind !== 'rag' && H.o.body) H.o.body.setAllowGravity(H.grav);
+    if (H.kind === 'enemy' && H.o.stasisT > 0) H.o.stasisGrav = H.grav;  // let go inside a time-stop: the field gives it back when it ends
+    else if (H.kind === 'enemy' && H.o.gravT > 0) { /* still floating: the grav bomb turns it back on when it lands */ }
+    else if (H.kind !== 'rag' && H.o.body) H.o.body.setAllowGravity(H.grav);
     if (H.kind === 'enemy') H.o.tbHeld = false;
   }
   tractorTrigger(trig, now, dt) {
@@ -10385,7 +10406,7 @@ class GameScene extends Phaser.Scene {
       if (!this.tb && now >= this.nextFire) {
         const got = this.tractorFind();
         if (got) {
-          if (got.kind !== 'rag') { got.grav = got.o.body.allowGravity; got.o.body.setAllowGravity(false); }
+          if (got.kind !== 'rag') { const o = got.o; got.grav = got.kind === 'enemy' && (o.gravT > 0 || o.gravSlam) ? true : got.kind === 'enemy' && o.stasisT > 0 ? o.stasisGrav !== false : o.body.allowGravity; o.body.setAllowGravity(false); }   // its real gravity, not one a time-stop or a grav bomb switched off
           if (got.kind === 'enemy' && got.o.kind === 'mimic' && got.o.ai === 'hide') this.mimicReveal(got.o, now);
           if (got.kind === 'enemy') { got.o.tbHeld = true; got.o.stunT = Math.max(got.o.stunT, 0.3); got.o.kickedT = 0; }
           if (got.kind === 'gib' && got.o.stuckT > 0) got.o.stuckT = 0;
@@ -10813,9 +10834,13 @@ class GameScene extends Phaser.Scene {
       if (b.blocked.left || b.blocked.right) { e.dir = -e.dir; this.fxSparks(b.center.x, b.center.y, 4); }
       for (const o of this.enemies.getChildren()) { if (!o.alive || o === e || o.under || (e.hitMap.get(o) || 0) > now) continue; const ob = o.body; if (ob.right > b.left && ob.left < b.right && ob.bottom > b.top && ob.top < b.bottom) { e.hitMap.set(o, now + 500); this.damageEnemy(o, T.ownDmg, e.dir, -0.5, 'saw'); this.ignite(o, 2); Sfx.clang(0.5); this.hitStop(30); } }
     } else if (e.stunT <= 0 && e.aggro && alive) {
-      if (Math.abs(dx) > 30) e.dir = dx >= 0 ? 1 : -1;
+      e.hopT = (e.hopT || 0) - dt; e.bounceT = (e.bounceT || 0) - dt;
+      if (Math.abs(dx) > 30 && e.bounceT <= 0) e.dir = dx >= 0 ? 1 : -1;
+      if ((b.blocked.left && e.dir < 0) || (b.blocked.right && e.dir > 0)) {
+        if (onG && e.hopT <= 0) { b.velocity.y = -T.hop; e.hopT = 1; }  // a step in the way: hop it
+        else if (e.hopT < 0.6) { e.dir = -e.dir; e.bounceT = 0.8; this.fxSparks(b.center.x + e.dir * -6, b.center.y, 3); }   // a real wall: bounce off it
+      }
       b.velocity.x = e.dir * T.speed;
-      if (b.blocked.left) e.dir = 1; else if (b.blocked.right) e.dir = -1;
       if (onG && dy < -30 && Math.abs(dx) < 90 && Math.random() < dt * 3) b.velocity.y = -T.hop;
     } else if (!e.aggro) b.velocity.x *= 0.9;
     e.spinA += b.velocity.x * dt * 0.12;
@@ -10916,7 +10941,7 @@ class GameScene extends Phaser.Scene {
       }
       if ((R0.tick -= dt) > 0) continue;
       R0.tick = T.tick;
-      if (this.state !== 'dead' && pb.center.x > R0.x0 && pb.center.x < R0.x1 && Math.abs(pb.bottom - R0.y) < 3) { this.hurtPlayer(T.dmg, pb.center.x, { knock: false, iframes: false, srcY: R0.y }); this.fxSparks(pb.center.x, pb.bottom - 2, 4, -Math.PI / 2, 1.4, [40, 140]); Sfx.jellyZap(); }
+      if (this.state !== 'dead' && pb.center.x > R0.x0 && pb.center.x < R0.x1 && Math.abs(pb.bottom - R0.y) < 3) { this.hurtPlayer(T.dmg, pb.center.x, { knock: false, iframes: false, srcY: R0.y, by: 'A LIVE RAIL' }); this.fxSparks(pb.center.x, pb.bottom - 2, 4, -Math.PI / 2, 1.4, [40, 140]); Sfx.jellyZap(); }
       for (const e of this.enemies.getChildren()) {
         if (!e.alive || e.under || FLIERS.has(e.kind)) continue;
         const b = e.body; if (b.center.x < R0.x0 || b.center.x > R0.x1 || Math.abs(b.bottom - R0.y) > 3) continue;
@@ -11184,6 +11209,7 @@ class GameScene extends Phaser.Scene {
   // ================================================================== debrief round ====
   culprit(x, opts) {                                                      // who (or what) landed the killing blow, for the results
     if (opts.self) return 'YOURSELF';
+    if (opts.by) return opts.by;                                         // a hazard, not a foe
     const y = opts.srcY !== undefined ? opts.srcY : this.player.y, name = k => (CODEX.find(c => c[0] === k) || [0, k.toUpperCase()])[1];
     let best = null, bd = 1e9;
     for (const e of this.enemies.getChildren()) { if (!e.alive) continue; const d = Math.abs(e.x - x) * 2 + Math.abs(e.y - y) * 0.5; if (d < bd) { bd = d; best = e; } }
@@ -11250,7 +11276,8 @@ class GameScene extends Phaser.Scene {
       if (!z.alive) { this.fx.emit(S.x, S.y, { n: 4, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0xfff0b0], add: true }); this.souls.splice(i, 1); continue; }
       const ddx = z.x - S.x, ddy = z.body.top - S.y, l = Math.hypot(ddx, ddy) || 1;
       if (l < 8) {
-        z.souls = Math.min(T.maxSouls, z.souls + 1); z.def = Object.assign({}, z.def, { hp: z.def.hp + T.soulHp }); z.hp += T.soulHp;
+        if (z.souls >= T.maxSouls) { this.souls.splice(i, 1); continue; }   // full: the extra souls just fade
+        z.souls++; z.def = Object.assign({}, z.def, { hp: z.def.hp + T.soulHp }); z.hp += T.soulHp;
         this.spawnLight(z.x, z.y, 'ring', 0xffe080, 0.2, 1.2, 0.9, 0.25); this.dmgNumber(z.x, z.body.top - 5, '+' + T.soulHp, 'G'); Sfx.soul();
         if (z.souls === 1 && !this.empowerSeen) { this.empowerSeen = true; BUS.emit('callout', 'EMPOWERED'); }
         this.souls.splice(i, 1); continue;
@@ -11466,7 +11493,9 @@ class GameScene extends Phaser.Scene {
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
       let want = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
-      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+      const hunt = e.blindT > 3 && dy > 40;                              // lost you somewhere below: it'll drop off its ledge to look
+      if (hunt && !want) want = e.dir;
+      if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
       if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
       if (e.cd <= 0 && onG && (!e.wall || !this.bwalls.includes(e.wall))) {
@@ -11693,12 +11722,14 @@ class GameScene extends Phaser.Scene {
     }
   }
   foremanHounds(e) {
-    if (this.enemies.getChildren().filter(o => o.alive && o.owner === e).length >= TUNE.FOREMAN.maxHounds) return;
+    const room = TUNE.FOREMAN.maxHounds - this.enemies.getChildren().filter(o => o.alive && o.owner === e).length - (e.houndPend || 0);
+    if (room <= 0) return;
     const pts = this.A.points.G.slice().sort((p, q) => Math.abs(q[0] * TS - this.player.x) - Math.abs(p[0] * TS - this.player.x)).slice(0, 4);
-    for (let k = 0; k < 2; k++) {
+    for (let k = 0; k < Math.min(2, room); k++) {
+      e.houndPend = (e.houndPend || 0) + 1;
       const pt = pts[randi(0, pts.length - 1)];
       this.spawnLight(pt[0] * TS + 8, (pt[1] + 1) * TS - 10, 'ring', 0xff80e0, 1.4, 0.2, 0.8, 0.6);
-      this.time.delayedCall(600, () => { if (this.state === 'dead' || !e.alive) return; const o = this.spawnEnemy('hound', pt[0], pt[1]); Object.assign(o, { summoned: true, aggro: true, aggroT: 9, owner: e }); });
+      this.time.delayedCall(600, () => { e.houndPend--; if (this.state === 'dead' || !e.alive) return; const o = this.spawnEnemy('hound', pt[0], pt[1]); Object.assign(o, { summoned: true, aggro: true, aggroT: 9, owner: e }); });
     }
     BUS.emit('callout', 'HOUNDS'); Sfx.warp();
   }
@@ -11722,14 +11753,14 @@ class GameScene extends Phaser.Scene {
       for (const e of this.enemies.getChildren()) {
         if (end || !e.alive || e.under || ['boss', 'foreman', 'wyrm', 'wyrmseg'].includes(e.kind)) continue;
         if (Math.hypot(e.body.center.x - F.x, e.body.center.y - F.y) > T.radius) continue;
-        if (!(e.stasisT > 0)) { e.stasisDmg = 0; e.stasisGrav = e.body.allowGravity; e.body.setAllowGravity(false); }
+        if (!(e.stasisT > 0)) { e.stasisDmg = 0; e.stasisGrav = this.tb && this.tb.o === e ? this.tb.grav : e.body.allowGravity; e.body.setAllowGravity(false); }
         e.stasisT = 0.12; e.body.setVelocity(0, 0); n++;
       }
       if (!F.called && n >= 3) { F.called = true; BUS.emit('callout', 'TIME STOP'); this.addStyle(40); }
       for (const list of [this.ebulletList, this.boltList, this.eprojList]) for (const q of list) {   // shots hang in the air
         if (!q.active) { F.held.delete(q); continue; }
         if (F.held.has(q)) { if (end) { const [vx, vy, ag] = F.held.get(q); q.body.setAllowGravity(ag); q.body.setVelocity(vx, vy); } else { q.body.setVelocity(0, 0); if (q.life !== undefined) q.life += dt; } continue; }
-        if (!end && Math.hypot(q.x - F.x, q.y - F.y) < T.radius) { F.held.set(q, [q.body.velocity.x, q.body.velocity.y, q.body.allowGravity]); q.body.setVelocity(0, 0); q.body.setAllowGravity(false); }
+        if (!end && Math.hypot(q.x - F.x, q.y - F.y) < T.radius && !this.stasisFields.some(G => G !== F && G.held.has(q))) { F.held.set(q, [q.body.velocity.x, q.body.velocity.y, q.body.allowGravity]); q.body.setVelocity(0, 0); q.body.setAllowGravity(false); }
       }
       if (end) { F.held.clear(); this.stasisFields.splice(i, 1); this.spawnLight(F.x, F.y, 'ring', 0xffffff, 1.6, 0.2, 0.8, 0.25); Sfx.stasisEnd(); this.shake(80, 0.004); }
     }
@@ -11737,7 +11768,7 @@ class GameScene extends Phaser.Scene {
   updateStasisFoe(e, dt) {
     e.stasisT -= dt; e.body.setVelocity(0, 0);
     if (e.stasisT > 0) return;
-    e.body.setAllowGravity(e.stasisGrav !== false);                       // time catches up: everything it took lands at once
+    if (this.tb && this.tb.o === e) this.tb.grav = e.gravT > 0 || e.gravSlam || e.stasisGrav !== false; else e.body.setAllowGravity(e.stasisGrav !== false);   // time catches up: everything it took lands at once
     const d = e.stasisDmg; e.stasisDmg = 0;
     if (d > 0 && e.alive) {
       this.fxSparks(e.body.center.x, e.body.center.y, 8, 0, Math.PI * 2, [60, 200]); this.spawnLight(e.body.center.x, e.body.center.y, 'ring', 0xc8e8ff, 0.2, 1, 0.9, 0.2);
@@ -11904,7 +11935,7 @@ class GameScene extends Phaser.Scene {
     const pb = this.player.body;
     if (this.state !== 'dead' && now >= W.pHit) {
       const qx = clamp(bx, pb.left, pb.right), qy = clamp(by, pb.top, pb.bottom);
-      if (Math.hypot(qx - bx, qy - by) < R0) { W.pHit = now + 900; if (this.hurtPlayer(TUNE.WRECK.pdmg, bx, { knock: false, srcY: by })) { pb.velocity.x = ux * 380; pb.velocity.y = -260; Sfx.wreckHit(); this.shake(200, 0.01); } }
+      if (Math.hypot(qx - bx, qy - by) < R0) { W.pHit = now + 900; if (this.hurtPlayer(TUNE.WRECK.pdmg, bx, { knock: false, srcY: by, by: 'THE WRECKING BALL' })) { pb.velocity.x = ux * 380; pb.velocity.y = -260; Sfx.wreckHit(); this.shake(200, 0.01); } }
     }
     for (let ty = Math.floor((by - R0) / TS); ty <= Math.floor((by + R0) / TS); ty++) for (let tx = Math.floor((bx - R0) / TS); tx <= Math.floor((bx + R0) / TS); tx++) {
       const c = this.tileAt(tx, ty); if (c === 'x' || c === 'g') { this.damageTile(tx, ty, 999); Sfx.wreckHit(); }
@@ -12024,7 +12055,9 @@ class GameScene extends Phaser.Scene {
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
       let want = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
-      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+      const hunt = e.blindT > 3 && dy > 40;                              // lost you somewhere below: it'll drop off its ledge to look
+      if (hunt && !want) want = e.dir;
+      if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
       if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -250;
       if (e.cd <= 0 && !e.disc && e.sees && dist < 320) {
@@ -12479,6 +12512,7 @@ class GameScene extends Phaser.Scene {
     if (this.reeledBy) this.breakHarpoon('SNAPPED!');
     if (this.clawBy) this.clawRelease(this.clawBy, true);
     if (this.grabbedBy) this.grappleBreak(this.grabbedBy, 'SWAPPED');
+    if (this.hook) this.endHook();                                         // a hook line can't follow you through the swap
     for (const [x, y] of [[pcx, pb.center.y], [ecx, b.center.y]]) {     // a violet pop where each of you was
       this.fx.emit(x, y, { n: 16, speed: [40, 160], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xf0d8ff, 0xb070ff], add: true });
       this.spawnLight(x, y, 'ring', 0xc890ff, 0.2, 1.3, 0.9, 0.25);
@@ -12653,7 +12687,9 @@ class GameScene extends Phaser.Scene {
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
       let want = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
-      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+      const hunt = e.blindT > 3 && dy > 40;                              // lost you somewhere below: it'll drop off its ledge to look
+      if (hunt && !want) want = e.dir;
+      if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
       if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
       if (e.cd <= 0 && (e.sees || dist < 260) && dist < 320) {           // a lob: it doesn't need a clear line
@@ -12806,7 +12842,8 @@ class GameScene extends Phaser.Scene {
     e.rockCd -= dt;
     let tx = null;
     if (!e.carry && e.aggro) {
-      if (!e.tgtBarrel || !e.tgtBarrel.active) { e.tgtBarrel = null; let bd = T.reach; for (const k of this.barrelList) { if (!k.active || k.burning || Math.abs(k.y - e.y) > 50) continue; const d = Math.abs(k.x - e.x); if (d < bd) { bd = d; e.tgtBarrel = k; } } }
+      if (e.tgtBarrel && e.tgtBarrel.active && now - (e.tgtSince || now) > 4500) { e.skipB = e.tgtBarrel; e.tgtBarrel = null; }   // can't get at it: give it up
+      if (!e.tgtBarrel || !e.tgtBarrel.active) { e.tgtBarrel = null; let bd = T.reach; for (const k of this.barrelList) { if (!k.active || k.burning || k === e.skipB || Math.abs(k.y - e.y) > 50) continue; const d = Math.abs(k.x - e.x); if (d < bd) { bd = d; e.tgtBarrel = k; } } if (e.tgtBarrel) e.tgtSince = now; }
       if (e.tgtBarrel) {
         tx = e.tgtBarrel.x;
         if (Math.abs(tx - e.x) < 10 && Math.abs(e.tgtBarrel.y - e.y) < 30) {   // pick it up
@@ -12830,13 +12867,14 @@ class GameScene extends Phaser.Scene {
   }
 
   // ---------------------------------------------------------------- blimp ----
-  // A bomber airship cruising the top of the arena (40 px/s), swapping sides; it drops a bomb whenever you're roughly
-  // below it. Brought down, it falls burning and blows where it lands.
+  // A bomber airship cruising 120 px over you (70 once it's the last foe, so it can always be reached) at 40 px/s,
+  // swapping sides; it drops a bomb whenever you're roughly below it. Brought down, it falls burning and blows where it lands.
   updateBlimp(e, dt, now, dx, dy, dist, alive) {
     const T = TUNE.BLIMP, b = e.body, pb = this.player.body;
     e.fr = Math.floor(now / 80) % 2 ? 'b1' : 'b0'; e.aggro = true;
     if (e.crash) return;
-    let ty = T.alt; for (let yy = T.alt; yy > 30; yy -= 8) if (this.solidAt(e.x, yy - 12)) { ty = yy + 14; break; }
+    let ty = clamp(pb.center.y - (this.enemiesLeft <= 1 ? 70 : 120), 50, LH - 80);   // it keeps a height over you (lower when it's the last one) so it can be shot
+    for (let yy = ty; yy > 40; yy -= 8) if (!this.solidAt(e.x, yy) && !this.solidAt(e.x, yy + 8)) { ty = yy; break; }   // in open air, not inside a block
     const tx = clamp(pb.center.x + e.side * 90, 50, LW - 50);
     if (Math.abs(tx - e.x) < 16) e.side *= -1;
     b.velocity.x += (clamp((tx - e.x), -1, 1) * T.speed - b.velocity.x) * Math.min(1, dt * 1.5); b.velocity.y += ((ty - e.y) * 1.2 - b.velocity.y) * Math.min(1, dt * 2);
@@ -13169,6 +13207,7 @@ class GameScene extends Phaser.Scene {
     if (e.stunT > 0) return;
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; b.velocity.x = e.dir * T.speed;
+      if (onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -210;   // humps up over a step
       if (e.spitCd <= 0 && dist < 220 && e.sees) { e.ai = 'spit'; e.aiUntil = now + 350; Sfx.squelch(); return; }
     } else { b.velocity.x = e.dir * T.speed * 0.6; if (b.blocked.left || b.blocked.right) e.dir *= -1; }
     e.stepK += dt * 3; e.fr = Math.floor(e.stepK) % 2 ? 's1' : 's0';
@@ -13436,7 +13475,7 @@ class GameScene extends Phaser.Scene {
     this.fxDust(Pr.x - 18, y1, 6); this.fxDust(Pr.x + 18, y1, 6); this.fxSparks(Pr.x, y1 - 2, 8, -Math.PI / 2, 2.4, [60, 200]);
     const near = Math.hypot(this.player.x - Pr.x, this.player.y - y1) < 260;
     if (near) { this.shake(200, 0.01); Sfx.press(); }
-    if (this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > y0 && pb.top < y1 && this.hurtPlayer(T.dmg, Pr.x, { knock: false })) {
+    if (this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > y0 && pb.top < y1 && this.hurtPlayer(T.dmg, Pr.x, { knock: false, by: 'A CRUSHER' })) {
       pb.velocity.x = (Math.sign(pb.center.x - Pr.x) || this.facing) * 300; pb.velocity.y = -220; this.jumpCuttable = false; BUS.emit('callout', 'FLATTENED');
     }
     let crushed = 0;
@@ -13778,7 +13817,7 @@ class GameScene extends Phaser.Scene {
         this.damageEnemy(e, T.dmg, pp.dir, 0, 'flame'); if (e.alive) b.velocity.x += pp.dir * T.push * e.def.kb;
       }
       if (this.state !== 'dead' && (pp.ptick = (pp.ptick || 0) - 0.25) <= 0 && pb.right > xl && pb.left < xr && pb.bottom > yt && pb.top < yb) {
-        pp.ptick = 0.3; if (this.hurtPlayer(T.pdmg, pp.x, { knock: false, burn: true, srcY: pp.y })) pb.velocity.x += pp.dir * T.push;
+        pp.ptick = 0.3; if (this.hurtPlayer(T.pdmg, pp.x, { knock: false, burn: true, srcY: pp.y, by: 'STEAM' })) pb.velocity.x += pp.dir * T.push;
       }
     }
   }
@@ -13801,6 +13840,7 @@ class GameScene extends Phaser.Scene {
       b.setAllowGravity(false); b.velocity.y = -40; e.fr = step;
       let want = e.aggro && alive ? Math.sign(dx) : e.dir;
       if (!this.solidAt(b.center.x + want * 10, b.top - 3)) { want = e.aggro ? 0 : -want; }   // the ceiling ends: stop (or turn)
+      if (e.aggro && alive && !want && Math.abs(dx) > 40) { if ((e.ceilWaitT = (e.ceilWaitT || 0) + dt) > 4) { e.ceilWaitT = 0; e.ai = 'drop'; e.hitP = false; b.setAllowGravity(true); b.velocity.set(0, 60); return; } } else e.ceilWaitT = 0;   // stuck at the edge with you out of reach: drop and give chase
       if (want) e.dir = want;
       b.velocity.x = want * T.speed;
       if (want && Math.random() < dt * 3 && dist < 260) Sfx.skitter();
@@ -14105,7 +14145,8 @@ class GameScene extends Phaser.Scene {
       if (Math.random() < 0.5) this.fxSparks(e.x + e.dir * 9, b.bottom - 3, 1, -Math.PI / 2, 1.6, [40, 120]);
       if (Math.random() < 0.2) Sfx.weld();
       if (now >= e.aiUntil) {
-        const t = this.spawnEnemy('turret', Math.floor((e.x + e.dir * 14) / TS), Math.floor((b.bottom - 2) / TS));
+        const bx = this.solidAt(e.x + e.dir * 14, b.bottom - 6) || !this.standAt(e.x + e.dir * 14, b.bottom + 4) ? e.x : e.x + e.dir * 14;   // never inside a wall or off a ledge
+        const t = this.spawnEnemy('turret', Math.floor(bx / TS), Math.floor((b.bottom - 2) / TS));
         Object.assign(t, { summoned: true, owner: e, aggro: true });
         e.turrets.push(t); e.ai = 'walk'; e.buildCd = T.buildCd; this.spawnLight(t.x, t.y, 'ring', 0xffd040, 0.2, 1, 0.8, 0.2); Sfx.clang(0.5);
       }
@@ -14392,7 +14433,8 @@ class GameScene extends Phaser.Scene {
       let want = 0;
       if (e.aggro && alive) { const ax = Math.abs(dx); want = ax < 150 ? -Math.sign(dx) : ax > 260 ? Math.sign(dx) : 0; e.dir = dx >= 0 ? 1 : -1; }
       else { want = e.dir; if (b.blocked.left || b.blocked.right) { e.dir *= -1; want = e.dir; } }
-      if (want && !this.standAt(b.center.x + want * 12, b.bottom + 4)) { want = 0; if (!e.aggro) e.dir *= -1; }   // never walks off a ledge
+      if (e.aggro && alive && !want && e.blindT > 3 && dy > 40) want = e.dir;   // lost you below: go and look
+      if (want && !(e.aggro && e.blindT > 3 && dy > 40 && want === e.dir) && !this.stepOk(b.center.x + want * 12, b.bottom)) { want = 0; if (!e.aggro) e.dir *= -1; }   // won't walk off a big drop, unless it's lost you below
       b.velocity.x = want * T.speed;
       if (want) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; if (Math.floor(e.stepK) !== e.lastStep) { e.lastStep = Math.floor(e.stepK); if (dist < 300) Sfx.clunk(0.35); } }
       else e.fr = 'w0';
@@ -14504,12 +14546,14 @@ class GameScene extends Phaser.Scene {
   startWave(i) {
     this.wave = i;
     const list0 = this.endless ? this.endlessWave(i) : (this.bossrush ? RUSH : WAVES)[i], used = new Set(), PTS = this.A.points;
-    const list = MUT() === 'swarm' ? list0.concat(list0.filter(([k]) => !['boss', 'foreman', 'jugg', 'wyrm', 'gunship'].includes(k) && Math.random() < 0.5)) : list0;   // SWARM: half again as many
+    const list = MUT() === 'swarm' ? list0.concat(list0.filter(([k]) => !SWARM_SKIP.has(k) && Math.random() < 0.5)) : list0;   // SWARM: half again as many
     const mr = this.daily ? seeded(dayKey() * 31 + i) : Math.random;
-    const mod = this.endless ? (i % 6 === 5 ? null : mr() < 0.45 ? ['dark', 'slag', 'lowg', 'melt'][Math.floor(mr() * 4)] : null) : this.bossrush ? null : WAVE_MODS[i];
+    let mod = this.endless ? (i % 6 === 5 ? null : mr() < 0.45 ? ['dark', 'slag', 'lowg', 'melt'][Math.floor(mr() * 4)] : null) : this.bossrush ? null : WAVE_MODS[i];
+    if (this.endless && mod && mod === this.lastMod) mod = ['dark', 'slag', 'lowg', 'melt'].filter(m => m !== mod)[Math.floor(mr() * 3)];   // never the same twist twice running
+    this.lastMod = mod;
     this.enemiesLeft = list.length; if (this.endless) this.totalEnemies += list.length;
     BUS.emit('wave', i + 1, this.endless ? 0 : this.bossrush ? RUSH.length : WAVES.length); BUS.emit('enemies', this.enemiesLeft);
-    if (this.endless) BUS.emit('wavecard', 'OVERTIME ' + (i + 1), i % 6 === 5 ? 'THE SMELTER RETURNS' : MOD_CARDS[mod] || 'HOSTILES INBOUND');
+    if (this.endless) BUS.emit('wavecard', 'OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND');
     else if (this.bossrush) BUS.emit('wavecard', 'BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]);
     else BUS.emit('wavecard', i === WAVES.length - 1 ? 'FINAL WAVE' : 'WAVE ' + (i + 1), i === WAVES.length - 1 ? 'THE SMELTER WAKES' : MOD_CARDS[WAVE_MODS[i]] || 'HOSTILES INBOUND');
     this.spawnBarrels(true); this.spawnCanisters(true); this.applyMod(mod || (MUT() === 'lowg' ? 'lowg' : MUT() === 'dark' ? 'dark' : null));   // MOON BOOTS / LIGHTS OUT
@@ -14547,7 +14591,7 @@ class GameScene extends Phaser.Scene {
       const e = this.spawnEnemy(kind, cx, cy), now = this.time.now;
       e.aggro = true; e.aggroT = 6;
       if (this.endless && this.wave > 0) { const k = 1 + TUNE.ENDLESS.hpPer * this.wave; e.def = Object.assign({}, e.def, { hp: e.def.hp * k }); e.hp = e.def.hp; }   // OVERTIME: tougher every wave
-      if (MUT() === 'swarm' && !['boss', 'foreman'].includes(kind)) { e.def = Object.assign({}, e.def, { hp: e.def.hp * 0.67 }); e.hp = e.def.hp; }
+      if (MUT() === 'swarm' && !SWARM_SKIP.has(kind)) { e.def = Object.assign({}, e.def, { hp: e.def.hp * 0.67 }); e.hp = e.def.hp; }
       if (elite) this.makeElite(e, elite);
       if (isHumanoid(e)) { e.lkx = this.player.x; e.lky = this.player.y; e.lkT = now; this.alertHumanoid(e, now, false); }
       if (big) { this.boss = e; BUS.emit('boss', 'THE SMELTER', 'FOUNDRY WARDEN'); BUS.emit('flash', 0.35); this.shake(500, 0.012); }
@@ -14562,7 +14606,7 @@ class GameScene extends Phaser.Scene {
     });
   }
   hurtPlayer(dmg, srcX, opts = {}) {
-    if (this.state === 'dead') return false;
+    if (this.state !== 'play') return false;                             // dead, or already won
     const now = this.time.now, soft = opts.self || opts.burn;
     if (!opts.self) dmg *= DIFFS[OPTS.diff].dmg * (MUT() === 'glass' ? 2 : 1);   // difficulty; GLASS CANNON
     if (!opts.self && this.pCorrodeT > 0) dmg *= 1.25;                  // slug acid: corroded, you give way
@@ -14589,7 +14633,7 @@ class GameScene extends Phaser.Scene {
     return true;
   }
   killPlayer() {
-    this.state = 'dead'; LIFE.deaths++;
+    this.state = 'dead'; LIFE.deaths++; this.wheelOn = false;
     const p = this.player, b = p.body, cx = b.center.x, cy = b.center.y;
     for (const t of ['g_helm', 'g_armor', 'g_armor', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1', 'g_armor'])
       this.spawnGib(t, cx + rand(-4, 4), cy + rand(-6, 6), b.velocity.x * 0.4 + rand(-180, 180), rand(-380, -150));
@@ -14604,10 +14648,11 @@ class GameScene extends Phaser.Scene {
   }
   win() {
     if (this.state !== 'play') return;
-    this.state = 'won';
+    this.state = 'won'; this.wheelOn = false;
     this.slowmoUntil = this.time.now + 700;
     const runT = (this.time.now - this.stats.t0) / 1000;
-    this.award('slayer'); if (runT < 600) this.award('speed'); if (OPTS.diff === 2) this.award('ironclad'); if (OPTS.mut) this.award('mutant'); if (this.bossrush) this.award('rusher');
+    this.award('slayer'); const camp = !this.bossrush && !this.endless;   // the campaign medals are for the campaign
+    if (camp && runT < 600) this.award('speed'); if (camp && OPTS.diff === 2) this.award('ironclad'); if (camp && OPTS.mut) this.award('mutant'); if (this.bossrush) this.award('rusher');
     BUS.emit('callout', 'ARENA CLEARED');
     if (!Music.jingle('win', 'title')) Sfx.win();
     this.time.delayedCall(1500, () => this.showOver(true));
@@ -14626,7 +14671,7 @@ class GameScene extends Phaser.Scene {
     saveMastery();
     if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
       const key = this.daily ? 'slaghouse.daily' : 'slaghouse.bestEndless';
-      let ob = null; try { ob = JSON.parse(localStorage.getItem(key) || 'null'); } catch (err) { ob = null; }
+      let ob = loadRec(key);
       if (this.daily && ob && ob.date !== dayKey()) ob = null;                 // yesterday's daily doesn't count
       const nb = !ob || this.wave + 1 > ob.wave || (this.wave + 1 === ob.wave && score > ob.score);
       if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: dayKey(), wave: this.wave + 1, score } : { wave: this.wave + 1, score })); } catch (err) { /* private mode */ }
@@ -14636,7 +14681,7 @@ class GameScene extends Phaser.Scene {
       return;
     }
     const bkey = this.bossrush ? 'slaghouse.bestRush' : 'slaghouse.best';   // BOSS RUSH keeps its own record
-    let best = null; try { best = JSON.parse(localStorage.getItem(bkey) || 'null'); } catch (err) { best = null; }
+    let best = loadRec(bkey);
     const newBest = score > 0 && (!best || score > best.score);
     if (newBest) try { localStorage.setItem(bkey, JSON.stringify({ score, grade, time: Math.round(time), won, diff: DIFFS[OPTS.diff].name })); } catch (err) { /* private mode: no record */ }
     BUS.emit('over', { won, rush: this.bossrush, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
@@ -14787,6 +14832,14 @@ class GameScene extends Phaser.Scene {
     this.gnatCache = this.enemies.getChildren().filter(o => o.alive && o.kind === 'gnat');   // boids look at each other
     let near = 0; for (const o of this.gnatCache) if (Math.abs(o.x - pcx) < 170 && Math.abs(o.y - pcy) < 120) near++;
     this.swarmLvl = this.gnatCache.length ? clamp(0.25 + near / 8, 0, 1) : 0;
+    if (alive && this.state === 'play' && this.enemiesLeft <= 5 && now >= this.hustleT) {   // the last few stop lurking and come looking for you
+      this.hustleT = now + 4000;
+      for (const o of this.enemies.getChildren()) {
+        if (!o.alive || o.under) continue;
+        if (isHumanoid(o)) { if (o.ai === 'idle') { o.lkx = pcx; o.lky = pcy; o.lkT = now; this.alertHumanoid(o, now, false); } }
+        else if (!o.aggro) { o.aggro = true; o.aggroT = 8; }
+      }
+    }
     for (const e of this.enemies.getChildren()) {
       if (!e.alive) continue;
       e.flashT -= dt; e.stunT -= dt; e.t += dt; e.losT -= dt; e.aggroT -= dt;
@@ -14794,6 +14847,7 @@ class GameScene extends Phaser.Scene {
       const dx = (lure ? D0.x : pcx) - b.center.x, dy = (lure ? D0.y : pcy) - b.center.y, dist = Math.hypot(dx, dy);   // a decoy close by pulls it off you
       if (lure) e.aggro = true;
       if (e.losT <= 0) { e.losT = 0.15; e.sees = alive && dist < e.def.sight * 1.4 && this.los(b.center.x, b.center.y - 3, pcx, pcy - 4); }
+      e.blindT = e.sees ? 0 : (e.blindT || 0) + dt;                      // how long it's gone without sight of you
       if (e.burnT > 0) {                                               // on fire: damage over time, flames, spreads to neighbours
         e.burnT -= dt; e.burnTick -= dt; e.spreadT -= dt;
         if (Math.random() < 0.7) this.fx.emit(b.center.x + rand(-b.halfWidth, b.halfWidth), b.center.y + rand(-b.halfHeight, b.halfHeight * 0.5), { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [20, 60], life: [0.2, 0.45], size: [4, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -40 });
@@ -14809,7 +14863,9 @@ class GameScene extends Phaser.Scene {
         e.corrodeT -= dt;
         if (Math.random() < 0.3) this.fx.emit(b.center.x + rand(-b.halfWidth, b.halfWidth), b.center.y + rand(-b.halfHeight, b.halfHeight * 0.6), { n: 1, angle: Math.PI / 2, spread: 0.3, speed: [5, 25], life: [0.3, 0.6], size: [2, 1], cols: [0xe0ff90, 0x9aff4a, 0x4aa020], add: true, g: 300, mode: 1 });
       }
+      if (e.cook > 0 && now - e.cookT > 150) e.cook = Math.max(0, e.cook - dt * 0.6);   // microwave heat bleeds off
       if (e.elite) this.updateElite(e, dt, now);
+      if (this.grabbedBy === e && (e.stasisT > 0 || e.frozen > 0 || e.netT > 0 || e.gravT > 0 || e.gravSlam)) this.grappleBreak(e, 'BROKE FREE');
       if (e.stasisT > 0) this.updateStasisFoe(e, dt);
       else if (e.frozen > 0) this.updateFrozen(e, dt);
       else if (e.netT > 0) this.updateNetted(e, dt, now);
@@ -14901,7 +14957,7 @@ class GameScene extends Phaser.Scene {
         e.glueT -= dt; b.velocity.x *= TUNE.GLUE.slow; if (b.velocity.y < 0 && !FLIERS.has(e.kind)) b.velocity.y *= 0.6; else if (FLIERS.has(e.kind)) b.velocity.y *= TUNE.GLUE.slow;
         if (Math.random() < 0.15) this.fx.emit(b.center.x + rand(-b.halfWidth, b.halfWidth), b.bottom - 2, { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [5, 20], life: [0.3, 0.5], size: [2, 1], cols: [0xffd040, 0xc89a20], alpha: [0.8, 0] });
       }
-      if (e.panicT > 0) {                                              // burning and panicking: runs about blindly
+      if (e.panicT > 0 && !(e.stasisT > 0) && !(e.frozen > 0) && !(e.netT > 0) && !(e.gravT > 0) && !e.gravSlam) {   // burning and panicking: runs about blindly
         e.panicT -= dt;
         if (Math.random() < dt * 1.5) e.panicDir *= -1;
         if (b.blocked.left) e.panicDir = 1; else if (b.blocked.right) e.panicDir = -1;
@@ -15332,7 +15388,13 @@ class GameScene extends Phaser.Scene {
     if (goal < 0) return false;
     const start = navAt(e.body.center.x, e.body.bottom); if (start < 0) return false;
     const res = navDijkstra(start, goal, maxCost);
-    if (!isFinite(res.dist[goal])) return false;
+    if (!isFinite(res.dist[goal])) {                                     // out of planning range: head for the reachable cell nearest the goal
+      const G = NAV.nodes[goal], S = NAV.nodes[start], far = n => Math.abs(n.x - G.x) + 2 * Math.abs(n.y - G.y);
+      let best = -1, bd = far(S) - 4;
+      for (const u of res.reached) { const d = far(NAV.nodes[u]); if (d < bd) { bd = d; best = u; } }
+      if (best < 0) return false;
+      goal = best;
+    }
     e.goalNode = goal; e.path = navPath(res, goal); e.pathI = 0; e.navAir = false;
     return true;
   }
@@ -15783,12 +15845,15 @@ class GameScene extends Phaser.Scene {
       const lit = this.darkA > 0.1 && e.flareLit > now;                   // a flare lights foes up through the blackout
       if (lit !== !!e.litShown) { e.litShown = lit; e.setDepth(lit ? 16.2 : 5); }
       if (e.elite) {                                                     // elite: an aura, a diamond over its head, a shield bubble
-        const bx = e.body.center.x, by = e.body.center.y, ty = e.body.top - 9 + Math.sin(now / 200) * 1.5;
+        const bx = e.body.center.x, by = e.body.center.y, ty = e.body.top - 9 + Math.sin(now / 200) * 1.5, hid = e.under || !e.visible || e.alpha < 0.3;
+        e.eliteGlow.setVisible(!hid);
+        if (!hid) {                                                      // a cloaked or blinked-out elite stays hidden
         e.eliteGlow.setPosition(bx, by).setScale(Math.max(e.body.width, e.body.height) / 20 * 0.8 * (0.9 + 0.1 * Math.sin(now / 150)));
         g.fillStyle(ELITE_COL[e.elite], 0.95); g.fillTriangle(bx - 3, ty, bx, ty - 4, bx + 3, ty); g.fillTriangle(bx - 3, ty, bx, ty + 3, bx + 3, ty);
         g.fillStyle(0xffffff, 0.8).fillRect(bx - 1, ty - 2, 1, 1);
         if (e.esh > 0) { g.lineStyle(1, 0x46e6ff, now - e.lastHitT < 80 ? 1 : 0.4 + 0.2 * Math.sin(now / 120)); g.strokeCircle(bx, by, Math.max(e.body.halfWidth, e.body.halfHeight) + 5); }
         if (e.elite === 'volatile' && e.hp < e.def.hp * 0.35 && Math.floor(now / 120) % 2) { g.lineStyle(1, 0xff6a20, 0.8); g.strokeCircle(bx, by, Math.max(e.body.halfWidth, e.body.halfHeight) + 3); }
+        }
       }
       if (e.needleAngs && e.needleAngs.length) {                         // needles stuck in it, pulsing harder as it nears supercombine
         const cx = e.body.center.x, cy = e.body.center.y, r = Math.min(e.body.halfWidth, e.body.halfHeight) * 0.7, k = e.needles / TUNE.NEEDLE.stick, fl = 0.55 + 0.45 * Math.sin(now / (60 - 35 * k));
@@ -15880,8 +15945,8 @@ class GameScene extends Phaser.Scene {
       }
       if (e.kind === 'echo') { e.setAlpha(0.45 + Math.random() * 0.25); e.glow.setPosition(e.x, e.y); continue; }
       if (e.kind === 'grenadier') { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 5 : 2), e.y - 8).setScale(w ? 0.5 : 0.25); continue; }
-      if (e.cook > 0) {                                                  // being microwaved: it swells and glows, then pops
-        if (now - e.cookT > 150) e.cook = Math.max(0, e.cook - this.game.loop.delta / 1000 * 0.6);
+      if (e.cook > 0 || e.cookOn) {                                      // being microwaved: it swells and glows, then pops
+        e.cookOn = e.cook > 0;
         e.setScale((e.shrunkOn ? 0.5 : 1) * (1 + 0.25 * e.cook) * (e.growS || 1));
         if (Math.random() < e.cook * 0.6) this.fx.emit(e.body.center.x + rand(-e.body.halfWidth, e.body.halfWidth), e.body.center.y + rand(-e.body.halfHeight, e.body.halfHeight), { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0xffa040, 0xff5a1a], add: true });
         if (e.cook <= 0) e.setScale((e.shrunkOn ? 0.5 : 1) * (e.growS || 1));
@@ -16518,6 +16583,7 @@ class HudScene extends Phaser.Scene {
     }
   }
   onReset(d) {
+    this.lockedIds = [];                                                 // stolen guns come back with a new run
     this.hp = this.dispHp = d.hp; this.lblHp.setStyle({ color: '#ffffff' }).setText(String(d.hp));
     this.applyWeapon(d.weapon); this.count = d.enemies; this.lblCount.setText(String(d.enemies));
     this.setOverlay(false); this.tweens.killTweensOf(this.call); this.call.setAlpha(0);

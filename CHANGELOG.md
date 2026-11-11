@@ -151,6 +151,46 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - AudioGen takes for the beacon's alarm, the slug's squelch and the leech's slurp. The bank grows to 129 sounds.
 
 ### Fixed
+- **Restarting reused the last run's arena and carry.** Phaser keeps a scene's last start data when it restarts
+  without new data, so pressing R after the lift, or starting a new run from the title, could drop you into a later
+  arena with the old HP, perks, stats and wave count (and BOSS RUSH could start at the wrong boss, or crash). Every
+  run and restart now starts from explicit data.
+- The pause menu now stops the clock: RAMPAGE, OVERDRIVE, HASTE, i-frames, enemy tells and every other timer used to
+  keep running (and run out) while paused, and paused time counted toward the results TIME.
+- Pressing R or Esc in the second after dying or winning skipped the results and lost the run's records; both now
+  wait for the results screen.
+- Dying or winning with the weapon wheel open left the wheel on screen and the world in slow motion.
+- Hazards (live rails, presses, fire) could still hurt and "kill" you after a win.
+- The results screen named a random enemy as your killer for hazard deaths; it now says A LIVE RAIL, THE WRECKING
+  BALL, A CRUSHER or STEAM.
+- BIGGEST HIT counted scripted kills (a paratrooper splat, the Foreman's hounds dying with it) as hits of 999+.
+- The campaign medals (SPEEDRUNNER, IRONCLAD, MUTANT) could be earned by winning BOSS RUSH.
+- A mangled saved record showed "undefined" on the title screen and could stop new OVERTIME bests from saving.
+- A stolen gun stayed greyed out on the HUD ribbon after a restart.
+- A tethered jellyfish that died from a shared hit could kill its partner twice, counting two kills and ending a wave
+  early; shared tether damage also had every damage bonus (difficulty, GLASS, OVERDRIVE, perks) applied twice.
+- A grappler that was frozen, netted, floated or time-stopped while holding you let go, then yanked you back from
+  across the map when the effect wore off.
+- An enemy carried by the tractor beam into a stasis field (or grabbed out of one, or out of a grav bomb's slam) could
+  lose its gravity for good.
+- Burning enemies no longer panic-run when they're bosses, fliers or rooted (the Foreman, pylons, spore pods,
+  turrets), and stand still while frozen or time-stopped.
+- SWARM cut the HP of the Juggernaut, Gunship and Slag Wyrm without adding any extra enemies; DAILY now ignores
+  mutators, so it really is the same run for everyone.
+- A zealot could take more than three souls' worth of HP when several foes died next to it at once.
+- Overlapping stasis fields could leave enemy shots hanging in the air after both fields ended.
+- The riot shield could fire a free bash the next time you picked it, if you'd swapped away (or died) holding it.
+- Tripwires could have three wires out instead of two, and the Foreman could have five hounds instead of four.
+- OVERTIME's Foreman waves showed THE SMELTER RETURNS; they now say THE FOREMAN CLOCKS IN.
+- Microwave heat never cooled on some enemy types (grenadiers, harpooners, burrowers and others), so short bursts
+  added up until they popped.
+- An elite's aura and diamond gave away a cloaked cloaker or a blinked-out blinker.
+- A swap with a Swapper now cuts your grapple line.
+- The blimp could cruise out of reach high over a tall arena, stalling the wave; it now keeps a height over you.
+- A lugger kept waiting forever under a drum it couldn't reach; it now gives up after a few seconds.
+- A welder could build its turret inside a wall or off the edge of a ledge.
+- The cinder wheel jammed against any step or wall between it and you; it now hops steps and bounces off walls.
+- Slugs got stuck against one-tile steps; they now hump over them.
 - The blimp could jam against the pillars that hold up the furnace arena's catwalk and hang there out of reach,
   stalling wave 4; it now sails through scenery.
 - Several per-run values (leech count, a claw's grip, the corrosion tint) could survive a restart, because Phaser
@@ -311,6 +351,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   `dev/synthwave` (offline synth engine and score).
 
 ### Changed
+- When five or fewer enemies are left (when the off-screen arrows appear), the ones lurking out of sight come
+  looking for you, so the last few don't stall a wave.
+- Ranged enemies that hold a ledge (discus, chiller, bastion, howitzer) and broods now step down short drops, and
+  drop off bigger ones to find you if they've lost sight of you below for a few seconds. A creeper stuck at the end
+  of a ceiling with you out of reach drops down and gives chase.
+- Enemies too far away to plan a full route to you head for the nearest point they can reach instead of standing
+  still.
+- OVERTIME never rolls the same wave twist (blackout, slag rain, low gravity, meltdown) twice in a row, even across
+  a lift.
 - The painted level (blood, scorch marks, bullet holes) is now shown as 16 tiles, and only the tiles that were painted
   are re-uploaded to the GPU, instead of the whole 1600 x 432 texture several times a second during heavy gore.
 - **Esc** mid-run opens the pause menu. It replaces the earlier double-press confirm (`ESC AGAIN: QUIT`).
