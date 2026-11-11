@@ -1,10 +1,9 @@
-# SLAGHOUSE: draft GitHub issues
+# SLAGHOUSE: issue drafts
 
-These issues came out of the play-test session (fixes landed in commit 41c8e75 on `audio-soundtrack-sfx`).
-They aren't filed because the local repo has no GitHub remote and saworbit has no matching repository.
-Labels use GitHub's defaults (`bug`, `enhancement`), which a new repo starts with.
-Issues 1-5 come from the play-test session, 6-8 from the session that built the game, 9-13 from the SFX
-session, 14 from the overdrive round, and 16 from the red-team pass after round 20. They were checked against each other for duplicates.
+These drafts came out of the play-test session, the build and SFX sessions, the update rounds and the red-team pass.
+The open ones were filed on GitHub when the repository was published on 2026-11-11; each filed draft links to its
+issue below, and **the GitHub issue is now the source of truth**. Drafts 1-3 and 14 were already done or obsolete
+and weren't filed. Track new work on GitHub: <https://github.com/saworbit/slaghouse/issues>.
 
 ---
 
@@ -68,6 +67,8 @@ back into live combat on return.
 
 ## 4. [Tooling] Fix or remove the broken `static` and `static-alt` preview configs
 
+**Filed as:** https://github.com/saworbit/slaghouse/issues/3
+
 **Labels:** bug
 
 **Context**
@@ -88,6 +89,8 @@ for. That server is stopped now and won't be started again. The `autoPort` probl
 ---
 
 ## 5. [Testing] Save the play-test bot as a repeatable smoke test
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/4
 
 **Labels:** enhancement
 
@@ -134,6 +137,8 @@ It caught the weapon-swap cooldown bug and confirmed a full 61/61 run.
 # Game and repo issues (from the game-build session)
 
 ## 6. [Balance] Tune the havoc waves after real-time play
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/5
 
 **Labels:** enhancement
 
@@ -192,6 +197,8 @@ pipes, and ARENA 03 with belts and crusher presses (the run is now two waves per
 
 ## 7. [Licensing] Choose a project licence and clear the AudioGen SFX before any commercial use
 
+**Filed as:** https://github.com/saworbit/slaghouse/issues/6
+
 **Labels:** documentation
 
 **Context**
@@ -209,6 +216,8 @@ pipes, and ARENA 03 with belts and crusher presses (the run is now two waves per
 ---
 
 ## 8. [Build] Keep the source in modules and build the single-file game from them
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/7
 
 **Labels:** enhancement
 
@@ -230,6 +239,8 @@ fails. The scripts can't be re-run, and every change is a diff buried in one ver
 `tech-debt` is not a GitHub default label: create it, or use `enhancement`.
 
 ## 9. [sfxgen] Make sfx_bank.js rebuildable from a fresh clone
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/8
 
 **Labels:** tech-debt
 
@@ -258,6 +269,8 @@ change any other sound's takes.
 
 ## 10. [sfxgen] Flag a stale calib.json when a procedural sound changes
 
+**Filed as:** https://github.com/saworbit/slaghouse/issues/9
+
 **Labels:** tech-debt
 
 **Problem.** Every sample's gain is matched to the loudness of the synth sound it replaces, as stored in
@@ -276,6 +289,8 @@ Puppeteer driving the `OfflineAudioContext` code that already exists) so re-meas
 ---
 
 ## 11. [Sfx] N toggle leaves the ambient hum on the old version
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/10
 
 **Labels:** bug
 
@@ -298,6 +313,8 @@ drone, and repeated toggling doesn't stack or leak nodes.
 
 ## 12. [Audio] Report sample-bank decode failures instead of swallowing them
 
+**Filed as:** https://github.com/saworbit/slaghouse/issues/11
+
 **Labels:** bug
 
 **Problem.** Both loaders discard `decodeAudioData` errors. `Sfx.loadBank()` passes `() => {}` as the rejection
@@ -317,6 +334,8 @@ show what is actually playing.
 ---
 
 ## 13. [Repo] Keep generated audio banks and version snapshots from growing history
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/12
 
 **Status:** partly done in the overdrive round. `build.py` now keeps the existing encode for any sound whose picks and source WAVs are unchanged (`out/bank_src.json`), and new encodes are bit-exact, so adding a sound adds one line to `sfx_bank.js`. `music_bank.js` and `versions/` still stand as described.
 
@@ -361,6 +380,8 @@ the AudioGen takes at synth quality.
 
 ## 15. [Input] Test the gamepad layer on real controllers
 
+**Filed as:** https://github.com/saworbit/slaghouse/issues/13
+
 **Labels:** testing
 
 **Context**
@@ -384,6 +405,8 @@ calls `vibrationActuator.playEffect`. No real pad has been plugged in yet.
 ---
 
 ## 16. [Perf] Dead enemies stay in the enemy group until the arena changes
+
+**Filed as:** https://github.com/saworbit/slaghouse/issues/14
 
 **Labels:** enhancement
 
