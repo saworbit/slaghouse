@@ -25,6 +25,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   version they were measured against, taken from git history. (#9)
 
 ### Changed
+- Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
+  pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
+- Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
+  The next wave's look-ahead drops them again. (#40)
 - Lockdown starts with a grunt patrol and offers a choice of damage, sustain or mobility in the first perk draft.
 - Speedrunner requires a campaign clear under 10 minutes without using Continue or retrying from a checkpoint.
 - `dev/synthwave` has its own `requirements.txt` (numpy, scipy, numba, soundfile; no torch or GPU), and `loud.py`
