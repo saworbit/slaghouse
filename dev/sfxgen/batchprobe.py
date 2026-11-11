@@ -187,6 +187,12 @@ PROBES = {
  'railHum': ['an electrical hum', 'a dog barking', 'rain', 'music'],
  'dozer': ['a diesel engine', 'a gunshot', 'a dog barking', 'static noise'],
  'jellyZap': ['an electric zap', 'a gunshot', 'glass breaking', 'static noise'],
+ # gold round
+ 'tether': ['an energy zing', 'a dog barking', 'rain', 'static noise'],
+ 'sprout': ['an organic pop', 'a gunshot', 'glass breaking', 'static noise'],
+ 'gatlingSpin': ['a rising mechanical whine', 'a dog barking', 'rain', 'music'],
+ 'gatlingFire': ['a gunshot', 'a dog barking', 'rain', 'static noise'],
+ 'bannerPlant': ['a heavy thunk', 'a gunshot', 'glass breaking', 'static noise'],
 }
 names = sys.argv[1:] or list(PROBES)
 C = json.load(open('out/candidates.json'))

@@ -1,9 +1,9 @@
 # SLAGHOUSE
 
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
-pixel art, ragdolls and gibs, destructible terrain, 59 weapons (each with mastery stars to earn), 91 enemy types
+pixel art, ragdolls and gibs, destructible terrain, 61 weapons (each with mastery stars to earn, and gold plating at three), 94 enemy types
 (with an in-game codex), power-up supply drops, three
-arenas (five in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode and a seeded DAILY run), a perk pick after every wave and 26 medals to collect, on Easy, Normal or Brutal, with keyboard
+arenas (five in OVERTIME) and six waves that end in a boss fight (plus an endless OVERTIME mode, a seeded DAILY run and a BOSS RUSH), a perk pick after every wave and 27 medals to collect, on Easy, Normal or Brutal, with keyboard
 and mouse or a gamepad (with aim assist). The game runs in a browser with no build step.
 
 ## Play
@@ -34,7 +34,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke and dragon's breath have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
@@ -80,7 +80,8 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Drone pod (two gun drones orbit you for 10 s) | wheel | Gas launcher (a cloud of your own gas; light it for a fireball) |
 | wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | wheel | Riot shield (hold to block and reflect shots, let go to bash) |
 | wheel | Glue gun (gums foes up so they crawl) | wheel | Mini-nuke (one slow shell, one very big bang) |
-| wheel | Dragon's breath (burning buckshot) | | |
+| wheel | Dragon's breath (burning buckshot) | wheel | Seed launcher (plants a fungus turret that spores foes) |
+| wheel | Tether gun (links three foes: hurt one, hurt all) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -91,20 +92,20 @@ and **ARENA 03 :: THE SORTING LINE** (waves 5-6), where conveyor belts carry eve
 down on a tell. Clearing an arena takes you down the lift with your health, gun, perks and stats carried over.
 
 1. 10 placed enemies.
-2. 21 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
+2. 22 enemies in a **BLACKOUT**: you only see a small circle around you, and gunfire lights it up. Includes a
    mirror knight that reflects your shots, a wraith that drifts through walls, a tar spitter whose puddles slow you (and burn when lit), a mimic
    hiding among the drums, a gasbag whose toxic cloud goes up in a fireball if you light it, a creeper that
-   drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a soul-drinking zealot, a jellyfish trailing shock tendrils, a grenadier and a pack of sparkers that link up with live arcs.
+   drops off the ceiling, a scorcher that sprints trailing fire, a discus thrower whose disc comes back, an arc pylon that throws lightning, a berserker, a soul-drinking zealot, a jellyfish trailing shock tendrils, a burning cinder wheel (kick it back), a grenadier and a pack of sparkers that link up with live arcs.
 3. 21 enemies under **SLAG RAIN**, with a scrap golem that lobs junk over cover, a shellback you have to flip, a pyro, a torcher with a flamethrower (get behind it), a harpooner, a corpse-raising stitcher, a ricocheting buzzsaw
    (kick it back), a pilferer that steals your gun, a beacon that calls in reinforcements, leeches, a spotter whose red eye marks you for every foe, a
    duelist that sidesteps your shots, an armoured roller, a lugger that hurls drums, a bastion behind a hard-light wall, a porcupine that answers every hit with quills, a bulldozer that plows everything ahead of it, an orbiter whose spinning plates eat your shots and the gunship mini-boss.
-4. 21 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
+4. 22 enemies in **LOW GRAVITY**, led by the juggernaut mini-boss, with a pair of linker fence drones, a hive
    that keeps a gnat swarm going, a pair of pouncing hounds, a crane claw that grabs you from above, a magnetron whose field bends your shots away, a vortex drone that drags you in, a thundercloud that drops lightning on you, a teleporting blinker
    a howitzer that shells you from range, a welder that repairs the machines and builds turrets, and a jammer whose
-   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines, a sponge that soaks up bullets and spits them back and an acid slug. The furnace's fire vents go off every few seconds.
-5. 19 enemies (25 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
+   EMP ring jams your gun, a pogo, a spikeball, a bomber blimp, a chiller that ices the floor, a spore pod that puffs homing spores, a mine layer that seeds the floor with mines, a sponge that soaks up bullets and spits them back, a banner bearer that heals everything near it and an acid slug. The furnace's fire vents go off every few seconds.
+5. 20 enemies (26 once the slagling splits) in **MELTDOWN**: molten slag floods the ground floor for 6 s at a
    time, about every 25 s. A slagling, a rat king that bursts into ratbots, a burrower, a scavenger that eats the dead to grow, linkers, an echo, a laser strider, a warhorn that rallies the rest, a wall-leaping shinobi, a beacon,
-   a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman, a leaper that lands where you stood, a copycat that copies your gun and the Slag Wyrm mini-boss.
+   a paratrooper, a swapper that trades places with you, a tar spitter, a grappler that hurls you across the room, an axe-swinging headsman, a leaper that lands where you stood, a copycat that copies your gun, a gatling that hoses the room and the Slag Wyrm mini-boss.
 6. THE SMELTER, the boss. Below 15% health it overheats: its armour blows off and it fans slag everywhere.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
@@ -114,7 +115,7 @@ type can turn up, from echoes (holograms that replay your path and shots) to wra
 **DAILY** is an OVERTIME run seeded by the date: the same arena, starting perks, waves and modifiers for everyone
 that day.
 
-Every kill counts toward that gun's **mastery**: 25, 100 and 250 kills earn its three stars, each +5% damage with
+Every kill counts toward that gun's **mastery** (three stars gold-plate it): 25, 100 and 250 kills earn its three stars, each +5% damage with
 it. The weapon wheel shows each gun's stars.
 
 Medkits restock between waves, and after each wave you pick one of three perks for the rest of the run (more

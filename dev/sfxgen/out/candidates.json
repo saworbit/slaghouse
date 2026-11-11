@@ -13158,5 +13158,383 @@
    "clap": 0.0401,
    "score": -0.0399
   }
+ ],
+ "tether": [
+  {
+   "id": "3",
+   "dur": 0.3,
+   "loud": 0.327057,
+   "prompt": "a grappling line shooting out, a zing",
+   "clap": 0.2417,
+   "score": 0.2417
+  },
+  {
+   "id": "1",
+   "dur": 0.3,
+   "loud": 0.357963,
+   "prompt": "a grappling line shooting out, a zing",
+   "clap": 0.1387,
+   "score": 0.1387
+  },
+  {
+   "id": "6",
+   "dur": 0.3,
+   "loud": 0.249585,
+   "prompt": "a sci-fi dart gun firing with a twang, a light whip of energy",
+   "clap": 0.0757,
+   "score": 0.0757
+  },
+  {
+   "id": "0",
+   "dur": 0.3,
+   "loud": 0.295238,
+   "prompt": "a sci-fi dart gun firing with a twang, a light whip of energy",
+   "clap": 0.0729,
+   "score": 0.0729
+  },
+  {
+   "id": "2",
+   "dur": 0.3,
+   "loud": 0.258551,
+   "prompt": "a sci-fi dart gun firing with a twang, a light whip of energy",
+   "clap": 0.0637,
+   "score": 0.0637
+  },
+  {
+   "id": "5",
+   "dur": 0.3,
+   "loud": 0.192155,
+   "prompt": "a grappling line shooting out, a zing",
+   "clap": 0.0277,
+   "score": 0.0277
+  },
+  {
+   "id": "7",
+   "dur": 0.3,
+   "loud": 0.290995,
+   "prompt": "a grappling line shooting out, a zing",
+   "clap": 0.0265,
+   "score": 0.0265
+  },
+  {
+   "id": "4",
+   "dur": 0.14,
+   "loud": 0.240703,
+   "prompt": "a sci-fi dart gun firing with a twang, a light whip of energy",
+   "clap": 0.0217,
+   "score": 0.0217
+  }
+ ],
+ "sprout": [
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.184716,
+   "prompt": "a plant sprouting quickly, a wet organic pop",
+   "clap": 0.2863,
+   "score": 0.2863
+  },
+  {
+   "id": "0",
+   "dur": 0.4,
+   "loud": 0.226092,
+   "prompt": "a plant sprouting quickly, a wet organic pop",
+   "clap": 0.2359,
+   "score": 0.2359
+  },
+  {
+   "id": "3",
+   "dur": 0.4,
+   "loud": 0.152479,
+   "prompt": "a mushroom bursting out of the ground",
+   "clap": 0.1505,
+   "score": 0.1505
+  },
+  {
+   "id": "6",
+   "dur": 0.387,
+   "loud": 0.121044,
+   "prompt": "a plant sprouting quickly, a wet organic pop",
+   "clap": 0.1417,
+   "score": 0.1417
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.275705,
+   "prompt": "a mushroom bursting out of the ground",
+   "clap": 0.0905,
+   "score": 0.0905
+  },
+  {
+   "id": "4",
+   "dur": 0.072,
+   "loud": 0.183022,
+   "prompt": "a plant sprouting quickly, a wet organic pop",
+   "clap": 0.1531,
+   "score": 0.0731
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.282049,
+   "prompt": "a mushroom bursting out of the ground",
+   "clap": 0.0606,
+   "score": 0.0606
+  },
+  {
+   "id": "7",
+   "dur": 0.4,
+   "loud": 0.289855,
+   "prompt": "a mushroom bursting out of the ground",
+   "clap": 0.057,
+   "score": 0.057
+  }
+ ],
+ "gatlingSpin": [
+  {
+   "id": "2",
+   "dur": 1.0,
+   "loud": 0.316999,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0112,
+   "score": -0.0112
+  },
+  {
+   "id": "0",
+   "dur": 1.0,
+   "loud": 0.320731,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0274,
+   "score": -0.0274
+  },
+  {
+   "id": "4",
+   "dur": 0.702,
+   "loud": 0.237857,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0415,
+   "score": -0.0415
+  },
+  {
+   "id": "3",
+   "dur": 0.46,
+   "loud": 0.209905,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0676,
+   "score": -0.0676
+  },
+  {
+   "id": "5",
+   "dur": 0.301,
+   "loud": 0.251335,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0841,
+   "score": -0.1641
+  },
+  {
+   "id": "1",
+   "dur": 0.065,
+   "loud": 0.149465,
+   "prompt": "a minigun spinning up, a rising mechanical whine",
+   "clap": -0.0865,
+   "score": -0.1665
+  }
+ ],
+ "gatlingFire": [
+  {
+   "id": "1-0",
+   "dur": 0.12,
+   "loud": 0.364092,
+   "prompt": "a gatling gun burst",
+   "clap": 0.1076,
+   "score": 0.1076
+  },
+  {
+   "id": "3-0",
+   "dur": 0.12,
+   "loud": 0.192895,
+   "prompt": "a gatling gun burst",
+   "clap": 0.1018,
+   "score": 0.1018
+  },
+  {
+   "id": "6-0",
+   "dur": 0.088,
+   "loud": 0.221957,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": 0.0845,
+   "score": 0.0845
+  },
+  {
+   "id": "6-1",
+   "dur": 0.094,
+   "loud": 0.310218,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": 0.0189,
+   "score": 0.0189
+  },
+  {
+   "id": "0-2",
+   "dur": 0.05,
+   "loud": 0.278686,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0267,
+   "score": -0.0267
+  },
+  {
+   "id": "6-4",
+   "dur": 0.12,
+   "loud": 0.293488,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0307,
+   "score": -0.0307
+  },
+  {
+   "id": "6-2",
+   "dur": 0.12,
+   "loud": 0.248525,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0529,
+   "score": -0.0529
+  },
+  {
+   "id": "0-0",
+   "dur": 0.054,
+   "loud": 0.263225,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0622,
+   "score": -0.0622
+  },
+  {
+   "id": "6-3",
+   "dur": 0.12,
+   "loud": 0.224356,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.063,
+   "score": -0.063
+  },
+  {
+   "id": "2-4",
+   "dur": 0.116,
+   "loud": 0.431845,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0758,
+   "score": -0.0758
+  },
+  {
+   "id": "0-3",
+   "dur": 0.052,
+   "loud": 0.26627,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.1086,
+   "score": -0.1086
+  },
+  {
+   "id": "2-2",
+   "dur": 0.12,
+   "loud": 0.409065,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.1133,
+   "score": -0.1133
+  },
+  {
+   "id": "2-1",
+   "dur": 0.12,
+   "loud": 0.311353,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.1146,
+   "score": -0.1146
+  },
+  {
+   "id": "0-1",
+   "dur": 0.044,
+   "loud": 0.243818,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.0473,
+   "score": -0.1273
+  },
+  {
+   "id": "2-3",
+   "dur": 0.112,
+   "loud": 0.364301,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.1422,
+   "score": -0.1422
+  },
+  {
+   "id": "2-0",
+   "dur": 0.12,
+   "loud": 0.246153,
+   "prompt": "a minigun firing, a fast brrrt of gunshots",
+   "clap": -0.1856,
+   "score": -0.1856
+  }
+ ],
+ "bannerPlant": [
+  {
+   "id": "0",
+   "dur": 0.259,
+   "loud": 0.099792,
+   "prompt": "a flag pole slammed into the ground, a thud and cloth flap",
+   "clap": 0.2004,
+   "score": 0.2004
+  },
+  {
+   "id": "5",
+   "dur": 0.4,
+   "loud": 0.27084,
+   "prompt": "a banner planted with a heavy thunk",
+   "clap": 0.069,
+   "score": 0.069
+  },
+  {
+   "id": "2",
+   "dur": 0.4,
+   "loud": 0.147395,
+   "prompt": "a flag pole slammed into the ground, a thud and cloth flap",
+   "clap": 0.0529,
+   "score": 0.0529
+  },
+  {
+   "id": "3",
+   "dur": 0.356,
+   "loud": 0.304603,
+   "prompt": "a banner planted with a heavy thunk",
+   "clap": 0.0403,
+   "score": 0.0403
+  },
+  {
+   "id": "6",
+   "dur": 0.4,
+   "loud": 0.23987,
+   "prompt": "a flag pole slammed into the ground, a thud and cloth flap",
+   "clap": 0.039,
+   "score": 0.039
+  },
+  {
+   "id": "1",
+   "dur": 0.4,
+   "loud": 0.299895,
+   "prompt": "a banner planted with a heavy thunk",
+   "clap": 0.0337,
+   "score": 0.0337
+  },
+  {
+   "id": "7",
+   "dur": 0.335,
+   "loud": 0.430597,
+   "prompt": "a banner planted with a heavy thunk",
+   "clap": 0.0162,
+   "score": 0.0162
+  },
+  {
+   "id": "4",
+   "dur": 0.265,
+   "loud": 0.350652,
+   "prompt": "a flag pole slammed into the ground, a thud and cloth flap",
+   "clap": -0.0097,
+   "score": -0.0097
+  }
  ]
 }

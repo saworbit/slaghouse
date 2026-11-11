@@ -169,9 +169,14 @@
                           a mushroom of smoke. 3.5 s.
     Dragon's breath ..... (wheel) a sawn-off loaded with burning buckshot: six pellets (7 each) that set foes alight, and
                           about a third of the ones that hit a surface light a fire patch. 800 ms.
+    Seed launcher ....... (wheel) a lobbed seed that roots where it lands and sprouts (1 s) into a fungus turret for 9 s:
+                          every 1.6 s it puffs two homing spores (8 each) at the nearest foe it can see within 220 px.
+                          Two can grow at once.
+    Tether gun .......... (wheel) a fast dart (6) that links whatever it hits: up to three foes at once, for 8 s each.
+                          Damage to any linked foe is shared with the others at 60%.
     Weapon swap ......... 1-9 0 - = BKSP [ ] \ ; ' , . / Z X K L U I O Y H or Q/E / wheel; 120 ms draw. Each gun keeps its own fire
                           cooldown, so swapping off a slow gun (Singularity, railgun) never delays the next one.
-    Weapon wheel (Tab) .. hold for a ring of all 59 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
+    Weapon wheel (Tab) .. hold for a ring of all 61 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
                           under the name says what the gun does. Gold pips
                           under each gun show its mastery stars.
     Executions .......... an enemy under 20% health (30+ max HP, no bosses) pulses orange: kick it (or hammer-swing
@@ -440,6 +445,15 @@
     Jellyfish 50 HP ..... a shock jelly that drifts in pulses toward a spot just above you, trailing 36 px of tendrils
                           that zap anything under it (6 every 0.3 s). Popped, it discharges a shock nova (18 within
                           50 px, you included).
+    Cinder wheel 60 HP .. a burning iron wheel (fireproof) that rolls at you (150 px/s), bouncing off walls and hopping
+                          when you're above it, leaving a trail of fire. Kick it and it's yours for 1.5 s: it rolls
+                          back at 260 px/s, slamming into foes (40 each, and alight).
+    Gatling 150 HP ...... a heavy with a six-barrel gun, 140-260 px off: it spins up (0.9 s, a red sight), then hoses a
+                          stream for 2.2 s (5 a round) that tracks at only 1.2 rad/s; then it overheats for 1.5 s and
+                          takes x1.5. Otherwise its gun shields its front (x0.6).
+    Banner 80 HP ........ a standard-bearer that hangs back 200-300 px and every ~6 s plants its banner: every other foe
+                          within 150 px regenerates 5 HP a second (a green ring), it half that. It moves on if you
+                          close in.
     Wraith 70 HP ........ a shroud that drifts straight at you through walls and floors (50 px/s), faint while inside
                           them. In the open and within 85 px it shrieks (0.45 s), lunges (300 px/s, 14 on a touch)
                           and fades back for 1.4 s. Shoot it when it comes out.
@@ -480,15 +494,15 @@
     Fire jets ........... ARENA 02: three vents on the furnace top. Every ~9 s the grate flares (1.1 s tell), then they
                           fire left to right (1.3 s each, 0.3 s apart): 76 px columns that burn you for 9 per 0.25 s
                           and fling you out, and set alight any foe, corpse, drum or tar up there.
-    Waves ............... wave 1 = 10 placed enemies; wave 2 = 21 in a BLACKOUT (vision shrinks to a pool round
+    Waves ............... wave 1 = 10 placed enemies; wave 2 = 22 in a BLACKOUT (vision shrinks to a pool round
                           you, enemy eyes and lasers glow, gunfire strobes it wider) with a cloaker, a scorcher, a mirror knight,
-                          a wraith, a tar spitter, a mimic, a gasbag, a creeper, a discus, an arc pylon, a berserker, a zealot, a jellyfish and two sparkers; wave 3 = 21 under SLAG
+                          a wraith, a tar spitter, a mimic, a gasbag, a creeper, a discus, an arc pylon, a berserker, a zealot, a jellyfish, a cinder wheel and two sparkers; wave 3 = 21 under SLAG
                           RAIN with a scrap golem, a shellback, a pyro, a torcher, a harpooner, a stitcher, a duelist, a roller, a buzzsaw,
-                          an orbiter, a lugger, a mimic, a spotter, a bastion, a porcupine, a bulldozer and the gunship; wave 4 = 21 in LOW GRAVITY led by the
+                          an orbiter, a lugger, a mimic, a spotter, a bastion, a porcupine, a bulldozer and the gunship; wave 4 = 22 in LOW GRAVITY led by the
                           juggernaut, with a linker pair, a hive, two hounds, a claw, a magnetron, a vortex, a thundercloud, a blinker, a
-                          howitzer, a welder, a blimp, a chiller, a spore pod, a mine layer, a sponge and a jammer; wave 5 = 19 (25 with
+                          howitzer, a welder, a blimp, a chiller, a spore pod, a mine layer, a sponge, a banner bearer and a jammer; wave 5 = 20 (26 with
                           splits) in MELTDOWN with a slagling, a rat king, a burrower, a scavenger, linkers, a duelist, a strider,
-                          a warhorn, a shinobi, a swapper, a tar spitter, a grappler, a headsman, a leaper, a copycat and the slag wyrm;
+                          a warhorn, a shinobi, a swapper, a tar spitter, a grappler, a headsman, a leaper, a copycat, a gatling and the slag wyrm;
                           wave 6 = the boss. Each wave opens with a title card. Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad): HOLLOW POINTS +20%
                           damage, HAIR TRIGGER 20% faster fire, VAMPIRE 3 HP a kill, IRON BOOTS double kick damage
@@ -501,9 +515,9 @@
     Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
                           bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
                           New pipes every wave.
-    Medals .............. 26 to earn in a run (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
+    Medals .............. 27 to earn (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
                           kills, 5 crush kills, 3 shock combos, 3 supercombines, 5 wall splats, kills with 15 guns, 3
-                          rampages, a 6-kill chain, 8 katana deflects, 6 elites, 3 wrecking-ball kills, 5 microwave pops, beating the Foreman, a win with a mutator on, 15 ratbots, beating Boss Rush, 5 kills with one mini-nuke, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
+                          rampages, a 6-kill chain, 8 katana deflects, 6 elites, 3 wrecking-ball kills, 5 microwave pops, beating the Foreman, a win with a mutator on, 15 ratbots, beating Boss Rush, 5 kills with one mini-nuke, gold-plating a gun, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win, a
                           Brutal win). A gold toast pops when one lands; the results list the run's medals and the
                           title counts the collection (localStorage).
     Last-kill cam ....... the final kill of each wave: 0.9 s of slow-mo, a zoom punch, an impact frame and the camera
@@ -531,7 +545,9 @@
                           for the day is kept.
     Mastery ............. every kill with a gun counts toward it for good (localStorage). 25 / 100 / 250 kills earn
                           its 1st / 2nd / 3rd star, each worth +5% damage with that gun; a callout and a chime mark
-                          a new star, and the wheel shows each gun's stars.
+                          a new star, and the wheel shows each gun's stars. Three stars and the gun is gold-plated: it
+                          glints gold in your hand, on the HUD ribbon and in the ARMORY.
+    Lifetime ............ kills, runs, deaths and time played are kept (localStorage) and shown on the ARMORY page.
     Title menu .......... CAMPAIGN, OVERTIME, DAILY, BOSS RUSH, CODEX, ARMORY (every gun with its line, key, kills and mastery
                           pips), MEDALS, OPTIONS. CODEX: every foe, a grey silhouette until you've met it, with a line on
                           each; 66 to a page, Q/E turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS (difficulty, music, SFX, shake, post
@@ -836,6 +852,12 @@ const TUNE = {
   DOZER:     { speed: 50, front: 0.3, rear: 1.5, crush: 20 },
   COPYCAT:   { speed: 60, cd: 2.4 },
   JELLY:     { speed: 30, drop: 36, tick: 0.3, dmg: 6, nova: 50, novaDmg: 18 },
+  // ---- gold round ----
+  SEED:      { cooldown: 1200, speed: 260, max: 2, grow: 1, life: 9, cd: 1.6, range: 220, dmg: 8, spore: 150 },
+  TETHER:    { cooldown: 300, speed: 600, max: 3, share: 0.6, life: 8, dmg: 6 },
+  CINDER:    { speed: 150, hop: 260, trail: 1.6, owned: 1.5, ownSpeed: 260, ownDmg: 40 },
+  GATLING:   { speed: 35, keep: [140, 260], spin: 0.9, burst: 2.2, rate: 0.07, dmg: 5, turn: 1.2, cool: 1.5, front: 0.6, hot: 1.5 },
+  BANNER:    { speed: 40, keep: [200, 300], radius: 150, heal: 5, plant: 6 },
   FOREMAN:   { speed: 40, rage: 62, cd: 2.2, slamTell: 700, slamDmg: 22, spray: 3, magnet: 1.6, pull: 110, maxHounds: 4, core: 1.3 },
 };
 const DIFFS = [                                        // title screen: left / right picks one
@@ -905,6 +927,7 @@ const MEDALS = [
   { id: 'pest', name: 'PEST CONTROL', d: '15 RATBOTS IN A RUN' },
   { id: 'rusher', name: 'RUSHER', d: 'BEAT BOSS RUSH' },
   { id: 'nukeit', name: 'NUKE IT', d: '5 KILLS WITH ONE MINI-NUKE' },
+  { id: 'goldsmith', name: 'GOLDSMITH', d: 'GOLD-PLATE A GUN (3 STARS)' },
   { id: 'ghost', name: 'GHOST STEP', d: '10 DASH DODGES' },
   { id: 'demo', name: 'DEMOLITION', d: 'DETONATE 4 LIMPETS AT ONCE' },
   { id: 'slayer', name: 'SLAG SLAYER', d: 'BEAT THE SMELTER' },
@@ -1018,6 +1041,9 @@ const CODEX = [
   ['bulldozer', 'BULLDOZER', 'w0', 'ITS PLOW SHOVES EVERYTHING AHEAD AND SHRUGS OFF SHOTS. FLANK IT.'],
   ['copycat', 'COPYCAT', 'c0', 'COPIES THE GUN IN YOUR HAND: BURSTS, SPREADS, LOBS OR BEAMS.'],
   ['jelly', 'JELLYFISH', 'j0', 'DRIFTS OVER YOU TRAILING SHOCK TENDRILS. POPS IN A SHOCK NOVA.'],
+  ['cinder', 'CINDER WHEEL', 'w0', 'A BURNING WHEEL THAT ROLLS AND HOPS. KICK IT BACK AT THEM.'],
+  ['gatling', 'GATLING', 'w0', 'SPINS UP, THEN HOSES YOU. OUTRUN THE STREAM; HIT IT WHEN HOT.'],
+  ['banner', 'BANNER', 'w0', 'PLANTS A BANNER THAT HEALS EVERY FOE NEAR IT. TAKE IT DOWN.'],
   ['foreman', 'THE FOREMAN', 'w0', 'OVERTIME BOSS. SLAMS, SPRAYS RIVETS, MAGNETS YOU IN, CALLS HOUNDS.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
 ];
@@ -1031,6 +1057,8 @@ const seeded = seed => () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul
 // ---- weapon mastery: lifetime kills per gun; 25 / 100 / 250 earn a star (+5% damage each) ----
 const MASTERY = (() => { try { const o = JSON.parse(localStorage.getItem('slaghouse.mastery') || '{}'); return o && typeof o === 'object' ? o : {}; } catch (err) { return {}; } })();
 const masteryStars = id => TUNE.MASTERY.filter(n => (MASTERY[id] || 0) >= n).length;
+const LIFE = (() => { try { const o = JSON.parse(localStorage.getItem('slaghouse.life') || '{}'); return Object.assign({ kills: 0, runs: 0, deaths: 0, time: 0 }, o && typeof o === 'object' ? o : {}); } catch (err) { return { kills: 0, runs: 0, deaths: 0, time: 0 }; } })();
+const saveLife = () => { try { localStorage.setItem('slaghouse.life', JSON.stringify(LIFE)); } catch (err) { /* private mode */ } };
 const saveMastery = () => { try { localStorage.setItem('slaghouse.mastery', JSON.stringify(MASTERY)); } catch (err) { /* private mode */ } };
 let RUNMODE = 'campaign';                                // 'campaign' or 'endless' (OVERTIME), picked on the title screen
 const saveOpt = key => { try { localStorage.setItem('slaghouse.' + key, String(OPTS[key])); } catch (err) { /* private mode */ } };
@@ -1094,6 +1122,8 @@ const WEAPONS = [
   Object.assign({ id: 'glue', name: 'GLUE GUN', gun: 'glue' }, TUNE.GLUE),
   Object.assign({ id: 'nuke', name: 'MINI-NUKE', gun: 'nuke' }, TUNE.NUKE),
   Object.assign({ id: 'dragon', name: "DRAGON'S BREATH", gun: 'dragon' }, TUNE.DRAGON),
+  Object.assign({ id: 'seed', name: 'SEED LAUNCHER', gun: 'seed' }, TUNE.SEED),
+  Object.assign({ id: 'tether', name: 'TETHER GUN', gun: 'tether' }, TUNE.TETHER),
 ];
 // one line per gun for the weapon wheel
 const BLURBS = {
@@ -1120,6 +1150,7 @@ const BLURBS = {
   gaslaunch: 'A CLOUD THAT EATS FOES. LIGHT IT UP.', bubble: 'TRAPS FOES IN BUBBLES. POP TO DROP.',
   shield: 'HOLD: BLOCK, REFLECT. LET GO: BASH.', glue: 'GLUE GLOBS. GUMMED-UP FOES CRAWL.',
   nuke: 'ONE SLOW SHELL. ONE VERY BIG BANG.', dragon: 'BURNING BUCKSHOT. SETS FLOORS ALIGHT.',
+  seed: 'PLANTS A FUNGUS THAT SPORES FOES.', tether: 'LINK 3 FOES. HURT ONE, HURT ALL.',
 };
 const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'", ',', '.', '/', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];   // HUD labels (< = backspace; the flail has no key: wheel or Q/E)
 while (SLOT_KEYS.length < WEAPONS.length) SLOT_KEYS.push(' ');      // wheel-only guns have no key
@@ -1224,6 +1255,9 @@ const ENEMY = {
   lugger: { key: 'lugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
   blimp: { key: 'blimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
   strider: { key: 'strider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
+  cinder: { key: 'cinder', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 150, sight: 420, touch: 12, kb: 0.5, mech: true, gibs: ['g_plate', 'g_shard', 'g_shard2'], gibN: [6, 8] },
+  gatling: { key: 'gatling', fw: 22, fh: 24, bw: 14, bh: 20, hp: 150, speed: 35, sight: 420, touch: 10, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
+  banner: { key: 'banner', fw: 16, fh: 26, bw: 10, bh: 20, hp: 80, speed: 40, sight: 420, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
   bulldozer: { key: 'bulldozer', fw: 26, fh: 20, bw: 22, bh: 16, hp: 180, speed: 50, sight: 380, touch: 14, kb: 0.05, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [10, 14] },
   copycat: { key: 'copycat', fw: 16, fh: 14, bw: 12, bh: 10, hp: 70, speed: 60, sight: 480, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 8] },
   jelly: { key: 'jelly', fw: 16, fh: 20, bw: 12, bh: 10, hp: 50, speed: 30, sight: 400, touch: 0, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2'], gibN: [5, 7] },
@@ -1696,6 +1730,12 @@ const Sfx = {
     if (v <= 0.02) { this.swarmNode = null; n.g.gain.setTargetAtTime(0.0001, t, 0.15); for (const s of n.nodes) s.stop(t + 0.8); return; }
     n.g.gain.setTargetAtTime((n.bank ? this.bankGain.swarmLoop : 0.05) * v, t, 0.1);
   },
+  // ---- gold round ----
+  tether() { if (!this.ok('tth', 0.08)) return; if (this.smp('tether')) return; this.tone({ type: 'sine', f0: 1200, f1: 2400, dur: 0.12, vol: 0.05 }); this.tone({ type: 'triangle', f0: 600, f1: 900, dur: 0.15, vol: 0.03 }); },
+  sprout() { if (!this.ok('spr', 0.2)) return; if (this.smp('sprout')) return; this.noise({ filter: 'lowpass', f0: 900, f1: 300, dur: 0.25, vol: 0.15 }); this.tone({ type: 'sine', f0: 200, f1: 500, dur: 0.2, vol: 0.05 }); },
+  gatlingSpin() { if (!this.ok('gsp', 0.6)) return; if (this.smp('gatlingSpin')) return; this.tone({ type: 'sawtooth', f0: 80, f1: 600, dur: 0.9, vol: 0.05 }); },
+  gatlingFire() { if (!this.ok('gfr', 0.06)) return; if (this.smp('gatlingFire')) return; this.noise({ filter: 'bandpass', f0: 1500, q: 1, dur: 0.05, vol: 0.18 }); },
+  bannerPlant() { if (!this.ok('bnp', 0.5)) return; if (this.smp('bannerPlant')) return; this.noise({ filter: 'lowpass', f0: 1200, f1: 200, dur: 0.2, vol: 0.25 }); this.tone({ type: 'sine', f0: 520, f1: 780, dur: 0.3, vol: 0.05, delay: 0.1 }); },
   // ---- powerhouse round ----
   nuke() { if (!this.ok('nuk', 0.3)) return; if (this.smp('nuke')) return; this.noise({ filter: 'lowpass', f0: 2500, f1: 60, dur: 1.8, vol: 0.8, dest: this.crunch }); this.tone({ type: 'sine', f0: 60, f1: 25, dur: 1.6, vol: 0.6 }); },
   dragon() { if (!this.ok('drg', 0.1)) return; if (this.smp('dragon')) return; this.noise({ filter: 'lowpass', f0: 4000, f1: 600, dur: 0.4, vol: 0.45 }); this.noise({ filter: 'bandpass', f0: 900, f1: 1800, q: 0.8, dur: 0.5, vol: 0.2, delay: 0.04 }); },
@@ -2959,6 +2999,29 @@ function drawStrider(ctx, frame) {                   // 20x36 strider: a sensor 
   R(ctx, '#0a0a0c', 11, 5 + top, 5, 3); R(ctx, '#ff3020', 13, 6 + top, 2, 1);                                         // the eye
 }
 // ---- finale round: new enemies --------------------------------------------------------
+// ---- gold round: new enemies --------------------------------------------------------
+function drawCinder(ctx, frame) {                    // 16x16 cinder wheel: an iron spoked wheel wrapped in flame
+  const f = frame === 'w1' ? 1 : 0, M = '#3a3f47', Md = '#1a1c20', F = '#ff8a1f';
+  R(ctx, Md, 4, 1, 8, 14); R(ctx, Md, 1, 4, 14, 8); R(ctx, Md, 2, 2, 12, 12); R(ctx, M, 3, 3, 10, 10);                  // the rim
+  R(ctx, '#c84008', 4, 4, 8, 8); R(ctx, F, 5, 5, 6, 6); R(ctx, '#ffe46a', 7, 7, 2, 2);                                   // burning hub
+  if (f) { R(ctx, Md, 7, 2, 2, 12); R(ctx, Md, 2, 7, 12, 2); } else { for (let i = 0; i < 4; i++) { R(ctx, Md, 3 + i * 3, 3 + i * 3, 2, 2); R(ctx, Md, 11 - i * 3, 3 + i * 3, 2, 2); } }   // spokes
+}
+function drawGatling(ctx, frame) {                   // 22x24 gatling: a heavy hauling a six-barrel gun on a strap
+  const s = frame === 'w1' ? 1 : 0, f = frame === 'fire' || frame === 'fire2', S = '#4a5a4a', Sd = '#2a342a', K = '#141410', G = '#3a3f47';
+  R(ctx, Sd, 5 - s, 16, 4, 8); R(ctx, Sd, 11 + s, 16, 4, 8); R(ctx, K, 4 - s, 23, 6, 1); R(ctx, K, 10 + s, 23, 6, 1);
+  R(ctx, Sd, 4, 7, 12, 10); R(ctx, S, 5, 7, 10, 9); R(ctx, '#e8b422', 5, 9, 10, 1);                                      // body, ammo belt
+  R(ctx, Sd, 7, 1, 7, 6); R(ctx, '#c89070', 8, 2, 5, 4); R(ctx, K, 10, 3, 3, 1);                                         // head
+  R(ctx, G, 12, 10, 8, 5); R(ctx, '#22262c', 18, 9, 4, 7);                                                               // the gun body
+  for (let i = 0; i < 3; i++) R(ctx, (frame === 'fire2' ? i + 1 : i) % 2 ? '#8a94a0' : '#5a636e', 20, 10 + i * 2, 2, 1); // barrels turning
+  if (f) R(ctx, '#ffe46a', 21, 11, 1, 3);
+}
+function drawBanner(ctx, frame) {                    // 16x26 banner: a robed bearer with a tall green banner
+  const s = frame === 'w1' ? 1 : 0, pl = frame === 'plant', Rb = '#3a5a3a', Rd = '#1e321e', G = '#5cff7a', Gd = '#2a8a3a';
+  R(ctx, Rd, 3, 16, 7, 10); R(ctx, Rb, 4, 16, 5, 9); R(ctx, Rd, 3 - s, 24, 3, 2); R(ctx, Rd, 7 + s, 24, 3, 2);            // robe
+  R(ctx, Rd, 3, 8, 7, 9); R(ctx, Rb, 4, 8, 5, 8); R(ctx, Rd, 4, 2, 5, 6); R(ctx, '#c89070', 5, 3, 3, 4);                 // body, head
+  const px = pl ? 12 : 11; R(ctx, '#5a3a20', px, 0, 1, pl ? 26 : 22);                                                     // the pole
+  R(ctx, Gd, px + 1, 1, 4, 7); R(ctx, G, px + 1, 1, 3, 6); R(ctx, '#ffffff', px + 2, 3, 1, 2);                          // the flag
+}
 // ---- powerhouse round: new enemies --------------------------------------------------------
 function drawBulldozer(ctx, frame) {                 // 26x20 bulldozer: a yellow tracked dozer behind a huge plow blade
   const s = frame === 'w1' ? 1 : 0, Y = '#e8b422', Yd = '#a07810', M = '#4b535e', Md = '#22262c';
@@ -3457,6 +3520,15 @@ const GUNS = {
     for (let i = 0; i < 3; i++) { R(ctx, '#2a8ad0', 16 + i * 3, 3, 2, 5); R(ctx, '#9ae8ff', 16 + i * 3, 3, 1, 1); }
     R(ctx, '#c8f4ff', 25, 5, 1, 1);
   } },
+  seed: { w: 20, h: 12, py: 5, muzzle: 18, draw(ctx, arm) {                   // seed launcher: a wooden-gripped tube with a seed pod
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#5a3a20', 4, 5, 5, 5); R(ctx, '#3a4a2a', 8, 3, 9, 6); R(ctx, '#5a6a3a', 8, 3, 9, 1); R(ctx, '#8ac040', 12, 4, 3, 3); R(ctx, '#e0ff80', 13, 4, 1, 1); R(ctx, '#22262c', 17, 4, 3, 4);
+  } },
+  tether: { w: 22, h: 12, py: 5, muzzle: 20, draw(ctx, arm) {                 // tether gun: a dart gun with a coiled light-cord
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 4, 13, 4); R(ctx, '#6a7380', 5, 4, 13, 1); R(ctx, '#2a2e35', 6, 8, 3, 3);
+    R(ctx, '#80ffe0', 9, 2, 1, 2); R(ctx, '#80ffe0', 11, 2, 1, 2); R(ctx, '#80ffe0', 13, 2, 1, 2); R(ctx, '#22262c', 18, 5, 4, 2); R(ctx, '#ffffff', 21, 5, 1, 1);
+  } },
   nuke: { w: 28, h: 14, py: 6, muzzle: 26, draw(ctx, arm) {                   // mini-nuke: a fat launch tube with a warhead in the mouth
     if (arm) drawArm(ctx, 6);
     R(ctx, '#3a4a2a', 4, 2, 20, 10); R(ctx, '#5a6a3a', 4, 2, 20, 1); R(ctx, '#2a2e35', 6, 12, 3, 2); R(ctx, '#e8b422', 12, 4, 6, 6); R(ctx, '#141618', 14, 5, 2, 4); R(ctx, '#141618', 13, 6, 4, 2);
@@ -3819,13 +3891,13 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 const WAVES = [
   SPAWNS.enemies,
   [['bulwark', 'G'], ['mirror', 'G'], ['mender', 'A'], ['enforcer', 'G'], ['sniper', 'G'], ['stalker', 'G'], ['creeper', 'A'], ['grenadier', 'G'], ['mimic', 'G'], ['tarspit', 'G'],
-   ['wraith', 'A'], ['sparker', 'G'], ['sparker', 'G'], ['discus', 'G'], ['pylon', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['scorcher', 'G'], ['berserker', 'G'], ['zealot', 'G'], ['jelly', 'A']],
+   ['wraith', 'A'], ['sparker', 'G'], ['sparker', 'G'], ['discus', 'G'], ['pylon', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['scorcher', 'G'], ['berserker', 'G'], ['zealot', 'G'], ['jelly', 'A'], ['cinder', 'G']],
   [['golem', 'G'], ['roller', 'G'], ['shellback', 'G'], ['lugger', 'G'], ['rocketeer', 'G'], ['wasp', 'A'], ['orbiter', 'A'], ['stitcher', 'A'], ['harpooner', 'G'], ['duelist', 'G'],
    ['pilferer', 'A'], ['buzzsaw', 'A'], ['jet', 'A'], ['torcher', 'G'], ['leech', 'A'], ['spotter', 'A'], ['bastion', 'G'], ['porcupine', 'G'], ['bulldozer', 'G'], ['pyro', 'G'], ['gunship', 'A']],
   [['blinker', 'A'], ['blimp', 'A'], ['howitzer', 'G'], ['hive', 'A'], ['pogo', 'G'], ['hound', 'G'], ['hound', 'G'], ['claw', 'A'], ['jammer', 'A'], ['chiller', 'G'], ['welder', 'G'],
-   ['magnet', 'A'], ['vortex', 'A'], ['thundercloud', 'A'], ['jugg', 'G'], ['linker', 'A'], ['linker', 'A'], ['sporepod', 'G'], ['slug', 'G'], ['minelayer', 'A'], ['sponge', 'G']],
+   ['magnet', 'A'], ['vortex', 'A'], ['thundercloud', 'A'], ['jugg', 'G'], ['linker', 'A'], ['linker', 'A'], ['sporepod', 'G'], ['slug', 'G'], ['minelayer', 'A'], ['sponge', 'G'], ['banner', 'G']],
   [['slagling', 'G'], ['burrower', 'G'], ['linker', 'A'], ['linker', 'A'], ['scavenger', 'G'], ['strider', 'G'], ['echo', 'G'], ['ratking', 'G'],
-   ['para', 'A'], ['shinobi', 'G'], ['warhorn', 'G'], ['beacon', 'A'], ['swapper', 'G'], ['wyrm', 'G'], ['tarspit', 'G'], ['grappler', 'G'], ['headsman', 'G'], ['leaper', 'G'], ['copycat', 'A']],
+   ['para', 'A'], ['shinobi', 'G'], ['warhorn', 'G'], ['beacon', 'A'], ['swapper', 'G'], ['wyrm', 'G'], ['tarspit', 'G'], ['grappler', 'G'], ['headsman', 'G'], ['leaper', 'G'], ['copycat', 'A'], ['gatling', 'G']],
   [['boss', 'B']],
 ];
 // BOSS RUSH: five bosses back to back across the three arenas, a perk between each
@@ -4506,6 +4578,9 @@ function genTextures(scene) {
                             { name: 'o1', c: makeSprite(14, 18, x => drawMimic(x, 'o', 1)) }, { name: 'bite', c: makeSprite(14, 18, x => drawMimic(x, 'bite', 0)) }], 14, 18, true);
   addSheet(scene, 'howitzer', ['w0', 'w1', 'plant', 'fire'].map(f => ({ name: f, c: makeSprite(26, 22, x => drawHowitzer(x, f)) })), 26, 22, true);
   addSheet(scene, 'blinker', ['b0', 'b1', 'dash'].map(f => ({ name: f, c: makeSprite(16, 20, x => drawBlinker(x, f)) })), 16, 20, true);
+  addSheet(scene, 'cinder', ['w0', 'w1'].map(f => ({ name: f, c: makeSprite(16, 16, x => drawCinder(x, f)) })), 16, 16, true);
+  addSheet(scene, 'gatling', ['w0', 'w1', 'fire', 'fire2'].map(f => ({ name: f, c: makeSprite(22, 24, x => drawGatling(x, f)) })), 22, 24, true);
+  addSheet(scene, 'banner', ['w0', 'w1', 'plant'].map(f => ({ name: f, c: makeSprite(16, 26, x => drawBanner(x, f)) })), 16, 26, true);
   addSheet(scene, 'bulldozer', ['w0', 'w1'].map(f => ({ name: f, c: makeSprite(26, 20, x => drawBulldozer(x, f)) })), 26, 20, true);
   addSheet(scene, 'copycat', ['c0', 'c1'].map(f => ({ name: f, c: makeSprite(16, 14, x => drawCopycat(x, f)) })), 16, 14, true);
   addSheet(scene, 'jelly', ['j0', 'j1'].map(f => ({ name: f, c: makeSprite(16, 20, x => drawJelly(x, f)) })), 16, 20, true);
@@ -4750,16 +4825,17 @@ class TitleScene extends Phaser.Scene {
     this.codexCount = new PixelLabel(this, 480, 96, 'title_cxc', { maxChars: 24, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     const got = loadMedals();
     this.medalRows = MEDALS.map((m, i) => {
-      const x = 52 + (i % 3) * 300, y = 118 + Math.floor(i / 3) * 46, on = got.includes(m.id);
+      const x = 52 + (i % 3) * 300, y = 116 + Math.floor(i / 3) * 44, on = got.includes(m.id);
       return { x, y, on,
         name: new PixelLabel(this, x + 26, y - 6, 'title_mn' + i, { text: m.name, align: 'left', scale: 2, color: on ? '#ffd040' : '#5a636e', shadow: sh }).setDepth(21),
         desc: new PixelLabel(this, x + 26, y + 12, 'title_md' + i, { text: m.d, align: 'left', scale: 1, color: on ? '#d8dee6' : '#4a525c' }).setDepth(21) };
     });
     this.medalCount = new PixelLabel(this, 480, 96, 'title_mc', { text: 'COLLECTED ' + got.length + '/' + MEDALS.length, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.armImgs = WEAPONS.map((w, i) => this.add.image(480 + (i % 12 - 5.5) * 70, 124 + Math.floor(i / 12) * 56, 'icon_' + w.gun).setScale(Math.min(2, 54 / GUNS[w.gun].w)).setDepth(21));   // every gun, 12 to a row
+    this.armImgs = WEAPONS.map((w, i) => this.add.image(480 + (i % 13 - 6) * 66, 124 + Math.floor(i / 13) * 56, 'icon_' + w.gun).setScale(Math.min(2, 52 / GUNS[w.gun].w)).setDepth(21));   // every gun, 13 to a row
     this.armName = new PixelLabel(this, 480, 404, 'title_arn', { maxChars: 20, scale: 3, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armDesc = new PixelLabel(this, 480, 436, 'title_ard', { maxChars: 40, scale: 2, color: '#d8dee6', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armStat = new PixelLabel(this, 480, 464, 'title_ars', { maxChars: 52, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
+    this.armLife = new PixelLabel(this, 480, 490, 'title_arl', { maxChars: 60, scale: 1, color: '#c8a0ff', originY: 0.5 }).setDepth(21);
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
     this.optLbls = [0, 1, 2, 3, 4, 5, 6, 7].map(i => new PixelLabel(this, 480, 132 + i * 40, 'title_op' + i, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
@@ -4769,7 +4845,8 @@ class TitleScene extends Phaser.Scene {
     this.sub = name; this.subSel = 0;
     const cx = name === 'codex', md = name === 'medals', op = name === 'options', ar = name === 'armory';
     this.subTitle.setVisible(!!name).setText(cx ? 'CODEX' : md ? 'MEDALS' : op ? 'OPTIONS' : ar ? 'ARMORY' : '');
-    this.armImgs.forEach(o => o.setVisible(ar)); this.armName.setVisible(ar); this.armDesc.setVisible(ar); this.armStat.setVisible(ar);
+    this.armImgs.forEach((o, i) => o.setVisible(ar).setTint(masteryStars(WEAPONS[i].id) >= 3 ? 0xffe080 : 0xffffff));
+    if (this.armLife) { const h = Math.floor(LIFE.time / 3600), m = Math.floor(LIFE.time / 60) % 60; this.armLife.setVisible(ar).setText('LIFETIME  KILLS ' + LIFE.kills + '   RUNS ' + LIFE.runs + '   DEATHS ' + LIFE.deaths + '   TIME ' + (h ? h + 'H' : '') + m + 'M'); } this.armName.setVisible(ar); this.armDesc.setVisible(ar); this.armStat.setVisible(ar);
     this.armCount.setVisible(ar).setText('STARS ' + WEAPONS.reduce((n, w) => n + masteryStars(w.id), 0) + '/' + WEAPONS.length * 3 + '   GUNS ' + WEAPONS.length);
     this.subHint.setVisible(!!name).setText(cx ? 'ARROWS BROWSE   Q/E PAGE   ESC BACK' : ar ? 'ARROWS BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC BACK');
     this.codexImgs.forEach(o => o.setVisible(cx)); this.codexName.setVisible(cx); this.codexDesc.setVisible(cx); this.codexCount.setVisible(cx).setText('MET ' + CODEX.filter(c => SEEN.has(c[0])).length + '/' + CODEX.length);
@@ -4807,7 +4884,7 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'armory') {
-      const N = WEAPONS.length, d = { left: -1, right: 1, up: -12, down: 12 }[a];
+      const N = WEAPONS.length, d = { left: -1, right: 1, up: -13, down: 13 }[a];
       if (d) { this.subSel = (this.subSel + d + N) % N; Sfx.swap(); this.refreshSub(); }
       return;
     }
@@ -4856,7 +4933,7 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'armory') {
-      const i = this.armImgs.findIndex(o => Math.abs(p.x - o.x) < 34 && Math.abs(p.y - o.y) < 28);
+      const i = this.armImgs.findIndex(o => Math.abs(p.x - o.x) < 32 && Math.abs(p.y - o.y) < 28);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
       if (click && i < 0) this.subKey('back');
       return;
@@ -4882,7 +4959,7 @@ class TitleScene extends Phaser.Scene {
     sg.fillStyle(0x05060a, 1); sg.fillRect(30, 30, 900, 500); sg.fillStyle(0xff8a1f, 1); sg.fillRect(30, 30, 900, 2); sg.fillRect(30, 528, 900, 2);
     if (this.sub === 'codex') { const o = this.codexImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 34, o.y - 25, 68, 50); }
     if (this.sub === 'armory') {                                          // a frame on the pick, three mastery pips under every gun
-      const o = this.armImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 33, o.y - 22, 66, 52);
+      const o = this.armImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 31, o.y - 22, 62, 52);
       this.armImgs.forEach((im, i) => { const st = masteryStars(WEAPONS[i].id); for (let j = 0; j < 3; j++) { sg.fillStyle(j < st ? 0xffd040 : 0x2a2e35, 1); sg.fillRect(im.x - 9 + j * 7, im.y + 20, 5, 4); } });
     }
     if (this.sub === 'medals') for (const r of this.medalRows) { sg.fillStyle(r.on ? 0xffd040 : 0x2a2e35, 1); sg.fillTriangle(r.x, r.y + 4, r.x + 8, r.y - 10, r.x + 16, r.y + 4); sg.fillTriangle(r.x, r.y - 4, r.x + 16, r.y - 4, r.x + 8, r.y + 10); }
@@ -4986,6 +5063,7 @@ class GameScene extends Phaser.Scene {
     // debrief round: bubbles, holy orbs, souls, mines, and who killed you
     this.shieldUntil = 0; this.shieldBlockT = 0; this.globs = []; this.gluePuds = []; this.leapMarks = [];
     this.nukes = [];                                                     // powerhouse round: mini-nuke shells
+    this.seeds = []; this.shrooms = []; this.pspores = []; this.tethered = []; this.sharing = false; this.linkCalled = false;   // gold round
     this.bubbles = []; this.horbs = []; this.souls = []; this.emines = []; this.killer = null; this.bubbled = false; this.empowerSeen = false;
     { const onPick = id => this.onPerkPick(id); BUS.on('perkpick', onPick); this.events.once('shutdown', () => BUS.off('perkpick', onPick)); }
     this.grid = this.A.grid.map(r => r.slice()); NAV = buildNav(this.grid);   // a fresh breakable copy every run
@@ -5177,6 +5255,7 @@ class GameScene extends Phaser.Scene {
     this.applyGunTexture();
     this.visor = this.add.image(px, py, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.35).setAlpha(0.55).setDepth(18);
     this.enemies = this.physics.add.group();
+    if (!this.carry) LIFE.runs++;                                         // a fresh run (not a trip down the lift)
     if (!this.carry && !this.endless && !this.bossrush) for (const [kind, cx, cy] of WAVES[0]) this.spawnEnemy(kind, cx, cy);   // down the lift (or in OVERTIME), the next wave warps in instead
     this.enemiesLeft = this.carry || this.endless || this.bossrush ? 0 : WAVES[0].length;
     this.spawnBarrels(false); this.spawnCanisters(false);
@@ -5193,7 +5272,7 @@ class GameScene extends Phaser.Scene {
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
     const f0 = { drone: 'd0', mender: 'm0', enforcer: 'idle0', bulwark: 'idle0', sniper: 'idle0', rocketeer: 'idle0', stalker: 'idle', tick: 'k0', boss: 'w0', wasp: 'p0', jet: 'j0', sapper: 'idle', brood: 'w0', screamer: 's0', warden: 'v0', jugg: 's0w0', cloaker: 'idle', pyro: 'idle', gunship: 'g0',
                  slagling: 'a', slagmid: 'a', slagbit: 'a', burrower: 'sw0', harpooner: 'idle', linker: 'l0',
-                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0', wraith: 'f0', chiller: 'w0', warhorn: 'w0', orbiter: 'o0', swapper: 'w0', scorcher: 'r0', grappler: 'w0', spotter: 's0', hound: 'r0', torcher: 'w0', discus: 'w0', sporepod: 'p0', vortex: 'v0', pylon: 'p0', scavenger: 'w0', shellback: 'w0', shinobi: 'w0', thundercloud: 'c0', foreman: 'w0', headsman: 'w0', berserker: 'w0', bastion: 'w0', zealot: 'w0', minelayer: 'm0', ratking: 'w0', ratbot: 'r0', porcupine: 'w0', sponge: 'w0', leaper: 'w0', bulldozer: 'w0', copycat: 'c0', jelly: 'j0' }[kind] || 'w0';
+                 mirror: 'idle0', hive: 'h0', gnat: 'n0', stitcher: 's0', wyrm: 'c', wyrmseg: 'a', buzzsaw: 'z0', magnet: 'm0', tarspit: 'idle', mimic: 'h', howitzer: 'w0', blinker: 'b0', gasbag: 'g0', welder: 'w0', turret: 't0', duelist: 'idle', creeper: 'c0', roller: 'r0', jammer: 'j0', claw: 'open', sparker: 's0', golem: 'g0', echo: 'idle0', pilferer: 'p0', pogo: 'c', beacon: 'b0', slug: 's0', leech: 'l0', grenadier: 'idle', spikeball: 'k0', para: 'drop', lugger: 'w0', blimp: 'b0', strider: 'w0', wraith: 'f0', chiller: 'w0', warhorn: 'w0', orbiter: 'o0', swapper: 'w0', scorcher: 'r0', grappler: 'w0', spotter: 's0', hound: 'r0', torcher: 'w0', discus: 'w0', sporepod: 'p0', vortex: 'v0', pylon: 'p0', scavenger: 'w0', shellback: 'w0', shinobi: 'w0', thundercloud: 'c0', foreman: 'w0', headsman: 'w0', berserker: 'w0', bastion: 'w0', zealot: 'w0', minelayer: 'm0', ratking: 'w0', ratbot: 'r0', porcupine: 'w0', sponge: 'w0', leaper: 'w0', bulldozer: 'w0', copycat: 'c0', jelly: 'j0', cinder: 'w0', gatling: 'w0', banner: 'w0' }[kind] || 'w0';
     markSeen(kind);
     const e = this.enemies.create(x, y, D.key, f0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
@@ -5304,6 +5383,13 @@ class GameScene extends Phaser.Scene {
     } else if (kind === 'strider') {
       Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), stepK: 0, a0: 0, beamA: 0, hitT: 0, lastStep: 0 });
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+    } else if (kind === 'cinder') {
+      Object.assign(e, { ai: 'roll', owned: 0, lastTrailX: x, hitMap: new Map(), spinA: 0 });
+      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.6).setAlpha(0.7).setDepth(4.9);
+    } else if (kind === 'gatling') {
+      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), aimA: 0, shotT: 0 });
+    } else if (kind === 'banner') {
+      Object.assign(e, { ai: 'walk', stepK: 0, plantT: rand(1, 2), healT: 0 });
     } else if (kind === 'bulldozer') {
       Object.assign(e, { ai: 'drive', stepK: 0, crushT: 0, stuckT: 0 });
     } else if (kind === 'copycat') {
@@ -5680,7 +5766,7 @@ class GameScene extends Phaser.Scene {
     this.updateNets(dt, now); this.updateFlail(dt, now); this.updateBelts(dt, now); this.updatePresses(dt, now); this.updateSparkLinks(dt, now);
     this.updateSky(dt, now); this.updateBlades(dt, now);
     this.updateSpiders(dt, now); this.updateNapalms(dt, now); this.updateAcids(dt, now);
-    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt); this.updateFireworks(dt, now); this.updateHunt(dt, now); this.updateWreck(dt, now); this.updateSplits(dt); this.updateDecoy(dt, now); this.updateDiscs(dt, now); this.updateSpores(dt, now); this.updateStasisFields(dt, now); this.updatePunch(dt, now); this.updateTrips(dt, now); this.updateAllies(dt, now); this.updateWalls(dt, now); this.updateBubbles(dt, now); this.updateHorbs(dt, now); this.updateEMines(dt, now); this.updateGlobs(dt, now); this.updateRails(dt, now); this.updateNukes(dt, now);
+    this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt); this.updateFireworks(dt, now); this.updateHunt(dt, now); this.updateWreck(dt, now); this.updateSplits(dt); this.updateDecoy(dt, now); this.updateDiscs(dt, now); this.updateSpores(dt, now); this.updateStasisFields(dt, now); this.updatePunch(dt, now); this.updateTrips(dt, now); this.updateAllies(dt, now); this.updateWalls(dt, now); this.updateBubbles(dt, now); this.updateHorbs(dt, now); this.updateEMines(dt, now); this.updateGlobs(dt, now); this.updateRails(dt, now); this.updateNukes(dt, now); this.updateSeeds(dt, now); this.updateTethers(dt, now);
     if (this.state !== 'dead') { this.hist.push({ t: now, x: this.player.x, y: this.player.y, fire: now - this.lastShotT < 140, fr: this.pFrame, face: this.facing }); while (this.hist.length && now - this.hist[0].t > 3000) this.hist.shift(); }
     if (this.revAmmo <= 0 && now >= this.revReloadUntil) { this.revAmmo = TUNE.REVOLVER.rounds; Sfx.revClick(); }
     this.updateHarpoons(dt, now); this.updateLinkBeams(dt, now);
@@ -6097,6 +6183,12 @@ class GameScene extends Phaser.Scene {
     } else if (W.id === 'splitter') {
       this.stats.shots++; this.splits.push({ x: ox, y: oy, px: ox, py: oy, vx: Math.cos(a) * TUNE.SPLITTER.speed, vy: Math.sin(a) * TUNE.SPLITTER.speed, gen: 0, t: TUNE.SPLITTER.life, hit: new Set() });
       this.recoil = 4; Sfx.split(); this.muzzle(mx, my, a, 0.8, 45); this.spawnLight(mx, my, 'glow', 0x9af4ff, 0.8, 1.6, 0.8, 0.1); this.addKick(-ca * 2.5, -sa * 2.5); this.shake(50, 0.0025);
+    } else if (W.id === 'seed') {
+      this.stats.shots++; this.seeds.push({ x: ox, y: oy, vx: Math.cos(a) * TUNE.SEED.speed, vy: Math.sin(a) * TUNE.SEED.speed - 50, t: 3 });
+      this.recoil = 3; Sfx.mineThrow(); this.addKick(-ca * 1.5, -sa * 1.5);
+    } else if (W.id === 'tether') {
+      this.stats.shots++; this.spawnBullet('tetherdart', ox, oy, a, TUNE.TETHER.speed, TUNE.TETHER.dmg, 0.8);
+      this.recoil = 2; Sfx.tether(); this.muzzle(mx, my, a, 0.5, 35); this.addKick(-ca, -sa);
     } else if (W.id === 'nuke') {
       this.stats.shots++; this.nukes.push({ x: ox, y: oy, vx: Math.cos(a) * TUNE.NUKE.speed, vy: Math.sin(a) * TUNE.NUKE.speed - TUNE.NUKE.lift, t: 5 });
       this.recoil = 9; Sfx.mortar(); this.muzzle(mx, my, a, 1.6, 90); this.fxSmoke(mx, my, 10); this.shake(160, 0.008); this.addKick(-ca * 7, -sa * 7);
@@ -6164,12 +6256,12 @@ class GameScene extends Phaser.Scene {
   }
   spawnBullet(kind, x, y, ang, speed, dmg, life) {
     const b = this.bullets.getFirstDead(false); if (!b) return;
-    b.setTexture(kind === 'nail' ? 'nail' : kind === 'pellet' || kind === 'ember' ? 'pellet' : kind === 'rivet' ? 'rivet' : kind === 'shard' ? 'shard' : 'parry');
+    b.setTexture(kind === 'nail' || kind === 'tetherdart' ? 'nail' : kind === 'pellet' || kind === 'ember' ? 'pellet' : kind === 'rivet' ? 'rivet' : kind === 'shard' ? 'shard' : 'parry');
     b.enableBody(true, x, y, true, true);
     b.body.setSize(4, 4, true); b.body.setAllowGravity(false);
     b.setRotation(ang); b.setVelocity(Math.cos(ang) * speed, Math.sin(ang) * speed);
     Object.assign(b, { kind, dmg, life, ang, px: x, py: y, bounces: 0 });
-    if (kind === 'ember') b.setTint(0xff9a30); else b.clearTint();
+    if (kind === 'ember') b.setTint(0xff9a30); else if (kind === 'tetherdart') b.setTint(0x80ffe0); else b.clearTint();
     return b;
   }
   spawnRocket(x, y, a) {
@@ -6444,7 +6536,7 @@ class GameScene extends Phaser.Scene {
     this.shake(30, 0.0008);
   }
   ignite(e, t) {
-    if (e.kind === 'pyro' || e.kind === 'scorcher' || e.kind === 'torcher' || e.def.molten || e.under) return;            // fireproof
+    if (e.kind === 'pyro' || e.kind === 'scorcher' || e.kind === 'torcher' || e.kind === 'cinder' || e.def.molten || e.under) return;            // fireproof
     if (e.kind === 'boss') t *= 0.5;
     if (e.burnT <= 0) {
       Sfx.ignite();
@@ -7123,6 +7215,10 @@ class GameScene extends Phaser.Scene {
     }
     if (e.kind === 'foreman' && e.phase === 3) dmg *= TUNE.FOREMAN.core;
     if (src === 'ember') this.ignite(e, TUNE.DRAGON.burn);
+    if (src === 'tetherdart') this.tetherTag(e);
+    if (e.kind === 'gatling' && e.ai !== 'hot' && dx && Math.sign(dx) === -e.dir && !['burn', 'gas', 'rocket', 'crush'].includes(src)) dmg *= TUNE.GATLING.front;
+    if (e.kind === 'gatling' && e.ai === 'hot') dmg *= TUNE.GATLING.hot;
+    if (e.kind === 'cinder' && src === 'kick') { e.owned = TUNE.CINDER.owned; e.dir = Math.sign(dx) || e.dir; e.hitMap = new Map(); BUS.emit('callout', 'RETURNED!'); this.addStyle(40); }
     if (e.kind === 'bulldozer' && dx && src !== 'burn' && src !== 'gas') { if (Math.sign(dx) === -e.dir && !['rocket', 'crush'].includes(src)) { dmg *= TUNE.DOZER.front; if (Math.random() < 0.4) { this.fxSparks(e.body.center.x + e.dir * 12, e.body.center.y, 3, e.dir > 0 ? 0 : Math.PI, 1.2, [60, 180]); Sfx.clang(0.35); } } else if (Math.sign(dx) === e.dir) dmg *= TUNE.DOZER.rear; }
     if (e.kind === 'porcupine' && src !== 'burn' && src !== 'gas' && (e.quillAcc = (e.quillAcc || 0) + dmg) >= TUNE.PORCUPINE.per) { e.quillAcc -= TUNE.PORCUPINE.per; this.time.delayedCall(30, () => { if (e.alive) this.quillBurst(e); }); }
     if (e.slipUntil && this.time.now < e.slipUntil && src !== 'burn' && src !== 'gas' && src !== 'rocket') { if (Math.random() < 0.3) this.fxSparks(e.body.center.x, e.body.center.y, 2, 0, Math.PI * 2, [40, 120]); return; }   // a duelist mid-sidestep: shots slip past
@@ -7159,6 +7255,11 @@ class GameScene extends Phaser.Scene {
     if (e.rallyT > this.time.now) dmg *= TUNE.WARHORN.take;               // rallied by a warhorn: half damage
     if (e.kind === 'cloaker') e.revealT = 1.5;                           // getting hit lights a cloaker up
     if (e.kind === 'mimic' && e.ai === 'hide') this.mimicReveal(e, this.time.now);   // shoot the "drum" and it bares its teeth
+    if (e.tetherT > this.time.now && !this.sharing && src !== 'tether') {   // tethered: the others take a share
+      this.sharing = true;
+      for (const o of this.tethered) if (o !== e && o.alive && o.tetherT > this.time.now) { this.damageEnemy(o, dmg * TUNE.TETHER.share, 0, 0, 'tether'); this.tetherFlashT = this.time.now; }
+      this.sharing = false;
+    }
     if (dmg > (this.stats.big || 0)) this.stats.big = dmg;                 // the biggest single hit of the run
     e.hp -= dmg; e.flashT = 0.08; e.aggro = true; e.aggroT = 5; e.lastHs = !!hs;
     e.dmgAcc += dmg; if (hs) e.dmgHead = true; if (!e.dmgFlushAt) e.dmgFlushAt = this.time.now + (src === 'burn' || src === 'flame' || src === 'acid' || src === 'crush' || src === 'needle' || src === 'drill' || src === 'gas' || src === 'siphon' || src === 'microwave' ? 420 : 90);   // batched damage numbers (streams batch longer)
@@ -7233,10 +7334,10 @@ class GameScene extends Phaser.Scene {
     const wid = WEAPONS[this.weapon].id;
     if (this.style.lastWeapon && this.style.lastWeapon !== wid) style += 30;      // reward mixing weapons
     this.style.lastWeapon = wid;
-    if (!e.summoned) this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1;
+    if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; LIFE.kills++; }
     if (!e.summoned && wid) {                                             // lifetime mastery for the gun in hand
       const before = masteryStars(wid); MASTERY[wid] = (MASTERY[wid] || 0) + 1; const after = masteryStars(wid);
-      if (after > before) { BUS.emit('callout', (WEAPONS.find(w => w.id === wid) || {}).name + ' ' + '*'.repeat(after)); Sfx.rankUp(); saveMastery(); }
+      if (after > before) { BUS.emit('callout', (WEAPONS.find(w => w.id === wid) || {}).name + ' ' + '*'.repeat(after)); Sfx.rankUp(); saveMastery(); if (after >= 3) { this.award('goldsmith'); this.time.delayedCall(900, () => BUS.emit('callout', 'GOLD-PLATED')); } }
     }
     // little overkill and no blast: it drops as a ragdoll you can keep shooting; otherwise it bursts now
     const rag = !!RAG[e.kind] && src !== 'rocket' && src !== 'tickboom' && src !== 'crush' && src !== 'shatter' && src !== 'execute' && -e.hp <= 26;   // (the heavy always bursts)
@@ -7283,6 +7384,7 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'chiller') { this.spawnIce(cx, b.bottom - 2, 96); this.fx.emit(cx, cy, { n: 22, speed: [40, 180], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x6ab0e0], add: true, g: 300 }); Sfx.iceForm(); }   // the tank bursts: frost everywhere
     if (e.elite) this.eliteDeath(e, cx, cy);
     if (e.kind === 'copycat' && e.icon) { e.icon.destroy(); e.icon = null; }
+    if (e.kind === 'cinder') { this.spawnFirePatch(cx, b.bottom - 4); this.fxFire(cx, cy, 14); }
     if (e.kind === 'jelly') this.jellyNova(cx, cy);
     if (e.kind !== 'zealot' && !e.summoned) this.zealotSouls(cx, cy);                // zealots nearby drink the soul
     if (e.kind === 'ratking') for (let k = 0; k < TUNE.RATKING.burst; k++) this.time.delayedCall(40 * k, () => { if (this.state === 'dead') return; const o = this.spawnEnemy('ratbot', Math.floor(cx / TS), Math.floor((b.bottom - 2) / TS)); Object.assign(o, { summoned: true, aggro: true, aggroT: 9 }); o.body.setVelocity(rand(-170, 170), rand(-240, -120)); });
@@ -10640,6 +10742,153 @@ class GameScene extends Phaser.Scene {
     for (const Q of this.tars.slice()) if (Math.abs(Q.y - P.y) < 6 && Math.abs(Q.x - P.x) < (Q.w + P.w) / 2 + 10) this.time.delayedCall(140, () => this.igniteTar(Q));   // runs along touching tar
   }
 
+  // ================================================================== gold round ====
+  // ---------------------------------------------------------------- seed launcher ----
+  // A lobbed seed that roots where it lands and sprouts (1 s) into a fungus turret for 9 s: every 1.6 s it puffs two
+  // homing spores (150 px/s, 8 each) at the nearest foe it can see within 220 px. Two can grow at once.
+  updateSeeds(dt, now) {
+    const T = TUNE.SEED, G = this.iceG;
+    for (let i = this.seeds.length - 1; i >= 0; i--) {
+      const S = this.seeds[i]; S.t -= dt; S.vy += 520 * dt;
+      const nx = S.x + S.vx * dt, ny = S.y + S.vy * dt;
+      if (S.t <= 0 || ny > LH) { this.seeds.splice(i, 1); continue; }
+      if (this.solidAt(nx, ny)) {
+        this.seeds.splice(i, 1);
+        const fy = this.floorBelow(S.x, S.y - 4); if (fy === null || fy - S.y > 40) { this.fx.emit(S.x, S.y, { n: 5, speed: [20, 60], life: [0.2, 0.4], size: [2, 1], cols: [0x8ac040] }); continue; }
+        if (this.shrooms.length >= T.max) this.shrooms.shift();
+        this.shrooms.push({ x: S.x, y: fy, t: T.life, grow: 0, cd: 0.6 }); Sfx.sprout();
+        continue;
+      }
+      S.x = nx; S.y = ny;
+    }
+    for (let i = this.shrooms.length - 1; i >= 0; i--) {                  // the fungus turrets
+      const M = this.shrooms[i]; M.t -= dt; M.grow = Math.min(1, M.grow + dt / T.grow);
+      if (M.t <= 0) { this.fx.emit(M.x, M.y - 4, { n: 10, angle: -Math.PI / 2, spread: 1, speed: [10, 50], life: [0.4, 0.8], size: [2, 4], cols: [0x8ac040, 0x5a7a20], alpha: [0.6, 0], g: -10 }); this.shrooms.splice(i, 1); continue; }
+      const h = 4 + 6 * M.grow, w = 4 + 8 * M.grow, fade = Math.min(1, M.t / 0.5);
+      G.fillStyle(0x6a5a3a, fade).fillRect(M.x - 1, M.y - h, 3, h); G.fillStyle(0x8ac040, fade).fillRect(M.x - w / 2, M.y - h - 3, w, 4); G.fillStyle(0xe0ff80, fade).fillRect(M.x - w / 2 + 2, M.y - h - 3, 2, 1); G.fillStyle(0xe0ff80, fade).fillRect(M.x + 1, M.y - h - 2, 1, 1);
+      if (M.grow < 1 || (M.cd -= dt) > 0) continue;
+      let tgt = null, bd = T.range;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - M.x, e.body.center.y - (M.y - h)); if (d < bd && this.los(M.x, M.y - h - 2, e.body.center.x, e.body.center.y)) { bd = d; tgt = e; } }
+      if (!tgt) { M.cd = 0.3; continue; }
+      M.cd = T.cd; for (let k = 0; k < 2; k++) this.pspores.push({ x: M.x, y: M.y - h - 3, vx: rand(-40, 40), vy: rand(-90, -60), t: 3, tgt });
+      this.fx.emit(M.x, M.y - h - 3, { n: 6, angle: -Math.PI / 2, spread: 0.8, speed: [20, 60], life: [0.3, 0.6], size: [2, 4], cols: [0xc8ff60, 0x8ac040], alpha: [0.6, 0], g: -20 }); Sfx.sporePuff();
+    }
+    for (let i = this.pspores.length - 1; i >= 0; i--) {                  // your spores home in on their foe
+      const S = this.pspores[i]; S.t -= dt;
+      if (S.t <= 0 || this.solidAt(S.x, S.y)) { this.pspores.splice(i, 1); continue; }
+      const e = S.tgt && S.tgt.alive ? S.tgt : null;
+      if (e) { const ddx = e.body.center.x - S.x, ddy = e.body.center.y - S.y, l = Math.hypot(ddx, ddy) || 1, k = Math.min(1, dt * 3); S.vx += (ddx / l * T.spore - S.vx) * k; S.vy += (ddy / l * T.spore - S.vy) * k; if (l < e.body.halfWidth + 3) { this.damageEnemy(e, T.dmg, Math.sign(S.vx) || 1, 0, 'needle'); this.stats.hits++; this.fx.emit(S.x, S.y, { n: 4, speed: [20, 60], life: [0.2, 0.4], size: [2, 1], cols: [0xc8ff60], add: true }); this.pspores.splice(i, 1); continue; } }
+      else S.vy += 100 * dt;
+      S.x += S.vx * dt; S.y += S.vy * dt;
+    }
+  }
+
+  // ---------------------------------------------------------------- tether gun ----
+  // A fast dart (6) that links whatever it hits: up to three foes at once, for 8 s each (a fourth link drops the
+  // oldest). Damage to any linked foe is shared with the others at 60%: link a pack, then blow one of them up.
+  tetherTag(e) {
+    const T = TUNE.TETHER;
+    if (!e.alive || e.under) return;
+    if (!this.tethered.includes(e)) { this.tethered.push(e); if (this.tethered.length > T.max) { const old = this.tethered.shift(); old.tetherT = 0; } }
+    e.tetherT = this.time.now + T.life * 1000;
+    this.spawnLight(e.body.center.x, e.body.center.y, 'ring', 0x80ffe0, 0.2, 1, 0.8, 0.2);
+    if (this.tethered.length >= T.max && !this.linkCalled) { this.linkCalled = true; BUS.emit('callout', 'LINKED'); this.addStyle(30); }
+  }
+  updateTethers(dt, now) {
+    if (!this.tethered.length) return;
+    this.tethered = this.tethered.filter(o => o.alive && o.tetherT > now);
+    if (this.tethered.length < TUNE.TETHER.max) this.linkCalled = false;
+  }
+
+  // ---------------------------------------------------------------- cinder wheel ----
+  // A burning iron wheel (60 HP, fireproof) that rolls at you along the floor (150 px/s), bouncing off walls and hopping
+  // at you when you're above it, leaving a trail of fire. Kick it and it's yours for 1.5 s: it rolls back the other
+  // way at 260 px/s, slamming into foes (40 each).
+  updateCinder(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.CINDER, b = e.body, onG = b.blocked.down || b.touching.down;
+    if (alive && !e.aggro && (e.sees || dist < 260) && dist < e.def.sight) this.alertEnemy(e, now);
+    e.fr = Math.floor(now / 80) % 2 ? 'w1' : 'w0';
+    if (e.owned > 0) {                                                    // kicked: it's yours, rolling back at them
+      e.owned -= dt; b.velocity.x = e.dir * T.ownSpeed;
+      if (b.blocked.left || b.blocked.right) { e.dir = -e.dir; this.fxSparks(b.center.x, b.center.y, 4); }
+      for (const o of this.enemies.getChildren()) { if (!o.alive || o === e || o.under || (e.hitMap.get(o) || 0) > now) continue; const ob = o.body; if (ob.right > b.left && ob.left < b.right && ob.bottom > b.top && ob.top < b.bottom) { e.hitMap.set(o, now + 500); this.damageEnemy(o, T.ownDmg, e.dir, -0.5, 'saw'); this.ignite(o, 2); Sfx.clang(0.5); this.hitStop(30); } }
+    } else if (e.stunT <= 0 && e.aggro && alive) {
+      if (Math.abs(dx) > 30) e.dir = dx >= 0 ? 1 : -1;
+      b.velocity.x = e.dir * T.speed;
+      if (b.blocked.left) e.dir = 1; else if (b.blocked.right) e.dir = -1;
+      if (onG && dy < -30 && Math.abs(dx) < 90 && Math.random() < dt * 3) b.velocity.y = -T.hop;
+    } else if (!e.aggro) b.velocity.x *= 0.9;
+    e.spinA += b.velocity.x * dt * 0.12;
+    if (onG && Math.abs(e.x - e.lastTrailX) >= 18) {                      // the fire trail
+      e.lastTrailX = e.x; const fy = Math.floor((b.bottom + 2) / TS) * TS;
+      if (this.standAt(e.x, fy + 2)) this.puddles.push({ x: e.x, y: fy, w: 14, t: T.trail, tick: 0.2, fire: true });
+    }
+  }
+
+  // ---------------------------------------------------------------- gatling ----
+  // A heavy (150 HP) with a six-barrel gun that keeps 140-260 px off. It spins up (0.9 s, a red sight), then hoses a
+  // stream at you for 2.2 s (5 a round, ~14 a second) that tracks you at only 1.2 rad/s: outrun it. Then it overheats
+  // for 1.5 s, venting, and takes x1.5; otherwise its gun shields the front (x0.6).
+  updateGatling(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.GATLING, b = e.body, onG = b.blocked.down || b.touching.down, want = Math.atan2(dy - 4, dx);
+    if (alive && !e.aggro && (e.sees || dist < 220) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    const track = r => { let d = Math.atan2(Math.sin(want - e.aimA), Math.cos(want - e.aimA)); e.aimA += clamp(d, -r * dt, r * dt); };
+    if (e.ai === 'spin') { b.velocity.x = 0; track(T.turn * 2); e.fr = Math.floor(now / 50) % 2 ? 'fire2' : 'w0'; if (now >= e.aiUntil) { e.ai = 'fire'; e.aiUntil = now + T.burst * 1000; } return; }
+    if (e.ai === 'fire') {
+      b.velocity.x = 0; track(T.turn); e.fr = Math.floor(now / 40) % 2 ? 'fire2' : 'fire';
+      if ((e.shotT -= dt) <= 0 && alive) { e.shotT = T.rate; const a = e.aimA + rand(-0.04, 0.04); this.spawnEBullet(e.x + Math.cos(a) * 16, e.y - 4 + Math.sin(a) * 16, a, 300, T.dmg); Sfx.gatlingFire(); this.spawnLight(e.x + Math.cos(a) * 16, e.y - 4 + Math.sin(a) * 16, 'glow', 0xffc060, 0.4, 0.8, 0.7, 0.05); }
+      if (now >= e.aiUntil) { e.ai = 'hot'; e.aiUntil = now + T.cool * 1000; }
+      return;
+    }
+    if (e.ai === 'hot') { b.velocity.x = 0; e.fr = 'w0'; if (now >= e.aiUntil) { e.ai = 'walk'; e.cd = rand(1, 1.8); } return; }
+    if (e.stunT > 0) return;
+    e.cd -= dt;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
+      let mv = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
+      if (mv && !this.standAt(b.center.x + mv * 10, b.bottom + 4)) mv = 0;
+      b.velocity.x = mv * T.speed;
+      if (mv && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if (e.cd <= 0 && e.sees) { e.ai = 'spin'; e.aiUntil = now + T.spin * 1000; e.aimA = want; Sfx.gatlingSpin(); return; }
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 4; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+
+  // ---------------------------------------------------------------- banner ----
+  // A robed standard-bearer (80 HP) that hangs back 200-300 px and every ~6 s plants its banner: every other foe within
+  // 150 px regenerates 5 HP a second while it stands (a green ring), and so does it at half that. It moves on when
+  // you close in. Take it down first.
+  updateBanner(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.BANNER, b = e.body, onG = b.blocked.down || b.touching.down;
+    if (alive && !e.aggro && (e.sees || dist < 240) && dist < e.def.sight) this.alertEnemy(e, now);
+    if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
+    if (e.ai === 'plant') {
+      b.velocity.x = 0; e.fr = 'plant';
+      if ((e.healT -= dt) <= 0) {
+        e.healT = 0.5;
+        for (const o of this.enemies.getChildren()) {
+          if (!o.alive || o.under || o.def.tiny || o.kind === 'boss' || o.kind === 'foreman' || o.hp >= o.def.hp) continue;
+          const self = o === e; if (!self && Math.hypot(o.body.center.x - e.x, o.body.center.y - e.y) > T.radius) continue;
+          o.hp = Math.min(o.def.hp, o.hp + T.heal * 0.5 * (self ? 0.5 : 1));
+          if (Math.random() < 0.5) this.fx.emit(o.body.center.x + rand(-4, 4), o.body.top, { n: 1, angle: -Math.PI / 2, spread: 0.3, speed: [10, 30], life: [0.3, 0.6], size: [2, 1], cols: [0x5cff7a, 0xd0ffd8], add: true });
+        }
+      }
+      if (now >= e.aiUntil || (alive && dist < 120)) { e.ai = 'walk'; e.plantT = rand(1.5, 2.5); }
+      return;
+    }
+    if (e.stunT > 0) return;
+    if (e.aggro && alive) {
+      e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
+      let mv = ax < T.keep[0] ? -e.dir : ax > T.keep[1] ? e.dir : 0;
+      if (mv && !this.standAt(b.center.x + mv * 10, b.bottom + 4)) mv = 0;
+      b.velocity.x = mv * T.speed;
+      if (mv && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if ((e.plantT -= dt) <= 0 && onG && dist > 120) { e.ai = 'plant'; e.aiUntil = now + T.plant * 1000; e.healT = 0.3; Sfx.bannerPlant(); this.fxDust(e.x + 6, b.bottom, 4); return; }
+    } else b.velocity.x = 0;
+    if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 5; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
+  }
+
   // ================================================================== powerhouse round ====
   // ---------------------------------------------------------------- live rails ----
   // ARENA 05: four floor rails in two banks. Every ~4-5.5 s one bank hums (1.2 s, flashing yellow), then goes live for
@@ -12990,7 +13239,7 @@ class GameScene extends Phaser.Scene {
     const T2 = ['bulwark', 'rocketeer', 'wasp', 'sapper', 'screamer', 'cloaker', 'pyro', 'harpooner', 'tarspit', 'buzzsaw', 'roller', 'duelist', 'blinker', 'magnet',
                 'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker',
                 'para', 'lugger', 'blimp', 'strider', 'beacon', 'leech', 'wraith', 'chiller', 'warhorn',
-                'orbiter', 'swapper', 'scorcher', 'grappler', 'spotter', 'hound', 'torcher', 'discus', 'sporepod', 'vortex', 'pylon', 'scavenger', 'shellback', 'shinobi', 'thundercloud', 'headsman', 'berserker', 'bastion', 'zealot', 'minelayer', 'ratking', 'porcupine', 'sponge', 'leaper', 'bulldozer', 'copycat', 'jelly'];
+                'orbiter', 'swapper', 'scorcher', 'grappler', 'spotter', 'hound', 'torcher', 'discus', 'sporepod', 'vortex', 'pylon', 'scavenger', 'shellback', 'shinobi', 'thundercloud', 'headsman', 'berserker', 'bastion', 'zealot', 'minelayer', 'ratking', 'porcupine', 'sponge', 'leaper', 'bulldozer', 'copycat', 'jelly', 'cinder', 'gatling', 'banner'];
     while (out.length < n) {
       const kind = pk(rnd() < t2 ? T2 : T1);
       if (kind === 'linker') { out.push(['linker', 'A'], ['linker', 'A']); continue; }
@@ -14265,7 +14514,7 @@ class GameScene extends Phaser.Scene {
     else BUS.emit('wavecard', i === WAVES.length - 1 ? 'FINAL WAVE' : 'WAVE ' + (i + 1), i === WAVES.length - 1 ? 'THE SMELTER WAKES' : MOD_CARDS[WAVE_MODS[i]] || 'HOSTILES INBOUND');
     this.spawnBarrels(true); this.spawnCanisters(true); this.applyMod(mod || (MUT() === 'lowg' ? 'lowg' : MUT() === 'dark' ? 'dark' : null));   // MOON BOOTS / LIGHTS OUT
     for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }   // fresh pipes every wave
-    this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery();
+    this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery(); saveLife();
     Sfx.warp(); Music.track(WAVE_MUSIC[this.bossrush ? WAVE_MUSIC.length - 1 : Math.min(i, WAVE_MUSIC.length - 1)]);
     for (const k of this.pickups) if (k.taken && MUT() !== 'vamp') {   // restock medkits between waves (not for a VAMPIRE)
       k.taken = false; k.img.setVisible(true); k.glow.setVisible(true);
@@ -14340,7 +14589,7 @@ class GameScene extends Phaser.Scene {
     return true;
   }
   killPlayer() {
-    this.state = 'dead';
+    this.state = 'dead'; LIFE.deaths++;
     const p = this.player, b = p.body, cx = b.center.x, cy = b.center.y;
     for (const t of ['g_helm', 'g_armor', 'g_armor', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1', 'g_armor'])
       this.spawnGib(t, cx + rand(-4, 4), cy + rand(-6, 6), b.velocity.x * 0.4 + rand(-180, 180), rand(-380, -150));
@@ -14372,6 +14621,7 @@ class GameScene extends Phaser.Scene {
     const score = Math.max(0, Math.round(s.kills * 100 + this.headshots * 50 + s.executes * 150 + this.bestCombo * 60 + s.dodges * 25 + this.style.best * 500 + (this.endless ? this.wave * 600 : 0)
                                          + (won ? Math.max(0, 900 - time) * 10 : 0) - s.taken * 4) * DIFFS[OPTS.diff].score);
     const favId = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a])[0], fav = favId ? WEAPONS.find(w => w.id === favId).name : '-';
+    LIFE.time += time; saveLife();                                        // lifetime stats: time played
     const topGuns = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a]).slice(0, 3).map(id => [WEAPONS.find(w => w.id === id).name, s.wk[id]]);
     saveMastery();
     if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
@@ -14595,6 +14845,9 @@ class GameScene extends Phaser.Scene {
       else if (e.kind === 'zealot') this.updateZealot(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'porcupine') this.updatePorcupine(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'bulldozer') this.updateBulldozer(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'cinder') this.updateCinder(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'gatling') this.updateGatling(e, dt, now, dx, dy, dist, alive);
+      else if (e.kind === 'banner') this.updateBanner(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'copycat') this.updateCopycat(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'jelly') this.updateJelly(e, dt, now, dx, dy, dist, alive);
       else if (e.kind === 'sponge') this.updateSponge(e, dt, now, dx, dy, dist, alive);
@@ -15326,6 +15579,9 @@ class GameScene extends Phaser.Scene {
         const c = this.lanceCharge, G = GUNS.lance;
         this.gun.setTint((255 << 16) | (Math.round(255 - 90 * c) << 8) | Math.round(255 - 190 * c)); this.gunTinted = true;
         this.lanceGlow.setVisible(true).setPosition(this.gun.x + ca * G.muzzle, this.gun.y + sa * G.muzzle).setScale(0.35 + 1.1 * c + (c >= 1 ? Math.random() * 0.3 : 0)).setAlpha(0.45 + 0.45 * c);
+      } else if (masteryStars(wid) >= 3) {                              // mastered: gold-plated, with the odd glint
+        this.gun.setTint(0xffe080); this.gunTinted = true;
+        if (Math.random() < 0.05) this.fx.emit(this.gun.x + ca * rand(2, 14), this.gun.y + sa * rand(2, 14) + rand(-2, 2), { n: 1, speed: [0, 8], life: [0.15, 0.3], size: [1, 1], cols: [0xffffff, 0xffe080], add: true });
       } else if (this.gunTinted) { this.gun.clearTint(); this.gunTinted = false; }
       if (!(wid === 'lance' && this.lanceOn)) this.lanceGlow.setVisible(false);
       if (wid === 'ripper') { const key = now < this.ripperUntil && Math.floor(now / 35) % 2 ? 'gun_ripper2' : 'gun_ripper'; if (this.gun.texture.key !== key) this.gun.setTexture(key); }
@@ -15428,6 +15684,13 @@ class GameScene extends Phaser.Scene {
       g.lineStyle(hit ? 4 : 3, hit ? 0xffffff : 0x9ad8ff, hit ? 0.9 : 0.55); g.beginPath(); g.arc(sx, sy, 15, a - A0, a + A0, false); g.strokePath();
       g.lineStyle(1, 0xe0f4ff, 0.8); g.beginPath(); g.arc(sx, sy, 17, a - A0, a + A0, false); g.strokePath();
     }
+    for (const S of this.seeds) { g.fillStyle(0x8ac040, 1).fillCircle(S.x, S.y, 2); g.fillStyle(0xe0ff80, 1).fillRect(Math.round(S.x), Math.round(S.y) - 1, 1, 1); }
+    for (const S of this.pspores) { g.fillStyle(0xc8ff60, 0.85).fillCircle(S.x, S.y, 1.5); }
+    if (this.tethered.length > 1) {                                       // the tether: a cord of light through every linked foe
+      const flash = now - (this.tetherFlashT || 0) < 90;
+      for (let i = 1; i < this.tethered.length; i++) { const a = this.tethered[i - 1], b = this.tethered[i]; if (!a.alive || !b.alive) continue; g.lineStyle(flash ? 2 : 1, flash ? 0xffffff : 0x80ffe0, flash ? 0.9 : 0.5 + 0.2 * Math.sin(now / 90)).lineBetween(a.body.center.x, a.body.center.y, b.body.center.x, b.body.center.y); }
+    }
+    for (const o of this.tethered) if (o.alive) { g.lineStyle(1, 0x80ffe0, 0.7); g.strokeCircle(o.body.center.x, o.body.center.y, 4); }
     for (const N of this.nukes) { g.fillStyle(0xd8e040, 1).fillCircle(N.x, N.y, 3); g.fillStyle(0xffffff, 1).fillRect(Math.round(N.x) - 1, Math.round(N.y) - 1, 1, 1); }
     for (const G of this.globs) { g.fillStyle(0xffd040, 0.95).fillCircle(G.x, G.y, 2); g.fillStyle(0xfff0a0, 1).fillRect(Math.round(G.x) - 1, Math.round(G.y) - 1, 1, 1); }
     for (const B of this.bubbles) { const r = 4 + Math.sin(B.w) * 0.6; g.lineStyle(1, 0xd8f8ff, 0.8).strokeCircle(B.x, B.y, r); g.fillStyle(0xffffff, 0.9).fillRect(Math.round(B.x) - 2, Math.round(B.y) - 2, 1, 1); }
@@ -15628,6 +15891,13 @@ class GameScene extends Phaser.Scene {
         g.fillStyle(0xc8f0ff, 0.08).fillCircle(bx, by, r); g.lineStyle(1, 0xd8f8ff, 0.75).strokeCircle(bx, by, r); g.fillStyle(0xffffff, 0.85).fillRect(bx - r * 0.5, by - r * 0.6, 2, 1);
       }
       if (e.stasisT > 0) { g.lineStyle(1, 0xc8e8ff, 0.8); g.strokeRect(e.body.left - 2, e.body.top - 2, e.body.width + 4, e.body.height + 4); }
+      if (e.kind === 'cinder') { e.rotation = e.spinA; e.glow.setPosition(e.x, e.y).setScale(e.owned > 0 ? 0.8 : 0.55); if (Math.random() < 0.6) this.fxFire(e.x + rand(-4, 4), e.y - 2, 1); continue; }
+      if (e.kind === 'banner' && e.ai === 'plant') {                     // the banner's healing ring
+        const R0 = TUNE.BANNER.radius; g.lineStyle(1, 0x5cff7a, 0.35 + 0.15 * Math.sin(now / 200));
+        for (let j = 0; j < 24; j += 2) { const a0 = j / 24 * Math.PI * 2 + now / 1500; g.beginPath(); g.arc(e.x, e.y, R0, a0, a0 + Math.PI / 24, false); g.strokePath(); }
+      }
+      if (e.kind === 'gatling' && (e.ai === 'spin' || e.ai === 'fire')) { const a = e.aimA, mx = e.x + Math.cos(a) * 14, my = e.y - 4 + Math.sin(a) * 14; if (e.ai === 'spin') this.laserG.lineStyle(1, 0xff3020, 0.15 + 0.3 * Math.random()).lineBetween(mx, my, mx + Math.cos(a) * 200, my + Math.sin(a) * 200); }
+      if (e.kind === 'gatling' && e.ai === 'hot' && Math.random() < 0.4) this.fx.emit(e.x + e.dir * 12, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.4, 0.8], size: [3, 6], cols: [0xe8e8e8, 0xb8b8b8], alpha: [0.4, 0], g: -30 });
       if (e.kind === 'jelly') {                                          // tendrils trailing beneath it
         e.glow.setPosition(e.x, e.y - 2).setScale(0.45 + 0.08 * Math.sin(now / 160));
         for (let k = -1; k <= 1; k++) { let px = e.x + k * 4, py = e.body.bottom; for (let j = 1; j <= 6; j++) { const qx = e.x + k * 4 + Math.sin(now / 140 + j * 0.9 + k) * 2.5, qy = e.body.bottom + j * TUNE.JELLY.drop / 6; g.lineStyle(1, e.zapping ? 0xffffff : 0xff90e8, e.zapping ? 0.9 : 0.5).lineBetween(px, py, qx, qy); px = qx; py = qy; } }
@@ -16494,6 +16764,7 @@ class HudScene extends Phaser.Scene {
         const x = Math.round(14 + (4 + d) * 34), y = 82, sel = i === this.weapon, fade = clamp((4.6 - ad) * 1.4, 0, 1), lock = this.lockedIds.includes(i);
         g.fillStyle(sel ? 0x2a1806 : 0x06070a, (sel ? 0.9 : 0.6) * fade); g.fillRect(x, y, 32, 46);
         g.lineStyle(2, sel ? 0xff8a1f : 0x2a2f37, fade); g.strokeRect(x + 1, y + 1, 30, 44);
+        ic.setTint(masteryStars(WEAPONS[i].id) >= 3 ? 0xffe080 : 0xffffff);   // mastered guns show gold
         ic.setVisible(true).setPosition(x + 16, y + 28).setAlpha((lock ? 0.15 : sel ? 1 : 0.45) * fade).setScale(ic.baseS * (sel ? 1 + 0.35 * this.ribPop : 1));
         kl.setVisible(true).setPosition(x + 3, y + 3).setAlpha(fade * (sel ? 1 : 0.7));
       }

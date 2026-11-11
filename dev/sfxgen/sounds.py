@@ -274,4 +274,10 @@ SOUNDS = {
     'railHum': dict(p='a high voltage electrical hum building up, a transformer buzz', d=2.0, max=1.2, keep=1, air=0.8, on=-24),
     'dozer': dict(p=['a bulldozer diesel engine rumbling', 'heavy machinery engine idling'], d=1.5, max=0.6, keep=2, n=8, air=0.3),
     'jellyZap': dict(p=['a small electric shock zap', 'a quick static discharge'], d=1.0, max=0.2, keep=3, n=8, air=0.9),
+    # ------------------------------------------------------------------ gold round
+    'tether': dict(p=['a sci-fi dart gun firing with a twang, a light whip of energy', 'a grappling line shooting out, a zing'], d=1.0, max=0.3, keep=2, n=8, air=0.9),
+    'sprout': dict(p=['a plant sprouting quickly, a wet organic pop', 'a mushroom bursting out of the ground'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
+    'gatlingSpin': dict(p='a minigun spinning up, a rising mechanical whine', d=1.5, max=1.0, keep=1, air=0.6, on=-24),
+    'gatlingFire': dict(p=['a minigun firing, a fast brrrt of gunshots', 'a gatling gun burst'], d=1.5, max=0.12, keep=4, n=8, mode='slice', air=0.6),
+    'bannerPlant': dict(p=['a flag pole slammed into the ground, a thud and cloth flap', 'a banner planted with a heavy thunk'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
 }

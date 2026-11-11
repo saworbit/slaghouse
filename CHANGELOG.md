@@ -6,6 +6,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Gold round: gold guns and lifetime stats.** A gun with all three mastery stars is gold-plated: it glints gold in
+  your hand, on the HUD ribbon and in the ARMORY, and the first one earns the GOLDSMITH medal. Lifetime kills, runs,
+  deaths and time played are kept and shown on the ARMORY page.
+- **Two more weapons** (wheel / Q/E). Seed launcher: plants a fungus turret that puffs homing spores at foes. Tether
+  gun: links up to three foes so damage to one is shared with the others.
+- **Three more enemies.** Cinder wheel: a burning wheel that rolls and hops at you (kick it back at them). Gatling:
+  spins up and hoses a slow-tracking stream, then overheats. Banner: plants a banner that heals every foe near it.
+- AudioGen takes for the tether dart, the fungus sprouting, the gatling's fire and the banner thud. The bank grows
+  to 195 sounds.
 - **Powerhouse round: ARENA 05.** OVERTIME and DAILY now also visit THE POWERHOUSE: a generator block, walkways and
   decks over a floor of live rails that power up in two banks, turn and turn about, zapping whoever's standing on
   them. A new NUKE IT medal is for 5 kills with one mini-nuke.
@@ -52,7 +61,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   wall, throwing stars at the top of each jump. Thundercloud: hangs over you and drops lightning.
 - AudioGen takes for the gauntlet's thruster and punch, the rifle crack, the thrown stars and the thunder. The
   bank grows to 172 sounds.
-- **Armory round: an ARMORY page.** The title menu has a new ARMORY: every gun, 12 to a row with three mastery pips
+- **Armory round: an ARMORY page.** The title menu has a new ARMORY: every gun, 13 to a row with three mastery pips
   under each, and the picked one's name, line, key, kills and the kills to its next star. A new POPCORN medal is
   for 5 microwave pops in a run.
 - **Two more weapons** (wheel / Q/E). Stasis grenade: a bubble of stopped time; hits on frozen foes are stored and
