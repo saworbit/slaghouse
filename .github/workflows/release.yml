@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:                   # dry run: builds the zip and notes from the chosen ref and uploads them as artifacts; publishes nothing
+    inputs:
+      version:
+        description: Changelog section to take the notes from (a version such as 0.2.0, or Unreleased)
+        default: Unreleased
 
 permissions:
   contents: write
@@ -12,6 +17,8 @@ jobs:
     name: Build and publish the playable zip
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      NAME: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -21,15 +28,29 @@ jobs:
         run: node dev/check.mjs
       - name: Build the zip
         run: |
+          name="${NAME//\//-}"            # a branch like fix/x makes slaghouse-fix-x.zip; tags have no slash
           mkdir -p dist/slaghouse
           cp slaghouse.html sfx_bank.js music_bank.js LICENSE README.md CHANGELOG.md dist/slaghouse/
-          (cd dist && zip -r -X "slaghouse-${GITHUB_REF_NAME}.zip" slaghouse)
+          (cd dist && zip -r -X "slaghouse-${name}.zip" slaghouse)
       - name: Pull this version's notes from the changelog
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          v="${GITHUB_REF_NAME#v}"
+          v="${VERSION:-${NAME#v}}"
           awk -v h="## [$v]" 'index($0, h) == 1 { on = 1; next } on && (/^## \[/ || /^\[[^]]*\]: /) { exit } on' CHANGELOG.md > dist/notes.md
           test -s dist/notes.md || echo "See CHANGELOG.md." > dist/notes.md
+      - name: Upload the dry run
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v7
+        with:
+          name: slaghouse-dry-run
+          path: |
+            dist/slaghouse
+            dist/notes.md
+            dist/*.zip
+          if-no-files-found: error
       - name: Create the release, or add the zip to the one already there
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
