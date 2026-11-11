@@ -1,7 +1,6 @@
 # SLAGHOUSE
 
 [![CI](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml/badge.svg)](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/saworbit/slaghouse?include_prereleases&sort=semver)](https://github.com/saworbit/slaghouse/releases)
 ![License: proprietary](https://img.shields.io/badge/license-proprietary-red)
 ![Phaser 4.2.1](https://img.shields.io/badge/Phaser-4.2.1-8a2be2)
 ![No build step](https://img.shields.io/badge/build-none-lightgrey)
