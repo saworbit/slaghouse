@@ -1931,6 +1931,10 @@ const Sfx = {
     n.g.gain.setTargetAtTime((n.bank ? this.bankGain.tractorLoop : 0.07) * v, t, 0.06);
     if (n.nodes[0].playbackRate) n.nodes[0].playbackRate.setTargetAtTime(0.85 + 0.15 * v, t, 0.1);
   },
+  stopLoops() {                                                    // every continuous weapon sound; a new loop gets its line here and nowhere else
+    this.arcSet(false); this.flameSet(false); this.miniSet(0); this.cryoSet(false); this.ripperSet(0);
+    this.lanceSet(0); this.swarmSet(0); this.acidSet(false); this.tractorSet(0);
+  },
   acidSet(on) {                                                    // hiss of the corroder while it sprays
     if (!this.ctx) return;
     if (on && !this.acidNode && !this.muted && (this.acidNode = this.loopNode('acidLoop', 0.03))) return;
@@ -5219,7 +5223,7 @@ class GameScene extends Phaser.Scene {
     this.totalEnemies = this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN_TOTAL;   // OVERTIME counts up as waves come
     this.kickReady = 0; this.kickUntil = 0; this.kickQueued = false; this.flameActiveUntil = 0; this.scorchT = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
-    Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); this.spin = 0; this.heat = 0;
+    Sfx.stopLoops(); this.spin = 0; this.heat = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
     this.hook = null; this.hookReady = 0; this.wrecks = []; this.darkA = 0;
     this.physics.world.gravity.y = TUNE.GRAVITY;
@@ -5236,10 +5240,9 @@ class GameScene extends Phaser.Scene {
     this.coils = []; this.pwaves = []; this.hammerOn = false; this.hammerCharge = 0; this.hammerSwing = 0; this.diving = false; this.diveCharge = 0;
     this.coilHeld = false; this.coilHeldT = 0; this.coilOverloaded = false; this.fenceT = 0; this.wheelOn = false; this.wheelSel = 0;
     this.orbChain = 0; this.orbChainT = 0; this.swarmLvl = 0; this.gnatCache = [];
-    Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Music.paused = false;
+    Music.paused = false;
     // furnace round: tractor grip, thrown things, tar, corroder, magnet fields
     this.tb = null; this.tbOn = false; this.thrown = []; this.tars = []; this.tarT = 0; this.inTar = false; this.acidActiveUntil = 0; this.acidPaintT = 0; this.magnets = [];
-    Sfx.acidSet(false); Sfx.tractorSet(0);
     this.tarG = this.add.graphics().setDepth(4.95);
     // shockworks round: shock orbs + beams, needles, fire jets, impact frames
     this.shockOrbs = []; this.shockBeams = []; this.shockHeld = false; this.shockHoldT = 0; this.shockReady = false; this.needles = []; this.impactN = 0;
@@ -5981,7 +5984,7 @@ class GameScene extends Phaser.Scene {
     }
     if (this.jd.M) Sfx.toggleMute();
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
-    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.arcSet(false); Sfx.flameSet(false); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
+    if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.stopLoops(); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
     if ((this.jd.R && (this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
@@ -9341,16 +9344,15 @@ class GameScene extends Phaser.Scene {
   }
 
   // ------------------------------------------------------------- run control ----
-  stopLoops() { Sfx.arcSet(false); Sfx.flameSet(false); Sfx.miniSet(0); Sfx.cryoSet(false); Sfx.ripperSet(0); Sfx.lanceSet(0); Sfx.swarmSet(0); Sfx.acidSet(false); Sfx.tractorSet(0); }
   restartRun() {
     this.saveCampaignPlayTime();
     const checkpoint = this.state === 'won' ? null : this.chapterStart;
-    this.stopLoops(); Music.paused = false;
+    Sfx.stopLoops(); Music.paused = false;
     this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena() : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId });   // a restart is the same run, so it keeps (or still lacks) the save
   }
   quitToTitle() {
     this.saveCampaignPlayTime();
-    this.stopLoops(); Music.paused = false; Music.intensity = 0;
+    Sfx.stopLoops(); Music.paused = false; Music.intensity = 0;
     this.scene.stop('Hud'); this.scene.start('Title');
   }
   saveCampaignPlayTime() {                                              // the scene clock holds still in the pause menu, so this.time.now is right either way
@@ -9363,7 +9365,8 @@ class GameScene extends Phaser.Scene {
   }
   pauseGame() {
     if (this.paused || this.state !== 'play') return;
-    this.paused = true; this.stopLoops(); Music.paused = true;
+    this.paused = true; Sfx.stopLoops(); Music.paused = true;
+    Music.need(this.restartTrack()); Music.need('title');               // RESTART and QUIT TO TITLE start without a gap; the next wave's keep() drops them again
     if (this.pfx && POSTFX.on) { const m = this.pfx.cm.colorMatrix; m.reset(); m.saturate(-0.75); m.brightness(0.55, true); this.pfx.key = 'pause'; }
     this.input.setDefaultCursor('default');
     BUS.emit('pause', true);
@@ -10602,7 +10605,7 @@ class GameScene extends Phaser.Scene {
         const save = loadCampaign();
         if (ownsCampaign(save, this.campaignRunId)) writeCampaign({ checkpoint: carry, cleared: !!save?.cleared, owner: this.campaignRunId });   // a stale tab keeps playing but leaves a newer campaign's checkpoint alone
       }
-      this.stopLoops();
+      Sfx.stopLoops();
       this.scene.restart({ arena, carry });
     });
   }
@@ -14859,6 +14862,7 @@ class GameScene extends Phaser.Scene {
     if (this.bossrush) return WAVE_MUSIC[WAVE_MUSIC.length - 1];
     return WAVE_MUSIC[this.endless ? i % 6 : Math.min(i, WAVE_MUSIC.length - 1)];   // endless boss waves are i % 6 === 5
   }
+  restartTrack() { return this.waveTrack(this.chapterStart ? CAMPAIGN_ACTS[this.chapterStart.arena].first : 0); }   // the first track R or RESTART plays
   musicAhead(i) { Music.keep([this.waveTrack(i), this.waveTrack(i + 1), 'win', 'lose']); }   // decode this wave's track, the next one and the jingles; drop the rest
   startWave(i) {
     this.wave = i;
@@ -14996,8 +15000,8 @@ class GameScene extends Phaser.Scene {
     this.paintSplatAround(cx, b.bottom - 2, 16);
     p.disableBody(true, true);
     this.pv.setVisible(false); this.gun.setVisible(false); this.visor.setVisible(false); this.mflash.setVisible(false);
-    this.lanceGlow.setVisible(false); this.lanceOn = false; this.locks = []; this.hornetHeld = false; this.reeledBy = null; this.stopLoops();
-    Sfx.gib(1.6); if (!Music.jingle('lose', 'title')) Sfx.lose(); Music.need(this.waveTrack(this.chapterStart ? CAMPAIGN_ACTS[this.chapterStart.arena].first : 0)); Sfx.arcSet(false); Sfx.flameSet(false); BUS.emit('splat', 9);
+    this.lanceGlow.setVisible(false); this.lanceOn = false; this.locks = []; this.hornetHeld = false; this.reeledBy = null; Sfx.stopLoops();
+    Sfx.gib(1.6); if (!Music.jingle('lose', 'title')) Sfx.lose(); Music.need(this.restartTrack()); BUS.emit('splat', 9);
     this.shake(320, 0.014); this.slowmoUntil = this.time.now + 900;
     this.time.delayedCall(1300, () => this.showOver(false));
   }
