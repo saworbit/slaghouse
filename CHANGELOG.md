@@ -6,6 +6,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Wrecking-yard round: ARENA 04.** OVERTIME and DAILY now rotate through a fourth arena, THE WRECKING YARD: junk
+  heaps of crates, a raised dais, and a wrecking ball swinging across the middle that flings foes, knocks you aside,
+  smashes crates and lights drums. A new WRECKING CREW medal is for 3 kills with it in a run.
+- **Two more weapons** (wheel / Q/E). Splitter: a bolt that splits in two every time it hits, three generations
+  deep. Decoy launcher: a holo canister that projects a hologram of you; nearby foes go for it and set it off.
+- **Three more enemies.** Torcher: a fireproof heavy that sweeps a flamethrower; its fuel tank blows if you shoot
+  it from behind. Discus: throws a disc that comes back to its hand (kick it to send it back). Spore pod: a rooted
+  fungus that puffs homing spores and bursts into a toxic cloud.
+- AudioGen takes for the wrecking ball (swing, crash, chain creak), the splitter's zap and forks, the decoy, the
+  discus throw and the spore puff. The bank grows to 161 sounds.
 - **Elite round: elite foes.** From wave 2 a few foes in each wave (more as OVERTIME climbs) warp in as elites with
   extra health, a coloured aura, a diamond over the head and one trait: ARMORED (double health), SHIELDED (a
   recharging bubble), VOLATILE (blows up when it dies) or REGEN (heals when left alone). Each drops two health

@@ -309,10 +309,12 @@
  },
  "creak": {
   "ids": [
-   "5"
+   "3",
+   "1"
   ],
   "wav": [
-   "ab5a312334d2db6b"
+   "48e4ba0f5c0dc922",
+   "4e0b00e9122df946"
   ],
   "rate": "40k"
  },
@@ -1691,6 +1693,70 @@
   "wav": [
    "ba1e4cf5667c6d9b",
    "f5cb0e8976960b0a"
+  ],
+  "rate": "40k"
+ },
+ "wreckSwing": {
+  "ids": [
+   "6",
+   "4"
+  ],
+  "wav": [
+   "eef8228820a67462",
+   "30805cb616fdbc6f"
+  ],
+  "rate": "40k"
+ },
+ "wreckHit": {
+  "ids": [
+   "2",
+   "1"
+  ],
+  "wav": [
+   "990aa68e7b4f4170",
+   "546985091361f9ca"
+  ],
+  "rate": "40k"
+ },
+ "split": {
+  "ids": [
+   "3",
+   "4"
+  ],
+  "wav": [
+   "075f2bda00a8a30c",
+   "ce5298e581eccf58"
+  ],
+  "rate": "40k"
+ },
+ "splitPop": {
+  "ids": [
+   "2",
+   "3",
+   "1"
+  ],
+  "wav": [
+   "a2997920cbf2f61f",
+   "9416cf4d65adbaae",
+   "6709c9f39f2dafb0"
+  ],
+  "rate": "40k"
+ },
+ "discThrow": {
+  "ids": [
+   "0"
+  ],
+  "wav": [
+   "dda090bf2944861a"
+  ],
+  "rate": "40k"
+ },
+ "sporePuff": {
+  "ids": [
+   "6"
+  ],
+  "wav": [
+   "4e6fb3b1c5cae1de"
   ],
   "rate": "40k"
  }

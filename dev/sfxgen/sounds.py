@@ -226,4 +226,13 @@ SOUNDS = {
     'spotted': dict(p='a short electronic alarm beep, a security alert chirp', d=1.0, max=0.4, keep=1, air=0.9),
     'bark': dict(p=['a robot dog barking, a metallic bark', 'a mechanical dog growl and bark'], d=1.0, max=0.3, keep=2, n=8, air=0.7),
     'shieldPop': dict(p=['an energy shield shattering, a glassy electric burst', 'a force field breaking with a crackle'], d=1.0, max=0.4, keep=2, n=8, air=0.9),
+    # ------------------------------------------------------------------ wrecking-yard round
+    'wreckSwing': dict(p=['a huge heavy object swinging past, a deep whoosh', 'a wrecking ball swinging through the air'], d=1.5, max=0.8, keep=2, n=8, air=0.4, on=-20),
+    'wreckHit': dict(p=['a wrecking ball smashing into metal, a massive crash', 'a huge iron ball hitting a wall, heavy impact'], d=1.5, max=0.8, keep=2, n=8, air=0.4),
+    'creak': dict(p='a heavy chain creaking under strain, metal groan', d=1.5, max=0.8, keep=2, air=0.6, on=-20),
+    'split': dict(p=['a sci-fi energy bolt firing, a sharp zap', 'a laser blaster shot with a crackle'], d=1.0, max=0.3, keep=2, n=8, air=0.9),
+    'splitPop': dict(p=['a small electric pop, a tiny zap', 'a short spark crackle'], d=1.0, max=0.15, keep=3, n=8, air=0.9),
+    'decoy': dict(p='a hologram projector powering on, a sci-fi shimmer', d=1.5, max=0.6, keep=1, air=0.9),
+    'discThrow': dict(p=['a metal frisbee whooshing through the air', 'a spinning blade whirring past'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    'sporePuff': dict(p=['a soft puff of spores, a squishy release of air', 'a mushroom releasing a cloud of spores'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
 }
