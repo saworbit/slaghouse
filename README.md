@@ -22,9 +22,13 @@ The game loads Phaser 4.2.1 from the jsDelivr CDN, so it needs an internet conne
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then go to <http://localhost:8765/slaghouse.html> and click the game. The title menu has CAMPAIGN (new game or continue from a checkpoint), OVERTIME (the
-endless mode), DAILY (today's seeded OVERTIME run), BOSS RUSH (all five bosses back to back), CODEX (every enemy you've met), ARMORY (every gun, its kills and mastery stars), MEDALS and OPTIONS (including run **mutators**: glass cannon, swarm, moon boots, lights out, vampire); **W / S** to choose, **Enter** to pick, **A / D**
-to change the difficulty, **E** to jump straight into OVERTIME.
+Open <http://127.0.0.1:8765/slaghouse.html> and click the game. On the title screen, use **W / S** to choose,
+**Enter** to select, **A / D** to change difficulty and **E** to start OVERTIME. In **CAMPAIGN**, use **A / D**
+to choose **New Campaign** or **Continue** when a checkpoint is available.
+
+The title also has **OVERTIME** (endless waves), **DAILY** (today's seeded OVERTIME run), **BOSS RUSH** (five bosses
+back to back), **CODEX**, **ARMORY**, **MEDALS** and **OPTIONS**. Options include the Glass Cannon, Swarm, Moon Boots,
+Lights Out and Vampire mutators.
 
 `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
 automatically. Both are optional; without them the game uses its built-in procedural audio.
@@ -44,7 +48,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
-| Pause menu (resume, restart, post FX, screen shake, music and SFX volume, controls, quit to title) | **Esc** or **P** |
+| Pause menu (resume, retry act or restart, post FX, screen shake, volume, controls, quit to title) | **Esc** or **P** |
 | Retry the current campaign act or restart the run (mid-run, or once the results are up) | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
@@ -102,13 +106,21 @@ enter after their escorts fall.
 | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Start against a small grunt patrol, then face the floor security team. Gunfire lights the blackout. After both operations, enter the marked Furnace lift. |
 | II · The Furnace | **Slag Rain**, **Gravity Loss** | Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
-| III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at both coolant valves in order to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
+| III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at each marked coolant valve until its meter fills. Open valve 1 before valve 2 to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
 
 Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.
-The two lifts save your weapon, perks, stats, difficulty and mutator. Entering the Furnace brings your health up
-to at least 60 HP, and entering the Sorting Line brings it up to at least 75 HP. The Vampire mutator skips this
-recovery. Continue from the campaign screen after quitting, or press **R** to retry from the start of the current
-act. The Speedrunner medal requires a clear in one run.
+Step onto each marked lift to enter the next act and save a checkpoint. The Furnace checkpoint brings your
+health up to at least 60 HP and the Sorting Line checkpoint brings it up to at least 75 HP. The Vampire mutator
+skips this recovery. Each checkpoint also saves your equipped weapon, perks, difficulty, mutator and accumulated
+run stats.
+
+Choose **Campaign → Continue** to return to the saved act after quitting or reloading. Keep the same browser
+profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the
+campaign clears it.
+
+Press **R** during play or after defeat to retry the saved act. In Act I or after victory, **R** starts a fresh
+run. The pause menu shows **Retry Act** when a checkpoint is available. Speedrunner requires a clear under
+10 minutes without using **Continue** or retrying from a checkpoint.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
 a boss every sixth (the Smelter and THE FOREMAN, a four-legged crane walker, take turns), a perk after each wave and a new arena every three, including THE WRECKING YARD,
@@ -152,8 +164,8 @@ keeps your best score.
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks and checks the script tags; CI runs
   it on every push to `main` and every pull request.
-- **Testing:** there are no automated gameplay tests yet. `dev/playtest/` has the in-page harness used for
-  playtesting: it steps the game from the browser console and has a bot that plays the campaign.
+- **Testing:** CI runs static checks. Use the [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check)
+  for progression changes and the [in-page harness](dev/playtest/README.md) for combat and arena tests.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
   venv comes from `dev/synthwave/requirements.txt`.
