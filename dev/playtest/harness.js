@@ -14,10 +14,14 @@ window.T = (() => {
   T.snapNow = async (name) => { const p = T.snap(name); T.run(17); return await p; };
   T.boot = () => { T.start(); const ts = game.scene.getScene('Title'); ts.scene.start('Game'); ts.scene.launch('Hud'); T.run(100); };
   T.setup = (arena, keepWaves) => {
-    const gs = T.g();
+    const gs = T.g(), mode = RUNMODE;
+    // the campaign has no act in ARENA 04 and 05 (only OVERTIME and DAILY go there), so stage those as OVERTIME
+    if (RUNMODE === 'campaign' && (arena === true ? 1 : arena || 0) >= CAMPAIGN_ACTS.length) RUNMODE = 'endless';
     // explicit data every time: a bare restart reuses the last run's arena and carry (arena 0 used to land there)
-    gs.scene.restart(arena ? { arena: arena === true ? 1 : arena, carry: { hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} }, style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, totalEnemies: 50, wave: 3, diff: OPTS.diff, mut: OPTS.mut } } : { arena: 0, carry: null });
-    T.run(50);
+    try {
+      gs.scene.restart(arena ? { arena: arena === true ? 1 : arena, carry: { hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} }, style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, totalEnemies: 50, wave: 3, diff: OPTS.diff, mut: OPTS.mut } } : { arena: 0, carry: null });
+      T.run(50);
+    } finally { RUNMODE = mode; }                                   // create() has read it; later setups and restarts see the mode you set
     const g = T.g(); g.pauseGame = () => {}; if (!keepWaves) g.startWave = () => {};
     const hp0 = g.hurtPlayer.bind(g); g.hurtPlayer = (d, x, o) => { const r = hp0(d, x, o); T.dmgLog.push(Math.round(d)); g.hp = 100; return r; };
     if (!keepWaves) { for (const e of g.enemies.getChildren()) if (e.alive) { e.alive = false; e.disableBody(true, true); if (e.glow) e.glow.setVisible(false); if (e.gun) e.gun.setVisible(false); } g.enemiesLeft = 99; }
@@ -58,12 +62,15 @@ T.bot = async (opts = {}) => {
     k.A.isDown = moveDir < 0; k.D.isDown = moveDir > 0;
     k.SPACE.isDown = Math.random() < 0.08 || (p.body.blocked.left || p.body.blocked.right);
     g._farT = (best && (bd > 170 || !g.los(p.x, p.y - 4, best.body.center.x, best.body.center.y)) ? (g._farT || 0) + 0.05 : 0);
-    if (best && g._farT > 5) {                                       // stuck far away: hop next to the nearest foe (open tile with floor)
-      g._farT = 0; const bx = Math.floor(best.x / 16), by = Math.floor(best.y / 16);
-      outer: for (let r = 3; r < 14; r++) for (const dx of [-r, r]) for (let dy = -4; dy <= 6; dy++) {
-        const tx = bx + dx, ty = by + dy; if (tx < 2 || tx > 97 || ty < 2 || ty > 24) continue;
-        if (g.grid[ty][tx] === '.' && g.grid[ty - 1][tx] === '.' && g.grid[ty + 1] && g.grid[ty + 1][tx] !== '.') { T.tp(tx, ty); log.push('tp ' + tx + ',' + ty + ' @' + t.toFixed(0)); break outer; }
-      }
+    if (best && g._farT > 5) {                                       // stuck far away: hop next to the nearest foe, onto an open tile with floor that can see it
+      g._farT = 0; const bx = Math.floor(best.x / 16), by = Math.floor(best.y / 16), cx = best.body.center.x, cy = best.body.center.y;
+      const stand = (tx, ty) => tx >= 2 && tx <= 97 && ty >= 2 && ty <= 24 && g.grid[ty][tx] === '.' && g.grid[ty - 1][tx] === '.' &&
+        g.grid[ty + 1] && g.grid[ty + 1][tx] !== '.' && tx + ',' + ty !== g._lastTp;   // the last spot didn't help, or we wouldn't be here
+      const sees = (tx, ty) => g.los(tx * 16 + 8, (ty + 1) * 16 - 16, cx, cy);   // eye height after T.tp, as the far check above measures it
+      let spot = null;
+      outer: for (let r = 3; r < 14; r++) for (const dx of [-r, r]) for (let dy = -4; dy <= 6; dy++) if (stand(bx + dx, by + dy) && sees(bx + dx, by + dy)) { spot = [bx + dx, by + dy]; break outer; }
+      for (let r = 1; r < 14 && !spot; r++) for (const dx of [-r, r]) if (!spot && stand(bx + dx, by)) spot = [bx + dx, by];   // nothing in sight: the nearest spot on the foe's own row
+      if (spot) { T.tp(spot[0], spot[1]); g._lastTp = spot.join(','); log.push('tp ' + g._lastTp + ' @' + t.toFixed(0)); }
     }
     if (best) { T.aimAt(best.body.center.x, best.body.center.y); T.trig(Math.random() < 0.85); if (bd < 26 && Math.random() < 0.3) g.kickQueued = true; }
     else T.trig(false);

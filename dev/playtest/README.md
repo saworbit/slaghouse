@@ -22,9 +22,12 @@ RUNMODE = 'campaign'; T.boot(); T.run(300);
 const r = await VB.campaign(900);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
 ```
 
-A pass has `state: 'won'` and an empty `errs` array. The bot stands on lift and coolant-valve markers as they
+A pass has `state: 'won'`, an empty `errs` array and an empty `removed` array. `removed` lists any foe the bot
+couldn't see for 30 s with five or fewer left; `VB.campaign` kills it so the run goes on, so a non-empty list means
+the bot got stuck there. The bot stands on lift and coolant-valve markers as they
 open. Use `T.setup(0)` to stage a fight in the Melt Floor or `T.setup(1)` to stage one in the Furnace with waves
-disabled. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
+disabled. Under the campaign `RUNMODE`, `T.setup(3)` and `T.setup(4)` stage ARENA 04 and 05 as OVERTIME, since the
+campaign has no act there. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
 reload, retry and the valve meter's pause behavior.
 
 ## Things that bite
