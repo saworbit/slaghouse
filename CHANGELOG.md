@@ -16,6 +16,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `dev/synthwave/build.py` checks the bank after writing it (`--check` checks the current one): every track the game
   asks for is there, each level is within 0.5 dB of `TARGET`, and each loop's seam lines up with its `ls` / `len`.
   It exits non-zero and names the track. (#23)
+- `dev/sfxgen/calibcheck.mjs`: `calib.json` entries carry a fingerprint of the synth code they measured, and
+  `build.py` lists any whose procedural sound has changed since. Existing entries got the fingerprint of the
+  version they were measured against, taken from git history. (#9)
 
 ### Changed
 - `dev/synthwave` has its own `requirements.txt` (numpy, scipy, numba, soundfile; no torch or GPU), and `loud.py`
@@ -33,6 +36,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- `dev/sfxgen/build.py` stops with a clear message, before writing anything, when processed takes are missing (as
+  on a fresh clone) instead of crashing in soundfile, and ends with a note listing the sounds it skipped. (part of
+  #8 and #15)
 - `.claude/launch.json` keeps only the preview config that works (`static-test` on 8781); the two that came up dead
   or served a stale copy are gone. (#3)
 - OVERTIME and DAILY play the stage loops again after wave 6; the boss theme now comes back only on boss waves
