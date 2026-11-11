@@ -25,7 +25,8 @@ This compiles the game script and both audio banks, checks that local scripts ex
 to an exact version. CI runs the same script on every push to `main` and on every pull request.
 
 There are no automated gameplay tests yet; play the modes you touched (campaign, OVERTIME, DAILY, BOSS RUSH) and
-watch the browser console for errors.
+watch the browser console for errors. [`dev/playtest/`](dev/playtest/README.md) has an in-page harness that can step
+the game by hand and play the campaign with a bot.
 
 ## Workflow
 
@@ -38,8 +39,7 @@ watch the browser console for errors.
 
 ## Releasing
 
-Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip. These steps are manual for now;
-automating them is [issue #20](https://github.com/saworbit/slaghouse/issues/20).
+Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip.
 
 1. In `CHANGELOG.md`, move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading and update the
    version links at the bottom of the file.
@@ -54,17 +54,10 @@ automating them is [issue #20](https://github.com/saworbit/slaghouse/issues/20).
    git push origin vX.Y.Z
    ```
 
-4. Build the playable zip (a `slaghouse/` folder with the game, both audio banks, LICENSE, README and CHANGELOG):
-
-   ```bash
-   python -c "import sys,zipfile;v=sys.argv[1];z=zipfile.ZipFile(f'slaghouse-{v}.zip','w',zipfile.ZIP_DEFLATED);[z.write(f,'slaghouse/'+f) for f in ['slaghouse.html','sfx_bank.js','music_bank.js','LICENSE','README.md','CHANGELOG.md']]" vX.Y.Z
-   ```
-
-5. Publish the release with notes (highlights, notable fixes, how to play) and the zip attached:
-
-   ```bash
-   gh release create vX.Y.Z --title "SLAGHOUSE vX.Y.Z" --notes-file notes.md --verify-tag slaghouse-vX.Y.Z.zip
-   ```
+The `Release` workflow (`.github/workflows/release.yml`) takes it from there: it runs `node dev/check.mjs`, builds
+`slaghouse-vX.Y.Z.zip` (a `slaghouse/` folder with the game, both audio banks, LICENSE, README and CHANGELOG) and
+publishes the release with that version's changelog section as its notes. If the release already exists, it attaches
+the zip to it. Edit the notes on GitHub afterwards to add highlights or how to play.
 
 ## Audio
 

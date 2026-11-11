@@ -15,6 +15,7 @@ way adding one sound doesn't rewrite the whole bank in git. Delete out/bank_src.
 import os, re, sys, json, base64, hashlib, subprocess, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, '..', 'audiolib'))   # loud.py, shared with dev/synthwave
 import numpy as np, soundfile as sf
 from sounds import SOUNDS
 from loud import loudness
@@ -66,11 +67,25 @@ def previous_bank():                            # name -> [base64 takes] from th
     return prev
 
 
+# calib.json entries measured against an older version of their procedural sound (calibcheck.mjs; needs node)
+try:
+    print(subprocess.run(['node', os.path.join(HERE, 'calibcheck.mjs')], capture_output=True, text=True, check=True).stdout, end='')
+except (OSError, subprocess.CalledProcessError) as e:
+    print(f'note: calib.json was not checked for stale entries ({e})')
+
+skipped = [n for n in SOUNDS if n not in cands or n not in calib]
+buildable = [n for n in SOUNDS if n not in skipped]
+missing = [os.path.relpath(os.path.join(PROC, n, f'{cid}.wav'), HERE) for n in buildable for cid in choose(n, SOUNDS[n])
+           if not os.path.exists(os.path.join(PROC, n, f'{cid}.wav'))]
+if missing:                                     # checked before anything is written, so a failed build leaves the bank alone
+    sys.exit(f'{len(missing)} processed take(s) are missing, starting with {missing[0]}. out/proc/ is not in git, so on a '
+             f'fresh clone run gen.py and process.py first (see "Rebuilding from a fresh clone" in README.md).')
+
 SRC_JSON = os.path.join(HERE, 'out', 'bank_src.json')
 prev_data, prev_src = previous_bank(), (json.load(open(SRC_JSON)) if os.path.exists(SRC_JSON) else {})
 bank, total, used, src, reused = {}, 0, {}, {}, 0
 for name, spec in SOUNDS.items():
-    if name not in cands or name not in calib:
+    if name in skipped:
         print(f'skip {name} (no candidates or calibration)'); continue
     loop = spec.get('mode') == 'loop'
     used[name] = choose(name, spec)
@@ -88,7 +103,7 @@ for name, spec in SOUNDS.items():
             b = opus((y * (common / l)).astype(np.float32))
             total += len(b)
             data.append(base64.b64encode(b).decode())
-    target, synth_peak = calib[name]
+    target, synth_peak = calib[name][:2]               # [loudness, peak, fingerprint]
     g = MASTER * target / common
     peak = max(float(np.max(np.abs(y * (common / l)))) for y, l in zip(ys, louds))
     capped = g * peak > PEAK_CAP * synth_peak
@@ -108,3 +123,5 @@ json.dump(used, open(os.path.join(HERE, 'out', 'picks_used.json'), 'w'), indent=
 json.dump({k: v.get('keep', 1) for k, v in SOUNDS.items()}, open(os.path.join(HERE, 'out', 'keep.json'), 'w'))
 json.dump(src, open(SRC_JSON, 'w', newline='\n'), indent=1)
 print(f'wrote {OUT}: {len(bank)} sounds ({reused} reused, {len(bank) - reused} encoded), {total / 1024:.0f} KB opus, {os.path.getsize(OUT) / 1024:.0f} KB file')
+if skipped:
+    print(f'NOTE: {len(skipped)} sound(s) in sounds.py are not in the bank, so the game plays their synth versions: {" ".join(skipped)}')

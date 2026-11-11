@@ -44,7 +44,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
-| Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
+| Pause menu (resume, restart, post FX, screen shake, music and SFX volume, controls, quit to title) | **Esc** or **P** |
 | Retry the current campaign act or restart the run (mid-run, or once the results are up) | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
@@ -139,6 +139,7 @@ keeps your best score.
 | `dev/sfxgen/` | AudioGen pipeline for the SFX bank; see its README. |
 | `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
 | `dev/build/` | One-off scripts and code snippets that applied each update round to `slaghouse.html`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
+| `dev/playtest/` | In-page test harness: step the game by hand, a bot, arena storms and a timed campaign run; see its README. |
 | `dev/screenshots/` | Screenshots from playtesting. |
 | `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
 | `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |
@@ -151,10 +152,11 @@ keeps your best score.
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks and checks the script tags; CI runs
   it on every push to `main` and every pull request.
-- **Testing:** there are no automated gameplay tests yet. Playtesting has been done by driving the game from the
-  browser console; saving that as a smoke test is an open issue.
+- **Testing:** there are no automated gameplay tests yet. `dev/playtest/` has the in-page harness used for
+  playtesting: it steps the game from the browser console and has a bot that plays the campaign.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
-  need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU.
+  need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
+  venv comes from `dev/synthwave/requirements.txt`.
 - **History:** see [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing and security

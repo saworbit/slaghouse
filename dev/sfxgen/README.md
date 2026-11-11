@@ -3,8 +3,8 @@
 Generates the game's sampled SFX with [AudioCraft](https://github.com/facebookresearch/audiocraft)'s
 AudioGen (`facebook/audiogen-medium`, runs locally on the GPU) and packs them into `../../sfx_bank.js`.
 The game plays a sample when one is loaded and falls back to its procedural synth otherwise. Press **N**
-in game to A/B the two. The weapon loops (arc, flame, cryo) switch on the next trigger pull, but the ambient
-hum keeps whichever version it started with.
+in game to A/B the two. The weapon loops (arc, flame, cryo) switch on the next trigger pull, and the ambient
+hum crossfades to the selected version.
 
 ## Pipeline
 
@@ -14,7 +14,7 @@ hum keeps whichever version it started with.
 | generate | `gen.py [names]` | 6-12 AudioGen takes per sound -> `out/raw/` (about 12 min for everything on an RTX 3070 Ti) |
 | process | `process.py [names]` | trim / slice / seamless loop, 16 -> 48 kHz with synthesized >8 kHz "air", CLAP ranking -> `out/proc/`, `out/candidates.json`, `out/sheets/` |
 | audition | `review.html` | serve the repo root and open `/dev/sfxgen/review.html`: play every take, tick picks, export `picks.json` |
-| calibrate | `calib.js` -> `calib.json` | renders each procedural sound offline in the browser and measures K-weighted loudness + peak |
+| calibrate | `calib.js` -> `calib.json` | renders each procedural sound offline in the browser and measures K-weighted loudness + peak, with a fingerprint of the synth code it measured |
 | build | `build.py` | encodes the picks to Opus, gain-matches each sound to the synth it replaces -> `../../sfx_bank.js` (only re-encodes sounds whose picks or source audio changed, see below) |
 
 `picks.json` holds hand overrides (sounds where the CLAP ranking chose badly); everything else uses the
@@ -34,12 +34,19 @@ loop at full charge).
 
 A sound in `sounds.py` with no `calib.json` entry is left out of the bank: `build.py` prints
 `skip <name> (no candidates or calibration)` and the game plays that sound's synth version. So calibrate every
-new sound before building, and check the build output for `skip` lines.
+new sound before building. `build.py` ends with a `NOTE` listing every skipped sound.
+
+Each entry is `[loudness, peak, fingerprint]`. The fingerprint hashes the source of the `Sfx` method a
+measurement played and the `Sfx` methods it calls. `build.py` first runs `calibcheck.mjs` (needs node), which
+recomputes the fingerprints from the current `slaghouse.html` and lists every entry whose procedural sound has
+changed since it was measured, so you know what to re-measure. `node calibcheck.mjs --strict` exits 1 when
+anything is stale.
 
 ## Rebuilding from a fresh clone
 
 Only `out/candidates.json`, `out/picks_used.json`, `out/keep.json` and `out/bank_src.json` are committed. The processed WAVs that
-`build.py` and `review.html` read (`out/proc/`) are gitignored, so on a fresh clone run `gen.py` and
+`build.py` and `review.html` read (`out/proc/`) are gitignored, so on a fresh clone `build.py` stops before
+writing anything and says so. Run `gen.py` and
 `process.py` first. Each sound's seed is `1000 + its position in sounds.py`. Adding or reordering entries
 shifts the seeds, and different GPU or library versions can also change the takes. After regenerating,
 re-check the `picks.json` overrides in `review.html`.

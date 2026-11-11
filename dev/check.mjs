@@ -2,6 +2,7 @@
 // - every inline <script> in slaghouse.html compiles
 // - the optional audio banks compile
 // - every local <script src> exists, and CDN scripts are pinned to an exact version
+// - notes any sampled sound name the game asks for that sfx_bank.js doesn't have (the synth plays instead)
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,10 +39,20 @@ for (const m of html.matchAll(/<script[^>]*\bsrc="([^"]+)"/g)) {
   }
 }
 
+const SYNTH_ONLY = new Set(['skitter']);          // no take sounded right, so it stays synth on purpose
 for (const bank of ['sfx_bank.js', 'music_bank.js']) {
   const p = join(root, bank);
   if (!existsSync(p)) { ok(`${bank} absent (optional; the game falls back to synth audio)`); continue; }
-  if (compile(readFileSync(p, 'utf8'), bank)) ok(`${bank} compiles`);
+  const src = readFileSync(p, 'utf8');
+  if (!compile(src, bank)) continue;
+  ok(`${bank} compiles`);
+  if (bank !== 'sfx_bank.js') continue;
+  const ctx = { window: {} }; vm.runInNewContext(src, ctx);
+  const have = new Set(Object.keys(ctx.window.SLAG_SFX || {})), asked = new Set();
+  for (const m of html.matchAll(/\b(?:smp|loopNode)\(([^)]*)\)/g)) for (const q of m[1].matchAll(/'([A-Za-z][A-Za-z0-9_]+)'/g)) asked.add(q[1]);
+  const missing = [...asked].filter((n) => !have.has(n) && !SYNTH_ONLY.has(n)).sort();
+  if (missing.length) console.log(`note  ${missing.length} sampled sound(s) not in sfx_bank.js, so the synth plays: ${missing.join(' ')}`);
+  else ok(`every sampled sound name the game asks for is in sfx_bank.js`);
 }
 
 if (failures.length) {

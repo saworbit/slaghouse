@@ -10,10 +10,28 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
 - **Campaign checkpoints.** Continue from either lift with your weapon, perks, stats and difficulty intact, or
   retry your current act after a death. The campaign screen shows the route and current checkpoint.
+- The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
+  the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
+- `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
+  `VB.campaign()` for a timed full campaign run that reports kills, errors and step cost), with a README. (#4)
+- `dev/check.mjs` lists any sampled sound name the game asks for that `sfx_bank.js` doesn't have. (#4)
+- A `Release` workflow: pushing a `vX.Y.Z` tag runs the checks, builds the playable zip and publishes the release
+  with that version's changelog notes. CONTRIBUTING.md's release steps shrink to match. (#20)
+- `dev/synthwave/build.py` checks the bank after writing it (`--check` checks the current one): every track the game
+  asks for is there, each level is within 0.5 dB of `TARGET`, and each loop's seam lines up with its `ls` / `len`.
+  It exits non-zero and names the track. (#23)
+- `dev/sfxgen/calibcheck.mjs`: `calib.json` entries carry a fingerprint of the synth code they measured, and
+  `build.py` lists any whose procedural sound has changed since. Existing entries got the fingerprint of the
+  version they were measured against, taken from git history. (#9)
 
 ### Changed
 - Lockdown starts with a grunt patrol and offers a choice of damage, sustain or mobility in the first perk draft.
 - The Speedrunner medal requires a clear in one run.
+- `dev/synthwave` has its own `requirements.txt` (numpy, scipy, numba, soundfile; no torch or GPU), and `loud.py`
+  moved to `dev/audiolib/`, shared by both audio pipelines. Soundtrack encodes are bit-exact, so rebuilding from
+  unchanged WAVs no longer rewrites `music_bank.js`. (#24)
+- Best records (campaign, BOSS RUSH, OVERTIME) store the mutator that was on, and the title screen shows it next to
+  the best. A mutator run is marked, not kept apart. Old records without the field still load. (#21)
 - CONTRIBUTING.md has a release runbook (changelog, tag, playable zip, GitHub release) and points to GitHub issues
   for open work.
 - The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,
@@ -24,6 +42,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Dead foes leave the enemy group 3 s after they die, so the per-frame loops stop walking every corpse sprite until
+  the arena changes. In a 10-minute OVERTIME run under SWARM the group peaked at 28 sprites, down from 104. (#14)
+- `dev/sfxgen/build.py` stops with a clear message, before writing anything, when processed takes are missing (as
+  on a fresh clone) instead of crashing in soundfile, and ends with a note listing the sounds it skipped. (part of
+  #8 and #15)
+- `.claude/launch.json` keeps only the preview config that works (`static-test` on 8781); the two that came up dead
+  or served a stale copy are gone. (#3)
 - OVERTIME and DAILY play the stage loops again after wave 6; the boss theme now comes back only on boss waves
   (6, 12, 18 ...). A BOSS RUSH lift ride keeps the boss theme instead of a stage loop. (#25)
 - **N** now swaps the ambient hum along with the other sounds, with a crossfade, instead of leaving the old drone
@@ -31,6 +56,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - Sample bank decode failures are no longer silent: the console gets one warning with the count, **N** says
   `SFX BANK UNAVAILABLE` when nothing decoded, and a music track that fails to decode hands over to the procedural
   loop (and **B** says so) instead of playing nothing. (#11)
+- When five or fewer foes are left, a walker stuck against a wall it can't climb (ARENA 02's side pockets) warps
+  out to the ground spawn point nearest you after a few seconds, so the wave finishes without hooking in. (#16)
+- The ranged keepers (discus, chiller, bastion, howitzer) hop high enough to climb back up the 3-tile steps they
+  are allowed to step down, so they hold high ground over a long wave. The howitzer only leaves its perch to hunt
+  you once you're out of its lob range. (#19)
+- The pause menu now stops the game's clock itself, so every timer holds while paused, including the ones the old
+  timestamp shifting missed (per-target cooldowns, kill-time lists, local timers). (#18)
+- The Game scene no longer adds another `resume` listener on every restart. (#17)
 
 ## [0.1.0] - 2026-11-11
 
