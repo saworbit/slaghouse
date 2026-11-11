@@ -593,7 +593,8 @@
     HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
                           as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
                           came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
-                          (and to a boss), and those last few stop lurking and come looking for you; lance charge
+                          (and to a boss), and those last few stop lurking and come looking for you (one stuck
+                          against a wall it can't climb for 4 s warps to the ground point nearest you); lance charge
                           ring and hornet lock pips at the crosshair. Damage numbers
                           step aside from ones still rising nearby.
   =============================================================================
@@ -1300,6 +1301,7 @@ const ENEMY = {
   tarspit: { key: 'tarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
 };
+const KEEPER_HOP = 290;                             // ranged keepers' hop when blocked: clears the 3-tile step stepOk lets them take (48 px needs 277 at gravity 800)
 const isHumanoid = e => e.kind === 'enforcer' || e.kind === 'stalker' || e.kind === 'bulwark' || e.kind === 'sniper' || e.kind === 'rocketeer' || e.kind === 'sapper' || e.kind === 'cloaker' || e.kind === 'pyro' || e.kind === 'harpooner' || e.kind === 'mirror' || e.kind === 'tarspit' || e.kind === 'duelist' || e.kind === 'grenadier';
 const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind === 'rocketeer';
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
@@ -11527,7 +11529,7 @@ class GameScene extends Phaser.Scene {
       if (hunt && !want) want = e.dir;
       if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
-      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -KEEPER_HOP;
       if (e.cd <= 0 && onG && (!e.wall || !this.bwalls.includes(e.wall))) {
         e.cd = T.cd * rand(0.9, 1.1); e.ai = 'cast'; e.aiUntil = now + 400;
         const wx = e.x + e.dir * 26; if (!this.solidAt(wx, b.bottom - 8)) { e.wall = { x: wx, y0: b.bottom - T.wallH, y1: b.bottom, hp: T.wallHp, t: T.wallT, hitT: 0, owner: e }; this.bwalls.push(e.wall); Sfx.hardlight(); this.spawnLight(wx, b.bottom - 20, 'glow', 0x46e6ff, 0.6, 1.4, 0.8, 0.2); }
@@ -12089,7 +12091,7 @@ class GameScene extends Phaser.Scene {
       if (hunt && !want) want = e.dir;
       if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
-      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -250;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -KEEPER_HOP;
       if (e.cd <= 0 && !e.disc && e.sees && dist < 320) {
         e.cd = T.cd * rand(0.85, 1.15); e.ai = 'throw'; e.aiUntil = now + 350;
         const a = Math.atan2(dy, dx), D = { x: e.x + e.dir * 6, y: e.y - 4, vx: Math.cos(a) * T.disc, vy: Math.sin(a) * T.disc, owner: e, st: 'out', dist: 0, hitP: 0, mine: false, spin: 0, hits: new Set() };
@@ -12721,7 +12723,7 @@ class GameScene extends Phaser.Scene {
       if (hunt && !want) want = e.dir;
       if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 10, b.bottom)) want = 0;   // backing away, it still minds the edge
       b.velocity.x = want * T.speed;
-      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -KEEPER_HOP;
       if (e.cd <= 0 && (e.sees || dist < 260) && dist < 320) {           // a lob: it doesn't need a clear line
         e.cd = T.cd * rand(0.85, 1.15); e.ai = 'throw'; e.aiUntil = now + 420;
         this.time.delayedCall(180, () => {
@@ -14463,9 +14465,11 @@ class GameScene extends Phaser.Scene {
       let want = 0;
       if (e.aggro && alive) { const ax = Math.abs(dx); want = ax < 150 ? -Math.sign(dx) : ax > 260 ? Math.sign(dx) : 0; e.dir = dx >= 0 ? 1 : -1; }
       else { want = e.dir; if (b.blocked.left || b.blocked.right) { e.dir *= -1; want = e.dir; } }
-      if (e.aggro && alive && !want && e.blindT > 3 && dy > 40) want = e.dir;   // lost you below: go and look
-      if (want && !(e.aggro && e.blindT > 3 && dy > 40 && want === e.dir) && !this.stepOk(b.center.x + want * 12, b.bottom)) { want = 0; if (!e.aggro) e.dir *= -1; }   // won't walk off a big drop, unless it's lost you below
+      const hunt = e.aggro && alive && e.blindT > 3 && dy > 40 && dist > T.range;   // lost you below and out of lob range: go and look
+      if (hunt && !want) want = e.dir;
+      if (want && !(hunt && want === e.dir) && !this.stepOk(b.center.x + want * 12, b.bottom)) { want = 0; if (!e.aggro) e.dir *= -1; }   // won't walk off a big drop, unless it's hunting you
       b.velocity.x = want * T.speed;
+      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -KEEPER_HOP;
       if (want) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; if (Math.floor(e.stepK) !== e.lastStep) { e.lastStep = Math.floor(e.stepK); if (dist < 300) Sfx.clunk(0.35); } }
       else e.fr = 'w0';
       if (e.aggro && alive && e.cd <= 0 && onG && dist < T.range) { e.ai = 'plant'; e.aiUntil = now + T.plantMs; b.velocity.x = 0; Sfx.creak(); this.fxDust(b.center.x, b.bottom, 4); }
@@ -14862,6 +14866,18 @@ class GameScene extends Phaser.Scene {
   }
 
   // ----------------------------------------------------------------- enemies ----
+  unstrand(e) {                                                         // a walker walled off from you (ARENA 02's side pockets): it warps to the ground point nearest you
+    const p = this.player, to = this.A.points.G.map(q => ({ x: q[0] * TS + 8, y: (q[1] + 1) * TS - e.def.fh / 2 }))
+      .map(o => Object.assign(o, { d: Math.hypot(o.x - p.x, o.y - p.y) }))
+      .filter(o => o.d > 150 && Math.hypot(o.x - e.x, o.y - e.y) > 96).sort((a, c) => a.d - c.d)[0];
+    if (!to) return;
+    this.spawnLight(e.x, e.y, 'ring', 0xff80e0, 1.4, 0.2, 0.8, 0.5);
+    this.fx.emit(e.x, e.y, { n: 18, speed: [40, 160], life: [0.3, 0.6], size: [3, 1], cols: [0xffffff, 0xffa0f0, 0xff40c0], add: true, drag: 2 });
+    e.body.reset(to.x, to.y); e.homeX = to.x; e.homeY = to.y; e.blindT = 0; e.stunT = Math.max(e.stunT, 0.6);
+    const beam = this.add.image(to.x, to.y + e.def.fh / 2, 'beam').setOrigin(0.5, 1).setBlendMode(ADD).setTint(0xff50d0).setAlpha(0.9).setScale(0.6, 1.4).setDepth(17);
+    this.tweens.add({ targets: beam, alpha: 0, duration: 500, onComplete: () => beam.destroy() });
+    this.spawnLight(to.x, to.y, 'glow', 0xff60e0, 1.5, 3.5, 1, 0.3); Sfx.warp();
+  }
   updateEnemies(dt, now) {
     const p = this.player, alive = this.state !== 'dead';
     const pcx = p.body.center.x, pcy = p.body.center.y;
@@ -14876,6 +14892,7 @@ class GameScene extends Phaser.Scene {
         else if (!o.aggro) { o.aggro = true; o.aggroT = 8; }
       }
     }
+    const hustle = alive && this.state === 'play' && this.enemiesLeft <= 5;
     for (const e of this.enemies.getChildren()) {
       if (!e.alive) continue;
       e.flashT -= dt; e.stunT -= dt; e.t += dt; e.losT -= dt; e.aggroT -= dt;
@@ -14884,6 +14901,11 @@ class GameScene extends Phaser.Scene {
       if (lure) e.aggro = true;
       if (e.losT <= 0) { e.losT = 0.15; e.sees = alive && dist < e.def.sight * 1.4 && this.los(b.center.x, b.center.y - 3, pcx, pcy - 4); }
       e.blindT = e.sees ? 0 : (e.blindT || 0) + dt;                      // how long it's gone without sight of you
+      if (hustle && !e.under && this.boss !== e && !FLIERS.has(e.kind) && !isHumanoid(e) && !e.tbHeld && !(e.netT > 0) && !(e.gravT > 0) && !(e.stasisT > 0)) {
+        const walled = e.blindT > 3 && Math.abs(dx) > 120 && (dx > 0 ? b.blocked.right : b.blocked.left);   // the last few: a walker pressed against a wall it can't climb
+        e.strandT = walled ? (e.strandT || 0) + dt : Math.max(0, (e.strandT || 0) - dt);
+        if (e.strandT > 4) { e.strandT = 0; this.unstrand(e); }
+      }
       if (e.burnT > 0) {                                               // on fire: damage over time, flames, spreads to neighbours
         e.burnT -= dt; e.burnTick -= dt; e.spreadT -= dt;
         if (Math.random() < 0.7) this.fx.emit(b.center.x + rand(-b.halfWidth, b.halfWidth), b.center.y + rand(-b.halfHeight, b.halfHeight * 0.5), { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [20, 60], life: [0.2, 0.45], size: [4, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -40 });
