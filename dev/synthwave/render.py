@@ -1,6 +1,6 @@
 """Render the score to 48 kHz stereo WAVs.
 
-    ../sfxgen/.venv/Scripts/python render.py [names]      -> out/<name>.wav
+    .venv/Scripts/python render.py [names]      -> out/<name>.wav
 
 Loops are rendered once with a few seconds of tail (reverb, delay, releases) and the tail is folded back onto
 the start, so the file plays exactly as if it had been looping forever: no seam to hide. Time-based effects
@@ -10,7 +10,7 @@ import os, sys, zlib, time
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, '..', 'sfxgen'))
+sys.path.insert(0, os.path.join(HERE, '..', 'audiolib'))   # loud.py, shared with dev/sfxgen
 import soundfile as sf
 from dsp import (SR, reverb_ir, gated_ir, convolve, pingpong, chorus, compress, softclip, fold, hp, lp)
 import instruments as I

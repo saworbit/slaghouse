@@ -15,6 +15,7 @@ way adding one sound doesn't rewrite the whole bank in git. Delete out/bank_src.
 import os, re, sys, json, base64, hashlib, subprocess, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, '..', 'audiolib'))   # loud.py, shared with dev/synthwave
 import numpy as np, soundfile as sf
 from sounds import SOUNDS
 from loud import loudness

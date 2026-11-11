@@ -13,8 +13,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `dev/check.mjs` lists any sampled sound name the game asks for that `sfx_bank.js` doesn't have. (#4)
 - A `Release` workflow: pushing a `vX.Y.Z` tag runs the checks, builds the playable zip and publishes the release
   with that version's changelog notes. CONTRIBUTING.md's release steps shrink to match. (#20)
+- `dev/synthwave/build.py` checks the bank after writing it (`--check` checks the current one): every track the game
+  asks for is there, each level is within 0.5 dB of `TARGET`, and each loop's seam lines up with its `ls` / `len`.
+  It exits non-zero and names the track. (#23)
 
 ### Changed
+- `dev/synthwave` has its own `requirements.txt` (numpy, scipy, numba, soundfile; no torch or GPU), and `loud.py`
+  moved to `dev/audiolib/`, shared by both audio pipelines. Soundtrack encodes are bit-exact, so rebuilding from
+  unchanged WAVs no longer rewrites `music_bank.js`. (#24)
 - Best records (campaign, BOSS RUSH, OVERTIME) store the mutator that was on, and the title screen shows it next to
   the best. A mutator run is marked, not kept apart. Old records without the field still load. (#21)
 - CONTRIBUTING.md has a release runbook (changelog, tag, playable zip, GitHub release) and points to GitHub issues

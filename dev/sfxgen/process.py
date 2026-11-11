@@ -13,6 +13,7 @@ import os, sys, json, glob, warnings
 warnings.filterwarnings('ignore')
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, '..', 'audiolib'))   # loud.py, shared with dev/synthwave
 import numpy as np, soundfile as sf
 from scipy import signal
 from sounds import SOUNDS

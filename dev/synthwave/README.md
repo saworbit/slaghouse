@@ -26,18 +26,23 @@ the base music level against the SFX, and the pause menu's music volume (`OPTS.m
 | `instruments.py` | patches (supersaw pads, plucked arp, sidechained / distorted basses, saw and square leads, brass stabs) and the drum machine |
 | `dsp.py` | band-limited oscillators, resonant SVF filters, envelopes, hall / gated reverb, ping-pong delay, chorus, compressor (numba for the per-sample loops) |
 | `render.py [names]` | renders tracks to `out/<name>.wav` (48 kHz stereo) and prints each stem's loudness relative to the mix |
-| `build.py` | gain-matches the tracks and encodes them to 64 kbps stereo Opus -> `../../music_bank.js` |
+| `build.py` | gain-matches the tracks and encodes them to 64 kbps stereo Opus -> `../../music_bank.js`, then checks the bank (`--check` alone checks the current one) |
+| `requirements.txt` | the pinned Python packages this folder needs |
 
-Run with the sfxgen venv (numpy, scipy, numba, soundfile; `ffmpeg` with libopus on PATH). numba comes in with
-librosa in the sfxgen setup (tested with numba 0.68.1, numpy 1.26.4, scipy 1.17.1). `build.py` and `render.py`
-also import `loud.py` from `../sfxgen`.
+It has its own small venv: Python 3.11 with numpy, scipy, numba and soundfile pinned in `requirements.txt` (no torch
+or GPU), plus `ffmpeg` with libopus on PATH. `render.py` and `build.py` import `loud.py` from `../audiolib`, which
+dev/sfxgen shares.
 
 ```
-../sfxgen/.venv/Scripts/python render.py
-../sfxgen/.venv/Scripts/python build.py
+uv venv --python 3.11 .venv
+uv pip install --python .venv/Scripts/python.exe -r requirements.txt
+.venv/Scripts/python render.py
+.venv/Scripts/python build.py
 ```
 
-A full render takes about a minute.
+A full render takes about a minute. Encodes are bit-exact, so rebuilding from unchanged WAVs gives the same bank.
+After writing the bank, `build.py` decodes it back and fails, naming the track, if a track the game asks for is
+missing, a level is more than 0.5 dB off `TARGET`, or a loop's seam doesn't line up with its `ls` / `len`.
 
 ## How it holds together
 
