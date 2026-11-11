@@ -6,3 +6,9 @@ updates:
       interval: monthly
     commit-message:
       prefix: "CI:"
+  - package-ecosystem: npm
+    directory: /dev/playtest
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "Playtest:"

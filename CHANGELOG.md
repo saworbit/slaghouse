@@ -23,6 +23,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `dev/sfxgen/calibcheck.mjs`: `calib.json` entries carry a fingerprint of the synth code they measured, and
   `build.py` lists any whose procedural sound has changed since. Existing entries got the fingerprint of the
   version they were measured against, taken from git history. (#9)
+- `dev/playtest/run.mjs` runs the play-test harness in headless Chrome, and CI runs it as a second job: the two-tab
+  and DAILY checks, campaign checkpoint checks (reload and Continue, die and retry the act, five damaged saves) and a
+  full `VB.campaign(900)` run. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
+  steps. (#45, #39)
 - The `Release` workflow has a dry run: run it by hand and it builds the zip and notes from the chosen branch and
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 

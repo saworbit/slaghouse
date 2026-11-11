@@ -26,8 +26,19 @@ to an exact version and carry an integrity hash. If you bump Phaser, put the new
 note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
 request.
 
-CI covers static checks. Play the affected modes in a browser and watch the console for errors.
-The [in-page harness](dev/playtest/README.md) can step the game for combat and arena checks.
+CI also runs the [play-test harness](dev/playtest/README.md) headless: the two-tab and DAILY checks, the campaign
+checkpoint checks (reload and Continue, retry the act, damaged saves) and a full campaign run. It takes about half
+a minute headless. To run it locally with Google Chrome installed:
+
+```bash
+npm ci --prefix dev/playtest
+```
+
+```bash
+node dev/playtest/run.mjs --quick
+```
+
+`--quick` skips the campaign run. Still play the affected modes in a browser and watch the console for errors.
 
 ### Campaign smoke check
 
