@@ -5,9 +5,20 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- CONTRIBUTING.md has a release runbook (changelog, tag, playable zip, GitHub release) and points to GitHub issues
+  for open work.
+- The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,
+  the pause menu holds every timer, hazards are named as your killer, and the last few foes come looking for you.
+- The README no longer shows a release badge; shields.io can't read the private repository.
+
 ## [0.1.0] - 2026-11-11
 
 ### Added
+- **Repository and release setup.** A proprietary LICENSE; CI that runs `dev/check.mjs` (compiles the game script
+  and audio banks, checks the script tags) on every push and pull request; Dependabot for GitHub Actions; issue
+  forms, a pull request template and CODEOWNERS; CONTRIBUTING.md and SECURITY.md; and a playable zip on the GitHub
+  release. The open drafts in `dev/ISSUES.md` are filed as GitHub issues.
 - **Gold round: gold guns and lifetime stats.** A gun with all three mastery stars is gold-plated: it glints gold in
   your hand, on the HUD ribbon and in the ARMORY, and the first one earns the GOLDSMITH medal. Lifetime kills, runs,
   deaths and time played are kept and shown on the ARMORY page.

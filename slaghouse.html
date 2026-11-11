@@ -579,15 +579,17 @@
                           heavy stomp 15, drone bolt 10; four +30 health packs in the arena
     Pause (Esc / P) ..... pause menu: resume, restart, post FX on/off, screen shake, music volume, SFX volume (0-100%
                           in quarter steps with A/D or Enter; remembered), quit. Physics, timers and weapon
-                          loops stop and the music muffles. Hiding the tab pauses too, and coming back waits on the
-                          menu. Esc on the results screen goes back to the title.
+                          loops stop and the music muffles; buffs, i-frames and enemy tells pick up where they left
+                          off, and paused time doesn't count toward the run time. Hiding the tab pauses too, and
+                          coming back waits on the menu. Esc on the results screen goes back to the title.
     Post FX (V) ......... Phaser 4 camera filters on the world (not the HUD): bloom, a barrel-warp pulse on nearby
                           blasts, colour grading (rampage saturation, low-health desaturation, grey on death and
                           while paused). The choice is remembered in localStorage.
     Results ............. stats count up (with your top three guns by kills, the biggest single hit and, if you died,
-                          what killed you), then a grade (S-D from completion, accuracy, best style and damage taken)
-                          and a score (x the difficulty's multiplier); the best score is kept in localStorage and
-                          shown on the title screen with its difficulty.
+                          what killed you, or the hazard that did), then a grade (S-D from completion, accuracy, best
+                          style and damage taken) and a score (x the difficulty's multiplier); the best score is kept in
+                          localStorage and shown on the title screen with its difficulty. R and Esc wait for the results
+                          (the run's records are saved when they appear); R / Enter starts a fresh run from ARENA 01.
     HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
                           as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
                           came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left

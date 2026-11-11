@@ -45,7 +45,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, restart, post FX, screen shake, music and SFX volume, quit to title) | **Esc** or **P** |
-| Restart run | **R** |
+| Restart run (mid-run, or once the results are up) | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
 
@@ -127,7 +127,7 @@ it. The weapon wheel shows each gun's stars.
 
 Medkits restock between waves, and after each wave you pick one of three perks for the rest of the run (more
 damage, faster fire, life steal, a double jump, exploding kills and so on). Steam pipes on the walls burst into
-scalding jets when shot. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. From wave 2, a few foes warp in as **elites**
+scalding jets when shot. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. When five or fewer foes are left, arrows at the screen edge point to them and the stragglers come looking for you. From wave 2, a few foes warp in as **elites**
 (armored, shielded, volatile or regenerating, marked by a coloured diamond) that drop health when they die. Medals pop up as you earn them, and the title screen counts your collection. Supply
 crates float down mid-wave with a power-up: OVERDRIVE (double damage), HASTE, an AEGIS shield or a MEDPACK. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
 orbs. The results screen lists your top guns, your biggest hit and what killed you, grades the run (S-D) and
