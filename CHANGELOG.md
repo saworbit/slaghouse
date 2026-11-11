@@ -5,7 +5,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+- The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
+  the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
+
 ### Changed
+- Best records (campaign, BOSS RUSH, OVERTIME) store the mutator that was on, and the title screen shows it next to
+  the best. A mutator run is marked, not kept apart. Old records without the field still load. (#21)
 - CONTRIBUTING.md has a release runbook (changelog, tag, playable zip, GitHub release) and points to GitHub issues
   for open work.
 - The README and the in-game header notes describe the red-team behaviour: R and Esc wait for the results screen,

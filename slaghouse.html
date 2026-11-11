@@ -578,7 +578,7 @@
     Player .............. 100 HP, 750 ms i-frames; contact dmg grunt 12 / heavy 20,
                           heavy stomp 15, drone bolt 10; four +30 health packs in the arena
     Pause (Esc / P) ..... pause menu: resume, restart, post FX on/off, screen shake, music volume, SFX volume (0-100%
-                          in quarter steps with A/D or Enter; remembered), quit. Physics, timers and weapon
+                          in quarter steps with A/D or Enter; remembered), controls (every key and pad binding), quit. Physics, timers and weapon
                           loops stop and the music muffles; buffs, i-frames and enemy tells pick up where they left
                           off, and paused time doesn't count toward the run time. Hiding the tab pauses too, and
                           coming back waits on the menu. Esc on the results screen goes back to the title.
@@ -588,7 +588,7 @@
     Results ............. stats count up (with your top three guns by kills, the biggest single hit and, if you died,
                           what killed you, or the hazard that did), then a grade (S-D from completion, accuracy, best
                           style and damage taken) and a score (x the difficulty's multiplier); the best score is kept in
-                          localStorage and shown on the title screen with its difficulty. R and Esc wait for the results
+                          localStorage and shown on the title screen with its difficulty (and mutator, if one was on). R and Esc wait for the results
                           (the run's records are saved when they appear); R / Enter starts a fresh run from ARENA 01.
     HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
                           as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
@@ -940,6 +940,7 @@ const MEDALS = [
   { id: 'speed', name: 'SPEEDRUNNER', d: 'WIN IN UNDER 10 MINUTES' },
   { id: 'ironclad', name: 'IRONCLAD', d: 'WIN ON BRUTAL' },
 ];
+const mutTag = r => { const m = r && r.mut && MUTATORS.find(o => o.id === r.mut); return m ? '  ' + m.name : ''; };   // '  GLASS CANNON' for a record set with a mutator on
 const loadRec = key => { try { const o = JSON.parse(localStorage.getItem(key) || 'null'); return o && typeof o === 'object' && isFinite(o.score) ? o : null; } catch (err) { return null; } };   // a saved record, or null if it's missing or mangled
 const loadMedals = () => { try { const a = JSON.parse(localStorage.getItem('slaghouse.medals') || '[]'); return Array.isArray(a) ? a : []; } catch (err) { return []; } };
 // ---- perks: after each wave you pick one of three (they stay for the run) ----
@@ -2152,6 +2153,15 @@ const HINT1 = 'A/D MOVE  SPACE JUMP  SHIFT DASH  CLICK FIRE  F KICK  G MINE  C H
 const HINT2 = 'TAB WHEEL  Q/E CYCLE  KICK GLOWING FOES TO EXECUTE  ESC PAUSE  V FX';
 const HINT_PAD1 = 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY';
 const HINT_PAD2 = 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE';
+const CONTROL_LINES = [                              // the pause menu's CONTROLS page: the hint strips plus everything they leave out
+  ['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
+  ['WEAPONS  ' + SLOT_KEYS.filter(k => k.trim()).map(k => (k === '<' ? 'BKSP' : k)).join(' ')],
+  ['ARROWS MOVE  W JUMP  S+SPACE DROP  RIGHT CLICK KICK  MIDDLE CLICK MINE'],
+  ['J FIRE ON KEYS  MOUSE WHEEL CYCLE  P PAUSE  R RESTART  M MUTE'],
+  ['N SAMPLED/SYNTH SFX  B SAMPLED/SYNTH MUSIC'],
+  ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
+  ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK'],
+];
 const TRACE_NAIL = [0xffe46a, 0xff8a1f], TRACE_PELLET = [0xfff0a0, 0xffa030], TRACE_ENEMY = [0xff6a4a, 0xc02010], TRACE_PARRY = [0xffffff, 0xffe14a];
 const TRACE_SNIPE = [0xffffff, 0x9adcff];
 
@@ -4805,9 +4815,9 @@ class TitleScene extends Phaser.Scene {
     new PixelLabel(this, 480, 160, 'title_sub',{ text: 'THE MELT FLOOR  >  THE FURNACE  >  THE SORTING LINE', scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });
     let best = loadRec('slaghouse.best');
     const medN = loadMedals().length;
-    if (best || medN) new PixelLabel(this, 480, 186, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
+    if (best || medN) new PixelLabel(this, 480, 186, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + mutTag(best) + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
     let otb = loadRec('slaghouse.bestEndless');
-    if (otb) new PixelLabel(this, 480, 203, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score, scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
+    if (otb) new PixelLabel(this, 480, 203, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score + mutTag(otb), scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
     this.buildMenu();
     new PixelLabel(this, 480, 138, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
     // difficulty: A/D or the arrows (or click the arrows) before starting; remembered between visits
@@ -4842,7 +4852,7 @@ class TitleScene extends Phaser.Scene {
     this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS'].map((t, i) => new PixelLabel(this, 480, 400 + i * 17, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
     let dly = loadRec('slaghouse.daily');
     let rsh = loadRec('slaghouse.bestRush');
-    if (rsh && rsh.won) new PixelLabel(this, 650, 451, 'title_rsh', { text: 'CLEARED ' + rsh.grade, align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
+    if (rsh && rsh.won) new PixelLabel(this, 650, 451, 'title_rsh', { text: 'CLEARED ' + rsh.grade + mutTag(rsh), align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
     if (dly && dly.date === dayKey()) new PixelLabel(this, 650, 434, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
     this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { text: 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   M MUTE', scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
     this.subG = this.add.graphics().setDepth(20);
@@ -14711,7 +14721,7 @@ class GameScene extends Phaser.Scene {
       let ob = loadRec(key);
       if (this.daily && ob && ob.date !== dayKey()) ob = null;                 // yesterday's daily doesn't count
       const nb = !ob || this.wave + 1 > ob.wave || (this.wave + 1 === ob.wave && score > ob.score);
-      if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: dayKey(), wave: this.wave + 1, score } : { wave: this.wave + 1, score })); } catch (err) { /* private mode */ }
+      if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: dayKey(), wave: this.wave + 1, score } : { wave: this.wave + 1, score, mut: MUT() !== 'none' ? MUT() : undefined })); } catch (err) { /* private mode */ }
       BUS.emit('over', { won: false, endless: true, daily: this.daily, waves: this.wave + 1, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
                          style: STYLE_RANKS[this.style.best].n, taken: Math.round(s.taken), executes: s.executes, dodges: s.dodges, fav, top: topGuns, big: Math.round(s.big || 0), killer: won ? null : this.killer || null, score, grade,
                          best: ob ? ob.score : 0, newBest: nb, diff: DIFFS[OPTS.diff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
@@ -14720,7 +14730,7 @@ class GameScene extends Phaser.Scene {
     const bkey = this.bossrush ? 'slaghouse.bestRush' : 'slaghouse.best';   // BOSS RUSH keeps its own record
     let best = loadRec(bkey);
     const newBest = score > 0 && (!best || score > best.score);
-    if (newBest) try { localStorage.setItem(bkey, JSON.stringify({ score, grade, time: Math.round(time), won, diff: DIFFS[OPTS.diff].name })); } catch (err) { /* private mode: no record */ }
+    if (newBest) try { localStorage.setItem(bkey, JSON.stringify({ score, grade, time: Math.round(time), won, diff: DIFFS[OPTS.diff].name, mut: MUT() !== 'none' ? MUT() : undefined })); } catch (err) { /* private mode: no record */ }   // a mutator run is marked, not kept apart
     BUS.emit('over', { won, rush: this.bossrush, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
                        style: STYLE_RANKS[this.style.best].n, taken: Math.round(s.taken), executes: s.executes, dodges: s.dodges, fav, top: topGuns, big: Math.round(s.big || 0), killer: won ? null : this.killer || null, score, grade,
                        best: best ? best.score : 0, newBest, diff: DIFFS[OPTS.diff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
@@ -16369,13 +16379,16 @@ class HudScene extends Phaser.Scene {
     this.wcSub = new PixelLabel(this, 480, 286, 'hud_wcs', { maxChars: 36, scale: 2, color: '#ffd8a0', shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
     this.pG = this.add.graphics().setDepth(10);
     this.pTitle = new PixelLabel(this, 480, 150, 'hud_pt', { text: 'PAUSED', scale: 8, rows: LOGO_ROWS, shadow, originY: 0.5 }).setDepth(11);
-    this.pItems = ['RESUME', 'RESTART', 'POST FX: ON', 'SHAKE: 100%', 'MUSIC: 100%', 'SFX: 100%', 'QUIT TO TITLE'].map((t, i) => new PixelLabel(this, 480, 206 + i * 30, 'hud_pi' + i, { maxChars: 14, text: t, scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
+    this.pItems = ['RESUME', 'RESTART', 'POST FX: ON', 'SHAKE: 100%', 'MUSIC: 100%', 'SFX: 100%', 'CONTROLS', 'QUIT TO TITLE'].map((t, i) => new PixelLabel(this, 480, 206 + i * 30, 'hud_pi' + i, { maxChars: 14, text: t, scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
     this.wheelG = this.add.graphics().setDepth(11.5);                   // Tab: weapon wheel
     this.wheelIcons = WEAPONS.map(w => this.add.image(0, 0, 'icon_' + w.gun).setDepth(12).setVisible(false));
     this.wheelBlurb = new PixelLabel(this, 480, 328, 'hud_wb', { maxChars: 40, scale: 1, color: '#c8d0da', originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelName = new PixelLabel(this, 480, 282, 'hud_wn', { maxChars: 16, scale: 3, color: '#ffb347', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelKey = new PixelLabel(this, 480, 306, 'hud_wk', { maxChars: 12, scale: 2, color: '#8f9bab', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
-    this.pHint = new PixelLabel(this, 480, 416, 'hud_ph', { text: 'W/S PICK  :  A/D CHANGE  :  ESC BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
+    this.pHint = new PixelLabel(this, 480, 446, 'hud_ph', { text: 'W/S PICK  :  A/D CHANGE  :  ESC BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
+    this.ctlTitle = new PixelLabel(this, 480, 108, 'hud_ctt', { text: 'CONTROLS', scale: 4, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(11);
+    this.ctlLines = [this.ctlTitle, ...CONTROL_LINES.map(([t, c], i) => new PixelLabel(this, 480, 146 + i * 26, 'hud_ctl' + i, { maxChars: 80, text: t, scale: 2, color: c || '#c6ced8', shadow, originY: 0.5 }).setDepth(11)),
+      new PixelLabel(this, 480, 446, 'hud_ctb', { text: 'ESC / ENTER / CLICK / B : BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11)];
     this.setPause(false);
     this.input.keyboard.on('keydown', ev => this.onPauseKey(ev));
     this.input.on('pointermove', p => this.onPausePointer(p, false));
@@ -16490,10 +16503,16 @@ class HudScene extends Phaser.Scene {
   }
   onPause(on) { this.setPause(on); if (on) { this.pArm = this.hudFrame; this.pSel = 0; this.input.setDefaultCursor('default'); } }
   setPause(on) {
-    this.pauseOn = on; this.pShownSel = -1;
+    this.pauseOn = on; this.pShownSel = -1; this.ctlOn = false;
     [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(on));
+    this.ctlLines.forEach(o => o.setVisible(false));
     if (on) this.pLabels();
     if (!on) this.pG.clear();
+  }
+  setControls(on) {                                                    // the CONTROLS page swaps in for the menu; back returns to it
+    this.ctlOn = on; this.pShownSel = -1;
+    [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(!on));
+    this.ctlLines.forEach(o => o.setVisible(on));
   }
   pausePick(i) {
     const gs = this.scene.get('Game'); Sfx.ui();
@@ -16501,6 +16520,7 @@ class HudScene extends Phaser.Scene {
     else if (i === 1) { this.setPause(false); gs.restartRun(); }
     else if (i === 2) { gs.togglePostFx(); this.pLabels(); }
     else if (i >= 3 && i <= 5) this.pStep(i, -1, true);
+    else if (i === 6) this.setControls(true);
     else { this.setPause(false); gs.quitToTitle(); }
   }
   pLabels() {
@@ -16519,6 +16539,7 @@ class HudScene extends Phaser.Scene {
   onPauseKey(ev) {
     if (!this.pauseOn || this.hudFrame === this.pArm) return;           // ignore the press that opened the menu
     const k = ev.keyCode;
+    if (this.ctlOn) { if (k === 13 || k === 32 || k === 27 || k === 80 || k === 8) { this.setControls(false); Sfx.ui(); } return; }
     const N = this.pItems.length;
     if (k === 38 || k === 87) { this.pSel = (this.pSel + N - 1) % N; Sfx.swap(); }
     else if (k === 40 || k === 83) { this.pSel = (this.pSel + 1) % N; Sfx.swap(); }
@@ -16529,6 +16550,7 @@ class HudScene extends Phaser.Scene {
   }
   onPausePointer(p, click) {
     if (!this.pauseOn) return;
+    if (this.ctlOn) { if (click && this.hudFrame !== this.pArm) { this.setControls(false); Sfx.ui(); } return; }
     const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < 15 && Math.abs(p.x - 480) < 190);
     if (i < 0) return;
     if (i !== this.pSel) { this.pSel = i; Sfx.swap(); }
@@ -16537,8 +16559,9 @@ class HudScene extends Phaser.Scene {
   drawPause(time) {
     const g = this.pG; g.clear();
     g.fillStyle(0x000000, 0.62); g.fillRect(0, 0, VIEW_W, VIEW_H);
-    g.fillStyle(0x06070a, 0.85); g.fillRect(270, 100, 420, 336);
-    g.fillStyle(0xff8a1f, 1); g.fillRect(270, 100, 420, 3); g.fillRect(270, 433, 420, 3);
+    if (this.ctlOn) { g.fillStyle(0x06070a, 0.9); g.fillRect(6, 80, VIEW_W - 12, 390); g.fillStyle(0xff8a1f, 1); g.fillRect(6, 80, VIEW_W - 12, 3); g.fillRect(6, 467, VIEW_W - 12, 3); return; }
+    g.fillStyle(0x06070a, 0.85); g.fillRect(270, 100, 420, 366);
+    g.fillStyle(0xff8a1f, 1); g.fillRect(270, 100, 420, 3); g.fillRect(270, 463, 420, 3);
     if (this.pShownSel !== this.pSel) { this.pShownSel = this.pSel; this.pItems.forEach((o, i) => o.setStyle({ color: i === this.pSel ? '#ffe46a' : '#8f9bab' })); }
     const o = this.pItems[this.pSel];
     g.fillStyle(0x2a1806, 0.95); g.fillRect(300, o.y - 15, 360, 30); g.fillStyle(0xff8a1f, 1); g.fillRect(300, o.y - 15, 4, 30); g.fillRect(656, o.y - 15, 4, 30);
@@ -16809,9 +16832,12 @@ class HudScene extends Phaser.Scene {
     }
     if (this.pauseOn && this.hudFrame !== this.pArm) {                 // pad drives the pause menu
       const N = this.pItems.length, my = PAD.menuY(), mx = PAD.menuX();
-      if (my) { this.pSel = (this.pSel + N + my) % N; Sfx.swap(); }
-      if (mx && this.pSel >= 2 && this.pSel <= 5) { if (this.pSel === 2) this.pausePick(2); else { this.pStep(this.pSel, mx, false); Sfx.ui(); } }
-      if (PAD.jd(0)) this.pausePick(this.pSel); else if (PAD.jd(1) || PAD.jd(9)) this.pausePick(0);
+      if (this.ctlOn) { if (PAD.jd(0) || PAD.jd(1) || PAD.jd(9)) { this.setControls(false); Sfx.ui(); } }   // the CONTROLS page: any of A / B / Start goes back
+      else {
+        if (my) { this.pSel = (this.pSel + N + my) % N; Sfx.swap(); }
+        if (mx && this.pSel >= 2 && this.pSel <= 5) { if (this.pSel === 2) this.pausePick(2); else { this.pStep(this.pSel, mx, false); Sfx.ui(); } }
+        if (PAD.jd(0)) this.pausePick(this.pSel); else if (PAD.jd(1) || PAD.jd(9)) this.pausePick(0);
+      }
     }
     if (this.overOn) { this.ovPrompt.setAlpha(Math.floor(time / 400) % 2 ? 1 : 0.35); this.tallyOver(dt); }
     this.drawWheel(gsr);
