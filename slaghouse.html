@@ -5962,6 +5962,7 @@ class GameScene extends Phaser.Scene {
       if (this.campaign) {
         this.stats.t0 = now;
         const act = CAMPAIGN_ACTS[this.A.id - 1];
+        if (!act) throw new Error(`campaign run in ARENA 0${this.A.id}, which has no act (only OVERTIME and DAILY go there)`);
         BUS.emit('wavecard', 'ACT 0' + this.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
         Music.track(this.waveTrack(act.first), !c);
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(act.first); });

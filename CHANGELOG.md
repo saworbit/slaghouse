@@ -47,6 +47,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- `T.setup(3)` and `T.setup(4)` (and `CH.arenaStorm` in those arenas) no longer throw under the default campaign
+  `RUNMODE`: they stage ARENA 04 and 05 as OVERTIME. A campaign run in an arena with no act now fails with a named
+  error. (#47)
+- The play-test bot's teleport picks a tile that can see the foe, skips the spot that just failed, and falls back to
+  the foe's own row, so `VB.campaign` no longer loops forever under a foe it can't see in ARENA 02. As a backstop,
+  `VB.campaign` removes a foe hidden for 30 s with five or fewer left and lists it in `removed`. (#46)
 - Lifetime kills, runs, deaths, play time, weapon mastery and codex sightings read the stored value again before
   saving and add this tab's progress to it, so a second tab no longer erases the first one's. (#51)
 - **New Campaign** makes its run the owner of the campaign save. A run left open in another tab keeps playing, but
