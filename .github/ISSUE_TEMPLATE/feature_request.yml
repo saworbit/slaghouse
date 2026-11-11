@@ -1,0 +1,21 @@
+name: Feature or content idea
+description: A new weapon, enemy, mode, arena, or a change to how something plays.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What it is and how it plays.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What it adds, or what problem it solves.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Counters, tuning numbers, sound or art ideas, references.

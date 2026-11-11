@@ -1,5 +1,13 @@
 # SLAGHOUSE
 
+[![CI](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml/badge.svg)](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/saworbit/slaghouse?include_prereleases&sort=semver)](https://github.com/saworbit/slaghouse/releases)
+![License: proprietary](https://img.shields.io/badge/license-proprietary-red)
+![Phaser 4.2.1](https://img.shields.io/badge/Phaser-4.2.1-8a2be2)
+![No build step](https://img.shields.io/badge/build-none-lightgrey)
+
+![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
+
 A pixel-art side-scrolling arena shooter: one HTML file running on [Phaser 4](https://phaser.io/) with procedural
 pixel art, ragdolls and gibs, destructible terrain, 61 weapons (each with mastery stars to earn, and gold plating at three), 94 enemy types
 (with an in-game codex), power-up supply drops, three
@@ -138,20 +146,36 @@ keeps your best score.
 | `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
 | `dev/build/` | One-off scripts and code snippets that applied each update round to `slaghouse.html`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
 | `dev/screenshots/` | Screenshots from playtesting. |
-| `dev/ISSUES.md` | Draft GitHub issues (the repo has no GitHub remote yet). |
+| `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
+| `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |
+| `docs/` | Images for this README. |
+| `.github/` | CI workflow, Dependabot, issue and pull request templates, CODEOWNERS. |
 | `.claude/launch.json` | Local preview-server configs for Claude Code. |
 
 ## Development notes
 
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
-- **Testing:** there are no automated tests yet. Playtesting has been done by driving the game from the browser
-  console; saving that as a smoke test is a draft issue in `dev/ISSUES.md`.
+- **Checks:** `node dev/check.mjs` compiles the game script and both audio banks and checks the script tags; CI runs
+  it on every push to `main` and every pull request.
+- **Testing:** there are no automated gameplay tests yet. Playtesting has been done by driving the game from the
+  browser console; saving that as a smoke test is an open issue.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU.
 - **History:** see [CHANGELOG.md](CHANGELOG.md).
 
+## Contributing and security
+
+Contributions are by invitation; see [CONTRIBUTING.md](CONTRIBUTING.md). Report security problems privately as
+described in [SECURITY.md](SECURITY.md).
+
 ## Licensing
 
-The code, art, music and procedural sounds are original to this project, and there is no license file yet. The
-sampled SFX in `sfx_bank.js` were generated with Meta's AudioGen, whose model weights are licensed CC-BY-NC 4.0,
-so treat that bank as non-commercial. Phaser is MIT-licensed and loaded from its CDN.
+Copyright (c) 2026 Shane Wall. All rights reserved. SLAGHOUSE is proprietary software: no part of it may be copied,
+modified or distributed without written permission. See [LICENSE](LICENSE).
+
+Third-party components keep their own licenses:
+
+- **Phaser** is MIT-licensed and loaded from the jsDelivr CDN; it isn't included in this repository.
+- The sampled SFX in `sfx_bank.js` were generated with Meta's **AudioGen** (`facebook/audiogen-medium`), whose model
+  weights are licensed CC BY-NC 4.0, so treat that bank as non-commercial. Every sampled sound has a synth fallback,
+  so the game can ship without it.

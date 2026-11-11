@@ -1,0 +1,26 @@
+SLAGHOUSE - Proprietary License
+
+Copyright (c) 2026 Shane Wall. All rights reserved.
+
+This repository and everything in it, including the source code, art, music, sounds, level data, tools and
+documentation (the "Software"), is the proprietary property of the copyright holder.
+
+No license is granted. Without the copyright holder's prior written permission you may not copy, modify, merge,
+publish, distribute, sublicense, sell, rent, host or create derivative works of the Software, in whole or in part.
+
+Access to this repository is not a grant of rights. If the copyright holder has given you access (for example as
+a collaborator), you may view and run the Software only for the purpose that access was given for, and you may
+not share it with anyone else.
+
+Third-party components keep their own licenses and are not covered by this notice:
+
+- Phaser (MIT License) is loaded at runtime from the jsDelivr CDN and is not included in this repository.
+- The sampled sound effects in sfx_bank.js were generated with Meta's AudioGen (facebook/audiogen-medium), whose
+  model weights are licensed CC BY-NC 4.0. See the Licensing section of README.md.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For permission requests, contact the copyright holder through GitHub: https://github.com/saworbit

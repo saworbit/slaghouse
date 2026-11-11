@@ -1,9 +1,11 @@
 # Changelog
 
 All notable changes to SLAGHOUSE are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the game has no numbered releases yet.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases are tagged `vX.Y.Z` on GitHub.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-11-11
 
 ### Added
 - **Gold round: gold guns and lifetime stats.** A gun with all three mastery stars is gold-plated: it glints gold in
@@ -149,52 +151,6 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   acid grub whose trail and spit corrode you (you take +25% damage and glow green). Leech: latches on, drains you
   and slows you until a dash or kick shakes it off.
 - AudioGen takes for the beacon's alarm, the slug's squelch and the leech's slurp. The bank grows to 129 sounds.
-
-### Fixed
-- **Restarting reused the last run's arena and carry.** Phaser keeps a scene's last start data when it restarts
-  without new data, so pressing R after the lift, or starting a new run from the title, could drop you into a later
-  arena with the old HP, perks, stats and wave count (and BOSS RUSH could start at the wrong boss, or crash). Every
-  run and restart now starts from explicit data.
-- The pause menu now stops the clock: RAMPAGE, OVERDRIVE, HASTE, i-frames, enemy tells and every other timer used to
-  keep running (and run out) while paused, and paused time counted toward the results TIME.
-- Pressing R or Esc in the second after dying or winning skipped the results and lost the run's records; both now
-  wait for the results screen.
-- Dying or winning with the weapon wheel open left the wheel on screen and the world in slow motion.
-- Hazards (live rails, presses, fire) could still hurt and "kill" you after a win.
-- The results screen named a random enemy as your killer for hazard deaths; it now says A LIVE RAIL, THE WRECKING
-  BALL, A CRUSHER or STEAM.
-- BIGGEST HIT counted scripted kills (a paratrooper splat, the Foreman's hounds dying with it) as hits of 999+.
-- The campaign medals (SPEEDRUNNER, IRONCLAD, MUTANT) could be earned by winning BOSS RUSH.
-- A mangled saved record showed "undefined" on the title screen and could stop new OVERTIME bests from saving.
-- A stolen gun stayed greyed out on the HUD ribbon after a restart.
-- A tethered jellyfish that died from a shared hit could kill its partner twice, counting two kills and ending a wave
-  early; shared tether damage also had every damage bonus (difficulty, GLASS, OVERDRIVE, perks) applied twice.
-- A grappler that was frozen, netted, floated or time-stopped while holding you let go, then yanked you back from
-  across the map when the effect wore off.
-- An enemy carried by the tractor beam into a stasis field (or grabbed out of one, or out of a grav bomb's slam) could
-  lose its gravity for good.
-- Burning enemies no longer panic-run when they're bosses, fliers or rooted (the Foreman, pylons, spore pods,
-  turrets), and stand still while frozen or time-stopped.
-- SWARM cut the HP of the Juggernaut, Gunship and Slag Wyrm without adding any extra enemies; DAILY now ignores
-  mutators, so it really is the same run for everyone.
-- A zealot could take more than three souls' worth of HP when several foes died next to it at once.
-- Overlapping stasis fields could leave enemy shots hanging in the air after both fields ended.
-- The riot shield could fire a free bash the next time you picked it, if you'd swapped away (or died) holding it.
-- Tripwires could have three wires out instead of two, and the Foreman could have five hounds instead of four.
-- OVERTIME's Foreman waves showed THE SMELTER RETURNS; they now say THE FOREMAN CLOCKS IN.
-- Microwave heat never cooled on some enemy types (grenadiers, harpooners, burrowers and others), so short bursts
-  added up until they popped.
-- An elite's aura and diamond gave away a cloaked cloaker or a blinked-out blinker.
-- A swap with a Swapper now cuts your grapple line.
-- The blimp could cruise out of reach high over a tall arena, stalling the wave; it now keeps a height over you.
-- A lugger kept waiting forever under a drum it couldn't reach; it now gives up after a few seconds.
-- A welder could build its turret inside a wall or off the edge of a ledge.
-- The cinder wheel jammed against any step or wall between it and you; it now hops steps and bounces off walls.
-- Slugs got stuck against one-tile steps; they now hump over them.
-- The blimp could jam against the pillars that hold up the furnace arena's catwalk and hang there out of reach,
-  stalling wave 4; it now sails through scenery.
-- Several per-run values (leech count, a claw's grip, the corrosion tint) could survive a restart, because Phaser
-  keeps a scene's properties when it restarts; they're now reset at the start of every run.
 - **Overtime round: OVERTIME, an endless mode** (E on the title screen, Y on a pad). Random waves that grow by
   two each time and get tougher (enemy HP +7% a wave), harder enemy types mixing in, a mini-boss every few waves,
   the Smelter every sixth, a random modifier now and then, a perk after every wave and a new arena every three.
@@ -235,9 +191,6 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   jams your gun (with a glitching HUD) and shorts out your sentry unless you dash through it.
 - AudioGen takes for the flare shot, limpet launch, steam burst, EMP pulse, jam static and roller rumble (the
   creeper's skitter stays synth: no take sounded right). The bank grows to 118 sounds.
-
-### Fixed
-- The results screen no longer shows the perk list or a medal toast through its panel.
 - **Slagforge round: perk draft.** After every wave but the last you pick one of three perks (keys 1-3, click or the
   pad) from twelve: hollow points, hair trigger, vampire, iron boots, double jump, blast shield, afterburner,
   scavenger, showboat, volatile, adrenaline and barbed plate. They last the run, ride the lift into ARENA 02 and
@@ -370,6 +323,51 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The control hints fade out completely after about 13 s instead of staying on screen at 30%.
 
 ### Fixed
+- **Restarting reused the last run's arena and carry.** Phaser keeps a scene's last start data when it restarts
+  without new data, so pressing R after the lift, or starting a new run from the title, could drop you into a later
+  arena with the old HP, perks, stats and wave count (and BOSS RUSH could start at the wrong boss, or crash). Every
+  run and restart now starts from explicit data.
+- The pause menu now stops the clock: RAMPAGE, OVERDRIVE, HASTE, i-frames, enemy tells and every other timer used to
+  keep running (and run out) while paused, and paused time counted toward the results TIME.
+- Pressing R or Esc in the second after dying or winning skipped the results and lost the run's records; both now
+  wait for the results screen.
+- Dying or winning with the weapon wheel open left the wheel on screen and the world in slow motion.
+- Hazards (live rails, presses, fire) could still hurt and "kill" you after a win.
+- The results screen named a random enemy as your killer for hazard deaths; it now says A LIVE RAIL, THE WRECKING
+  BALL, A CRUSHER or STEAM.
+- BIGGEST HIT counted scripted kills (a paratrooper splat, the Foreman's hounds dying with it) as hits of 999+.
+- The campaign medals (SPEEDRUNNER, IRONCLAD, MUTANT) could be earned by winning BOSS RUSH.
+- A mangled saved record showed "undefined" on the title screen and could stop new OVERTIME bests from saving.
+- A stolen gun stayed greyed out on the HUD ribbon after a restart.
+- A tethered jellyfish that died from a shared hit could kill its partner twice, counting two kills and ending a wave
+  early; shared tether damage also had every damage bonus (difficulty, GLASS, OVERDRIVE, perks) applied twice.
+- A grappler that was frozen, netted, floated or time-stopped while holding you let go, then yanked you back from
+  across the map when the effect wore off.
+- An enemy carried by the tractor beam into a stasis field (or grabbed out of one, or out of a grav bomb's slam) could
+  lose its gravity for good.
+- Burning enemies no longer panic-run when they're bosses, fliers or rooted (the Foreman, pylons, spore pods,
+  turrets), and stand still while frozen or time-stopped.
+- SWARM cut the HP of the Juggernaut, Gunship and Slag Wyrm without adding any extra enemies; DAILY now ignores
+  mutators, so it really is the same run for everyone.
+- A zealot could take more than three souls' worth of HP when several foes died next to it at once.
+- Overlapping stasis fields could leave enemy shots hanging in the air after both fields ended.
+- The riot shield could fire a free bash the next time you picked it, if you'd swapped away (or died) holding it.
+- Tripwires could have three wires out instead of two, and the Foreman could have five hounds instead of four.
+- OVERTIME's Foreman waves showed THE SMELTER RETURNS; they now say THE FOREMAN CLOCKS IN.
+- Microwave heat never cooled on some enemy types (grenadiers, harpooners, burrowers and others), so short bursts
+  added up until they popped.
+- An elite's aura and diamond gave away a cloaked cloaker or a blinked-out blinker.
+- A swap with a Swapper now cuts your grapple line.
+- The blimp could cruise out of reach high over a tall arena, stalling the wave; it now keeps a height over you.
+- A lugger kept waiting forever under a drum it couldn't reach; it now gives up after a few seconds.
+- A welder could build its turret inside a wall or off the edge of a ledge.
+- The cinder wheel jammed against any step or wall between it and you; it now hops steps and bounces off walls.
+- Slugs got stuck against one-tile steps; they now hump over them.
+- The blimp could jam against the pillars that hold up the furnace arena's catwalk and hang there out of reach,
+  stalling wave 4; it now sails through scenery.
+- Several per-run values (leech count, a claw's grip, the corrosion tint) could survive a restart, because Phaser
+  keeps a scene's properties when it restarts; they're now reset at the start of every run.
+- The results screen no longer shows the perk list or a medal toast through its panel.
 - Each weapon keeps its own fire cooldown, so swapping off a slow gun (such as the Singularity) no longer locks
   out the next weapon.
 - Music and weapon loops no longer keep playing while the tab is hidden; audio pauses with the game and resumes
@@ -402,3 +400,6 @@ stood before each round is kept in `versions/` (`slaghouse.before-<round>.html`)
 - **Havoc round:** prism laser (**[**) that ricochets off walls, grapple hook (**C**) that reels enemies in or
   you to walls. Phase-cloaked cloakers, fireproof pyros with firebombs, and the gunship mini-boss that crashes
   when killed. BLACKOUT modifier on wave 2.
+
+[Unreleased]: https://github.com/saworbit/slaghouse/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/saworbit/slaghouse/releases/tag/v0.1.0

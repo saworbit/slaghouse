@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in the game is broken, stuck or wrong.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start OVERTIME on Normal
+        2. Reach wave 4 in ARENA 02
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      multiple: true
+      options:
+        - Campaign
+        - OVERTIME
+        - DAILY
+        - BOSS RUSH
+        - Title / menus
+  - type: dropdown
+    id: input
+    attributes:
+      label: Input
+      options:
+        - Keyboard and mouse
+        - Gamepad
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 131 on Windows 11
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.1.0, or the commit hash
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Any errors from the browser console (F12).
+      render: text

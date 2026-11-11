@@ -1,0 +1,18 @@
+# Normalise text to LF in the repository and the working tree.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.wav binary
+*.ogg binary
+*.opus binary
+*.mp3 binary
+
+# Generated or archival files: kept out of GitHub's language stats and collapsed in diffs
+sfx_bank.js linguist-generated
+music_bank.js linguist-generated
+dev/sfxgen/out/** linguist-generated
+versions/** linguist-generated
