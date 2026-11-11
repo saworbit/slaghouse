@@ -7372,7 +7372,7 @@ class GameScene extends Phaser.Scene {
   }
   killEnemy(e, dx, dy, src) {
     if (!e.alive) return;                                               // already dead (a chain reaction got there first)
-    e.alive = false;
+    e.alive = false; e.deadAt = this.time.now;
     const b = e.body, cx = b.center.x, cy = b.center.y, D = e.def, now0 = this.time.now;
     if (D.tiny) {                                                       // swarm gnats: a little pop, none of the heavy kill feedback
       if (e.kind === 'ratbot' && (this.ms.rats = (this.ms.rats || 0) + 1) >= 15) this.award('pest');
@@ -14887,6 +14887,10 @@ class GameScene extends Phaser.Scene {
   }
   updateEnemies(dt, now) {
     const p = this.player, alive = this.state !== 'dead';
+    if ((this.sweepT = (this.sweepT || 0) - dt) <= 0) {                 // dead foes leave the group 3 s on, so the per-frame loops stop walking them;
+      this.sweepT = 1;                                                    // the sprite isn't destroyed (other lists may still point at it) and goes with the arena
+      for (const e of this.enemies.getChildren().filter(o => !o.alive && now - (o.deadAt || 0) > 3000)) this.enemies.remove(e);
+    }
     const pcx = p.body.center.x, pcy = p.body.center.y;
     this.gnatCache = this.enemies.getChildren().filter(o => o.alive && o.kind === 'gnat');   // boids look at each other
     let near = 0; for (const o of this.gnatCache) if (Math.abs(o.x - pcx) < 170 && Math.abs(o.y - pcy) < 120) near++;
