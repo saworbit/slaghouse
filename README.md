@@ -144,6 +144,7 @@ keeps your best score.
 | `dev/sfxgen/` | AudioGen pipeline for the SFX bank; see its README. |
 | `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
 | `dev/build/` | One-off scripts and code snippets that applied each update round to `slaghouse.html`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
+| `dev/playtest/` | In-page test harness: step the game by hand, a bot, arena storms and a timed campaign run; see its README. |
 | `dev/screenshots/` | Screenshots from playtesting. |
 | `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
 | `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |

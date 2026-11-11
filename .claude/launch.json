@@ -2,30 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "static",
-      "runtimeExecutable": "python",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8765",
-        "--bind",
-        "127.0.0.1"
-      ],
-      "port": 8765
-    },
-    {
-      "name": "static-alt",
-      "runtimeExecutable": "python",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8771",
-        "--bind",
-        "127.0.0.1"
-      ],
-      "port": 8771
-    },
-    {
       "name": "static-test",
       "runtimeExecutable": "python",
       "runtimeArgs": [
