@@ -1618,5 +1618,80 @@
    "8a8bb3210d4cddba"
   ],
   "rate": "40k"
+ },
+ "vacuum": {
+  "ids": [
+   "1",
+   "4"
+  ],
+  "wav": [
+   "2d220f52285c1f6f",
+   "d8aa28728cb905c2"
+  ],
+  "rate": "40k"
+ },
+ "scrapBlast": {
+  "ids": [
+   "2",
+   "1"
+  ],
+  "wav": [
+   "e2868ebc6a45a8c0",
+   "74c200df18d3a92e"
+  ],
+  "rate": "40k"
+ },
+ "siphon": {
+  "ids": [
+   "4",
+   "0"
+  ],
+  "wav": [
+   "d41f62263d98d589",
+   "d391ef526a2bc174"
+  ],
+  "rate": "40k"
+ },
+ "grab": {
+  "ids": [
+   "1",
+   "0"
+  ],
+  "wav": [
+   "189cbf872ed43807",
+   "1ef472745bcc79f2"
+  ],
+  "rate": "40k"
+ },
+ "spotted": {
+  "ids": [
+   "4"
+  ],
+  "wav": [
+   "4e5dbce0f1e64e06"
+  ],
+  "rate": "40k"
+ },
+ "bark": {
+  "ids": [
+   "2",
+   "6"
+  ],
+  "wav": [
+   "e8a9bddaa1e53fbe",
+   "ec0f8d265451567f"
+  ],
+  "rate": "40k"
+ },
+ "shieldPop": {
+  "ids": [
+   "2",
+   "6"
+  ],
+  "wav": [
+   "ba1e4cf5667c6d9b",
+   "f5cb0e8976960b0a"
+  ],
+  "rate": "40k"
  }
 }

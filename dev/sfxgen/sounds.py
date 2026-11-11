@@ -218,4 +218,12 @@ SOUNDS = {
     'swapZap': dict(p=['a sci-fi teleport zap, a quick warping whoosh', 'a teleporter beam sound effect'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
     'scorch': dict(p='a flamethrower whoosh, a roaring burst of fire', d=1.5, max=0.7, keep=2, air=0.5),
     'plateBreak': dict(p=['a metal plate snapping off and clanging', 'a heavy steel panel breaking with a clang'], d=1.0, max=0.4, keep=2, n=8, air=0.8),
+    # ------------------------------------------------------------------ elite round
+    'vacuum': dict(p=['an industrial vacuum cleaner sucking air, a loud whoosh', 'a powerful suction hose roaring'], d=1.5, max=0.4, keep=2, n=8, air=0.7),
+    'scrapBlast': dict(p=['a blast of metal scrap shrapnel, a loud bang with rattling debris', 'a cannon firing a load of scrap metal'], d=1.5, max=0.7, keep=2, n=8, air=0.6),
+    'siphon': dict(p=['a wet slurping drain, liquid sucked through a tube', 'a vampiric energy drain hum'], d=1.5, max=0.4, keep=2, n=8, air=0.6),
+    'grab': dict(p=['a heavy body being grabbed, a thud and cloth rustle', 'a wrestler grabbing someone, a grunt and impact'], d=1.0, max=0.35, keep=2, n=8, air=0.6),
+    'spotted': dict(p='a short electronic alarm beep, a security alert chirp', d=1.0, max=0.4, keep=1, air=0.9),
+    'bark': dict(p=['a robot dog barking, a metallic bark', 'a mechanical dog growl and bark'], d=1.0, max=0.3, keep=2, n=8, air=0.7),
+    'shieldPop': dict(p=['an energy shield shattering, a glassy electric burst', 'a force field breaking with a crackle'], d=1.0, max=0.4, keep=2, n=8, air=0.9),
 }

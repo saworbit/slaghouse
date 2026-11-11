@@ -6,6 +6,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Elite round: elite foes.** From wave 2 a few foes in each wave (more as OVERTIME climbs) warp in as elites with
+  extra health, a coloured aura, a diamond over the head and one trait: ARMORED (double health), SHIELDED (a
+  recharging bubble), VOLATILE (blows up when it dies) or REGEN (heals when left alone). Each drops two health
+  orbs; a new ELITE HUNTER medal is for 6 in a run. The medals page now lays out in three columns.
+- **Two more weapons** (wheel / Q/E). Scrap vacuum: hold to suck up gibs, corpses, drums and light foes, let go to
+  blast the stored scrap out as shrapnel. Siphon: a drain beam that heals you a little as it hurts.
+- **Three more enemies.** Grappler: a brute that grabs you and hurls you across the room (kick or dash free).
+  Spotter: a floating eye that marks you, so every foe hunts you and hits land harder. Hound: robot dogs that hunt
+  in pairs, flank and pounce.
+- AudioGen takes for the vacuum, the scrap blast, the siphon, the grappler's grab, the spotter's alarm, the hound's
+  bark and an elite shield breaking. The bank grows to 155 sounds.
 - **Arsenal round: a weapon ribbon and codex pages.** The HUD's strip of 41 tiny slots is now a ribbon of nine: the
   gun in hand in the middle, four either side, sliding the short way round as you swap, with a pop on the new pick.
   The codex holds 66 foes a page and Q/E turns the pages. A new BLADEMASTER medal is for 8 katana deflects in a run.
