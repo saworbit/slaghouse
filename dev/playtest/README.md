@@ -10,9 +10,29 @@ automatically.
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |
+| `checkpoint.js` | `window.CP`: `CP.save()`, `CP.resume(snap)`, `CP.retry(snap)` and `CP.damaged()`, the campaign checkpoint checks `run.mjs` drives across page reloads |
+| `run.mjs` | the headless runner: serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on every push and pull request |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
-## Running it
+## Running it headless
+
+`run.mjs` needs Node and an installed Google Chrome (or `PLAYTEST_CHROME` set to a browser's path). From the repo root:
+
+```bash
+npm ci --prefix dev/playtest
+```
+
+```bash
+node dev/playtest/run.mjs
+```
+
+Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, the checkpoint flow (New Campaign on BRUTAL with
+GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
+retry the act, compare), five damaged saves that must fall back to New Campaign, and `VB.campaign(900)`. Any page
+error or console error fails the check it happened in. `--quick` skips the campaign run (the whole thing takes about 30 s headless; the campaign is most of it).
+It exits 1 and names each failure.
+
+## Running it in a browser
 
 Serve the repo root with `python -m http.server 8765 --bind 127.0.0.1`. In a fresh page at
 <http://127.0.0.1:8765/slaghouse.html>, run the following in the browser console.
