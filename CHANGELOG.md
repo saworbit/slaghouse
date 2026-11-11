@@ -59,6 +59,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   (#48)
 - `slagCalib()` seeds its random noise and jitter from each sound's name, so measuring the same code twice gives
   the same numbers. (#37)
+- A DAILY run reads its day once, when you pick DAILY, and keeps it. A run that crosses 00:00 UTC no longer
+  switches to the next day's waves and modifiers, R stays in the same arena, and the record is filed under the
+  day the run started. A newer day's record is never replaced. `dev/playtest/daily.js` checks it. (#49)
 - Lifetime kills, runs, deaths, play time, weapon mastery and codex sightings read the stored value again before
   saving and add this tab's progress to it, so a second tab no longer erases the first one's. (#51)
 - **New Campaign** makes its run the owner of the campaign save. A run left open in another tab keeps playing, but

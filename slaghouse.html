@@ -542,7 +542,7 @@
                           its own ('CLEARED' and the grade on the title); the RUSHER medal is for beating it.
     Daily run ........... DAILY on the title: an OVERTIME run seeded by today's UTC date, so everyone gets the same arena,
                           the same two starting perks, the same waves and the same wave modifiers. Your best wave
-                          for the day is kept.
+                          for the day is kept. A run (and R) keeps its day past 00:00 UTC.
     Mastery ............. every kill with a gun counts toward it for good (localStorage). 25 / 100 / 250 kills earn
                           its 1st / 2nd / 3rd star, each worth +5% damage with that gun; a callout and a chime mark
                           a new star, and the wheel shows each gun's stars. Three stars and the gun is gold-plated: it
@@ -882,7 +882,7 @@ const MUTATORS = [
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
 const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship']);   // SWARM never doubles (or thins) a boss
-const dailyArena = () => Math.floor(seeded(dayKey())() * ARENAS.length);   // the DAILY's arena: the same for everyone today
+const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
 //  D-pad up/down cycle weapons, Start pause. Menus: D-pad / LS, A pick, B back.
@@ -4932,7 +4932,8 @@ class TitleScene extends Phaser.Scene {
       this.started = true;
       Sfx.init(); Sfx.startHum(); Sfx.ui(); Music.start();
       this.cameras.main.fadeOut(240, 0, 0, 0);
-      const data = { arena: checkpoint?.arena ?? (RUNMODE === 'daily' ? dailyArena() : 0), carry: checkpoint, retry: !!checkpoint, runId };
+      const day = RUNMODE === 'daily' ? dayKey() : null;                 // read once, when DAILY is picked: the whole run plays this day
+      const data = { arena: checkpoint?.arena ?? (day ? dailyArena(day) : 0), carry: checkpoint, retry: !!checkpoint, runId, day };
       this.time.delayedCall(260, () => { this.scene.start('Game', data); this.scene.launch('Hud'); });
     };
     this.startRun = start;
@@ -5200,6 +5201,7 @@ class GameScene extends Phaser.Scene {
     this.time.now = this.gt;
     this.A = ARENAS[(data && data.arena) || 0]; this.carry = (data && data.carry) || null; this.descending = false; this.endless = RUNMODE === 'endless' || RUNMODE === 'daily'; this.daily = RUNMODE === 'daily'; this.bossrush = RUNMODE === 'bossrush';   // which arena; run state carried down the lift
     this.campaign = !this.endless && !this.bossrush;
+    this.day = this.daily ? data?.day ?? dayKey() : null;              // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
     this.runDiff = this.campaign && this.carry ? this.carry.diff : OPTS.diff;
     this.runMut = this.daily ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
     this.mutator = MUTATORS[this.runMut].id;
@@ -5977,11 +5979,11 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
       } else if (this.endless) {                                       // OVERTIME: no placed wave, it starts straight in
         if (this.daily) {                                                // DAILY: two seeded starting perks
-          const r = seeded(dayKey() + 77), pool = PERKS.slice();
+          const r = seeded(this.day + 77), pool = PERKS.slice();
           for (let k = 0; k < 2; k++) this.perks[pool.splice(Math.floor(r() * pool.length), 1)[0].id] = true;
           BUS.emit('perklist', Object.keys(this.perks));
         }
-        BUS.emit('wavecard', this.daily ? 'DAILY ' + dayKey() : 'OVERTIME', this.daily ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(this.waveTrack(0), true);
+        BUS.emit('wavecard', this.daily ? 'DAILY ' + this.day : 'OVERTIME', this.daily ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(this.waveTrack(0), true);
         this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
       }
       this.musicAhead(c?.wave ?? 0);
@@ -9352,7 +9354,7 @@ class GameScene extends Phaser.Scene {
     this.saveCampaignPlayTime();
     const checkpoint = this.state === 'won' ? null : this.chapterStart;
     Sfx.stopLoops(); Music.paused = false;
-    this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena() : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId });   // a restart is the same run, so it keeps (or still lacks) the save
+    this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena(this.day) : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId, day: this.day });   // a restart is the same run, so it keeps (or still lacks) the save
   }
   quitToTitle() {
     this.saveCampaignPlayTime();
@@ -13530,7 +13532,7 @@ class GameScene extends Phaser.Scene {
   // every 6th. Enemy HP +7% a wave. A random modifier 45% of the time. A new arena every 3 waves.
   endlessWave(i) {
     const E = TUNE.ENDLESS, n = Math.min(E.base + i * E.per, E.max), t2 = Math.min(0.7, 0.15 + i * 0.06), out = [];
-    const rnd = this.daily ? seeded(dayKey() * 131 + i * 7919) : Math.random, pk = a => a[Math.floor(rnd() * a.length)];
+    const rnd = this.daily ? seeded(this.day * 131 + i * 7919) : Math.random, pk = a => a[Math.floor(rnd() * a.length)];
     const T1 = ['grunt', 'drone', 'stalker', 'enforcer', 'tick', 'heavy', 'sniper', 'mender', 'slagling', 'gasbag', 'sparker', 'mimic', 'creeper', 'pogo', 'grenadier', 'spikeball', 'slug'];
     const T2 = ['bulwark', 'rocketeer', 'wasp', 'sapper', 'screamer', 'cloaker', 'pyro', 'harpooner', 'tarspit', 'buzzsaw', 'roller', 'duelist', 'blinker', 'magnet',
                 'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker',
@@ -14878,7 +14880,7 @@ class GameScene extends Phaser.Scene {
       return { ...squad, spawns: foes.concat(extras).map(foe => ({ foe })) };
     });
     const entries = squads.flatMap(squad => squad.spawns);
-    const mr = this.daily ? seeded(dayKey() * 31 + i) : Math.random;
+    const mr = this.daily ? seeded(this.day * 31 + i) : Math.random;
     let mod = this.endless ? (i % 6 === 5 ? null : mr() < 0.45 ? ['dark', 'slag', 'lowg', 'melt'][Math.floor(mr() * 4)] : null) : op?.mod ?? null;
     if (this.endless && mod && mod === this.lastMod) mod = ['dark', 'slag', 'lowg', 'melt'].filter(m => m !== mod)[Math.floor(mr() * 3)];
     this.lastMod = mod;
@@ -15042,9 +15044,10 @@ class GameScene extends Phaser.Scene {
     if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
       const key = this.daily ? 'slaghouse.daily' : 'slaghouse.bestEndless';
       let ob = loadRec(key);
-      if (this.daily && ob && ob.date !== dayKey()) ob = null;                 // yesterday's daily doesn't count
-      const nb = !ob || this.wave + 1 > ob.wave || (this.wave + 1 === ob.wave && score > ob.score);
-      if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: dayKey(), wave: this.wave + 1, score } : { wave: this.wave + 1, score, mut: this.mutator !== 'none' ? this.mutator : undefined })); } catch (err) { /* private mode */ }
+      const later = this.daily && ob && ob.date > this.day;                    // a newer day's record stays, even if this run's day ended mid-run
+      if (this.daily && ob && ob.date !== this.day) ob = null;                 // another day's daily doesn't count
+      const nb = !later && (!ob || this.wave + 1 > ob.wave || (this.wave + 1 === ob.wave && score > ob.score));
+      if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: this.day, wave: this.wave + 1, score } : { wave: this.wave + 1, score, mut: this.mutator !== 'none' ? this.mutator : undefined })); } catch (err) { /* private mode */ }
       BUS.emit('over', { won: false, endless: true, daily: this.daily, waves: this.wave + 1, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
                          style: STYLE_RANKS[this.style.best].n, taken: Math.round(s.taken), executes: s.executes, dodges: s.dodges, fav, top: topGuns, big: Math.round(s.big || 0), killer: won ? null : this.killer || null, score, grade,
                          best: ob ? ob.score : 0, newBest: nb, diff: DIFFS[this.runDiff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
