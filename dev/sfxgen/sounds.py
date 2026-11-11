@@ -268,4 +268,10 @@ SOUNDS = {
     'quills': dict(p=['a burst of spikes shooting out, a quick volley of darts', 'many small darts firing at once'], d=1.0, max=0.35, keep=2, n=8, air=0.8),
     'spit': dict(p=['a monster spitting out a wet blast', 'a creature vomiting a spray'], d=1.0, max=0.4, keep=2, n=8, air=0.6),
     'leap': dict(p=['a robot leaping with a hydraulic launch, a whoosh', 'a mechanical spring jump'], d=1.0, max=0.35, keep=2, n=8, air=0.7),
+    # ------------------------------------------------------------------ powerhouse round
+    'nuke': dict(p=['a massive nuclear explosion, a huge deep boom with rumble', 'a gigantic bomb blast with a long rumbling tail'], d=3.0, max=2.0, keep=2, n=8, air=0.4),
+    'dragon': dict(p=['a shotgun blast with a roar of fire', 'an incendiary shotgun firing, a fiery whoosh'], d=1.5, max=0.7, keep=2, n=8, air=0.5),
+    'railHum': dict(p='a high voltage electrical hum building up, a transformer buzz', d=2.0, max=1.2, keep=1, air=0.8, on=-24),
+    'dozer': dict(p=['a bulldozer diesel engine rumbling', 'heavy machinery engine idling'], d=1.5, max=0.6, keep=2, n=8, air=0.3),
+    'jellyZap': dict(p=['a small electric shock zap', 'a quick static discharge'], d=1.0, max=0.2, keep=3, n=8, air=0.9),
 }

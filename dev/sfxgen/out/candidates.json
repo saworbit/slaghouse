@@ -12844,5 +12844,319 @@
    "clap": -0.0561,
    "score": -0.0561
   }
+ ],
+ "nuke": [
+  {
+   "id": "0",
+   "dur": 2.0,
+   "loud": 0.333049,
+   "prompt": "a massive nuclear explosion, a huge deep boom with rumble",
+   "clap": 0.4335,
+   "score": 0.4335
+  },
+  {
+   "id": "6",
+   "dur": 2.0,
+   "loud": 0.382927,
+   "prompt": "a massive nuclear explosion, a huge deep boom with rumble",
+   "clap": 0.4045,
+   "score": 0.4045
+  },
+  {
+   "id": "4",
+   "dur": 2.0,
+   "loud": 0.366098,
+   "prompt": "a massive nuclear explosion, a huge deep boom with rumble",
+   "clap": 0.3134,
+   "score": 0.3134
+  },
+  {
+   "id": "5",
+   "dur": 1.877,
+   "loud": 0.367711,
+   "prompt": "a gigantic bomb blast with a long rumbling tail",
+   "clap": 0.305,
+   "score": 0.305
+  },
+  {
+   "id": "3",
+   "dur": 2.0,
+   "loud": 0.305461,
+   "prompt": "a gigantic bomb blast with a long rumbling tail",
+   "clap": 0.3001,
+   "score": 0.3001
+  },
+  {
+   "id": "7",
+   "dur": 2.0,
+   "loud": 0.335373,
+   "prompt": "a gigantic bomb blast with a long rumbling tail",
+   "clap": 0.2918,
+   "score": 0.2918
+  },
+  {
+   "id": "1",
+   "dur": 2.0,
+   "loud": 0.412923,
+   "prompt": "a gigantic bomb blast with a long rumbling tail",
+   "clap": 0.2842,
+   "score": 0.2842
+  },
+  {
+   "id": "2",
+   "dur": 0.745,
+   "loud": 0.350863,
+   "prompt": "a massive nuclear explosion, a huge deep boom with rumble",
+   "clap": 0.3369,
+   "score": 0.2569
+  }
+ ],
+ "dragon": [
+  {
+   "id": "1",
+   "dur": 0.7,
+   "loud": 0.219411,
+   "prompt": "an incendiary shotgun firing, a fiery whoosh",
+   "clap": 0.284,
+   "score": 0.284
+  },
+  {
+   "id": "5",
+   "dur": 0.7,
+   "loud": 0.269109,
+   "prompt": "an incendiary shotgun firing, a fiery whoosh",
+   "clap": 0.2814,
+   "score": 0.2814
+  },
+  {
+   "id": "4",
+   "dur": 0.7,
+   "loud": 0.349923,
+   "prompt": "a shotgun blast with a roar of fire",
+   "clap": 0.2743,
+   "score": 0.2743
+  },
+  {
+   "id": "3",
+   "dur": 0.7,
+   "loud": 0.214303,
+   "prompt": "an incendiary shotgun firing, a fiery whoosh",
+   "clap": 0.2469,
+   "score": 0.2469
+  },
+  {
+   "id": "7",
+   "dur": 0.455,
+   "loud": 0.385441,
+   "prompt": "an incendiary shotgun firing, a fiery whoosh",
+   "clap": 0.2337,
+   "score": 0.2337
+  },
+  {
+   "id": "6",
+   "dur": 0.7,
+   "loud": 0.290172,
+   "prompt": "a shotgun blast with a roar of fire",
+   "clap": 0.2099,
+   "score": 0.2099
+  },
+  {
+   "id": "0",
+   "dur": 0.7,
+   "loud": 0.324983,
+   "prompt": "a shotgun blast with a roar of fire",
+   "clap": 0.1979,
+   "score": 0.1979
+  },
+  {
+   "id": "2",
+   "dur": 0.7,
+   "loud": 0.259371,
+   "prompt": "a shotgun blast with a roar of fire",
+   "clap": 0.1886,
+   "score": 0.1886
+  }
+ ],
+ "railHum": [
+  {
+   "id": "5",
+   "dur": 1.2,
+   "loud": 0.257516,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.2778,
+   "score": 0.2778
+  },
+  {
+   "id": "0",
+   "dur": 1.2,
+   "loud": 0.278554,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.2543,
+   "score": 0.2543
+  },
+  {
+   "id": "2",
+   "dur": 1.2,
+   "loud": 0.348354,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.1964,
+   "score": 0.1964
+  },
+  {
+   "id": "1",
+   "dur": 1.2,
+   "loud": 0.354982,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.196,
+   "score": 0.196
+  },
+  {
+   "id": "4",
+   "dur": 1.2,
+   "loud": 0.304666,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.109,
+   "score": 0.109
+  },
+  {
+   "id": "3",
+   "dur": 1.2,
+   "loud": 0.356476,
+   "prompt": "a high voltage electrical hum building up, a transformer buzz",
+   "clap": 0.0775,
+   "score": 0.0775
+  }
+ ],
+ "dozer": [
+  {
+   "id": "4",
+   "dur": 0.6,
+   "loud": 0.255655,
+   "prompt": "a bulldozer diesel engine rumbling",
+   "clap": 0.1355,
+   "score": 0.1355
+  },
+  {
+   "id": "5",
+   "dur": 0.6,
+   "loud": 0.262229,
+   "prompt": "heavy machinery engine idling",
+   "clap": 0.1141,
+   "score": 0.1141
+  },
+  {
+   "id": "0",
+   "dur": 0.6,
+   "loud": 0.297515,
+   "prompt": "a bulldozer diesel engine rumbling",
+   "clap": 0.1124,
+   "score": 0.1124
+  },
+  {
+   "id": "2",
+   "dur": 0.6,
+   "loud": 0.253904,
+   "prompt": "a bulldozer diesel engine rumbling",
+   "clap": 0.08,
+   "score": 0.08
+  },
+  {
+   "id": "3",
+   "dur": 0.6,
+   "loud": 0.224689,
+   "prompt": "heavy machinery engine idling",
+   "clap": 0.065,
+   "score": 0.065
+  },
+  {
+   "id": "6",
+   "dur": 0.6,
+   "loud": 0.234193,
+   "prompt": "a bulldozer diesel engine rumbling",
+   "clap": 0.0599,
+   "score": 0.0599
+  },
+  {
+   "id": "7",
+   "dur": 0.6,
+   "loud": 0.30207,
+   "prompt": "heavy machinery engine idling",
+   "clap": 0.0278,
+   "score": 0.0278
+  },
+  {
+   "id": "1",
+   "dur": 0.6,
+   "loud": 0.311892,
+   "prompt": "heavy machinery engine idling",
+   "clap": 0.0101,
+   "score": 0.0101
+  }
+ ],
+ "jellyZap": [
+  {
+   "id": "3",
+   "dur": 0.2,
+   "loud": 0.268975,
+   "prompt": "a quick static discharge",
+   "clap": 0.1972,
+   "score": 0.1972
+  },
+  {
+   "id": "1",
+   "dur": 0.2,
+   "loud": 0.207921,
+   "prompt": "a quick static discharge",
+   "clap": 0.1673,
+   "score": 0.1673
+  },
+  {
+   "id": "2",
+   "dur": 0.2,
+   "loud": 0.352295,
+   "prompt": "a small electric shock zap",
+   "clap": 0.1411,
+   "score": 0.1411
+  },
+  {
+   "id": "4",
+   "dur": 0.2,
+   "loud": 0.335725,
+   "prompt": "a small electric shock zap",
+   "clap": 0.0595,
+   "score": 0.0595
+  },
+  {
+   "id": "0",
+   "dur": 0.2,
+   "loud": 0.292812,
+   "prompt": "a small electric shock zap",
+   "clap": 0.0474,
+   "score": 0.0474
+  },
+  {
+   "id": "6",
+   "dur": 0.102,
+   "loud": 0.335401,
+   "prompt": "a small electric shock zap",
+   "clap": 0.0459,
+   "score": 0.0459
+  },
+  {
+   "id": "7",
+   "dur": 0.123,
+   "loud": 0.192379,
+   "prompt": "a quick static discharge",
+   "clap": 0.0167,
+   "score": 0.0167
+  },
+  {
+   "id": "5",
+   "dur": 0.054,
+   "loud": 0.147901,
+   "prompt": "a quick static discharge",
+   "clap": 0.0401,
+   "score": -0.0399
+  }
  ]
 }

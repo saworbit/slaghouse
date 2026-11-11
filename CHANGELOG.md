@@ -6,6 +6,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Powerhouse round: ARENA 05.** OVERTIME and DAILY now also visit THE POWERHOUSE: a generator block, walkways and
+  decks over a floor of live rails that power up in two banks, turn and turn about, zapping whoever's standing on
+  them. A new NUKE IT medal is for 5 kills with one mini-nuke.
+- **Two more weapons** (wheel / Q/E). Mini-nuke: one slow shell, one very big bang. Dragon's breath: burning
+  buckshot that sets foes and floors alight.
+- **Three more enemies.** Bulldozer: plows drums, corpses, crates and you ahead of it; flank it. Copycat: copies the
+  gun in your hand. Jellyfish: trails shock tendrils and pops in a shock nova.
+- AudioGen takes for the nuke, the dragon's breath, the rails' hum, the bulldozer's engine and the jellyfish zap.
+  The bank grows to 191 sounds.
 - **Rush round: BOSS RUSH.** A new title mode: the Juggernaut, the Gunship, the Slag Wyrm, the Foreman and the Smelter
   back to back across the three arenas, with a perk between each and its own best record. A new RUSHER medal is for
   beating it.
