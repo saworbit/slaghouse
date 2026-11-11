@@ -13,7 +13,7 @@ an internet connection. Serve the folder and open the page:
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then open <http://localhost:8765/slaghouse.html>.
+Then open <http://127.0.0.1:8765/slaghouse.html>. Use the same URL and browser profile when testing a saved checkpoint.
 
 ## Checks
 
@@ -26,9 +26,22 @@ to an exact version. It also notes any sampled sound name the game asks for that
 note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
 request.
 
-There are no automated gameplay tests yet; play the modes you touched (campaign, OVERTIME, DAILY, BOSS RUSH) and
-watch the browser console for errors. [`dev/playtest/`](dev/playtest/README.md) has an in-page harness that can step
-the game by hand and play the campaign with a bot.
+CI covers static checks. Play the affected modes in a browser and watch the console for errors.
+The [in-page harness](dev/playtest/README.md) can step the game for combat and arena checks.
+
+### Campaign smoke check
+
+1. In a fresh browser profile, start a new campaign. Clear Lockdown and confirm the three opening perks appear.
+   Pick one with **1**, **2** or **3** while a different weapon is equipped. The perk pick should leave the weapon equipped.
+2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
+   same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
+3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
+   checkpoint. Clear the act and enter the Sorting Line lift. Confirm **Continue** now starts in the Sorting Line.
+4. After Meltdown, leave the first coolant valve before the meter fills and check that it resets. Pause while
+   standing at the valve and check that the meter holds. Resume, open both valves in order and defeat the Smelter.
+   Confirm the results appear and **Continue** is unavailable on the campaign screen.
+5. Start OVERTIME, DAILY and BOSS RUSH after a campaign change to the shared wave or results code. Check that each
+   mode starts in the expected arena and shows its own wave, boss or daily perk setup.
 
 ## Workflow
 

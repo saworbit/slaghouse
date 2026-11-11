@@ -1,5 +1,5 @@
 // vibe metrics: per-wave time and damage taken by the (god-mode) bot, plus callout counts. Needs harness.js.
-// VB.campaign() plays the campaign to ARENA CLEARED (or maxSecs) and reports waves, kills, errors and step cost.
+// VB.campaign() plays the campaign to the end (or maxSecs) and reports waves, kills, errors and step cost.
 window.VB = (() => {
   const VB = {};
   VB.campaign = async (maxSecs = 700) => {
