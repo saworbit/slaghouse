@@ -6,6 +6,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Three-act campaign.** Six named operations deploy authored squads with solo mini-boss encounters. Follow the
+  marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
+- **Campaign checkpoints.** Entering the Furnace or Sorting Line saves your health, weapon, perks, run stats,
+  difficulty and mutator in the browser. Continue from the title screen or retry the act after a death.
 - The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
   the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
 - `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
@@ -21,6 +25,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   version they were measured against, taken from git history. (#9)
 
 ### Changed
+- Lockdown starts with a grunt patrol and offers a choice of damage, sustain or mobility in the first perk draft.
+- Speedrunner requires a campaign clear under 10 minutes without using Continue or retrying from a checkpoint.
 - `dev/synthwave` has its own `requirements.txt` (numpy, scipy, numba, soundfile; no torch or GPU), and `loud.py`
   moved to `dev/audiolib/`, shared by both audio pipelines. Soundtrack encodes are bit-exact, so rebuilding from
   unchanged WAVs no longer rewrites `music_bank.js`. (#24)

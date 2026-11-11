@@ -8,20 +8,23 @@ automatically.
 | --- | --- |
 | `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.setup(arena)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
-| `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to ARENA CLEARED and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
+| `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
 ## Running it
 
-Serve the repo root (`python -m http.server 8765 --bind 127.0.0.1`), open `slaghouse.html`, then in the console:
+Serve the repo root with `python -m http.server 8765 --bind 127.0.0.1`. In a fresh page at
+<http://127.0.0.1:8765/slaghouse.html>, run the following in the browser console.
 
 ```js
 for (const f of ['harness', 'chaos', 'vibe']) eval(await (await fetch('/dev/playtest/' + f + '.js')).text());
 RUNMODE = 'campaign'; T.boot(); T.run(300);
-const r = await VB.campaign(900);   // { waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts, errs }
+const r = await VB.campaign(900);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
 ```
 
-`state: 'won'` and an empty `errs` is a pass. `T.setup(1)` restarts in ARENA 02 (index 1) with a wave 4 carry, no
-waves and a god-mode player, which is the quickest way to stage a fight by hand.
+A pass has `state: 'won'` and an empty `errs` array. The bot stands on lift and coolant-valve markers as they
+open. Use `T.setup(0)` to stage a fight in the Melt Floor or `T.setup(1)` to stage one in the Furnace with waves
+disabled. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
+reload, retry and the valve meter's pause behavior.
 
 ## Things that bite
 
