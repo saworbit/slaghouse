@@ -85,6 +85,10 @@ async function open(ctx, files) {
   try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }); } catch (err) { throw stuck(err); }
   try { await page.waitForFunction(() => window.game && game.scene && game.scene.getScene('Title') && game.scene.getScene('Title').sys.isActive(), null, { timeout: 60000 }); }
   catch (err) { throw stuck(err); }
+  // No drawing: nothing here reads pixels, and on a runner without a GPU every stepped frame is software WebGL in
+  // the GPU process all pages share. Its backlog stalled the next page's WebGL setup for minutes. VB.campaign
+  // already turns rendering off for the same reason.
+  await page.evaluate(() => { game.renderer.render = function () {}; });
   for (const f of ['harness', ...files]) await page.evaluate(src => { (0, eval)(src); }, scripts[f]);
   return page;
 }
