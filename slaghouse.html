@@ -199,6 +199,34 @@
                           it rockets about for 1.2-1.8 s, ricocheting and ramming (25 dmg), then explodes
                           (radius 58, 70->20 dmg).
     Hanging lamps ....... shoot the lamp or its chain: it drops, crushes whatever is under it (80) and goes out.
+    Breakables .......... twenty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
+                          each. Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw blades,
+                          the hose and the wrecking ball wear them down; things that hang swing when hit and drop
+                          if you cut what holds them (or blow it away). First kill by each callouts its name.
+      Neon sign 20 ...... a letter pops every 5; the last drops the sign: 40 to anything it lands on, 25 around.
+      Strip light 6 ..... strobes 0.3 s, bursts: glass rains 14 on whoever is under it. Cut a cable: it drops (30).
+      Floodlight 30 ..... lens blows, it topples the way it was hit and brings its head down for 45.
+      Fuse box 15 ....... door blows off; arcs at the nearest foe in 96 px every 0.14-0.28 s (8 + stun) for 3 s, pops.
+      Capacitor 40 ...... charges 0.9 s, then chain lightning through up to 5 foes (38 + stun each).
+      Propane tank 22 ... 1 s blowtorch out the valve (ignites, 5 a tick), then radius 72, 85->25, fire on the floor.
+      Toxic drum 22 ..... leaks where shot; bursts into a gas cloud (light it) over a pool that eats feet (5 / 0.4 s).
+      Cryo tank 22 ...... leaks frost; a 74 px nova freezes foes, puts out fires, turns spilt water to ice.
+      Oil drum 18 ....... leaks a slick where shot, spills a 92 px one when it goes; burning, it spills alight.
+      Boiler 50 ......... hits vent steam (6 a tick); the needle climbs; at the top it screams 1.3 s and bursts
+                          (radius 84, 60->15, a huge shove) into a scalding fog.
+      Wall fan 30 ....... its three blades fly off as your saw blades.
+      Slag ladle 36 ..... shoot it or its chain: it tips and pours slag for 2.4 s (8 + burning a tick), then drops (80).
+      Vending 60 ........ every 12 knocks a can out; broken, it sprays 8 fizzing cans (14 each) and 2 health orbs.
+      Terminal 28 ....... the tubes implode: an EMP pop stuns foes in 64 px (machines 1.6 s and 22 damage).
+      Ammo crate 26 ..... cooks off 2.4 s spraying your rounds (9 each) every which way, then pops.
+      Flare case 16 ..... lobs 5 signal flares that stick, burn and light a blackout.
+      Extinguisher 8 .... a 64 px foam cloud: stuns 1.4 s, blinds whatever is in it, puts fires out for 3.6 s.
+      Window 12 ......... cracks, then shatters: glass rains 18 on whoever is below.
+      PA horn 12 ........ a feedback shriek: stuns and shoves foes in 104 px and breaks any glass in earshot.
+      Water tank 40 ..... leaks where shot; bursts in a wave (shoves, puts fires out) and floods the floor for 12 s.
+                          Water conducts: a fuse box, capacitor or terminal going off near it, or a live rail
+                          under it, electrifies the puddle (10 + stun a tick to foes in it, 5 to you).
+      Fire cooks off the propane, oil, ammo and flares: a flame jet, fire puddle, burning foe or flare near them.
     Rampage ............. hitting S style rank: 6 s of 40% faster fire (sentry too), +25% damage, afterimages,
                           orange screen edge and max music. Re-arms once your rank drops below B.
     Kill-cam ............ 3+ kills inside 350 ms: 0.7 s slow-mo, zoom punch, CARNAGE / MASSACRE.
@@ -1343,6 +1371,38 @@ const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind =
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
+// Twenty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
+// backdrop, 'hang' dangles from whatever is overhead and swings when hit); what it's made of (the chips and the sound a
+// hit makes); the methods that run on a hit, on breaking and while it goes off; how long fire takes to cook it off
+// (cook); its light ([tint, scale x, scale y, x, y, alpha] from its centre) and the callout when it kills something.
+const PROPS = {
+  neon:      { hp: 20, mount: 'wall',  mat: 'glass', hit: 'hitNeon', brk: 'breakNeon', live: 'liveNeon', light: [0xff3aa0, 2.6, 1.0, 0, 0, 0.55], call: 'SIGN OFF!' },
+  tube:      { hp: 6,  mount: 'hang',  mat: 'glass', brk: 'breakTube', live: 'liveTube', light: [0xc8ecff, 1.8, 0.7, 0, 2, 0.5], cone: [0xd8f2ff, 1.3, 1.5, 0.15], call: 'LIGHTS OUT!' },
+  flood:     { hp: 30, mount: 'floor', mat: 'metal', brk: 'breakFlood', live: 'liveFlood', light: [0xfff0c0, 1.1, 1.1, 5, -6, 0.6], beam: [0xfff2d0, 1.7, 2.6, 0.14], call: 'TIMBER!' },
+  fuse:      { hp: 15, mount: 'wall',  mat: 'metal', brk: 'breakFuse', live: 'liveFuse', light: [0xff2a14, 0.3, 0.3, 3, -3, 0.7], call: 'SHORT CIRCUIT!' },
+  capacitor: { hp: 40, mount: 'floor', mat: 'metal', brk: 'breakCap', live: 'liveCap', light: [0x46a0ff, 0.9, 1.1, 0, -2, 0.35], call: 'OVERCHARGED!' },
+  propane:   { hp: 22, mount: 'floor', mat: 'metal', brk: 'breakPropane', live: 'livePropane', cook: 2.2, call: 'COOKED!' },
+  toxic:     { hp: 22, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakToxic', light: [0x7dff4a, 0.8, 0.5, -2, -5, 0.3], call: 'TOXIC!' },
+  cryo:      { hp: 22, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakCryo', light: [0x9adcff, 0.8, 1.0, 0, 0, 0.18], call: 'FLASH FROZEN!' },
+  oil:       { hp: 18, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakOil', cook: 3, call: 'SLICK!' },
+  boiler:    { hp: 50, mount: 'floor', mat: 'metal', hit: 'hitBoiler', brk: 'breakBoiler', live: 'liveBoiler', light: [0xff7020, 1.1, 0.6, 0, 11, 0.45], call: 'SCALDED!' },
+  fan:       { hp: 30, mount: 'wall',  mat: 'metal', brk: 'breakFan', call: 'FAN MAIL!' },
+  ladle:     { hp: 36, mount: 'hang',  mat: 'metal', brk: 'breakLadle', live: 'liveLadle', light: [0xff7a20, 1.6, 0.9, 0, -3, 0.55], call: 'FRESH SLAG!' },
+  vending:   { hp: 60, mount: 'floor', mat: 'glass', hit: 'hitVending', brk: 'breakVending', live: 'liveVending', light: [0x3ae8e0, 1.2, 1.6, -2, -2, 0.32], call: 'REFRESHING!' },
+  terminal:  { hp: 28, mount: 'floor', mat: 'glass', brk: 'breakTerminal', live: 'liveTerminal', light: [0x46f088, 1.4, 0.8, 0, -3, 0.3], call: 'BLUE SCREEN!' },
+  ammo:      { hp: 26, mount: 'floor', mat: 'wood',  brk: 'breakAmmo', live: 'liveAmmo', cook: 1.4, call: 'COOK-OFF!' },
+  flares:    { hp: 16, mount: 'floor', mat: 'wood',  brk: 'breakFlares', live: 'liveFlares', cook: 1.2, call: 'SIGNAL FIRE!' },
+  ext:       { hp: 8,  mount: 'wall',  mat: 'metal', brk: 'breakExt', live: 'liveExt', call: 'FOGGED!' },
+  window:    { hp: 12, mount: 'wall',  mat: 'glass', hit: 'hitWindow', brk: 'breakWindow', call: 'GLASSED!' },
+  horn:      { hp: 12, mount: 'wall',  mat: 'metal', brk: 'breakHorn', light: [0xff2a14, 0.45, 0.45, -6, -4, 0.8], call: 'FEEDBACK!' },
+  water:     { hp: 40, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakWater', call: 'WASHED OUT!' },
+};
+const PROP_BLAST = {                                               // the props that go bang
+  propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70 },
+  boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60 },
+  small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18 },
+  slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30 },
+};
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
 const POSTFX = { on: (() => { try { return localStorage.getItem('slaghouse.postfx') !== '0'; } catch (err) { return true; } })() };   // V toggles bloom / warp / grading
@@ -3874,6 +3934,408 @@ function drawDrone(ctx, sway, charge) {          // 18x16 hovering eye-sentry
   R(ctx, EP.ml, 8, 1, 1, 1); R(ctx, EP.md, 7, 13, 4, 1);
 }
 
+// ---- destructible props: art ------------------------------------------------------
+// Twenty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
+// outline. Each has its intact frame, any frames it needs while it's hurt or going off, and a wreck ('x') that stays
+// put until the next wave restocks it. PROP_ART[kind] = { w, h, fr: frame names (the first is the intact one), draw }.
+const PRR = {
+  red: ['#1e0605', '#3a0c0a', '#5e1410', '#8a1e16', '#b42c1e', '#d8442c', '#f26e4e', '#ffa080'],
+  wht: ['#2a2e34', '#454b53', '#646b74', '#868d96', '#a8aeb6', '#c8cdd3', '#e4e7ea', '#ffffff'],
+  yel: ['#2e2004', '#5a3e08', '#86600e', '#b08416', '#d4a422', '#f0c434', '#ffe070'],
+  grn: ['#0a2006', '#14400c', '#226a14', '#36961e', '#56c42c', '#86ec4a', '#c8ff96'],
+  ice: ['#0a1626', '#12304c', '#1c5276', '#2c7aa2', '#4ca4c8', '#7ccae4', '#b8ecf8', '#f0fdff'],
+  blk: ['#060608', '#0e0f12', '#17191e', '#22252c', '#30343c', '#444952', '#5e6470', '#868c98'],
+  cop: ['#1a0a05', '#36170a', '#5a2a12', '#82401c', '#aa5a28', '#ce7836', '#ec9c52', '#ffc888'],
+  brs: ['#241606', '#46300c', '#6a4a12', '#92661c', '#b88828', '#d8aa40', '#f2d26c', '#fff0b0'],
+  olv: ['#10140a', '#1e2410', '#2e3818', '#3e4c20', '#50622a', '#687c36', '#849a48'],
+  tea: ['#041418', '#082a30', '#0e4048', '#16585f', '#227478', '#349494', '#56b8b4', '#90e0d8'],
+  blu: ['#06101e', '#0c1e36', '#142e52', '#1e446e', '#2a5c8c', '#3a78aa', '#5a9ac8', '#8cc0e6'],
+};
+const prCyl = (c, cx, y0, y1, r, ramp, bias = 0) => limb(c, cx, y0, cx, y1, r, r, ramp, bias, true);   // upright drum
+function prEll(c, cx, cy, rx, ry, col) {
+  for (let y = Math.floor(cy - ry); y < Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x < Math.ceil(cx + rx); x++) if (inBlob(x, y, cx, cy, rx, ry, 2)) R(c, col, x, y);
+}
+function prLine(c, col, x0, y0, x1, y1) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+  for (let i = 0; i <= n; i++) R(c, col, Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n));
+}
+const prRng = s => () => ((s = (s * 16807) % 2147483647) & 0xffff) / 0xffff;
+function prCracks(c, cx, cy, n, len, seed, hi = '#d8f0fa', lo = '#4a7484') {   // a starburst of cracks in glass
+  const rnd = prRng(seed * 7919 + 13);
+  for (let i = 0; i < n; i++) {
+    let a = (i / n) * Math.PI * 2 + rnd() * 0.7, x = cx + 0.5, y = cy + 0.5;
+    const L = len * (0.55 + rnd() * 0.7);
+    for (let k = 0; k < L; k++) { a += (rnd() - 0.5) * 0.6; x += Math.cos(a); y += Math.sin(a); R(c, k % 3 === 2 ? lo : hi, Math.floor(x), Math.floor(y)); }
+  }
+  R(c, '#ffffff', cx, cy);
+}
+function prOpaque(c, x, y) { return x >= 0 && y >= 0 && x < c.canvas.width && y < c.canvas.height && c.getImageData(x, y, 1, 1).data[3] > 0; }
+function prTear(c, x0, x1, y0, amp, seed, rim = '#1a120e') {    // rip the top off along a ragged line, with a scorched lip
+  const rnd = prRng(seed * 4099 + 7); let h = y0;
+  for (let x = x0; x < x1; x++) {
+    h = clamp(Math.round(h + (rnd() - 0.5) * amp * 1.8 + (y0 - h) * 0.35), y0 - amp, y0 + amp);
+    const top = h - (rnd() < 0.2 ? Math.round(rnd() * amp * 1.5) : 0);   // the odd petal of metal sticking up
+    c.clearRect(x, 0, 1, top);
+    if (prOpaque(c, x, top)) R(c, rim, x, top);
+  }
+}
+function prScorch(c, x0, y0, w, h, n, seed) {                       // soot on whatever is already drawn
+  const rnd = prRng(seed * 131 + 3);
+  c.globalCompositeOperation = 'source-atop';
+  for (let i = 0; i < n; i++) { c.fillStyle = rnd() < 0.5 ? 'rgba(6,5,4,0.8)' : 'rgba(18,12,9,0.55)'; c.fillRect(Math.floor(x0 + rnd() * w), Math.floor(y0 + rnd() * h), rnd() < 0.3 ? 2 : 1, rnd() < 0.3 ? 2 : 1); }
+  c.globalCompositeOperation = 'source-over';
+}
+function prDrum(c, cx, r, ramp, band) {                             // a 15-tall drum with rolled ribs, its lid seen a little from above
+  prCyl(c, cx, 2, 14.5, r, ramp);
+  prCyl(c, cx, 5, 6, r + 0.1, band); prCyl(c, cx, 10, 11, r + 0.1, band);
+  prEll(c, cx, 2.2, r, 1.7, ramp[ramp.length - 2]); prEll(c, cx, 2.3, r - 1.1, 1.0, ramp[2]);
+}
+const NEON_G = {
+  S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+  L: ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+  G: ['.####', '#....', '#....', '#..##', '#...#', '#...#', '.###.'],
+};
+const NEON_POP = [3, 0, 2, 1];                                    // the order the letters go out
+function drawNeon(c, lit, dead) {                                 // 34x15: 'SLAG' in pink tube inside a cyan frame tube
+  for (const bx of [7, 25]) { R(c, '#2a2e35', bx, 0, 2, 3); R(c, '#5d6775', bx, 0, 1, 2); }
+  R(c, '#0d0f13', 0, 2, 34, 13); R(c, '#181b21', 1, 3, 32, 11); R(c, '#262a32', 1, 3, 32, 1); R(c, '#08090b', 1, 13, 32, 1);
+  const off = new Set(NEON_POP.slice(0, 4 - lit)), on = i => !dead && !off.has(i), glyph = (i, fn) => {
+    const g = NEON_G['SLAG'[i]], ox = 4 + i * 7;
+    for (let y = 0; y < 7; y++) for (let x = 0; x < 5; x++) if (g[y][x] === '#') fn(ox + x, 5 + y);
+  };
+  for (let i = 0; i < 4; i++) if (on(i)) glyph(i, (x, y) => { for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) R(c, '#3a0c26', x + dx, y + dy); });
+  for (let i = 0; i < 4; i++) if (on(i)) glyph(i, (x, y) => { for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) R(c, '#b0207a', x + dx, y + dy); });
+  const cy = dead ? '#1c3a42' : '#4ce4fa';
+  for (let x = 2; x <= 31; x++) { R(c, cy, x, 4); R(c, cy, x, 12); }
+  for (let y = 4; y <= 12; y++) { R(c, cy, 2, y); R(c, cy, 31, y); }
+  if (!dead) { R(c, '#e4fdff', 3, 4, 27, 1); R(c, '#e4fdff', 2, 5, 1, 6); }
+  for (let i = 0; i < 4; i++) glyph(i, (x, y) => R(c, on(i) ? '#ffd2ee' : '#3e1a30', x, y));
+  if (dead) { R(c, '#0d0f13', 13, 5, 1, 3); R(c, '#0d0f13', 27, 9, 2, 1); }      // gaps where tube snapped
+  for (const [x, y] of [[1, 3], [32, 3], [1, 13], [32, 13]]) R(c, '#4b535e', x, y);
+}
+function drawTube(c, st) {                                        // 26x6 fluorescent fitting: 'ok' lit, 'off' mid-flicker, 'x' smashed
+  R(c, '#262a31', 0, 0, 26, 2); R(c, '#4b535e', 1, 0, 24, 1); R(c, '#15171b', 1, 2, 24, 1);
+  for (const ex of [0, 24]) { R(c, '#3a3f47', ex, 2, 2, 4); R(c, '#5d6775', ex, 2, 1, 4); R(c, '#c8a040', ex ? 24 : 1, 3, 1, 1); }
+  if (st === 'x') { R(c, '#b8c8d0', 2, 3, 3, 1); R(c, '#7c8c98', 2, 4, 2, 1); R(c, '#dfe8ee', 21, 3, 3, 1); R(c, '#9aaab6', 22, 5, 2, 1); R(c, '#c8d8e0', 3, 5, 1, 1); return; }
+  const lit = st === 'ok';
+  R(c, lit ? '#f4fcff' : '#7a8a98', 2, 3, 22, 1); R(c, lit ? '#9ad4ec' : '#36424c', 2, 4, 22, 1); R(c, lit ? '#e0f5ff' : '#68788a', 2, 5, 22, 1);
+  if (lit) { R(c, '#ffffff', 4, 3, 9, 1); R(c, '#ffffff', 15, 5, 5, 1); }
+}
+function drawFlood(c, st) {                                       // 16x24 tripod floodlight, lens facing right
+  const Y = PRR.yel, x = st === 'x';
+  prLine(c, IRN[2], 8, 14, 8, 22); prLine(c, IRN[5], 7, 13, 1, 23); prLine(c, IRN[4], 9, 13, 15, 23);
+  R(c, IRN[3], 0, 23, 3, 1); R(c, IRN[3], 14, 23, 2, 1); R(c, IRN[2], 7, 22, 3, 1);
+  R(c, IRN[3], 6, 12, 5, 2); R(c, IRN[6], 6, 12, 5, 1); R(c, IRN[3], 7, 9, 3, 3); R(c, IRN[5], 7, 9, 1, 3);
+  R(c, IRN[4], 3, 9, 11, 1); R(c, IRN[4], 3, 3, 1, 7); R(c, IRN[3], 13, 3, 1, 7); R(c, IRN[6], 3, 5, 1, 1); R(c, IRN[6], 13, 5, 1, 1);   // yoke
+  limb(c, 5, 5.5, 11, 5.5, 4.4, 4.4, Y, 0.02, true);
+  for (const fx of [5, 7]) R(c, Y[1], fx, 2, 1, 7);                // cooling fins
+  R(c, IRN[3], 6, 0, 5, 1); R(c, IRN[5], 6, 0, 2, 1);              // handle
+  prEll(c, 12.5, 5.5, 2.2, 5, '#1a1d22');
+  prEll(c, 12.6, 5.5, 1.5, 4.2, x ? '#12161c' : '#fff2c4');
+  if (!x) { R(c, '#ffffff', 12, 3, 1, 5); R(c, '#ffe08a', 13, 2, 1, 1); R(c, '#ffe08a', 13, 8, 1, 1); }
+  else { R(c, '#c8d8e0', 12, 2); R(c, '#8a9aa6', 13, 4); R(c, '#dfe8ee', 12, 7); R(c, '#8a9aa6', 13, 8); R(c, Y[0], 8, 2, 2, 2); R(c, Y[5], 8, 4, 2, 1); prScorch(c, 4, 1, 10, 9, 10, 5); }
+}
+function drawFuse(c, st) {                                        // 14x18 fuse box on a conduit
+  R(c, IRN[3], 6, 0, 2, 4); R(c, IRN[5], 6, 0, 1, 4);
+  R(c, IRN[1], 0, 3, 14, 15); R(c, IRN[4], 1, 4, 12, 13); R(c, IRN[6], 1, 4, 12, 1); R(c, IRN[5], 1, 5, 1, 12); R(c, IRN[2], 1, 16, 12, 1); R(c, IRN[3], 12, 5, 1, 11);
+  if (st === 'x') {
+    R(c, '#07080a', 2, 5, 10, 11);
+    for (let i = 0; i < 3; i++) { const y = 6 + i * 3; R(c, IRN[3], 3, y, 8, 2); for (let k = 0; k < 4; k++) R(c, (i + k) % 3 ? '#c8cdd3' : '#e8b422', 3 + k * 2, y, 1, 1); }
+    R(c, '#020202', 6, 7, 3, 4); R(c, '#020202', 5, 9, 1, 3); R(c, '#020202', 8, 11, 2, 2);
+    R(c, '#c83020', 4, 15, 1, 3); R(c, '#e8b422', 8, 15, 1, 3); R(c, '#3a80e0', 10, 16, 1, 2); R(c, IRN[7], 1, 6); R(c, IRN[7], 1, 13);
+    return;
+  }
+  R(c, IRN[5], 2, 5, 10, 11); R(c, IRN[6], 2, 5, 10, 1); R(c, IRN[3], 2, 15, 10, 1); R(c, IRN[3], 11, 6, 1, 9); R(c, IRN[7], 2, 6); R(c, IRN[7], 2, 13);
+  for (let r = 0; r < 4; r++) R(c, r === 3 ? '#c08a14' : '#e8b422', 7 - r, 6 + r, r * 2 + 1, 1);
+  R(c, '#15161a', 7, 7); R(c, '#15161a', 6, 8, 2, 1); R(c, '#15161a', 7, 9);
+  R(c, IRN[2], 4, 11, 6, 1); R(c, IRN[2], 4, 13, 6, 1); R(c, IRN[7], 4, 12, 6, 1);
+  R(c, IRN[2], 10, 9, 1, 3); R(c, IRN[7], 10, 9);
+  R(c, st === 'hit' ? '#ffb0a0' : '#ff2a14', 10, 6);
+  if (st === 'hit') { R(c, IRN[3], 4, 6, 2, 1); R(c, IRN[7], 4, 7, 2, 1); R(c, '#07080a', 9, 11); R(c, '#07080a', 5, 14); R(c, '#ffe080', 5, 13); }
+}
+function drawCap(c, st) {                                         // 18x22 capacitor bank: two cans, a coil and a spark gap
+  const ch = st === 'charge';
+  R(c, IRN[2], 0, 19, 18, 3); R(c, IRN[4], 0, 19, 18, 1);
+  for (let i = 0; i < 9; i++) R(c, i % 2 ? '#15161a' : '#e8b422', i * 2, 20, 2, 2);
+  for (let y = 7; y < 18; y++) { R(c, y % 2 ? PRR.cop[5] : PRR.cop[2], 8, y, 2, 1); if (!(y % 2)) R(c, ch ? '#e8fbff' : '#1e5aa0', 8 + (y % 4 ? 1 : 0), y, 1, 1); }
+  R(c, IRN[3], 7, 18, 4, 1);
+  for (const cx of [4, 14]) {
+    prCyl(c, cx, 6, 19, 3.5, PRR.blk); prCyl(c, cx, 9, 11, 3.6, PRR.yel); prCyl(c, cx, 15, 16, 3.6, PRR.yel.slice(0, 5));
+    prEll(c, cx, 6, 3.5, 1.2, PRR.blk[5]); prCyl(c, cx, 3, 6, 1.5, PRR.cop); R(c, PRR.cop[7], cx - 1, 3);
+  }
+  R(c, IRN[5], 5, 3, 2, 1); R(c, IRN[5], 11, 3, 2, 1); blob(c, 7, 3.5, 1.4, 1.4, PRR.cop, 2, 0.1); blob(c, 11, 3.5, 1.4, 1.4, PRR.cop, 2, 0.1);
+  if (ch) { R(c, '#ffffff', 8, 3, 2, 1); R(c, '#a0e8ff', 9, 2); R(c, '#a0e8ff', 8, 4); }
+  R(c, '#0a0b0e', 6, 16, 6, 2);
+  for (let i = 0; i < 4; i++) R(c, i < (ch ? 4 : 2) ? (ch ? '#c8f8ff' : '#5cff7a') : '#1a2a1e', 7 + i, 17);
+  if (st === 'x') { prTear(c, 0, 18, 10, 3, 11); prScorch(c, 0, 8, 18, 14, 40, 7); R(c, '#3a2a20', 8, 12, 2, 1); }
+}
+function drawPropane(c, st) {                                     // 12x18 propane bottle in its guard collar
+  const W = PRR.wht;
+  R(c, W[1], 2, 16, 8, 2); R(c, W[3], 2, 16, 8, 1);
+  limb(c, 6, 7.5, 6, 12.5, 5, 5, W, 0.04);
+  R(c, W[2], 2, 10, 8, 1); R(c, W[5], 2, 11, 1, 1);
+  R(c, W[3], 2, 1, 8, 1); R(c, W[6], 2, 1, 4, 1); R(c, W[4], 2, 2, 1, 2); R(c, W[2], 9, 2, 1, 2);
+  R(c, PRR.brs[4], 5, 2, 2, 2); R(c, PRR.brs[6], 5, 2, 1, 1); R(c, PRR.red[4], 4, 1, 4, 1); R(c, PRR.red[6], 4, 1, 1, 1);
+  R(c, PRR.red[5], 6, 11); R(c, PRR.red[5], 5, 12, 3, 1); R(c, PRR.red[5], 6, 13); R(c, '#ffffff', 6, 12);
+  if (st === 'hit') { R(c, W[2], 3, 7, 2, 1); R(c, W[7], 3, 8, 2, 1); R(c, W[1], 8, 14); }
+  if (st === 'x') { prTear(c, 0, 12, 11, 3, 3); prScorch(c, 0, 7, 12, 11, 22, 3); }
+}
+function drawToxic(c, st) {                                       // 13x15 waste drum: hazard band, ooze over the rim
+  const G = PRR.grn;
+  prDrum(c, 6.5, 5.5, PRR.yel, PRR.yel.slice(0, 5));
+  for (let y = 6; y <= 9; y++) for (let x = 1; x < 12; x++) if (prOpaque(c, x, y) && ((x + y) >> 1) % 2 === 0) R(c, x < 3 ? '#34322a' : x > 9 ? '#060608' : '#15161a', x, y);
+  R(c, G[5], 3, 2, 4, 1); R(c, G[6], 4, 2); R(c, G[4], 3, 3, 1, 4); R(c, G[6], 3, 3); R(c, G[3], 3, 7); R(c, G[4], 6, 3, 1, 2); R(c, G[3], 6, 5);
+  R(c, G[4], 9, 3, 1, 2); R(c, G[5], 9, 3);
+  if (st === 'hit') { R(c, '#0a1406', 10, 11); R(c, G[5], 10, 12, 1, 2); R(c, '#0a1406', 4, 12); R(c, G[5], 4, 13); R(c, PRR.yel[2], 9, 4, 1, 1); }
+  if (st === 'x') { prTear(c, 0, 13, 8, 2, 5); for (let x = 2; x < 11; x++) if (prOpaque(c, x, 9)) R(c, x % 3 ? G[3] : G[5], x, 9); prScorch(c, 0, 8, 13, 7, 14, 9); }
+}
+function drawCryo(c, st) {                                        // 12x20 coolant tank, frosting over
+  const I = PRR.ice.slice(2);
+  prCyl(c, 6, 5, 19.5, 5, I, 0.06);
+  blob(c, 6, 5.2, 5, 2.6, I, 2, 0.1, (x, y) => y <= 5);
+  prCyl(c, 6, 9, 12, 5.08, PRR.ice.slice(0, 5));
+  R(c, '#ffffff', 6, 9, 1, 3); R(c, '#ffffff', 5, 10, 3, 1); for (const [x, y] of [[5, 9], [7, 9], [5, 11], [7, 11]]) R(c, '#a8e4f8', x, y);
+  R(c, '#f0fdff', 1, 17, 3, 1); R(c, '#f0fdff', 2, 16); R(c, '#d8f4ff', 1, 15, 1, 2); R(c, '#f0fdff', 8, 18, 2, 1); R(c, '#ffffff', 2, 6); R(c, '#e8fbff', 9, 15);
+  R(c, IRN[4], 5, 0, 2, 3); R(c, IRN[6], 5, 0, 1, 2); R(c, PRR.wht[6], 8, 1, 2, 2); R(c, '#e02020', 9, 1);
+  if (st === 'hit') { R(c, '#2c5a78', 8, 6, 2, 1); R(c, '#ffffff', 8, 7, 2, 1); R(c, '#12304c', 3, 13); R(c, '#ffffff', 3, 14, 1, 2); }
+  if (st === 'x') { prTear(c, 0, 12, 12, 3, 8, '#7ccae4'); for (const x of [2, 5, 8, 10]) if (prOpaque(c, x, 12)) R(c, '#f0fdff', x, 10, 1, 2); prScorch(c, 0, 10, 12, 10, 6, 2); }
+}
+function drawOil(c, st) {                                         // 12x15 black oil drum: a wet sheen and an orange flammable band
+  prDrum(c, 6, 5, PRR.blk, PRR.blk.slice(2));
+  prCyl(c, 6, 7, 10, 5.06, ['#3a1404', '#6a2a08', '#a8480e', '#d8681a', '#f08a30', '#ffb060']);
+  R(c, '#f4f4ec', 6, 7); R(c, '#f4f4ec', 5, 8, 3, 1); R(c, '#f4f4ec', 6, 9); R(c, '#c8401a', 6, 8);
+  R(c, '#8a909c', 2, 3, 1, 4); R(c, '#8a909c', 2, 11, 1, 3); R(c, '#d8dce4', 2, 4);
+  R(c, '#020203', 9, 2, 1, 4); R(c, '#4a4e58', 9, 3); R(c, '#020203', 8, 2);
+  if (st === 'hit') { R(c, '#000000', 3, 12); R(c, '#2a2d35', 3, 13, 1, 1); R(c, PRR.blk[2], 9, 4, 1, 2); R(c, PRR.blk[6], 9, 6); }
+  if (st === 'x') { prTear(c, 0, 12, 8, 2, 4, '#5e6470'); R(c, '#020203', 4, 9, 4, 1); }
+}
+function drawBoiler(c, st) {                                      // 26x30 riveted copper boiler on its firebox
+  const hot = st === 'hot', C = PRR.cop;
+  R(c, IRN[1], 2, 22, 22, 7); R(c, IRN[4], 2, 22, 22, 1); R(c, IRN[3], 2, 23, 1, 6); R(c, IRN[0], 23, 23, 1, 6);
+  R(c, IRN[1], 2, 29, 5, 1); R(c, IRN[1], 19, 29, 5, 1);
+  R(c, IRN[0], 8, 24, 10, 4);
+  for (let x = 9; x < 17; x++) { R(c, MLT[hot ? 5 + (x * 7) % 3 : 2 + (x * 5) % 3], x, 26, 1, 2); R(c, MLT[hot ? 4 : 1], x, 25); }
+  for (const x of [10, 13, 16]) R(c, IRN[3], x, 24, 1, 4);
+  prCyl(c, 13, 8, 22, 10, C, hot ? 0.08 : 0.02);
+  blob(c, 13, 8.5, 10, 5.5, C, 2.2, 0.06, (x, y) => y < 8.5);
+  for (const y of [11, 18]) { prCyl(c, 13, y, y + 1.2, 10.1, PRR.brs); for (let x = 5; x <= 21; x += 3) R(c, hot ? '#ffe070' : PRR.brs[7], x, y); }
+  if (hot) for (const y of [12, 19, 8]) for (let x = 4; x < 23; x++) if ((x * 13 + y) % 5 < 2) R(c, x % 2 ? '#ff6a1a' : '#ffb040', x, y);
+  prEll(c, 19, 14.5, 3.2, 3.2, IRN[1]); prEll(c, 19, 14.5, 2.4, 2.4, '#e8e4d8'); R(c, '#e02020', 21, 13, 1, 2); R(c, '#e02020', 20, 12);
+  R(c, IRN[3], 16, 0, 2, 5); R(c, IRN[5], 16, 0, 1, 5); R(c, IRN[3], 8, 0, 9, 2); R(c, IRN[5], 8, 0, 9, 1);
+  prCyl(c, 9.5, 2, 5, 1.6, PRR.brs); R(c, PRR.brs[7], 9, 2);
+  R(c, PRR.brs[4], 3, 20, 2, 2); R(c, PRR.red[4], 2, 20, 1, 1);
+  if (st === 'x') { prTear(c, 0, 26, 16, 4, 6, '#3a1a0c'); prScorch(c, 0, 10, 26, 20, 60, 4); R(c, IRN[0], 9, 25, 8, 3); }
+}
+function drawFanBase(c, st) {                                     // 22x22 wall fan housing (the blades and guard are their own sprites)
+  R(c, IRN[2], 0, 0, 22, 22); R(c, IRN[4], 0, 0, 22, 1); R(c, IRN[4], 0, 0, 1, 22); R(c, IRN[0], 21, 0, 1, 22); R(c, IRN[0], 0, 21, 22, 1);
+  for (let y = 1; y < 21; y++) for (let x = 1; x < 21; x++) {
+    const dx = x + 0.5 - 11, dy = y + 0.5 - 11, r = Math.hypot(dx, dy);
+    if (r > 10.3) continue;
+    if (r > 9.2) R(c, IRN[(dx + dy) < 0 ? 5 : 2], x, y);
+    else R(c, r < 4 ? '#11141a' : r < 7 ? '#0c0e12' : '#08090c', x, y);
+  }
+  for (const [x, y] of [[2, 2], [19, 2], [2, 19], [19, 19]]) { R(c, IRN[6], x, y); R(c, IRN[0], x + 1, y + 1); }
+  if (st === 'x') {
+    prLine(c, '#6a737e', 3, 7, 8, 10); prLine(c, '#4b535e', 14, 16, 18, 12); prLine(c, '#6a737e', 11, 2, 12, 5); prLine(c, '#4b535e', 4, 15, 7, 13);
+    blob(c, 11, 11, 2.6, 2.6, IRN, 2, 0.05); R(c, '#2a1810', 10, 12, 2, 1); prScorch(c, 4, 4, 14, 14, 18, 6);
+  }
+}
+function drawFanBlade(c) {                                        // 18x18 three curved paddles on a hub
+  for (let y = 0; y < 18; y++) for (let x = 0; x < 18; x++) {
+    const dx = x + 0.5 - 9, dy = y + 0.5 - 9;
+    for (let k = 0; k < 3; k++) {
+      const b = k * Math.PI * 2 / 3, u = dx * Math.cos(b) + dy * Math.sin(b), v = -dx * Math.sin(b) + dy * Math.cos(b);
+      if (u < 1.5 || u > 8.4) continue;
+      const t = (u - 1.2) / 7.2, half = 0.6 + 2.3 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 0.95)), 0.8), sv = v - 0.09 * (u - 1.5) * (u - 1.5);
+      if (Math.abs(sv) > half) continue;
+      const e = sv / half; R(c, u > 7.6 ? IRN[4] : e < -0.45 ? IRN[7] : e < 0.25 ? IRN[6] : e < 0.7 ? IRN[5] : IRN[3], x, y);
+    }
+  }
+  blob(c, 9, 9, 2.7, 2.7, IRN, 2, 0.12); R(c, IRN[7], 8, 8); R(c, '#e8b422', 9, 9);
+}
+function drawFanGrill(c) {                                        // 22x22 see-through wire guard
+  for (let y = 0; y < 22; y++) for (let x = 0; x < 22; x++) {
+    const dx = x + 0.5 - 11, dy = y + 0.5 - 11, r = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
+    const ring = Math.abs(r - 4.2) < 0.5 || Math.abs(r - 6.9) < 0.5 || Math.abs(r - 9.4) < 0.55;
+    const spoke = r > 2.2 && r < 9.8 && Math.abs(Math.sin(a * 2)) < 0.55 / r;
+    if (ring || spoke) R(c, dx + dy < 0 ? '#a0aab6' : dx + dy < 6 ? '#6a737e' : '#4b535e', x, y);
+  }
+  R(c, '#2a2e35', 10, 10, 2, 2); R(c, '#c8d0d8', 10, 10);
+}
+function drawLadle(c, st) {                                       // 22x18 foundry ladle on a bail, slag glowing in its mouth
+  const cold = st === 'x';
+  for (let i = 0; i <= 28; i++) { const a = Math.PI * i / 28; R(c, IRN[i < 14 ? 6 : 4], Math.round(11 - Math.cos(a) * 10), Math.round(9 - Math.sin(a) * 8)); }
+  R(c, IRN[7], 10, 0, 2, 1); R(c, IRN[6], 1, 8, 1, 2); R(c, IRN[4], 20, 8, 1, 2);
+  for (let y = 6; y < 18; y++) {
+    const hw = 10 - (y - 6) / 11 * 3, x0 = Math.round(11 - hw), x1 = Math.round(11 + hw), band = y === 9 || y === 14, ramp = band ? RST : IRN;
+    for (let x = x0; x < x1; x++) { const n = (x + 0.5 - 11) / hw, I = -n * 0.55 + Math.sqrt(Math.max(0, 1 - n * n)) * 0.45 - (y - 6) * 0.015; R(c, ramp[shadeIdx(ramp.length, I, band ? 0.1 : -0.04)], x, y); }
+  }
+  R(c, IRN[6], 1, 6, 20, 1); R(c, IRN[7], 2, 6, 6, 1); R(c, IRN[5], 0, 5, 2, 1); R(c, IRN[6], 0, 4);
+  prEll(c, 11, 5.6, 8.6, 1.5, cold ? '#2a1a14' : MLT[5]);
+  if (!cold) { prEll(c, 11, 5.6, 6, 0.9, MLT[6]); R(c, MLT[7], 9, 5, 4, 1); R(c, MLT[2], 5, 6); R(c, MLT[2], 16, 5); R(c, MLT[3], 17, 6); R(c, MLT[4], 0, 6); }
+  else { R(c, '#4a2a1a', 6, 5, 3, 1); R(c, '#140c08', 12, 6, 4, 1); R(c, '#6a3418', 15, 5); prScorch(c, 2, 6, 18, 12, 16, 8); }
+}
+function drawVending(c, st) {                                     // 18x30 coolant-cola machine
+  const T = PRR.tea, x = st === 'x', hit = st === 'hit';
+  R(c, T[2], 0, 0, 18, 30); R(c, T[5], 0, 0, 18, 1); R(c, T[4], 0, 1, 1, 29); R(c, T[1], 17, 1, 1, 29); R(c, T[0], 0, 29, 18, 1);
+  R(c, '#061012', 1, 1, 16, 5);
+  if (!x) { R(c, '#3ae8e0', 2, 2, 14, 3); R(c, '#d8fffc', 2, 2, 14, 1); for (const lx of [3, 5, 6, 8, 10, 11, 13, 14]) R(c, '#0e6a66', lx, 3); for (const lx of [4, 7, 9, 12]) R(c, '#0e6a66', lx, 4); }
+  else { R(c, '#0c1a1c', 2, 2, 14, 3); R(c, '#2a8a86', 3, 2, 2, 1); R(c, '#1a5a58', 12, 4, 3, 1); }
+  R(c, '#b8c2cc', 1, 7, 11, 18); R(c, '#e8eef4', 1, 7, 11, 1); R(c, '#e8eef4', 1, 7, 1, 18); R(c, '#6a737e', 11, 8, 1, 17);
+  R(c, x ? '#040608' : '#081014', 2, 8, 9, 16);
+  const CAN = ['#e03424', '#38c858', '#f0c828', '#3a88f0'];
+  for (let s = 0; s < 4; s++) {
+    const y = 11 + s * 4; R(c, '#6a737e', 2, y, 9, 1);
+    for (let k = 0; k < 3; k++) {
+      if ((x && (s + k) % 3) || (hit && s === 1 && k === 2)) continue;
+      const cx = 3 + k * 3, col = CAN[(s + k) % 4]; R(c, col, cx, y - 3, 2, 3); R(c, '#ffffff', cx, y - 3, 2, 1); R(c, 'rgba(0,0,0,0.35)', cx + 1, y - 2, 1, 2);
+    }
+  }
+  if (!x) for (let i = 0; i < 16; i++) { const yy = 8 + i, xx = 10 - Math.floor(i * 0.5); R(c, 'rgba(170,225,245,0.32)', xx, yy); if (i % 3) R(c, 'rgba(170,225,245,0.18)', xx - 4, yy); }
+  if (hit) prCracks(c, 6, 13, 6, 6, 11);
+  if (x) { for (const [tx, ty, h] of [[2, 8, 2], [5, 8, 3], [9, 8, 1], [2, 21, 3], [10, 19, 4], [7, 23, 1]]) R(c, '#9ab4c0', tx, ty, 1, h); prScorch(c, 2, 8, 9, 16, 14, 2); }
+  R(c, T[1], 12, 7, 5, 18); R(c, T[3], 12, 7, 5, 1); R(c, '#e8b422', 13, 9, 3, 1); R(c, '#15161a', 14, 9);
+  for (let r = 0; r < 3; r++) for (const kx of [13, 15]) R(c, x ? '#3a4448' : '#c8d0d8', kx, 12 + r * 2);
+  R(c, x ? '#2a1008' : '#ff6a20', 13, 19, 3, 1);
+  R(c, '#04070a', 3, 26, 12, 2); R(c, '#22343a', 3, 26, 12, 1);
+  if (x) { prScorch(c, 0, 0, 18, 30, 40, 5); R(c, '#ffe080', 14, 21); }
+}
+function drawTerminal(c, st) {                                    // 24x20 console: two green-screen CRTs on a keyboard deck
+  const f = st === 'ok1' ? 1 : st === 'ok2' ? 2 : 0, x = st === 'x';
+  R(c, IRN[2], 0, 13, 24, 7); R(c, IRN[4], 0, 13, 24, 1); R(c, IRN[3], 0, 14, 1, 6); R(c, IRN[1], 23, 14, 1, 6);
+  R(c, IRN[1], 2, 15, 20, 2); for (let k = 0; k < 10; k++) { if (x && k % 3 === 1) continue; R(c, '#8a94a0', 3 + k * 2, 15); R(c, '#5d6775', 2 + k * 2, 16); }
+  const LED = ['#ff4020', '#5cff7a', '#ffd040', '#46e6ff'];
+  for (let i = 0; i < 6; i++) R(c, x ? '#1a1d22' : (i + f) % 3 ? LED[(i + f) % 4] : '#2a2e35', [3, 5, 7, 16, 18, 20][i], 18);
+  R(c, IRN[5], 21, 0, 1, 2); R(c, x ? '#3a1010' : '#ff3020', 21, 0);
+  for (const mx of [0, 12]) {
+    R(c, IRN[3], mx + 1, 2, 10, 10); R(c, IRN[5], mx + 1, 2, 10, 1); R(c, IRN[4], mx + 1, 3, 1, 8); R(c, IRN[1], mx + 10, 3, 1, 8); R(c, IRN[1], mx + 1, 11, 10, 1);
+    R(c, IRN[2], mx + 4, 12, 4, 1);
+    const sx = mx + 3, sy = 4, broke = x, stat = st === 'hit' && mx === 0;
+    if (broke) { R(c, '#040508', sx, sy, 6, 6); R(c, '#8a9aa6', sx, sy, 2, 1); R(c, '#c8d8e0', sx + 5, sy + 1, 1, 2); R(c, '#6a7a86', sx + 1, sy + 5, 2, 1); R(c, '#0a0a0a', sx + 1, 1, 3, 1); continue; }
+    R(c, '#04180c', sx, sy, 6, 6);
+    if (stat) { const rnd = prRng(77); for (let yy = 0; yy < 6; yy++) for (let xx = 0; xx < 6; xx++) if (rnd() < 0.45) R(c, rnd() < 0.5 ? '#c8d8d0' : '#5a6a64', sx + xx, sy + yy); prCracks(c, sx + 2, sy + 2, 4, 3, 5, '#e8f0ec', '#3a4440'); continue; }
+    const rnd = prRng(mx * 31 + f * 7 + 3);
+    for (let r = 0; r < 6; r += 2) { const len = 1 + Math.floor(rnd() * 5); R(c, '#46f088', sx, sy + r, len, 1); if (r === 4 && f !== 1) R(c, '#d8ffe4', sx + len, sy + r, 1, 1); }
+    for (let r = 1; r < 6; r += 2) R(c, '#031008', sx, sy + r, 6, 1);
+    R(c, '#a8ffd0', sx, sy);
+  }
+  if (x) prScorch(c, 0, 0, 24, 20, 30, 12);
+}
+function drawAmmo(c, st) {                                        // 18x12 ammunition crate, lid lifted on a row of rounds
+  const O = PRR.olv, x = st === 'x';
+  if (!x) {
+    R(c, O[5], 1, 0, 16, 1); R(c, O[4], 0, 1, 18, 2); R(c, O[6], 0, 1, 18, 1); R(c, O[2], 0, 3, 18, 1);
+    for (let bx = 9; bx < 17; bx += 2) { R(c, PRR.brs[7], bx, 3); R(c, PRR.brs[4], bx + 1, 3); }
+    R(c, IRN[6], 8, 2, 2, 2); R(c, IRN[3], 8, 3, 2, 1);
+  }
+  R(c, O[3], 0, 4, 18, 8); R(c, O[4], 2, 4, 14, 1); R(c, O[1], 2, 7, 14, 1); R(c, O[4], 2, 8, 14, 1); R(c, O[1], 0, 11, 18, 1);
+  for (const bx of [0, 16]) { R(c, IRN[3], bx, 4, 2, 8); R(c, IRN[bx ? 2 : 5], bx, 4, 1, 8); R(c, IRN[7], bx + 1, 5); R(c, IRN[7], bx + 1, 10); }
+  R(c, '#d8c848', 5, 5, 8, 1); R(c, '#d8c848', 5, 9, 3, 1); R(c, '#d8c848', 9, 9, 4, 1); R(c, '#a89830', 12, 5);
+  R(c, '#b08a50', 2, 6, 1, 3); R(c, '#b08a50', 15, 6, 1, 3); R(c, '#e0c080', 2, 6);
+  if (x) { prTear(c, 0, 18, 6, 2, 9, '#2a1a10'); prScorch(c, 0, 4, 18, 8, 26, 4); R(c, PRR.brs[5], 2, 11); R(c, PRR.brs[5], 14, 11); }
+}
+function drawFlares(c, st) {                                      // 16x10 signal-flare case, lid propped open
+  const Rr = PRR.red, x = st === 'x';
+  if (!x) { R(c, Rr[2], 1, 0, 14, 2); R(c, Rr[4], 1, 0, 14, 1); for (let i = 0; i < 4; i++) { const fx = 2 + i * 3; R(c, '#e02818', fx, 1, 2, 3); R(c, '#ff7a5a', fx, 2, 1, 2); R(c, '#f4f0e8', fx, 1, 2, 1); } }
+  R(c, Rr[3], 0, 3, 16, 7); R(c, Rr[5], 0, 3, 16, 1); R(c, Rr[5], 0, 4, 1, 5); R(c, Rr[1], 15, 4, 1, 5); R(c, Rr[1], 0, 9, 16, 1);
+  R(c, '#ecece4', 1, 6, 14, 1); R(c, '#ffd040', 7, 5, 2, 3); R(c, '#ff8a20', 7, 6, 2, 1);
+  R(c, IRN[3], 0, 5, 1, 2); R(c, IRN[3], 15, 5, 1, 2);
+  if (x) { prTear(c, 0, 16, 5, 1, 2, '#1a0a06'); prScorch(c, 0, 3, 16, 7, 40, 6); }
+}
+function drawExt(c, st) {                                         // 8x16 fire extinguisher in its wall bracket
+  R(c, IRN[2], 2, 1, 4, 15); R(c, IRN[4], 2, 1, 1, 15);
+  if (st !== 'x') {
+    limb(c, 4, 5.5, 4, 13, 2.8, 2.8, PRR.red, 0.02);
+    R(c, PRR.wht[5], 3, 1, 3, 2); R(c, PRR.wht[7], 3, 1); R(c, PRR.wht[6], 2, 0, 5, 1);
+    R(c, '#e8e8e0', 5, 3); R(c, '#40d060', 5, 3);
+    R(c, '#15161a', 6, 2); R(c, '#15161a', 7, 3, 1, 7); R(c, '#2a2e35', 6, 10, 1, 2);
+    R(c, '#f0ece0', 3, 8, 2, 3); R(c, PRR.red[5], 3, 9, 2, 1);
+  } else { prScorch(c, 2, 1, 4, 15, 10, 3); R(c, '#c8cdd3', 3, 14, 2, 1); }
+  R(c, IRN[5], 1, 8, 6, 1); R(c, IRN[7], 1, 8, 2, 1);
+}
+function drawWindow(c, st) {                                      // 34x22 control-room window, two panes
+  R(c, IRN[3], 0, 0, 34, 22); R(c, IRN[5], 0, 0, 34, 1); R(c, IRN[5], 0, 0, 1, 22); R(c, IRN[1], 33, 1, 1, 21); R(c, IRN[1], 1, 21, 33, 1);
+  for (let rx = 3; rx < 33; rx += 5) { R(c, IRN[6], rx, 1); R(c, IRN[6], rx, 20); }
+  R(c, IRN[6], 1, 19, 32, 1);
+  const GR = ['#14303c', '#102631', '#0c1d26', '#09161d'];
+  for (const px of [2, 18]) {
+    for (let y = 0; y < 17; y++) R(c, GR[Math.min(3, Math.floor(y / 4.5))], px, 2 + y, 14, 1);
+    R(c, '#05090b', px + 1, 14, 12, 5); R(c, '#3aff7a', px + 3, 15); R(c, '#ffb040', px + 6, 15); R(c, '#3aff7a', px + 10, 16); R(c, '#2a6a8a', px + 8, 15, 2, 1);
+    R(c, '#3a3424', px + 5, 3, 4, 1);
+    if (st !== 'x') {
+      for (let y = 0; y < 17; y++) for (let xx = 0; xx < 14; xx++) { const k = (xx + y * 0.7) % 11; if (k < 1.2) R(c, 'rgba(150,210,235,0.30)', px + xx, 2 + y); else if (k > 5 && k < 5.7) R(c, 'rgba(150,210,235,0.14)', px + xx, 2 + y); }
+      R(c, 'rgba(225,248,255,0.75)', px, 2, 3, 1); R(c, 'rgba(225,248,255,0.55)', px, 3, 1, 2);
+    } else {
+      const rnd = prRng(px + 5);
+      for (let xx = 0; xx < 14; xx++) { if (rnd() < 0.55) R(c, '#7aa4b4', px + xx, 2, 1, 1 + Math.floor(rnd() * 3)); if (rnd() < 0.4) { const h = 1 + Math.floor(rnd() * 2); R(c, '#5a8494', px + xx, 19 - h, 1, h); } }
+      for (let y = 0; y < 17; y++) { if (rnd() < 0.3) R(c, '#6a94a4', px, 2 + y, 1 + Math.floor(rnd() * 2), 1); if (rnd() < 0.3) R(c, '#6a94a4', px + 13, 2 + y, 1, 1); }
+    }
+  }
+  R(c, IRN[4], 16, 2, 2, 17); R(c, IRN[6], 16, 2, 1, 17);
+  if (st === 'c1' || st === 'c2') prCracks(c, 8, 8, 6, 6, 3);
+  if (st === 'c2') { prCracks(c, 25, 11, 7, 7, 9); prCracks(c, 5, 15, 4, 4, 21); }
+}
+function drawHorn(c, st) {                                        // 16x14 PA horn on a wall bracket, warning beacon on top
+  R(c, IRN[2], 0, 4, 3, 8); R(c, IRN[4], 0, 4, 1, 8); R(c, IRN[6], 1, 5); R(c, IRN[6], 1, 10);
+  R(c, IRN[4], 2, 7, 3, 2); R(c, IRN[6], 2, 7, 3, 1);
+  if (st === 'x') {
+    limb(c, 5, 8, 7, 10, 2.2, 2.2, PRR.yel); limb(c, 7, 10, 11, 13, 1.5, 3.4, IRN.slice(2), 0, true); R(c, '#05060a', 11, 11, 2, 3);
+    prLine(c, '#15161a', 2, 3, 4, 6); R(c, '#e8b422', 2, 2); prScorch(c, 4, 6, 10, 8, 8, 5);
+    return;
+  }
+  blob(c, 1.5, 2.5, 1.6, 2, PRR.red, 2, 0.1); R(c, '#ffd0c0', 1, 1); R(c, IRN[3], 0, 3, 3, 1);
+  limb(c, 4.5, 7.5, 7, 7.5, 2.5, 2.5, PRR.yel);
+  limb(c, 7, 7.5, 14.5, 7.5, 1.7, 5.8, IRN.slice(2), 0.02, true);
+  for (const rx of [9, 11]) for (let y = 0; y < 14; y++) if (prOpaque(c, rx, y)) R(c, y < 7 ? IRN[5] : IRN[3], rx, y);
+  R(c, IRN[7], 14, 3, 1, 4); R(c, IRN[5], 14, 7, 1, 5); R(c, '#05060a', 15, 3, 1, 9); R(c, '#20242c', 15, 4, 1, 1);
+}
+function drawWaterTank(c, st) {                                   // 22x26 water tank on a braced stand
+  const B = PRR.blu, x = st === 'x';
+  R(c, IRN[2], 5, 17, 1, 8); R(c, IRN[2], 16, 17, 1, 8);
+  R(c, IRN[4], 2, 16, 2, 10); R(c, IRN[6], 2, 16, 1, 10); R(c, IRN[4], 18, x ? 18 : 16, 2, x ? 8 : 10); R(c, IRN[3], 19, 16, 1, 10);
+  prLine(c, IRN[3], 4, 18, 17, 24); prLine(c, IRN[3], 17, 18, 4, 24);
+  R(c, IRN[1], 1, 25, 4, 1); R(c, IRN[1], 17, 25, 4, 1);
+  prCyl(c, 11, 4, 17, 10, B, 0.03); blob(c, 11, 4.5, 10, 3.8, B, 2.2, 0.08, (xx, y) => y < 4.5);
+  for (const y of [7, 14]) { prCyl(c, 11, y, y + 1.2, 10.1, IRN.slice(2)); for (let rx = 3; rx <= 19; rx += 4) R(c, IRN[7], rx, y); }
+  R(c, '#05080c', 17, 5, 2, 9); R(c, '#4ac8f8', 17, 9, 2, 5); R(c, '#d8f8ff', 17, 9, 2, 1); R(c, IRN[6], 17, 4, 2, 1); R(c, IRN[6], 17, 14, 2, 1);
+  R(c, PRR.wht[6], 5, 9, 7, 3); R(c, PRR.wht[4], 5, 11, 7, 1); for (const lx of [6, 8, 10]) R(c, B[3], lx, 10);
+  R(c, PRR.brs[4], 10, 17, 2, 2); R(c, PRR.brs[6], 10, 17); R(c, PRR.red[4], 9, 17, 4, 1);
+  R(c, IRN[3], 9, 0, 4, 2); R(c, IRN[5], 9, 0, 4, 1);
+  if (st === 'hit') { R(c, '#02060c', 6, 13); R(c, '#8ce0ff', 6, 14, 1, 2); R(c, '#02060c', 14, 6); R(c, '#8ce0ff', 14, 7); R(c, B[2], 12, 3, 2, 1); }
+  if (x) { prTear(c, 0, 22, 10, 4, 10, '#0c1e36'); R(c, '#4ac8f8', 6, 12, 8, 1); prScorch(c, 0, 8, 22, 10, 10, 2); }
+}
+const PROP_ART = {
+  neon:     { w: 34, h: 15, fr: ['n4', 'n3', 'n2', 'n1', 'n0', 'dead', 'x'], draw: (c, f) => f === 'x' ? (R(c, '#2a2e35', 7, 0, 2, 2), R(c, '#2a2e35', 9, 1, 2, 1), R(c, '#2a2e35', 25, 0, 2, 3), R(c, '#5d6775', 25, 0, 1, 2), prLine(c, '#1a1c20', 26, 3, 27, 6), prLine(c, '#1a1c20', 27, 6, 25, 9), R(c, '#e8b422', 25, 10), R(c, '#ff8040', 24, 10)) : drawNeon(c, f === 'dead' ? 0 : +f[1], f === 'dead') },
+  tube:     { w: 26, h: 6,  fr: ['ok', 'off', 'x'], draw: drawTube },
+  flood:    { w: 16, h: 24, fr: ['ok', 'x'], draw: drawFlood },
+  fuse:     { w: 14, h: 18, fr: ['ok', 'hit', 'x'], draw: drawFuse },
+  capacitor:{ w: 18, h: 22, fr: ['ok', 'charge', 'x'], draw: drawCap },
+  propane:  { w: 12, h: 18, fr: ['ok', 'hit', 'x'], draw: drawPropane },
+  toxic:    { w: 13, h: 15, fr: ['ok', 'hit', 'x'], draw: drawToxic },
+  cryo:     { w: 12, h: 20, fr: ['ok', 'hit', 'x'], draw: drawCryo },
+  oil:      { w: 12, h: 15, fr: ['ok', 'hit', 'x'], draw: drawOil },
+  boiler:   { w: 26, h: 30, fr: ['ok', 'hot', 'x'], draw: drawBoiler },
+  fan:      { w: 22, h: 22, fr: ['ok', 'x'], draw: drawFanBase },
+  ladle:    { w: 22, h: 18, fr: ['ok', 'x'], draw: drawLadle },
+  vending:  { w: 18, h: 30, fr: ['ok', 'hit', 'x'], draw: drawVending },
+  terminal: { w: 24, h: 20, fr: ['ok0', 'ok1', 'ok2', 'hit', 'x'], draw: drawTerminal },
+  ammo:     { w: 18, h: 12, fr: ['ok', 'x'], draw: drawAmmo },
+  flares:   { w: 16, h: 10, fr: ['ok', 'x'], draw: drawFlares },
+  ext:      { w: 8,  h: 16, fr: ['ok', 'x'], draw: drawExt },
+  window:   { w: 34, h: 22, fr: ['ok', 'c1', 'c2', 'x'], draw: drawWindow },
+  horn:     { w: 16, h: 14, fr: ['ok', 'x'], draw: drawHorn },
+  water:    { w: 22, h: 26, fr: ['ok', 'hit', 'x'], draw: drawWaterTank },
+};
+function genPropTextures(scene) {
+  for (const k in PROP_ART) {
+    const A = PROP_ART[k];
+    addSheet(scene, 'pr_' + k, A.fr.map(name => ({ name, c: makeSprite(A.w, A.h, c => A.draw(c, name)) })), A.w, A.h, true);
+  }
+  addTex(scene, 'pr_blade', makeSprite(18, 18, drawFanBlade));
+  addTex(scene, 'pr_grill', makeSprite(22, 22, drawFanGrill, null));
+}
+
 // ---- gibs -----------------------------------------------------------------------
 const GIBDEF = {
   g_flesh1: [7, 6, c => { R(c, '#7a3b30', 1, 1, 5, 4); R(c, '#a3584a', 2, 1, 2, 1); R(c, '#4e211b', 1, 4, 5, 1); R(c, '#b01818', 4, 2, 1, 1); }],
@@ -3927,6 +4389,20 @@ const GIBDEF = {
   g_jplate: [11, 7, c => { R(c, '#3a414b', 1, 1, 9, 5); R(c, '#5a636e', 1, 1, 9, 1); for (let i = 0; i < 3; i++) R(c, i % 2 ? '#15161a' : '#e8b422', 2 + i * 3, 3, 3, 2); }],
   g_jughelm: [10, 9, c => { R(c, '#3a414b', 1, 1, 8, 6); R(c, '#5a636e', 2, 1, 6, 1); R(c, '#15171a', 3, 3, 6, 2); R(c, '#ff3020', 4, 3, 4, 1); R(c, '#7a0c0c', 1, 7, 4, 1); }],
   g_barrel: [7, 5, c => { R(c, '#a02018', 1, 1, 5, 3); R(c, '#e8b422', 2, 2, 2, 1); R(c, '#601010', 1, 3, 5, 1); }],
+  // destructible props
+  g_glass: [5, 4, c => { R(c, '#d0f0fa', 1, 1, 3, 1); R(c, '#6aa8c4', 1, 2, 2, 1); }],
+  g_glass2: [4, 5, c => { R(c, '#eefaff', 1, 1, 1, 3); R(c, '#7ab8d0', 2, 2, 1, 2); }],
+  g_neon: [7, 3, c => { R(c, '#ff5ac0', 1, 1, 5, 1); R(c, '#ffe0f4', 2, 1, 2, 1); }],
+  g_soda: [4, 6, c => { R(c, '#d83424', 1, 1, 2, 4); R(c, '#f4f4f0', 1, 1, 2, 1); R(c, '#ff8a70', 1, 2, 1, 2); }],
+  g_door: [10, 12, c => { R(c, '#5d6775', 1, 1, 8, 10); R(c, '#7f8a99', 1, 1, 8, 1); R(c, '#e8b422', 4, 3, 2, 1); R(c, '#e8b422', 3, 4, 4, 1); R(c, '#e8b422', 2, 5, 6, 1); R(c, '#232730', 2, 8, 6, 1); }],
+  g_lid: [12, 5, c => { R(c, '#aa5a28', 1, 1, 10, 2); R(c, '#ec9c52', 2, 1, 6, 1); R(c, '#5a2a12', 1, 3, 10, 1); R(c, '#d8aa40', 5, 1, 2, 1); }],
+  g_crt: [6, 5, c => { R(c, '#1a2a22', 1, 1, 4, 3); R(c, '#4af088', 2, 2, 1, 1); R(c, '#8a9aa6', 1, 1, 4, 1); }],
+  g_ext: [6, 11, c => { R(c, '#b42c1e', 1, 2, 4, 8); R(c, '#f26e4e', 1, 2, 1, 8); R(c, '#c8cdd3', 2, 1, 2, 1); R(c, '#f0ece0', 2, 5, 2, 2); }],
+  g_cop: [6, 4, c => { R(c, '#aa5a28', 1, 1, 4, 2); R(c, '#ec9c52', 1, 1, 2, 1); }],
+  g_yel: [7, 5, c => { R(c, '#d4a422', 1, 1, 5, 3); R(c, '#ffe070', 1, 1, 3, 1); R(c, '#15161a', 4, 2, 2, 1); }],
+  g_blk: [7, 5, c => { R(c, '#22252c', 1, 1, 5, 3); R(c, '#5e6470', 1, 1, 3, 1); }],
+  g_wht: [7, 5, c => { R(c, '#a8aeb6', 1, 1, 5, 3); R(c, '#e4e7ea', 1, 1, 3, 1); R(c, '#d8442c', 4, 2, 1, 1); }],
+  g_blu: [7, 5, c => { R(c, '#2a5c8c', 1, 1, 5, 3); R(c, '#5a9ac8', 1, 1, 3, 1); }],
   // overdrive round
   g_slag: [6, 6, c => { R(c, '#b8380a', 1, 1, 4, 4); R(c, '#ffa030', 1, 1, 3, 3); R(c, '#fff6d0', 2, 2, 1, 1); }],
   g_crust: [6, 4, c => { R(c, '#36221a', 1, 1, 4, 2); R(c, '#4a3024', 1, 1, 4, 1); R(c, '#f06a14', 4, 2, 1, 1); }],
@@ -4274,6 +4750,22 @@ const ARENAS = [
     decor: DECOR5, barrels: [[14, 24], [35, 24], [64, 24], [85, 24], [18, 14], [82, 14]], canisters: [[30, 24], [70, 24], [48, 16], [20, 19]],
     pipes: [[32, 388, 1], [1568, 388, -1]] },
 ];
+// Where each arena keeps its breakables: [kind, tile x, tile y, facing]. Floor props stand in that cell, wall props
+// centre on it and hanging ones dangle there from whatever is overhead. ARENA 01 has one of each.
+const PROP_SPOTS = [
+  [['neon', 50, 4], ['window', 18, 5], ['tube', 25, 7], ['horn', 22, 8], ['ladle', 58, 9], ['fan', 8, 19], ['fuse', 36, 22], ['water', 33, 24],
+   ['capacitor', 66, 24], ['propane', 24, 24], ['toxic', 60, 16], ['cryo', 31, 16], ['oil', 85, 24], ['vending', 61, 24, -1], ['terminal', 41, 20],
+   ['ammo', 70, 20], ['flares', 21, 20], ['ext', 55, 19], ['flood', 7, 12], ['boiler', 89, 24, -1]],
+  [['ladle', 39, 12], ['ladle', 60, 12, -1], ['boiler', 16, 24], ['propane', 38, 24], ['oil', 61, 24], ['fan', 5, 18], ['fuse', 27, 20], ['water', 20, 24],
+   ['capacitor', 68, 24], ['ext', 40, 20], ['tube', 12, 11], ['flood', 96, 12, -1], ['ammo', 82, 20], ['vending', 93, 24, -1], ['cryo', 79, 24]],
+  [['terminal', 50, 20], ['window', 25, 5], ['horn', 49, 4], ['neon', 50, 9], ['capacitor', 38, 24], ['fuse', 59, 21], ['water', 60, 24], ['fan', 3, 15],
+   ['fan', 96, 15, -1], ['vending', 37, 12], ['tube', 44, 15], ['tube', 56, 15], ['ext', 32, 15], ['flood', 8, 10], ['flares', 93, 20], ['ammo', 5, 20]],
+  [['oil', 25, 24], ['propane', 34, 24], ['toxic', 66, 24], ['ammo', 60, 24], ['flares', 39, 24], ['vending', 30, 18], ['water', 69, 18], ['fuse', 66, 15],
+   ['fan', 3, 13], ['flood', 6, 8], ['horn', 22, 5], ['ext', 40, 15], ['tube', 64, 6], ['cryo', 88, 20], ['capacitor', 12, 20]],
+  [['water', 10, 24], ['water', 90, 24], ['capacitor', 38, 24], ['capacitor', 61, 24], ['terminal', 50, 16], ['fuse', 5, 21], ['fuse', 94, 21, -1], ['neon', 50, 5],
+   ['window', 25, 6], ['horn', 31, 8], ['tube', 47, 11], ['tube', 52, 11], ['cryo', 15, 14], ['ext', 60, 18], ['vending', 80, 14], ['fan', 3, 13]],
+];
+ARENAS.forEach((A, i) => { A.props = PROP_SPOTS[i] || []; });
 const CAMPAIGN_ARENAS = [
   ...ARENAS.slice(0, 3),
   { ...ARENAS[3], grid: buildLevel4(true) },
@@ -4733,6 +5225,7 @@ function genTextures(scene) {
   addTex(scene, 'xhair', makeSprite(13, 13, c => { R(c, '#ffffff', 6, 1, 1, 3); R(c, '#ffffff', 6, 9, 1, 3); R(c, '#ffffff', 1, 6, 3, 1); R(c, '#ffffff', 9, 6, 3, 1); R(c, '#ff5a2a', 6, 6, 1, 1); }, '#000000'));
   addTex(scene, 'lamp', makeSprite(13, 9, c => { R(c, '#2a2e35', 5, 1, 3, 2); R(c, '#3c434d', 3, 3, 7, 2); R(c, '#58616c', 3, 3, 7, 1); R(c, '#1a1d22', 2, 5, 9, 1);
     R(c, '#fff1c0', 5, 6, 3, 1); R(c, '#ffd27a', 4, 6, 1, 1); R(c, '#ffd27a', 8, 6, 1, 1); }));
+  genPropTextures(scene);
   // backgrounds + vignette
   addTex(scene, 'bgFar', drawBgFar());
   addTex(scene, 'bgMid', drawBgMid());
@@ -5464,6 +5957,7 @@ class GameScene extends Phaser.Scene {
     this.fx = new FX(this, 1500, 12);
     this.fx.solid = (x, y) => this.solidAt(x, y);
     this.fx.paint = (x, y, p, wall) => this.paintDrop(x, y, p.fixed, wall);
+    this.buildProps();
   }
 
   buildPools() {
@@ -6095,7 +6589,7 @@ class GameScene extends Phaser.Scene {
     this.updateStakes(dt); this.updateMines(dt); this.updateCharges(dt); this.updateHaywires(dt); this.updateCanisters(dt);
     this.updateSentry(dt, now); this.updateWrecks(dt); if (this.mod === 'slag' && this.state === 'play') this.updateSlagRain(dt);
     this.updateOrbs(dt, now);
-    this.updateBarrels(dt);
+    this.updateBarrels(dt); this.updateProps(dt, now);
     this.updateHazards(dt, now);
     if (this.campaign) this.updateCampaignRoute(dt, now);
     this.updateEProjs(dt);
@@ -6669,7 +7163,7 @@ class GameScene extends Phaser.Scene {
   }
   // Railgun: instant piercing slug. Everything on the line takes it; heads take double; shields don't help.
   fireRail(now, ox, oy, a, mx, my) {
-    const W = TUNE.RAIL, ca = Math.cos(a), sa = Math.sin(a), hits = [], kegs = [], rhits = [];
+    const W = TUNE.RAIL, ca = Math.cos(a), sa = Math.sin(a), hits = [], kegs = [], rhits = [], ptok = {};
     this.stats.shots++;
     let ex = ox, ey = oy;
     let pierced = 0;
@@ -6688,7 +7182,7 @@ class GameScene extends Phaser.Scene {
       for (const k of this.barrelList) if (k.active && !kegs.includes(k) && Math.abs(k.x - x) < 6 && Math.abs(k.y - y) < 8) kegs.push(k);
       const rh = this.ragdolls.length ? this.ragAt(x, y, 1) : null;
       if (rh && !rhits.some(h => h.rd === rh.rd)) rhits.push(rh);
-      this.propHitAt(x, y, ca, sa);
+      this.propHitAt(x, y, ca, sa, W.damage, ptok);
     }
     kegs.forEach(k => this.damageBarrel(k, W.damage));
     for (const h of rhits) { this.fxBlood(h.x, h.y, 8, a, 0.6, [120, 320]); this.hitRagdoll(h.rd, h.x, h.y, W.damage, ca, sa, 'rail', h.pi); }
@@ -6798,6 +7292,7 @@ class GameScene extends Phaser.Scene {
     for (const k of this.barrelList) if (k.active && inBox(k.x, k.y, 6)) { k.body.velocity.x = f * 380; k.body.velocity.y = -220; k.kicked = true; hit = true; }
     for (const c of this.chargeList) if (c.active && inBox(c.x, c.y, 6)) { c.body.velocity.x = f * 380; c.body.velocity.y = -230; c.kicked = true; hit = true; BUS.emit('callout', 'PUNTED'); }
     for (const k of this.canisterList) if (k.active && k.state === 'idle' && inBox(k.x, k.y, 6)) { this.igniteCanister(k, f > 0 ? -0.6 : Math.PI + 0.6); hit = true; }
+    if (this.kickProps(inBox, f)) hit = true;
     for (const D of this.discs) if (!D.mine && inBox(D.x, D.y, 8)) { D.mine = true; D.st = 'back'; hit = true; BUS.emit('callout', 'RETURNED!'); this.addStyle(50); Sfx.clang(); this.hitStop(60); }
     for (const q of this.eprojList) {                                  // rockets and bombs go back where they came from
       if (!q.active || !inBox(q.x, q.y, 10)) continue;
@@ -6865,6 +7360,7 @@ class GameScene extends Phaser.Scene {
       this.damageEnemy(e, W.damage, Math.cos(a), Math.sin(a), 'flame');
     }
     for (const k of this.barrelList) if (k.active && inCone(k.x, k.y, 6)) this.igniteBarrel(k);
+    this.heatProps(inCone, 1);
     for (const T of this.tars.slice()) if (inCone(T.x, T.y - 2, 4) || inCone(T.x - T.w / 2 + 3, T.y - 2, 4) || inCone(T.x + T.w / 2 - 3, T.y - 2, 4)) this.igniteTar(T);   // the hose lights tar
     for (const C of this.clouds.slice()) if (inCone(C.x, C.y, C.r * 0.7)) this.igniteCloud(C);                                     // ...and gas
     for (const rd of this.ragdolls.slice()) { const c = rd.pts[2]; if (inCone(c.x, c.y, 6)) { rd.burnT = Math.max(rd.burnT, W.burn); this.hitRagdoll(rd, c.x, c.y, W.damage, Math.cos(a), Math.sin(a), 'flame', 2); } }
@@ -7297,7 +7793,7 @@ class GameScene extends Phaser.Scene {
       if (b.kind === 'shard') { b.ang = Math.atan2(b.body.velocity.y, b.body.velocity.x); b.setRotation(b.ang); }
       const rh = this.ragSweep(b.px, b.py, b.x, b.y, 1.5);
       if (rh) { this.hitRagdoll(rh.rd, rh.x, rh.y, b.dmg, Math.cos(b.ang), Math.sin(b.ang), b.kind, rh.pi); b.disableBody(true, true); continue; }
-      if (this.propSweep(b.px, b.py, b.x, b.y, Math.cos(b.ang), Math.sin(b.ang))) { b.disableBody(true, true); continue; }   // lamps, gas, charges, mines
+      if (this.propSweep(b.px, b.py, b.x, b.y, Math.cos(b.ang), Math.sin(b.ang), b.dmg)) { b.disableBody(true, true); continue; }   // lamps, gas, props, charges, mines
       const tc = b.kind === 'nail' ? TRACE_NAIL : b.kind === 'parry' ? TRACE_PARRY : TRACE_PELLET;   // short additive tracer tail
       this.fx.emit((b.px + b.x) / 2, (b.py + b.y) / 2, { n: 1, speed: [0, 0], life: [0.06, 0.1], size: [2, 1], cols: tc, add: true });
       this.fx.emit(b.px, b.py, { n: 1, speed: [0, 0], life: [0.05, 0.08], size: [1, 1], cols: tc, alpha: [0.8, 0], add: true });
@@ -7465,6 +7961,7 @@ class GameScene extends Phaser.Scene {
     for (const c of this.chargeList) if (c.active && Math.hypot(c.x - x, c.y - y) < R + 6) c.fuse = Math.min(c.fuse, 0.1 + Math.random() * 0.08);
     for (const k of this.canisterList) if (k.active && k.state === 'idle' && Math.hypot(k.x - x, k.y - y) < R + 6) this.igniteCanister(k, Math.atan2(k.y - y, k.x - x) - 0.7);
     for (const L of this.lamps) if (!L.falling && !L.dead && Math.hypot(L.x - x, L.y - y) < R + 6) this.dropLamp(L);
+    this.blastProps(x, y, R, W);
     if (W.enemy && this.sentry && Math.hypot(this.sentry.x - x, this.sentry.y - 10 - y) < R + 6) this.sentry.hp -= (W.selfDamage || 20) * 1.5;   // they can wreck your turret
     if (this.state !== 'dead') {                                          // self-damage + rocket-jump push, or a real hit if hostile
       const pb = this.player.body, qx = clamp(x, pb.left, pb.right), qy = clamp(y, pb.top, pb.bottom), d = Math.hypot(qx - x, qy - y);
@@ -8829,17 +9326,18 @@ class GameScene extends Phaser.Scene {
   }
 
   // ------------------------------------------------------------- props: lamps & gas ----
-  propHitAt(x, y, ca, sa) {                                            // shots hit the scenery too; true if something took it
+  propHitAt(x, y, ca, sa, dmg, tok) {                                  // shots hit the scenery too; true if something took it
     for (const L of this.lamps) if (!L.falling && !L.dead && ((Math.abs(x - L.x) < 7 && Math.abs(y - L.y) < 6) || (Math.abs(x - L.x) < 2 && y > 2 * TS && y < L.y - 3))) { this.dropLamp(L); return true; }
     for (const k of this.canisterList) if (k.active && k.state === 'idle' && Math.abs(x - k.x) < 5 && Math.abs(y - k.y) < 8) {
       const h = Math.atan2(sa, ca); this.igniteCanister(k, h + (Math.cos(h) >= 0 ? -0.9 : 0.9) + rand(-0.3, 0.3)); return true;
     }
+    if (this.props && this.hitPropsAt(x, y, ca, sa, dmg, tok)) return true;
     for (const c of this.chargeList) if (c.active && Math.abs(x - c.x) < 5 && Math.abs(y - c.y) < 5) { this.detonateCharge(c); BUS.emit('callout', 'COOKED OFF'); this.addStyle(40); return true; }
     for (const m of this.mineList) if (m.active && Math.abs(x - m.x) < 4 && Math.abs(y - m.y) < 4) { this.detonateMine(m); return true; }
     return false;
   }
-  propSweep(x0, y0, x1, y1, ca, sa) {
-    for (let i = 1; i <= 3; i++) if (this.propHitAt(x0 + (x1 - x0) * i / 3, y0 + (y1 - y0) * i / 3, ca, sa)) return true;
+  propSweep(x0, y0, x1, y1, ca, sa, dmg) {
+    for (let i = 1; i <= 3; i++) if (this.propHitAt(x0 + (x1 - x0) * i / 3, y0 + (y1 - y0) * i / 3, ca, sa, dmg)) return true;
     return false;
   }
   dropLamp(L) {
@@ -8916,6 +9414,806 @@ class GameScene extends Phaser.Scene {
       if (k.t <= 0) { const x = k.x, y = k.y; k.disableBody(true, true); for (let i = 0; i < 4; i++) this.spawnGib('g_can', x, y, rand(-220, 220), rand(-320, -120), 'metal'); this.explode(x, y, TUNE.CANISTER); }
     }
   }
+  // ------------------------------------------------------------- destructible props ----
+  // Twenty kinds of breakable scenery (PROPS for how they play, PROP_ART for how they look), placed per arena as
+  // [kind, tile x, tile y, facing]. Shots, blasts, kicks, saws and fire wear them down, each goes off its own way,
+  // and every wave restocks the broken ones. Water they spill conducts: anything electrical that goes off near a
+  // puddle lights the whole puddle up.
+  buildProps() {
+    this.props = []; this.waters = []; this.fizzes = []; this.zaps = []; this.propTick = 0;
+    this.propG = this.add.graphics().setDepth(4.6);                     // chains, cables, gauge needles
+    this.waterG = this.add.graphics().setDepth(4.96);                   // puddles
+    this.zapG = this.add.graphics().setDepth(16).setBlendMode(ADD);    // arcs and molten pours
+    for (const [kind, tx, ty, dir] of this.A.props || []) if (PROPS[kind]) this.props.push(this.makeProp(kind, tx, ty, kind === 'neon' ? 1 : dir || 1));
+  }
+  makeProp(kind, tx, ty, dir) {
+    const D = PROPS[kind], A = PROP_ART[kind], p = { kind, D, A, dir, tx, ty, hw: A.w / 2 - 1, hh: Math.max(4, A.h / 2 - 1) };
+    p.bx = tx * TS + 8; p.by = D.mount === 'floor' ? (ty + 1) * TS : ty * TS + 8;
+    if (D.mount === 'hang') {                                           // find what it hangs from
+      p.ay = 2 * TS;
+      for (let y = ty * TS; y > 0; y -= 4) if (this.standAt(p.bx, y)) { p.ay = Math.floor(y / TS) * TS + TS; break; }
+      p.L = Math.max(4, p.by - A.h / 2 - p.ay);
+    }
+    const depth = D.mount === 'wall' ? 1.3 : 4.2;
+    p.img = this.add.sprite(p.bx, p.by, 'pr_' + kind, A.fr[0]).setOrigin(0.5, D.mount === 'floor' ? 1 : D.mount === 'hang' ? 0 : 0.5).setDepth(depth).setFlipX(dir < 0);
+    if (kind === 'fan') { p.blade = this.add.image(p.bx, p.by, 'pr_blade').setDepth(depth + 0.01); p.grill = this.add.image(p.bx, p.by, 'pr_grill').setDepth(depth + 0.02); }
+    if (D.light) p.glow = this.add.image(0, 0, 'glow').setBlendMode(ADD).setTint(D.light[0]).setDepth(18);
+    if (D.cone) p.cone = this.add.image(0, 0, 'cone').setOrigin(0.5, 0).setBlendMode(ADD).setTint(D.cone[0]).setDepth(18);
+    if (D.beam) p.beam = this.add.image(0, 0, 'cone').setOrigin(0.5, 0).setBlendMode(ADD).setTint(D.beam[0]).setDepth(18);
+    this.resetProp(p, false);
+    return p;
+  }
+  resetProp(p, fx) {
+    if (p.fall) p.fall.destroy();
+    Object.assign(p, { hp: p.D.hp, st: 'ok', fr: p.A.fr[0], t: 0, x: p.bx, y: p.by, vy: 0, sw: 0, swv: 0, rot: 0, flash: 0, jig: 0, la: 1, burning: false, cookT: 0,
+      leaks: [], jets: [], called: false, beamT: 0, tok: null, smoke: 0, steamT: 0, falling: false, fall: null, phase: '', ang: 0, angV: 0, n: 0, popT: 0, arcT: 0,
+      canAcc: 0, lit: 4, flickT: 0, tick: rand(0, 0.3), tick2: 0, cool: 0, wob: rand(0, 6) });
+    p.img.setTexture('pr_' + p.kind, p.fr).setVisible(true).setRotation(0);
+    if (p.blade) { p.blade.setVisible(true); p.grill.setVisible(true); }
+    for (const o of [p.glow, p.cone, p.beam]) if (o) o.setVisible(true);
+    this.placeProp(p);
+    if (fx) { this.fx.emit(p.cx, p.cy, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xa0e8ff], add: true, g: -40 }); this.spawnLight(p.cx, p.cy, 'glow', 0xa0e8ff, 0.6, 1.4, 0.6, 0.25); }
+  }
+  placeProp(p) {                                                       // centre for hit tests, then the sprites and lights
+    const D = p.D, A = p.A, j = p.jig > 0 ? Math.sin(p.wob * 53) * p.jig : 0;
+    if (D.mount === 'hang' && !p.falling) {
+      p.x = p.bx + Math.sin(p.sw) * p.L; p.y = p.ay + Math.cos(p.sw) * p.L;
+      p.cx = p.x + Math.sin(p.sw) * A.h / 2; p.cy = p.y + Math.cos(p.sw) * A.h / 2;
+      p.img.setPosition(p.x + j, p.y).setRotation(-p.sw + p.rot);
+    } else {
+      p.cx = p.x; p.cy = D.mount === 'floor' ? p.y - A.h / 2 : D.mount === 'hang' ? p.y + A.h / 2 : p.y;
+      p.img.setPosition(p.x + j, p.y).setRotation(p.rot);
+    }
+    if (p.blade) { p.blade.setPosition(p.x + j, p.y); p.grill.setPosition(p.x + j, p.y); }
+    if (p.glow) { const L = D.light; p.glow.setPosition(p.cx + L[3] * p.dir, p.cy + L[4]).setScale(L[1], L[2]); }
+    if (p.cone) p.cone.setPosition(p.cx, p.cy + 1).setRotation(-p.sw).setScale(D.cone[1], D.cone[2]);
+    if (p.beam) p.beam.setPosition(p.x + 5.5 * p.dir, p.y - 18.5).setRotation(p.dir > 0 ? -Math.PI / 2 + 0.45 : Math.PI / 2 - 0.45).setScale(D.beam[1], D.beam[2]);
+  }
+  hideProp(p) {
+    p.st = 'gone';
+    for (const o of [p.img, p.blade, p.grill, p.glow, p.cone, p.beam, p.fall]) if (o) o.setVisible(false);
+  }
+  restockProps() {                                                     // a new wave puts back what broke, if there's still somewhere to put it
+    for (const p of this.props || []) {
+      if (p.st === 'ok' && p.y === p.by && !p.falling) continue;
+      if (p.D.mount === 'floor' && (this.tileAt(p.tx, p.ty) !== '.' || this.tileAt(p.tx, p.ty + 1) === '.')) continue;
+      if (p.D.mount === 'hang' && !this.standAt(p.bx, p.ay - 2)) continue;
+      this.resetProp(p, true);
+    }
+  }
+  // shots: propHitAt finds the prop under a point. dmg undefined = a beam or blade passing through (12 a touch, at most
+  // every 110 ms per prop); tok = one shot that may test many points (a rail), which hits each prop once.
+  hitPropsAt(x, y, ca, sa, dmg, tok) {
+    const now = this.time.now;
+    for (const p of this.props) {
+      if (p.st !== 'ok') continue;
+      if (p.D.mount === 'hang' && this.chainHit(p, x, y)) { this.snapProp(p, ca); return true; }
+      if (Math.abs(x - p.cx) > p.hw || Math.abs(y - p.cy) > p.hh) continue;
+      if (tok) { if (p.tok === tok) continue; p.tok = tok; }
+      else if (dmg === undefined) { if (now < p.beamT) return true; p.beamT = now + 110; }
+      this.hitProp(p, dmg ?? 12, 'shot', x, y, ca, sa);
+      return true;
+    }
+    return false;
+  }
+  chainHit(p, x, y) {                                                  // a shot through the chain or cables it hangs by
+    if (p.falling || y < p.ay || y > p.y - 1) return false;
+    const t = (y - p.ay) / Math.max(1, p.y - p.ay), lx = p.bx + (p.x - p.bx) * t;
+    return p.kind === 'tube' ? Math.abs(x - (lx - 10)) < 1.5 || Math.abs(x - (lx + 10)) < 1.5 : Math.abs(x - lx) < 2;
+  }
+  hitProp(p, dmg, src, hx, hy, ca, sa) {
+    if (p.st !== 'ok' || !(dmg > 0)) return;
+    const D = p.D, x = hx ?? p.cx, y = hy ?? p.cy;
+    p.hp -= dmg; p.flash = 0.06; p.jig = Math.min(2.5, 0.8 + dmg / 20);
+    if (D.mount === 'hang') p.swv = clamp(p.swv + (ca || (Math.random() < 0.5 ? -1 : 1)) * Math.min(2.5, dmg * 0.05), -4, 4);
+    if (src !== 'flame') this.propChips(p, x, y, ca, sa, Math.min(8, 2 + dmg / 8));
+    if (D.hit) this[D.hit](p, dmg, x, y, ca || 0, sa || 0, src);
+    if (p.st !== 'ok') return;
+    if (p.hp <= 0) this.breakProp(p, src, ca);
+    else if (p.hp <= D.hp * 0.5 && p.fr === p.A.fr[0] && p.A.fr.includes('hit')) p.fr = 'hit';
+  }
+  propChips(p, x, y, ca, sa, n) {                                      // what flies off a hit, by what it's made of
+    const back = ca === undefined ? -Math.PI / 2 : Math.atan2(-(sa || 0), -ca);
+    if (p.D.mat === 'glass') { this.fx.emit(x, y, { n, angle: back, spread: 1.6, speed: [40, 160], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xd8f4ff, 0x9ad4ec], g: 500, mode: 1 }); Sfx.tink(0.6); }
+    else if (p.D.mat === 'wood') { this.fx.emit(x, y, { n, angle: back, spread: 1.4, speed: [40, 150], life: [0.25, 0.5], size: [2, 1], cols: [0xa07040, 0x6a4422, 0xc89a5a], g: 600, mode: 1 }); Sfx.clunk(); }
+    else { this.fxSparks(x, y, n, back, 1.4, [60, 200]); if (Math.random() < 0.3) Sfx.clang(0.3); else Sfx.tink(0.5); }
+  }
+  breakProp(p, src, ca) {
+    if (p.st !== 'ok') return;
+    p.st = 'live'; p.t = 0; p.hp = 0; p.fdir = Math.sign(ca || 0) || (Math.random() < 0.5 ? -1 : 1);
+    this.addStyle(12); this.propsBroken = (this.propsBroken || 0) + 1;
+    this[p.D.brk](p, src);
+  }
+  wreckProp(p, smoke) {                                                // done going off: the wreck stays, dark, until the next wave
+    p.st = 'x'; p.fr = 'x'; p.smoke = smoke; p.burning = false; p.leaks.length = 0; p.jets.length = 0;
+    for (const o of [p.glow, p.cone, p.beam]) if (o) o.setVisible(false);
+  }
+  propHurt(p, e, dmg, dx, dy, src) {                                   // damage from a prop going off; its first kill gets a callout
+    if (!e.alive || e.under) return;
+    this.damageEnemy(e, dmg, dx, dy, src);
+    if (!e.alive && !p.called) { p.called = true; BUS.emit('callout', p.D.call); this.addStyle(60); }
+  }
+  igniteProp(p) { if (p.st === 'ok' && p.D.cook && !p.burning) { p.burning = true; p.cookT = p.D.cook; Sfx.ignite(); } }
+  blastProps(x, y, R, W) {                                             // explosions: hit everything in reach, swing what hangs
+    if (!this.props) return;
+    const base = W.tileDamage ?? W.maxDamage ?? 40;
+    for (const p of this.props) {
+      if (p.st === 'gone') continue;
+      const qx = clamp(x, p.cx - p.hw, p.cx + p.hw), qy = clamp(y, p.cy - p.hh, p.cy + p.hh), d = Math.hypot(qx - x, qy - y);
+      if (d >= R + 4) continue;
+      const f = 1 - d / (R + 4);
+      if (p.D.mount === 'hang' && !p.falling) p.swv = clamp(p.swv + (Math.sign(p.cx - x) || 1) * 3 * f, -4, 4);
+      if (p.st !== 'ok' || (d > 8 && !this.los(x, y, p.cx, p.cy))) continue;
+      if (W.burn) this.igniteProp(p);
+      this.hitProp(p, base * (0.45 + 0.75 * f), 'blast', qx, qy, Math.sign(p.cx - x) || 1, -0.5);
+    }
+  }
+  kickProps(inBox, f) {
+    let hit = false;
+    for (const p of this.props || []) {
+      if (p.st !== 'ok' || !inBox(p.cx, p.cy, Math.min(p.hw, 8))) continue;
+      hit = true; if (p.D.mount === 'hang') p.swv = clamp(p.swv + f * 2.2, -4, 4);
+      this.hitProp(p, TUNE.KICK.damage * 0.8, 'kick', p.cx - f * p.hw, p.cy, f, -0.2);
+    }
+    return hit;
+  }
+  heatProps(inCone, dmg) {                                             // the hose: cooks off what burns, wears down the rest
+    for (const p of this.props || []) if (p.st === 'ok' && inCone(p.cx, p.cy, p.hw)) { this.igniteProp(p); this.hitProp(p, dmg, 'flame'); }
+  }
+  douse(x, y, r) {                                                     // water and foam: fires out, burning things stop burning
+    let n = 0;
+    for (let j = this.puddles.length - 1; j >= 0; j--) {
+      const Q = this.puddles[j]; if (!Q.fire || Math.abs(Q.y - y) > r || Math.max(0, Math.abs(Q.x - x) - Q.w / 2) > r) continue;
+      this.puddles.splice(j, 1); n++;
+      this.fx.emit(Q.x, Q.y - 3, { n: 8, angle: -Math.PI / 2, spread: 1, speed: [10, 50], life: [0.5, 1], size: [3, 7], cols: [0xe8f0f4, 0xb0bcc4], alpha: [0.5, 0], g: -40, drag: 2 });
+    }
+    for (const e of this.enemies.getChildren()) if (e.alive && e.burnT > 0 && Math.hypot(e.body.center.x - x, e.body.center.y - y) < r) { e.burnT = 0; e.panicT = 0; n++; }
+    for (const rd of this.ragdolls) if (rd.burnT > 0 && Math.hypot(rd.pts[2].x - x, rd.pts[2].y - y) < r) { rd.burnT = 0; n++; }
+    for (const p of this.props) if (p.burning && Math.hypot(p.cx - x, p.cy - y) < r) { p.burning = false; n++; }
+    if (n) Sfx.sizzle();
+    return n;
+  }
+  addZap(x0, y0, x1, y1, t, c0 = 0x4ab8ff, c1 = 0xe8f8ff) { this.zaps.push({ x0, y0, x1, y1, t, c0, c1 }); }
+  electrifyWater(x, y, r) {
+    let lit = false;
+    for (const W of this.waters) if (Math.hypot(Math.max(0, Math.abs(W.x - x) - W.w / 2), W.y - y) < r) { if (W.zap <= 0) this.addZap(x, y, clamp(x, W.x - W.w / 2, W.x + W.w / 2), W.y - 1, 0.15); W.zap = Math.max(W.zap, 1.8); lit = true; }
+    if (lit) Sfx.zap();
+    return lit;
+  }
+  spanOn(x, fy, w) {                                                   // a spill only covers the floor it lands on
+    const ok = xx => this.standAt(xx, fy + 1) && !this.solidAt(xx, fy - 2);
+    let l = x - w / 2, r = x + w / 2;
+    for (let xx = x; xx > l; xx -= 2) if (!ok(xx)) { l = xx + 1; break; }
+    for (let xx = x; xx < r; xx += 2) if (!ok(xx)) { r = xx - 1; break; }
+    return [(l + r) / 2, Math.max(4, r - l)];
+  }
+  spawnWater(x, y, w) {
+    const fy = this.floorBelow(x, y - 4); if (fy === null || fy - y > 90) return;
+    [x, w] = this.spanOn(x, fy, w);
+    for (const W of this.waters) if (Math.abs(W.y - fy) < 3 && Math.abs(W.x - x) < (W.w + w) / 2) {
+      const l = Math.min(W.x - W.w / 2, x - w / 2), r = Math.max(W.x + W.w / 2, x + w / 2);
+      [W.x, W.w] = this.spanOn((l + r) / 2, fy, Math.min(170, r - l)); W.t = Math.max(W.t, 12); return;
+    }
+    this.waters.push({ x, y: fy, w, t: 12, grow: 0, zap: 0, tick: 0, seed: Math.random() * 100 });
+    if (this.waters.length > 14) this.waters.shift();
+  }
+
+  updateProps(dt, now) {
+    if (!this.props) return;
+    this.propG.clear(); this.zapG.clear();
+    for (const p of this.props) {
+      if (p.st === 'gone') continue;
+      const D = p.D;
+      p.wob += dt;
+      if (p.flash > 0) p.flash -= dt;
+      if (p.jig > 0) p.jig = Math.max(0, p.jig - dt * 10);
+      if (D.mount === 'floor') { this.propSupport(p, dt); if (p.st === 'gone') continue; }
+      if (D.mount === 'hang' && !p.falling) { p.swv += (-Math.sin(p.sw) * 30 - p.swv * 1.4) * dt; p.sw = clamp(p.sw + p.swv * dt, -1.2, 1.2); }
+      if (D.mount === 'hang') this.drawHangers(p);
+      if (p.st === 'ok') {
+        if (p.burning) {
+          p.cookT -= dt;
+          if (Math.random() < 0.8) this.fx.emit(p.cx + rand(-p.hw, p.hw) * 0.7, p.cy - p.hh + 2, { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [20, 60], life: [0.2, 0.45], size: [4, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -40 });
+          if (Math.random() < 0.1) this.fxSmoke(p.cx, p.cy - p.hh, 1, 0.7);
+          if (p.cookT <= 0) this.breakProp(p, 'fire');
+        }
+        if (p.st === 'ok' && (p.tick -= dt) <= 0) { p.tick = 0.3; this.propEnvironment(p); }
+        if (p.leaks.length) this.updateLeaks(p, dt);
+        if (p.jets.length) this.updateBoilerJets(p, dt);
+      } else if (p.st === 'live' && D.live) this[D.live](p, dt, now);
+      if (p.st === 'x') {
+        if (p.smoke > 0) { p.smoke -= dt; if (Math.random() < 0.12) this.fxSmoke(p.cx, p.cy - 2, 1, 0.7); if (D.mat !== 'wood' && Math.random() < 0.03) this.fxSparks(p.cx + rand(-4, 4), p.cy, 2, -Math.PI / 2, 1.5, [30, 120]); }
+        if (p.steamT > 0) this.updatePropSteam(p, dt);
+      }
+      this.propAmbient(p, dt, now);
+      const key = 'pr_' + p.kind + (p.flash > 0 ? '_w' : '');
+      if (p.img.texture.key !== key || p.img.frame.name !== p.fr) p.img.setTexture(key, p.fr);
+      this.placeProp(p);
+    }
+    for (const s of this.sawList) if (s.active) for (const p of this.props) {   // saw blades chew through them
+      if (p.st !== 'ok' || Math.abs(s.x - p.cx) > p.hw + 4 || Math.abs(s.y - p.cy) > p.hh + 4 || (s.hitMap.get(p) || 0) > now) continue;
+      s.hitMap.set(p, now + 300); this.hitProp(p, TUNE.SAW.damage, 'saw', s.x, s.y, Math.sign(s.body.velocity.x) || 1, 0);
+    }
+    if ((this.propTick -= dt) <= 0) {                                   // spilled toxin eats whatever stands in it
+      this.propTick = 0.4;
+      for (const A of this.acids) if (A.eat) for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind) || Math.abs(e.body.center.x - A.x) > A.w / 2 + 3 || Math.abs(e.body.bottom - A.y) > 5) continue;
+        this.damageEnemy(e, 5, 0, 0, 'acid'); if (e.alive) e.corrodeT = Math.max(e.corrodeT, 1.5);
+      }
+    }
+    this.updateWaters(dt, now); this.updateFizzes(dt);
+    for (let i = this.zaps.length - 1; i >= 0; i--) { const z = this.zaps[i]; z.t -= dt; if (z.t <= 0) { this.zaps.splice(i, 1); continue; } this.zapCol(this.zapG, z.x0, z.y0, z.x1, z.y1, z.c0, z.c1); }
+  }
+  propSupport(p, dt) {                                                 // floor props drop when what they stand on goes
+    const on = y => this.standAt(p.x, y) || this.standAt(p.x - p.hw + 2, y) || this.standAt(p.x + p.hw - 2, y);
+    if (p.vy === 0 && on(p.y + 1)) return;
+    p.vy = Math.min(p.vy + 900 * dt, 560);
+    const ny = p.y + p.vy * dt;
+    if (on(ny)) {
+      const hard = p.vy > 260; p.y = Math.floor(ny / TS) * TS; p.vy = 0;
+      if (hard) { this.fxDust(p.x, p.y, 6); Sfx.clunk(); if (p.st === 'ok') this.hitProp(p, 25, 'crush'); }
+    } else { p.y = ny; if (p.y > LH + 40) this.hideProp(p); }
+  }
+  drawHangers(p) {
+    const G = this.propG, s = Math.sin(-p.sw + p.rot), c = Math.cos(-p.sw + p.rot);
+    if (p.falling) { G.lineStyle(1, 0x2a2e35, 1); for (const ox of p.kind === 'tube' ? [-10, 10] : [0]) G.lineBetween(p.bx + ox, p.ay, p.bx + ox + Math.sin(p.wob * 3 + ox) * 2, p.ay + 9); return; }
+    if (p.kind === 'tube') { G.lineStyle(1, 0x15171b, 1); for (const ox of [-10, 10]) G.lineBetween(p.bx + ox, p.ay, p.x + ox * c, p.y + ox * s); return; }
+    const dx = p.x - p.bx, dy = p.y - p.ay, n = Math.max(1, Math.floor(Math.hypot(dx, dy) / 3));
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, odd = i % 2; G.fillStyle(odd ? 0x2a2e35 : 0x6a737e, 1).fillRect(Math.round(p.bx + dx * t) - (odd ? 0 : 1), Math.round(p.ay + dy * t) - 1, odd ? 1 : 2, 3); }
+  }
+  propEnvironment(p) {                                                 // every 0.3 s: has its anchor gone, is anything setting it alight?
+    if (p.D.mount === 'hang' && !this.standAt(p.bx, p.ay - 2)) { this.dropHanging(p); return; }
+    if (!p.D.cook || p.burning) return;
+    let lit = false;
+    for (const Q of this.puddles) if (Q.fire && Math.abs(Q.y - (p.D.mount === 'floor' ? p.y : p.cy)) < p.hh + 6 && Math.abs(Q.x - p.cx) < Q.w / 2 + p.hw) { lit = true; break; }
+    if (!lit) for (const e of this.enemies.getChildren()) if (e.alive && e.burnT > 0 && Math.abs(e.body.center.x - p.cx) < p.hw + 8 && Math.abs(e.body.center.y - p.cy) < p.hh + 10) { lit = true; break; }
+    if (!lit) for (const F of this.flares) if (Math.hypot(F.x - p.cx, F.y - p.cy) < TUNE.FLARE.igniteR + p.hw) { lit = true; break; }
+    if (lit) this.igniteProp(p);
+  }
+  propAmbient(p, dt, now) {                                            // idle life: flicker, drips, vapour, spinning blades
+    const D = p.D, ok = p.st === 'ok', hurt = p.hp < D.hp;
+    if (ok) p.la = 1;
+    switch (p.kind) {
+      case 'neon':
+        if (!ok) break;
+        if (Math.random() < (hurt ? 0.04 : 0.004)) { p.flickT = 0.05 + Math.random() * 0.08; if (hurt) Sfx.buzz(); }
+        if (p.flickT > 0) { p.flickT -= dt; p.la = 0.15; p.fr = 'n0'; } else { p.fr = 'n' + p.lit; p.la = p.lit / 4 * (0.85 + 0.15 * Math.sin(now / 90 + p.wob)); }
+        break;
+      case 'tube': if (ok) { const fl = Math.random() < (hurt ? 0.22 : 0.003); p.fr = fl ? 'off' : 'ok'; p.la = fl ? 0.12 : 0.92 + 0.08 * Math.sin(now / 37); } break;
+      case 'flood': if (ok) p.la = 0.92 + 0.08 * Math.sin(now / 60 + p.wob); break;
+      case 'fuse': if (ok) p.la = Math.floor(now / 480 + p.wob) % 2 ? 1 : 0.1; break;
+      case 'capacitor': if (ok) { p.la = 0.6 + 0.4 * Math.sin(now / 160 + p.wob); if (Math.random() < dt * 1.4) this.addZap(p.x - 2, p.y - 18, p.x + 2, p.y - 18, 0.05); } break;
+      case 'toxic': if (ok) { p.la = 0.7 + 0.3 * Math.sin(now / 300 + p.wob); if (Math.random() < dt * 1.2) this.fx.emit(p.x - 3, p.y - 10, { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [5, 15], life: [0.5, 0.9], size: [1, 1], cols: [0x86ec4a], g: 200 }); } break;
+      case 'cryo': if (ok && Math.random() < dt * 6) this.fx.emit(p.x + rand(-5, 5), p.y - rand(3, 18), { n: 1, angle: Math.PI / 2 + rand(-0.4, 0.4), spread: 0.3, speed: [4, 14], life: [0.6, 1.2], size: [2, 5], cols: [0xe8fbff, 0xb8e4f4], alpha: [0.35, 0], g: 20, drag: 1 }); break;
+      case 'oil': if (ok && Math.random() < dt * 0.6) this.fx.emit(p.x + 2 * p.dir, p.y - 11, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [5, 10], life: [0.5, 0.6], size: [1, 1], cols: [0x1a1c22], g: 500, mode: 1 }); break;
+      case 'boiler':
+        if (ok) { p.la = 0.75 + 0.25 * Math.random(); if (Math.random() < dt * 2.5) this.fx.emit(p.x - 3.5 * p.dir, p.y - 30, { n: 1, angle: -Math.PI / 2, spread: 0.3, speed: [10, 25], life: [0.8, 1.4], size: [2, 6], cols: [0xe8eef4, 0xb8c0c8], alpha: [0.35, 0], g: -15, drag: 1 }); }
+        if (p.st !== 'x') this.drawGauge(p);
+        break;
+      case 'fan': if (ok) p.blade.rotation += dt * (hurt ? 9 + Math.random() * 8 : 16); break;
+      case 'ladle':
+        if (p.st !== 'x' && Math.random() < dt * 9) this.fx.emit(p.cx + rand(-6, 6), p.cy - 4, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [15, 45], life: [0.6, 1.3], size: [1, 1], cols: [0xffe080, 0xff8a20], add: true, g: -25, drag: 0.4 });
+        if (ok) p.la = 0.85 + 0.15 * Math.random();
+        if (p.st === 'x' && p.cool > 0 && p.glow) { p.cool -= dt; p.glow.setVisible(true); p.la = p.cool / 6; }
+        break;
+      case 'vending': if (ok) p.la = Math.random() < (hurt ? 0.08 : 0.008) ? 0.25 : 0.95; break;
+      case 'terminal': if (ok) { p.fr = p.hp <= D.hp * 0.5 ? 'hit' : 'ok' + (Math.floor(now / 260 + p.wob) % 3); p.la = 0.8 + 0.2 * Math.random(); } break;
+      case 'horn': if (ok) p.la = Math.max(0, Math.sin(now / 120 + p.wob)); break;
+      case 'water': if (ok && Math.random() < dt * 0.8) this.fx.emit(p.x, p.y - 6, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [5, 10], life: [0.35, 0.45], size: [1, 1], cols: [0x8ce0ff], g: 600, mode: 1 }); break;
+      case 'window': {
+        const ph = (now / 1000 + p.wob * 3) % 7;
+        if (ok && ph < 0.5) { const gx = p.x - 9 + ph / 0.5 * 24; this.propG.lineStyle(2, 0xffffff, 0.22).lineBetween(gx, p.y - 8, gx - 7, p.y + 8); }
+        break;
+      }
+    }
+    if (p.glow && p.glow.visible) p.glow.setAlpha(clamp(D.light[5] * p.la, 0, 1));
+    if (p.cone && p.cone.visible) p.cone.setAlpha(clamp(D.cone[3] * p.la, 0, 1));
+    if (p.beam && p.beam.visible) p.beam.setAlpha(clamp(D.beam[3] * p.la, 0, 1));
+  }
+  drawGauge(p) {                                                       // the boiler's needle climbs as it takes damage
+    const k = p.st === 'live' ? 1 : 1 - p.hp / p.D.hp, a = Math.PI * (0.75 + 1.1 * k) + (p.st === 'live' ? rand(-0.2, 0.2) : 0);
+    const gx = p.x + 6 * p.dir + (p.jig > 0 ? Math.sin(p.wob * 53) * p.jig : 0), gy = p.y - 15.5;
+    this.propG.lineStyle(1, 0xc01010, 1).lineBetween(gx, gy, gx + Math.cos(a) * 2.2 * p.dir, gy + Math.sin(a) * 2.2);
+  }
+  hitLeak(p, dmg, x, y) {                                              // drums and tanks spring leaks where they're shot
+    if (p.hp <= 0) return;
+    p.leaks.push({ ox: clamp(x - p.x, -p.hw + 1, p.hw - 1), oy: clamp(y - p.y, -p.A.h + 3, -2), dir: x < p.x ? -1 : 1, t: 2.4, drip: 0.15 });
+    if (p.leaks.length > 3) p.leaks.shift();
+  }
+  updateLeaks(p, dt) {
+    for (let i = p.leaks.length - 1; i >= 0; i--) {
+      const L = p.leaks[i]; L.t -= dt;
+      if (L.t <= 0) { p.leaks.splice(i, 1); continue; }
+      const x = p.x + L.ox, y = p.y + L.oy, k = Math.min(1, L.t / 0.8), sp = 50 + 90 * k, ang = L.dir > 0 ? -0.35 : Math.PI + 0.35;
+      L.drip -= dt;
+      if (p.kind === 'toxic') {
+        this.fx.emit(x, y, { n: 1, angle: ang, spread: 0.25, speed: [sp * 0.8, sp], life: [0.3, 0.5], size: [2, 1], cols: [0xc8ff96, 0x86ec4a, 0x36961e], g: 500, mode: 1 });
+        if (L.drip <= 0) { L.drip = 0.6; const fy = this.floorBelow(x + L.dir * 10, y); if (fy !== null) { const [ax, aw] = this.spanOn(x + L.dir * 12, fy, 12); this.acids.push({ x: ax, y: fy, w: aw, t: 4, eat: true }); if (this.acids.length > 60) this.acids.shift(); } }
+      } else if (p.kind === 'oil') {
+        this.fx.emit(x, y, { n: 1, angle: ang, spread: 0.25, speed: [sp * 0.8, sp], life: [0.3, 0.5], size: [2, 1], cols: [0x30343c, 0x0e0f12, 0x5e6470], g: 500, mode: 1 });
+        if (L.drip <= 0) { L.drip = 0.7; this.spawnTarPatch(x + L.dir * 9, y, 16); }
+      } else if (p.kind === 'water') {
+        this.fx.emit(x, y, { n: 2, angle: ang, spread: 0.2, speed: [sp * 0.8, sp], life: [0.3, 0.5], size: [2, 1], cols: [0xd8f8ff, 0x8ce0ff, 0x4ac8f8], g: 500, mode: 1 });
+        if (L.drip <= 0) { L.drip = 0.8; this.spawnWater(x + L.dir * 10, y, 18); this.douse(x + L.dir * 14, y + 8, 18); }
+      } else if (p.kind === 'cryo') {                                   // a jet of frost: chills whatever stands in it
+        this.fx.emit(x, y, { n: 2, angle: L.dir > 0 ? 0 : Math.PI, spread: 0.3, speed: [90, 150], life: [0.2, 0.35], size: [2, 5], cols: [0xffffff, 0xd8f4ff, 0x9adcff], alpha: [0.6, 0], drag: 2 });
+        if (L.drip <= 0) {
+          L.drip = 0.15; const x0 = Math.min(x, x + L.dir * 36), x1 = Math.max(x, x + L.dir * 36);
+          for (const e of this.enemies.getChildren()) if (e.alive && !e.under && e.body.right > x0 && e.body.left < x1 && e.body.bottom > y - 8 && e.body.top < y + 8) this.chill(e, 0.07);
+          this.douse((x0 + x1) / 2, y, 20);
+        }
+      }
+    }
+  }
+  updatePropSteam(p, dt) {                                             // what's left of the boiler: a scalding fog for a couple of seconds
+    p.steamT -= dt; const k = Math.min(1, p.steamT / 0.8);
+    if (Math.random() < 0.9 * k) { const th = rand(0, Math.PI * 2), r = Math.sqrt(Math.random()) * 50; this.fx.emit(p.cx + Math.cos(th) * r, p.cy + Math.sin(th) * r * 0.6, { n: 1, speed: [6, 24], life: [0.7, 1.3], size: [5, 12], cols: [0xffffff, 0xe0e6ec, 0xc0c8d0], alpha: [0.45 * k, 0], drag: 1, g: -20, jitter: 3 }); }
+    if ((p.tick2 -= dt) > 0) return;
+    p.tick2 = 0.3;
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.hypot(e.body.center.x - p.cx, e.body.center.y - p.cy) < 54) this.propHurt(p, e, 4, 0, 0, 'flame');
+    this.douse(p.cx, p.cy, 54);
+  }
+  updateWaters(dt, now) {
+    const g = this.waterG; g.clear();
+    if (!this.waters.length) return;
+    const pb = this.player.body, C = this.railCyc;
+    for (let i = this.waters.length - 1; i >= 0; i--) {
+      const W = this.waters[i]; W.t -= dt; W.grow = Math.min(1, W.grow + dt * 4);
+      if (W.t <= 0) { this.waters.splice(i, 1); continue; }
+      const half = W.w / 2 * W.grow, a = Math.min(1, W.t / 1.5), x0 = Math.round(W.x - half);
+      for (let j = this.puddles.length - 1; j >= 0; j--) {             // it puts out fires it spreads into
+        const Q = this.puddles[j]; if (!Q.fire || Math.abs(Q.y - W.y) > 6 || Math.abs(Q.x - W.x) > Q.w / 2 + half) continue;
+        this.puddles.splice(j, 1); Sfx.sizzle();
+        this.fx.emit(Q.x, Q.y - 3, { n: 10, angle: -Math.PI / 2, spread: 1, speed: [10, 50], life: [0.5, 1], size: [3, 7], cols: [0xe8f0f4, 0xb0bcc4], alpha: [0.5, 0], g: -40, drag: 2 });
+      }
+      if (this.rails.length && C.st === 'live') for (const R0 of this.rails) if (R0.g === C.g && Math.abs(R0.y - W.y) < 4 && W.x + half > R0.x0 && W.x - half < R0.x1) W.zap = Math.max(W.zap, 0.4);   // a live rail under it
+      W.zap = Math.max(0, W.zap - dt);
+      const live = W.zap > 0;
+      g.fillStyle(live ? 0x46c8ff : 0x2a6aa8, 0.6 * a).fillRect(x0, W.y - 2, half * 2, 2);
+      g.fillStyle(live ? 0xe8fbff : 0x7cc8f0, 0.8 * a).fillRect(x0 + 1, W.y - 2, Math.max(0, half * 2 - 2), 1);
+      for (let k = 0; k < 2; k++) { const gx = x0 + 1 + ((now / (28 + k * 11) + W.seed * (k + 1) * 37) % Math.max(1, half * 2 - 4)); g.fillStyle(0xffffff, 0.7 * a).fillRect(gx, W.y - 2, 2, 1); }
+      if (!live) continue;
+      g.lineStyle(1, 0xe0f8ff, 0.9);
+      for (let k = 0; k < 3; k++) { let x = W.x + rand(-half, half), y = W.y - 2; for (let s = 0; s < 3; s++) { const nx = x + rand(-5, 5), ny = W.y - 2 - rand(0, 7); g.lineBetween(x, y, nx, ny); x = nx; y = ny; } }
+      if ((W.tick -= dt) > 0) continue;
+      W.tick = 0.3;
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind) || Math.abs(e.body.center.x - W.x) > half + 2 || Math.abs(e.body.bottom - W.y) > 5) continue;
+        this.damageEnemy(e, 10, 0, -1, 'arc'); if (e.alive) e.stunT = Math.max(e.stunT, 0.35);
+      }
+      if (this.state !== 'dead' && Math.abs(pb.center.x - W.x) < half + 3 && Math.abs(pb.bottom - W.y) < 5) this.hurtPlayer(5, W.x, { knock: false, iframes: false, srcY: W.y, by: 'A LIVE PUDDLE' });
+    }
+  }
+  updateFizzes(dt) {                                                   // cans out of the vending machine, fizzing about like tiny rockets
+    for (let i = this.fizzes.length - 1; i >= 0; i--) {
+      const F = this.fizzes[i]; F.t -= dt; F.heading += rand(-7, 7) * dt;
+      F.vx = clamp(F.vx + Math.cos(F.heading) * 900 * dt, -300, 300); F.vy = clamp(F.vy + Math.sin(F.heading) * 900 * dt + 300 * dt, -300, 300);
+      const nx = F.x + F.vx * dt, ny = F.y + F.vy * dt;
+      if (this.solidAt(nx, F.y)) { F.vx *= -0.6; F.heading = Math.PI - F.heading; } else F.x = nx;
+      if (this.solidAt(F.x, ny)) { F.vy *= -0.6; F.heading = -F.heading; } else F.y = ny;
+      F.img.setPosition(F.x, F.y).setRotation(F.heading + Math.PI / 2);
+      this.fx.emit(F.x - Math.cos(F.heading) * 3, F.y - Math.sin(F.heading) * 3, { n: 1, angle: F.heading + Math.PI, spread: 0.5, speed: [30, 80], life: [0.2, 0.4], size: [2, 4], cols: [0xffffff, 0xf0e0c8, 0xc8a070], alpha: [0.8, 0], drag: 2, g: 100 });
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || F.hits.has(e)) continue; const b = e.body;
+        if (F.x > b.left - 3 && F.x < b.right + 3 && F.y > b.top - 3 && F.y < b.bottom + 3) { F.hits.add(e); this.propHurt(F.p, e, 14, Math.sign(F.vx) || 1, -0.4, 'pellet'); F.t = 0; break; }
+      }
+      if (F.t > 0) continue;
+      this.fx.emit(F.x, F.y, { n: 12, speed: [30, 120], life: [0.2, 0.5], size: [2, 4], cols: [0xffffff, 0xf0e0c8, 0xc8a070], alpha: [0.85, 0], drag: 2, g: 150 });
+      Sfx.bubblePop(); F.img.destroy(); this.fizzes.splice(i, 1);
+    }
+  }
+
+  // ---- how each one goes ----
+  // NEON SIGN: every 5 damage a letter pops; the last drops the sign, which smashes on whatever is under it
+  hitNeon(p) {
+    const lit = clamp(Math.ceil(p.hp / 5), 0, 4);
+    while (p.lit > lit) { p.lit--; this.neonPop(p, NEON_POP[3 - p.lit]); }
+    p.fr = 'n' + p.lit;
+  }
+  neonPop(p, i) {
+    const lx = p.x - 17 + 6.5 + i * 7, ly = p.y + 1;
+    for (let k = 0; k < 3; k++) this.spawnGib('g_neon', lx, ly, rand(-120, 120), rand(-160, -40), 'metal');
+    this.fx.emit(lx, ly, { n: 10, speed: [30, 140], life: [0.15, 0.4], size: [2, 1], cols: [0xffffff, 0xffd2ee, 0xff5ac0], add: true, g: 400, mode: 1 });
+    this.spawnLight(lx, ly, 'glow', 0xff5ac0, 0.6, 1.6, 0.9, 0.18); Sfx.shatter(); Sfx.zap();
+  }
+  breakNeon(p) {
+    p.lit = 0;
+    p.fall = this.add.sprite(p.x, p.y + 1, 'pr_neon', 'dead').setDepth(4.3); p.fy = p.y + 1; p.fvy = -40; p.fspin = rand(-1.2, 1.2); p.hits = new Set();
+    p.fr = 'x'; if (p.glow) p.glow.setVisible(false);
+    Sfx.snap(); Sfx.clang(0.5); this.fxSparks(p.x - 9, p.y - 6, 8, -Math.PI / 2, 2); this.fxSparks(p.x + 9, p.y - 6, 8, -Math.PI / 2, 2);
+  }
+  liveNeon(p, dt) {
+    const F = p.fall; if (!F) { this.wreckProp(p, 0); return; }
+    p.fvy += 900 * dt; p.fy += p.fvy * dt; F.setPosition(p.x, p.fy).setRotation(F.rotation + p.fspin * dt);
+    if (p.fvy > 100) for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under || p.hits.has(e)) continue; const b = e.body;
+      if (p.x + 15 > b.left && p.x - 15 < b.right && p.fy + 6 > b.top && p.fy - 6 < b.bottom) { p.hits.add(e); this.propHurt(p, e, 40, 0, 1, 'crush'); }
+    }
+    if (!(this.standAt(p.x, p.fy + 7) || this.standAt(p.x - 14, p.fy + 7) || this.standAt(p.x + 14, p.fy + 7) || p.fy > LH)) return;
+    const x = p.x, y = p.fy + 4; F.destroy(); p.fall = null;
+    for (let k = 0; k < 8; k++) this.spawnGib(pick(['g_neon', 'g_glass', 'g_shard']), x + rand(-14, 14), y, rand(-200, 200), rand(-260, -60), 'metal');
+    this.fx.emit(x, y, { n: 26, speed: [40, 220], life: [0.15, 0.5], size: [2, 1], cols: [0xffffff, 0xffd2ee, 0xff5ac0, 0x4ce4fa], add: true, g: 500, mode: 1 });
+    this.spawnLight(x, y, 'glow', 0xff5ac0, 2, 4, 1, 0.25); this.fxSparks(x, y, 12, -Math.PI / 2, 2.4);
+    Sfx.shatter(); Sfx.smash('='); this.shake(120, 0.005);
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.abs(e.body.center.x - x) < 24 && Math.abs(e.body.bottom - y) < 14) this.propHurt(p, e, 25, Math.sign(e.body.center.x - x) || 1, -0.5, 'crush');
+    this.wreckProp(p, 0);
+  }
+  // STRIP LIGHT: strobes, then bursts and rains glass on whatever is under it. Cut a cable and it drops
+  breakTube(p) { p.t = 0.32; Sfx.buzz(); }
+  liveTube(p, dt) {
+    if (p.falling) { this.fallTube(p, dt); return; }
+    p.t -= dt; const fl = Math.random() < 0.5; p.fr = fl ? 'off' : 'ok'; p.la = fl ? 0.1 : 1.4;
+    if (p.t <= 0) this.burstTube(p, p.cx, p.cy);
+  }
+  burstTube(p, x, y) {
+    for (let k = 0; k < 10; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', x + rand(-11, 11), y + 2, rand(-70, 70), rand(-60, 40), 'metal');
+    this.fx.emit(x, y + 2, { n: 24, angle: Math.PI / 2, spread: 2.4, speed: [30, 160], life: [0.2, 0.6], size: [2, 1], cols: [0xffffff, 0xe0f5ff, 0x9ad4ec], add: true, g: 600, mode: 1 });
+    this.spawnLight(x, y, 'glow', 0xe0f5ff, 1.5, 3, 1, 0.2); Sfx.shatter(); Sfx.zap();
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue; const b = e.body;
+      if (Math.abs(b.center.x - x) < 15 && b.bottom > y && b.top < y + 96 && this.los(x, y + 4, b.center.x, b.top + 2)) this.propHurt(p, e, 14, 0, 1, 'glass');
+    }
+    this.wreckProp(p, 0);
+  }
+  snapProp(p, ca) {                                                    // a shot through its chain or cables
+    if (p.kind === 'ladle') { this.breakProp(p, 'chain', ca); return; }
+    p.st = 'live'; p.hp = 0; p.falling = true; p.fvy = -20; p.fspin = rand(-3, 3); p.hits = new Set();
+    Sfx.snap(); this.fxSparks(p.bx, p.ay + 4, 6, Math.PI / 2, 1.5); this.addStyle(12);
+  }
+  dropHanging(p) {                                                     // what it hung from is gone
+    if (p.kind !== 'ladle') { this.snapProp(p); return; }
+    p.st = 'live'; p.hp = 0; p.phase = 'drop'; p.falling = true; p.fvy = 0; p.hits = new Set(); Sfx.snap();
+  }
+  fallTube(p, dt) {
+    p.fvy += 900 * dt; p.y += p.fvy * dt; p.rot += p.fspin * dt;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under || p.hits.has(e) || p.fvy < 100) continue; const b = e.body;
+      if (p.x + 11 > b.left && p.x - 11 < b.right && p.y + 6 > b.top && p.y < b.bottom) { p.hits.add(e); this.propHurt(p, e, 30, 0, 1, 'crush'); }
+    }
+    if (this.standAt(p.x, p.y + 6) || p.y > LH) { p.y = Math.floor((p.y + 6) / TS) * TS - 6; p.rot = rand(-0.08, 0.08); this.burstTube(p, p.x, p.y + 3); }
+  }
+  // FLOODLIGHT: the lens blows, then it topples the way it was hit and brings its head down on whoever is there
+  breakFlood(p) {
+    const lx = p.x + 4.5 * p.dir, ly = p.y - 18.5;
+    for (let k = 0; k < 6; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', lx, ly, rand(-150, 150), rand(-200, -60), 'metal');
+    this.fx.emit(lx, ly, { n: 18, speed: [40, 180], life: [0.15, 0.4], size: [2, 1], cols: [0xffffff, 0xfff2c4, 0xffe08a], add: true, g: 400, mode: 1 });
+    this.spawnLight(lx, ly, 'glow', 0xfff4d8, 2.5, 5, 1, 0.2); Sfx.shatter(); Sfx.zap();
+    p.fr = 'x'; p.topple = p.fdir; p.ang = 0; p.angV = 0.6;
+    for (const o of [p.glow, p.beam]) if (o) o.setVisible(false);
+  }
+  liveFlood(p, dt) {
+    p.angV += 9 * dt; p.ang = Math.min(Math.PI / 2, p.ang + p.angV * dt); p.rot = p.ang * p.topple;
+    if (p.ang < Math.PI / 2) return;
+    const hx = p.x + p.topple * 19, hy = p.y - 4;
+    this.fxDust(hx, p.y, 8); this.fxSparks(hx, hy, 10, -Math.PI / 2, 2); Sfx.clang(0.8); Sfx.smash('x'); this.shake(120, 0.005);
+    for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right > hx - 9 && b.left < hx + 9 && b.bottom > hy - 8 && b.top < hy + 6) this.propHurt(p, e, 45, p.topple, -0.6, 'crush'); }
+    this.wreckProp(p, 2);
+  }
+  // FUSE BOX: the door blows off and it arcs at anything close for 3 s, then pops
+  breakFuse(p) {
+    p.fr = 'x'; p.t = 3; p.arcT = 0.1;
+    this.spawnGib('g_door', p.x + p.dir * 2, p.y, p.fdir * rand(120, 200), rand(-220, -140), 'metal');
+    this.fxSparks(p.x, p.y, 20, -Math.PI / 2, 2.2, [80, 280]); this.spawnLight(p.x, p.y, 'glow', 0x9adcff, 1, 2.6, 1, 0.2);
+    Sfx.clang(0.7); Sfx.zap(); this.electrifyWater(p.x, p.y, 100);
+  }
+  liveFuse(p, dt) {
+    p.t -= dt; p.la = Math.random();
+    if (Math.random() < 0.6) this.fxSparks(p.x + rand(-4, 4), p.y + rand(-4, 6), 1, Math.PI / 2, 2, [40, 160]);
+    if ((p.arcT -= dt) <= 0) {
+      p.arcT = rand(0.14, 0.28);
+      let tgt = null, bd = 96;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - p.x, e.body.center.y - p.y); if (d < bd && this.los(p.x, p.y, e.body.center.x, e.body.center.y)) { bd = d; tgt = e; } }
+      if (tgt) { this.addZap(p.x, p.y + 2, tgt.body.center.x, tgt.body.center.y, 0.09); this.propHurt(p, tgt, 8, Math.sign(tgt.body.center.x - p.x) || 1, -0.3, 'arc'); if (tgt.alive) tgt.stunT = Math.max(tgt.stunT, 0.35); }
+      else { const a = rand(0, Math.PI * 2), r = rand(16, 40); this.addZap(p.x, p.y + 2, p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, 0.06); }
+      if (Math.random() < 0.5) Sfx.zap();
+      this.electrifyWater(p.x, p.y, 100);
+      const pb = this.player.body;
+      if (this.state !== 'dead' && Math.hypot(pb.center.x - p.x, pb.center.y - p.y) < 22 && Math.random() < 0.3) { this.addZap(p.x, p.y, pb.center.x, pb.center.y, 0.08); this.hurtPlayer(4, p.x, { knock: false, srcY: p.y, by: 'A FUSE BOX' }); }
+    }
+    if (p.t <= 0) { this.explode(p.x, p.y + 2, PROP_BLAST.small); this.wreckProp(p, 4); }
+  }
+  // CAPACITOR BANK: charges for 0.9 s, then chains lightning through up to five foes
+  breakCap(p) { p.t = 0.9; p.fr = 'charge'; Sfx.pylonCharge(); this.spawnLight(p.cx, p.cy, 'glow', 0x80d0ff, 0.5, 1.6, 0.8, 0.9); }
+  liveCap(p, dt) {
+    p.t -= dt; p.la = 1 + (0.9 - p.t) * 3; p.jig = 0.8;
+    if (Math.random() < 0.5) this.addZap(p.x + rand(-8, 8), p.y - rand(4, 20), p.x + rand(-8, 8), p.y - rand(4, 20), 0.05);
+    if (p.t > 0) return;
+    const hit = new Set(); let fx = p.x, fy = p.y - 18;
+    for (let k = 0; k < 5; k++) {
+      let tgt = null, bd = k ? 120 : 170;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under || hit.has(e)) continue; const d = Math.hypot(e.body.center.x - fx, e.body.center.y - fy); if (d < bd && this.los(fx, fy, e.body.center.x, e.body.center.y)) { bd = d; tgt = e; } }
+      if (!tgt) break;
+      hit.add(tgt); const tx = tgt.body.center.x, ty = tgt.body.center.y;
+      this.addZap(fx, fy, tx, ty, 0.3, 0x80c8ff, 0xffffff); this.addZap(fx, fy, tx, ty, 0.2);
+      this.propHurt(p, tgt, 38, Math.sign(tx - fx) || 1, -0.4, 'arc'); if (tgt.alive) tgt.stunT = Math.max(tgt.stunT, 0.6);
+      this.fxSparks(tx, ty, 8); fx = tx; fy = ty;
+    }
+    if (!hit.size) for (let k = 0; k < 4; k++) { const a = rand(-Math.PI, 0), r = rand(40, 90); this.addZap(p.x, p.y - 18, p.x + Math.cos(a) * r, p.y - 18 + Math.sin(a) * r, 0.25); }
+    this.spawnLight(p.cx, p.cy, 'ring', 0x80e0ff, 0.3, 3, 0.9, 0.3); this.spawnLight(p.cx, p.cy, 'glow', 0xc8f0ff, 2, 5, 1, 0.3);
+    Sfx.pylonZap(); Sfx.thunder(); this.shake(160, 0.006); BUS.emit('flash', 0.12);
+    this.electrifyWater(p.cx, p.cy, 170);
+    this.explode(p.cx, p.cy, PROP_BLAST.small);
+    this.wreckProp(p, 5);
+  }
+  // PROPANE TANK: the valve shears into a blowtorch for a second, then it goes up and leaves the floor burning
+  breakPropane(p) { p.t = 1; p.jd = p.fdir; p.fr = 'hit'; Sfx.gasHiss(); Sfx.clang(0.5); }
+  livePropane(p, dt) {
+    p.t -= dt; p.jig = 1.2;
+    const vx = p.x + p.jd * 2, vy = p.y - 16, len = 50;
+    for (let k = 0; k < 3; k++) this.fx.emit(vx, vy, { n: 1, angle: p.jd > 0 ? -0.05 : Math.PI + 0.05, spread: 0.18, speed: [220, 320], life: [0.12, 0.22], size: [4, 1], cols: [0xffffff, 0xbfe8ff, 0xffe46a, 0xff8a1f], add: true, drag: 1, g: -60 });
+    if (Math.random() < 0.5) this.spawnLight(vx + p.jd * 24, vy, 'glow', 0xff9a40, 1.2, 1.8, 0.5, 0.08);
+    if ((p.tick2 -= dt) <= 0) {
+      p.tick2 = 0.12; Sfx.gasHiss();
+      const x0 = Math.min(vx, vx + p.jd * len), x1 = Math.max(vx, vx + p.jd * len), pb = this.player.body;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right > x0 && b.left < x1 && b.bottom > vy - 6 && b.top < vy + 6) { this.ignite(e, 2); this.propHurt(p, e, 5, p.jd, 0, 'flame'); } }
+      for (const T of this.tars.slice()) if (Math.abs(T.y - vy) < 20 && T.x + T.w / 2 > x0 && T.x - T.w / 2 < x1) this.igniteTar(T);
+      for (const k of this.barrelList) if (k.active && Math.abs(k.y - vy) < 10 && k.x > x0 - 5 && k.x < x1 + 5) this.igniteBarrel(k);
+      for (const C of this.clouds.slice()) if (Math.abs(C.y - vy) < C.r && C.x + C.r > x0 && C.x - C.r < x1) this.igniteCloud(C);
+      for (const q of this.props) if (q !== p && q.st === 'ok' && Math.abs(q.cy - vy) < q.hh + 6 && q.cx + q.hw > x0 && q.cx - q.hw < x1) { this.igniteProp(q); this.hitProp(q, 4, 'flame'); }
+      if (this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > vy - 6 && pb.top < vy + 6) this.hurtPlayer(6, vx, { knock: false, iframes: false, burn: true, srcY: vy, by: 'A PROPANE JET' });
+    }
+    if (p.t > 0) return;
+    const x = p.cx, y = p.cy;
+    for (let k = 0; k < 5; k++) this.spawnGib(k % 2 ? 'g_wht' : 'g_shard', x, y, rand(-240, 240), rand(-360, -140), 'metal');
+    this.explode(x, y, PROP_BLAST.propane);
+    for (const dx of [-26, 0, 26]) this.spawnFirePatch(x + dx, p.y - 4);
+    this.wreckProp(p, 5);
+  }
+  // TOXIC DRUM: leaks where it's shot; bursts into a cloud (light it for a fireball) over a pool that eats feet
+  breakToxic(p) {
+    const x = p.cx, y = p.cy, fy = this.floorBelow(p.x, p.y - 4) ?? p.y;
+    this.spawnCloud(x, y - 4);
+    const [ax, aw] = this.spanOn(p.x, fy, 54); this.acids.push({ x: ax, y: fy, w: aw, t: 9, eat: true }); this.paintAcid(p.x, fy + 1, 12);
+    this.fx.emit(x, y, { n: 30, speed: [60, 220], life: [0.3, 0.7], size: [3, 1], cols: [0xc8ff96, 0x86ec4a, 0x36961e, 0x14400c], g: 600, mode: 1 });
+    for (let k = 0; k < 4; k++) this.spawnGib(k % 2 ? 'g_yel' : 'g_shard', x, y, rand(-200, 200), rand(-300, -120), 'metal');
+    this.spawnLight(x, y, 'glow', 0x7dff4a, 1.5, 3.5, 0.9, 0.3);
+    Sfx.splat(1); this.shake(80, 0.003);
+    this.wreckProp(p, 2);
+  }
+  // CRYO TANK: a frost nova that freezes what's close, turns spilt water to ice and puts out fires
+  breakCryo(p) {
+    const x = p.cx, y = p.cy, R = 74;
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.hypot(e.body.center.x - x, e.body.center.y - y) < R && this.los(x, y, e.body.center.x, e.body.center.y)) { this.chill(e, 1.2); this.propHurt(p, e, 10, Math.sign(e.body.center.x - x) || 1, -0.3, 'frost'); }
+    this.douse(x, y, R + 10);
+    for (const W of this.waters.slice()) if (Math.abs(W.y - p.y) < 40 && Math.max(0, Math.abs(W.x - x) - W.w / 2) < R) { this.spawnIce(W.x, W.y - 2, W.w); this.waters.splice(this.waters.indexOf(W), 1); }
+    const fy = this.floorBelow(p.x, p.y - 6); if (fy !== null) { const [ix, iw] = this.spanOn(p.x, fy, 72); this.spawnIce(ix, fy - 2, iw); }
+    this.fx.emit(x, y, { n: 40, speed: [60, 260], life: [0.3, 0.8], size: [2, 1], cols: [0xffffff, 0xe8fbff, 0x9adcff, 0x4ca4c8], add: true, drag: 2.2 });
+    this.fx.emit(x, y, { n: 16, speed: [20, 90], life: [0.8, 1.6], size: [4, 10], cols: [0xf0fdff, 0xc8ecf8], alpha: [0.45, 0], drag: 1.6, g: 10, jitter: 4 });
+    for (let k = 0; k < 6; k++) this.spawnGib(pick(['g_ice1', 'g_ice2', 'g_ice3']), x, y, rand(-220, 220), rand(-320, -100), 'metal');
+    this.spawnLight(x, y, 'ring', 0xc8f0ff, 0.3, 3.2, 0.9, 0.3); this.spawnLight(x, y, 'glow', 0xa0e0ff, 2, 5, 1, 0.3);
+    Sfx.freeze(); Sfx.shatter(); this.shake(120, 0.005);
+    this.wreckProp(p, 0);
+  }
+  // OIL DRUM: leaks a slick where it's shot and spills a big one when it goes; already alight if it was burning
+  breakOil(p) {
+    const lit = p.burning;
+    const fy = this.floorBelow(p.x, p.y - 4) ?? p.y, [sx, sw] = this.spanOn(p.x, fy, 92); this.spawnTarPatch(sx, p.y - 4, sw);
+    this.fx.emit(p.cx, p.cy, { n: 26, speed: [60, 200], life: [0.3, 0.6], size: [2, 1], cols: [0x30343c, 0x0e0f12, 0x5e6470], g: 600, mode: 1 });
+    for (let k = 0; k < 3; k++) this.spawnGib(k % 2 ? 'g_blk' : 'g_shard2', p.cx, p.cy, rand(-180, 180), rand(-260, -120), 'metal');
+    Sfx.splat(1); Sfx.clunk();
+    if (lit) { const T = this.tars.find(q => Math.abs(q.y - p.y) < 6 && Math.abs(q.x - p.x) < q.w / 2 + 4); if (T) this.igniteTar(T); }
+    this.wreckProp(p, lit ? 4 : 0);
+  }
+  // BOILER: shots vent scalding steam and wind the needle up; at the top it screams for 1.3 s and bursts
+  hitBoiler(p, dmg, x, y) {
+    if (p.hp <= 0) return;
+    p.jets.push({ oy: clamp(y - p.y, -24, -6), dir: x < p.x ? -1 : 1, t: 0.8, tick: 0 }); if (p.jets.length > 3) p.jets.shift();
+    Sfx.steam();
+  }
+  updateBoilerJets(p, dt) {
+    for (let i = p.jets.length - 1; i >= 0; i--) {
+      const J = p.jets[i]; J.t -= dt; if (J.t <= 0) { p.jets.splice(i, 1); continue; }
+      const x = p.x + J.dir * 10, y = p.y + J.oy, k = Math.min(1, J.t / 0.4);
+      for (let n = 0; n < 2; n++) this.fx.emit(x, y + rand(-1, 1), { n: 1, angle: J.dir > 0 ? 0 : Math.PI, spread: 0.25, speed: [150, 240], life: [0.15, 0.3 * k + 0.05], size: [3, 8], cols: [0xffffff, 0xd8e0e8, 0xa0a8b0], alpha: [0.6, 0], drag: 2, g: -40, jitter: 2 });
+      if ((J.tick -= dt) > 0) continue;
+      J.tick = 0.25;
+      const xl = Math.min(x, x + J.dir * 42), xr = Math.max(x, x + J.dir * 42), pb = this.player.body;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right < xl || b.left > xr || b.bottom < y - 10 || b.top > y + 10) continue; this.propHurt(p, e, 6, J.dir, 0, 'flame'); if (e.alive) b.velocity.x += J.dir * 140 * e.def.kb; }
+      if (this.state !== 'dead' && pb.right > xl && pb.left < xr && pb.bottom > y - 10 && pb.top < y + 10) this.hurtPlayer(4, x, { knock: false, iframes: false, burn: true, srcY: y, by: 'STEAM' });
+      this.douse(x + J.dir * 20, y, 22);
+    }
+  }
+  breakBoiler(p) { p.t = 1.3; p.fr = 'hot'; p.whT = 0; }
+  liveBoiler(p, dt) {
+    p.t -= dt; p.jig = 1 + (1.3 - p.t); p.la = 1.5 + Math.random();
+    if ((p.whT -= dt) <= 0) { p.whT = 0.28; Sfx.whistle(); }
+    if (Math.random() < 0.7) { const a = rand(0, Math.PI * 2); this.fx.emit(p.x + Math.cos(a) * 9, p.y - 15 + Math.sin(a) * 7, { n: 1, angle: a, spread: 0.3, speed: [60, 140], life: [0.2, 0.4], size: [2, 6], cols: [0xffffff, 0xd8e0e8], alpha: [0.6, 0], drag: 2, g: -40 }); }
+    this.fx.emit(p.x - 3.5 * p.dir, p.y - 30, { n: 2, angle: -Math.PI / 2, spread: 0.2, speed: [120, 200], life: [0.2, 0.4], size: [2, 6], cols: [0xffffff, 0xe8eef4], alpha: [0.7, 0], drag: 1.5, g: -60 });
+    if (p.t > 0) return;
+    const x = p.cx, y = p.cy;
+    this.spawnGib('g_lid', x, p.y - 28, rand(-60, 60), -520, 'metal');
+    for (let k = 0; k < 7; k++) this.spawnGib(k % 3 ? 'g_cop' : 'g_plate', x, y, rand(-280, 280), rand(-380, -120), 'metal');
+    this.explode(x, y, PROP_BLAST.boiler);
+    this.fx.emit(x, y, { n: 40, speed: [40, 220], life: [0.8, 1.8], size: [5, 14], cols: [0xffffff, 0xe0e6ec, 0xb8c0c8], alpha: [0.6, 0], drag: 1.8, g: -30, jitter: 5 });
+    Sfx.steam(); this.wreckProp(p, 6); p.steamT = 2.2;
+  }
+  // WALL FAN: the guard pops and its three blades fly off as ricocheting saw blades (yours)
+  breakFan(p) {
+    const a0 = p.blade.rotation;
+    for (let k = 0; k < 3; k++) { const a = a0 + k * Math.PI * 2 / 3; this.spawnSaw(p.x + Math.cos(a) * 5, p.y + Math.sin(a) * 5, a); }
+    p.blade.setVisible(false); p.grill.setVisible(false);
+    for (let k = 0; k < 5; k++) this.spawnGib(k % 2 ? 'g_wire' : 'g_bar', p.x, p.y, rand(-200, 200), rand(-260, -60), 'metal');
+    this.fxSparks(p.x, p.y, 18, 0, Math.PI * 2, [80, 260]); this.spawnLight(p.x, p.y, 'glow', 0xfff0c0, 1, 2.4, 0.9, 0.15);
+    Sfx.sawLaunch(); Sfx.clang(0.8); this.shake(90, 0.004);
+    this.wreckProp(p, 4);
+  }
+  // SLAG LADLE: tips and pours molten slag on whatever is under its spout for 2.4 s, then drops and splashes
+  breakLadle(p) { p.phase = 'tip'; p.t = 0; Sfx.creak(); }
+  liveLadle(p, dt, now) {
+    if (p.phase === 'tip') {
+      p.t += dt; p.rot = -p.dir * 1.75 * Math.min(1, p.t / 0.45) ** 2;
+      if (p.t >= 0.45) { p.phase = 'pour'; p.t = 2.4; p.pudT = 0; Sfx.erupt(); }
+      return;
+    }
+    if (p.phase === 'pour') {
+      p.t -= dt; p.la = 1.3 + Math.random() * 0.3;
+      const r = -p.sw + p.rot, lx = p.x - 11 * p.dir * Math.cos(r) - 6 * Math.sin(r), ly = p.y - 11 * p.dir * Math.sin(r) + 6 * Math.cos(r);
+      const fy = this.floorBelow(lx, ly) ?? LH, k = Math.min(1, p.t / 0.4), wb = Math.sin(now / 45) * 0.6, G = this.zapG;
+      G.fillStyle(0xc0340a, 0.9).fillRect(lx - 2 * k + wb, ly, 4 * k, fy - ly); G.fillStyle(0xff8a20, 1).fillRect(lx - 1.2 * k + wb, ly, 2.4 * k, fy - ly); G.fillStyle(0xffe68a, 1).fillRect(lx - 0.5 + wb, ly, 1, fy - ly);
+      this.fx.emit(lx, fy - 1, { n: 3, angle: -Math.PI / 2, spread: 1.6, speed: [60, 180], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20, 0xc03010], add: true, g: 500, mode: 1 });
+      if (Math.random() < 0.3) this.spawnLight(lx, fy - 4, 'glow', 0xff7a20, 1.4, 2.2, 0.6, 0.12);
+      if ((p.pudT -= dt) <= 0) { p.pudT = 0.5; this.puddles.push({ x: lx, y: fy, w: 30, t: 3.2, tick: 0.1, fire: true }); this.paintScorch(lx, fy + 2, 8); if (Math.random() < 0.5) Sfx.sizzle(); }
+      if ((p.tick2 -= dt) <= 0) {
+        p.tick2 = 0.15; const pb = this.player.body;
+        for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right > lx - 5 && b.left < lx + 5 && b.bottom > ly && b.top < fy) { this.ignite(e, 2.5); this.propHurt(p, e, 8, 0, 1, 'flame'); } }
+        for (const T of this.tars.slice()) if (Math.abs(T.y - fy) < 8 && Math.abs(T.x - lx) < T.w / 2 + 6) this.igniteTar(T);
+        for (const k of this.barrelList) if (k.active && Math.abs(k.x - lx) < 8 && k.y > ly && k.y < fy + 4) this.igniteBarrel(k);
+        for (const C of this.clouds.slice()) if (Math.abs(C.x - lx) < C.r && fy > C.y - C.r && ly < C.y + C.r) this.igniteCloud(C);
+        for (const q of this.props) if (q !== p && q.st === 'ok' && Math.abs(q.cx - lx) < q.hw + 5 && q.cy + q.hh > ly && q.cy - q.hh < fy) { this.igniteProp(q); this.hitProp(q, 6, 'flame'); }
+        if (this.state !== 'dead' && pb.right > lx - 5 && pb.left < lx + 5 && pb.bottom > ly && pb.top < fy) this.hurtPlayer(8, lx, { knock: false, iframes: false, burn: true, srcY: fy, by: 'MOLTEN SLAG' });
+      }
+      if (p.t <= 0) { p.phase = 'drop'; p.falling = true; p.fvy = 0; p.hits = new Set(); Sfx.snap(); this.fxSparks(p.bx, p.ay + 4, 6, Math.PI / 2, 1.5); }
+      return;
+    }
+    p.fvy += 900 * dt; p.y += p.fvy * dt; p.rot += p.dir * dt * 1.2;            // dropping
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under || p.hits.has(e) || p.fvy < 100) continue; const b = e.body;
+      if (p.x + 10 > b.left && p.x - 10 < b.right && p.y + 18 > b.top && p.y < b.bottom) { p.hits.add(e); this.propHurt(p, e, 80, 0, 1, 'crush'); }
+    }
+    if (!this.standAt(p.x, p.y + 18) && p.y < LH) return;
+    const fy = Math.floor((p.y + 18) / TS) * TS, x = p.x;
+    p.y = fy - 18; p.rot = -p.dir * 0.22;
+    this.explode(x, fy - 6, PROP_BLAST.slag);
+    this.puddles.push({ x, y: fy, w: 40, t: 4, tick: 0.1, fire: true }); this.paintScorch(x, fy + 2, 14);
+    for (let k = 0; k < 8; k++) this.spawnGib(k % 2 ? 'g_slag' : 'g_crust', x, fy - 6, rand(-220, 220), rand(-320, -100), 'slag');
+    Sfx.smash('x'); this.shake(180, 0.008);
+    this.wreckProp(p, 3); p.cool = 6;
+  }
+  // VENDING MACHINE: hits knock cans out; broken, it shorts and sprays a volley of fizzing cans and a couple of health orbs
+  hitVending(p, dmg) {
+    p.canAcc += dmg;
+    while (p.canAcc >= 12) { p.canAcc -= 12; this.spawnGib('g_soda', p.x - p.dir, p.y - 3, rand(-150, 150), rand(-220, -90), 'shell'); Sfx.clunk(); }
+  }
+  breakVending(p) {
+    p.fr = 'x'; p.t = 0.4;
+    for (let k = 0; k < 12; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', p.x - 3 * p.dir + rand(-4, 4), p.y - 15 + rand(-8, 8), rand(-200, 200), rand(-240, -60), 'metal');
+    this.fx.emit(p.cx - 3 * p.dir, p.cy, { n: 24, speed: [40, 180], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xd8f4ff, 0x9ad4ec], add: true, g: 500, mode: 1 });
+    this.fxSparks(p.cx, p.cy - 8, 14, -Math.PI / 2, 2.2); Sfx.shatter();
+  }
+  liveVending(p, dt) {
+    p.t -= dt; p.la = Math.random() < 0.3 ? 1 : 0.1;
+    if (Math.random() < 0.4) this.fxSparks(p.cx + rand(-6, 6), p.cy + rand(-10, 10), 1);
+    if (p.t > 0) return;
+    for (let k = 0; k < 8; k++) {
+      const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = rand(120, 220);
+      this.fizzes.push({ x: p.cx, y: p.cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, heading: a, t: rand(0.7, 1.3), hits: new Set(), p, img: this.add.image(p.cx, p.cy, 'g_soda').setDepth(9) });
+    }
+    this.fx.emit(p.cx, p.cy, { n: 30, speed: [40, 200], life: [0.3, 0.7], size: [2, 5], cols: [0xffffff, 0xf0e0c8, 0xc8a070], alpha: [0.85, 0], drag: 2, g: 200 });
+    this.dropOrbs(p.cx, p.cy - 6, 2);
+    Sfx.gasPop(); this.shake(80, 0.003);
+    this.wreckProp(p, 4);
+  }
+  // TERMINAL: the tubes implode, then an EMP pop stuns what's close (machines longest)
+  breakTerminal(p) {
+    p.t = 0.14; const x = p.cx, y = p.cy - 4;
+    for (let k = 0; k < 16; k++) { const a = rand(0, Math.PI * 2), r = rand(12, 20); this.fx.emit(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.7, { n: 1, angle: a + Math.PI, spread: 0.1, speed: [r * 4, r * 5], life: [0.18, 0.22], size: [2, 1], cols: [0xffffff, 0xa8ffd0], add: true }); }
+    Sfx.crack();
+  }
+  liveTerminal(p, dt) {
+    p.t -= dt; if (p.t > 0) return;
+    const x = p.cx, y = p.cy - 4;
+    for (let k = 0; k < 8; k++) this.spawnGib(k % 2 ? 'g_crt' : 'g_glass', x + rand(-8, 8), y, rand(-220, 220), rand(-280, -80), 'metal');
+    this.fx.emit(x, y, { n: 30, speed: [60, 240], life: [0.15, 0.45], size: [2, 1], cols: [0xffffff, 0xa8ffd0, 0x46f088], add: true, g: 400, mode: 1 });
+    this.spawnLight(x, y, 'glow', 0xe8fff0, 2, 4.5, 1, 0.2); this.spawnLight(x, y, 'ring', 0x80ffc0, 0.3, 2.4, 0.8, 0.25);
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.hypot(e.body.center.x - x, e.body.center.y - y) < 64 && this.los(x, y, e.body.center.x, e.body.center.y)) { e.stunT = Math.max(e.stunT, e.def.mech ? 1.6 : 1); this.propHurt(p, e, e.def.mech ? 22 : 10, Math.sign(e.body.center.x - x) || 1, -0.3, 'arc'); }
+    this.electrifyWater(x, y, 70);
+    Sfx.emp(); Sfx.shatter(); this.shake(100, 0.004);
+    this.wreckProp(p, 5);
+  }
+  // AMMO CRATE: cooks off for 2.4 s, spraying live rounds (yours) every which way, then pops
+  breakAmmo(p) { p.fr = 'x'; p.t = 2.4; p.popT = 0; Sfx.crackle(); this.fxSparks(p.cx, p.cy, 10, -Math.PI / 2, 1.6); this.spawnLight(p.cx, p.cy, 'glow', 0xffc060, 1, 2, 0.8, 0.12); }
+  liveAmmo(p, dt) {
+    p.t -= dt; p.jig = 0.8;
+    if (Math.random() < 0.5) this.fx.emit(p.cx + rand(-6, 6), p.y - 6, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [20, 60], life: [0.2, 0.45], size: [4, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -40 });
+    if ((p.popT -= dt) <= 0) {
+      p.popT = rand(0.05, 0.14);
+      const a = -Math.PI / 2 + rand(-1.35, 1.35), sx = p.cx + rand(-5, 5), sy = p.y - 7;
+      this.spawnBullet('nail', sx, sy, a, rand(380, 520), 9, 0.7);
+      this.fx.emit(sx, sy, { n: 3, angle: a, spread: 0.5, speed: [40, 120], life: [0.05, 0.12], size: [2, 1], cols: [0xffffff, 0xffe46a], add: true });
+      if (Math.random() < 0.6) this.spawnGib('g_casing', sx, sy, rand(-80, 80), rand(-200, -100), 'shell');
+      if (Math.random() < 0.3) this.spawnLight(sx, sy, 'glow', 0xffd080, 0.4, 0.9, 0.7, 0.06);
+      Sfx.rivet(); if (Math.random() < 0.2) Sfx.crackle();
+    }
+    if (p.t > 0) return;
+    this.explode(p.cx, p.cy, PROP_BLAST.small);
+    this.wreckProp(p, 4);
+  }
+  // FLARE CASE: lobs five signal flares that stick, burn and light up a blackout, then burns out
+  breakFlares(p) { p.fr = 'x'; p.n = 5; p.popT = 0.05; p.t = 3; Sfx.ignite(); }
+  liveFlares(p, dt) {
+    p.t -= dt;
+    if (Math.random() < 0.7) this.fx.emit(p.cx + rand(-6, 6), p.y - 5, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [20, 70], life: [0.2, 0.5], size: [4, 1], cols: [0xffffff, 0xff9a9a, 0xff3a2a, 0xa01008], add: true, g: -40 });
+    if (Math.random() < 0.15) this.spawnLight(p.cx, p.y - 6, 'glow', 0xff4a2a, 1.2, 1.6, 0.5, 0.15);
+    if (p.n > 0 && (p.popT -= dt) <= 0) {
+      p.n--; p.popT = 0.28;
+      const a = -Math.PI / 2 + rand(-0.75, 0.75), sp = rand(240, 340), x = p.cx, y = p.y - 8;
+      if (this.flares.length >= 10) this.dropFlare(this.flares[0]);
+      this.flares.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: TUNE.FLARE.burn, stuck: false, e: null, ox: 0, oy: 0, tick: 0,
+        img: this.add.image(x, y, 'flare').setDepth(16.3), glow: this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff4a2a).setScale(1.4).setAlpha(0.8).setDepth(16.4) });
+      Sfx.flare(); this.fxSparks(x, y, 6, a, 0.6, [60, 160]);
+    }
+    if (p.t <= 0) this.wreckProp(p, 3);
+  }
+  // EXTINGUISHER: bursts into a cloud of foam: everything close is stunned, nothing in it can see out, fires in it die
+  breakExt(p) {
+    p.fr = 'x'; p.t = 3.6; p.fogX = p.x; p.fogY = p.y + 10;
+    this.spawnGib('g_ext', p.x, p.y, p.fdir * rand(140, 220), rand(-260, -160), 'metal');
+    const x = p.fogX, y = p.fogY;
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.hypot(e.body.center.x - x, e.body.center.y - y) < 64) { e.stunT = Math.max(e.stunT, 1.4); this.chill(e, 0.35); }
+    this.douse(x, y, 72);
+    this.fx.emit(x, y, { n: 50, speed: [40, 240], life: [0.6, 1.4], size: [5, 14], cols: [0xffffff, 0xf0f4f8, 0xd8e0e8], alpha: [0.85, 0], drag: 2.6, g: 20, jitter: 5 });
+    this.spawnLight(x, y, 'glow', 0xffffff, 1.5, 3.5, 0.6, 0.25);
+    Sfx.steam(); Sfx.gasHiss(); Sfx.clang(0.5);
+  }
+  liveExt(p, dt) {
+    p.t -= dt; const k = Math.min(1, p.t / 1.2), x = p.fogX, y = p.fogY;
+    if (Math.random() < 0.9 * k) { const th = rand(0, Math.PI * 2), r = Math.sqrt(Math.random()) * 56; this.fx.emit(x + Math.cos(th) * r, y + Math.sin(th) * r * 0.6, { n: 1, speed: [4, 18], life: [0.8, 1.5], size: [6, 13], cols: [0xffffff, 0xe8eef4, 0xd0d8e0], alpha: [0.5 * k, 0], drag: 1, g: 6, jitter: 3 }); }
+    if ((p.tick2 -= dt) <= 0) { p.tick2 = 0.2; this.douse(x, y, 60); for (const e of this.enemies.getChildren()) if (e.alive && Math.hypot(e.body.center.x - x, e.body.center.y - y) < 56) { e.sees = false; e.losT = 0.25; } }
+    if (p.t <= 0) this.wreckProp(p, 0);
+  }
+  // WINDOW: cracks, then shatters into a rain of glass on whoever is below
+  hitWindow(p) { p.fr = p.hp <= p.D.hp / 3 ? 'c2' : 'c1'; Sfx.crack(); }
+  breakWindow(p) {
+    const x = p.x, y = p.y;
+    for (let k = 0; k < 16; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', x + rand(-15, 15), y + rand(-9, 9), rand(-160, 160) + p.fdir * 60, rand(-180, 40), 'metal');
+    this.fx.emit(x, y, { n: 40, speed: [30, 180], life: [0.2, 0.7], size: [2, 1], cols: [0xffffff, 0xe0f5ff, 0x9ad4ec, 0x5a8a9a], add: true, g: 600, mode: 1 });
+    this.spawnLight(x, y, 'glow', 0xd8f4ff, 2, 4, 0.8, 0.18); Sfx.shatter(); this.shake(60, 0.003);
+    for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (Math.abs(b.center.x - x) < 19 && b.bottom > y && b.top < y + 120 && this.los(x, y + 12, b.center.x, b.top + 2)) this.propHurt(p, e, 18, 0, 1, 'glass'); }
+    this.wreckProp(p, 0);
+  }
+  // PA HORN: a feedback shriek: stuns and shoves everything nearby, and shatters any glass in earshot
+  breakHorn(p) {
+    const x = p.x + p.dir * 9, y = p.y;
+    this.spawnLight(x, y, 'ring', 0xfff0d0, 0.2, 3.4, 0.8, 0.35); this.spawnLight(x, y, 'ring', 0xffe0a0, 0.1, 2.4, 0.7, 0.3); this.spawnLight(x, y, 'ring', 0xffd090, 0.05, 1.5, 0.6, 0.25);
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue; const b = e.body, d = Math.hypot(b.center.x - x, b.center.y - y);
+      if (d > 104 || !this.los(x, y, b.center.x, b.center.y)) continue;
+      const f = 1 - d / 104, a = Math.atan2(b.center.y - y, b.center.x - x);
+      e.stunT = Math.max(e.stunT, 0.6 + f); b.velocity.x += Math.cos(a) * 260 * f * e.def.kb; b.velocity.y += (Math.sin(a) * 160 - 120) * f * e.def.kb;
+      this.propHurt(p, e, 8, Math.cos(a), Math.sin(a), 'blast');
+    }
+    for (const q of this.props) if (q !== p && q.st === 'ok' && q.D.mat === 'glass' && Math.hypot(q.cx - x, q.cy - y) < 112) this.hitProp(q, 40, 'sonic', q.cx, q.cy, Math.sign(q.cx - x) || 1, 0);
+    this.pushRagdolls(x, y, 90, 300, 160);
+    Sfx.sonic(); Sfx.wail(); this.shake(140, 0.006);
+    this.wreckProp(p, 2);
+  }
+  // WATER TANK: leaks where it's shot; bursts in a wave that shoves foes, puts out fires and floods the floor
+  breakWater(p) {
+    const x = p.cx, y = p.cy;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue; const b = e.body, d = Math.hypot(b.center.x - x, b.center.y - y);
+      if (d > 88 || !this.los(x, y, b.center.x, b.center.y)) continue;
+      const f = 1 - d / 88, s = Math.sign(b.center.x - x) || 1; b.velocity.x += s * 320 * f * e.def.kb; b.velocity.y -= 140 * f * e.def.kb; e.stunT = Math.max(e.stunT, 0.4 * f);
+    }
+    this.douse(x, y, 100);
+    this.spawnWater(p.x, p.y - 2, 124);
+    this.fx.emit(x, y, { n: 50, angle: -Math.PI / 2, spread: 2.6, speed: [60, 260], life: [0.4, 0.9], size: [2, 1], cols: [0xffffff, 0xd8f8ff, 0x8ce0ff, 0x4ac8f8], g: 700, mode: 1 });
+    this.fx.emit(x, y, { n: 14, speed: [20, 80], life: [0.5, 1.0], size: [4, 9], cols: [0xe8f8ff, 0xb8e0f0], alpha: [0.45, 0], drag: 2, g: -10 });
+    for (let k = 0; k < 5; k++) this.spawnGib(k % 2 ? 'g_blu' : 'g_plate', x, y, rand(-220, 220), rand(-320, -120), 'metal');
+    Sfx.splat(1); Sfx.gurgle(); this.shake(90, 0.004);
+    this.wreckProp(p, 0);
+  }
+
   // ---------------------------------------------------------------- cryo cannon ----
   // A freezing spray: chill slows enemies, full chill turns them into ice statues for a few seconds. A statue
   // takes 1.5x from chip damage, and any real hit (10+, kicks, blasts, a hard landing) shatters it outright.
@@ -12338,6 +13636,7 @@ class GameScene extends Phaser.Scene {
       const c = this.tileAt(tx, ty); if (c === 'x' || c === 'g') { this.damageTile(tx, ty, 999); Sfx.wreckHit(); }
     }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - bx, k.y - by) < R0 + 6) { k.body.velocity.x = ux * 420; k.body.velocity.y = -260; k.kicked = true; this.igniteBarrel(k); }
+    for (const p of this.props) if (p.st === 'ok' && Math.hypot(p.cx - bx, p.cy - by) < R0 + Math.max(p.hw, p.hh)) this.hitProp(p, 80, 'crush', bx, by, ux, 0);
     for (const g2 of this.gibList) if (g2.active && Math.hypot(g2.x - bx, g2.y - by) < R0 + 3) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.x = vx * 1.2; g2.body.velocity.y = vy * 1.2 - 120; }
     for (const rd of this.ragdolls) if (Math.hypot(rd.pts[2].x - bx, rd.pts[2].y - by) < R0 + 6) { for (const q of rd.pts) { q.vx = vx * 1.1; q.vy = vy * 1.1 - 150; } rd.asleep = false; rd.stillT = 0; }
   }
@@ -15044,7 +16343,7 @@ class GameScene extends Phaser.Scene {
       this.setCampaignMachinery(op.machinery);
       this.issueWeapons(op.unlock);
     }
-    this.spawnBarrels(true); this.spawnCanisters(true);
+    this.spawnBarrels(true); this.spawnCanisters(true); this.restockProps();
     this.applyMod(mod || (this.mutator === 'lowg' ? 'lowg' : this.mutator === 'dark' ? 'dark' : null));
     for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }
     this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery(); saveLife();

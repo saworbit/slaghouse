@@ -11,6 +11,7 @@ automatically.
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |
 | `kinds.js` | `window.KC`: `KC.check()` warps in every kind in `ENEMY` on its own, the way a wave does, and checks that it has a codex row, a texture with its start frame and an `update` method the scene has, spawns on that frame, then runs, takes a hit and dies without an error. `KC.check(['wasp'])` checks only those |
+| `props.js` | `window.PR`: `PR.check()` goes through every arena's breakable props and checks each has its art, frames and scene methods, sits where it can (a floor under it, clear of walls, something to hang from), then breaks it with grunts about, runs its effect to a wreck, restocks it and breaks it again to a blast, all without an error. `PR.check([0])` checks only ARENA 01 |
 | `checkpoint.js` | `window.CP` checks campaign saves, including legacy checkpoints, and scripted pacing via `CP.progression()`, `CP.furnacePacing()` and `CP.latePacing()` |
 | `run.mjs` | Serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on pushes to `main` and on pull requests. |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
@@ -28,7 +29,7 @@ node dev/playtest/run.mjs
 ```
 
 Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, and enemy
-spawning. It checks weapon and preparation prompts, blackout, fire cleanup, the separate Hound squads, and
+spawning, plus prop placement, breakage and restocking. It checks weapon and preparation prompts, blackout, fire cleanup, the separate Hound squads, and
 late-campaign machinery and boss phases. Checkpoint coverage includes reload, retry, legacy migration and five
 damaged saves. The full run calls `VB.campaign(1500)` and checks that the bot visits all five acts and wins.
 
