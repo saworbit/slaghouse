@@ -6,18 +6,18 @@ automatically.
 
 | file | what it gives you |
 | --- | --- |
-| `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.setup(arena)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
+| `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.setup(arena, keepWaves)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |
 | `kinds.js` | `window.KC`: `KC.check()` warps in every kind in `ENEMY` on its own, the way a wave does, and checks that it has a codex row, a texture with its start frame and an `update` method the scene has, spawns on that frame, then runs, takes a hit and dies without an error. `KC.check(['wasp'])` checks only those |
-| `checkpoint.js` | `window.CP`: `CP.save()`, `CP.resume(snap)`, `CP.retry(snap)` and `CP.damaged()`, the campaign checkpoint checks `run.mjs` drives across page reloads |
-| `run.mjs` | the headless runner: serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on every push and pull request |
+| `checkpoint.js` | `window.CP` checks campaign saves, including legacy checkpoints, and scripted pacing via `CP.progression()`, `CP.furnacePacing()` and `CP.latePacing()` |
+| `run.mjs` | Serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on pushes to `main` and on pull requests. |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
 ## Running it headless
 
-`run.mjs` needs Node and an installed Google Chrome (or `PLAYTEST_CHROME` set to a browser's path). From the repo root:
+Use Node.js 22 to match CI. Install Google Chrome or set `PLAYTEST_CHROME` to the browser executable path. From the repository root:
 
 ```bash
 npm ci --prefix dev/playtest
@@ -27,13 +27,14 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, `KC.check()`, the checkpoint flow (New Campaign on BRUTAL with
-GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
-retry the act, compare), five damaged saves that must fall back to New Campaign, and `VB.campaign(900)`, which must end won. Foes in its
-`removed` list are printed as a note, since a mimic hiding as a drum can beat the bot without anything being broken.
-Any page error or console error fails the check it happened in. Phaser is fetched from jsDelivr once, checked
-against the tag's integrity hash and served to every page. `--quick` skips the campaign run (the whole thing takes about 30 s headless; the campaign is most of it).
-It exits 1 and names each failure.
+Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, and enemy
+spawning. It checks weapon and preparation prompts, blackout, fire cleanup, the separate Hound squads, and
+late-campaign machinery and boss phases. Checkpoint coverage includes reload, retry, legacy migration and five
+damaged saves. The full run calls `VB.campaign(1500)` and checks that the bot visits all five acts and wins.
+
+Any page or console error fails the check. Phaser is fetched from jsDelivr once, verified against the tag's
+integrity hash, and served to each page. `--quick` skips `VB.campaign(1500)` and runs the other checks.
+The runner exits 1 on failure and names the failing checks.
 
 ## Running it in a browser
 
@@ -43,16 +44,17 @@ Serve the repo root with `python -m http.server 8765 --bind 127.0.0.1`. In a fre
 ```js
 for (const f of ['harness', 'chaos', 'vibe']) eval(await (await fetch('/dev/playtest/' + f + '.js')).text());
 RUNMODE = 'campaign'; T.boot(); T.run(300);
-const r = await VB.campaign(900);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
+const r = await VB.campaign(1500);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
 ```
 
-A pass has `state: 'won'`, an empty `errs` array and an empty `removed` array. `removed` lists any foe the bot
-couldn't see for 30 s with five or fewer left; `VB.campaign` kills it so the run goes on, so a non-empty list means
-the bot got stuck there. The bot stands on lift and coolant-valve markers as they
-open. Use `T.setup(0)` to stage a fight in the Melt Floor or `T.setup(1)` to stage one in the Furnace with waves
-disabled. Under the campaign `RUNMODE`, `T.setup(3)` and `T.setup(4)` stage ARENA 04 and 05 as OVERTIME, since the
-campaign has no act there. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
-reload, retry and the valve meter's pause behavior.
+An automated clear reports `state: 'won'` and an empty `errs` array. The bot restores health and can teleport to
+enemies, lift markers and coolant valves. `VB.campaign` also removes foes that stay out of sight for 30 seconds
+with five or fewer hostiles left. The runner logs these under `removed` without failing the run.
+
+`T.setup(arena)` uses a zero-based index from 0 (Melt Floor) to 4 (Powerhouse) and disables scheduled waves.
+Pass `true` as the second argument to keep waves enabled in a fresh harness session. Campaign setups restore
+the arsenal earned before the selected act. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check)
+to verify real-time pacing, traversal, checkpoint reload, retry and the valve meter's pause behavior.
 
 ## Things that bite
 
