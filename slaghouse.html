@@ -4758,11 +4758,11 @@ const PROP_SPOTS = [
    ['ammo', 70, 20], ['flares', 21, 20], ['ext', 55, 19], ['flood', 7, 12], ['boiler', 89, 24, -1]],
   [['ladle', 39, 12], ['ladle', 60, 12, -1], ['boiler', 16, 24], ['propane', 38, 24], ['oil', 61, 24], ['fan', 5, 18], ['fuse', 27, 20], ['water', 20, 24],
    ['capacitor', 68, 24], ['ext', 40, 20], ['tube', 12, 11], ['flood', 96, 12, -1], ['ammo', 82, 20], ['vending', 93, 24, -1], ['cryo', 79, 24]],
-  [['terminal', 50, 20], ['window', 25, 5], ['horn', 49, 4], ['neon', 50, 9], ['capacitor', 38, 24], ['fuse', 59, 21], ['water', 60, 24], ['fan', 3, 15],
+  [['terminal', 45, 20], ['window', 25, 5], ['horn', 49, 4], ['neon', 50, 9], ['capacitor', 38, 24], ['fuse', 59, 21], ['water', 60, 24], ['fan', 3, 15],
    ['fan', 96, 15, -1], ['vending', 37, 12], ['tube', 44, 15], ['tube', 56, 15], ['ext', 32, 15], ['flood', 8, 10], ['flares', 93, 20], ['ammo', 5, 20]],
   [['oil', 25, 24], ['propane', 34, 24], ['toxic', 66, 24], ['ammo', 60, 24], ['flares', 39, 24], ['vending', 30, 18], ['water', 69, 18], ['fuse', 66, 15],
    ['fan', 3, 13], ['flood', 6, 8], ['horn', 22, 5], ['ext', 40, 15], ['tube', 64, 6], ['cryo', 88, 20], ['capacitor', 12, 20]],
-  [['water', 10, 24], ['water', 90, 24], ['capacitor', 38, 24], ['capacitor', 61, 24], ['terminal', 50, 16], ['fuse', 5, 21], ['fuse', 94, 21, -1], ['neon', 50, 5],
+  [['water', 17, 24], ['water', 95, 24], ['capacitor', 38, 24], ['capacitor', 61, 24], ['terminal', 50, 16], ['fuse', 13, 21], ['fuse', 94, 21, -1], ['neon', 50, 5],
    ['window', 25, 6], ['horn', 31, 8], ['tube', 47, 11], ['tube', 52, 11], ['cryo', 15, 14], ['ext', 60, 18], ['vending', 80, 14], ['fan', 3, 13]],
 ];
 ARENAS.forEach((A, i) => { A.props = PROP_SPOTS[i] || []; });
@@ -15183,6 +15183,7 @@ class GameScene extends Phaser.Scene {
     }
     if (crushed) { BUS.emit('callout', crushed > 1 ? 'COMPACTED!' : 'CRUSHED!'); this.addStyle(60 * crushed); this.impactFrame(1); }
     for (const k of this.barrelList) if (k.active && k.x > x0 && k.x < x1 && k.y > y0 && k.y < y1) this.explodeBarrel(k);
+    for (const p of this.props) if (p.st === 'ok' && p.cx + p.hw > x0 && p.cx - p.hw < x1 && p.cy + p.hh > y0 && p.cy - p.hh < y1) this.hitProp(p, 999, 'crush', p.cx, p.cy - p.hh, 0, 1);
     for (const rd of this.ragdolls.slice()) { const c = rd.pts[2]; if (c.x > x0 && c.x < x1 && c.y > y0 && c.y < y1) this.hitRagdoll(rd, c.x, c.y, 999, 0, 1, 'blast'); }
   }
 

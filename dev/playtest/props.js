@@ -6,13 +6,16 @@
 //     a hanging one with something overhead to hang from
 //   - break with a few grunts about and run its whole effect to a wreck without an error, come back when the
 //     wave restocks, and break again to a blast
+// Each arena is checked the way the current RUNMODE stages it, and again in the other mode where the campaign builds it
+// differently (ARENA 04 and 05 get extra steps in the campaign).
 // PR.check([0]) checks only those arenas (0 = ARENA 01). Returns { fails: [...], props: n }; an empty list is a pass.
 window.PR = (() => {
   const PR = {};
   const EFFECT_MS = 6000;
 
   PR.check = (only) => {
-    const fails = [], arenas = only || ARENAS.map((_, i) => i);
+    const fails = [], arenas = only || ARENAS.map((_, i) => i), mode = RUNMODE, other = mode === 'campaign' ? 'endless' : 'campaign';
+    const stages = arenas.flatMap(a => CAMPAIGN_ARENAS[a].grid === ARENAS[a].grid ? [[a, mode]] : [[a, mode], [a, other]]);
     let count = 0;
     for (const kind of Object.keys(PROPS)) {
       const D = PROPS[kind], A = PROP_ART[kind], say = msg => fails.push(`${kind}: ${msg}`);
@@ -22,8 +25,10 @@ window.PR = (() => {
       for (const f of A.fr) if (!tex.has(f)) say(`frame '${f}' isn't in texture 'pr_${kind}'`);
       if (!A.fr.includes('x')) say('no wreck frame');
     }
-    for (const a of arenas) {
-      const g = T.setup(a), name = ARENAS[a].name;
+    for (const [a, m] of stages) {
+      RUNMODE = m;
+      let g; try { g = T.setup(a); } finally { RUNMODE = mode; }
+      const name = ARENAS[a].name + (m === 'campaign' ? ' (campaign)' : '');
       const step = (ms, what) => { try { T.run(ms); return true; } catch (err) { fails.push(`${name}: threw ${what}: ${String(err && err.message || err).split('\n')[0]}`); return false; } };
       T.errs.length = 0;
       if (g.props.length !== (PROP_SPOTS[a] || []).length) fails.push(`${name}: ${g.props.length} props built for ${(PROP_SPOTS[a] || []).length} spots`);
