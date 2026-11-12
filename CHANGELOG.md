@@ -39,6 +39,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
   `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
   needs entries in three side tables. No foe behaves differently. (#52)
+- Each enemy record also names the scene method that runs it each frame (`update`). `updateEnemies` calls it
+  directly instead of testing the kind against an 81-line `else if` chain, and `kinds.js` fails a record whose
+  method doesn't exist. Every kind runs the same method as before. (#52)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
