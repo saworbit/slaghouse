@@ -503,8 +503,9 @@
                           Fight the Gunship, then the Juggernaut in low gravity. SORTING SHIFT starts the belts.
                           MELTDOWN adds presses first, then rising slag and the Wyrm. DEMOLITION releases the
                           wrecking ball before the Foreman. LIVE CIRCUIT energizes the rails before the Smelter.
-                          Early squads wait for a full clear and leave 2.8 s in the Melt Floor or 2 s in the
-                          Furnace. Lockdown and Slag Rain clear with health restored to at least 75 and 65,
+                          The first five operations grow from 2 to 6 enemies per squad. Breaks shorten from
+                          3.2 to 1.6 s, spawn spacing narrows, and incoming damage climbs from 80% to full.
+                          Lockdown and Slag Rain clear with health restored to at least 75 and 65,
                           except with the Vampire mutator. Machinery stops between campaign operations.
                           Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad). The campaign
@@ -3970,30 +3971,35 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 
 // The operation order controls the arsenal, the first appearance of threats, and when machinery starts.
 const CAMPAIGN = [
-  { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN', recovery: 75, squads: [
-    { foes: [['grunt', 11, 24], ['grunt', 24, 24], ['grunt', 33, 16]] },
+  { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN',
+    breakMs: 3200, spawnGap: 1100, damageScale: 0.8, recovery: 75, squads: [
+    { foes: [['grunt', 11, 24], ['grunt', 24, 24]] },
     { name: 'HEAVY INBOUND', unlock: ['shotgun'], foes: [['heavy', 62, 24]] },
     { name: 'DRONES INBOUND', foes: [['drone', 47, 11], ['drone', 80, 6]] },
     { name: 'FLOOR SECURITY', foes: [['enforcer', 47, 8], ['stalker', 54, 20]] },
   ] },
-  { name: 'BLACKOUT', brief: 'USE FLARES WHEN THE LIGHTS CUT', unlock: ['flare', 'net'], squads: [
+  { name: 'BLACKOUT', brief: 'USE FLARES WHEN THE LIGHTS CUT', unlock: ['flare', 'net'],
+    breakMs: 2800, spawnGap: 950, damageScale: 0.85, squads: [
     { foes: [['grunt', 'G'], ['enforcer', 'G'], ['bulwark', 'G']] },
     { name: 'DARK AMBUSH', mod: 'dark', foes: [['creeper', 'A'], ['mimic', 'G'], ['stalker', 'G']] },
-    { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['drone', 'A'], ['tarspit', 'G'], ['mender', 'A']] },
+    { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['tarspit', 'G'], ['mender', 'A']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT' }] },
-  { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'], recovery: 65, squads: [
+  { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'],
+    breakMs: 2400, spawnGap: 800, damageScale: 0.9, recovery: 65, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
     { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
     { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
     { foes: [['gunship', 'A']] },
   ] },
-  { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'], elites: 1, squads: [
+  { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
+    breakMs: 2000, spawnGap: 650, damageScale: 0.95, elites: 1, squads: [
     { foes: [['grunt', 'G'], ['hound', 'G'], ['hound', 'G'], ['blinker', 'A']] },
-    { name: 'GRAVITY SURGE', foes: [['pogo', 'G'], ['chiller', 'G'], ['linker', 'A'], ['linker', 'A']] },
-    { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G']] },
+    { name: 'GRAVITY SURGE', foes: [['pogo', 'G'], ['linker', 'A'], ['linker', 'A']] },
+    { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G'], ['chiller', 'G']] },
     { foes: [['jugg', 'G']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT' }] },
-  { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'], elites: 1, squads: [
+  { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'],
+    breakMs: 1600, spawnGap: 550, elites: 1, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['scavenger', 'G'], ['spotter', 'A']] },
     { name: 'FLOOR TRAPS', wait: 0, foes: [['minelayer', 'A'], ['grenadier', 'G'], ['pogo', 'G'], ['sporepod', 'G'],
       ['shellback', 'G'], ['mender', 'A']] },
@@ -4025,8 +4031,8 @@ const CAMPAIGN = [
     squads: [{ foes: [['boss', 'B']] }] },
 ];
 const CAMPAIGN_ACTS = [
-  { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347, breakMs: 2800, spawnGap: 850 },
-  { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60, breakMs: 2000, spawnGap: 680 },
+  { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347 },
+  { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60 },
   { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75, breakMs: 1400, spawnGap: 520 },
   { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75, breakMs: 1000, spawnGap: 450, overlap: 1 },
   { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80, breakMs: 800, spawnGap: 380, overlap: 1 },
@@ -15033,8 +15039,9 @@ class GameScene extends Phaser.Scene {
     BUS.emit('enemies', this.activeHostiles());
   }
   releaseCampaignSquad(opening = false) {
-    const next = this.campaignSquads[0], act = CAMPAIGN_ACTS[this.A.id - 1];
+    const next = this.campaignSquads[0], act = CAMPAIGN_ACTS[this.A.id - 1], op = CAMPAIGN[this.wave];
     if (!next || this.campaignReinforceAt || (!opening && this.activeHostiles() > (next.wait ?? act.overlap ?? 0))) return;
+    const breakMs = op.breakMs ?? act.breakMs;
     this.issueWeapons(next.unlock);
     const deploy = () => {
       this.campaignReinforceAt = 0;
@@ -15044,13 +15051,13 @@ class GameScene extends Phaser.Scene {
       if (next.name) BUS.emit('callout', next.name);
       if (next.mod && next.mod !== this.mod) this.applyMod(next.mod);
       if (next.machinery) this.setCampaignMachinery(next.machinery);
-      this.queueWaveSpawns(next.spawns, act.spawnGap);
+      this.queueWaveSpawns(next.spawns, op.spawnGap ?? act.spawnGap);
       if (!opening) BUS.emit('enemies', this.activeHostiles());
     };
     if (opening) deploy();
     else {
-      this.campaignReinforceAt = this.time.now + act.breakMs;
-      this.time.delayedCall(act.breakMs, deploy);
+      this.campaignReinforceAt = this.time.now + breakMs;
+      this.time.delayedCall(breakMs, deploy);
     }
   }
   queueWaveSpawns(entries, gap = 380) {
@@ -15104,7 +15111,10 @@ class GameScene extends Phaser.Scene {
     if (this.state !== 'play') return false;
     if (this.campaign && (this.descending || (this.wave === CAMPAIGN.length - 1 && !this.enemiesLeft))) return false;
     const now = this.time.now, soft = opts.self || opts.burn;
-    if (!opts.self) dmg *= DIFFS[this.runDiff].dmg * (this.mutator === 'glass' ? 2 : 1);   // difficulty; GLASS CANNON
+    if (!opts.self) {
+      const campaignScale = this.campaign ? (CAMPAIGN[this.wave]?.damageScale ?? 1) : 1;
+      dmg *= campaignScale * DIFFS[this.runDiff].dmg * (this.mutator === 'glass' ? 2 : 1);
+    }
     if (!opts.self && this.pCorrodeT > 0) dmg *= 1.25;                  // slug acid: corroded, you give way
     if (!opts.self && now < this.markedUntil) dmg *= TUNE.SPOTTER.take;   // a spotter has you marked
     if (!opts.self && this.aegis > 0 && !(opts.iframes !== false && now < this.invulnUntil)) {   // AEGIS soaks hits first

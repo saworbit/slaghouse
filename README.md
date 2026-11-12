@@ -100,9 +100,10 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. The other weapons arrive in
 fixed groups as each operation starts. The HUD announces new weapons, and hotkeys, the wheel and weapon cycling
-use the same arsenal. In the Melt Floor and Furnace, finish each squad before the next one deploys. The HUD
-counts down the break, and the first heavy arrives alone so you have time to equip the Shotgun. OVERTIME,
-DAILY and BOSS RUSH start with all 61 weapons.
+use the same arsenal. Across the first five operations, the largest squad grows from two to six foes, the
+breaks shorten from 3.2 to 1.6 seconds, and incoming damage rises from 80% to full for the selected difficulty.
+The HUD counts down each break. The first heavy arrives alone after you get the Shotgun.
+OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |

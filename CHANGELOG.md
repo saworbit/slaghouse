@@ -39,9 +39,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
-- **Campaign pacing.** The first two acts use smaller squads, wider spawn spacing and countdown breaks after
-  every squad. The first heavy enters alone, slag rain gives more time to reach cover, and Lockdown and Slag Rain
-  restore a minimum amount of health after a clear. Later hazard encounters introduce threats in smaller groups.
+- **Campaign pacing.** The first five operations build from two to six foes per squad while shortening
+  reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
+  more time to reach cover, and Lockdown and Slag Rain restore a minimum amount of health after a clear.
 - Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
   `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
   needs entries in three side tables. No foe behaves differently. (#52)

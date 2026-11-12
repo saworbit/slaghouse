@@ -76,12 +76,23 @@ window.CP = (() => {
     g.wheelOn = true; hud.drawWheel(g); g.wheelOn = false;
     expect(hud.wheelIcons.filter(icon => icon.visible).length === 1, 'the weapon wheel exposed unissued slots');
 
+    const opening = CAMPAIGN.slice(0, 5);
+    expect(opening.every((op, i) => Math.max(...op.squads.map(s => s.foes.length)) === i + 2),
+      'the first five operations must grow from two to six foes per squad');
+    expect(opening.slice(1).every((op, i) => op.breakMs < opening[i].breakMs && op.spawnGap < opening[i].spawnGap),
+      'each of the first five operations must reduce the delay between threats');
+    expect(opening.slice(1).every((op, i) => (op.damageScale ?? 1) > opening[i].damageScale),
+      'incoming damage must rise through the first five operations');
+    const hp = g.hp;
+    g.hurtPlayer(10, g.player.x, { iframes: false, knock: false });
+    expect(hp - g.hp === 8, 'Lockdown did not apply the opening damage reduction');
+
     const patrol = g.enemies.getChildren().filter(e => e.alive);
-    expect(patrol.length === 3 && patrol.every(e => e.kind === 'grunt'), 'Lockdown skipped its grunt patrol');
+    expect(patrol.length === 2 && patrol.every(e => e.kind === 'grunt'), 'Lockdown skipped its two-grunt patrol');
     for (const e of patrol) g.killEnemy(e, 1, 0, 'nail');
     g.cycleWeapon(1);
     expect(g.weapon === weaponSlot('shotgun'), 'clearing the patrol did not issue the Shotgun');
-    const gap = CAMPAIGN_ACTS[0].breakMs;
+    const gap = CAMPAIGN[0].breakMs;
     expect(g.activeHostiles() === 0 && g.campaignReinforceAt > g.time.now, 'the next squad skipped the break');
     T.run(gap - 400);
     expect(g.activeHostiles() === 0, 'hostiles arrived during the equipment break');
@@ -97,7 +108,7 @@ window.CP = (() => {
     expect(!g.mod, 'the power cut started before the opening squad fell');
     g.enemiesLeft = g.campaignReserve;
     g.releaseCampaignSquad();
-    T.run(gap - 400);
+    T.run(CAMPAIGN[1].breakMs - 400);
     expect(!g.mod && g.activeHostiles() === 0, 'Blackout cut power before the break ended');
     T.run(500);
     expect(g.mod === 'dark' && g.activeHostiles() === 3, 'Blackout did not deploy the smaller ambush');
