@@ -105,7 +105,7 @@ enter after their escorts fall.
 | Act | Operations | Objective |
 | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Start against a small grunt patrol, then face the floor security team. Gunfire lights the blackout. After both operations, enter the marked Furnace lift. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Slag falls in showers with clear spells between; **SLAG INCOMING** warns you before each one. Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
 | III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at each marked coolant valve until its meter fills. Open valve 1 before valve 2 to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
 
 Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.

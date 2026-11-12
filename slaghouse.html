@@ -500,7 +500,9 @@
                           and fling you out, and set alight any foe, corpse, drum or tar up there.
     Waves ............... 1 LOCKDOWN: 10 enemies across two squads, opening with grunts. 2 BLACKOUT: 22 across
                           three squads. Gunfire briefly expands your pool of light. 3 SLAG RAIN: 21 across three
-                          squads, ending with the Gunship. 4 GRAVITY LOSS: 22 across three squads, ending with the
+                          squads, ending with the Gunship. The slag falls in 7 to 9 s showers with 5 to 7 s clear
+                          spells (SLAG INCOMING warns 1.2 s ahead); it burns and shoves but breaks no platforms and
+                          sets off no drums. 4 GRAVITY LOSS: 22 across three squads, ending with the
                           Juggernaut. 5 MELTDOWN: 20 before splits, ending with the Slag Wyrm. 6 THE SMELTER: solo
                           boss fight. Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad). The campaign
@@ -659,6 +661,7 @@ const TUNE = {
   TICK:  { speed: 150, leap: 230, armRange: 22, fuse: 350, radius: 46, maxDamage: 40, minDamage: 12, selfDamage: 30, push: 300, maxRise: 400, enemy: true },
   SNIPER: { aimMs: 1100, lockAt: 0.75, bulletSpeed: 900, damage: 22, fireCd: 2.6 },
   BOSS:  { speed: 55, slag: { radius: 34, maxDamage: 30, minDamage: 10, enemyDamage: 20, selfDamage: 16, push: 260, maxRise: 360, enemy: true, spare: 'boss', burn: 1.5 } },
+  RAIN:  { shower: [7, 9], clear: [5, 7], tell: 1.2, gap: [0.28, 0.55] },   // SLAG RAIN comes in showers (s) with clear spells; a drop every gap s
   MINI:    { cooldown: 45, spinUp: 0.55, speed: 600, damage: 7, spread: 4.5, life: 0.75 },
   CLUSTER: { cooldown: 1400, speed: 250, lift: 140, bomblets: 6,
              shell: { radius: 30, maxDamage: 30, minDamage: 10, selfDamage: 6, push: 220, maxRise: 360, tileDamage: 50 },
@@ -6886,7 +6889,7 @@ class GameScene extends Phaser.Scene {
       s.glow.setPosition(s.x, s.y);
       if (Math.random() < 0.7) this.fx.emit(s.x, s.y, { n: 1, speed: [0, 15], life: [0.2, 0.4], size: [3, 1], cols: [0xffe080, 0xff8a20, 0xc03010], add: true, g: -30 });
       const hit = this.sweep(s.px, s.py, s.x, s.y);
-      if (hit || (s.body.velocity.y > 0 && this.standAt(s.x, s.y + 3))) { this.slagImpact(hit ? hit.x : s.x, hit ? hit.y : s.y); s.disableBody(true, true); s.glow.setVisible(false); continue; }
+      if (hit || (s.body.velocity.y > 0 && this.standAt(s.x, s.y + 3))) { this.slagImpact(hit ? hit.x : s.x, hit ? hit.y : s.y, s.rain); s.disableBody(true, true); s.glow.setVisible(false); continue; }
       s.px = s.x; s.py = s.y;
     }
     for (let i = this.puddles.length - 1; i >= 0; i--) {              // molten puddles: burn whoever stands in them
@@ -6911,8 +6914,8 @@ class GameScene extends Phaser.Scene {
       if (!w.hit && alive && Math.abs(pb.center.x - w.x) < 10 && pb.bottom > w.y - 18 && pb.bottom <= w.y + 4) { w.hit = true; this.hurtPlayer(20, w.x - w.dir * 10); }
     }
   }
-  slagImpact(x, y) {
-    this.explode(x, y, TUNE.BOSS.slag);
+  slagImpact(x, y, rain) {                                              // rain burns and shoves but leaves floors and drums alone, so a shower can't dig you into a pit
+    this.explode(x, y, rain ? this.rainBlast || (this.rainBlast = { ...TUNE.BOSS.slag, tileDamage: 0, drums: false }) : TUNE.BOSS.slag);
     for (let yy = y; yy < y + 40; yy += 2) if (this.standAt(x, yy)) { const sy = Math.floor(yy / TS) * TS; this.puddles.push({ x, y: sy, w: 34, t: 2.6, tick: 0.2 }); this.paintScorch(x, sy + 2, 10); break; }
   }
 
@@ -7091,7 +7094,7 @@ class GameScene extends Phaser.Scene {
       for (let yy = pb.bottom - 4; yy < pb.bottom + 120; yy += 4) if (this.standAt(tx, yy)) { ty = Math.floor(yy / TS) * TS; break; }
       s.enableBody(true, x0, y0, true, true); s.body.setAllowGravity(true); s.body.setSize(5, 5, true);
       s.setVelocity((tx - x0) / T, (ty - 4 - y0 - 0.5 * G * T * T) / T);
-      Object.assign(s, { px: x0, py: y0 });
+      Object.assign(s, { px: x0, py: y0, rain: false });
       s.glow.setVisible(true);
       this.spawnLight(tx, ty - 2, 'ring', 0xff4020, 1.2, 0.5, 0.9, T);   // landing markers
       this.spawnLight(tx, ty - 2, 'glow', 0xff3010, 1.4, 1.0, 0.6, T);
@@ -7105,7 +7108,7 @@ class GameScene extends Phaser.Scene {
       const s2 = this.slags.getFirstDead(false); if (!s2) break;
       const a = -Math.PI + (k + 0.5) / 10 * Math.PI, sp = rand(170, 240);
       s2.enableBody(true, x0, y0, true, true); s2.body.setAllowGravity(true); s2.body.setSize(5, 5, true);
-      s2.setVelocity(Math.cos(a) * sp, Math.sin(a) * sp * 1.3 - 60); Object.assign(s2, { px: x0, py: y0 }); s2.glow.setVisible(true);
+      s2.setVelocity(Math.cos(a) * sp, Math.sin(a) * sp * 1.3 - 60); Object.assign(s2, { px: x0, py: y0, rain: false }); s2.glow.setVisible(true);
     }
   }
   bossSlam(e) {
@@ -7348,7 +7351,7 @@ class GameScene extends Phaser.Scene {
       if (W.burn) rd.burnT = Math.max(rd.burnT, W.burn);
       this.hitRagdoll(rd, c.x, c.y, (W.enemyDamage ?? W.maxDamage) * (0.05 + 1.2 * f * f), Math.sign(c.x - x) || 1, -0.6, 'blast');   // edge of a blast just throws them
     }
-    for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < R + 6) {   // chain into drums
+    if (W.drums !== false) for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < R + 6) {   // chain into drums
       this.damageBarrel(k, 50, 0.12); k.body.velocity.x += Math.sign(k.x - x || 1) * 140; k.body.velocity.y -= 120;
     }
     this.blastTiles(x, y, R, W.tileDamage ?? W.maxDamage ?? 40);       // and the scenery
@@ -9049,18 +9052,25 @@ class GameScene extends Phaser.Scene {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
   applyMod(m) {                                                         // wave modifiers: chaos with rules
-    this.mod = m; this.rainT = 1.5;
+    this.mod = m; this.rainT = 1.5; this.rainOn = true; this.rainTold = false;
+    this.rainPhaseT = 1.5 + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
     this.physics.world.gravity.y = m === 'lowg' ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;
     if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
   }
-  updateSlagRain(dt) {                                                  // molten drips from the ceiling, marked where they'll land
+  updateSlagRain(dt) {                                                  // molten drips from the ceiling in showers, marked where they'll land
+    const R = TUNE.RAIN;
+    if ((this.rainPhaseT -= dt) <= 0) { this.rainOn = !this.rainOn; this.rainPhaseT = rand(...(this.rainOn ? R.shower : R.clear)); this.rainTold = false; this.rainT = 0.4; }
+    if (!this.rainOn) {                                                 // a clear spell: warn a beat before the next shower
+      if (!this.rainTold && this.rainPhaseT <= R.tell) { this.rainTold = true; BUS.emit('callout', 'SLAG INCOMING'); Sfx.rumble(0.7); this.shake(500, 0.004); }
+      return;
+    }
     this.rainT -= dt; if (this.rainT > 0) return;
-    this.rainT = rand(0.28, 0.55);
+    this.rainT = rand(...R.gap);
     const x = clamp(this.player.x + rand(-280, 280), 40, LW - 40), y = 2 * TS + 4;
     if (this.solidAt(x, y)) return;
     const s = this.slags.getFirstDead(false); if (!s) return;
     s.enableBody(true, x, y, true, true); s.body.setAllowGravity(true); s.body.setSize(5, 5, true); s.setVelocity(rand(-10, 10), 30);
-    Object.assign(s, { px: x, py: y }); s.glow.setVisible(true);
+    Object.assign(s, { px: x, py: y, rain: true }); s.glow.setVisible(true);
     let gy = y; while (gy < LH - TS && !this.standAt(x, gy)) gy += 4;
     this.spawnLight(x, Math.floor(gy / TS) * TS - 2, 'ring', 0xff4020, 0.9, 0.4, 0.8, 0.6);
     if (Math.random() < 0.3) Sfx.whistle();
@@ -10556,7 +10566,7 @@ class GameScene extends Phaser.Scene {
   wyrmSpit(e) {                                                          // phase 2: molten globs rain off it as it flies
     const s = this.slags.getFirstDead(false); if (!s) return;
     s.enableBody(true, e.hx, e.hy, true, true); s.body.setAllowGravity(true); s.body.setSize(5, 5, true);
-    s.setVelocity(e.vx * 0.3 + rand(-60, 60), rand(-120, 20)); Object.assign(s, { px: e.hx, py: e.hy }); s.glow.setVisible(true);
+    s.setVelocity(e.vx * 0.3 + rand(-60, 60), rand(-120, 20)); Object.assign(s, { px: e.hx, py: e.hy, rain: false }); s.glow.setVisible(true);
     Sfx.ignite();
   }
   wyrmTouch(part) {
