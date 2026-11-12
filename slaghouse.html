@@ -503,7 +503,10 @@
                           Fight the Gunship, then the Juggernaut in low gravity. SORTING SHIFT starts the belts.
                           MELTDOWN adds presses first, then rising slag and the Wyrm. DEMOLITION releases the
                           wrecking ball before the Foreman. LIVE CIRCUIT energizes the rails before the Smelter.
-                          Arena machinery stops between campaign operations. Medkits restock between waves.
+                          Early squads wait for a full clear and leave 2.8 s in the Melt Floor or 2 s in the
+                          Furnace. Lockdown and Slag Rain clear with health restored to at least 75 and 65,
+                          except with the Vampire mutator. Machinery stops between campaign operations.
+                          Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad). The campaign
                           opens with a choice of HOLLOW POINTS, VAMPIRE or DOUBLE JUMP. HOLLOW POINTS +20%
                           damage, HAIR TRIGGER 20% faster fire, VAMPIRE 3 HP a kill, IRON BOOTS double kick damage
@@ -3966,32 +3969,28 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 
 // The operation order controls the arsenal, the first appearance of threats, and when machinery starts.
 const CAMPAIGN = [
-  { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN', squads: [
+  { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN', recovery: 75, squads: [
     { foes: [['grunt', 11, 24], ['grunt', 24, 24], ['grunt', 33, 16]] },
-    { name: 'HEAVY INBOUND', wait: 0, unlock: ['shotgun'], foes: [['heavy', 62, 24], ['drone', 47, 11], ['drone', 80, 6]] },
-    { name: 'FLOOR SECURITY', foes: [['enforcer', 86, 12], ['enforcer', 47, 8], ['stalker', 54, 20], ['stalker', 72, 20]] },
+    { name: 'HEAVY INBOUND', unlock: ['shotgun'], foes: [['heavy', 62, 24]] },
+    { name: 'DRONES INBOUND', foes: [['drone', 47, 11], ['drone', 80, 6]] },
+    { name: 'FLOOR SECURITY', foes: [['enforcer', 47, 8], ['stalker', 54, 20]] },
   ] },
   { name: 'BLACKOUT', brief: 'USE FLARES WHEN THE LIGHTS CUT', unlock: ['flare', 'net'], squads: [
-    { foes: [['bulwark', 'G'], ['enforcer', 'G'], ['sniper', 'G'], ['stalker', 'G'], ['mender', 'A'], ['mirror', 'G']] },
-    { name: 'DARK AMBUSH', wait: 0, mod: 'dark', foes: [['creeper', 'A'], ['mimic', 'G'], ['wraith', 'A'], ['grenadier', 'G'],
-      ['tarspit', 'G'], ['gasbag', 'A'], ['cloaker', 'G'], ['scorcher', 'G']] },
-    { name: 'POWER SURGE', foes: [['sparker', 'G'], ['sparker', 'G'], ['pylon', 'G'], ['jelly', 'A'],
-      ['discus', 'G'], ['berserker', 'G'], ['zealot', 'G'], ['cinder', 'G']] },
+    { foes: [['grunt', 'G'], ['enforcer', 'G'], ['bulwark', 'G']] },
+    { name: 'DARK AMBUSH', mod: 'dark', foes: [['creeper', 'A'], ['mimic', 'G'], ['stalker', 'G']] },
+    { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['drone', 'A'], ['tarspit', 'G'], ['mender', 'A']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT' }] },
-  { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'], elites: 1, squads: [
-    { foes: [['golem', 'G'], ['roller', 'G'], ['shellback', 'G'], ['lugger', 'G'], ['rocketeer', 'G'],
-      ['wasp', 'A'], ['orbiter', 'A']] },
-    { name: 'SALVAGE CREW', wait: 0, mod: 'slag', foes: [['stitcher', 'A'], ['harpooner', 'G'], ['duelist', 'G'], ['pilferer', 'A'],
-      ['buzzsaw', 'A'], ['jet', 'A'], ['torcher', 'G'], ['leech', 'A'], ['spotter', 'A'], ['bastion', 'G'],
-      ['porcupine', 'G'], ['bulldozer', 'G'], ['pyro', 'G']] },
-    { wait: 0, foes: [['gunship', 'A']] },
+  { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'], recovery: 65, squads: [
+    { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
+    { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
+    { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
+    { foes: [['gunship', 'A']] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'], elites: 1, squads: [
-    { foes: [['blinker', 'A'], ['blimp', 'A'], ['howitzer', 'G'], ['hive', 'A'], ['pogo', 'G'], ['hound', 'G'],
-      ['hound', 'G'], ['claw', 'A'], ['jammer', 'A'], ['chiller', 'G']] },
-    { name: 'GRAVITY SURGE', foes: [['welder', 'G'], ['magnet', 'A'], ['vortex', 'A'], ['thundercloud', 'A'],
-      ['linker', 'A'], ['linker', 'A'], ['sporepod', 'G'], ['slug', 'G'], ['minelayer', 'A'], ['sponge', 'G'], ['banner', 'G']] },
-    { wait: 0, foes: [['jugg', 'G']] },
+    { foes: [['grunt', 'G'], ['hound', 'G'], ['hound', 'G'], ['blinker', 'A']] },
+    { name: 'GRAVITY SURGE', foes: [['pogo', 'G'], ['chiller', 'G'], ['linker', 'A'], ['linker', 'A']] },
+    { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G']] },
+    { foes: [['jugg', 'G']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT' }] },
   { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'], elites: 1, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['scavenger', 'G'], ['spotter', 'A']] },
@@ -3999,10 +3998,9 @@ const CAMPAIGN = [
       ['shellback', 'G'], ['mender', 'A']] },
   ] },
   { name: 'MELTDOWN', brief: 'CLIMB WHEN THE SLAG RISES', machinery: 'presses', unlock: ['rocket', 'katana', 'siphon'], elites: 2, squads: [
-    { foes: [['slagling', 'G'], ['burrower', 'G'], ['linker', 'A'], ['linker', 'A'], ['scavenger', 'G'],
-      ['strider', 'G'], ['echo', 'G'], ['ratking', 'G']] },
-    { name: 'LAST SHIFT', wait: 0, mod: 'melt', foes: [['para', 'A'], ['shinobi', 'G'], ['warhorn', 'G'], ['beacon', 'A'],
-      ['swapper', 'G'], ['tarspit', 'G'], ['grappler', 'G'], ['headsman', 'G'], ['leaper', 'G'], ['copycat', 'A'], ['gatling', 'G']] },
+    { foes: [['slagling', 'G'], ['scavenger', 'G'], ['linker', 'A'], ['linker', 'A'], ['ratking', 'G']] },
+    { name: 'LAST SHIFT', wait: 0, mod: 'melt', foes: [['burrower', 'G'], ['para', 'A'], ['tarspit', 'G'], ['headsman', 'G'], ['leaper', 'G']] },
+    { name: 'CONTROL GUARD', foes: [['strider', 'G'], ['warhorn', 'G'], ['swapper', 'G'], ['grappler', 'G'], ['gatling', 'G']] },
     { wait: 0, foes: [['wyrm', 'G']] },
   ], route: [
     { cell: [36, 24], label: 'STAND AT COOLANT VALVE 1', hold: 0.8, done: 'INTAKE OPEN' },
@@ -4011,30 +4009,32 @@ const CAMPAIGN = [
   ] },
   { name: 'DEMOLITION', brief: 'DRAW THE CREW UNDER THE BALL', unlock: ['flak', 'tractor', 'drill'], elites: 2, squads: [
     { foes: [['lugger', 'G'], ['heavy', 'G'], ['roller', 'G'], ['enforcer', 'G'], ['pylon', 'G']] },
-    { name: 'BALL RELEASED', wait: 0, machinery: 'wreck', foes: [['bulldozer', 'G'], ['harpooner', 'G'],
-      ['rocketeer', 'G'], ['wraith', 'A'], ['hound', 'G'], ['bastion', 'G'], ['buzzsaw', 'A'], ['spotter', 'A']] },
+    { name: 'BALL RELEASED', wait: 0, machinery: 'wreck', foes: [['bulldozer', 'G'], ['harpooner', 'G'], ['hound', 'G'], ['spotter', 'A']] },
+    { name: 'WRECKING CREW', foes: [['rocketeer', 'G'], ['wraith', 'A'], ['bastion', 'G'], ['buzzsaw', 'A']] },
   ] },
   { name: 'THE FOREMAN', music: 'boss', brief: 'DODGE THE WALKER AND THE BALL', machinery: 'wreck', unlock: ['mini', 'marksman', 'shield'],
     squads: [{ foes: [['foreman', 'B']] }], route: [{ cell: [95, 24], label: 'REACH THE POWERHOUSE LIFT' }] },
   { name: 'LIVE CIRCUIT', brief: 'USE THE WALKS WHEN THE RAILS LIGHT', unlock: ['coil', 'prism', 'tether'], elites: 3, squads: [
     { foes: [['sparker', 'G'], ['sparker', 'G'], ['linker', 'A'], ['linker', 'A']] },
-    { name: 'RAILS LIVE', wait: 0, machinery: 'rails', foes: [['magnet', 'A'], ['vortex', 'A'], ['jammer', 'A'],
-      ['thundercloud', 'A'], ['pylon', 'G'], ['welder', 'G'], ['bastion', 'G'], ['duelist', 'G']] },
+    { name: 'RAILS LIVE', wait: 0, machinery: 'rails', foes: [['magnet', 'A'], ['jammer', 'A'], ['pylon', 'G'], ['welder', 'G']] },
+    { name: 'SURGE CREW', foes: [['vortex', 'A'], ['thundercloud', 'A'], ['bastion', 'G'], ['duelist', 'G']] },
     { name: 'CORE GUARD', foes: [['gatling', 'G'], ['sponge', 'G'], ['shellback', 'G'], ['copycat', 'A']] },
   ] },
   { name: 'THE SMELTER', music: 'boss', brief: 'STAY ABOVE THE RAILS AND THE SLAG', machinery: 'rails', unlock: ['sing', 'nuke', 'lance'],
     squads: [{ foes: [['boss', 'B']] }] },
 ];
 const CAMPAIGN_ACTS = [
-  { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347 },
-  { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60 },
-  { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75 },
-  { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75 },
-  { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80 },
+  { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347, breakMs: 2800, spawnGap: 850 },
+  { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60, breakMs: 2000, spawnGap: 680 },
+  { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75, breakMs: 1400, spawnGap: 520 },
+  { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75, breakMs: 1000, spawnGap: 450, overlap: 1 },
+  { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80, breakMs: 800, spawnGap: 380, overlap: 1 },
 ];
-const CAMPAIGN_TOTAL = CAMPAIGN.reduce((total, op) => total + op.squads.reduce((n, squad) => n + squad.foes.length, 0), 0);
+const campaignFoesFrom = wave => CAMPAIGN.slice(wave).reduce((total, op) =>
+  total + op.squads.reduce((n, squad) => n + squad.foes.length, 0), 0);
+const CAMPAIGN_TOTAL = campaignFoesFrom(0);
 const CAMPAIGN_KEY = 'slaghouse.campaign.v1';
-const CAMPAIGN_REVISION = 2, LEGACY_CAMPAIGN_TOTAL = 96;
+const CAMPAIGN_REVISION = 2;
 const ALL_WEAPON_SLOTS = WEAPONS.map((_, i) => i);
 const weaponSlot = id => WEAPONS.findIndex(w => w.id === id);
 function campaignWeaponSlots(wave, legacyWeapon) {
@@ -4071,7 +4071,6 @@ function campaignCheckpoint(save = loadCampaign()) {
       !index(c.diff, DIFFS) || !index(c.mut, MUTATORS) || !index(c.weapon, WEAPONS) ||
       !nonnegative(c.hp) || c.hp <= 0 || c.hp > TUNE.PLAYER_HP ||
       ![c.elapsed, c.bestCombo, c.headshots, c.totalEnemies, c.style?.pts].every(nonnegative) ||
-      c.totalEnemies < (legacy ? LEGACY_CAMPAIGN_TOTAL : CAMPAIGN_TOTAL) ||
       !index(c.style.rank, STYLE_RANKS) || !index(c.style.best, STYLE_RANKS)) return null;
   const stats = c.stats, wk = stats?.wk;
   if (!stats || !['shots', 'hits', 'kills', 'taken', 'executes', 'dodges'].every(k => nonnegative(stats[k])) ||
@@ -4081,8 +4080,11 @@ function campaignCheckpoint(save = loadCampaign()) {
       !c.perks || Array.isArray(c.perks) || typeof c.perks !== 'object' ||
       !Object.entries(c.perks).every(([id, on]) => on === true && PERKS.some(p => p.id === id)) ||
       !c.ms || Array.isArray(c.ms) || typeof c.ms !== 'object' || !Object.values(c.ms).every(nonnegative)) return null;
-  if (legacy) return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon: c.weapon, totalEnemies: c.totalEnemies + CAMPAIGN_TOTAL - LEGACY_CAMPAIGN_TOTAL };
-  return campaignWeaponSlots(c.wave, c.legacyWeapon).includes(c.weapon) ? c : null;
+  if (stats.kills > c.totalEnemies) return null;
+  const legacyWeapon = legacy ? c.weapon : c.legacyWeapon;
+  if (!campaignWeaponSlots(c.wave, legacyWeapon).includes(c.weapon)) return null;
+  // A checkpoint only saves after an act is clear. Keep its kills and use the current rosters for the acts ahead.
+  return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
 // BOSS RUSH: five bosses back to back across the three arenas, a perk between each
 const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
@@ -5269,7 +5271,7 @@ class GameScene extends Phaser.Scene {
     this.campaignElapsed = this.chapterStart?.elapsed ?? 0;
     this.campaignRetried = !!(data?.retry || this.chapterStart?.retried);
     this.campaignRunId = this.chapterStart?.runId ?? (this.campaign ? data?.runId ?? newRunId() : null);
-    this.campaignSquads = []; this.campaignReserve = 0; this.campaignRoute = []; this.campaignMachinery = null;
+    this.campaignSquads = []; this.campaignReserve = 0; this.campaignReinforceAt = 0; this.campaignRoute = []; this.campaignMachinery = null;
     this.legacyWeapon = this.chapterStart?.legacyWeapon;
     this.weaponSlots = this.campaign ? campaignWeaponSlots(this.chapterStart?.wave ?? 0, this.legacyWeapon) : ALL_WEAPON_SLOTS;
     this.unlockText = ''; this.unlockUntil = 0;
@@ -9132,8 +9134,9 @@ class GameScene extends Phaser.Scene {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
   applyMod(m) {                                                         // wave modifiers: chaos with rules
-    this.mod = m; this.rainT = 1.5; this.rainOn = true; this.rainTold = false;
-    this.rainPhaseT = 1.5 + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
+    const rainLead = this.campaign ? 3 : 1.5;
+    this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
+    this.rainPhaseT = rainLead + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
     this.physics.world.gravity.y = m === 'lowg' ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;
     if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
   }
@@ -14898,6 +14901,12 @@ class GameScene extends Phaser.Scene {
     if (this.campaign) {
       this.campaignMachinery = null;
       this.applyMod(null);
+      const recovery = CAMPAIGN[this.wave].recovery;
+      if (this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery) {
+        this.hp = recovery;
+        BUS.emit('hp', this.hp, 0);
+        Sfx.pickup();
+      }
     }
     BUS.emit('callout', 'WAVE CLEARED');
     if (this.stats.taken <= this.waveTaken) this.time.delayedCall(900, () => this.award('untouched'));
@@ -15017,22 +15026,33 @@ class GameScene extends Phaser.Scene {
     if (op) {
       this.campaignSquads = squads;
       this.campaignReserve = entries.length;
+      this.campaignReinforceAt = 0;
       this.releaseCampaignSquad(true);
     } else this.queueWaveSpawns(entries);
     BUS.emit('enemies', this.activeHostiles());
   }
   releaseCampaignSquad(opening = false) {
-    const next = this.campaignSquads[0];
-    if (!next || (!opening && this.activeHostiles() > (next.wait ?? 2))) return;
-    this.campaignSquads.shift();
-    this.campaignReserve -= next.spawns.length;
-    if (next.name) BUS.emit('callout', next.name);
+    const next = this.campaignSquads[0], act = CAMPAIGN_ACTS[this.A.id - 1];
+    if (!next || this.campaignReinforceAt || (!opening && this.activeHostiles() > (next.wait ?? act.overlap ?? 0))) return;
     this.issueWeapons(next.unlock);
-    if (next.mod && next.mod !== this.mod) this.applyMod(next.mod);
-    if (next.machinery) this.setCampaignMachinery(next.machinery);
-    this.queueWaveSpawns(next.spawns);
+    const deploy = () => {
+      this.campaignReinforceAt = 0;
+      if (this.state !== 'play') return;
+      this.campaignSquads.shift();
+      this.campaignReserve -= next.spawns.length;
+      if (next.name) BUS.emit('callout', next.name);
+      if (next.mod && next.mod !== this.mod) this.applyMod(next.mod);
+      if (next.machinery) this.setCampaignMachinery(next.machinery);
+      this.queueWaveSpawns(next.spawns, act.spawnGap);
+      if (!opening) BUS.emit('enemies', this.activeHostiles());
+    };
+    if (opening) deploy();
+    else {
+      this.campaignReinforceAt = this.time.now + act.breakMs;
+      this.time.delayedCall(act.breakMs, deploy);
+    }
   }
-  queueWaveSpawns(entries) {
+  queueWaveSpawns(entries, gap = 380) {
     const used = new Set();
     entries.forEach(({ foe: [kind, type, row], elite }, i) => {
       let choice, air;
@@ -15047,7 +15067,7 @@ class GameScene extends Phaser.Scene {
         air = type === 'A';
         used.add(choice);
       }
-      this.time.delayedCall(700 + i * 380, () => this.warpIn(kind, choice, air, elite));
+      this.time.delayedCall(700 + i * gap, () => this.warpIn(kind, choice, air, elite));
     });
   }
   warpIn(kind, [cx, cy], air, elite) {
@@ -17062,8 +17082,10 @@ class HudScene extends Phaser.Scene {
     const cam = gs.cameras.main, wv = cam.worldView, z = cam.zoom, toS = (x, y) => [(x - wv.x) * z, (y - wv.y) * z];
     if (gs.campaign && gs.state === 'play' && !this.perkOn && !gs.wheelOn && !gs.descending && !gs.boss) {
       const station = gs.campaignRoute[0], op = CAMPAIGN[gs.wave], n = op.squads.length;
-      if (station || gs.activeHostiles() > 0) {
-        const label = station ? station.label : op.name + '  /  SQUAD ' + (n - gs.campaignSquads.length) + '/' + n;
+      const incoming = Math.ceil((gs.campaignReinforceAt - gs.time.now) / 1000);
+      if (station || incoming > 0 || gs.activeHostiles() > 0) {
+        const label = station?.label || (incoming > 0 && !gs.activeHostiles() ? 'NEXT SQUAD IN ' + incoming + 'S' :
+          op.name + '  /  SQUAD ' + (n - gs.campaignSquads.length) + '/' + n);
         this.routeLabel.setText(label).setVisible(true);
         g.fillStyle(0x070d12, 0.9).fillRect(328, 12, 424, 43);
         g.fillStyle(station ? 0x76e8ff : 0xffb347, 1).fillRect(328, 12, 424, 2);

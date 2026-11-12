@@ -7,7 +7,7 @@ window.CP = (() => {
   const CP = {};
   const title = () => game.scene.getScene('Title');
   const checker = () => { const fails = []; return [fails, (ok, msg) => { if (!ok) fails.push(msg); }]; };
-  const loadout = g => ({ arena: g.A.id - 1, weapon: g.weapon, slots: g.weaponSlots.join(','), perks: Object.keys(g.perks).filter(k => g.perks[k]).sort().join(','), diff: g.runDiff, mut: g.runMut });
+  const loadout = g => ({ arena: g.A.id - 1, weapon: g.weapon, slots: g.weaponSlots.join(','), total: g.totalEnemies, perks: Object.keys(g.perks).filter(k => g.perks[k]).sort().join(','), diff: g.runDiff, mut: g.runMut });
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const startFromTitle = (choice) => {                                  // choice 0 = Continue, 1 = New Campaign
     T.start(); T.run(200);
@@ -29,12 +29,14 @@ window.CP = (() => {
     const shotgun = weaponSlot('shotgun');
     g.setWeapon(shotgun); g.perks.hollow = true; g.perks.boots = true;
     g.startWave = () => {};                                             // hold the wave timer, or it resets g.wave before the lift saves
-    g.wave = CAMPAIGN_ACTS[1].first - 1; g.descend(); T.run(2600);
+    g.wave = CAMPAIGN_ACTS[1].first - 1;
+    g.stats.kills = CAMPAIGN_TOTAL - campaignFoesFrom(g.wave + 1);
+    g.descend(); T.run(2600);
     delete g.startWave;                                                 // the scene object outlives the restart; give it its own method back
     const c = campaignCheckpoint();
     expect(c && c.arena === 1, `the Furnace lift saved no valid checkpoint: ${localStorage.getItem(CAMPAIGN_KEY)}`);
-    const snap = c && { arena: c.arena, weapon: c.weapon, slots: campaignWeaponSlots(c.wave).join(','), perks: Object.keys(c.perks).sort().join(','), diff: c.diff, mut: c.mut };
-    expect(!snap || same(snap, { arena: 1, weapon: shotgun, slots: g.weaponSlots.join(','), perks: 'boots,hollow', diff: 2, mut: 1 }), `the checkpoint didn't take the loadout: ${JSON.stringify(snap)}`);
+    const snap = c && { arena: c.arena, weapon: c.weapon, slots: campaignWeaponSlots(c.wave).join(','), total: c.totalEnemies, perks: Object.keys(c.perks).sort().join(','), diff: c.diff, mut: c.mut };
+    expect(!snap || same(snap, { arena: 1, weapon: shotgun, slots: g.weaponSlots.join(','), total: CAMPAIGN_TOTAL, perks: 'boots,hollow', diff: 2, mut: 1 }), `the checkpoint didn't take the loadout: ${JSON.stringify(snap)}`);
     return { fails, snap };
   };
 
@@ -65,7 +67,7 @@ window.CP = (() => {
   CP.progression = () => {
     const [fails, expect] = checker();
     const [g] = startFromTitle(1);
-    T.run(4250);
+    T.run(5100);
     expect(g.weaponSlots.join(',') === String(weaponSlot('nail')), 'the opening patrol should issue only the Nailgun');
     g.setWeapon(weaponSlot('rail'));
     g.cycleWeapon(1);
@@ -79,16 +81,32 @@ window.CP = (() => {
     for (const e of patrol) g.killEnemy(e, 1, 0, 'nail');
     g.cycleWeapon(1);
     expect(g.weapon === weaponSlot('shotgun'), 'clearing the patrol did not issue the Shotgun');
+    const gap = CAMPAIGN_ACTS[0].breakMs;
+    expect(g.activeHostiles() === 0 && g.campaignReinforceAt > g.time.now, 'the next squad skipped the break');
+    T.run(gap - 400);
+    expect(g.activeHostiles() === 0, 'hostiles arrived during the equipment break');
+    T.run(500);
+    expect(g.activeHostiles() === 1, 'the heavy did not deploy alone');
 
     g.time.removeAllEvents();
     g.startWave(1);
+    g.time.removeAllEvents();                                           // test the dispatch timer independently of the opening spawn beams
     expect(!g.mod && g.weaponSlots.includes(weaponSlot('flare')), 'Blackout must issue the Flare Gun before cutting power');
     g.enemiesLeft = g.campaignReserve + 1;
     g.releaseCampaignSquad();
     expect(!g.mod, 'the power cut started before the opening squad fell');
     g.enemiesLeft = g.campaignReserve;
     g.releaseCampaignSquad();
-    expect(g.mod === 'dark', 'the Blackout reinforcement did not cut power');
+    T.run(gap - 400);
+    expect(!g.mod && g.activeHostiles() === 0, 'Blackout cut power before the break ended');
+    T.run(500);
+    expect(g.mod === 'dark' && g.activeHostiles() === 3, 'Blackout did not deploy the smaller ambush');
+    g.wave = 0; g.hp = 34;
+    g.waveCleared();
+    expect(g.hp === 75, 'Lockdown clear did not restore the opening health floor');
+    g.mutator = 'vamp'; g.hp = 34;
+    g.waveCleared();
+    expect(g.hp === 34, 'Vampire gained campaign clear recovery');
     return { fails };
   };
 
@@ -97,7 +115,7 @@ window.CP = (() => {
     const [g, offered] = startFromTitle(0);
     expect(offered.checkpoint && offered.sel === 0, 'an older campaign save did not offer Continue');
     expect(g?.weapon === weaponSlot('nuke') && g.weaponSlots.includes(g.weapon), 'Continue lost the legacy equipped weapon');
-    expect(g?.totalEnemies === CAMPAIGN_TOTAL + 2, 'Continue did not retain the legacy enemy count adjustment');
+    expect(g?.stats.kills === 34 && g.totalEnemies === 34 + campaignFoesFrom(2), 'Continue did not keep cleared kills and recount upcoming foes');
     return { fails };
   };
 

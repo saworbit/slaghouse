@@ -100,7 +100,9 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. The other weapons arrive in
 fixed groups as each operation starts. The HUD announces new weapons, and hotkeys, the wheel and weapon cycling
-use the same arsenal. OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
+use the same arsenal. In the Melt Floor and Furnace, finish each squad before the next one deploys. The HUD
+counts down the break, and the first heavy arrives alone so you have time to equip the Shotgun. OVERTIME,
+DAILY and BOSS RUSH start with all 61 weapons.
 
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |
@@ -110,7 +112,9 @@ use the same arsenal. OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 | IV · The Wrecking Yard | **Demolition**, **The Foreman** | Flak Cannon, Tractor, Drill Launcher, Rivet Minigun, Marksman Rifle, Riot Shield | The second squad releases the wrecking ball. Use the steel steps to reach the dais after the crates break. The Foreman fights beneath the active ball. |
 | V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Singularity, Mini-Nuke, Magma Lance | Fight the first electrical squad before the floor rails energize. Use the steps and catwalks above the live banks. The Smelter overheats below 15% health and fans slag across the room. |
 
-Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.
+Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
+it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
+after Lockdown. Later perk drafts draw from the remaining pool.
 Step onto each marked lift to enter the next act and save a checkpoint. Arrival raises health to at least
 60 HP in the Furnace, 75 HP in the Sorting Line and Wrecking Yard, and 80 HP in the Powerhouse. The Vampire
 mutator skips this recovery. Checkpoints restore issued weapons, the equipped weapon, perks, difficulty,

@@ -116,7 +116,7 @@ try {
     const page = await open(ctx, ['daily']);
     return (await page.evaluate(() => { RUNMODE = 'daily'; T.boot(); T.run(300); return DY.check(); })).fails;
   });
-  await check('campaign patrol, weapon access and staged blackout', async ctx => {
+  await check('campaign patrol, weapon access, reinforcement break and staged blackout', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.progression())).fails;
   });
@@ -146,7 +146,8 @@ try {
         const legacy = JSON.parse(payload);
         delete legacy.checkpoint.revision;
         legacy.checkpoint.weapon = weaponSlot('nuke');
-        legacy.checkpoint.totalEnemies = LEGACY_CAMPAIGN_TOTAL + 2;
+        legacy.checkpoint.stats.kills = 34;                         // 32 base foes cleared, plus two extras in the old opening acts
+        legacy.checkpoint.totalEnemies = 98;
         localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(legacy));
       }, saved);
       page = await open(ctx, ['checkpoint']);
