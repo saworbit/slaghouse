@@ -1,0 +1,58 @@
+// Enemy kind checks (#52). Not part of the game; see dev/playtest/README.md. Needs harness.js.
+// KC.check() goes through every kind in ENEMY. Each one is warped in on its own, in a fresh ARENA 01 stage, the way
+// a wave brings it in. It must:
+//   - have a CODEX row (body parts of another foe aside) and a texture holding its start frame and codex frame
+//   - spawn on its start frame
+//   - run for a while beside the player, take a hit, die and clear away without an error
+// KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
+window.KC = (() => {
+  const KC = {};
+  const PARTS = { wyrmseg: 'wyrm', slagmid: 'slagling', slagbit: 'slagling' };   // pieces of another foe: the codex row is the parent's
+  const RUN_MS = 1500, DEAD_MS = 1200;
+
+  KC.check = (only) => {
+    const fails = [], kinds = only || Object.keys(ENEMY), codex = new Map(CODEX.map(r => [r[0], r]));
+    for (const kind of kinds) {
+      const D = ENEMY[kind], say = msg => fails.push(`${kind}: ${msg}`);
+      if (!D) { say('not in ENEMY'); continue; }
+      const row = codex.get(kind);
+      if (!row && !PARTS[kind]) say('no CODEX row');
+      if (!game.textures.exists(D.key)) { say(`no texture '${D.key}'`); continue; }
+      const tex = game.textures.get(D.key);
+      if (!tex.has(D.frame0)) say(`start frame '${D.frame0}' isn't in texture '${D.key}'`);
+      if (row && !tex.has(row[2])) say(`codex frame '${row[2]}' isn't in texture '${D.key}'`);
+
+      const g = T.setup(1);
+      T.errs.length = 0;
+      const air = FLIERS.has(kind), px = g.player.x, py = g.player.y;
+      // the nearest spawn point of its type that isn't on top of the player, so it meets the player straight away
+      const near = (g.A.points[air ? 'A' : 'G'] || []).map(p => ({ p, d: Math.hypot(p[0] * TS + 8 - px, p[1] * TS - py) }))
+        .filter(o => o.d > 64).sort((a, b) => a.d - b.d)[0];
+      if (!near) { say(`ARENA 01 has no ${air ? 'air' : 'ground'} spawn point to warp it in at`); continue; }
+      const pt = near.p;
+      let e = null, frame = null;
+      const spawn = g.spawnEnemy;
+      g.spawnEnemy = function (k, cx, cy) { const o = spawn.call(this, k, cx, cy); if (k === kind && !e) { e = o; frame = o.frame.name; } return o; };
+      const step = (ms, what) => { try { T.run(ms); return true; } catch (err) { say(`threw ${what}: ${String(err && err.message || err).split('\n')[0]}`); return false; } };
+      try {
+        try { g.warpIn(kind, pt, air); } catch (err) { say('warpIn threw: ' + err.message); continue; }
+        if (!step(kind === 'boss' ? 1700 : 1100, 'while warping in')) continue;
+      } finally { delete g.spawnEnemy; }                                // the scene object outlives the restart; give it its own method back
+      if (!e) { say('never spawned'); continue; }
+      if (frame !== D.frame0) say(`spawned on frame '${frame}', its start frame is '${D.frame0}'`);
+      if (!step(RUN_MS, 'while running')) continue;
+      if (e.alive) {
+        try { g.damageEnemy(e, 1, 0, 0, 'harness'); } catch (err) { say('damageEnemy threw: ' + err.message); }
+        if (!step(100, 'after a hit')) continue;
+      }
+      if (e.alive) {
+        try { g.killEnemy(e, 0, -1, 'harness'); } catch (err) { say('killEnemy threw: ' + err.message); }
+        if (!step(DEAD_MS, 'after dying')) continue;
+        if (e.alive) say('still alive after killEnemy');
+      }
+      for (const m of T.errs) say('error: ' + m);
+    }
+    return { fails, kinds: kinds.length };
+  };
+  return KC;
+})();
