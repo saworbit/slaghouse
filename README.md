@@ -8,7 +8,7 @@
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
 A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
-ragdolls, destructible terrain, 61 weapons with mastery stars, 94 enemy types and 27 medals. The three-act
+ragdolls, destructible terrain, 61 weapons with mastery stars, 94 enemy types and 27 medals. The five-act
 campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
 Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
 with no build step.
@@ -98,21 +98,24 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 ## Campaign
 
-The campaign descends through three acts. Each has two operations. The HUD shows the active squad and marks route
-objectives in cyan. Reinforcements arrive as the current squad thins out. The Gunship, Juggernaut and Slag Wyrm
-enter after their escorts fall.
+The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. The other weapons arrive in
+fixed groups as each operation starts. The HUD announces new weapons, and hotkeys, the wheel and weapon cycling
+use the same arsenal. OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 
-| Act | Operations | Objective |
-| --- | --- | --- |
-| I · The Melt Floor | **Lockdown**, **Blackout** | Start against a small grunt patrol, then face the floor security team. Gunfire lights the blackout. After both operations, enter the marked Furnace lift. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Slag falls in showers with clear spells between; **SLAG INCOMING** warns you before each one. Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
-| III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at each marked coolant valve until its meter fills. Open valve 1 before valve 2 to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
+| Act | Operations | New weapons | Threats and objectives |
+| --- | --- | --- | --- |
+| I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Fight armoured squads around the vents. Use overhead cover when slag showers begin, then use the higher platforms in low gravity. The Gunship and Juggernaut arrive after their escorts. |
+| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Rocket Launcher, Plasma Katana, Siphon | Learn the belts before the presses and slag tide activate. Defeat the Wyrm and seal both coolant valves in order to open the lift. |
+| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Flak Cannon, Tractor, Drill Launcher, Rivet Minigun, Marksman Rifle, Riot Shield | The second squad releases the wrecking ball. Use the steel steps to reach the dais after the crates break. The Foreman fights beneath the active ball. |
+| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Singularity, Mini-Nuke, Magma Lance | Fight the first electrical squad before the floor rails energize. Use the steps and catwalks above the live banks. The Smelter overheats below 15% health and fans slag across the room. |
 
 Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.
-Step onto each marked lift to enter the next act and save a checkpoint. The Furnace checkpoint brings your
-health up to at least 60 HP and the Sorting Line checkpoint brings it up to at least 75 HP. The Vampire mutator
-skips this recovery. Each checkpoint also saves your equipped weapon, perks, difficulty, mutator and accumulated
-run stats.
+Step onto each marked lift to enter the next act and save a checkpoint. Arrival raises health to at least
+60 HP in the Furnace, 75 HP in the Sorting Line and Wrecking Yard, and 80 HP in the Powerhouse. The Vampire
+mutator skips this recovery. Checkpoints restore issued weapons, the equipped weapon, perks, difficulty,
+mutator and accumulated run stats. A checkpoint from the three-act campaign also keeps its equipped weapon
+if that weapon falls outside the new progression.
 
 Choose **Campaign → Continue** to return to the saved act after quitting or reloading. Keep the same browser
 profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the

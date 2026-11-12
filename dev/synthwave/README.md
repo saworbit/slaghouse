@@ -8,8 +8,8 @@ flips between the two.
 | --- | --- | --- |
 | `title` SLAGHOUSE | title screen, and under the results screen after a jingle | F minor, 96 BPM, 16 bars (40 s) |
 | `stage1` MELT FLOOR | campaign waves 1-2; OVERTIME / DAILY waves 1-2 of every six | A minor, 118 BPM, 32 bars (65 s) |
-| `stage2` SLAG RAIN | campaign waves 3-5; OVERTIME / DAILY waves 3-5 of every six | D minor, 126 BPM, 32 bars (61 s) |
-| `boss` THE SMELTER | campaign wave 6 (the Smelter); every BOSS RUSH fight; OVERTIME / DAILY waves 6, 12, 18 ... | E minor / phrygian, 140 BPM, 32 bars (55 s) |
+| `stage2` SLAG RAIN | campaign from the Furnace onward, except the Foreman and Smelter fights; OVERTIME / DAILY waves 3-5 of every six | D minor, 126 BPM, 32 bars (61 s) |
+| `boss` THE SMELTER | the Foreman and Smelter campaign fights; every BOSS RUSH fight; OVERTIME / DAILY waves 6, 12, 18 ... | E minor / phrygian, 140 BPM, 32 bars (55 s) |
 | `win` / `lose` | ARENA CLEARED fanfare / YOU GOT GIBBED tape-stop | 6.5 s / 5.3 s |
 
 Waves pick their track from `WAVE_MUSIC` in `slaghouse.html` (`waveTrack`): the campaign's last entry covers any later

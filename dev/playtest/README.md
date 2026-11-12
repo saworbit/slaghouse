@@ -28,7 +28,7 @@ node dev/playtest/run.mjs
 
 Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, the checkpoint flow (New Campaign on BRUTAL with
 GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
-retry the act, compare), five damaged saves that must fall back to New Campaign, and `VB.campaign(900)`, which must end won. Foes in its
+retry the act, compare), a legacy save and five damaged saves, and `VB.campaign(1500)`, which must visit all five acts and end won. Foes in its
 `removed` list are printed as a note, since a mimic hiding as a drum can beat the bot without anything being broken.
 Any page error or console error fails the check it happened in. Phaser is fetched from jsDelivr once, checked
 against the tag's integrity hash and served to every page. `--quick` skips the campaign run (the whole thing takes about 30 s headless; the campaign is most of it).
@@ -42,15 +42,15 @@ Serve the repo root with `python -m http.server 8765 --bind 127.0.0.1`. In a fre
 ```js
 for (const f of ['harness', 'chaos', 'vibe']) eval(await (await fetch('/dev/playtest/' + f + '.js')).text());
 RUNMODE = 'campaign'; T.boot(); T.run(300);
-const r = await VB.campaign(900);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
+const r = await VB.campaign(1500);   // Inspect waves, state, kills, total, totalTaken, msPerFrame, simFps, callouts and errs.
 ```
 
 A pass has `state: 'won'`, an empty `errs` array and an empty `removed` array. `removed` lists any foe the bot
 couldn't see for 30 s with five or fewer left; `VB.campaign` kills it so the run goes on, so a non-empty list means
 the bot got stuck there. The bot stands on lift and coolant-valve markers as they
 open. Use `T.setup(0)` to stage a fight in the Melt Floor or `T.setup(1)` to stage one in the Furnace with waves
-disabled. Under the campaign `RUNMODE`, `T.setup(3)` and `T.setup(4)` stage ARENA 04 and 05 as OVERTIME, since the
-campaign has no act there. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
+disabled. Use `T.setup(3)` or `T.setup(4)` for the Wrecking Yard or Powerhouse. Campaign setups restore the
+arsenal earned before that act. Use the [campaign smoke checklist](../../CONTRIBUTING.md#campaign-smoke-check) to verify checkpoint
 reload, retry and the valve meter's pause behavior.
 
 ## Things that bite

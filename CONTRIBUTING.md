@@ -42,17 +42,20 @@ node dev/playtest/run.mjs --quick
 
 ### Campaign smoke check
 
-1. In a fresh browser profile, start a new campaign. Clear Lockdown and confirm the three opening perks appear.
-   Pick one with **1**, **2** or **3** while a different weapon is equipped. The perk pick should leave the weapon equipped.
+1. In a fresh campaign, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
+   grunt patrol falls. Equip the newly issued Shotgun. Pick a perk with **1**, **2** or **3** after Lockdown and
+   confirm the equipped weapon stays put. Check that the Flare Gun arrives before the lights go out.
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
    same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
    checkpoint. Clear the act and enter the Sorting Line lift. Confirm **Continue** now starts in the Sorting Line.
-4. After Meltdown, leave the first coolant valve before the meter fills and check that it resets. Pause while
-   standing at the valve and check that the meter holds. Resume, open both valves in order and defeat the Smelter.
-   Confirm the results appear and **Continue** is unavailable on the campaign screen.
-5. Start OVERTIME, DAILY and BOSS RUSH after a campaign change to the shared wave or results code. Check that each
-   mode starts in the expected arena and shows its own wave, boss or daily perk setup.
+4. After Meltdown, leave the first coolant valve early to reset its meter, then pause on the valve to check
+   that the meter holds. Resume, seal both valves in order and enter the Wrecking Yard lift.
+5. Check that the wrecking ball starts with the second Demolition squad and that the rails turn on after the
+   first Live Circuit squad. Defeat the Foreman and Smelter in order. Confirm the results appear and Continue
+   is unavailable on the campaign screen.
+6. Start OVERTIME, DAILY and BOSS RUSH. Check that the full arsenal is available and each mode has its own
+   wave, boss or daily perk setup.
 
 ## Workflow
 

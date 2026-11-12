@@ -6,10 +6,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
-- **Three-act campaign.** Six named operations deploy authored squads with solo mini-boss encounters. Follow the
-  marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
-- **Campaign checkpoints.** Entering the Furnace or Sorting Line saves your health, weapon, perks, run stats,
-  difficulty and mutator in the browser. Continue from the title screen or retry the act after a death.
+- **Five-act campaign.** Ten operations descend from the Melt Floor through the Wrecking Yard and Powerhouse.
+  Enemy squads introduce blackout, slag showers, presses, the wrecking ball and live rails in stages. Fight
+  the Foreman in the Yard before facing the Smelter in the Powerhouse.
+- **Campaign arsenal.** Start with the Nailgun, earn the Shotgun after the first patrol, and unlock 27 weapons
+  through the campaign. All other modes start with the full arsenal.
+- **Campaign checkpoints.** Each lift saves your health, weapon, perks, stats, difficulty and mutator. Continue
+  from the title or retry the act after death. Saves from the three-act campaign keep their equipped weapon.
 - The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
   the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
 - `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
@@ -25,7 +28,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   version they were measured against, taken from git history. (#9)
 - `dev/playtest/run.mjs` runs the play-test harness in headless Chrome, and CI runs it as a second job: the two-tab
   and DAILY checks, campaign checkpoint checks (reload and Continue, die and retry the act, five damaged saves) and a
-  full `VB.campaign(900)` run. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
+  full `VB.campaign(1500)` run across all five acts. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
   steps. (#45, #39)
 - `dev/synthwave/render.py` checks every loop for a baked-in seam: each stem has died away before the render ends,
   and the reverb and delay don't drop across the wrap. A loop that fails isn't written to `out/`, and it exits 1
