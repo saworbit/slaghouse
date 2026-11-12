@@ -10,6 +10,7 @@ automatically.
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |
+| `kinds.js` | `window.KC`: `KC.check()` warps in every kind in `ENEMY` on its own, the way a wave does, and checks that it has a codex row and a texture with its start frame, spawns on that frame, then runs, takes a hit and dies without an error. `KC.check(['wasp'])` checks only those |
 | `checkpoint.js` | `window.CP`: `CP.save()`, `CP.resume(snap)`, `CP.retry(snap)` and `CP.damaged()`, the campaign checkpoint checks `run.mjs` drives across page reloads |
 | `run.mjs` | the headless runner: serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on every push and pull request |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
@@ -26,7 +27,7 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, the checkpoint flow (New Campaign on BRUTAL with
+Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, `KC.check()`, the checkpoint flow (New Campaign on BRUTAL with
 GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
 retry the act, compare), a legacy save and five damaged saves, and `VB.campaign(1500)`, which must visit all five acts and end won. Foes in its
 `removed` list are printed as a note, since a mimic hiding as a drum can beat the bot without anything being broken.

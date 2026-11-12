@@ -35,8 +35,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   naming the track. Skipping the tail fold for one track now fails it. (#41)
 - The `Release` workflow has a dry run: run it by hand and it builds the zip and notes from the chosen branch and
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
+- `dev/playtest/kinds.js`, run by `run.mjs` and CI: every enemy kind is warped in on its own and must have a codex
+  row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+- Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
+  `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
+  needs entries in three side tables. No foe behaves differently. (#52)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
