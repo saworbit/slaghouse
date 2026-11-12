@@ -8,7 +8,7 @@
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
 A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
-ragdolls, destructible terrain, 61 weapons with mastery stars, 94 enemy types and 27 medals. The three-act
+ragdolls, destructible terrain, twenty kinds of breakable scenery, 61 weapons with mastery stars, 94 enemy types and 27 medals. The three-act
 campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
 Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
 with no build step.

@@ -3,6 +3,8 @@
 //   - the two-tab check (twotab.js) and the DAILY midnight check (daily.js)
 //   - every enemy kind (kinds.js), warped in one at a time: a codex row, its start frame, then it runs, takes a hit
 //     and dies without an error
+//   - every breakable prop in every arena (props.js): it sits where it can, breaks and goes off, restocks and breaks
+//     again to a blast without an error
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
 //     the act, and a few damaged saves that must fall back to New Campaign
 //   - a full VB.campaign(900) run (vibe.js), which must end won; foes the bot couldn't reach are listed as a note
@@ -60,7 +62,7 @@ const browser = await chromium.launch({
   ...(process.env.PLAYTEST_CHROME ? { executablePath: process.env.PLAYTEST_CHROME } : { channel: 'chrome' }),
   args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'],
 });
-const scripts = Object.fromEntries(await Promise.all(['harness', 'vibe', 'twotab', 'daily', 'kinds', 'checkpoint'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
+const scripts = Object.fromEntries(await Promise.all(['harness', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
 const failures = [];
 const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(0) + 's';
 const report = (name, fails) => {
@@ -119,6 +121,10 @@ try {
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;
+  });
+  await check('every breakable prop goes off cleanly in every arena', async ctx => {
+    const page = await open(ctx, ['props']);
+    return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return PR.check(); })).fails;
   });
   let saved = null;
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {

@@ -6,6 +6,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Twenty kinds of breakable scenery**, restocked every wave: neon signs, strip lights, floodlights, fuse boxes,
+  capacitor banks, propane tanks, toxic and oil drums, cryo and water tanks, a steam boiler, wall fans, slag ladles,
+  vending machines, terminals, ammo crates, flare cases, extinguishers, control-room windows and PA horns. Each goes
+  off its own way (a ladle pours slag, a fan's blades fly off as saw blades, a capacitor chains lightning, a vending
+  machine sprays fizzing cans and health orbs) and they set each other off: fire cooks off what burns, a PA horn
+  shatters glass, spilt water conducts when anything electrical goes off near it. Every arena has a set; ARENA 01
+  has one of each. Shots, blasts, kicks, saw blades, the hose and the wrecking ball all hit them.
+- `dev/playtest/props.js`, run by `run.mjs` and CI: every prop in every arena is broken, run through its effect,
+  restocked and broken again without an error.
 - **Three-act campaign.** Six named operations deploy authored squads with solo mini-boss encounters. Follow the
   marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
 - **Campaign checkpoints.** Entering the Furnace or Sorting Line saves your health, weapon, perks, run stats,
