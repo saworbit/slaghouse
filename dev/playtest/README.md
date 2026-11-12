@@ -27,7 +27,9 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Each check gets a fresh browser profile: `TT.check()`, `DY.check()`, `KC.check()`, the checkpoint flow (New Campaign on BRUTAL with
+Each check gets a fresh browser profile. The campaign pacing checks cover the opening patrol, staged blackout,
+rain and fire cleanup around the Gunship, and the separate Hound squads in Gravity Loss. The suite also runs
+`TT.check()`, `DY.check()`, `KC.check()`, the checkpoint flow (New Campaign on BRUTAL with
 GLASS CANNON and a changed loadout, ride the Furnace lift, reload, Continue, compare; then change the loadout, die,
 retry the act, compare), a legacy save and five damaged saves, and `VB.campaign(1500)`, which must visit all five acts and end won. Foes in its
 `removed` list are printed as a note, since a mimic hiding as a drum can beat the bot without anything being broken.

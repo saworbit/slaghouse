@@ -48,7 +48,10 @@ node dev/playtest/run.mjs --quick
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
    same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
-   checkpoint. Clear the act and enter the Sorting Line lift. Confirm **Continue** now starts in the Sorting Line.
+   checkpoint. Check that the rain and molten puddles clear before the Gunship and that ground fire stops
+   damaging you after **WAVE CLEARED**, including during the Gunship crash. Check that one Hound arrives in
+   the first low-gravity squad and the second arrives with **Gravity Surge**. Enter the Sorting Line lift and
+   confirm **Continue** now starts in the Sorting Line.
 4. After Meltdown, leave the first coolant valve early to reset its meter, then pause on the valve to check
    that the meter holds. Resume, seal both valves in order and enter the Wrecking Yard lift.
 5. Check that the wrecking ball starts with the second Demolition squad and that the rails turn on after the

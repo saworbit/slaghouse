@@ -121,6 +121,77 @@ window.CP = (() => {
     return { fails };
   };
 
+  CP.furnacePacing = () => {
+    const [fails, expect] = checker();
+    Math.random = seeded(426);
+    const [g] = startFromTitle(1);
+    g.scene.restart({ arena: 1 }); T.run(100);
+    g.time.removeAllEvents();
+    const alive = () => g.enemies.getChildren().filter(e => e.alive);
+    const clear = () => { for (const e of alive()) g.killEnemy(e, 1, 0, 'nail'); };
+    const gunship = () => alive().find(e => e.kind === 'gunship');
+    g.startWave(2); T.run(3300); clear();
+    const rainBreak = CAMPAIGN[2].breakMs;
+    T.run(rainBreak + 3300);
+    expect(g.mod === 'slag', 'Slag Rain did not start with Salvage Crew');
+    clear(); T.run(rainBreak + 4100);
+    expect(g.mod === 'slag' && !gunship(), 'the rain should still be active during Furnace Guard');
+
+    const { x, body } = g.player;
+    const drop = g.slagList[0];
+    drop.enableBody(true, x, 100, true, true); drop.rain = true; drop.glow.setVisible(true);
+    g.slagImpact(x, body.bottom - 5, true);
+    g.spawnFirePatch(x, body.bottom - 5);
+    expect(g.puddles.some(p => p.rain) && g.puddles.some(p => p.fire), 'test setup did not create rain and fire puddles');
+    clear();
+    expect(g.mod === null && !drop.active && !drop.glow.visible && !g.puddles.some(p => p.rain),
+      'the Gunship break did not clear the rain, airborne slag and rain puddles');
+    expect(g.puddles.some(p => p.fire), 'ending the rain removed fire from a different source');
+    T.run(rainBreak - 300);
+    expect(!gunship(), 'the Gunship skipped the reinforcement break');
+    T.run(2000);
+    expect(gunship() && g.mod === null, 'the Gunship did not arrive in clear weather');
+    if (!gunship()) return { fails };
+
+    g.spawnFirePatch(g.player.x, g.player.body.bottom - 5);
+    g.hp = 10;
+    clear();
+    expect(g.enemiesLeft === 0 && !g.puddles.length && g.hp === 65, 'the clear did not extinguish existing fires and restore health');
+    const wreck = g.wrecks[0];
+    expect(wreck, 'defeating the Gunship did not leave a wreck');
+    if (wreck) {                                                     // hold the wreck above the floor until the next operation starts
+      wreck.body.setAllowGravity(false); wreck.body.setVelocity(0, 0);
+      wreck.t = -10;
+    }
+    const taken = g.stats.taken;
+    g.hurtPlayer(20, g.player.x, { self: true, iframes: false });        // a blast can go off after the last kill
+    g.spawnFirePatch(g.player.x, g.player.body.bottom - 5);             // a late firebomb can still hit the ground
+    T.run(1800);
+    expect(!g.puddles.length && g.stats.taken === taken && g.state === 'play', 'a late blast or fire patch harmed the player after the clear');
+    expect(g.perkOffer, 'the safe break did not offer the next perk');
+    if (!g.perkOffer) return { fails };
+
+    g.onPerkPick(g.perkOffer[0]); T.run(750);
+    expect(wreck && g.wrecks.includes(wreck), 'test setup did not carry the wreck into the next operation');
+    if (wreck && g.wrecks.includes(wreck)) {
+      wreck.body.reset(g.player.x, g.player.y);
+      wreck.t = 5;
+      T.run(50);
+    }
+    expect(g.wave === 3 && !g.wrecks.length && !g.puddles.length && g.stats.taken === taken,
+      'the old Gunship wreck damaged the player or reignited the arena after the next operation started');
+    T.run(2950);
+    const hounds = () => alive().filter(e => e.kind === 'hound').length;
+    expect(g.wave === 3 && g.mod === 'lowg' && g.physics.world.gravity.y === TUNE.GRAVITY * 0.5 && hounds() === 1,
+      'Gravity Loss did not open in low gravity with one Hound');
+    clear();
+    T.run(CAMPAIGN[3].breakMs - 300);
+    expect(g.activeHostiles() === 0 && hounds() === 0 && g.mod === 'lowg', 'the second Hound skipped the low-gravity break');
+    T.run(2000);
+    expect(hounds() === 1 && g.mod === 'lowg', 'the second Hound did not arrive with Gravity Surge');
+    return { fails };
+  };
+
   CP.legacy = () => {
     const [fails, expect] = checker();
     const [g, offered] = startFromTitle(0);

@@ -500,13 +500,14 @@
     Campaign encounters . LOCKDOWN opens with grunts. BLACKOUT cuts the lights on the second squad. In the
                           FURNACE, the vents are already active when the second squad brings SLAG RAIN. Showers
                           last 7 to 9 s, with 5 to 7 s clear and 1.2 s warning. They spare platforms and drums.
-                          Fight the Gunship, then the Juggernaut in low gravity. SORTING SHIFT starts the belts.
+                          The rain clears before the Gunship arrives. GRAVITY LOSS starts with a grunt, one Hound
+                          and a Blinker before the second Hound joins the next squad. SORTING SHIFT starts the belts.
                           MELTDOWN adds presses first, then rising slag and the Wyrm. DEMOLITION releases the
                           wrecking ball before the Foreman. LIVE CIRCUIT energizes the rails before the Smelter.
                           The first five operations grow from 2 to 6 enemies per squad. Breaks shorten from
                           3.2 to 1.6 s, spawn spacing narrows, and incoming damage climbs from 80% to full.
                           Lockdown and Slag Rain clear with health restored to at least 75 and 65,
-                          except with the Vampire mutator. Machinery stops between campaign operations.
+                          except with the Vampire mutator. Machinery and ground fires clear between operations.
                           Medkits restock between waves.
     Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad). The campaign
                           opens with a choice of HOLLOW POINTS, VAMPIRE or DOUBLE JUMP. HOLLOW POINTS +20%
@@ -3989,12 +3990,12 @@ const CAMPAIGN = [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
     { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
     { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
-    { foes: [['gunship', 'A']] },
+    { mod: null, foes: [['gunship', 'A']] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
     breakMs: 2000, spawnGap: 650, damageScale: 0.95, elites: 1, squads: [
-    { foes: [['grunt', 'G'], ['hound', 'G'], ['hound', 'G'], ['blinker', 'A']] },
-    { name: 'GRAVITY SURGE', foes: [['pogo', 'G'], ['linker', 'A'], ['linker', 'A']] },
+    { foes: [['grunt', 'G'], ['hound', 'G'], ['blinker', 'A']] },
+    { name: 'GRAVITY SURGE', foes: [['hound', 'G'], ['pogo', 'G'], ['linker', 'A'], ['linker', 'A']] },
     { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G'], ['chiller', 'G']] },
     { foes: [['jugg', 'G']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT' }] },
@@ -6981,6 +6982,8 @@ class GameScene extends Phaser.Scene {
       if (hit || (s.body.velocity.y > 0 && this.standAt(s.x, s.y + 3))) { this.slagImpact(hit ? hit.x : s.x, hit ? hit.y : s.y, s.rain); s.disableBody(true, true); s.glow.setVisible(false); continue; }
       s.px = s.x; s.py = s.y;
     }
+    // A wreck or firebomb can land after the clear and leave a new patch.
+    if (this.campaign && !this.enemiesLeft) this.puddles.length = 0;
     for (let i = this.puddles.length - 1; i >= 0; i--) {              // molten puddles: burn whoever stands in them
       const P = this.puddles[i]; P.t -= dt;
       if (P.t <= 0) { this.puddles.splice(i, 1); continue; }
@@ -7005,7 +7008,8 @@ class GameScene extends Phaser.Scene {
   }
   slagImpact(x, y, rain) {                                              // rain burns and shoves but leaves floors and drums alone, so a shower can't dig you into a pit
     this.explode(x, y, rain ? this.rainBlast || (this.rainBlast = { ...TUNE.BOSS.slag, tileDamage: 0, drums: false }) : TUNE.BOSS.slag);
-    for (let yy = y; yy < y + 40; yy += 2) if (this.standAt(x, yy)) { const sy = Math.floor(yy / TS) * TS; this.puddles.push({ x, y: sy, w: 34, t: 2.6, tick: 0.2 }); this.paintScorch(x, sy + 2, 10); break; }
+    if (rain && this.campaign && this.mod !== 'slag') return;           // the impact itself can clear the squad and end the rain
+    for (let yy = y; yy < y + 40; yy += 2) if (this.standAt(x, yy)) { const sy = Math.floor(yy / TS) * TS; this.puddles.push({ x, y: sy, w: 34, t: 2.6, tick: 0.2, rain }); this.paintScorch(x, sy + 2, 10); break; }
   }
 
   // ------------------------------------------------------------------- ticks ----
@@ -9141,6 +9145,13 @@ class GameScene extends Phaser.Scene {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
   applyMod(m) {                                                         // wave modifiers: chaos with rules
+    if (this.campaign && this.mod === 'slag' && m !== 'slag') {
+      for (const s of this.slagList) if (s.active && s.rain) {
+        s.disableBody(true, true);
+        s.glow.setVisible(false);
+      }
+      this.puddles = this.puddles.filter(p => !p.rain);
+    }
     const rainLead = this.campaign ? 3 : 1.5;
     this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
     this.rainPhaseT = rainLead + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
@@ -9408,15 +9419,18 @@ class GameScene extends Phaser.Scene {
       this.fxFire(w.x + rand(-12, 12), w.y + rand(-4, 4), 2); this.fxSmoke(w.x, w.y - 4, 2, 1.4);
       if (Math.random() < 0.15) this.boomFx(w.x + rand(-18, 18), w.y + rand(-6, 6), 0.35);
       for (const e of this.enemies.getChildren()) {                      // flattens whatever it comes down on
-        if (!e.alive || w.hits.has(e) || e.kind === 'boss') continue;
+        if (w.cosmetic || !e.alive || w.hits.has(e) || e.kind === 'boss') continue;
         const eb = e.body; if (Math.abs(eb.center.x - w.x) < 26 && Math.abs(eb.center.y - w.y) < 14) { w.hits.add(e); this.damageEnemy(e, 90, 0, 1, 'crush'); }
       }
       if ((w.t > 0.25 && (b.blocked.down || b.blocked.left || b.blocked.right)) || w.t > 5) {
         const x = w.x, y = w.y, D = ENEMY.gunship; w.col.destroy(); w.destroy(); this.wrecks.splice(i, 1);
         for (let j = 0; j < 24; j++) this.spawnGib(pick(D.gibs), x + rand(-18, 18), y + rand(-6, 6), rand(-300, 300), rand(-420, -120), 'metal');
-        this.explode(x, y, TUNE.GUNSHIP.crash);
+        if (w.cosmetic) this.boomFx(x, y, TUNE.GUNSHIP.crash.radius / 60);
+        else {
+          this.explode(x, y, TUNE.GUNSHIP.crash);
+          for (let j = 0; j < 4; j++) this.spawnFirePatch(x + rand(-40, 40), y);
+        }
         for (let j = 0; j < 6; j++) this.time.delayedCall(80 + j * 90, () => this.boomFx(x + rand(-40, 40), y + rand(-20, 10), rand(0.6, 1.1)));
-        for (let j = 0; j < 4; j++) this.spawnFirePatch(x + rand(-40, 40), y);
         this.zoomPunch = 0.15; BUS.emit('flash', 0.5);
       }
     }
@@ -14908,6 +14922,8 @@ class GameScene extends Phaser.Scene {
     if (this.campaign) {
       this.campaignMachinery = null;
       this.applyMod(null);
+      this.puddles.length = 0;
+      for (const w of this.wrecks) w.cosmetic = true;                  // a wreck still in the air cannot reignite the arena
       const recovery = CAMPAIGN[this.wave].recovery;
       if (this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery) {
         this.hp = recovery;
@@ -15042,6 +15058,11 @@ class GameScene extends Phaser.Scene {
     const next = this.campaignSquads[0], act = CAMPAIGN_ACTS[this.A.id - 1], op = CAMPAIGN[this.wave];
     if (!next || this.campaignReinforceAt || (!opening && this.activeHostiles() > (next.wait ?? act.overlap ?? 0))) return;
     const breakMs = op.breakMs ?? act.breakMs;
+    if (next.mod === null && this.mod !== null) {
+      const wasRaining = this.mod === 'slag';
+      this.applyMod(null);
+      if (wasRaining) BUS.emit('callout', 'SLAG RAIN CLEARED');
+    }
     this.issueWeapons(next.unlock);
     const deploy = () => {
       this.campaignReinforceAt = 0;
@@ -15109,7 +15130,7 @@ class GameScene extends Phaser.Scene {
   }
   hurtPlayer(dmg, srcX, opts = {}) {
     if (this.state !== 'play') return false;
-    if (this.campaign && (this.descending || (this.wave === CAMPAIGN.length - 1 && !this.enemiesLeft))) return false;
+    if (this.campaign && (this.descending || !this.enemiesLeft)) return false;
     const now = this.time.now, soft = opts.self || opts.burn;
     if (!opts.self) {
       const campaignScale = this.campaign ? (CAMPAIGN[this.wave]?.damageScale ?? 1) : 1;

@@ -41,7 +41,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ### Changed
 - **Campaign pacing.** The first five operations build from two to six foes per squad while shortening
   reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
-  more time to reach cover, and Lockdown and Slag Rain restore a minimum amount of health after a clear.
+  more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
+  Lockdown and Slag Rain restore a minimum amount of health after a clear.
 - Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
   `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
   needs entries in three side tables. No foe behaves differently. (#52)
@@ -70,6 +71,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Ground fires go out when a campaign round clears. Late explosions and fire patches can no longer damage the
+  player while choosing a perk or waiting for the next round.
 - **Slag Rain** comes in 7 to 9 s showers with 5 to 7 s clear spells instead of without a break, and **SLAG
   INCOMING** warns 1.2 s before each shower. Rain drops still burn and knock you about, but they no longer break
   platforms or set off drums, so a shower can't dig you into a pit you can't climb out of. The Smelter's slag
