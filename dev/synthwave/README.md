@@ -12,8 +12,9 @@ flips between the two.
 | `boss` THE SMELTER | the Foreman and Smelter campaign fights; every BOSS RUSH fight; OVERTIME / DAILY waves 6, 12, 18 ... | E minor / phrygian, 140 BPM, 32 bars (55 s) |
 | `win` / `lose` | ARENA CLEARED fanfare / YOU GOT GIBBED tape-stop | 6.5 s / 5.3 s |
 
-Waves pick their track from `WAVE_MUSIC` in `slaghouse.html` (`waveTrack`): the campaign's last entry covers any later
-wave, and OVERTIME and DAILY go round all six.
+`waveTrack()` uses the campaign operation's `music` field for the Foreman and Smelter. The other campaign
+operations use the stage tracks listed above. OVERTIME and DAILY cycle through `WAVE_MUSIC`, and BOSS RUSH uses
+its boss track for each fight.
 Stage loops are muffled (low-pass, quieter) until an enemy notices you and open up as the fight heats up
 (`Music.shade`); title, boss and jingles always play full, and the pause menu muffles everything. `Music.LEVEL` sets
 the base music level against the SFX, and the pause menu's music volume (`OPTS.music`) scales it.

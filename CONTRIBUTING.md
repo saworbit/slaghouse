@@ -26,19 +26,21 @@ to an exact version and carry an integrity hash. If you bump Phaser, put the new
 note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
 request.
 
-CI also runs the [play-test harness](dev/playtest/README.md) headless: the two-tab and DAILY checks, the campaign
-checkpoint checks (reload and Continue, retry the act, damaged saves) and a full campaign run. It takes about half
-a minute headless. To run it locally with Google Chrome installed:
+CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks multi-tab saves, DAILY,
+enemy types, campaign checkpoints, and scripted progression, then runs through all five campaign acts. To run
+it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
+`PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
 ```bash
 npm ci --prefix dev/playtest
 ```
 
 ```bash
-node dev/playtest/run.mjs --quick
+node dev/playtest/run.mjs
 ```
 
-`--quick` skips the campaign run. Still play the affected modes in a browser and watch the console for errors.
+Add `--quick` to skip the full campaign run while keeping the scripted checks. Use the smoke check below to
+verify the cues, traversal and difficulty at real speed.
 
 ### Campaign smoke check
 

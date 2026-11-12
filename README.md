@@ -98,9 +98,9 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 ## Campaign
 
-The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. The other weapons arrive in
-fixed groups as each operation starts. The HUD announces new weapons, and hotkeys, the wheel and weapon cycling
-use the same arsenal. Across the first five operations, the largest squad grows from two to six foes, the
+The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. Other weapons unlock at fixed
+points as operations or reinforcement breaks begin. Hotkeys, the wheel and weapon cycling share the issued
+arsenal. Across the first five operations, the largest squad grows from two to six foes, the
 breaks shorten from 3.2 to 1.6 seconds, and incoming damage rises from 80% to full for the selected difficulty.
 The HUD counts down each break. The first heavy arrives alone after you get the Shotgun.
 OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
@@ -114,7 +114,8 @@ OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 | V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |
 
 Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
-starts. When a weapon is issued, its card shows how to equip it and what it does.
+starts. Each new weapon card shows what the weapon does and how to equip it. Ground fire clears at the end of an
+operation, and the Gunship wreck can no longer set the arena on fire after the clear.
 
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
@@ -178,8 +179,9 @@ keeps your best score.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
   any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
-- **Testing:** CI runs static checks. Use the [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check)
-  for progression changes and the [in-page harness](dev/playtest/README.md) for combat and arena tests.
+- **Testing:** CI runs static checks and a headless campaign suite. Use the
+  [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check) to check progression and pacing at real speed.
+  See the [playtest guide](dev/playtest/README.md) for local commands and what the automated run covers.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
   venv comes from `dev/synthwave/requirements.txt`.

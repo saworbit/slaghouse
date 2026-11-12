@@ -289,7 +289,7 @@
     Stitcher 55 HP ...... reanimator drone: claims a corpse, channels 1.3 s over it (green tether), and raises it as a
                           revenant at half health (green-tinted; doesn't count toward the wave). Gib the bodies, or
                           hit it for 15 mid-channel to break the stitch.
-    Slag wyrm 700 HP .... wave 5 mini-boss (own bar): a 9-segment worm that swims under your floor and bursts out
+    Slag wyrm 700 HP .... Meltdown mini-boss (own bar): a 9-segment worm that swims under your floor and bursts out
                           after a 0.9 s tell - a BREACH straight up under you, or a low SKIM across the room through
                           where you stand (a ring marks where it lands). Head 22 dmg, body 12; the body passes 60% of
                           damage to the head; only hittable while out. Under half health it spits slag. Dies
@@ -468,7 +468,8 @@
                           landing markers, burning puddles), leap slams that send ground shockwaves,
                           sweeping slag breath (phase 2+), summons ticks (phase 3); +50% crits on
                           its head vent. Letterbox intro, boss bar with phase notches.
-    THE FOREMAN (boss) .. OVERTIME only, every other sixth wave in place of the Smelter: a four-legged crane walker,
+    THE FOREMAN (boss) .. Wrecking Yard boss, also in BOSS RUSH and alternating with the Smelter every sixth
+                          wave in OVERTIME and DAILY: a four-legged crane walker,
                           1400 HP. It stomps after you and cycles attacks every ~2.2 s: SLAM (0.7 s tell, 22 up close
                           and a floor shockwave each way) and RIVET SPRAY (bursts of five). Below 60% its armour comes
                           off and it adds MAGNET (drags you in for 1.6 s) and HOUNDS (two at a time, four at most).
@@ -480,9 +481,9 @@
                           restores the act's checkpoint. New Campaign replaces it and victory clears it.
                           Speedrunner requires a clear in under 10 minutes without Continue or a checkpoint retry.
     Campaign weapons .... start with the Nailgun, earn the Shotgun after the first patrol, then get new weapons
-                          as operations begin. The HUD announces what was issued. Hotkeys, cycling and the wheel
-                          share the issued arsenal. Earlier checkpoints keep their equipped weapon. OVERTIME,
-                          DAILY and BOSS RUSH start with the full arsenal.
+                          when operations or reinforcement breaks begin. Weapon cards show the use and equip
+                          control. Hotkeys, cycling and the wheel share the issued arsenal. Earlier checkpoints
+                          keep their equipped weapon. OVERTIME, DAILY and BOSS RUSH start with the full arsenal.
     Belts + presses ..... ARENA 03: four belts (60 px/s on the floor, 50 on the upper decks) carry you, foes, drums,
                           gibs and corpses. Three crusher presses (under the upper belts and over the control block)
                           run on a cycle: 0.6 s tell (red light, dust, creak), 0.1 s slam (40 to you and a fling,
@@ -571,11 +572,12 @@
                           take double), SWARM (each wave half again as big, foes a third weaker), MOON BOOTS (low
                           gravity every wave), LIGHTS OUT (every wave in the dark), VAMPIRE (every kill heals 4, no
                           medkits). The MUTANT medal is for winning the campaign with one on.
-    Meltdown tide ....... wave 5: every ~11 s the floor seams glow for 2.2 s, then slag floods the ground floor
-                          28 px deep (3 s rise, 6 s hold, 3 s drain). Wading burns 5 per 0.4 s; it ignites
-                          anything not fireproof, sets off ticks and drums, and melts gibs.
+    Meltdown tide ....... during LAST SHIFT in the campaign, the floor seams glow for 2.2 s, then slag floods
+                          the ground floor 28 px deep (3 s rise, 6 s hold, 3 s drain). Wading burns 5 per 0.4 s.
+                          Slag ignites anything vulnerable to fire, sets off ticks and drums, and melts gibs.
     Music ............... synthwave soundtrack from music_bank.js (rendered by dev/synthwave): title theme,
-                          MELT FLOOR (waves 1-2), SLAG RAIN (waves 3-5), THE SMELTER (boss), clear / game over
+                          MELT FLOOR (operations 1–2), SLAG RAIN (later operations), THE SMELTER (Foreman and
+                          Smelter fights), clear / game over
                           jingles. Stage loops are muffled until you're noticed and open up as the fight heats
                           up. B flips to the procedural 132 BPM drum + bass loop (the fallback without the bank).
     SFX ................. AudioGen sample bank from sfx_bank.js (dev/sfxgen) over the procedural synth; N flips

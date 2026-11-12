@@ -11,8 +11,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   the Foreman in the Yard before facing the Smelter in the Powerhouse.
 - **Campaign arsenal.** Start with the Nailgun, earn the Shotgun after the first patrol, and unlock 27 weapons
   through the campaign. All other modes start with the full arsenal.
-- **Campaign checkpoints.** Each lift saves your health, weapon, perks, stats, difficulty and mutator. Continue
-  from the title or retry the act after death. Saves from the three-act campaign keep their equipped weapon.
+- **Campaign checkpoints.** Lifts save health, weapon, perks, stats, difficulty and mutator at the start of
+  Acts 2–5. Continue from the title or retry the act after death. Saves from the three-act campaign keep
+  their equipped weapon.
 - The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
   the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
 - `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
@@ -44,7 +45,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
   Lockdown and Slag Rain restore a minimum amount of health after a clear.
 - Later campaign squads wait for the current fight to end. Meltdown separates presses, rising slag and the
-  Wyrm. The Foreman and Smelter start their arena machinery in phase two.
+  Wyrm. Demolition and Live Circuit give players time to reach safe ground before the wrecking ball or rails
+  activate. The Foreman and Smelter start their arena machinery in phase two.
 - Campaign countdowns show what arrives next and where to prepare. New weapon cards show each weapon's use and
   equip control. Meltdown, Demolition and Live Circuit issue their weapons across successive squads.
 - Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
@@ -77,13 +79,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ### Fixed
 - Ground fires go out when a campaign round clears. Late explosions and fire patches can no longer damage the
   player while choosing a perk or waiting for the next round.
+- A Gunship wreck that lands after the campaign round clears can no longer start new fires, including after
+  the next operation starts.
 - **Slag Rain** comes in 7 to 9 s showers with 5 to 7 s clear spells instead of without a break, and **SLAG
   INCOMING** warns 1.2 s before each shower. Rain drops still burn and knock you about, but they no longer break
   platforms or set off drums, so a shower can't dig you into a pit you can't climb out of. The Smelter's slag
   still breaks terrain. (`TUNE.RAIN`)
-- `T.setup(3)` and `T.setup(4)` (and `CH.arenaStorm` in those arenas) no longer throw under the default campaign
-  `RUNMODE`: they stage ARENA 04 and 05 as OVERTIME. A campaign run in an arena with no act now fails with a named
-  error. (#47)
+- `T.setup()` can stage all five campaign arenas with the arsenal earned before the selected act, including
+  the Wrecking Yard and Powerhouse. (#47)
 - The play-test bot's teleport picks a tile that can see the foe, skips the spot that just failed, and falls back to
   the foe's own row, so `VB.campaign` no longer loops forever under a foe it can't see in ARENA 02. As a backstop,
   `VB.campaign` removes a foe hidden for 30 s with five or fewer left and lists it in `removed`. (#46)
