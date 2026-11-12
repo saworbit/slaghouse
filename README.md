@@ -109,9 +109,12 @@ OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 | --- | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
 | II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then fight the Gunship after the rain clears. Practice low-gravity jumps against the opening squad. The second Hound arrives with Gravity Surge. |
-| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Rocket Launcher, Plasma Katana, Siphon | Learn the belts before the presses and slag tide activate. Defeat the Wyrm and seal both coolant valves in order to open the lift. |
-| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Flak Cannon, Tractor, Drill Launcher, Rivet Minigun, Marksman Rifle, Riot Shield | The second squad releases the wrecking ball. Use the steel steps to reach the dais after the crates break. The Foreman fights beneath the active ball. |
-| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Singularity, Mini-Nuke, Magma Lance | Fight the first electrical squad before the floor rails energize. Use the steps and catwalks above the live banks. The Smelter overheats below 15% health and fans slag across the room. |
+| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains and seal both coolant valves to open the lift. |
+| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | Get to the dais before the second squad releases the ball. The ball starts swinging again after you breach the Foreman's armor. |
+| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |
+
+Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
+starts. When a weapon is issued, its card shows how to equip it and what it does.
 
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump

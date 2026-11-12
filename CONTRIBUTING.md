@@ -43,8 +43,9 @@ node dev/playtest/run.mjs --quick
 ### Campaign smoke check
 
 1. In a fresh campaign, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
-   grunt patrol falls. Equip the newly issued Shotgun. Pick a perk with **1**, **2** or **3** after Lockdown and
-   confirm the equipped weapon stays put. Check that the Flare Gun arrives before the lights go out.
+   grunt patrol falls. Equip the newly issued Shotgun using the **2** shown on its card. Pick a perk with
+   **1**, **2** or **3** after Lockdown and confirm the equipped weapon stays put. Check that the Flare Gun
+   arrives before the lights go out.
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
    same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
@@ -52,11 +53,13 @@ node dev/playtest/run.mjs --quick
    damaging you after **WAVE CLEARED**, including during the Gunship crash. Check that one Hound arrives in
    the first low-gravity squad and the second arrives with **Gravity Surge**. Enter the Sorting Line lift and
    confirm **Continue** now starts in the Sorting Line.
-4. After Meltdown, leave the first coolant valve early to reset its meter, then pause on the valve to check
-   that the meter holds. Resume, seal both valves in order and enter the Wrecking Yard lift.
-5. Check that the wrecking ball starts with the second Demolition squad and that the rails turn on after the
-   first Live Circuit squad. Defeat the Foreman and Smelter in order. Confirm the results appear and Continue
-   is unavailable on the campaign screen.
+4. In Meltdown, check that the countdown gives you time to reach a walkway. The presses stop before the slag
+   rises, and the floor drains before the Wyrm arrives. After Meltdown, leave the first coolant valve early to
+   reset its meter, then pause on the valve to check that the meter holds. Resume, seal both valves in order
+   and enter the Wrecking Yard lift.
+5. Check that the wrecking ball and live rails have preparation countdowns before their squads. Fight the
+   Foreman and Smelter and verify that each starts its arena machinery in phase two. Defeat them in order
+   and confirm the results appear and Continue is unavailable on the campaign screen.
 6. Start OVERTIME, DAILY and BOSS RUSH. Check that the full arsenal is available and each mode has its own
    wave, boss or daily perk setup.
 

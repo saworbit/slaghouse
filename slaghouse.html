@@ -502,8 +502,9 @@
                           last 7 to 9 s, with 5 to 7 s clear and 1.2 s warning. They spare platforms and drums.
                           The rain clears before the Gunship arrives. GRAVITY LOSS starts with a grunt, one Hound
                           and a Blinker before the second Hound joins the next squad. SORTING SHIFT starts the belts.
-                          MELTDOWN adds presses first, then rising slag and the Wyrm. DEMOLITION releases the
-                          wrecking ball before the Foreman. LIVE CIRCUIT energizes the rails before the Smelter.
+                          MELTDOWN stops the presses before the tide and drains the floor for the Wyrm.
+                          DEMOLITION and LIVE CIRCUIT give time to reach safe ground before machinery starts.
+                          The Foreman releases the ball and the Smelter charges the rails in phase two.
                           The first five operations grow from 2 to 6 enemies per squad. Breaks shorten from
                           3.2 to 1.6 s, spawn spacing narrows, and incoming damage climbs from 80% to full.
                           Lockdown and Slag Rain clear with health restored to at least 75 and 65,
@@ -3975,8 +3976,8 @@ const CAMPAIGN = [
   { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN',
     breakMs: 3200, spawnGap: 1100, damageScale: 0.8, recovery: 75, squads: [
     { foes: [['grunt', 11, 24], ['grunt', 24, 24]] },
-    { name: 'HEAVY INBOUND', unlock: ['shotgun'], foes: [['heavy', 62, 24]] },
-    { name: 'DRONES INBOUND', foes: [['drone', 47, 11], ['drone', 80, 6]] },
+    { name: 'HEAVY INBOUND', incoming: 'HEAVY', unlock: ['shotgun'], foes: [['heavy', 62, 24]] },
+    { name: 'DRONES INBOUND', incoming: 'DRONES', foes: [['drone', 47, 11], ['drone', 80, 6]] },
     { name: 'FLOOR SECURITY', foes: [['enforcer', 47, 8], ['stalker', 54, 20]] },
   ] },
   { name: 'BLACKOUT', brief: 'USE FLARES WHEN THE LIGHTS CUT', unlock: ['flare', 'net'],
@@ -3990,7 +3991,7 @@ const CAMPAIGN = [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
     { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
     { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
-    { mod: null, foes: [['gunship', 'A']] },
+    { incoming: 'GUNSHIP', mod: null, foes: [['gunship', 'A']] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
     breakMs: 2000, spawnGap: 650, damageScale: 0.95, elites: 1, squads: [
@@ -4002,41 +4003,46 @@ const CAMPAIGN = [
   { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'],
     breakMs: 1600, spawnGap: 550, elites: 1, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['scavenger', 'G'], ['spotter', 'A']] },
-    { name: 'FLOOR TRAPS', wait: 0, foes: [['minelayer', 'A'], ['grenadier', 'G'], ['pogo', 'G'], ['sporepod', 'G'],
+    { name: 'FLOOR TRAPS', foes: [['minelayer', 'A'], ['grenadier', 'G'], ['pogo', 'G'], ['sporepod', 'G'],
       ['shellback', 'G'], ['mender', 'A']] },
   ] },
-  { name: 'MELTDOWN', brief: 'CLIMB WHEN THE SLAG RISES', machinery: 'presses', unlock: ['rocket', 'katana', 'siphon'], elites: 2, squads: [
-    { foes: [['slagling', 'G'], ['scavenger', 'G'], ['linker', 'A'], ['linker', 'A'], ['ratking', 'G']] },
-    { name: 'LAST SHIFT', wait: 0, mod: 'melt', foes: [['burrower', 'G'], ['para', 'A'], ['tarspit', 'G'], ['headsman', 'G'], ['leaper', 'G']] },
-    { name: 'CONTROL GUARD', foes: [['strider', 'G'], ['warhorn', 'G'], ['swapper', 'G'], ['grappler', 'G'], ['gatling', 'G']] },
-    { wait: 0, foes: [['wyrm', 'G']] },
+  { name: 'MELTDOWN', brief: 'MOVE WHEN THE PRESS LIGHTS FLASH', machinery: 'presses', unlock: ['katana'], elites: 2, squads: [
+    { foes: [['slagling', 'G'], ['scavenger', 'G']] },
+    { name: 'PRESS CREW', foes: [['linker', 'A'], ['linker', 'A'], ['ratking', 'G']] },
+    { name: 'LAST SHIFT', prepare: 'CLIMB TO THE WALKWAYS', breakMs: 3200, machinery: null, mod: 'melt', unlock: ['rocket'],
+      foes: [['burrower', 'G'], ['para', 'A'], ['tarspit', 'G'], ['headsman', 'G'], ['leaper', 'G']] },
+    { name: 'CONTROL GUARD', prepare: 'SLAG DRAINING', mod: null, unlock: ['siphon'],
+      foes: [['strider', 'G'], ['warhorn', 'G'], ['swapper', 'G'], ['grappler', 'G'], ['gatling', 'G']] },
+    { incoming: 'WYRM', prepare: 'WATCH THE GROUND FOR ITS TELL', breakMs: 3200, foes: [['wyrm', 'G']] },
   ], route: [
     { cell: [36, 24], label: 'STAND AT COOLANT VALVE 1', hold: 0.8, done: 'INTAKE OPEN' },
     { cell: [63, 24], label: 'STAND AT COOLANT VALVE 2', hold: 0.8, done: 'COOLANT SEALED' },
     { cell: [95, 24], label: 'REACH THE WRECKING YARD LIFT' },
   ] },
-  { name: 'DEMOLITION', brief: 'DRAW THE CREW UNDER THE BALL', unlock: ['flak', 'tractor', 'drill'], elites: 2, squads: [
-    { foes: [['lugger', 'G'], ['heavy', 'G'], ['roller', 'G'], ['enforcer', 'G'], ['pylon', 'G']] },
-    { name: 'BALL RELEASED', wait: 0, machinery: 'wreck', foes: [['bulldozer', 'G'], ['harpooner', 'G'], ['hound', 'G'], ['spotter', 'A']] },
-    { name: 'WRECKING CREW', foes: [['rocketeer', 'G'], ['wraith', 'A'], ['bastion', 'G'], ['buzzsaw', 'A']] },
+  { name: 'DEMOLITION', brief: 'CLEAR THE CREW BEFORE THE BALL DROPS', unlock: ['drill'], elites: 2, squads: [
+    { foes: [['lugger', 'G'], ['heavy', 'G'], ['roller', 'G'], ['enforcer', 'G']] },
+    { name: 'BALL RELEASED', incoming: 'WRECKING BALL', prepare: 'STAY ON THE DAIS', breakMs: 2600, machinery: 'wreck', unlock: ['tractor'],
+      foes: [['bulldozer', 'G'], ['harpooner', 'G'], ['hound', 'G'], ['spotter', 'A']] },
+    { name: 'WRECKING CREW', unlock: ['flak'], foes: [['rocketeer', 'G'], ['wraith', 'A'], ['bastion', 'G'], ['buzzsaw', 'A'], ['pylon', 'G']] },
   ] },
-  { name: 'THE FOREMAN', music: 'boss', brief: 'DODGE THE WALKER AND THE BALL', machinery: 'wreck', unlock: ['mini', 'marksman', 'shield'],
+  { name: 'THE FOREMAN', music: 'boss', brief: 'JUMP OVER THE SLAM WAVES', leadMs: 1800, unlock: ['shield', 'mini', 'marksman'],
     squads: [{ foes: [['foreman', 'B']] }], route: [{ cell: [95, 24], label: 'REACH THE POWERHOUSE LIFT' }] },
-  { name: 'LIVE CIRCUIT', brief: 'USE THE WALKS WHEN THE RAILS LIGHT', unlock: ['coil', 'prism', 'tether'], elites: 3, squads: [
+  { name: 'LIVE CIRCUIT', brief: 'CLEAR THE CREW WHILE RAILS ARE OFF', unlock: ['coil'], elites: 3, squads: [
     { foes: [['sparker', 'G'], ['sparker', 'G'], ['linker', 'A'], ['linker', 'A']] },
-    { name: 'RAILS LIVE', wait: 0, machinery: 'rails', foes: [['magnet', 'A'], ['jammer', 'A'], ['pylon', 'G'], ['welder', 'G']] },
-    { name: 'SURGE CREW', foes: [['vortex', 'A'], ['thundercloud', 'A'], ['bastion', 'G'], ['duelist', 'G']] },
+    { name: 'RAIL CREW', prepare: 'JUMP TO THE WALKWAYS', breakMs: 2600, machinery: 'rails', unlock: ['prism'],
+      foes: [['magnet', 'A'], ['jammer', 'A'], ['pylon', 'G'], ['welder', 'G']] },
+    { name: 'SURGE CREW', unlock: ['tether'], foes: [['vortex', 'A'], ['thundercloud', 'A'], ['bastion', 'G'], ['duelist', 'G']] },
     { name: 'CORE GUARD', foes: [['gatling', 'G'], ['sponge', 'G'], ['shellback', 'G'], ['copycat', 'A']] },
   ] },
-  { name: 'THE SMELTER', music: 'boss', brief: 'STAY ABOVE THE RAILS AND THE SLAG', machinery: 'rails', unlock: ['sing', 'nuke', 'lance'],
+  { name: 'THE SMELTER', music: 'boss', brief: 'KEEP CLEAR OF ITS BREATH', leadMs: 1800, unlock: ['lance', 'sing', 'nuke'],
     squads: [{ foes: [['boss', 'B']] }] },
 ];
 const CAMPAIGN_ACTS = [
   { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347 },
   { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60 },
-  { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75, breakMs: 1400, spawnGap: 520 },
-  { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75, breakMs: 1000, spawnGap: 450, overlap: 1 },
-  { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80, breakMs: 800, spawnGap: 380, overlap: 1 },
+  { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75, breakMs: 1500, spawnGap: 525 },
+  { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75, breakMs: 1350, spawnGap: 490 },
+  { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80, breakMs: 1250, spawnGap: 460 },
 ];
 const campaignFoesFrom = wave => CAMPAIGN.slice(wave).reduce((total, op) =>
   total + op.squads.reduce((n, squad) => n + squad.foes.length, 0), 0);
@@ -5282,7 +5288,7 @@ class GameScene extends Phaser.Scene {
     this.campaignSquads = []; this.campaignReserve = 0; this.campaignReinforceAt = 0; this.campaignRoute = []; this.campaignMachinery = null;
     this.legacyWeapon = this.chapterStart?.legacyWeapon;
     this.weaponSlots = this.campaign ? campaignWeaponSlots(this.chapterStart?.wave ?? 0, this.legacyWeapon) : ALL_WEAPON_SLOTS;
-    this.unlockText = ''; this.unlockUntil = 0;
+    this.unlockSlots = []; this.unlockUntil = 0;
     this.routeHold = 0; this.routeG = null; this.perkPicked = false;
     this.physics.world.timeScale = 1;
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
@@ -6388,8 +6394,8 @@ class GameScene extends Phaser.Scene {
     const issued = ids.map(weaponSlot).filter(i => !this.weaponSlots.includes(i));
     if (!issued.length) return;
     this.weaponSlots.push(...issued);
-    this.unlockText = issued.map(i => WEAPONS[i].name).join(' / ');
-    this.unlockUntil = this.time.now + 4800;
+    this.unlockSlots = issued;
+    this.unlockUntil = this.time.now + 6200;
     Sfx.pickup();
   }
 
@@ -7099,7 +7105,9 @@ class GameScene extends Phaser.Scene {
     const hpF = e.hp / e.def.hp, phase = hpF > 0.66 ? 1 : hpF > 0.33 ? 2 : hpF > 0.15 ? 3 : 4, rage = phase === 4 ? 1.8 : phase === 3 ? 1.5 : phase === 2 ? 1.25 : 1;
     e.stunT = 0;
     if (phase !== e.phase) {
-      e.phase = phase; BUS.emit('callout', phase === 2 ? 'IT GETS HOTTER' : phase === 3 ? 'MELTDOWN!' : 'OVERHEAT!'); Sfx.roar(); this.shake(500, 0.012); e.atkCd = 1.2;
+      const chargeRails = this.campaign && alive && phase >= 2 && this.campaignMachinery !== 'rails';
+      if (chargeRails) this.setCampaignMachinery('rails');
+      e.phase = phase; BUS.emit('callout', chargeRails ? 'RAILS CHARGING' : phase === 2 ? 'IT GETS HOTTER' : phase === 3 ? 'MELTDOWN!' : 'OVERHEAT!'); Sfx.roar(); this.shake(500, 0.012); e.atkCd = 1.2;
       if (phase === 4) { this.impactFrame(2); BUS.emit('flash', 0.35); this.slowmoUntil = Math.max(this.slowmoUntil, now + 500); e.ringCd = 1; for (let i = 0; i < 6; i++) this.spawnGib('g_plate', e.x + rand(-14, 14), e.y - 10, rand(-200, 200), rand(-320, -160), 'metal'); }   // its armour blows off
     }
     if (phase === 4 && alive && e.introT <= 0) {                        // OVERHEAT: a ring of slag every 4 s, and it sheds sparks
@@ -11295,8 +11303,10 @@ class GameScene extends Phaser.Scene {
   // 2.2 s: 6 per 0.3 s to you if you're standing on it, 12 and a jolt to any foe on it; the banks take turns. Stay on
   // the walkways, the decks or the other bank.
   setCampaignMachinery(kind = null) {
+    if (kind === this.campaignMachinery) return;
     this.campaignMachinery = kind;
     if (kind === 'rails') this.railCyc = { st: 'idle', t: 3.5, g: 0 };
+    if (kind === 'wreck' && this.wreck) this.wreck.t = this.wreck.period / 4;  // release from the top of the swing
   }
   updateRails(dt, now) {
     if (!this.rails.length) return;
@@ -12059,9 +12069,11 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.FOREMAN, b = e.body, onG = b.blocked.down || b.touching.down, p = this.player, pb = p.body, f = e.hp / e.def.hp, ph = f > 0.6 ? 1 : f > 0.25 ? 2 : 3;
     e.aggro = true;
     if (ph !== e.phase) {                                                 // a phase break: plates fly off, it staggers
+      const releaseBall = this.campaign && alive && ph >= 2 && this.campaignMachinery !== 'wreck';
+      if (releaseBall) this.setCampaignMachinery('wreck');
       e.phase = ph; e.ai = 'stagger'; e.aiUntil = now + 1000;
       for (let i = 0; i < 6; i++) this.spawnGib(pick(['g_plate', 'g_shard', 'g_wire']), e.x + rand(-14, 14), b.top + rand(0, 10), rand(-260, 260), rand(-380, -160), 'metal');
-      BUS.emit('callout', ph === 2 ? 'ARMOR BREACHED' : 'CORE EXPOSED'); this.shake(400, 0.01); Sfx.wreckHit(); this.impactFrame(2);
+      BUS.emit('callout', releaseBall ? 'BALL RELEASED' : ph === 2 ? 'ARMOR BREACHED' : 'CORE EXPOSED'); this.shake(400, 0.01); Sfx.wreckHit(); this.impactFrame(2);
       return;
     }
     if (e.ai === 'stagger') { b.velocity.x = 0; e.fr = 'slam'; if (Math.random() < 0.4) this.fxSparks(e.x + rand(-14, 14), e.y + rand(-10, 6), 2); if (now >= e.aiUntil) e.ai = 'walk'; return; }
@@ -15056,12 +15068,13 @@ class GameScene extends Phaser.Scene {
   }
   releaseCampaignSquad(opening = false) {
     const next = this.campaignSquads[0], act = CAMPAIGN_ACTS[this.A.id - 1], op = CAMPAIGN[this.wave];
-    if (!next || this.campaignReinforceAt || (!opening && this.activeHostiles() > (next.wait ?? act.overlap ?? 0))) return;
-    const breakMs = op.breakMs ?? act.breakMs;
+    if (!next || this.campaignReinforceAt || (!opening && this.activeHostiles() > 0)) return;
+    const breakMs = next.breakMs ?? op.breakMs ?? act.breakMs;
+    if (next.machinery === null) this.setCampaignMachinery(null);
     if (next.mod === null && this.mod !== null) {
       const wasRaining = this.mod === 'slag';
       this.applyMod(null);
-      if (wasRaining) BUS.emit('callout', 'SLAG RAIN CLEARED');
+      if (wasRaining) BUS.emit('callout', 'RAIN CLEARED');
     }
     this.issueWeapons(next.unlock);
     const deploy = () => {
@@ -15072,7 +15085,7 @@ class GameScene extends Phaser.Scene {
       if (next.name) BUS.emit('callout', next.name);
       if (next.mod && next.mod !== this.mod) this.applyMod(next.mod);
       if (next.machinery) this.setCampaignMachinery(next.machinery);
-      this.queueWaveSpawns(next.spawns, op.spawnGap ?? act.spawnGap);
+      this.queueWaveSpawns(next.spawns, op.spawnGap ?? act.spawnGap, opening ? op.leadMs : undefined);
       if (!opening) BUS.emit('enemies', this.activeHostiles());
     };
     if (opening) deploy();
@@ -15081,7 +15094,7 @@ class GameScene extends Phaser.Scene {
       this.time.delayedCall(breakMs, deploy);
     }
   }
-  queueWaveSpawns(entries, gap = 380) {
+  queueWaveSpawns(entries, gap = 380, lead = 700) {
     const used = new Set();
     entries.forEach(({ foe: [kind, type, row], elite }, i) => {
       let choice, air;
@@ -15096,7 +15109,7 @@ class GameScene extends Phaser.Scene {
         air = type === 'A';
         used.add(choice);
       }
-      this.time.delayedCall(700 + i * gap, () => this.warpIn(kind, choice, air, elite));
+      this.time.delayedCall(lead + i * gap, () => this.warpIn(kind, choice, air, elite));
     });
   }
   warpIn(kind, [cx, cy], air, elite) {
@@ -16816,7 +16829,12 @@ class HudScene extends Phaser.Scene {
     this.lblCount = new PixelLabel(this, 932, 52, 'hud_count', { maxChars: 2, align: 'right', scale: 4, color: '#ff5a3a', shadow, originY: 0.5 }).setDepth(3);
     this.lblWave = new PixelLabel(this, 768, 64, 'hud_wave', { maxChars: 11, text: 'WAVE 1/' + CAMPAIGN.length, align: 'left', scale: 2, color: '#d090ff', shadow }).setDepth(3);
     this.routeLabel = new PixelLabel(this, 540, 24, 'hud_route', { maxChars: 33, scale: 2, color: '#d8dee6', shadow }).setDepth(3).setVisible(false);
-    this.unlockLabel = new PixelLabel(this, 480, 455, 'hud_unlock', { maxChars: 60, scale: 2, color: '#a1f2ff', shadow }).setDepth(3).setVisible(false);
+    this.routeDetail = new PixelLabel(this, 540, 42, 'hud_route_detail', { maxChars: 46, scale: 1.5, color: '#ffd58c', shadow }).setDepth(3).setVisible(false);
+    this.unlockCards = Array.from({ length: 3 }, (_, i) => {
+      const label = (y, part, maxChars, scale, color) => new PixelLabel(this, 480, y, 'hud_unlock_' + part + i,
+        { maxChars, scale, color, shadow }).setDepth(3).setVisible(false);
+      return { name: label(444, 'name', 22, 2, '#a1f2ff'), use: label(465, 'use', 44, 1, '#d8dee6'), key: label(477, 'key', 30, 1.5, '#ffd58c') };
+    });
     this.lblCombo = new PixelLabel(this, 940, 104, 'hud_combo', { maxChars: 10, align: 'right', scale: 3, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(3).setAlpha(0);
     this.lblStyleT = new PixelLabel(this, 944, 128, 'hud_stylet', { text: 'STYLE', align: 'right', scale: 2, color: '#8f9bab', shadow }).setDepth(3);
     this.lblRank = new PixelLabel(this, 944, 166, 'hud_rank', { maxChars: 3, text: 'D', align: 'right', scale: 6, color: STYLE_RANKS[0].c, shadow, originY: 0.5 }).setDepth(3);
@@ -17023,21 +17041,34 @@ class HudScene extends Phaser.Scene {
   drawIndicators(gs, time) {                                            // off-screen hostiles + where the last hit came from
     const g = this.arrowG; g.clear();
     this.routeLabel.setVisible(false);
-    this.unlockLabel.setVisible(false);
+    this.routeDetail.setVisible(false);
+    for (const { name, use, key } of this.unlockCards) {
+      name.setVisible(false); use.setVisible(false); key.setVisible(false);
+    }
     if (!gs || !gs.sys.isActive() || this.overOn) return;
-    if (gs.campaign && gs.state === 'play' && !this.perkOn && !gs.wheelOn && gs.time.now < gs.unlockUntil) {
-      const text = 'ISSUED  ' + gs.unlockText, width = text.length * 12 + 24;
-      g.fillStyle(0x071118, 0.94).fillRect(480 - width / 2, 448, width, 28);
-      g.fillStyle(0x76e8ff, 1).fillRect(480 - width / 2, 448, width, 2);
-      this.unlockLabel.setText(text).setVisible(true);
+    const showCampaign = gs.campaign && gs.state === 'play' && !this.pauseOn && !this.perkOn && !gs.wheelOn && !gs.descending;
+    if (showCampaign && gs.time.now < gs.unlockUntil) {
+      const slots = gs.unlockSlots;
+      for (const [i, slot] of slots.entries()) {
+        const card = this.unlockCards[i], weapon = WEAPONS[slot], x = 480 + (i - (slots.length - 1) / 2) * 292;
+        const key = SLOT_KEYS[slot]?.trim(), equipped = slot === gs.weapon;
+        const action = equipped ? 'EQUIPPED' : PAD.on && PAD.active ? 'HOLD LB FOR WHEEL' :
+          key ? (key === '<' ? 'BKSP' : key) + ' TO EQUIP' : 'HOLD TAB FOR WHEEL';
+        g.fillStyle(0x071118, 0.94).fillRect(x - 140, 437, 280, 54);
+        g.fillStyle(0x76e8ff, 1).fillRect(x - 140, 437, 280, 2);
+        card.name.setX(x).setText(weapon.name).setVisible(true);
+        card.use.setX(x).setText(BLURBS[weapon.id] || '').setVisible(true);
+        card.key.setX(x).setText(action).setVisible(true);
+      }
     }
     const cam = gs.cameras.main, wv = cam.worldView, z = cam.zoom, toS = (x, y) => [(x - wv.x) * z, (y - wv.y) * z];
-    if (gs.campaign && gs.state === 'play' && !this.perkOn && !gs.wheelOn && !gs.descending && !gs.boss) {
+    if (showCampaign && !gs.boss) {
       const station = gs.campaignRoute[0], op = CAMPAIGN[gs.wave], n = op.squads.length;
+      const next = gs.campaignSquads[0], released = n - gs.campaignSquads.length;
       const incoming = Math.ceil((gs.campaignReinforceAt - gs.time.now) / 1000);
       if (station || incoming > 0 || gs.activeHostiles() > 0) {
-        const label = station?.label || (incoming > 0 && !gs.activeHostiles() ? 'NEXT SQUAD IN ' + incoming + 'S' :
-          op.name + '  /  SQUAD ' + (n - gs.campaignSquads.length) + '/' + n);
+        const label = station?.label || (incoming > 0 ? (next?.incoming || next?.name || 'NEXT SQUAD') + ' IN ' + incoming + 'S' :
+          (op.squads[released - 1]?.name || op.name) + '  /  SQUAD ' + released + '/' + n);
         this.routeLabel.setText(label).setVisible(true);
         g.fillStyle(0x070d12, 0.9).fillRect(328, 12, 424, 43);
         g.fillStyle(station ? 0x76e8ff : 0xffb347, 1).fillRect(328, 12, 424, 2);
@@ -17050,10 +17081,11 @@ class HudScene extends Phaser.Scene {
             g.fillStyle(0x76e8ff, 1).fillTriangle(x + ca * 9, y + sa * 9,
               x - ca * 5 - sa * 6, y - sa * 5 + ca * 6, x - ca * 5 + sa * 6, y - sa * 5 - ca * 6);
           }
+        } else if (incoming > 0 && next?.prepare) {
+          this.routeDetail.setText(next.prepare).setVisible(true);
         } else {
           for (let i = 0; i < n; i++) {
-            const released = i < n - gs.campaignSquads.length;
-            g.fillStyle(released ? 0xffb347 : 0x37424f, 1).fillRect(540 + (i - n / 2) * 20 + 2, 44, 16, 3);
+            g.fillStyle(i < released ? 0xffb347 : 0x37424f, 1).fillRect(540 + (i - n / 2) * 20 + 2, 44, 16, 3);
           }
         }
       }

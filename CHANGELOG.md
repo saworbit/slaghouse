@@ -43,6 +43,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
   more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
   Lockdown and Slag Rain restore a minimum amount of health after a clear.
+- Later campaign squads wait for the current fight to end. Meltdown separates presses, rising slag and the
+  Wyrm. The Foreman and Smelter start their arena machinery in phase two.
+- Campaign countdowns show what arrives next and where to prepare. New weapon cards show each weapon's use and
+  equip control. Meltdown, Demolition and Live Circuit issue their weapons across successive squads.
 - Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
   `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
   needs entries in three side tables. No foe behaves differently. (#52)

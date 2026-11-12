@@ -90,6 +90,9 @@ window.CP = (() => {
     const patrol = g.enemies.getChildren().filter(e => e.alive);
     expect(patrol.length === 2 && patrol.every(e => e.kind === 'grunt'), 'Lockdown skipped its two-grunt patrol');
     for (const e of patrol) g.killEnemy(e, 1, 0, 'nail');
+    hud.drawIndicators(g, g.time.now);
+    expect(hud.unlockCards[0].name._text === 'SHOTGUN' && hud.unlockCards[0].key._text === '2 TO EQUIP',
+      'the Shotgun notice did not show its equip key');
     g.cycleWeapon(1);
     expect(g.weapon === weaponSlot('shotgun'), 'clearing the patrol did not issue the Shotgun');
     const gap = CAMPAIGN[0].breakMs;
@@ -189,6 +192,74 @@ window.CP = (() => {
     expect(g.activeHostiles() === 0 && hounds() === 0 && g.mod === 'lowg', 'the second Hound skipped the low-gravity break');
     T.run(2000);
     expect(hounds() === 1 && g.mod === 'lowg', 'the second Hound did not arrive with Gravity Surge');
+    return { fails };
+  };
+
+  CP.latePacing = () => {
+    const [fails, expect] = checker();
+    Math.random = seeded(628);
+    const [g] = startFromTitle(1);
+    const hud = game.scene.getScene('Hud');
+    const begin = (arena, wave) => {
+      g.scene.restart({ arena }); T.run(100);
+      g.time.removeAllEvents(); g.startWave(wave);
+    };
+    const alive = () => g.enemies.getChildren().filter(e => e.alive);
+    const clear = () => { for (const e of alive()) g.killEnemy(e, 1, 0, 'nail'); };
+    const has = id => g.weaponSlots.includes(weaponSlot(id));
+
+    begin(2, 5); T.run(2400);
+    expect(g.campaignMachinery === 'presses' && g.mod === null && has('katana') && !has('rocket'),
+      'Meltdown did not introduce the presses and Katana first');
+    clear(); T.run(100);
+    expect(g.activeHostiles() === 2 && !g.campaignReinforceAt, 'the slagling halves did not count toward the opening squad');
+    clear(); T.run(100);
+    expect(g.activeHostiles() === 4 && !g.campaignReinforceAt, 'the final slag fragments did not count toward the opening squad');
+    clear(); T.run(4300);
+    expect(g.campaignMachinery === 'presses' && !g.mod && g.activeHostiles() === 3, 'the press crew skipped its own fight');
+    clear(); hud.drawIndicators(g, g.time.now);
+    expect(!g.campaignMachinery && !g.mod && has('rocket') && !has('siphon') && g.activeHostiles() === 0 &&
+      hud.routeDetail.visible && hud.routeDetail._text === 'CLIMB TO THE WALKWAYS', 'Meltdown did not give a safe, readable climb break');
+    T.run(3100);
+    expect(!g.mod && !g.activeHostiles(), 'the tide arrived during the climb break');
+    T.run(3800);
+    expect(g.mod === 'melt' && !g.campaignMachinery && g.activeHostiles() > 0, 'the presses ran during the slag-tide fight');
+    clear(); T.run(5250);
+    expect(g.mod === null && has('siphon'), 'the control guard arrived before the slag tide stopped');
+    clear(); T.run(3100);
+    expect(!g.boss && !g.mod && !g.campaignMachinery, 'the Wyrm skipped its clear-floor break');
+    T.run(1800);
+    expect(g.boss?.kind === 'wyrm' && !g.mod && !g.tide, 'the Wyrm arrived before the arena drained');
+
+    begin(3, 6); T.run(3200);
+    expect(has('drill') && !has('tractor') && !g.campaignMachinery, 'Demolition did not introduce the Drill with the ball parked');
+    clear(); T.run(2500);
+    expect(has('tractor') && !g.campaignMachinery && !g.activeHostiles(), 'the wrecking ball skipped the preparation break');
+    T.run(200);
+    expect(g.campaignMachinery === 'wreck' && !has('flak'), 'the wrecking ball did not start with its squad');
+
+    begin(3, 7); T.run(2400);
+    expect(!g.boss && !g.campaignMachinery, 'the Foreman arrived during the loadout briefing');
+    T.run(400);
+    expect(g.boss?.kind === 'foreman' && !g.campaignMachinery, 'the ball was active at the start of the Foreman fight');
+    if (g.boss) { g.boss.hp = g.boss.def.hp * 0.55; T.run(100); }
+    expect(g.campaignMachinery === 'wreck', 'the Foreman phase change did not release the ball');
+
+    begin(4, 8); T.run(3100);
+    const last = alive().pop();
+    for (const e of alive()) if (e !== last) g.killEnemy(e, 1, 0, 'nail');
+    expect(g.activeHostiles() === 1 && !g.campaignReinforceAt && !g.campaignMachinery && !has('prism'),
+      'the Powerhouse queued reinforcements before the current squad was defeated');
+    clear(); T.run(2500);
+    expect(has('prism') && !g.campaignMachinery && !g.activeHostiles(), 'the rail crew skipped the walkway break');
+    T.run(200);
+    expect(g.campaignMachinery === 'rails' && g.railCyc.st === 'idle', 'the rails did not start with a charge-up');
+
+    begin(4, 9); T.run(3400);
+    expect(g.boss?.kind === 'boss' && !g.campaignMachinery, 'the rails were active at the start of the Smelter fight');
+    if (g.boss) { g.boss.hp = g.boss.def.hp * 0.60; T.run(100); }
+    expect(g.campaignMachinery === 'rails' && g.railCyc.st === 'idle', 'the Smelter phase change did not begin the rail charge');
+    expect(campaignWeaponSlots(CAMPAIGN.length).length === 27, 'the new issue order changed the campaign arsenal size');
     return { fails };
   };
 

@@ -124,6 +124,10 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.furnacePacing())).fails;
   });
+  await check('late campaign stages hazard warnings, weapon issues and boss machinery', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.latePacing())).fails;
+  });
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;
