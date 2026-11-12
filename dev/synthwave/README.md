@@ -25,7 +25,7 @@ the base music level against the SFX, and the pause menu's music volume (`OPTS.m
 | `score.py` | the compositions: per-bar chords, bass patterns, arps, pads, stabs, lead melodies, drum lanes, risers |
 | `instruments.py` | patches (supersaw pads, plucked arp, sidechained / distorted basses, saw and square leads, brass stabs) and the drum machine |
 | `dsp.py` | band-limited oscillators, resonant SVF filters, envelopes, hall / gated reverb, ping-pong delay, chorus, compressor (numba for the per-sample loops) |
-| `render.py [names]` | renders tracks to `out/<name>.wav` (48 kHz stereo) and prints each stem's loudness relative to the mix |
+| `render.py [names]` | renders tracks to `out/<name>.wav` (48 kHz stereo) and prints each stem's loudness relative to the mix. Each loop is checked for a baked-in seam: every stem has to die away before the render ends, and the reverb and delay can't drop across the wrap. A loop that fails isn't written, and it exits 1 naming the track |
 | `build.py` | gain-matches the tracks and encodes them to 64 kbps stereo Opus -> `../../music_bank.js`, then checks the bank (`--check` alone checks the current one) |
 | `requirements.txt` | the pinned Python packages this folder needs |
 

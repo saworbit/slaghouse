@@ -27,6 +27,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   and DAILY checks, campaign checkpoint checks (reload and Continue, die and retry the act, five damaged saves) and a
   full `VB.campaign(900)` run. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
   steps. (#45, #39)
+- `dev/synthwave/render.py` checks every loop for a baked-in seam: each stem has died away before the render ends,
+  and the reverb and delay don't drop across the wrap. A loop that fails isn't written to `out/`, and it exits 1
+  naming the track. Skipping the tail fold for one track now fails it. (#41)
 - The `Release` workflow has a dry run: run it by hand and it builds the zip and notes from the chosen branch and
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 
