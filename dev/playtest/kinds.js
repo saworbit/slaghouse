@@ -2,6 +2,7 @@
 // KC.check() goes through every kind in ENEMY. Each one is warped in on its own, in a fresh ARENA 01 stage, the way
 // a wave brings it in. It must:
 //   - have a CODEX row (body parts of another foe aside) and a texture holding its start frame and codex frame
+//   - name an update method the scene has (its per-frame brain)
 //   - spawn on its start frame
 //   - run for a while beside the player, take a hit, die and clear away without an error
 // KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
@@ -23,6 +24,7 @@ window.KC = (() => {
       if (row && !tex.has(row[2])) say(`codex frame '${row[2]}' isn't in texture '${D.key}'`);
 
       const g = T.setup(1);
+      if (typeof g[D.update] !== 'function') { say(`update '${D.update}' isn't a GameScene method`); continue; }
       T.errs.length = 0;
       const air = FLIERS.has(kind), px = g.player.x, py = g.player.y;
       // the nearest spawn point of its type that isn't on top of the player, so it meets the player straight away
