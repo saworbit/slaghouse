@@ -6,10 +6,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
-- **Three-act campaign.** Six named operations deploy authored squads with solo mini-boss encounters. Follow the
-  marked lifts into the Furnace and Sorting Line, then open the coolant valves to expose the Smelter.
-- **Campaign checkpoints.** Entering the Furnace or Sorting Line saves your health, weapon, perks, run stats,
-  difficulty and mutator in the browser. Continue from the title screen or retry the act after a death.
+- **Five-act campaign.** Ten operations descend from the Melt Floor through the Wrecking Yard and Powerhouse.
+  Enemy squads introduce blackout, slag showers, presses, the wrecking ball and live rails in stages. Fight
+  the Foreman in the Yard before facing the Smelter in the Powerhouse.
+- **Campaign arsenal.** Start with the Nailgun, earn the Shotgun after the first patrol, and unlock 27 weapons
+  through the campaign. All other modes start with the full arsenal.
+- **Campaign checkpoints.** Lifts save health, weapon, perks, stats, difficulty and mutator at the start of
+  Acts 2–5. Continue from the title or retry the act after death. Saves from the three-act campaign keep
+  their equipped weapon.
 - The pause menu has a CONTROLS page with every keyboard and gamepad binding. It is built from the same strings as
   the HUD's control hints, plus the weapon keys and the toggles they leave out. (#26)
 - `dev/playtest/`: the in-page harness from the red-team pass (`T` for stepping and the bot, `CH` for arena storms,
@@ -25,12 +29,32 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   version they were measured against, taken from git history. (#9)
 - `dev/playtest/run.mjs` runs the play-test harness in headless Chrome, and CI runs it as a second job: the two-tab
   and DAILY checks, campaign checkpoint checks (reload and Continue, die and retry the act, five damaged saves) and a
-  full `VB.campaign(900)` run. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
+  full `VB.campaign(1500)` run across all five acts. Any page or console error fails it. `dev/playtest/checkpoint.js` holds the checkpoint
   steps. (#45, #39)
+- `dev/synthwave/render.py` checks every loop for a baked-in seam: each stem has died away before the render ends,
+  and the reverb and delay don't drop across the wrap. A loop that fails isn't written to `out/`, and it exits 1
+  naming the track. Skipping the tail fold for one track now fails it. (#41)
 - The `Release` workflow has a dry run: run it by hand and it builds the zip and notes from the chosen branch and
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
+- `dev/playtest/kinds.js`, run by `run.mjs` and CI: every enemy kind is warped in on its own and must have a codex
+  row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+- **Campaign pacing.** The first five operations build from two to six foes per squad while shortening
+  reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
+  more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
+  Lockdown and Slag Rain restore a minimum amount of health after a clear.
+- Later campaign squads wait for the current fight to end. Meltdown separates presses, rising slag and the
+  Wyrm. Demolition and Live Circuit give players time to reach safe ground before the wrecking ball or rails
+  activate. The Foreman and Smelter start their arena machinery in phase two.
+- Campaign countdowns show what arrives next and where to prepare. New weapon cards show each weapon's use and
+  equip control. Meltdown, Demolition and Live Circuit issue their weapons across successive squads.
+- Each enemy record in `ENEMY` now holds its start frame and whether it flies or is humanoid. `FLIERS` and
+  `isHumanoid` are built from the records, and the start-frame map in `spawnEnemy` is gone, so a new kind no longer
+  needs entries in three side tables. No foe behaves differently. (#52)
+- Each enemy record also names the scene method that runs it each frame (`update`). `updateEnemies` calls it
+  directly instead of testing the kind against an 81-line `else if` chain, and `kinds.js` fails a record whose
+  method doesn't exist. Every kind runs the same method as before. (#52)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
@@ -53,9 +77,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
-- `T.setup(3)` and `T.setup(4)` (and `CH.arenaStorm` in those arenas) no longer throw under the default campaign
-  `RUNMODE`: they stage ARENA 04 and 05 as OVERTIME. A campaign run in an arena with no act now fails with a named
-  error. (#47)
+- Ground fires go out when a campaign round clears. Late explosions and fire patches can no longer damage the
+  player while choosing a perk or waiting for the next round.
+- A Gunship wreck that lands after the campaign round clears can no longer start new fires, including after
+  the next operation starts.
+- **Slag Rain** comes in 7 to 9 s showers with 5 to 7 s clear spells instead of without a break, and **SLAG
+  INCOMING** warns 1.2 s before each shower. Rain drops still burn and knock you about, but they no longer break
+  platforms or set off drums, so a shower can't dig you into a pit you can't climb out of. The Smelter's slag
+  still breaks terrain. (`TUNE.RAIN`)
+- `T.setup()` can stage all five campaign arenas with the arsenal earned before the selected act, including
+  the Wrecking Yard and Powerhouse. (#47)
 - The play-test bot's teleport picks a tile that can see the foe, skips the spot that just failed, and falls back to
   the foe's own row, so `VB.campaign` no longer loops forever under a foe it can't see in ARENA 02. As a backstop,
   `VB.campaign` removes a foe hidden for 30 s with five or fewer left and lists it in `removed`. (#46)
