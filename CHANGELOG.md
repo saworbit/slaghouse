@@ -56,6 +56,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- **Slag Rain** comes in 7 to 9 s showers with 5 to 7 s clear spells instead of without a break, and **SLAG
+  INCOMING** warns 1.2 s before each shower. Rain drops still burn and knock you about, but they no longer break
+  platforms or set off drums, so a shower can't dig you into a pit you can't climb out of. The Smelter's slag
+  still breaks terrain. (`TUNE.RAIN`)
 - `T.setup(3)` and `T.setup(4)` (and `CH.arenaStorm` in those arenas) no longer throw under the default campaign
   `RUNMODE`: they stage ARENA 04 and 05 as OVERTIME. A campaign run in an arena with no act now fails with a named
   error. (#47)
