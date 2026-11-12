@@ -14,14 +14,16 @@ window.T = (() => {
   T.snapNow = async (name) => { const p = T.snap(name); T.run(17); return await p; };
   T.boot = () => { T.start(); const ts = game.scene.getScene('Title'); ts.scene.start('Game'); ts.scene.launch('Hud'); T.run(100); };
   T.setup = (arena, keepWaves) => {
-    const gs = T.g(), mode = RUNMODE;
-    // the campaign has no act in ARENA 04 and 05 (only OVERTIME and DAILY go there), so stage those as OVERTIME
-    if (RUNMODE === 'campaign' && (arena === true ? 1 : arena || 0) >= CAMPAIGN_ACTS.length) RUNMODE = 'endless';
-    // explicit data every time: a bare restart reuses the last run's arena and carry (arena 0 used to land there)
-    try {
-      gs.scene.restart(arena ? { arena: arena === true ? 1 : arena, carry: { hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} }, style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, totalEnemies: 50, wave: 3, diff: OPTS.diff, mut: OPTS.mut } } : { arena: 0, carry: null });
-      T.run(50);
-    } finally { RUNMODE = mode; }                                   // create() has read it; later setups and restarts see the mode you set
+    const gs = T.g(), index = arena === true ? 1 : arena || 0;
+    const campaign = RUNMODE === 'campaign';
+    const carry = index ? {
+      hp: 100, weapon: 0, stats: { t0: 0, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} },
+      style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0,
+      totalEnemies: campaign ? CAMPAIGN_TOTAL : 50, wave: campaign ? CAMPAIGN_ACTS[index].first : 3,
+      diff: OPTS.diff, mut: OPTS.mut,
+    } : null;
+    gs.scene.restart({ arena: index, carry });                      // explicit data keeps the previous arena and carry from leaking in
+    T.run(50);
     const g = T.g(); g.pauseGame = () => {}; if (!keepWaves) g.startWave = () => {};
     const hp0 = g.hurtPlayer.bind(g); g.hurtPlayer = (d, x, o) => { const r = hp0(d, x, o); T.dmgLog.push(Math.round(d)); g.hp = 100; return r; };
     if (!keepWaves) { for (const e of g.enemies.getChildren()) if (e.alive) { e.alive = false; e.disableBody(true, true); if (e.glow) e.glow.setVisible(false); if (e.gun) e.gun.setVisible(false); } g.enemiesLeft = 99; }
@@ -37,7 +39,7 @@ window.T = (() => {
 // ---- simple bot: aims at the nearest foe, cycles all weapons, moves, jumps, kicks, dashes ----
 T.bot = async (opts = {}) => {
   const maxS = opts.seconds || 600, log = [], seenKinds = new Set(), wUse = {};
-  let t = 0, wT = 0, wi = 0, moveDir = 1, moveT = 0, lastArena = 0, lastWave = -1;
+  let t = 0, wT = 0, moveDir = 1, moveT = 0, lastArena = 0, lastWave = -1;
   const K = () => T.g().keys;
   while (t < maxS) {
     let g = T.g();
@@ -55,7 +57,7 @@ T.bot = async (opts = {}) => {
     }
     const p = g.player; let best = null, bd = 1e9;
     for (const e of g.enemies.getChildren()) { if (!e.alive || e.under) continue; seenKinds.add(e.kind); const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = e; } }
-    if ((wT -= 0.05) <= 0) { wT = opts.wSecs || 3; wi = (wi + 1) % WEAPONS.length; g.setWeapon(wi); }
+    if ((wT -= 0.05) <= 0) { wT = opts.wSecs || 3; g.cycleWeapon(1); }
     wUse[WEAPONS[g.weapon].id] = (wUse[WEAPONS[g.weapon].id] || 0) + 1;
     const k = K();
     if ((moveT -= 0.05) <= 0) { moveT = 0.6 + Math.random() * 1.2; moveDir = best ? (Math.sign(best.x - p.x) * (bd < 70 ? -1 : 1)) || 1 : (Math.random() < 0.5 ? -1 : 1); if (Math.random() < 0.25) moveDir = 0; }

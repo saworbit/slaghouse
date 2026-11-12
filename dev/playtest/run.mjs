@@ -7,7 +7,7 @@
 //     again to a blast without an error
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
 //     the act, and a few damaged saves that must fall back to New Campaign
-//   - a full VB.campaign(900) run (vibe.js), which must end won; foes the bot couldn't reach are listed as a note
+//   - a full VB.campaign(1500) run (vibe.js), which must end won; foes the bot couldn't reach are listed as a note
 // Any page error or console error fails the run too. Exits 1 and names each failure.
 //   npm ci --prefix dev/playtest        (once: installs playwright-core, no browser download)
 //   node dev/playtest/run.mjs           (all of it, about 30 s; the campaign run is most of that)
@@ -118,6 +118,18 @@ try {
     const page = await open(ctx, ['daily']);
     return (await page.evaluate(() => { RUNMODE = 'daily'; T.boot(); T.run(300); return DY.check(); })).fails;
   });
+  await check('campaign patrol, weapon access, reinforcement break and staged blackout', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.progression())).fails;
+  });
+  await check('Furnace rain clears before the Gunship, fires clear at the break and Hounds arrive in separate squads', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.furnacePacing())).fails;
+  });
+  await check('late campaign stages hazard warnings, weapon issues and boss machinery', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.latePacing())).fails;
+  });
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;
@@ -141,7 +153,20 @@ try {
   if (saved) {
     const c = JSON.parse(saved);
     damaged['weapon out of range'] = JSON.stringify({ ...c, checkpoint: { ...c.checkpoint, weapon: 999 } });
-    damaged['arena with no act'] = JSON.stringify({ ...c, checkpoint: { ...c.checkpoint, arena: 4 } });
+    damaged['arena with no act'] = JSON.stringify({ ...c, checkpoint: { ...c.checkpoint, arena: 5 } });
+    await check('legacy campaign checkpoint keeps its equipped weapon', async ctx => {
+      let page = await open(ctx, []);
+      await page.evaluate(payload => {
+        const legacy = JSON.parse(payload);
+        delete legacy.checkpoint.revision;
+        legacy.checkpoint.weapon = weaponSlot('nuke');
+        legacy.checkpoint.stats.kills = 34;                         // 32 base foes cleared, plus two extras in the old opening acts
+        legacy.checkpoint.totalEnemies = 98;
+        localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(legacy));
+      }, saved);
+      page = await open(ctx, ['checkpoint']);
+      return (await page.evaluate(() => CP.legacy())).fails;
+    });
     damaged['unknown perk'] = JSON.stringify({ ...c, checkpoint: { ...c.checkpoint, perks: { ...c.checkpoint.perks, nope: true } } });
   }
   for (const [what, payload] of Object.entries(damaged)) {
@@ -153,12 +178,13 @@ try {
     });
   }
   if (!quick) {
-    await check('VB.campaign(900) plays the campaign to the end', async ctx => {
+    await check('VB.campaign(1500) plays all five acts', async ctx => {
       const page = await open(ctx, ['vibe']);
-      const r = await page.evaluate(async () => { RUNMODE = 'campaign'; T.boot(); T.run(300); return await VB.campaign(900); });
+      const r = await page.evaluate(async () => { RUNMODE = 'campaign'; T.boot(); T.run(300); return await VB.campaign(1500); });
       console.log(`      ${r.state}, ${r.kills}/${r.total} kills, ${r.simFps} sim fps; ${r.waves.join('; ')}`);
       const fails = [];
       if (r.state !== 'won') fails.push(`state ${r.state}, want won (stopped at ${r.kills}/${r.total} kills)`);
+      if ([1, 2, 3, 4, 5].some(a => !r.waves.some(w => w.includes('/a' + a + ' ')))) fails.push('campaign did not visit all five arenas');
       // a removal is the bot failing to reach a foe (a mimic hiding as a drum, say), not the game failing: report it
       if (r.removed.length) console.log(`note  the bot couldn't reach ${r.removed.length} foe(s), so VB.campaign removed them: ${r.removed.join('; ')}`);
       fails.push(...r.errs.map(e => 'harness error: ' + e));

@@ -8,7 +8,8 @@
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
 A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
-ragdolls, destructible terrain, twenty kinds of breakable scenery, 61 weapons with mastery stars, 94 enemy types and 27 medals. The three-act
+ragdolls, destructible terrain, twenty kinds of breakable scenery, 61 weapons with mastery stars, 94 enemy types and
+27 medals. The five-act
 campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
 Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
 with no build step.
@@ -98,21 +99,33 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 ## Campaign
 
-The campaign descends through three acts. Each has two operations. The HUD shows the active squad and marks route
-objectives in cyan. Reinforcements arrive as the current squad thins out. The Gunship, Juggernaut and Slag Wyrm
-enter after their escorts fall.
+The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. Other weapons unlock at fixed
+points as operations or reinforcement breaks begin. Hotkeys, the wheel and weapon cycling share the issued
+arsenal. Across the first five operations, the largest squad grows from two to six foes, the
+breaks shorten from 3.2 to 1.6 seconds, and incoming damage rises from 80% to full for the selected difficulty.
+The HUD counts down each break. The first heavy arrives alone after you get the Shotgun.
+OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 
-| Act | Operations | Objective |
-| --- | --- | --- |
-| I · The Melt Floor | **Lockdown**, **Blackout** | Start against a small grunt patrol, then face the floor security team. Gunfire lights the blackout. After both operations, enter the marked Furnace lift. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Slag falls in showers with clear spells between; **SLAG INCOMING** warns you before each one. Fight under cover until the Gunship arrives. Use the high ground in low gravity, bring down the Juggernaut and reach the Sorting Line lift. |
-| III · The Sorting Line | **Meltdown**, **The Smelter** | Stay above the slag during the Wyrm encounter. Then stand at each marked coolant valve until its meter fills. Open valve 1 before valve 2 to expose the Smelter. Below 15% health it overheats, sheds its armour and fans slag across the room. |
+| Act | Operations | New weapons | Threats and objectives |
+| --- | --- | --- | --- |
+| I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then fight the Gunship after the rain clears. Practice low-gravity jumps against the opening squad. The second Hound arrives with Gravity Surge. |
+| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains and seal both coolant valves to open the lift. |
+| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | Get to the dais before the second squad releases the ball. The ball starts swinging again after you breach the Foreman's armor. |
+| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |
 
-Pick Hollow Points, Vampire or Double Jump after Lockdown. Later perk drafts draw from the remaining pool.
-Step onto each marked lift to enter the next act and save a checkpoint. The Furnace checkpoint brings your
-health up to at least 60 HP and the Sorting Line checkpoint brings it up to at least 75 HP. The Vampire mutator
-skips this recovery. Each checkpoint also saves your equipped weapon, perks, difficulty, mutator and accumulated
-run stats.
+Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
+starts. Each new weapon card shows what the weapon does and how to equip it. Ground fire clears at the end of an
+operation, and the Gunship wreck can no longer set the arena on fire after the clear.
+
+Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
+it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
+after Lockdown. Later perk drafts draw from the remaining pool.
+Step onto each marked lift to enter the next act and save a checkpoint. Arrival raises health to at least
+60 HP in the Furnace, 75 HP in the Sorting Line and Wrecking Yard, and 80 HP in the Powerhouse. The Vampire
+mutator skips this recovery. Checkpoints restore issued weapons, the equipped weapon, perks, difficulty,
+mutator and accumulated run stats. A checkpoint from the three-act campaign also keeps its equipped weapon
+if that weapon falls outside the new progression.
 
 Choose **Campaign → Continue** to return to the saved act after quitting or reloading. Keep the same browser
 profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the
@@ -167,8 +180,9 @@ keeps your best score.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
   any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
-- **Testing:** CI runs static checks. Use the [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check)
-  for progression changes and the [in-page harness](dev/playtest/README.md) for combat and arena tests.
+- **Testing:** CI runs static checks and a headless campaign suite. Use the
+  [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check) to check progression and pacing at real speed.
+  See the [playtest guide](dev/playtest/README.md) for local commands and what the automated run covers.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
   venv comes from `dev/synthwave/requirements.txt`.
