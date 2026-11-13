@@ -12,10 +12,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   off its own way (a ladle pours slag, a fan's blades fly off as saw blades, a capacitor chains lightning, a vending
   machine sprays fizzing cans and health orbs) and they set each other off: fire cooks off what burns, a PA horn
   shatters glass, spilt water conducts when anything electrical goes off near it. Every arena has a set; ARENA 01
-  has one of each. Shots, blasts, kicks, saw blades, the hose and the wrecking ball all hit them.
+  has one of each. Shots, blasts, kicks, saw blades, the hose and the wrecking ball all hit them. (#71)
 - `dev/playtest/props.js`, run by `run.mjs` and CI: every prop in every arena is broken, run through its effect,
   restocked and broken again without an error, in both the campaign and OVERTIME layouts of ARENA 04 and 05.
-  Presses crush any prop under them.
+  Presses crush any prop under them. (#71, #76)
 - **Five-act campaign.** Ten operations descend from the Melt Floor through the Wrecking Yard and Powerhouse.
   Enemy squads introduce blackout, slag showers, presses, the wrecking ball and live rails in stages. Fight
   the Foreman in the Yard before facing the Smelter in the Powerhouse.
