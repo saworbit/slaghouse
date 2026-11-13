@@ -751,7 +751,7 @@ const TUNE = {
   FLAME: { cooldown: 40, damage: 3, range: 92, cone: 18, burn: 3, burnDps: 8 },
   SING:  { cooldown: 1800, speed: 170, travel: 0.8, well: 1.4, pull: 110 },
   SING_BLAST: { radius: 72, maxDamage: 90, minDamage: 35, selfDamage: 15, push: 300, maxRise: 420, style: 'void' },
-  BARREL: { radius: 64, maxDamage: 90, minDamage: 25, selfDamage: 25, push: 460, maxRise: 600, hp: 20 },
+  BARREL: { radius: 64, maxDamage: 90, minDamage: 25, selfDamage: 25, push: 460, maxRise: 600, hp: 20, scenery: true },
   TICK:  { speed: 150, leap: 230, armRange: 22, fuse: 350, radius: 46, maxDamage: 40, minDamage: 12, selfDamage: 30, push: 300, maxRise: 400, enemy: true },
   SNIPER: { aimMs: 1100, lockAt: 0.75, bulletSpeed: 900, damage: 22, fireCd: 2.6 },
   BOSS:  { speed: 55, slag: { radius: 34, maxDamage: 30, minDamage: 10, enemyDamage: 20, selfDamage: 16, push: 260, maxRise: 360, enemy: true, spare: 'boss', burn: 1.5 } },
@@ -1460,10 +1460,10 @@ const PROPS = {
   water:     { hp: 40, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakWater', call: 'WASHED OUT!' },
 };
 const PROP_BLAST = {                                               // the props that go bang
-  propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70 },
-  boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60 },
-  small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18 },
-  slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30 },
+  propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70, scenery: true },
+  boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60, scenery: true },
+  small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18, scenery: true },
+  slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30, scenery: true },
 };
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
@@ -6388,6 +6388,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
     this.state = 'play'; this.overShown = false; this.needReset = true;
     this.stats = { t0: this.time.now, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} };
+    this.playSaved = 0;                                                 // ms of this.stats.t0's span already added to LIFE.time
     this.weapon = this.lab ? weaponSlot(this.lab.weapon) : 0; this.nextFire = 0; this.wNext = []; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
     this.hp = T.PLAYER_HP; this.invulnUntil = 0; this.dropUntil = 0;
     this.lastGround = -1e9; this.jumpBuffer = -1e9; this.jumpCuttable = false; this.wasGround = false; this.lastVy = 0;
@@ -7728,7 +7729,7 @@ class GameScene extends Phaser.Scene {
     b.enableBody(true, x, y, true, true);
     b.body.setSize(4, 4, true); b.body.setAllowGravity(false);
     b.setRotation(ang); b.setVelocity(Math.cos(ang) * speed, Math.sin(ang) * speed);
-    Object.assign(b, { kind, dmg, life, ang, px: x, py: y, bounces: 0 });
+    Object.assign(b, { kind, dmg, life, ang, px: x, py: y, bounces: 0, free: false });   // free: not fired by the player, so its hits don't count toward accuracy
     if (kind === 'ember') b.setTint(0xff9a30); else if (kind === 'tetherdart') b.setTint(0x80ffe0); else b.clearTint();
     return b;
   }
@@ -8542,7 +8543,7 @@ class GameScene extends Phaser.Scene {
       this.spawnLight(bx, by, 'glow', 0xfff0c0, 0.5, 0.9, 0.8, 0.06);
       return;
     }
-    this.stats.hits++;
+    if (!b.free) this.stats.hits++;
     const hs = (isHumanoid(e) || e.kind === 'jet') && by < e.body.top + 5;                    // top quarter of a humanoid = head
     if (e.kind === 'boss' && by < e.body.top + 12) { e.dmgHead = true; b.dmg *= 1.5; }   // boss head / furnace crit
     if (e.def.molten) this.fx.emit(bx, by, { n: 5, angle: ang + Math.PI, spread: 1.6, speed: [40, 160], life: [0.2, 0.45], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 400, mode: 1 });   // slag spits sparks, not blood
@@ -8577,7 +8578,7 @@ class GameScene extends Phaser.Scene {
       if (W.burn) this.ignite(e, W.burn);
       this.damageEnemy(e, dmg, Math.cos(ang), Math.sin(ang), 'rocket');
     }
-    if (damaged && byPlayer) this.stats.hits++;
+    if (damaged && byPlayer && !W.scenery) this.stats.hits++;           // a drum or prop going off isn't a shot that hit
     for (const { rd, f } of this.pushRagdolls(x, y, R + 10, 620, 400)) { // corpses fly; close ones burst
       const c = rd.pts[2];
       if (W.burn) rd.burnT = Math.max(rd.burnT, W.burn);
@@ -8883,7 +8884,7 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'slug') for (let i = 0; i < 3; i++) this.acids.push({ x: cx + rand(-12, 12), y: e.body.bottom, w: 18, t: TUNE.SLUG.pool * 1.5 });
     if (e.kind === 'echo') { this.fx.emit(cx, cy, { n: 30, speed: [30, 160], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0x9af0ff, 0x46b8f0], add: true }); this.spawnLight(cx, cy, 'player', 0x60e0ff, 1, 1.4, 0.6, 0.3, e.fr, e.dir < 0); }
     if (e.kind === 'pilferer') { if (e.gunImg) e.gunImg.destroy(); if (e.stolen >= 0) { this.locked.delete(e.stolen); BUS.emit('locked', [...this.locked]); BUS.emit('callout', 'GUN RECOVERED'); this.addStyle(40); } }
-    if (e.kind === 'golem') { this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.time.delayedCall(60, () => { this.explode(cx, cy, TUNE.GOLEM.scrap); for (let i = 0; i < 10; i++) { const b = this.spawnBullet('shard', cx, cy - 6, i / 10 * Math.PI * 2 + rand(-0.2, 0.2), rand(220, 340), 9, 0.5); if (b) b.bounces = 1; } BUS.emit('callout', 'SCRAPPED'); }); }
+    if (e.kind === 'golem') { this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.time.delayedCall(60, () => { this.explode(cx, cy, TUNE.GOLEM.scrap); for (let i = 0; i < 10; i++) { const b = this.spawnBullet('shard', cx, cy - 6, i / 10 * Math.PI * 2 + rand(-0.2, 0.2), rand(220, 340), 9, 0.5); if (b) { b.bounces = 1; b.free = true; } } BUS.emit('callout', 'SCRAPPED'); }); }
     if (e.kind === 'jammer') { this.spawnLight(cx, cy, 'ring', 0x60ff9a, 0.3, 1.8, 0.9, 0.25); this.fxSparks(cx, cy, 12, 0, Math.PI * 2, [60, 220]); }
     for (const L of this.limpets) if (L.e === e) { L.e = null; L.vx = rand(-60, 60); L.vy = -120; L.stuck = false; }   // limpets fall off the body
     if (e.kind === 'turret') this.boomFx(cx, cy, 0.4);
@@ -10165,7 +10166,7 @@ class GameScene extends Phaser.Scene {
   breakProp(p, src, ca) {
     if (p.st !== 'ok') return;
     p.st = 'live'; p.t = 0; p.hp = 0; p.fdir = Math.sign(ca || 0) || (Math.random() < 0.5 ? -1 : 1);
-    this.addStyle(12); this.propsBroken = (this.propsBroken || 0) + 1;
+    this.addStyle(12);
     this[p.D.brk](p, src);
   }
   wreckProp(p, smoke) {                                                // done going off: the wreck stays, dark, until the next wave
@@ -10772,7 +10773,7 @@ class GameScene extends Phaser.Scene {
     if ((p.popT -= dt) <= 0) {
       p.popT = rand(0.05, 0.14);
       const a = -Math.PI / 2 + rand(-1.35, 1.35), sx = p.cx + rand(-5, 5), sy = p.y - 7;
-      this.spawnBullet('nail', sx, sy, a, rand(380, 520), 9, 0.7);
+      const round = this.spawnBullet('nail', sx, sy, a, rand(380, 520), 9, 0.7); if (round) round.free = true;
       this.fx.emit(sx, sy, { n: 3, angle: a, spread: 0.5, speed: [40, 120], life: [0.05, 0.12], size: [2, 1], cols: [0xffffff, 0xffe46a], add: true });
       if (Math.random() < 0.6) this.spawnGib('g_casing', sx, sy, rand(-80, 80), rand(-200, -100), 'shell');
       if (Math.random() < 0.3) this.spawnLight(sx, sy, 'glow', 0xffd080, 0.4, 0.9, 0.7, 0.06);
@@ -11436,20 +11437,21 @@ class GameScene extends Phaser.Scene {
 
   // ------------------------------------------------------------- run control ----
   restartRun() {
-    this.saveCampaignPlayTime();
+    this.savePlayTime();
     const checkpoint = this.state === 'won' ? null : this.chapterStart;
     Sfx.stopLoops(); Music.paused = false;
     if (this.lab) { this.labTransition = true; this.scene.restart({ lab: this.lab, spawns: this.labRoster }); return; }
     this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena(this.day) : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId, day: this.day });   // a restart is the same run, so it keeps (or still lacks) the save
   }
   quitToTitle() {
-    this.saveCampaignPlayTime();
+    this.savePlayTime();
     Sfx.stopLoops(); Music.paused = false; Music.intensity = 0;
     this.scene.stop('Hud'); this.scene.start('Title');
   }
-  saveCampaignPlayTime() {                                              // the scene clock holds still in the pause menu, so this.time.now is right either way
-    if (!this.campaign || this.overShown || this.needReset) return;
-    LIFE.time += Math.max(0, this.time.now - this.stats.t0) / 1000;
+  savePlayTime() {                                                      // the scene clock holds still in the pause menu, so this.time.now is right either way
+    if (this.lab || this.overShown || this.needReset) return;           // after the results screen the run's time is already in
+    const ms = Math.max(0, this.time.now - this.stats.t0 - this.playSaved);
+    LIFE.time += ms / 1000; this.playSaved += ms;
     saveLife(); saveMastery();
   }
   runTime() {
@@ -12698,7 +12700,7 @@ class GameScene extends Phaser.Scene {
         perks: { ...this.perks }, medals: [...this.medals], ms: { ...this.ms }, lastMod: this.lastMod,
       };
       if (this.campaign) {
-        this.saveCampaignPlayTime();
+        this.savePlayTime();
         carry.arena = arena;
         carry.revision = CAMPAIGN_REVISION;
         carry.legacyWeapon = this.legacyWeapon;
@@ -12709,7 +12711,7 @@ class GameScene extends Phaser.Scene {
         delete carry.stats.t0;
         const save = loadCampaign();
         if (ownsCampaign(save, this.campaignRunId)) writeCampaign({ ...save, checkpoint: carry, cleared: !!save?.cleared, owner: this.campaignRunId });   // a stale tab keeps playing but leaves a newer campaign's checkpoint alone
-      }
+      } else carry.playSaved = this.playSaved;
       Sfx.stopLoops();
       this.scene.restart({ arena, carry });
     });
@@ -12722,6 +12724,7 @@ class GameScene extends Phaser.Scene {
     });
     this.medals = new Set(c.medals || []); this.ms = { ...this.ms, ...c.ms }; this.waveTaken = this.stats.taken;
     this.weapon = c.weapon; this.applyGunTexture();
+    if (!this.campaign) this.playSaved = c.playSaved || 0;              // OVERTIME keeps one clock across the lift; each campaign act starts its own
   }
 
   // ---------------------------------------------------------------- tractor ----
@@ -17195,7 +17198,7 @@ class GameScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => this.showOver(true));
   }
   showOver(won) {
-    this.saveCampaignPlayTime();
+    this.savePlayTime();
     this.overShown = true;
     if (this.lab) { BUS.emit('wavecard', 'TEST ENDED', 'R RESET / F2 CONTROLS / ESC EXIT'); return; }
     const s = this.stats, time = this.runTime(), acc = s.shots ? Math.round(Math.min(1, s.hits / s.shots) * 100) : 0;
@@ -17205,8 +17208,7 @@ class GameScene extends Phaser.Scene {
     const score = Math.max(0, Math.round(s.kills * 100 + this.headshots * 50 + s.executes * 150 + this.bestCombo * 60 + s.dodges * 25 + this.style.best * 500 + (this.endless ? this.wave * 600 : 0)
                                          + (won ? Math.max(0, 900 - time) * 10 : 0) - s.taken * 4) * DIFFS[this.runDiff].score);
     const favId = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a])[0], fav = favId ? WEAPONS.find(w => w.id === favId).name : '-';
-    if (!this.campaign) LIFE.time += time;
-    saveLife();                                        // lifetime stats: time played
+    saveLife();                                        // lifetime stats (savePlayTime above added the time played)
     const topGuns = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a]).slice(0, 3).map(id => [WEAPONS.find(w => w.id === id).name, s.wk[id]]);
     saveMastery();
     if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
@@ -19626,9 +19628,18 @@ window.game = new Phaser.Game({
 game.events.on('prestep', () => PAD.poll());
 // A hidden tab stops the game loop but not our own Web Audio graph: without this the music, the hum and any
 // weapon loop that was running (hose, arc, cryo, minigun motor) keep playing over a frozen game.
+// Hiding or closing the tab credits the time played so far and writes the lifetime counts and mastery, so a run
+// that never reaches its results screen still counts.
+const flushLife = () => {
+  const gs = game.scene.getScene('Game');
+  if (gs && gs.sys.isActive()) gs.savePlayTime();
+  saveLife(); saveMastery();
+};
+window.addEventListener('pagehide', flushLife);
 game.events.on('hidden', () => {
   const gs = game.scene.getScene('Game');                              // a hidden tab pauses the run; coming back waits on the menu
   if (gs && gs.sys.isActive() && gs.state === 'play' && !gs.paused) gs.pauseGame();
+  flushLife();
   if (Sfx.ctx && Sfx.ctx.state === 'running') Sfx.ctx.suspend().catch(() => {});
 });
 game.events.on('visible', () => { if (Sfx.ctx && Sfx.ctx.state === 'suspended') Sfx.ctx.resume().catch(() => {}); });

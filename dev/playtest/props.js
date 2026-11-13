@@ -60,6 +60,34 @@ window.PR = (() => {
     }
     return { fails, props: count };
   };
+  // Rounds the player never fired and scenery blasts must not count as hits: they'd lift run accuracy (#88).
+  PR.accuracy = () => {
+    const fails = [];
+    RUNMODE = 'endless'; T.boot();
+    const g = T.setup(0), crate = g.props.find(p => p.kind === 'ammo');
+    g.props = [crate];
+    const grunts = [-1, 0, 1, 2].map(dx => g.spawnEnemy('grunt', crate.tx + dx, crate.ty));
+    for (const e of grunts) { e.aggro = false; e.hp = 5000; }
+    T.run(200);
+    const hp0 = grunts.reduce((n, e) => n + e.hp, 0), hits0 = g.stats.hits, shots0 = g.stats.shots;
+    g.hitProp(crate, 999, 'kick', crate.cx, crate.cy, 1, 0);
+    T.run(4000);
+    if (crate.st === 'live' || crate.st === 'ok') fails.push(`the ammo crate is still '${crate.st}' 4 s after breaking`);
+    if (grunts.reduce((n, e) => n + e.hp, 0) >= hp0) fails.push('fixture: the cook-off and its blast hurt none of the grunts beside the crate');
+    if (g.stats.hits !== hits0 || g.stats.shots !== shots0) fails.push(`an ammo crate cooking off among foes added ${g.stats.hits - hits0} hits and ${g.stats.shots - shots0} shots`);
+    const e = grunts[0], at = () => [e.body.center.x, e.body.center.y];
+    g.explode(...at(), TUNE.BARREL);
+    if (g.stats.hits !== hits0) fails.push('a drum blast counted as a hit');
+    const round = g.spawnBullet('nail', ...at(), 0, 400, 1, 1); round.free = true;
+    g.onBulletHit(round, e);
+    if (g.stats.hits !== hits0) fails.push('a free round counted as a hit');
+    const shot = g.spawnBullet('nail', ...at(), 0, 400, 1, 1);           // the pool hands back the same bullet; it must be the player's again
+    if (shot.free) fails.push('a reused bullet kept its free tag');
+    g.onBulletHit(shot, e);
+    g.explode(...at(), TUNE.ROCKET);
+    if (g.stats.hits !== hits0 + 2) fails.push(`a player's bullet and rocket added ${g.stats.hits - hits0} hits, want 2`);
+    return [...fails, ...T.errs];
+  };
   PR.campaignContactDamage = () => {
     const fails = [];
     OPTS.diff = 1;

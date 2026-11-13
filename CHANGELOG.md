@@ -63,6 +63,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Breaking a prop no longer bumps an unread `propsBroken` counter. (#91)
 - **Restarting asks first.** Mid-run, **R** shows "PRESS R AGAIN TO RESTART" (or "RETRY ACT") under the objective
   banner, and only a second press within two seconds restarts. In the pause menu, RESTART / RETRY ACT and QUIT TO
   TITLE turn red with a question mark and need a second pick; moving off, Esc or B cancels. The pause list no longer
@@ -116,6 +117,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- An ammo crate's cook-off rounds, a scrap golem's shards and drum or prop blasts no longer count as hits, so they
+  don't lift run accuracy or the grade. Only the player's own shots, blasts and strikes count. (#88)
+- Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
+  tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - The campaign bot reaches the Blackout ceiling creeper and disguised mimic, and reroutes after failed platform
   jumps that previously stalled the Furnace on seed 91.
 - Gravity Loss Linkers stay below the Furnace catwalk. If pushed above it, they fly back down through a nearby opening.
