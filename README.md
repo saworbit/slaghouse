@@ -29,7 +29,11 @@ to choose **New Campaign** or **Continue** when a checkpoint is available.
 
 The title also has **OVERTIME** (endless waves), **DAILY** (today's seeded OVERTIME run), **BOSS RUSH** (five bosses
 back to back), **CODEX**, **ARMORY**, **MEDALS** and **OPTIONS**. Options include the Glass Cannon, Swarm, Moon Boots,
-Lights Out and Vampire mutators.
+Lights Out and Vampire mutators, and the full controls list. With a mouse, the wheel pages the CODEX and steps through
+the other lists; leave a page with **< BACK**, a right click or **Esc**.
+
+The game needs a keyboard and mouse or a gamepad. On a touch-only phone or tablet the title says so and holds runs
+until a key press or pad input arrives.
 
 `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
 automatically. Both are optional; without them the game uses its built-in procedural audio.

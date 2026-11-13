@@ -206,6 +206,60 @@ try {
     await wait('open linked room', () => document.getElementById('lab-panel').open && document.querySelector('#lab-form [name=room]').value === 'yard');
     return fail;
   });
+  await check('title pages: mouse paging, an explicit BACK, and the touch-only notice', async ctx => {
+    const fail = [];
+    let page = await open(ctx, []);
+    const at = async (x, y) => page.evaluate(([x, y]) => { const r = game.canvas.getBoundingClientRect(); return [r.left + x * r.width / VIEW_W, r.top + y * r.height / VIEW_H]; }, [x, y]);
+    const click = async (x, y, button = 'left') => { const [px, py] = await at(x, y); await page.mouse.click(px, py, { button }); await page.waitForTimeout(80); };
+    const title = () => page.evaluate(() => { const t = game.scene.getScene('Title'); return { sub: t.sub, sel: t.subSel }; });
+    const row = name => page.evaluate(n => { const o = game.scene.getScene('Title').menuItems.find(m => m._text === n); return [o.x, o.y]; }, name);
+    const wheel = async (x, y, dy) => { const [px, py] = await at(x, y); await page.mouse.move(px, py); await page.mouse.wheel(0, dy); await page.waitForTimeout(160); };
+    await click(...await row('CODEX'));
+    if ((await title()).sub !== 'codex') fail.push('clicking CODEX did not open it');
+    await wheel(480, 260, 120);
+    if ((await title()).sel < 66) fail.push('the mouse wheel did not page the CODEX forward');
+    await wheel(480, 260, -120);
+    if ((await title()).sel >= 66) fail.push('the mouse wheel did not page the CODEX back');
+    await click(480, await page.evaluate(() => game.scene.getScene('Title').codexCount.y));
+    if ((await title()).sel < 66) fail.push('clicking PAGE 1/2 did not turn the page');
+    await click(480, 514);                                            // the Q/E PAGE hint
+    await click(480, 500);                                            // empty space below the grid
+    if ((await title()).sub !== 'codex') fail.push('a stray click closed the CODEX');
+    await click(70, 64);                                              // < BACK
+    if ((await title()).sub !== null) fail.push('clicking BACK did not leave the CODEX');
+    await click(...await row('MEDALS'));
+    const medal = await page.evaluate(() => { const r = game.scene.getScene('Title').medalRows[4].name; return [r.x + 20, r.y + 6]; });
+    await click(...medal);
+    if ((await title()).sub !== 'medals') fail.push('clicking a medal closed MEDALS');
+    await click(480, 300, 'right');
+    if ((await title()).sub !== null) fail.push('a right click did not leave MEDALS');
+    await click(...await row('ARMORY'));
+    const [ax, ay] = await at(480, 200); await page.mouse.move(ax, ay); await page.waitForTimeout(80);   // hovering picks the gun under the cursor
+    const before = (await title()).sel;
+    await wheel(480, 200, 120);
+    if ((await title()).sel !== before + 13) fail.push(`the wheel on ARMORY moved from gun ${before} to ${(await title()).sel}, want one row down`);
+    await click(480, 500);
+    if ((await title()).sub !== 'armory') fail.push('a click off the guns closed ARMORY');
+    await click(...await row('OPTIONS'));
+    if ((await title()).sub !== 'armory') fail.push('fixture: the menu took a click through the ARMORY page');
+    // a touch-only device: the notice shows and runs wait for a key press
+    await ctx.addInitScript(() => {
+      const real = window.matchMedia.bind(window);
+      window.matchMedia = q => (/pointer: coarse/.test(q) ? { matches: true } : /any-pointer: fine/.test(q) ? { matches: false } : real(q));
+    });
+    page = await open(ctx, []);
+    const touch = await page.evaluate(() => { const t = game.scene.getScene('Title'); return { gate: t.touchGate, note: t.touchNote.visible }; });
+    if (!touch.gate || !touch.note) fail.push(`a touch-only device saw no notice: ${JSON.stringify(touch)}`);
+    await page.evaluate(() => game.scene.getScene('Title').menuPick(1));
+    await page.waitForTimeout(500);
+    if (await page.evaluate(() => game.scene.getScene('Game').sys.isActive())) fail.push('a touch-only device started OVERTIME with no keyboard or pad');
+    await page.keyboard.down('Shift'); await page.waitForTimeout(70); await page.keyboard.up('Shift');
+    if (await page.evaluate(() => game.scene.getScene('Title').touchNote.visible)) fail.push('a key press did not clear the touch notice');
+    await page.evaluate(() => game.scene.getScene('Title').menuPick(1));
+    try { await page.waitForFunction(() => game.scene.getScene('Game').sys.isActive()); }
+    catch { fail.push('OVERTIME did not start after a key press on a touch device'); }
+    return fail;
+  });
   await check('Lab presets, combat, snapshots, clean reset and save isolation', async ctx => {
     const page = await open(ctx, ['lab']);
     return page.evaluate(() => checkLab());
