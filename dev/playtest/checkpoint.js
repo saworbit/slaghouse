@@ -156,8 +156,10 @@ window.CP = (() => {
     expect(alive().map(e => e.kind).sort().join() === 'pyro,rocketeer', 'the Demolition Team did not arrive as a pair');
     clear();
     const bossBreak = CAMPAIGN[2].squads.at(-1).breakMs;
-    T.run(bossBreak - 300);
-    expect(!gunship(), 'the Gunship skipped its warning');
+    T.run(5600);
+    expect(!gunship() && g.activeHostiles() === 0 && g.campaignReinforceAt > g.time.now,
+      'the Gunship skipped the extra time to reposition after the Demolition Team');
+    T.run(bossBreak - 5600 - 300);
     T.run(2000);
     expect(gunship() && g.mod === null && alive().length === 1, 'the Gunship did not arrive alone in clear weather');
     if (!gunship()) return { fails };
@@ -258,8 +260,26 @@ window.CP = (() => {
     g.keys.A.isDown = true;
     pressJump(g); T.run(17);
     expect(b.velocity.x < 0, 'the jump fired before reaching the wall');
-    T.run(85);
-    expect(b.velocity.x > 0 && b.velocity.y < -200, 'a jump pressed just before contact did not launch away from the wall');
+    T.run(60);
+    expect(b.velocity.y < -200, 'a jump pressed just before contact did not launch away from the wall');
+
+    // Hold into one wall and repeat the jump without reversing or needing a second wall.
+    b.reset(38, 183); b.setVelocityY(30);
+    g.wallLockUntil = 0;
+    g.lastGround = -Infinity;
+    let farthest = b.left;
+    for (let jump = 0; jump < 3; jump++) {
+      pressJump(g); T.run(17);
+      expect(b.velocity.y < -TUNE.JUMP_VELOCITY, 'a repeated jump failed to kick off the same wall');
+      for (let frame = 0; frame < 8; frame++) {
+        T.run(17);
+        farthest = Math.max(farthest, b.left);
+      }
+      g.keys.SPACE.isDown = false;
+      T.run(17);
+    }
+    expect(b.bottom < 80 && farthest < 43,
+      'holding toward the same wall did not climb three jumps without drifting away');
     return { fails };
   };
 

@@ -549,7 +549,8 @@
                           explode (radius 40), ADRENALINE +50% damage under 35 HP, BARBED PLATE contact hurts the
                           toucher for 20. They last the run (and ride the lift); the HUD lists them.
     Wall slide / jump ... push into a wall while falling to slide. Jump near a wall while rising or falling, or just
-                          after leaving it. A jump pressed just before contact is buffered, and you can steer away immediately.
+                          after leaving it. Hold toward the wall for a short kick and jump again to climb, or
+                          steer away for a wider jump. A jump pressed just before contact is buffered.
     Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
                           bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
                           New pipes every wave.
@@ -787,7 +788,7 @@ const TUNE = {
   TURRET:  { fireCd: 1.3, tellMs: 300, speed: 300, dmg: 6 },
   DUELIST: { windupMs: 300, comboMs: 170, lunge: 300 },
   VOLATILE:{ radius: 40, maxDamage: 35, minDamage: 10, selfDamage: 0, push: 220, maxRise: 300, tileDamage: 15 },
-  WALL:    { slide: 90, reach: 3, jumpX: 215, jumpK: 1.07, grace: 160, lock: 90 },
+  WALL:    { slide: 90, reach: 3, climbX: 55, jumpX: 110, crossX: 160, jumpK: 1.07, grace: 160, lock: 45 },
   // ---- ironclad round ----
   FLARE:   { cooldown: 700, speed: 330, burn: 6, dps: 10, igniteR: 22, lightR: 90, max: 4 },
   LIMPET:  { cooldown: 300, speed: 300, holdMs: 350, max: 5, gap: 0.06 },
@@ -4872,7 +4873,7 @@ const CAMPAIGN = [
     { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A']] },
     { name: 'FURNACE GUARD', foes: [['golem', 'G'], ['enforcer', 'G']] },
     { name: 'DEMOLITION TEAM', mod: null, machinery: null, foes: [['pyro', 'G'], ['rocketeer', 'G']] },
-    { incoming: 'GUNSHIP', breakMs: 4200, foes: [['gunship', 50, 6]] },
+    { incoming: 'GUNSHIP', prepare: 'FIND COVER BEFORE THE VOLLEY', breakMs: 6200, foes: [['gunship', 50, 6]] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
     breakMs: 2500, spawnGap: 850, damageScale: 0.95, hazardContactMs: 350, squads: [
@@ -7097,7 +7098,10 @@ class GameScene extends Phaser.Scene {
     }
     if (now - this.jumpBuffer <= T.JUMP_BUFFER_MS && !jumped && !onGround && now - this.lastGround > T.COYOTE_MS) {
       if (now - this.wallT < W2.grace && this.wallSide) {                 // wall jump
-        b.setVelocity(-this.wallSide * W2.jumpX, -T.JUMP_VELOCITY * W2.jumpK); this.wallLockUntil = now + W2.lock;
+        const steer = dir * this.wallSide;
+        const push = steer > 0 ? W2.climbX : steer < 0 ? W2.crossX : W2.jumpX;
+        b.setVelocity(-this.wallSide * push, -T.JUMP_VELOCITY * W2.jumpK);
+        this.wallLockUntil = now + W2.lock;
         this.jumpBuffer = -1e9; this.wallT = -1e9; this.jumpCuttable = true; this.djUsed = false; jumped = true;
         Sfx.jump(); this.squash(0.75, 1.3); this.fxDust(p.x + this.wallSide * 5, p.y + 4, 5); this.addStyle(8);
       } else if (jumpPressed && this.perks.djump && !this.djUsed) {                      // double jump (perk)
