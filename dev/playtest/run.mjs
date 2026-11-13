@@ -420,6 +420,10 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.furnacePacing())).fails;
   });
+  await check('MOON BOOTS and LIGHTS OUT last through the Slag Rain hazards', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.mutatorHazards())).fails;
+  });
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;
