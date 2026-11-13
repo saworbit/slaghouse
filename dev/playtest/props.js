@@ -60,5 +60,58 @@ window.PR = (() => {
     }
     return { fails, props: count };
   };
+  PR.campaignContactDamage = () => {
+    const fails = [];
+    OPTS.diff = 1;
+    RUNMODE = 'campaign';
+    T.boot();
+
+    const setup = (arena, wave) => {
+      const g = T.setup(arena);
+      delete g.hurtPlayer;
+      g.wave = wave;
+      g.applyMod(CAMPAIGN[wave].mod);
+      g.hp = 100;
+      return g;
+    };
+
+    const blackout = setup(0, 1);
+    const tank = blackout.props.find(p => p.kind === 'water');
+    blackout.hitProp(tank, 999, 'shot', tank.cx, tank.cy, 1, 0);
+    const water = blackout.waters[0];
+    blackout.player.body.reset(water.x, water.y - 12);
+    blackout.electrifyWater(water.x, water.y, 20);
+    T.run(1700);
+    const waterDamage = 100 - blackout.hp;
+    if (waterDamage <= 0 || waterDamage > 13) fails.push(`Blackout: took ${waterDamage.toFixed(1)} HP from 1.7 s in electrified water (expected up to three hits)`);
+
+    const slagRain = setup(1, 2);
+    const drum = slagRain.props.find(p => p.kind === 'oil');
+    slagRain.props = [drum];
+    slagRain.hitProp(drum, 999, 'shot', drum.cx, drum.cy, 1, 0);
+    const oil = slagRain.tars[0];
+    slagRain.igniteTar(oil);
+    slagRain.spawnFirePatch(oil.x, oil.y - 4);
+    slagRain.player.body.reset(oil.x, oil.y - 12);
+    const beforeFire = slagRain.hp;
+    T.run(1200);
+    const oilDamage = beforeFire - slagRain.hp;
+    if (oilDamage <= 0 || oilDamage > 19) fails.push(`Slag Rain: took ${oilDamage.toFixed(1)} HP from 1.2 s in overlapping oil and floor fire (expected up to three hits)`);
+
+    const gravityLoss = setup(1, 3);
+    const ladle = gravityLoss.props.find(p => p.kind === 'ladle');
+    gravityLoss.props = [ladle];
+    gravityLoss.hitProp(ladle, 999, 'shot', ladle.cx, ladle.cy, 1, 0);
+    T.run(1950);
+    const pool = gravityLoss.puddles.at(-1);
+    const overlapping = gravityLoss.puddles.filter(p => Math.abs(p.x - pool.x) < p.w / 2 && p.y === pool.y);
+    if (ladle.phase !== 'pour' || overlapping.length < 2) fails.push('Gravity Loss: fixture needs overlapping pools under an active ladle');
+    gravityLoss.player.body.reset(pool.x, pool.y - 12);
+    const before = gravityLoss.hp;
+    T.run(900);
+    const ladleDamage = before - gravityLoss.hp;
+    if (ladleDamage <= 0 || ladleDamage > 23) fails.push(`Gravity Loss: took ${ladleDamage.toFixed(1)} HP from 0.9 s under a pouring ladle (expected up to three hits)`);
+    return fails;
+  };
   return PR;
 })();

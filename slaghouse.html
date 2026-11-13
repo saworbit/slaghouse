@@ -4856,20 +4856,20 @@ const CAMPAIGN = [
     { name: 'FLOOR SECURITY', foes: [['enforcer', 47, 8], ['stalker', 54, 20]] },
   ] },
   { name: 'BLACKOUT', brief: 'USE FLARES WHEN THE LIGHTS CUT', unlock: ['flare', 'net'],
-    breakMs: 2800, spawnGap: 950, damageScale: 0.85, squads: [
+    breakMs: 2800, spawnGap: 950, damageScale: 0.85, hazardContactMs: 500, squads: [
     { foes: [['grunt', 'G'], ['enforcer', 'G'], ['bulwark', 'G']] },
     { name: 'DARK AMBUSH', mod: 'dark', foes: [['creeper', 'A'], ['mimic', 'G'], ['stalker', 'G']] },
     { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['tarspit', 'G'], ['mender', 'A']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT' }] },
   { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'],
-    breakMs: 2400, spawnGap: 800, damageScale: 0.9, recovery: 65, squads: [
+    breakMs: 2400, spawnGap: 800, damageScale: 0.9, hazardContactMs: 425, recovery: 65, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
     { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
     { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
     { incoming: 'GUNSHIP', mod: null, foes: [['gunship', 'A']] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
-    breakMs: 2000, spawnGap: 650, damageScale: 0.95, elites: 1, squads: [
+    breakMs: 2000, spawnGap: 650, damageScale: 0.95, hazardContactMs: 350, elites: 1, squads: [
     { foes: [['grunt', 'G'], ['hound', 'G'], ['blinker', 'A']] },
     { name: 'GRAVITY SURGE', foes: [['hound', 'G'], ['pogo', 'G'], ['linker', 'A'], ['linker', 'A']] },
     { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G'], ['chiller', 'G']] },
@@ -6198,6 +6198,7 @@ class GameScene extends Phaser.Scene {
     this.style = { pts: 0, rank: 0, best: 0, lastWeapon: null }; this.headshots = 0; this.wave = 0; this.noiseT = 0;
     this.totalEnemies = this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN_TOTAL;   // OVERTIME counts up as waves come
     this.kickReady = 0; this.kickUntil = 0; this.kickQueued = false; this.flameActiveUntil = 0; this.scorchT = 0;
+    this.hazardContactUntil = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
     Sfx.stopLoops(); this.spin = 0; this.heat = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
@@ -7894,7 +7895,7 @@ class GameScene extends Phaser.Scene {
       if (P.tick <= 0) {
         P.tick = 0.35;
         for (const rd of this.ragdolls) if (Math.abs(rd.pts[2].x - P.x) < P.w / 2 && Math.abs(rd.pts[2].y - P.y) < 12) rd.burnT = Math.max(rd.burnT, 2);   // corpses catch too
-        if (alive && Math.abs(pb.center.x - P.x) < P.w / 2 + 5 && Math.abs(pb.bottom - P.y) < 6) this.hurtPlayer(7, P.x, { knock: false, iframes: false, burn: true, srcY: P.y + 8 });
+        if (alive && Math.abs(pb.center.x - P.x) < P.w / 2 + 5 && Math.abs(pb.bottom - P.y) < 6) this.hurtFromHazardContact(7, P.x, { burn: true, srcY: P.y + 8 });
         for (const e of this.enemies.getChildren()) if (e.alive && e.kind !== 'boss' && Math.abs(e.body.center.x - P.x) < P.w / 2 + 4 && Math.abs(e.body.bottom - P.y) < 6) this.ignite(e, 1.5);
       }
     }
@@ -10178,7 +10179,7 @@ class GameScene extends Phaser.Scene {
         if (!e.alive || e.under || FLIERS.has(e.kind) || Math.abs(e.body.center.x - W.x) > half + 2 || Math.abs(e.body.bottom - W.y) > 5) continue;
         this.damageEnemy(e, 10, 0, -1, 'arc'); if (e.alive) e.stunT = Math.max(e.stunT, 0.35);
       }
-      if (this.state !== 'dead' && Math.abs(pb.center.x - W.x) < half + 3 && Math.abs(pb.bottom - W.y) < 5) this.hurtPlayer(5, W.x, { knock: false, iframes: false, srcY: W.y, by: 'A LIVE PUDDLE' });
+      if (this.state !== 'dead' && Math.abs(pb.center.x - W.x) < half + 3 && Math.abs(pb.bottom - W.y) < 5) this.hurtFromHazardContact(5, W.x, { srcY: W.y, by: 'A LIVE PUDDLE' });
     }
   }
   updateFizzes(dt) {                                                   // cans out of the vending machine, fizzing about like tiny rockets
@@ -10347,7 +10348,7 @@ class GameScene extends Phaser.Scene {
       for (const k of this.barrelList) if (k.active && Math.abs(k.y - vy) < 10 && k.x > x0 - 5 && k.x < x1 + 5) this.igniteBarrel(k);
       for (const C of this.clouds.slice()) if (Math.abs(C.y - vy) < C.r && C.x + C.r > x0 && C.x - C.r < x1) this.igniteCloud(C);
       for (const q of this.props) if (q !== p && q.st === 'ok' && Math.abs(q.cy - vy) < q.hh + 6 && q.cx + q.hw > x0 && q.cx - q.hw < x1) { this.igniteProp(q); this.hitProp(q, 4, 'flame'); }
-      if (this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > vy - 6 && pb.top < vy + 6) this.hurtPlayer(6, vx, { knock: false, iframes: false, burn: true, srcY: vy, by: 'A PROPANE JET' });
+      if (this.state !== 'dead' && pb.right > x0 && pb.left < x1 && pb.bottom > vy - 6 && pb.top < vy + 6) this.hurtFromHazardContact(6, vx, { burn: true, srcY: vy, by: 'A PROPANE JET' });
     }
     if (p.t > 0) return;
     const x = p.cx, y = p.cy;
@@ -10406,7 +10407,7 @@ class GameScene extends Phaser.Scene {
       J.tick = 0.25;
       const xl = Math.min(x, x + J.dir * 42), xr = Math.max(x, x + J.dir * 42), pb = this.player.body;
       for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right < xl || b.left > xr || b.bottom < y - 10 || b.top > y + 10) continue; this.propHurt(p, e, 6, J.dir, 0, 'flame'); if (e.alive) b.velocity.x += J.dir * 140 * e.def.kb; }
-      if (this.state !== 'dead' && pb.right > xl && pb.left < xr && pb.bottom > y - 10 && pb.top < y + 10) this.hurtPlayer(4, x, { knock: false, iframes: false, burn: true, srcY: y, by: 'STEAM' });
+      if (this.state !== 'dead' && pb.right > xl && pb.left < xr && pb.bottom > y - 10 && pb.top < y + 10) this.hurtFromHazardContact(4, x, { burn: true, srcY: y, by: 'STEAM' });
       this.douse(x + J.dir * 20, y, 22);
     }
   }
@@ -10457,7 +10458,7 @@ class GameScene extends Phaser.Scene {
         for (const k of this.barrelList) if (k.active && Math.abs(k.x - lx) < 8 && k.y > ly && k.y < fy + 4) this.igniteBarrel(k);
         for (const C of this.clouds.slice()) if (Math.abs(C.x - lx) < C.r && fy > C.y - C.r && ly < C.y + C.r) this.igniteCloud(C);
         for (const q of this.props) if (q !== p && q.st === 'ok' && Math.abs(q.cx - lx) < q.hw + 5 && q.cy + q.hh > ly && q.cy - q.hh < fy) { this.igniteProp(q); this.hitProp(q, 6, 'flame'); }
-        if (this.state !== 'dead' && pb.right > lx - 5 && pb.left < lx + 5 && pb.bottom > ly && pb.top < fy) this.hurtPlayer(8, lx, { knock: false, iframes: false, burn: true, srcY: fy, by: 'MOLTEN SLAG' });
+        if (this.state !== 'dead' && pb.right > lx - 5 && pb.left < lx + 5 && pb.bottom > ly && pb.top < fy) this.hurtFromHazardContact(8, lx, { burn: true, srcY: fy, by: 'MOLTEN SLAG' });
       }
       if (p.t <= 0) { p.phase = 'drop'; p.falling = true; p.fvy = 0; p.hits = new Set(); Sfx.snap(); this.fxSparks(p.bx, p.ay + 4, 6, Math.PI / 2, 1.5); }
       return;
@@ -16839,6 +16840,16 @@ class GameScene extends Phaser.Scene {
       this.fx.emit(x, e.y, { n: 24, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xffa0f0, 0xff40c0], add: true, drag: 2 });
       this.shake(80, 0.003);
     });
+  }
+  // Sustained hazards share a player damage interval during the early campaign.
+  // A ladle stream and the fire beneath it should deal one contact hit at a time.
+  hurtFromHazardContact(dmg, srcX, opts) {
+    const interval = this.campaign ? CAMPAIGN[this.wave]?.hazardContactMs : 0;
+    const now = this.time.now;
+    if (interval && now < this.hazardContactUntil) return;
+    const aegis = this.aegis;
+    const hit = this.hurtPlayer(dmg, srcX, { ...opts, knock: false, iframes: false });
+    if (interval && (hit || this.aegis < aegis)) this.hazardContactUntil = now + interval;
   }
   hurtPlayer(dmg, srcX, opts = {}) {
     if (this.state !== 'play') return false;
