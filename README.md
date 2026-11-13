@@ -64,10 +64,10 @@ See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted ro
 | Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
-| Pause menu (resume, retry act or restart, post FX, screen shake, volume, controls, quit to title) | **Esc** or **P** |
+| Pause menu (resume, retry act or restart, volume, screen shake, post FX, flashes, controls, quit to title) | **Esc** or **P** |
 | Retry the current campaign act or restart the run (press twice mid-run; once when the results are up) | **R** |
 | Post-processing on / off | **V** |
-| Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
+| Mute (remembered; works in the pause menu too) / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
 
 On a gamepad: left stick moves (down + **A** drops through a platform), right stick aims, **RT** fires, **LT** throws a
 mine, **A** jumps, **B** dashes, **X** kicks, **Y** fires the hook, **RB** drops the sentry, hold **LB** for the weapon

@@ -31,7 +31,9 @@ node dev/playtest/run.mjs
 ```
 
 Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time
-for runs ended by R, quit or a hidden tab, run accuracy, and enemy spawning, plus prop placement, breakage, restocking and overlapping hazard damage on Normal. Campaign checks
+for runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the pause menu's restart and quit confirms
+with real key and pad input, the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
+placement, breakage, restocking and overlapping hazard damage on Normal. Campaign checks
 cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for
