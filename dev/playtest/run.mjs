@@ -126,6 +126,10 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.furnacePacing())).fails;
   });
+  await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.linkerRecovery())).fails;
+  });
   await check('upper catwalks and responsive wall jumps', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.traversal())).fails;

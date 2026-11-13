@@ -227,6 +227,39 @@ window.CP = (() => {
     return { fails };
   };
 
+  CP.linkerRecovery = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1;
+    T.boot();
+    // Reproduce the three pockets above the catwalk with a lone Linker and the player on the upper deck.
+    for (const [bay, playerX, linkerX, firingX] of [['left', 667, 647, 615], ['center', 667, 774, 806], ['right', 963, 972, 982]]) {
+      const g = T.setup(1);
+      g.wave = 3;
+      g.applyMod('lowg');
+      g.setCampaignMachinery(null);
+      const player = g.player.body;
+      player.reset(playerX, 56);
+      player.setAllowGravity(false);
+      const linker = g.spawnEnemy('linker', 33, 17);
+      linker.aggro = true;
+      linker.body.reset(linkerX, 38);
+
+      T.run(2800);
+      expect(linker.body.top > 11 * TS, `the Linker failed to descend from the ${bay} ceiling pocket`);
+
+      player.reset(firingX, 187);
+      T.run(150);
+      T.trig(true);
+      for (let shot = 0; shot < 70 && linker.alive; shot++) {
+        T.aimAt(linker.body.center.x, linker.body.center.y);
+        T.run(50);
+      }
+      T.trig(false);
+      expect(!linker.alive && g.stats.kills === 1, `the player could not clear the Linker from the ${bay} lane with normal fire`);
+    }
+    return { fails };
+  };
+
   CP.traversal = () => {
     const [fails, expect] = checker();
     RUNMODE = 'campaign'; OPTS.diff = 1;
