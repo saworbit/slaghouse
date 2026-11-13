@@ -214,7 +214,8 @@ window.CP = (() => {
     expect(hounds() === 1 && g.mod === 'lowg' && alive().length === 2, 'the second Hound and Pogo did not arrive with Gravity Surge');
     const advance = () => { clear(); T.run(CAMPAIGN[3].breakMs + 2700); };
     advance();
-    expect(alive().map(e => e.kind).sort().join() === 'linker,linker', 'the Linkers should enter after the second Hound is gone');
+    expect(alive().length === 2 && alive().every(e => e.kind === 'linker' && e.homeY > 10 * TS),
+      'the Linkers should enter together below the catwalk after the second Hound is gone');
     advance();
     expect(alive().map(e => e.kind).sort().join() === 'howitzer,welder', 'Heavy Support should arrive in its own pair');
     advance();
