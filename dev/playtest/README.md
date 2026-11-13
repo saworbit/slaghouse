@@ -10,7 +10,7 @@ Load them from DevTools or use the headless runner. The game's built-in `SlagLab
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |
 | `kinds.js` | `window.KC`: `KC.check()` warps in every kind in `ENEMY` on its own, the way a wave does, and checks that it has a codex row, a texture with its start frame and an `update` method the scene has, spawns on that frame, then runs, takes a hit and dies without an error. `KC.check(['wasp'])` checks only those |
-| `props.js` | `window.PR`: `PR.check()` goes through every arena's breakable props and checks each has its art, frames and scene methods, sits where it can (a floor under it, clear of walls, something to hang from), then breaks it with grunts about, runs its effect to a wreck, restocks it and breaks it again to a blast, all without an error. `PR.check([0])` checks only ARENA 01. `PR.campaignContactDamage()` checks sustained damage from electrified water, overlapping oil fire, and an active ladle with overlapping pools on Normal. |
+| `props.js` | `window.PR`: `PR.check()` goes through every arena's breakable props and checks each has its art, frames and scene methods, sits where it can (a floor under it, clear of walls, something to hang from), then breaks it with grunts about, runs its effect to a wreck, restocks it and breaks it again to a blast, all without an error. `PR.check([0])` checks only ARENA 01. `PR.campaignContactDamage()` checks sustained damage from electrified water, overlapping oil fire, and an active ladle with overlapping pools on Normal. `PR.accuracy()` checks that an ammo crate's cook-off and drum blasts add no hits while the player's own bullets and rockets do. |
 | `checkpoint.js` | `window.CP` checks campaign saves, including legacy checkpoints, and scripted pacing via `CP.progression()`, `CP.furnacePacing()` and `CP.latePacing()`. `CP.linkerRecovery()` checks escape from the Furnace ceiling pockets. `CP.traversal()` checks catwalk access and wall jumps. |
 | `lab.js` | `checkLab()` verifies presets, snapshots, roster validation, reset and save isolation through the browser API. |
 | `lab-sweep.js` | `labSweep('weapons' \| 'mobs' \| 'hazards')` fires weapons through player input and uses controlled fixtures to exercise enemy AI, boss phases, machinery, breakables and traversal. |
@@ -30,8 +30,8 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, and enemy
-spawning, plus prop placement, breakage, restocking and overlapping hazard damage on Normal. Campaign checks
+Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time
+for runs ended by R, quit or a hidden tab, run accuracy, and enemy spawning, plus prop placement, breakage, restocking and overlapping hazard damage on Normal. Campaign checks
 cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for

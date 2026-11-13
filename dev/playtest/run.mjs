@@ -269,6 +269,35 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('ammo crate cook-offs and scenery blasts leave accuracy alone', async ctx => {
+    const page = await open(ctx, ['props']);
+    return page.evaluate(() => PR.accuracy());
+  });
+  await check('lifetime TIME counts OVERTIME runs that end by R or quit, once each', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [], stored = () => JSON.parse(localStorage.getItem('slaghouse.life') || '{}').time || 0;
+      const near = (got, want, what) => { if (Math.abs(got - want) > 1) fails.push(`${what}: lifetime TIME went up ${got.toFixed(1)} s, want about ${want} s`); };
+      RUNMODE = 'endless'; T.boot(); T.run(300);
+      const g = T.g(), t0 = stored();
+      g.hurtPlayer = () => false;                                       // the stub outlives scene.restart(), so the run stays alive
+      T.run(11000); g.restartRun(); T.run(300);
+      near(stored() - t0, 11.3, 'R mid-run');
+      T.run(10000);
+      game.events.emit('hidden'); T.run(500); game.events.emit('visible');
+      near(stored() - t0, 21.6, 'hiding the tab');
+      g.quitToTitle(); T.run(300);                                       // QUIT TO TITLE from the pause menu
+      near(stored() - t0, 21.6, 'quit after hiding the tab');
+      T.boot(); T.run(300);
+      const g2 = T.g(), t1 = stored();
+      delete g2.hurtPlayer; T.run(4000);
+      g2.hurtPlayer(9999, g2.player.x, { iframes: false }); T.run(2000);
+      if (!g2.overShown) fails.push('fixture: the run did not reach its results screen');
+      g2.quitToTitle(); T.run(300);
+      near(stored() - t1, 5.6, 'death, then quit from the results screen');
+      return [...fails, ...T.errs];
+    });
+  });
   let saved = null;
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {
     let page = await open(ctx, ['checkpoint']);
