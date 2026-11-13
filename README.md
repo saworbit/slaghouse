@@ -39,7 +39,7 @@ automatically. Both are optional; without them the game uses its built-in proced
 | Action | Keys |
 | --- | --- |
 | Move | **A / D** or arrow keys |
-| Jump / drop through a platform / wall jump | **Space** or **W** / **S + Space** / jump near a wall, even while rising |
+| Jump / drop through a platform / wall jump | **Space** or **W** / **S + Space** / jump near a wall, even while rising. Hold toward the wall and jump again to climb |
 | Dash (8-way, i-frames) | **Shift** (kick straight out of a dash for a dropkick) |
 | Aim and fire | mouse + left click (**J** fires when playing on the keyboard) |
 | Kick / parry / execute (enemies pulsing orange) | **F** or right click |
@@ -109,7 +109,7 @@ OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team and the Gunship in clear weather. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team in clear weather. Use the six-second countdown to find cover before the Gunship. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. |
 | III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains and seal both coolant valves to open the lift. |
 | IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | Get to the dais before the second squad releases the ball. The ball starts swinging again after you breach the Foreman's armor. |
 | V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |

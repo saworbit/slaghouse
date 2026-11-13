@@ -50,6 +50,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+- Hold toward a wall for a shorter sideways kick, so repeated wall jumps can climb the same wall.
+- Slag Rain gives two extra seconds to reposition after the Demolition Team and before the Gunship.
 - Split later Furnace squads into pairs and stop the vents and rain before the final encounters. The campaign
   Gunship gives longer warnings, fires shorter bursts with recovery time, and drops one grunt. The campaign
   Juggernaut gives a longer warning before its minigun and takes longer to spin it up again.
