@@ -653,6 +653,28 @@
   #game { width: 100vw; height: 100vh; }
   canvas { image-rendering: pixelated; display: block; }
   .nophaser { color: #ddd; font: 16px monospace; padding: 2em; }
+  #lab-dock, #lab-panel { color: #e0e7ee; background: #13181e; font: 14px/1.45 ui-monospace, Consolas, monospace; }
+  #lab-dock { position: fixed; right: 8px; bottom: 8px; }
+  #lab-panel { box-sizing: border-box; width: min(680px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto;
+    padding: clamp(16px, 4vw, 30px); border: 1px solid #485461; border-top: 4px solid #ff9b3e; }
+  #lab-panel::backdrop { background: #040609c9; }
+  #lab-panel h1 { margin: 0; color: #ffb569; font-size: 26px; letter-spacing: .08em; }
+  #lab-panel p { margin: 0 0 14px; color: #acbac8; }
+  #lab-panel button, #lab-panel select, #lab-panel input {
+    color: inherit; background: #222b35; border: 1px solid #586775; border-radius: 3px; font: inherit; }
+  #lab-dock { color: #ffb569; background: #161b20; border: 1px solid #586775; border-radius: 3px; }
+  #lab-panel button, #lab-dock { cursor: pointer; padding: 7px 12px; }
+  #lab-panel button[type=submit] { background: #ffad5c; border-color: #ffad5c; color: #17110b; font-weight: bold; }
+  #lab-panel button:disabled { opacity: .5; cursor: default; }
+  #lab-panel :focus-visible, #lab-dock:focus-visible { outline: 2px solid #72e5ed; outline-offset: 2px; }
+  #lab-panel select, #lab-panel input[type=number] { display: block; box-sizing: border-box; width: 100%; margin: 3px 0 0; padding: 5px 6px; }
+  #lab-panel label { display: block; min-width: 0; }
+  #lab-panel .lab-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+  #lab-panel fieldset { margin: 16px 0; padding: 10px; border: 1px solid #485461; }
+  #lab-panel .lab-group { display: grid; grid-template-columns: minmax(0, 2fr) 7ch minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+  #lab-panel .lab-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  #lab-panel #lab-error { color: #ff9c87; margin: 8px 0 0; }
+  @media (max-width: 480px) { #lab-panel .lab-group { grid-template-columns: minmax(0, 1fr) 7ch; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" integrity="sha384-kyUQ5+cxc6+X89xEG6DhcXLcDU9T3Z+o/45VdT6pgAwtG6gxtAzYTEn0Wwj/BKZd" crossorigin="anonymous"></script>  <!-- SRI: a changed file won't run; re-hash on a version bump -->
 <script src="sfx_bank.js"></script>  <!-- optional AudioGen sample bank (dev/sfxgen); synth fallback without it -->
@@ -660,6 +682,34 @@
 </head>
 <body>
 <div id="game"></div>
+<button id="lab-dock" type="button" hidden>Lab controls · F2</button>
+<dialog id="lab-panel" aria-labelledby="lab-title">
+  <form id="lab-form">
+    <h1 id="lab-title">Slaghouse Lab</h1>
+    <p id="lab-room-detail"></p>
+    <div class="lab-fields">
+      <label><span id="lab-room-label">Room</span><select name="room" aria-labelledby="lab-room-label" autofocus></select></label>
+      <label><span id="lab-weapon-label">Starting weapon</span><select name="weapon" aria-labelledby="lab-weapon-label"></select></label>
+      <label><span id="lab-difficulty-label">Difficulty</span><select name="difficulty" aria-labelledby="lab-difficulty-label"></select></label>
+      <label><span id="lab-modifier-label">Hazard modifier</span><select name="modifier" aria-labelledby="lab-modifier-label"></select></label>
+      <label><input type="checkbox" name="stationary"> Stationary enemies</label>
+      <label><input type="checkbox" name="invulnerable"> Invulnerable player</label>
+    </div>
+    <fieldset>
+      <legend>Enemy groups</legend>
+      <div id="lab-groups"></div>
+      <button id="lab-add" type="button">Add group</button>
+    </fieldset>
+    <p>All weapons are available in play. Press F2 for controls or R to reset the room.</p>
+    <p id="lab-error" role="alert" hidden></p>
+    <div class="lab-actions">
+      <button type="submit">Deploy room</button>
+      <button id="lab-reset" type="button" hidden>Reset room</button>
+      <button id="lab-resume" type="button">Back</button>
+      <button id="lab-exit" type="button" hidden>Exit to title</button>
+    </div>
+  </form>
+</dialog>
 <script>
 'use strict';
 if (!window.Phaser) {
@@ -5194,6 +5244,113 @@ const CAMPAIGN_ARENAS = [
   { ...ARENAS[3], grid: buildLevel4(true) },
   { ...ARENAS[4], grid: buildLevel5(true), spawns: { ...ARENAS[4].spawns, player: [3, 24] } },
 ];
+
+// Lab layouts share the normal world, collision, prop and enemy systems.
+function buildLabArena(variant) {
+  const grid = Array.from({ length: MAP_H }, (_, y) =>
+    Array.from({ length: MAP_W }, (_, x) => y < 2 || y >= 25 || x < 2 || x >= 98 ? '#' : '.'));
+  const fill = (x, y, w, h, tile) => { for (let row = y; row < y + h; row++) grid[row].fill(tile, x, x + w); };
+  const workshop = variant === 'breakables', traversal = variant === 'traversal';
+  if (workshop) {
+    fill(22, 23, 3, 2, 'x'); fill(42, 20, 2, 5, '#'); fill(44, 20, 8, 1, 'g'); fill(52, 20, 2, 5, '#');
+  }
+  if (traversal) {
+    fill(14, 21, 6, 1, '='); fill(21, 17, 6, 1, '='); fill(28, 13, 6, 1, '=');
+    fill(36, 12, 2, 13, '#'); fill(43, 12, 2, 13, '#'); fill(45, 12, 8, 1, '=');
+    fill(59, 16, 6, 1, '='); fill(70, 20, 7, 1, '='); fill(83, 21, 9, 4, '#');
+    fill(54, 9, 5, 1, '#'); fill(66, 12, 4, 1, '#'); // grapple anchors above the gaps
+  }
+  const columns = [13, 17, 28, 33, 39, 48, 56, 62, 68, 78, 82, 94];
+  return {
+    id: 0, grid, spawns: { player: [6, 24], health: [[4, 24], [94, 24]] },
+    points: { G: columns.filter(x => grid[24][x] === '.' && grid[23][x] === '.').map(x => [x, 24]) },
+    decor: { lamps: [[156, 165], [394, 128], [702, 150], [972, 130], [1350, 148]], beacons: [[52, 356], [1544, 356]], vents: [] },
+    props: workshop ? [['propane', 16, 24], ['oil', 27, 24], ['water', 34, 24], ['capacitor', 38, 24],
+      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24]] : [],
+    barrels: workshop ? [[12, 24], [31, 24], [82, 24]] : [], canisters: workshop ? [[18, 24], [86, 24]] : [],
+    pipes: workshop ? [[32, 388, 1], [1568, 388, -1]] : [],
+    paint(ctx) {
+      for (let x = 96; x < 1510; x += 64) {
+        R(ctx, '#cf904e', x, 402, 1, (x - 96) % 256 ? 4 : 8);
+        if ((x - 96) % 256 === 0) drawGlyphs(ctx, String(x - 96), x + 5, 404, '#ffd59a');
+      }
+    },
+  };
+}
+const LAB_RANGE = buildLabArena('range');
+const LAB_ROOMS = {
+  range: { name: 'Firing Range', detail: 'A clear sightline, marked distances and stationary ground and air targets.',
+    arena: LAB_RANGE, weapon: 'nail', stationary: true, invulnerable: true, groups: [{ kind: 'grunt', count: 3 }, { kind: 'drone', count: 1 }] },
+  encounter: { name: 'Combat Pit', detail: 'Mix enemy types and elites in an open arena. Add groups to build a fight.',
+    arena: LAB_RANGE, weapon: 'shotgun', groups: [{ kind: 'grunt', count: 3 }, { kind: 'enforcer', count: 1 }, { kind: 'heavy', count: 1 }, { kind: 'drone', count: 2 }] },
+  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle. Shoot out a girder or stack of crates.',
+    arena: buildLabArena('breakables'), weapon: 'rocket', invulnerable: true, groups: [] },
+  traversal: { name: 'Traversal Course', detail: 'Climb staggered grates, wall-jump up the shaft and grapple across the gaps.',
+    arena: buildLabArena('traversal'), weapon: 'nail', invulnerable: true, groups: [] },
+  machinery: { name: 'Machinery Floor', detail: 'Ride the Sorting Line belts and cross the presses with or without enemies.',
+    arena: ARENAS[2], weapon: 'rail', groups: [] },
+  furnace: { name: 'Furnace Vents', detail: 'Watch for the vent warnings and use the catwalk to get above the jets.',
+    arena: ARENAS[1], weapon: 'flare', groups: [] },
+  yard: { name: 'Wrecking Yard', detail: 'Cross the swinging ball and use its impact against enemies or scenery.',
+    arena: ARENAS[3], weapon: 'tractor', groups: [] },
+  rails: { name: 'Live Rails', detail: 'Cross the Powerhouse while sections of the floor charge in sequence.',
+    arena: ARENAS[4], weapon: 'coil', groups: [] },
+  bosses: { name: 'Boss Chamber', detail: 'Practice one boss at a time. Change the enemy group to pick a different boss.',
+    arena: LAB_RANGE, weapon: 'rail', groups: [{ kind: 'boss', count: 1 }] },
+};
+const LAB_MODIFIERS = { none: 'None', dark: 'Blackout', slag: 'Slag Rain', lowg: 'Low Gravity', melt: 'Meltdown' };
+const LAB_BOSSES = new Set(RUSH.map(([entry]) => entry[0]));
+const LAB_ENEMIES = [...CODEX.map(([id, name]) => ({ id, name })),
+  { id: 'slagmid', name: 'SLAGLING HALF' }, { id: 'slagbit', name: 'SLAGLING BIT' }]
+  .sort((a, b) => a.name.localeCompare(b.name));
+const LAB_MAX_ENEMIES = 16;
+
+function labConfig(room = 'range', options = {}) {
+  if (!Object.hasOwn(LAB_ROOMS, room)) throw new RangeError('Unknown Lab room: ' + room);
+  const preset = LAB_ROOMS[room];
+  const { weapon = preset.weapon, difficulty = 1, modifier = 'none', stationary = !!preset.stationary,
+    invulnerable = !!preset.invulnerable, groups = preset.groups } = options;
+  if (weaponSlot(weapon) < 0) throw new RangeError('Unknown weapon: ' + weapon);
+  if (!Number.isInteger(difficulty) || !DIFFS[difficulty]) throw new RangeError('Choose a difficulty from 0 to 2.');
+  if (!Object.hasOwn(LAB_MODIFIERS, modifier)) throw new RangeError('Unknown modifier: ' + modifier);
+  if (typeof stationary !== 'boolean' || typeof invulnerable !== 'boolean') throw new TypeError('Stationary and invulnerable must be booleans.');
+  if (!Array.isArray(groups) || groups.length > LAB_MAX_ENEMIES) throw new RangeError('Use at most ' + LAB_MAX_ENEMIES + ' enemy groups.');
+  let total = 0, bosses = 0;
+  const roster = Array.from(groups, group => {
+    const { kind, count = 1, elite = null } = group || {};
+    if (!LAB_ENEMIES.some(e => e.id === kind)) throw new RangeError('Unknown Lab enemy: ' + kind);
+    if (!Number.isInteger(count) || count < 1 || count > LAB_MAX_ENEMIES) throw new RangeError('Set each group count from 1 to ' + LAB_MAX_ENEMIES + '.');
+    if (elite !== null && (!ELITE_KINDS.includes(elite) || NO_ELITE.has(kind) || ENEMY[kind].tiny)) throw new RangeError('Invalid elite for ' + kind + '.');
+    total += count; if (LAB_BOSSES.has(kind)) bosses += count;
+    return { kind, count, elite };
+  });
+  if (total > LAB_MAX_ENEMIES) throw new RangeError('A room can start with up to ' + LAB_MAX_ENEMIES + ' enemies.');
+  if (bosses > 1) throw new RangeError('A room can start with one boss.');
+  return { room, weapon, difficulty, modifier, stationary, invulnerable, groups: roster };
+}
+
+function labSpawns(config) {
+  const A = LAB_ROOMS[config.room].arena, used = [];
+  const floor = A.grid.flatMap((row, y) => row.flatMap((cell, x) => cell === '.' && /[#=gx]/.test(A.grid[y + 1]?.[x] || '') ? [[x, y]] : []));
+  const air = A.grid.flatMap((row, y) => y > 3 && y < 23 ? row.flatMap((cell, x) => cell === '.' && x % 3 === 1 && y % 3 === 2 ? [[x, y]] : []) : []);
+  const props = [...A.barrels, ...A.canisters, ...A.props.map(([, x, y]) => [x, y])];
+  return config.groups.flatMap(({ kind, count, elite }) => Array.from({ length: count }, () => {
+    const D = ENEMY[kind], flying = !!D.flier, radius = Math.ceil((D.fw - TS) / (TS * 2));
+    const preferred = LAB_BOSSES.has(kind) ? 21 : 12 + 4 * used.length;
+    const fits = ([x, y]) => {
+      const top = y - Math.ceil((flying ? D.fh / 2 : D.fh) / TS), bottom = flying ? y + Math.floor(D.fh / (TS * 2)) : y;
+      for (let row = top; row <= bottom; row++) for (let col = x - radius; col <= x + radius; col++) if (A.grid[row]?.[col] !== '.') return false;
+      return Math.abs(x - A.spawns.player[0]) >= 5 &&
+        !props.some(([px, py]) => Math.abs(px - x) <= radius + 1 && Math.abs(py - y) <= 1) &&
+        !used.some(([px, py, r]) => Math.abs(px - x) < r + radius + 2 && Math.abs(py - y) < 4);
+    };
+    const score = ([x, y]) => Math.abs(x - preferred) + Math.abs(y - (flying ? 20 : 24)) * 2;
+    const cell = (flying ? air : floor).filter(fits).sort((a, b) => score(a) - score(b))[0];
+    if (!cell) throw new RangeError('This room has no free spawn point for ' + kind + '.');
+    used.push([...cell, radius]);
+    return { kind, cell, flying, elite };
+  }));
+}
 function mergeRects(grid, ch, rowsOnly) {        // greedy-merge tiles into few static bodies (no seams to snag on)
   const H = grid.length, W = grid[0].length, used = grid.map(r => r.map(() => false)), out = [];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -5278,7 +5435,7 @@ function heapPop(h) {
   return top;
 }
 // Dijkstra over NAV; goal = -1 explores everything within maxCost (used to score candidate positions).
-function navDijkstra(start, goal, maxCost) {
+function navDijkstra(start, goal, maxCost, edgeCost) {
   // Float64 on purpose: float32 rounding made `d > dist[u]` drop valid entries.
   const N = NAV.nodes.length, dist = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), prevE = new Array(N);
   const done = new Uint8Array(N), heap = [[0, start]], reached = [];
@@ -5289,7 +5446,7 @@ function navDijkstra(start, goal, maxCost) {
     done[u] = 1; reached.push(u);
     if (u === goal) break;
     for (const ed of NAV.nodes[u].edges) {
-      const nd = d + ed.cost;
+      const nd = d + (edgeCost ? edgeCost(u, ed) : ed.cost);
       if (nd < dist[ed.to] && nd <= maxCost) { dist[ed.to] = nd; prev[ed.to] = u; prevE[ed.to] = ed; heapPush(heap, [nd, ed.to]); }
     }
   }
@@ -5786,7 +5943,7 @@ function genTextures(scene) {
   addTex(scene, 'tarblob', makeSprite(7, 6, c => { R(c, '#1a1410', 1, 1, 5, 4); R(c, '#4a3c30', 2, 1, 2, 1); R(c, '#0a0806', 1, 4, 5, 1); }));
   addTex(scene, 'hporb', makeSprite(7, 7, c => { for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) { const d = Math.hypot(x + 0.5 - 3.5, y + 0.5 - 3.5); if (d < 3.3) R(c, d < 1.2 ? '#ffffff' : d < 2.3 ? '#9dff9a' : '#2ad05a', x, y); } }, null));
   ART.levelBase = drawLevelArt(LEVEL_GRID);
-  for (const A of new Set([...ARENAS, ...CAMPAIGN_ARENAS])) A.art = drawLevelArt(A.grid, A.decor, A.paint);
+  for (const A of new Set([...ARENAS, ...CAMPAIGN_ARENAS, ...Object.values(LAB_ROOMS).map(room => room.arena)])) A.art = drawLevelArt(A.grid, A.decor, A.paint);
 }
 const ART = { levelBase: null };
 let NAV = buildNav(LEVEL_GRID);                    // rebuilt whenever the terrain breaks
@@ -5927,17 +6084,23 @@ class TitleScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', ev => this.onTitleKey(ev.keyCode));
     this.input.on('pointermove', p => this.onTitlePointer(p, false));
     this.input.on('pointerdown', p => { Sfx.init(); this.onTitlePointer(p, true); });
+    if (LAB_PANEL.initialRoom) {
+      this.menuSel = this.menuItems.length - 1;
+      const room = LAB_PANEL.initialRoom;
+      this.time.delayedCall(0, () => LAB_PANEL.open(room));
+      LAB_PANEL.initialRoom = null;
+    }
   }
   // ---- codex round: the title menu and its pages ----
   buildMenu() {
     const sh = '#000000';
     this.menuSel = 0; this.sub = null; this.subSel = 0;
     this.menuG = this.add.graphics().setDepth(5);
-    this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS'].map((t, i) => new PixelLabel(this, 480, 400 + i * 17, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
+    this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS', 'LAB'].map((t, i) => new PixelLabel(this, 480, 400 + i * 15, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
     let dly = loadRec('slaghouse.daily');
     let rsh = loadRec('slaghouse.bestRush');
-    if (rsh && rsh.won) new PixelLabel(this, 650, 451, 'title_rsh', { text: 'CLEARED ' + rsh.grade + mutTag(rsh), align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
-    if (dly && dly.date === dayKey()) new PixelLabel(this, 650, 434, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
+    if (rsh && rsh.won) new PixelLabel(this, 650, this.menuItems[3].y, 'title_rsh', { text: 'CLEARED ' + rsh.grade + mutTag(rsh), align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
+    if (dly && dly.date === dayKey()) new PixelLabel(this, 650, this.menuItems[2].y, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
     this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { text: 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   M MUTE', scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
     this.subG = this.add.graphics().setDepth(20);
     this.subTitle = new PixelLabel(this, 480, 64, 'title_subt', { maxChars: 10, scale: 4, rows: CALL_ROWS, shadow: sh, originY: 0.5 }).setDepth(21);
@@ -6092,21 +6255,22 @@ class TitleScene extends Phaser.Scene {
     else if (i === 1) { this.wantEndless = true; this.startRun(); }
     else if (i === 2) { this.wantDaily = true; this.startRun(); }
     else if (i === 3) { this.wantRush = true; this.startRun(); }
+    else if (i === this.menuItems.length - 1) this.time.delayedCall(0, () => LAB_PANEL.open());
     else { Sfx.ui(); this.showSub(['codex', 'armory', 'medals', 'options'][i - 4]); }
   }
   onTitleKey(k) {
     Sfx.init();
-    if (this.started) return;
+    if (this.started || LAB_PANEL.isOpen()) return;
     const up = k === 38 || k === 87, down = k === 40 || k === 83, left = k === 37 || k === 65, right = k === 39 || k === 68, ok = k === 13 || k === 32, back = k === 27 || k === 8;
     if (this.sub) { this.subKey(up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : ok ? 'ok' : back ? 'back' : k === 81 || k === 33 ? 'pgup' : k === 69 || k === 34 ? 'pgdn' : null); return; }
-    if (up || down) { this.menuSel = (this.menuSel + (up ? 7 : 1)) % 8; Sfx.swap(); }
+    if (up || down) { const n = this.menuItems.length; this.menuSel = (this.menuSel + n + (up ? -1 : 1)) % n; Sfx.swap(); }
     else if (left || right) this.stepDiff(left ? -1 : 1);
     else if (ok) this.menuPick(this.menuSel);
     else if (k === 69) this.menuPick(1);
     else if (k === 77) Sfx.toggleMute();
   }
   onTitlePointer(p, click) {
-    if (this.started) return;
+    if (this.started || LAB_PANEL.isOpen()) return;
     if (this.sub === 'campaign') {
       const i = this.campaignButtons.findIndex(o => Math.abs(p.x - o.x) < 116 && Math.abs(p.y - o.y) < 25);
       if (i >= 0 && (i !== 0 || this.checkpoint)) {
@@ -6135,7 +6299,7 @@ class TitleScene extends Phaser.Scene {
     }
     if (this.sub) { if (click) this.subKey('back'); return; }
     if (click && Math.abs(p.y - 246) < 18 && Math.abs(p.x - 480) < 140) { this.stepDiff(p.x < 480 ? -1 : 1); return; }   // the difficulty arrows
-    const i = this.menuItems.findIndex(o => Math.abs(p.y - o.y) < 10 && Math.abs(p.x - 480) < 120);
+    const i = this.menuItems.findIndex(o => Math.abs(p.y - o.y) < 7.5 && Math.abs(p.x - 480) < 120);
     if (i >= 0 && i !== this.menuSel) { this.menuSel = i; Sfx.swap(); }
     if (click && i >= 0) this.menuPick(i);
   }
@@ -6170,10 +6334,10 @@ class TitleScene extends Phaser.Scene {
   }
   update(time, delta) {
     const dt = Math.min(delta, 50) / 1000;
-    if (this.menuItems && !this.started) {                               // the pad drives the menu and its pages
+    if (this.menuItems && !this.started && !LAB_PANEL.isOpen()) {        // the pad drives the menu and its pages
       const my = PAD.menuY(), mx = PAD.menuX();
       if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
-      else { if (my) { this.menuSel = (this.menuSel + my + 8) % 8; Sfx.swap(); } if (mx) this.stepDiff(mx); if (PAD.jd(3)) this.menuPick(1); else if (PAD.jd(0) || PAD.jd(9)) this.menuPick(this.menuSel); }
+      else { if (my) { const n = this.menuItems.length; this.menuSel = (this.menuSel + my + n) % n; Sfx.swap(); } if (mx) this.stepDiff(mx); if (PAD.jd(3)) this.menuPick(1); else if (PAD.jd(0) || PAD.jd(9)) this.menuPick(this.menuSel); }
     }
     if (this.menuItems) this.drawMenu(time);
     if (Math.random() < 0.6) this.fx.emit(rand(0, VIEW_W), VIEW_H + 2, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [40, 110], life: [2, 4], size: [4, 2], cols: [0xffe46a, 0xff8a1f, 0xd04010], alpha: [0.9, 0], add: true, g: -10, drag: 0.3 });
@@ -6192,12 +6356,20 @@ class GameScene extends Phaser.Scene {
       this.sys.step = (time, delta) => step.call(this.sys, (this.gt += delta), delta);
     }
     this.time.now = this.gt;
-    this.A = ARENAS[(data && data.arena) || 0]; this.carry = (data && data.carry) || null; this.descending = false; this.endless = RUNMODE === 'endless' || RUNMODE === 'daily'; this.daily = RUNMODE === 'daily'; this.bossrush = RUNMODE === 'bossrush';   // which arena; run state carried down the lift
-    this.campaign = !this.endless && !this.bossrush;
+    this.lab = data?.lab ?? null;
+    this.labTransition = false;
+    this.labRoster = this.lab ? data.spawns ?? labSpawns(this.lab) : null;
+    this.labPending = 0;
+    this.A = this.lab ? LAB_ROOMS[this.lab.room].arena : ARENAS[data?.arena ?? 0];
+    this.carry = data?.carry ?? null; this.descending = false;
+    this.daily = !this.lab && RUNMODE === 'daily';
+    this.endless = this.daily || (!this.lab && RUNMODE === 'endless');
+    this.bossrush = !this.lab && RUNMODE === 'bossrush';
+    this.campaign = !this.lab && !this.endless && !this.bossrush;
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
     this.day = this.daily ? data?.day ?? dayKey() : null;              // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
-    this.runDiff = this.campaign && this.carry ? this.carry.diff : OPTS.diff;
-    this.runMut = this.daily ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
+    this.runDiff = this.lab?.difficulty ?? (this.campaign && this.carry ? this.carry.diff : OPTS.diff);
+    this.runMut = this.daily || this.lab ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
     this.mutator = MUTATORS[this.runMut].id;
     this.chapterStart = this.campaign ? this.carry : null;
     this.campaignElapsed = this.chapterStart?.elapsed ?? 0;
@@ -6212,7 +6384,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, LW, LH);       // default bounds = canvas size, far too small
     this.state = 'play'; this.overShown = false; this.needReset = true;
     this.stats = { t0: this.time.now, shots: 0, hits: 0, kills: 0, taken: 0, executes: 0, dodges: 0, wk: {} };
-    this.weapon = 0; this.nextFire = 0; this.wNext = []; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
+    this.weapon = this.lab ? weaponSlot(this.lab.weapon) : 0; this.nextFire = 0; this.wNext = []; this.aim = 0; this.aimMode = 'keys'; this.lastAimMode = null; this.facing = 1; this.aimPt = null;
     this.hp = T.PLAYER_HP; this.invulnUntil = 0; this.dropUntil = 0;
     this.lastGround = -1e9; this.jumpBuffer = -1e9; this.jumpCuttable = false; this.wasGround = false; this.lastVy = 0;
     this.runT = 0; this.idleT = 0; this.stepIdx = 0; this.recoil = 0; this.look = { x: 0, y: 0 }; this.sqx = 1; this.sqy = 1;
@@ -6222,7 +6394,7 @@ class GameScene extends Phaser.Scene {
     this.kick = { x: 0, y: 0 }; this.combo = 0; this.bestCombo = 0; this.lastKillT = -1e9; this.swapT = 0; this.heartT = 0; this.lastShotT = -1e9;
     this.zoomPunch = 0; this.arcActiveUntil = 0; this.arcUntil = 0; this.arcSegs = []; this.beams = []; this.fountains = []; this.dmgNums = [];
     this.style = { pts: 0, rank: 0, best: 0, lastWeapon: null }; this.headshots = 0; this.wave = 0; this.noiseT = 0;
-    this.totalEnemies = this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN_TOTAL;   // OVERTIME counts up as waves come
+    this.totalEnemies = this.lab || this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN_TOTAL;
     this.kickReady = 0; this.kickUntil = 0; this.kickQueued = false; this.flameActiveUntil = 0; this.scorchT = 0;
     this.hazardContactUntil = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
@@ -6266,6 +6438,7 @@ class GameScene extends Phaser.Scene {
     // supply round: crates, capsules, power-ups, bees
     this.supplies = []; this.supplyT = TUNE.SUPPLY.first; this.dmgUntil = 0; this.hasteUntil = 0; this.aegis = 0; this.bees = []; this.whipFx = null;
     this.supplyG = this.add.graphics().setDepth(6.6); this.auraImg = this.add.image(0, 0, 'glow').setBlendMode(ADD).setDepth(18).setVisible(false);
+    if (this.lab) this.supplyT = Infinity;
     // mastery round: the shrink ray's zaps, sonic waves
     this.zaps = []; this.sonics = [];
     // finale round: ice sheets, horn blasts, grav pulses, the multikill chain
@@ -6321,6 +6494,10 @@ class GameScene extends Phaser.Scene {
     // Visuals are synced after Arcade's post-update so camera, sprite and gun never disagree by a frame.
     this.events.on('postupdate', this.syncVisuals, this);
     this.events.once('shutdown', () => this.events.off('postupdate', this.syncVisuals, this));
+    if (this.lab) {
+      LAB_PANEL.dock.hidden = false;
+      this.events.once('shutdown', () => { LAB_PANEL.dock.hidden = true; });
+    }
   }
 
   // ---------------------------------------------------------------- world ----
@@ -6483,7 +6660,7 @@ class GameScene extends Phaser.Scene {
     this.applyGunTexture();
     this.visor = this.add.image(px, py, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.35).setAlpha(0.55).setDepth(18);
     this.enemies = this.physics.add.group();
-    if (!this.carry) LIFE.runs++;                                         // a fresh run (not a trip down the lift)
+    if (!this.carry && !this.lab) LIFE.runs++;                            // a fresh scored run (not a trip down the lift)
     this.enemiesLeft = 0;
     this.spawnBarrels(false); this.spawnCanisters(false);
     this.pickups = this.A.spawns.health.map(([cx, cy]) => {
@@ -6497,7 +6674,7 @@ class GameScene extends Phaser.Scene {
   spawnEnemy(kind, cx, cy) {
     const D = ENEMY[kind], x = cx * TS + 8, flier = !!D.flier;
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
-    markSeen(kind);
+    if (!this.lab) markSeen(kind);
     const e = this.enemies.create(x, y, D.key, D.frame0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
     e.setDepth(5).setCollideWorldBounds(true);
@@ -6785,6 +6962,11 @@ class GameScene extends Phaser.Scene {
       if (kind === 'rocketeer') { e.gun = this.add.image(x, y, 'gun_rlaunch').setOrigin(2 / 26, 5.5 / 11).setDepth(6); e.fireCd = 1.5; }
       if (kind === 'sapper') e.plantCd = rand(1, 2.5);
     }
+    if (this.lab?.stationary) {
+      e.body.setAllowGravity(false); e.body.setVelocity(0, 0);
+      // Ceiling climbers and paratroopers normally relocate on spawn. Keep their test position.
+      if (kind === 'para' || kind === 'claw') e.body.reset(x, y);
+    }
     return e;
   }
 
@@ -6961,8 +7143,17 @@ class GameScene extends Phaser.Scene {
       this.needReset = false;
       const c = this.carry;
       BUS.emit('reset', { hp: this.hp, weapon: this.weapon, enemies: this.enemiesLeft, carry: !!c });
-      BUS.emit('wave', (c ? c.wave : 0) + 1, this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN.length);
       BUS.emit('mines', TUNE.MINE.max); BUS.emit('perklist', Object.keys(this.perks));
+      if (this.lab) {
+        const room = LAB_ROOMS[this.lab.room];
+        BUS.emit('wave', 'LAB'); BUS.emit('wavecard', room.name.toUpperCase(), 'F2 CONTROLS / R RESET ROOM');
+        this.applyMod(this.lab.modifier === 'none' ? null : this.lab.modifier);
+        const spawns = this.labRoster;
+        this.labPending = this.enemiesLeft = this.totalEnemies = spawns.length;
+        BUS.emit('enemies', this.enemiesLeft);
+        for (const { kind, cell, flying, elite } of spawns) this.warpIn(kind, cell, flying, elite);
+        Music.track(this.waveTrack(0), true);
+      } else BUS.emit('wave', (c ? c.wave : 0) + 1, this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN.length);
       if (this.campaign) {
         this.stats.t0 = now;
         const act = CAMPAIGN_ACTS[this.A.id - 1];
@@ -6991,7 +7182,7 @@ class GameScene extends Phaser.Scene {
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.stopLoops(); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
-    if ((this.jd.R && (this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
+    if ((this.jd.R && (this.lab || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
     else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
@@ -8526,7 +8717,7 @@ class GameScene extends Phaser.Scene {
     if (e.shieldBy && e.shieldBy.alive && this.time.now < e.shieldT && src !== 'burn') { dmg *= TUNE.WARDEN.soak; e.shieldHit = this.time.now; Sfx.shieldHit(); }   // warden bubble
     if (this.time.now < this.rampageUntil && src !== 'burn') dmg *= TUNE.RAMPAGE.damage;
     if (e.corrodeT > 0 && src !== 'acid' && src !== 'burn') dmg *= TUNE.ACID.bonus;   // corroded metal and flesh give way
-    if (src !== 'burn' && src !== 'gas') { if (this.perks.hollow) dmg *= 1.2; if (this.perks.adren && this.hp <= 35) dmg *= 1.5; if (this.time.now < this.dmgUntil) dmg *= 2; dmg *= 1 + 0.05 * masteryStars(WEAPONS[this.weapon].id); }   // perks + OVERDRIVE + mastery
+    if (src !== 'burn' && src !== 'gas') { if (this.perks.hollow) dmg *= 1.2; if (this.perks.adren && this.hp <= 35) dmg *= 1.5; if (this.time.now < this.dmgUntil) dmg *= 2; if (!this.lab) dmg *= 1 + 0.05 * masteryStars(WEAPONS[this.weapon].id); }   // perks + OVERDRIVE + mastery
     if (e.shrunkT > 0 && src !== 'burn') dmg *= TUNE.SHRINK.take;        // shrunk: a soft target
     if (this.mutator === 'glass') dmg *= 2;                                      // GLASS CANNON
     if (e.kind === 'berserker' && e.rage) dmg *= TUNE.BERSERKER.take;
@@ -8606,6 +8797,7 @@ class GameScene extends Phaser.Scene {
       if (e.glow) e.glow.setVisible(false);
       if (this.locks.length) this.locks = this.locks.filter(o => o !== e);
       e.disableBody(true, true);
+      if (this.lab && !e.summoned) this.labKill();
       return;
     }
     this.flushDmg(e, e.lastHs ? 'Y' : 'R');
@@ -8615,8 +8807,8 @@ class GameScene extends Phaser.Scene {
     const wid = WEAPONS[this.weapon].id;
     if (this.style.lastWeapon && this.style.lastWeapon !== wid) style += 30;      // reward mixing weapons
     this.style.lastWeapon = wid;
-    if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; LIFE.kills++; }
-    if (!e.summoned && wid) {                                             // lifetime mastery for the gun in hand
+    if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; if (!this.lab) LIFE.kills++; }
+    if (!this.lab && !e.summoned && wid) {                                // lifetime mastery for the gun in hand
       const before = masteryStars(wid); MASTERY[wid] = (MASTERY[wid] || 0) + 1; const after = masteryStars(wid);
       if (after > before) { BUS.emit('callout', (WEAPONS.find(w => w.id === wid) || {}).name + ' ' + '*'.repeat(after)); Sfx.rankUp(); saveMastery(); if (after >= 3) { this.award('goldsmith'); this.time.delayedCall(900, () => BUS.emit('callout', 'GOLD-PLATED')); } }
     }
@@ -8711,7 +8903,11 @@ class GameScene extends Phaser.Scene {
       for (let i = 0; i < 5; i++) this.time.delayedCall(i * 110, () => this.boomFx(cx + rand(-14, 14), cy + rand(-14, 10), rand(0.5, 0.9)));
     }
     if (e.kind === 'sapper' && Math.random() < 0.35) { this.plantCharge(cx, cy, 1.4); BUS.emit('callout', 'DROPPED A CHARGE'); }
-    if (D.child && src !== 'shatter') { this.enemiesLeft += 2; this.totalEnemies += 2; this.time.delayedCall(16, () => this.slagSplit(cx, cy, D.child, dx)); }   // it splits; the halves count toward the wave
+    if (D.child && src !== 'shatter') {
+      this.enemiesLeft += 2; this.totalEnemies += 2;
+      if (this.lab) this.labPending += 2;
+      this.time.delayedCall(16, () => { this.slagSplit(cx, cy, D.child, dx); if (this.lab) this.labPending -= 2; });
+    }
     if (e.kind === 'harpooner' || this.reeledBy === e) this.dropHarpoon(e);
     if (e.kind === 'linker') { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.spawnLight(cx, cy, 'glow', 0x40f0ff, 1.5, 3, 0.9, 0.25); if (e.partner && e.partner.partner === e) e.partner.partner = null; }
     if (e.kind === 'burrower') { this.zoomPunch = Math.max(this.zoomPunch, 0.08); BUS.emit('callout', 'WORM SLAIN'); }
@@ -8777,6 +8973,7 @@ class GameScene extends Phaser.Scene {
     if (e.def.hp >= TUNE.SUPPLY.eliteHp && !e.summoned && e.kind !== 'boss' && Math.random() < TUNE.SUPPLY.eliteChance) this.dropCapsule(e.body.center.x, e.body.center.y);   // elites sometimes drop a power-up
     if (this.perks.volatile && src !== 'volatile' && Math.random() < 0.25) { const vx = e.body.center.x, vy = e.body.center.y; this.time.delayedCall(90, () => { if (this.state !== 'dead') this.explode(vx, vy, TUNE.VOLATILE); }); }
     if (e.summoned) return;                                            // boss spawn: doesn't count toward the wave
+    if (this.lab) { this.labKill(); return; }
     this.stats.kills++; this.enemiesLeft--;
     if (this.campaign && this.state === 'play') this.releaseCampaignSquad();
     BUS.emit('enemies', this.activeHostiles());
@@ -8785,6 +8982,11 @@ class GameScene extends Phaser.Scene {
       else if (e.kind === 'boss') this.time.delayedCall(1900, () => this.win());
       else this.win();
     } else if (this.enemiesLeft === 1 && e.kind !== 'tick') BUS.emit('callout', 'ONE LEFT');
+  }
+  labKill() {
+    this.stats.kills++; this.enemiesLeft--;
+    BUS.emit('enemies', this.activeHostiles());
+    if (this.enemiesLeft === 0 && this.state === 'play') BUS.emit('callout', 'ROOM CLEAR');
   }
   // ---------------------------------------------------------------- ragdolls ----
   // Walkers killed without much overkill drop as ragdolls: position-based dynamics (points + distance sticks)
@@ -11230,6 +11432,7 @@ class GameScene extends Phaser.Scene {
     this.saveCampaignPlayTime();
     const checkpoint = this.state === 'won' ? null : this.chapterStart;
     Sfx.stopLoops(); Music.paused = false;
+    if (this.lab) { this.labTransition = true; this.scene.restart({ lab: this.lab, spawns: this.labRoster }); return; }
     this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena(this.day) : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId, day: this.day });   // a restart is the same run, so it keeps (or still lacks) the save
   }
   quitToTitle() {
@@ -15853,7 +16056,7 @@ class GameScene extends Phaser.Scene {
   // ================================================================== ironclad round ====
   // ---------------------------------------------------------------- medals ----
   award(id) {
-    if (this.medals.has(id)) return;
+    if (this.lab || this.medals.has(id)) return;
     this.medals.add(id);
     const m = MEDALS.find(q => q.id === id); if (!m) return;
     BUS.emit('medal', m);
@@ -16890,7 +17093,11 @@ class GameScene extends Phaser.Scene {
     if (big) { this.camFocus = { x, y: y - 40, until: this.time.now + 3800 }; this.shake(1400, 0.004); }
     this.time.delayedCall(big ? 1400 : 800, () => {
       beam.destroy();
-      if (this.state === 'dead') return;
+      if (this.lab) this.labPending--;
+      if (this.state === 'dead') {
+        if (this.lab) { this.enemiesLeft--; this.totalEnemies--; BUS.emit('enemies', this.enemiesLeft); }
+        return;
+      }
       const e = this.spawnEnemy(kind, cx, cy), now = this.time.now;
       e.aggro = true; e.aggroT = 6;
       if (this.endless && this.wave > 0) { const k = 1 + TUNE.ENDLESS.hpPer * this.wave; e.def = Object.assign({}, e.def, { hp: e.def.hp * k }); e.hp = e.def.hp; }   // OVERTIME: tougher every wave
@@ -16919,7 +17126,7 @@ class GameScene extends Phaser.Scene {
     if (interval && (hit || this.aegis < aegis)) this.hazardContactUntil = now + interval;
   }
   hurtPlayer(dmg, srcX, opts = {}) {
-    if (this.state !== 'play') return false;
+    if (this.state !== 'play' || this.lab?.invulnerable) return false;
     if (this.campaign && (this.descending || !this.enemiesLeft)) return false;
     const now = this.time.now, soft = opts.self || opts.burn;
     if (!opts.self) {
@@ -16950,7 +17157,7 @@ class GameScene extends Phaser.Scene {
     return true;
   }
   killPlayer() {
-    this.state = 'dead'; LIFE.deaths++; this.wheelOn = false;
+    this.state = 'dead'; if (!this.lab) LIFE.deaths++; this.wheelOn = false;
     if (this.campaign) BUS.emit('perkdone');
     const p = this.player, b = p.body, cx = b.center.x, cy = b.center.y;
     for (const t of ['g_helm', 'g_armor', 'g_armor', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1', 'g_armor'])
@@ -16983,6 +17190,7 @@ class GameScene extends Phaser.Scene {
   showOver(won) {
     this.saveCampaignPlayTime();
     this.overShown = true;
+    if (this.lab) { BUS.emit('wavecard', 'TEST ENDED', 'R RESET / F2 CONTROLS / ESC EXIT'); return; }
     const s = this.stats, time = this.runTime(), acc = s.shots ? Math.round(Math.min(1, s.hits / s.shots) * 100) : 0;
     const comp = this.totalEnemies ? s.kills / this.totalEnemies : 0;   // grade: completion, accuracy, style, damage taken
     const idx = clamp(comp * 0.4 + Math.min(1, acc / 55) * 0.15 + this.style.best / 6 * 0.25 + Math.max(0, 1 - s.taken / 500) * 0.2, 0, 1) * (won ? 1 : 0.85);
@@ -17025,7 +17233,7 @@ class GameScene extends Phaser.Scene {
     this.hurtPlayer(TUNE.DRONE_BOLT.damage, b.x);
   }
   onTouchEnemy(p, e) {
-    if (!e.alive || this.state === 'dead') return;
+    if (!e.alive || this.state === 'dead' || this.lab?.stationary) return;
     if (e.frozen > 0) return;                                          // statues don't bite
     if (e.kind === 'screamer') { if (e.ai === 'dive') this.screamerBoom(e); return; }
     if (e.kind === 'cloaker') return;                                  // it only hurts when it means to (the strike)
@@ -17178,7 +17386,7 @@ class GameScene extends Phaser.Scene {
     this.gnatCache = this.enemies.getChildren().filter(o => o.alive && o.kind === 'gnat');   // boids look at each other
     let near = 0; for (const o of this.gnatCache) if (Math.abs(o.x - pcx) < 170 && Math.abs(o.y - pcy) < 120) near++;
     this.swarmLvl = this.gnatCache.length ? clamp(0.25 + near / 8, 0, 1) : 0;
-    if (alive && this.state === 'play' && this.activeHostiles() <= 5 && now >= this.hustleT) {   // the last few stop lurking and come looking for you
+    if (!this.lab?.stationary && alive && this.state === 'play' && this.activeHostiles() <= 5 && now >= this.hustleT) {   // the last few stop lurking and come looking for you
       this.hustleT = now + 4000;
       for (const o of this.enemies.getChildren()) {
         if (!o.alive || o.under) continue;
@@ -17186,7 +17394,7 @@ class GameScene extends Phaser.Scene {
         else if (!o.aggro) { o.aggro = true; o.aggroT = 8; }
       }
     }
-    const hustle = alive && this.state === 'play' && this.activeHostiles() <= 5;   // reserve squads still to deploy don't count
+    const hustle = !this.lab?.stationary && alive && this.state === 'play' && this.activeHostiles() <= 5;   // reserve squads still to deploy don't count
     for (const e of this.enemies.getChildren()) {
       if (!e.alive) continue;
       e.flashT -= dt; e.stunT -= dt; e.t += dt; e.losT -= dt; e.aggroT -= dt;
@@ -17222,7 +17430,7 @@ class GameScene extends Phaser.Scene {
       else if (e.frozen > 0) this.updateFrozen(e, dt);
       else if (e.netT > 0) this.updateNetted(e, dt, now);
       else if (e.gravT > 0 || e.gravSlam) this.updateGravved(e, dt, now);
-      else this[e.def.update](e, dt, now, dx, dy, dist, alive);          // its own brain, named on its ENEMY record
+      else if (!this.lab?.stationary) this[e.def.update](e, dt, now, dx, dy, dist, alive);
       if (!e.alive) continue;
       if (e.glueT > 0) {                                                 // gummed up: it crawls
         e.glueT -= dt; b.velocity.x *= TUNE.GLUE.slow; if (b.velocity.y < 0 && !FLIERS.has(e.kind)) b.velocity.y *= 0.6; else if (FLIERS.has(e.kind)) b.velocity.y *= TUNE.GLUE.slow;
@@ -17258,7 +17466,7 @@ class GameScene extends Phaser.Scene {
     }
   }
   alertEnemy(e, now) {
-    if (e.kind === 'mimic' && e.ai === 'hide') return;                  // a drum doesn't hear anything
+    if (this.lab?.stationary || (e.kind === 'mimic' && e.ai === 'hide')) return;
     const heavy = e.kind === 'heavy';
     e.aggro = true; e.aggroT = 4;
     if (!FLIERS.has(e.kind)) { e.ai = 'alert'; e.aiUntil = now + (heavy ? 420 : 300); if (e.body.blocked.down) e.body.velocity.y = -110; }
@@ -17777,7 +17985,7 @@ class GameScene extends Phaser.Scene {
     if (b.snipe) { this.shake(120, 0.006); BUS.emit('splat', 1); }
   }
   alertHumanoid(e, now, shout) {
-    if (e.ai !== 'idle') return;
+    if (this.lab?.stationary || e.ai !== 'idle') return;
     e.aggro = true; e.ai = { enforcer: 'engage', stalker: 'hunt', bulwark: 'advance', sniper: 'engage', rocketeer: 'engage', sapper: 'hunt', cloaker: 'hunt', pyro: 'engage', harpooner: 'engage', mirror: 'advance', duelist: 'hunt', grenadier: 'engage' }[e.kind] || 'engage'; e.repickT = 0; e.repathT = 0;
     this.popAlert(e);
     if (!shout) return;
@@ -17790,7 +17998,7 @@ class GameScene extends Phaser.Scene {
   }
   // Sound: gunfire reveals your position, explosions draw attention to the blast.
   makeNoise(x, y, r, fromPlayer) {
-    if (this.state === 'dead') return;
+    if (this.state === 'dead' || this.lab?.stationary) return;
     const now = this.time.now, pb = this.player.body;
     for (const e of this.enemies.getChildren()) {
       if (!e.alive || Math.hypot(e.x - x, e.y - y) > r) continue;
@@ -18584,7 +18792,7 @@ class HudScene extends Phaser.Scene {
     this.dirs = []; this.dashK = 1; this.wcT = 0; this.wcDur = 2.6; this.pauseOn = false; this.pSel = 0; this.pArm = -1; this.hudFrame = 0;
     this.arrowG = this.add.graphics().setDepth(2.5);
     this.wcG = this.add.graphics().setDepth(4.5);
-    this.wcTitle = new PixelLabel(this, 480, 246, 'hud_wct', { maxChars: 14, scale: 6, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
+    this.wcTitle = new PixelLabel(this, 480, 246, 'hud_wct', { maxChars: 16, scale: 6, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
     this.wcSub = new PixelLabel(this, 480, 286, 'hud_wcs', { maxChars: 36, scale: 2, color: '#ffd8a0', shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
     this.pG = this.add.graphics().setDepth(10);
     this.pTitle = new PixelLabel(this, 480, 150, 'hud_pt', { text: 'PAUSED', scale: 8, rows: LOGO_ROWS, shadow, originY: 0.5 }).setDepth(11);
@@ -18736,13 +18944,14 @@ class HudScene extends Phaser.Scene {
     else if (i === 1) { this.setPause(false); gs.restartRun(); }
     else if (i === 2) { gs.togglePostFx(); this.pLabels(); }
     else if (i >= 3 && i <= 5) this.pStep(i, -1, true);
-    else if (i === 6) this.setControls(true);
+    else if (i === 6) { if (gs.lab) LAB_PANEL.open(); else this.setControls(true); }
     else { this.setPause(false); gs.quitToTitle(); }
   }
   pLabels() {
     const pc = v => Math.round(v * 100) + '%';
     this.pItems[1].setText(this.scene.get('Game').chapterStart ? 'RETRY ACT' : 'RESTART');
     this.pItems[2].setText(POSTFX.on ? 'POST FX: ON' : 'POST FX: OFF');
+    this.pItems[6].setText(this.scene.get('Game').lab ? 'LAB CONTROLS' : 'CONTROLS');
     this.pItems[3].setText('SHAKE: ' + pc(OPTS.shake)); this.pItems[4].setText('MUSIC: ' + pc(OPTS.music)); this.pItems[5].setText('SFX: ' + pc(OPTS.sfx));
   }
   pStep(i, dir, wrap) {                                                // shake / music / sfx in quarter steps; Enter wraps 0 back to 100
@@ -18754,7 +18963,7 @@ class HudScene extends Phaser.Scene {
     this.pLabels();
   }
   onPauseKey(ev) {
-    if (!this.pauseOn || this.hudFrame === this.pArm) return;           // ignore the press that opened the menu
+    if (!this.pauseOn || this.hudFrame === this.pArm || LAB_PANEL.isOpen()) return;
     const k = ev.keyCode;
     if (this.ctlOn) { if (k === 13 || k === 32 || k === 27 || k === 80 || k === 8) { this.setControls(false); Sfx.ui(); } return; }
     const N = this.pItems.length;
@@ -18766,7 +18975,7 @@ class HudScene extends Phaser.Scene {
     else if (k === 27 || k === 80) this.pausePick(0);
   }
   onPausePointer(p, click) {
-    if (!this.pauseOn) return;
+    if (!this.pauseOn || LAB_PANEL.isOpen()) return;
     if (this.ctlOn) { if (click && this.hudFrame !== this.pArm) { this.setControls(false); Sfx.ui(); } return; }
     const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < 15 && Math.abs(p.x - 480) < 190);
     if (i < 0) return;
@@ -18909,7 +19118,7 @@ class HudScene extends Phaser.Scene {
     if (head) this.hmHead = true;
   }
   onFlash(a) { this.flashA = Math.max(this.flashA, a * (OPTS.flash ? 1 : 0.25)); }
-  onWave(n, total) { this.lblWave.setText(total ? 'WAVE ' + n + '/' + total : 'OT WAVE ' + n); }
+  onWave(n, total) { this.lblWave.setText(n === 'LAB' ? n : total ? 'WAVE ' + n + '/' + total : 'OT WAVE ' + n); }
   onMines(n) { this.lblMines.setText('G MINES ' + n); }
   onMinibar(name) { this.bossName.setText(name); this.bossDisp = 1; }
   onRankUp() { this.rankPop = 0.35; }
@@ -18927,6 +19136,7 @@ class HudScene extends Phaser.Scene {
     }
   }
   onReset(d) {
+    this.lbT = 0;
     this.lockedIds = [];                                                 // stolen guns come back with a new run
     this.hp = this.dispHp = d.hp; this.lblHp.setStyle({ color: d.hp > 60 ? '#ffffff' : d.hp > 30 ? '#ffc23a' : '#ff4a3a' }).setText(String(Math.ceil(d.hp)));
     this.applyWeapon(d.weapon); this.count = d.enemies; this.lblCount.setText(String(d.enemies));
@@ -19097,7 +19307,7 @@ class HudScene extends Phaser.Scene {
       this.drawPerks(time);
       if (!this.pauseOn && this.hudFrame !== this.perkArm) { const mx = PAD.menuX(), N = this.perkIds.length; if (mx) { this.perkSel = (this.perkSel + N + mx) % N; Sfx.swap(); } if (PAD.jd(0)) this.pickPerk(this.perkSel); }
     }
-    if (this.pauseOn && this.hudFrame !== this.pArm) {                 // pad drives the pause menu
+    if (this.pauseOn && this.hudFrame !== this.pArm && !LAB_PANEL.isOpen()) { // pad drives the pause menu
       const N = this.pItems.length, my = PAD.menuY(), mx = PAD.menuX();
       if (this.ctlOn) { if (PAD.jd(0) || PAD.jd(1) || PAD.jd(9)) { this.setControls(false); Sfx.ui(); } }   // the CONTROLS page: any of A / B / Start goes back
       else {
@@ -19211,6 +19421,164 @@ class HudScene extends Phaser.Scene {
     if (this.flashA > 0.01) { fg.fillStyle(0xfff2d8, this.flashA); fg.fillRect(0, 0, VIEW_W, VIEW_H); }
   }
 }
+
+// =============================================================================
+//  LAB CONTROLS
+// =============================================================================
+function activeLab() {
+  const scene = window.game?.scene.getScene('Game');
+  return scene?.lab && (scene.sys.isActive() || scene.sys.isPaused()) ? scene : null;
+}
+
+function deployLab(room, options) {
+  const lab = labConfig(room, options);
+  const spawns = labSpawns(lab);                                        // check that the roster fits before restarting
+  const live = activeLab(), title = game.scene.getScene('Title');
+  if (!live && (!title.sys.isActive() || title.started)) throw new Error('Open the Lab from the title screen.');
+  LAB_PANEL.close(false);
+  Sfx.init(); Sfx.startHum(); Sfx.stopLoops(); Music.start();
+  if (live) {
+    live.labTransition = true;
+    live.scene.restart({ lab, spawns });
+  }
+  else {
+    title.started = true;
+    title.scene.start('Game', { lab, spawns });
+    title.scene.launch('Hud');
+  }
+  return labConfig(room, lab);
+}
+
+const LAB_PANEL = (() => {
+  const dialog = document.getElementById('lab-panel'), form = document.getElementById('lab-form');
+  const dock = document.getElementById('lab-dock'), list = document.getElementById('lab-groups');
+  const reset = document.getElementById('lab-reset'), exit = document.getElementById('lab-exit');
+  const resume = document.getElementById('lab-resume'), add = document.getElementById('lab-add');
+  const error = document.getElementById('lab-error'), detail = document.getElementById('lab-room-detail');
+  const { room, weapon, difficulty, modifier, stationary, invulnerable } = form.elements;
+  let resumeGame = null;
+  const fillSelect = (select, choices) => select.replaceChildren(...choices.map(([value, label]) => new Option(label, value)));
+  fillSelect(room, Object.entries(LAB_ROOMS).map(([id, data]) => [id, data.name]));
+  fillSelect(weapon, WEAPONS.map(w => [w.id, w.name]));
+  fillSelect(difficulty, DIFFS.map((d, i) => [i, d.name]));
+  fillSelect(modifier, Object.entries(LAB_MODIFIERS));
+  const field = (label, input) => { const node = document.createElement('label'); node.append(label, input); return node; };
+  const report = message => { error.textContent = message; error.hidden = !message; };
+  function addGroup({ kind = 'grunt', count = 1, elite = null } = {}) {
+    if (list.children.length >= LAB_MAX_ENEMIES) return;
+    const row = document.createElement('div'); row.className = 'lab-group';
+    const enemy = document.createElement('select'), qty = document.createElement('input');
+    const rank = document.createElement('select'), remove = document.createElement('button');
+    enemy.dataset.field = 'kind'; qty.dataset.field = 'count'; rank.dataset.field = 'elite';
+    fillSelect(enemy, LAB_ENEMIES.map(e => [e.id, e.name])); enemy.value = kind;
+    Object.assign(qty, { type: 'number', min: 1, max: LAB_MAX_ENEMIES, required: true, value: count });
+    const updateElite = () => {
+      rank.disabled = NO_ELITE.has(enemy.value) || !!ENEMY[enemy.value].tiny;
+      if (rank.disabled) rank.value = '';
+    };
+    fillSelect(rank, [['', 'Standard'], ...ELITE_KINDS.map(id => [id, id === 'regen' ? 'Regenerating' : id[0].toUpperCase() + id.slice(1)])]);
+    rank.value = elite || ''; updateElite(); enemy.addEventListener('change', updateElite);
+    remove.type = 'button'; remove.textContent = 'Remove';
+    remove.addEventListener('click', () => { row.remove(); add.disabled = false; add.focus(); });
+    row.append(field('Enemy', enemy), field('Count', qty), field('Elite', rank), remove);
+    list.append(row); add.disabled = list.children.length >= LAB_MAX_ENEMIES;
+    return enemy;
+  }
+  function load(config) {
+    room.value = config.room; weapon.value = config.weapon; difficulty.value = config.difficulty;
+    modifier.value = config.modifier; stationary.checked = config.stationary; invulnerable.checked = config.invulnerable;
+    detail.textContent = LAB_ROOMS[config.room].detail;
+    list.replaceChildren(); add.disabled = false; config.groups.forEach(addGroup); report('');
+  }
+  function open(initial = 'range') {
+    if (dialog.open) return;
+    const live = activeLab(), title = game.scene.getScene('Title');
+    if (!live && (!title.sys.isActive() || title.started)) return;
+    load(live?.lab ?? labConfig(initial));
+    resumeGame = live?.sys.isActive() && live.state === 'play' ? live : null;
+    if (resumeGame) live.pauseGame();
+    reset.hidden = exit.hidden = !live;
+    resume.textContent = resumeGame ? 'Resume' : 'Back';
+    dialog.showModal();
+    room.focus();
+  }
+  function close(shouldResume = true) {
+    if (!dialog.open) return;
+    dialog.close();
+    if (shouldResume && resumeGame?.sys.isPaused()) {
+      resumeGame.scene.resume(); BUS.emit('pause', false);
+    }
+    resumeGame = null;
+    document.activeElement?.blur();
+  }
+  // Phaser listens on window. Keep the dialog's keyboard navigation and clicks inside the controls.
+  for (const event of ['keydown', 'keyup', 'pointerdown', 'pointerup']) dialog.addEventListener(event, e => e.stopPropagation());
+  dialog.addEventListener('cancel', e => { e.preventDefault(); close(); });
+  dialog.addEventListener('keydown', e => {
+    if (e.key === 'F2') { e.preventDefault(); close(); }
+    if (e.key === 'Tab') {
+      const fields = Array.from(dialog.querySelectorAll('button, select, input')).filter(el => !el.disabled && !el.hidden);
+      const next = fields.indexOf(document.activeElement) + (e.shiftKey ? -1 : 1);
+      fields[(next + fields.length) % fields.length].focus();
+      e.preventDefault();
+    }
+  });
+  room.addEventListener('change', () => load(labConfig(room.value)));
+  add.addEventListener('click', () => addGroup()?.focus());
+  resume.addEventListener('click', () => close());
+  reset.addEventListener('click', () => { const live = activeLab(); if (live) deployLab(live.lab.room, live.lab); });
+  exit.addEventListener('click', () => { const live = activeLab(); close(false); live?.quitToTitle(); });
+  dock.addEventListener('click', () => open());
+  window.addEventListener('keydown', e => {
+    if (e.key === 'F2' && !e.repeat && activeLab()) { e.preventDefault(); open(); }
+  });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const groups = Array.from(list.children, row => {
+      const value = field => row.querySelector(`[data-field=${field}]`).value;
+      return { kind: value('kind'), count: Number(value('count')), elite: value('elite') || null };
+    });
+    try {
+      deployLab(room.value, { weapon: weapon.value, difficulty: Number(difficulty.value), modifier: modifier.value,
+        stationary: stationary.checked, invulnerable: invulnerable.checked, groups });
+    } catch (err) { report(err.message); }
+  });
+  const initial = new URLSearchParams(location.search).get('lab');
+  return { open, close, isOpen: () => dialog.open, dock, initialRoom: initial === null ? null : Object.hasOwn(LAB_ROOMS, initial) ? initial : 'range' };
+})();
+
+window.SlagLab = Object.freeze({
+  catalog() {
+    return {
+      rooms: Object.entries(LAB_ROOMS).map(([id, { name, detail }]) => ({ id, name, detail, preset: labConfig(id) })),
+      weapons: WEAPONS.map(({ id, name }) => ({ id, name })),
+      enemies: LAB_ENEMIES.map(({ id, name }) => ({ id, name, hp: ENEMY[id].hp, boss: LAB_BOSSES.has(id),
+        elites: NO_ELITE.has(id) || ENEMY[id].tiny ? [] : [...ELITE_KINDS] })),
+      difficulties: DIFFS.map((d, id) => ({ id, name: d.name })),
+      modifiers: { ...LAB_MODIFIERS }, maxEnemies: LAB_MAX_ENEMIES,
+    };
+  },
+  load: deployLab,
+  reset() {
+    const g = activeLab(); if (!g) throw new Error('Load a Lab room first.');
+    return deployLab(g.lab.room, g.lab);
+  },
+  snapshot() {
+    const g = activeLab(); if (!g) return null;
+    const position = body => ({ x: body.center.x, y: body.center.y, vx: body.velocity.x, vy: body.velocity.y });
+    const enemies = g.enemies.getChildren().filter(e => e.alive).map(e => ({ id: e.kind, hp: e.hp, maxHp: e.def.hp,
+      elite: e.elite ?? null, summoned: e.summoned, targetable: e.body.enable && !e.under, ...position(e.body) }));
+    return {
+      config: labConfig(g.lab.room, g.lab), state: g.state, paused: g.paused,
+      ready: !g.labTransition && !g.needReset && g.labPending === 0,
+      elapsedMs: Math.round(g.time.now - g.stats.t0),
+      player: { ...position(g.player.body), hp: g.hp, weapon: WEAPONS[g.weapon].id },
+      stats: { ...g.stats, wk: { ...g.stats.wk } }, enemies,
+      props: g.props.map(p => ({ id: p.kind, x: p.cx, y: p.cy, hp: p.hp, state: p.st })),
+      remaining: g.enemiesLeft, total: g.totalEnemies,
+    };
+  },
+});
 
 // =============================================================================
 //  BOOT

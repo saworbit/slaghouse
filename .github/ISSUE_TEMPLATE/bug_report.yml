@@ -29,6 +29,7 @@ body:
         - OVERTIME
         - DAILY
         - BOSS RUSH
+        - Lab
         - Title / menus
   - type: dropdown
     id: input

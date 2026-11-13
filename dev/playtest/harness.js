@@ -5,9 +5,17 @@
 window.T = (() => {
   const game = window.game;
   const T = { game, errs: [], dmgLog: [] };
-  let vnow = Date.now();
+  let vnow = Date.now(), aim = null;
   T.start = () => { game.loop.sleep(); Date.now = () => vnow; };
-  T.run = (ms) => { const n = Math.max(1, Math.round(ms / 16.667)); for (let i = 0; i < n; i++) { vnow += 16.667; game.loop.now += 16.667; game.loop.time = game.loop.now; game.loop.delta = 16.667; game.step(game.loop.now, 16.667); } };
+  T.run = ms => {
+    const n = Math.max(1, Math.round(ms / 16.667));
+    const pointer = game.input.activePointer, project = pointer.positionToCamera;
+    // Headless stepping can skip camera rendering. Feed the gameplay pointer world coordinates directly.
+    if (aim) pointer.positionToCamera = (_camera, out) => out.set(aim.x, aim.y);
+    try {
+      for (let i = 0; i < n; i++) { vnow += 16.667; game.loop.now += 16.667; game.loop.time = game.loop.now; game.loop.delta = 16.667; game.step(game.loop.now, 16.667); }
+    } finally { pointer.positionToCamera = project; aim = null; }
+  };
   T.g = () => game.scene.getScene('Game');
   window.addEventListener('error', e => T.errs.push(String(e.message)));
   T.snap = (name) => new Promise(res => { game.renderer.snapshot(img => { fetch('http://127.0.0.1:8767/' + name, { method: 'POST', body: img.src }).then(() => res('ok')).catch(e => res('err ' + e)); }); });
@@ -32,10 +40,28 @@ window.T = (() => {
     return g;
   };
   T.tp = (tx, ty) => { const g = T.g(); g.player.body.reset(tx * 16 + 8, (ty + 1) * 16 - 12); g.camX = g.player.x; g.camY = g.player.y; };
-  T.aimAt = (x, y) => { const g = T.g(); g.aimMode = 'mouse'; const p = g.input.activePointer, cam = g.cameras.main; const v = cam.getWorldPoint ? null : null; p.x = (x - cam.worldView.x) * cam.zoom; p.y = (y - cam.worldView.y) * cam.zoom; p.worldX = x; p.worldY = y; };
+  T.aimAt = (x, y) => { T.g().aimMode = 'mouse'; aim = { x, y }; };
   T.trig = (on) => { const p = T.g().input.activePointer; p.isDown = on; p.buttons = on ? 1 : 0; };
   return T;
 })();
+
+function botFiringPosition(g, target, visited) {
+  const { x: tx, y: ty } = target.body.center;
+  let best = null, bestScore = Infinity;
+  for (const { x, y } of NAV.nodes) {
+    const key = y * MAP_W + x;
+    if (visited.has(key) || g.grid[y][x] !== '.' || g.grid[y + 1][x] === '.' || g.solidAt(x * TS + 8, y * TS - 2)) continue;
+    const px = x * TS + 8, py = (y + 1) * TS - 14;
+    const distance = Math.hypot(tx - px, ty - py);
+    if (distance < 30 || distance > 420 || !g.losHard(px, py, tx, ty)) continue;
+    const sight = g.los(px, py, tx, ty);
+    const front = (target.kind === 'bulwark' || target.kind === 'mirror') && Math.sign(px - tx) === target.dir;
+    const score = Math.abs(distance - 95) + (sight ? 0 : 440) + (front ? 90 : 0);
+    if (score < bestScore) { best = { x, y, key }; bestScore = score; }
+  }
+  return best;
+}
+
 // ---- simple bot: aims at the nearest foe, cycles all weapons, moves, jumps, kicks, dashes ----
 T.bot = async (opts = {}) => {
   const maxS = opts.seconds || 600, log = [], seenKinds = new Set(), wUse = {};
@@ -55,26 +81,46 @@ T.bot = async (opts = {}) => {
       const k = K(); k.A.isDown = k.D.isDown = false; T.trig(false);
       T.run(50); t += 0.05; continue;
     }
-    const p = g.player; let best = null, bd = 1e9;
-    for (const e of g.enemies.getChildren()) { if (!e.alive || e.under) continue; seenKinds.add(e.kind); const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = e; } }
-    if ((wT -= 0.05) <= 0) { wT = opts.wSecs || 3; g.cycleWeapon(1); }
+    const p = g.player;
+    const hunt = g._botHunt?.player === p ? g._botHunt : (g._botHunt = { player: p, target: null, visited: new Set() });
+    let best = null, bestScore = Infinity;
+    for (const e of g.enemies.getChildren()) {
+      if (!e.alive || e.under) continue;
+      seenKinds.add(e.kind);
+      const { x, y } = e.body.center;
+      const score = Math.hypot(x - p.x, y - p.y) + (g.los(p.x, p.y - 2, x, y) ? 0 : 350) + (e.summoned ? 250 : 0);
+      if (score < bestScore) { bestScore = score; best = e; }
+    }
+    if (hunt.position && hunt.target?.alive && !hunt.target.under) best = hunt.target;
+    if (hunt.target !== best) {
+      hunt.target = best; hunt.hp = best?.hp; hunt.since = g.time.now; hunt.position = null; hunt.visited.clear();
+    }
+    if (best && best.hp < hunt.hp) { hunt.hp = best.hp; hunt.since = g.time.now; }
+    if (best && g.time.now - hunt.since >= 5000) {
+      const spot = botFiringPosition(g, best, hunt.visited);
+      hunt.since = g.time.now;
+      if (spot) {
+        T.tp(spot.x, spot.y); hunt.visited.add(spot.key); hunt.position = spot;
+        log.push(`tp ${spot.x},${spot.y} for ${best.kind} @${t.toFixed(0)}`);
+      } else { hunt.position = null; hunt.visited.clear(); }
+    }
+    if (hunt.position) {
+      const preference = best.kind === 'sponge' ? ['arc', 'acid', 'rail'] : ['rail', 'nail'];
+      const slot = preference.map(weaponSlot).find(i => g.weaponSlots.includes(i) && !g.locked.has(i));
+      if (slot !== undefined) g.setWeapon(slot);
+    } else if ((wT -= 0.05) <= 0) { wT = opts.wSecs || 3; g.cycleWeapon(1); }
     wUse[WEAPONS[g.weapon].id] = (wUse[WEAPONS[g.weapon].id] || 0) + 1;
     const k = K();
+    const bd = best ? Math.hypot(best.body.center.x - p.x, best.body.center.y - p.y) : Infinity;
     if ((moveT -= 0.05) <= 0) { moveT = 0.6 + Math.random() * 1.2; moveDir = best ? (Math.sign(best.x - p.x) * (bd < 70 ? -1 : 1)) || 1 : (Math.random() < 0.5 ? -1 : 1); if (Math.random() < 0.25) moveDir = 0; }
-    k.A.isDown = moveDir < 0; k.D.isDown = moveDir > 0;
-    k.SPACE.isDown = Math.random() < 0.08 || (p.body.blocked.left || p.body.blocked.right);
-    g._farT = (best && (bd > 170 || !g.los(p.x, p.y - 4, best.body.center.x, best.body.center.y)) ? (g._farT || 0) + 0.05 : 0);
-    if (best && g._farT > 5) {                                       // stuck far away: hop next to the nearest foe, onto an open tile with floor that can see it
-      g._farT = 0; const bx = Math.floor(best.x / 16), by = Math.floor(best.y / 16), cx = best.body.center.x, cy = best.body.center.y;
-      const stand = (tx, ty) => tx >= 2 && tx <= 97 && ty >= 2 && ty <= 24 && g.grid[ty][tx] === '.' && g.grid[ty - 1][tx] === '.' &&
-        g.grid[ty + 1] && g.grid[ty + 1][tx] !== '.' && tx + ',' + ty !== g._lastTp;   // the last spot didn't help, or we wouldn't be here
-      const sees = (tx, ty) => g.los(tx * 16 + 8, (ty + 1) * 16 - 16, cx, cy);   // eye height after T.tp, as the far check above measures it
-      let spot = null;
-      outer: for (let r = 3; r < 14; r++) for (const dx of [-r, r]) for (let dy = -4; dy <= 6; dy++) if (stand(bx + dx, by + dy) && sees(bx + dx, by + dy)) { spot = [bx + dx, by + dy]; break outer; }
-      for (let r = 1; r < 14 && !spot; r++) for (const dx of [-r, r]) if (!spot && stand(bx + dx, by)) spot = [bx + dx, by];   // nothing in sight: the nearest spot on the foe's own row
-      if (spot) { T.tp(spot[0], spot[1]); g._lastTp = spot.join(','); log.push('tp ' + g._lastTp + ' @' + t.toFixed(0)); }
+    k.A.isDown = !hunt.position && moveDir < 0; k.D.isDown = !hunt.position && moveDir > 0;
+    k.SPACE.isDown = !hunt.position && (Math.random() < 0.08 || p.body.blocked.left || p.body.blocked.right);
+    if (best) {
+      const b = best.body, shield = best.shieldUp && (best.kind === 'bulwark' || best.kind === 'mirror');
+      T.aimAt(b.center.x, shield ? b.top + 2 : b.center.y);
+      T.trig(!!hunt.position || Math.random() < 0.85);
+      if (bd < 26 && Math.random() < 0.3) g.kickQueued = true;
     }
-    if (best) { T.aimAt(best.body.center.x, best.body.center.y); T.trig(Math.random() < 0.85); if (bd < 26 && Math.random() < 0.3) g.kickQueued = true; }
     else T.trig(false);
     T.run(50); t += 0.05;
     k.SPACE.isDown = false;
