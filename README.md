@@ -65,7 +65,7 @@ See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted ro
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, retry act or restart, post FX, screen shake, volume, controls, quit to title) | **Esc** or **P** |
-| Retry the current campaign act or restart the run (mid-run, or once the results are up) | **R** |
+| Retry the current campaign act or restart the run (press twice mid-run; once when the results are up) | **R** |
 | Post-processing on / off | **V** |
 | Mute / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
 
@@ -148,8 +148,9 @@ Choose **Campaign → Continue** to return to the saved act after quitting or re
 profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the
 campaign clears it. A campaign left running in another tab keeps playing but stops saving once you start a new one.
 
-Press **R** during play or after defeat to retry the saved act. In Act I or after victory, **R** starts a fresh
-run. The pause menu shows **Retry Act** when a checkpoint is available. Speedrunner requires a clear under
+Press **R** after defeat to retry the saved act. During play, press **R** twice within two seconds; the first
+press only shows a prompt. In Act I or after victory, **R** starts a fresh run. The pause menu shows **Retry Act**
+when a checkpoint is available. **Retry Act**, **Restart** and **Quit to Title** each need a second pick to confirm. Speedrunner requires a clear under
 10 minutes without using **Continue** or retrying from a checkpoint.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,

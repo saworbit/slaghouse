@@ -621,7 +621,8 @@
     Player .............. 100 HP, 750 ms i-frames; contact dmg grunt 12 / heavy 20,
                           heavy stomp 15, drone bolt 10; four +30 health packs in the arena
     Pause (Esc / P) ..... pause menu: resume, retry act or restart, post FX on/off, screen shake, music and SFX volume (0-100%
-                          in quarter steps with A/D or Enter; remembered), controls (every key and pad binding), quit. Physics, timers and weapon
+                          in quarter steps with A/D or Enter; remembered), controls (every key and pad binding), quit. Retry / restart
+                          and quit need a second pick (moving off, Esc or B cancels), and the list stops at both ends. Physics, timers and weapon
                           loops stop and the music muffles; buffs, i-frames and enemy tells pick up where they left
                           off, and paused time doesn't count toward the run time. Hiding the tab pauses too, and
                           coming back waits on the menu. Esc on the results screen goes back to the title.
@@ -633,7 +634,9 @@
                           style and damage taken) and a score (x the difficulty's multiplier); the best score is kept in
                           localStorage and shown on the title screen with its difficulty (and mutator, if one was on). R and Esc wait for the results
                           (the run's records are saved when they appear). R / Enter retries the checkpoint after a
-                          campaign defeat when one exists. Otherwise it starts a fresh run.
+                          campaign defeat when one exists. Otherwise it starts a fresh run. Mid-run, R needs a second
+                          press within 2 s (RESTART_CONFIRM_MS); the first shows a prompt under the objective banner.
+                          The Lab's R resets at once.
     HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
                           as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
                           came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
@@ -2314,11 +2317,12 @@ const HINT1 = 'A/D MOVE  SPACE JUMP  SHIFT DASH  CLICK FIRE  F KICK  G MINE  C H
 const HINT2 = 'TAB WHEEL  Q/E CYCLE  KICK GLOWING FOES TO EXECUTE  ESC PAUSE  V FX';
 const HINT_PAD1 = 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY';
 const HINT_PAD2 = 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE';
+const RESTART_CONFIRM_MS = 2000;                     // mid-run R arms a restart; a second R inside this window confirms it
 const CONTROL_LINES = [                              // the pause menu's CONTROLS page: the hint strips plus everything they leave out
   ['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
   ['WEAPONS  ' + SLOT_KEYS.filter(k => k.trim()).map(k => (k === '<' ? 'BKSP' : k)).join(' ')],
   ['ARROWS MOVE  W JUMP  S+SPACE DROP  RIGHT CLICK KICK  MIDDLE CLICK MINE'],
-  ['J FIRE ON KEYS  MOUSE WHEEL CYCLE  P PAUSE  R RESTART  M MUTE'],
+  ['J FIRE ON KEYS  MOUSE WHEEL CYCLE  P PAUSE  R TWICE RESTART  M MUTE'],
   ['N SAMPLED/SYNTH SFX  B SAMPLED/SYNTH MUSIC'],
   ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
   ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK'],
@@ -6399,6 +6403,7 @@ class GameScene extends Phaser.Scene {
     this.hazardContactUntil = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
     Sfx.stopLoops(); this.spin = 0; this.heat = 0;
+    this.restartArmUntil = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
     this.hook = null; this.hookReady = 0; this.wrecks = []; this.darkA = 0;
     this.physics.world.gravity.y = TUNE.GRAVITY;
@@ -7182,7 +7187,9 @@ class GameScene extends Phaser.Scene {
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.stopLoops(); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
-    if ((this.jd.R && (this.lab || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
+    if (this.jd.R && !this.lab && this.state === 'play' && this.time.now >= this.restartArmUntil) {   // R sits among the combat keys: mid-run, the first press only asks
+      this.restartArmUntil = this.time.now + RESTART_CONFIRM_MS; Sfx.ui();
+    } else if ((this.jd.R && (this.lab || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
     else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
@@ -11450,7 +11457,7 @@ class GameScene extends Phaser.Scene {
   }
   pauseGame() {
     if (this.paused || this.state !== 'play') return;
-    this.paused = true; Sfx.stopLoops(); Music.paused = true;
+    this.paused = true; this.restartArmUntil = 0; Sfx.stopLoops(); Music.paused = true;
     Music.need(this.restartTrack()); Music.need('title');               // RESTART and QUIT TO TITLE start without a gap; the next wave's keep() drops them again
     if (this.pfx && POSTFX.on) { const m = this.pfx.cm.colorMatrix; m.reset(); m.saturate(-0.75); m.brightness(0.55, true); this.pfx.key = 'pause'; }
     this.input.setDefaultCursor('default');
@@ -18790,6 +18797,7 @@ class HudScene extends Phaser.Scene {
     this.lblSentry = new PixelLabel(this, 26, 176, 'hud_sentry', { maxChars: 16, text: 'T SENTRY READY', align: 'left', scale: 2, color: '#5cff7a', shadow }).setDepth(3); this.sentTxt = '';
     // overdrive round: off-screen arrows, hit direction, wave cards, pause menu
     this.dirs = []; this.dashK = 1; this.wcT = 0; this.wcDur = 2.6; this.pauseOn = false; this.pSel = 0; this.pArm = -1; this.hudFrame = 0;
+    this.pConfirm = -1; this.rArmF = 0;                                 // the pause item waiting on its confirm press; how much of mid-run R's confirm window is left
     this.arrowG = this.add.graphics().setDepth(2.5);
     this.wcG = this.add.graphics().setDepth(4.5);
     this.wcTitle = new PixelLabel(this, 480, 246, 'hud_wct', { maxChars: 16, scale: 6, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
@@ -18802,7 +18810,7 @@ class HudScene extends Phaser.Scene {
     this.wheelBlurb = new PixelLabel(this, 480, 328, 'hud_wb', { maxChars: 40, scale: 1, color: '#c8d0da', originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelName = new PixelLabel(this, 480, 282, 'hud_wn', { maxChars: 16, scale: 3, color: '#ffb347', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
     this.wheelKey = new PixelLabel(this, 480, 306, 'hud_wk', { maxChars: 12, scale: 2, color: '#8f9bab', shadow, originY: 0.5 }).setDepth(12).setVisible(false);
-    this.pHint = new PixelLabel(this, 480, 446, 'hud_ph', { text: 'W/S PICK  :  A/D CHANGE  :  ESC BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
+    this.pHint = new PixelLabel(this, 480, 446, 'hud_ph', { maxChars: 37, text: 'W/S PICK  :  A/D CHANGE  :  ESC BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11);
     this.ctlTitle = new PixelLabel(this, 480, 108, 'hud_ctt', { text: 'CONTROLS', scale: 4, rows: CALL_ROWS, shadow, originY: 0.5 }).setDepth(11);
     this.ctlLines = [this.ctlTitle, ...CONTROL_LINES.map(([t, c], i) => new PixelLabel(this, 480, 146 + i * 26, 'hud_ctl' + i, { maxChars: 80, text: t, scale: 2, color: c || '#c6ced8', shadow, originY: 0.5 }).setDepth(11)),
       new PixelLabel(this, 480, 446, 'hud_ctb', { text: 'ESC / ENTER / CLICK / B : BACK', scale: 2, color: '#7d8896', shadow, originY: 0.5 }).setDepth(11)];
@@ -18852,6 +18860,7 @@ class HudScene extends Phaser.Scene {
     // ironclad round: medal toasts, the jam glitch, medals on the results screen
     this.medG = this.add.graphics().setDepth(6); this.medQ = []; this.medT = 0; this.jamT = 0;
     this.medLbl = new PixelLabel(this, 480, 146, 'hud_medal', { maxChars: 30, scale: 2, color: '#ffd040', shadow, originY: 0.5 }).setDepth(6.1).setVisible(false);
+    this.rArmLbl = new PixelLabel(this, 480, 66, 'hud_rarm', { maxChars: 26, scale: 2, color: '#ffe46a', shadow, originY: 0.5 }).setDepth(6.2).setVisible(false);   // its own label: callouts can't wipe it
     this.medSub = new PixelLabel(this, 480, 164, 'hud_medsub', { maxChars: 34, scale: 1, color: '#d8dee6', shadow, originY: 0.5 }).setDepth(6.1).setVisible(false);
     this.jamLbl = new PixelLabel(this, 26, 136, 'hud_jam', { maxChars: 10, text: 'JAMMED', align: 'left', scale: 2, color: '#60ff9a', shadow }).setDepth(3.5).setVisible(false);
     this.ovMedals = new PixelLabel(this, 410, 356, 'hud_ovmed', { maxChars: 62, scale: 2, color: '#ffd040', shadow }).setDepth(9);
@@ -18927,7 +18936,7 @@ class HudScene extends Phaser.Scene {
   }
   onPause(on) { this.setPause(on); if (on) { this.pArm = this.hudFrame; this.pSel = 0; this.input.setDefaultCursor('default'); } }
   setPause(on) {
-    this.pauseOn = on; this.pShownSel = -1; this.ctlOn = false;
+    this.pauseOn = on; this.pShownSel = -1; this.ctlOn = false; this.pConfirm = -1;
     [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(on));
     this.ctlLines.forEach(o => o.setVisible(false));
     if (on) this.pLabels();
@@ -18940,6 +18949,7 @@ class HudScene extends Phaser.Scene {
   }
   pausePick(i) {
     const gs = this.scene.get('Game'); Sfx.ui();
+    if ((i === 1 || i === 7) && !gs.lab && this.pConfirm !== i) { this.pConfirm = i; this.pShownSel = -1; this.pLabels(); return; }   // restart and quit lose the run: pick them twice
     if (i === 0) { this.setPause(false); this.scene.resume('Game'); BUS.emit('pause', false); }
     else if (i === 1) { this.setPause(false); gs.restartRun(); }
     else if (i === 2) { gs.togglePostFx(); this.pLabels(); }
@@ -18949,9 +18959,12 @@ class HudScene extends Phaser.Scene {
   }
   pLabels() {
     const pc = v => Math.round(v * 100) + '%';
-    this.pItems[1].setText(this.scene.get('Game').chapterStart ? 'RETRY ACT' : 'RESTART');
+    const ask = i => (this.pConfirm === i ? '?' : '');
+    this.pItems[1].setText((this.scene.get('Game').chapterStart ? 'RETRY ACT' : 'RESTART') + ask(1));
     this.pItems[2].setText(POSTFX.on ? 'POST FX: ON' : 'POST FX: OFF');
     this.pItems[6].setText(this.scene.get('Game').lab ? 'LAB CONTROLS' : 'CONTROLS');
+    this.pItems[7].setText('QUIT TO TITLE' + ask(7));
+    this.pHint.setText(this.pConfirm >= 0 ? 'PRESS AGAIN TO CONFIRM  :  ESC CANCEL' : 'W/S PICK  :  A/D CHANGE  :  ESC BACK');
     this.pItems[3].setText('SHAKE: ' + pc(OPTS.shake)); this.pItems[4].setText('MUSIC: ' + pc(OPTS.music)); this.pItems[5].setText('SFX: ' + pc(OPTS.sfx));
   }
   pStep(i, dir, wrap) {                                                // shake / music / sfx in quarter steps; Enter wraps 0 back to 100
@@ -18962,13 +18975,20 @@ class HudScene extends Phaser.Scene {
     if (key !== 'shake') Sfx.applyVolume();
     this.pLabels();
   }
+  pMove(i) {                                                           // the list stops at both ends, so RESUME is never one press from QUIT TO TITLE
+    i = clamp(i, 0, this.pItems.length - 1);
+    if (i === this.pSel) return;
+    this.pSel = i; Sfx.swap();
+    if (this.pConfirm >= 0) { this.pConfirm = -1; this.pShownSel = -1; this.pLabels(); }   // moving off a pending restart / quit cancels it
+  }
+  pCancel() { this.pConfirm = -1; this.pShownSel = -1; this.pLabels(); Sfx.swap(); }
   onPauseKey(ev) {
     if (!this.pauseOn || this.hudFrame === this.pArm || LAB_PANEL.isOpen()) return;
     const k = ev.keyCode;
     if (this.ctlOn) { if (k === 13 || k === 32 || k === 27 || k === 80 || k === 8) { this.setControls(false); Sfx.ui(); } return; }
-    const N = this.pItems.length;
-    if (k === 38 || k === 87) { this.pSel = (this.pSel + N - 1) % N; Sfx.swap(); }
-    else if (k === 40 || k === 83) { this.pSel = (this.pSel + 1) % N; Sfx.swap(); }
+    if (k === 38 || k === 87) this.pMove(this.pSel - 1);
+    else if (k === 40 || k === 83) this.pMove(this.pSel + 1);
+    else if ((k === 27 || k === 80) && this.pConfirm >= 0) this.pCancel();
     else if ((k === 37 || k === 65 || k === 39 || k === 68) && this.pSel >= 3 && this.pSel <= 5) { this.pStep(this.pSel, k === 37 || k === 65 ? -1 : 1, false); Sfx.ui(); }
     else if ((k === 37 || k === 65 || k === 39 || k === 68) && this.pSel === 2) this.pausePick(2);
     else if (k === 13 || k === 32) this.pausePick(this.pSel);
@@ -18979,7 +18999,7 @@ class HudScene extends Phaser.Scene {
     if (this.ctlOn) { if (click && this.hudFrame !== this.pArm) { this.setControls(false); Sfx.ui(); } return; }
     const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < 15 && Math.abs(p.x - 480) < 190);
     if (i < 0) return;
-    if (i !== this.pSel) { this.pSel = i; Sfx.swap(); }
+    this.pMove(i);
     if (click && this.hudFrame !== this.pArm) this.pausePick(i);
   }
   drawPause(time) {
@@ -18988,9 +19008,9 @@ class HudScene extends Phaser.Scene {
     if (this.ctlOn) { g.fillStyle(0x06070a, 0.9); g.fillRect(6, 80, VIEW_W - 12, 390); g.fillStyle(0xff8a1f, 1); g.fillRect(6, 80, VIEW_W - 12, 3); g.fillRect(6, 467, VIEW_W - 12, 3); return; }
     g.fillStyle(0x06070a, 0.85); g.fillRect(270, 100, 420, 366);
     g.fillStyle(0xff8a1f, 1); g.fillRect(270, 100, 420, 3); g.fillRect(270, 463, 420, 3);
-    if (this.pShownSel !== this.pSel) { this.pShownSel = this.pSel; this.pItems.forEach((o, i) => o.setStyle({ color: i === this.pSel ? '#ffe46a' : '#8f9bab' })); }
-    const o = this.pItems[this.pSel];
-    g.fillStyle(0x2a1806, 0.95); g.fillRect(300, o.y - 15, 360, 30); g.fillStyle(0xff8a1f, 1); g.fillRect(300, o.y - 15, 4, 30); g.fillRect(656, o.y - 15, 4, 30);
+    if (this.pShownSel !== this.pSel) { this.pShownSel = this.pSel; this.pItems.forEach((o, i) => o.setStyle({ color: i === this.pConfirm ? '#ff6a4a' : i === this.pSel ? '#ffe46a' : '#8f9bab' })); }
+    const o = this.pItems[this.pSel], ask = this.pConfirm === this.pSel;   // a pending restart / quit turns its bar red
+    g.fillStyle(ask ? 0x2a0806 : 0x2a1806, 0.95); g.fillRect(300, o.y - 15, 360, 30); g.fillStyle(ask ? 0xff4a3a : 0xff8a1f, 1); g.fillRect(300, o.y - 15, 4, 30); g.fillRect(656, o.y - 15, 4, 30);
     const s = this.pItems[this.pSel], bob = Math.round(Math.sin(time / 120) * 2);
     g.fillStyle(0xffe46a, 1); g.fillTriangle(314 + bob, s.y - 6, 314 + bob, s.y + 6, 322 + bob, s.y);
   }
@@ -19219,7 +19239,10 @@ class HudScene extends Phaser.Scene {
       const st = gsr.sentry ? 'T SENTRY ' + Math.ceil(gsr.sentry.t) + 'S' : gsr.time.now >= gsr.sentryReadyAt ? 'T SENTRY READY' : 'T SENTRY ' + Math.ceil((gsr.sentryReadyAt - gsr.time.now) / 1000);
       if (st !== this.sentTxt) { this.sentTxt = st; this.lblSentry.setStyle({ color: gsr.sentry ? '#46e6ff' : st.endsWith('READY') ? '#5cff7a' : '#7d8896' }).setText(st); }
       this.rampA = Math.max(0, (gsr.rampageUntil || 0) - gsr.time.now);
-    } else this.rampA = 0;
+      this.rArmF = gsr.state === 'play' && !this.pauseOn ? clamp((gsr.restartArmUntil - gsr.time.now) / RESTART_CONFIRM_MS, 0, 1) : 0;
+      if (this.rArmF > 0) this.rArmLbl.setText('PRESS R AGAIN TO ' + (gsr.chapterStart ? 'RETRY ACT' : 'RESTART'));
+    } else { this.rampA = 0; this.rArmF = 0; }
+    this.rArmLbl.setVisible(this.rArmF > 0);
     this.lblRamp.setVisible(this.rampA > 0 && !this.overOn).setAlpha(Math.floor(time / 150) % 2 ? 1 : 0.55);
     this.dispHp = this.dispHp > this.hp ? Math.max(this.hp, this.dispHp - 30 * dt) : this.hp;
     this.hurtA = Math.max(0, this.hurtA - dt * 1.8); this.healA = Math.max(0, this.healA - dt * 2);
@@ -19308,12 +19331,13 @@ class HudScene extends Phaser.Scene {
       if (!this.pauseOn && this.hudFrame !== this.perkArm) { const mx = PAD.menuX(), N = this.perkIds.length; if (mx) { this.perkSel = (this.perkSel + N + mx) % N; Sfx.swap(); } if (PAD.jd(0)) this.pickPerk(this.perkSel); }
     }
     if (this.pauseOn && this.hudFrame !== this.pArm && !LAB_PANEL.isOpen()) { // pad drives the pause menu
-      const N = this.pItems.length, my = PAD.menuY(), mx = PAD.menuX();
+      const my = PAD.menuY(), mx = PAD.menuX();
       if (this.ctlOn) { if (PAD.jd(0) || PAD.jd(1) || PAD.jd(9)) { this.setControls(false); Sfx.ui(); } }   // the CONTROLS page: any of A / B / Start goes back
       else {
-        if (my) { this.pSel = (this.pSel + N + my) % N; Sfx.swap(); }
+        if (my) this.pMove(this.pSel + my);
         if (mx && this.pSel >= 2 && this.pSel <= 5) { if (this.pSel === 2) this.pausePick(2); else { this.pStep(this.pSel, mx, false); Sfx.ui(); } }
-        if (PAD.jd(0)) this.pausePick(this.pSel); else if (PAD.jd(1) || PAD.jd(9)) this.pausePick(0);
+        if (PAD.jd(0)) this.pausePick(this.pSel);
+        else if (PAD.jd(1) || PAD.jd(9)) { if (this.pConfirm >= 0) this.pCancel(); else this.pausePick(0); }   // B / Start back out of a pending restart / quit first
       }
     }
     if (this.overOn) { this.ovPrompt.setAlpha(Math.floor(time / 400) % 2 ? 1 : 0.35); this.tallyOver(dt); }
@@ -19363,6 +19387,10 @@ class HudScene extends Phaser.Scene {
       g.fillStyle(0x1c2027, 1); g.fillRect(x, y + h - 2, w, 2); g.fillRect(x, y, 2, h); g.fillRect(x + w - 2, y, 2, h);
     };
     panel(14, 10, 302, 64);
+    if (this.rArmF > 0) {                                               // mid-run R: backing for the confirm prompt and its shrinking window
+      g.fillStyle(0x06070a, 0.85); g.fillRect(322, 56, 316, 22);
+      g.fillStyle(0xffb347, 1); g.fillRect(322, 76, Math.round(316 * this.rArmF), 2);
+    }
     const frac = this.hp / TUNE.PLAYER_HP, dfrac = this.dispHp / TUNE.PLAYER_HP;
     const col = frac > 0.6 ? 0x5cff7a : frac > 0.3 ? 0xffc23a : 0xff3a2a;
     const ox = this.panelShake > 0 ? randi(-2, 2) : 0, oy = this.panelShake > 0 ? randi(-2, 2) : 0;   // bar jolts when hit

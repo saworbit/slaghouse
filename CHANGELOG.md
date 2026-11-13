@@ -56,6 +56,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **Restarting asks first.** Mid-run, **R** shows "PRESS R AGAIN TO RESTART" (or "RETRY ACT") under the objective
+  banner, and only a second press within two seconds restarts. In the pause menu, RESTART / RETRY ACT and QUIT TO
+  TITLE turn red with a question mark and need a second pick; moving off, Esc or B cancels. The pause list no longer
+  wraps from RESUME to QUIT TO TITLE. R on the results screen and in the Lab still acts at once. (#98)
 - Headless campaign checks run three fixed Normal seeds by default. Use `--campaign --brutal --seeds=91,404,137,729`
   to repeat the Brutal matrix. Each run uses normal traversal, combat and in-game healing, and verifies all ten
   operations, the full kill count and zero survivors at lifts and victory.
