@@ -101,22 +101,24 @@ The comment at the top of `slaghouse.html` documents every weapon, enemy, wave a
 
 The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. Other weapons unlock at fixed
 points as operations or reinforcement breaks begin. Hotkeys, the wheel and weapon cycling share the issued
-arsenal. Across the first five operations, the largest squad grows from two to six foes, the
-breaks shorten from 3.2 to 1.6 seconds, and incoming damage rises from 80% to full for the selected difficulty.
-The HUD counts down each break. The first heavy arrives alone after you get the Shotgun.
+arsenal. The opening patrol has two grunts, and Sorting Shift brings squads of up to six. In the Furnace,
+later threats arrive in pairs, with longer preparation breaks before bosses. Incoming damage rises from 80%
+to full across the first five operations for the selected difficulty. The HUD counts down each break.
+The first heavy arrives alone after you get the Shotgun.
 OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
 
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team in clear weather. Use the six-second countdown to find cover before the Gunship. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team in clear weather. Use the 6.2-second countdown to find cover before the Gunship. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. The Linkers fight below the catwalk. |
 | III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains and seal both coolant valves to open the lift. |
 | IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | Get to the dais before the second squad releases the ball. The ball starts swinging again after you breach the Foreman's armor. |
 | V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |
 
 Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
-starts. Each new weapon card shows what the weapon does and how to equip it. Ground fire clears at the end of an
-operation, and the Gunship wreck can no longer set the arena on fire after the clear.
+starts. Each new weapon card shows what the weapon does and how to equip it. In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and sustained prop jets
+share a damage interval, so overlapping hazards cannot hit all at once. Ground fire clears when an
+operation ends. A Gunship wreck that lands after the clear cannot start a new fire.
 
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump

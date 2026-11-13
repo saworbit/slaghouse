@@ -27,8 +27,8 @@ note, not a failure: the synth plays instead). CI runs the same script on every 
 request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks multi-tab saves, DAILY,
-enemy types, campaign checkpoints, and scripted progression, then runs through all five campaign acts. To run
-it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
+enemy types, props, campaign checkpoints, progression and traversal, then runs through all five campaign acts.
+To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
 `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
 ```bash
@@ -44,17 +44,20 @@ verify the cues, traversal and difficulty at real speed.
 
 ### Campaign smoke check
 
-1. In a fresh campaign, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
+1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
    grunt patrol falls. Equip the newly issued Shotgun using the **2** shown on its card. Pick a perk with
    **1**, **2** or **3** after Lockdown and confirm the equipped weapon stays put. Check that the Flare Gun
    arrives before the lights go out.
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
    same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
-   checkpoint. Check that the rain and molten puddles clear before the Gunship and that ground fire stops
-   damaging you after **WAVE CLEARED**, including during the Gunship crash. Check that one Hound arrives in
-   the first low-gravity squad and the second arrives with **Gravity Surge**. Enter the Sorting Line lift and
-   confirm **Continue** now starts in the Sorting Line.
+   checkpoint. On Normal, check that the rain, its puddles and the vents clear before the **Demolition Team**.
+   After that squad, check that the Gunship countdown prompts you to find cover and gives you about six seconds
+   to move. Verify that its rocket and strafe warnings give you time to react and that ground fire stops
+   damaging you after **WAVE CLEARED**, including during the crash. In Gravity Loss, check that the second Hound
+   arrives with **Gravity Surge** and the Linkers arrive in the next squad. Climb onto the catwalk and confirm the
+   last Linker stays in reach or descends below it. Hold toward a wall and repeat the jump input to climb without
+   drifting away. Enter the Sorting Line lift and confirm **Continue** now starts in the Sorting Line.
 4. In Meltdown, check that the countdown gives you time to reach a walkway. The presses stop before the slag
    rises, and the floor drains before the Wyrm arrives. After Meltdown, leave the first coolant valve early to
    reset its meter, then pause on the valve to check that the meter holds. Resume, seal both valves in order
