@@ -47,8 +47,9 @@ its scripted death sequence.
 | `--brutal` | Sets the difficulty of the full campaigns to Brutal |
 | `--lab` | Lab sweeps, menu controls, presets, snapshots, reset and save isolation |
 | `--lab-sweep` | Weapon, enemy and hazard sweeps only |
+| `--help` | Prints the options. An unknown option or a bad `--seeds` value exits with status 2 |
 
-Run this command to repeat the four-seed Brutal check.
+CI runs the four-seed Brutal check as its own job. Run this command to repeat it.
 
 ```bash
 node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729
@@ -73,7 +74,9 @@ An automated clear reports `state: 'won'`, the selected `difficulty`, all ten op
 `kills` and `total`, zero `pending`, and empty `remaining`, `leftBehind`, `bossCleanup` and `errs` arrays.
 The campaign controller uses normal traversal and combat. Health comes from the game's pickups, perks and
 campaign recovery. Start from a fresh campaign for these checks. `T.setup()` and `T.bot()` are assisted arena fixtures.
-A stalled run reports surviving enemies and the controller's position, goal and current route edge when available.
+A stalled run reports each surviving enemy with its cell and whether the player can see it (or how long it has
+been hidden), the operation, reserve, squads still to come and open route station, and the controller's position,
+goal and current route edge when available.
 
 `T.setup(arena)` uses a zero-based index from 0 (Melt Floor) to 4 (Powerhouse) and disables scheduled waves.
 Pass `true` as the second argument to keep waves enabled in a fresh harness session. Campaign setups restore

@@ -214,10 +214,13 @@ window.CP = (() => {
     expect(g.activeHostiles() === 0 && hounds() === 0 && g.mod === 'lowg', 'the second Hound skipped the low-gravity break');
     T.run(2800);
     expect(hounds() === 1 && g.mod === 'lowg' && alive().length === 2, 'the second Hound and Pogo did not arrive with Gravity Surge');
-    const advance = () => { clear(); T.run(CAMPAIGN[3].breakMs + 2700); };
-    advance();
-    expect(alive().length === 2 && alive().every(e => e.kind === 'linker' && e.homeY > 10 * TS),
-      'the Linkers should enter together below the catwalk after the second Hound is gone');
+    const advance = () => { clear(); const due = g.campaignReinforceAt; T.run(CAMPAIGN[3].breakMs + 2700); return due; };
+    const linkersDue = advance(), linkers = alive();
+    const foe = e => `${e.kind} (${Math.floor(e.x / TS)},${Math.floor(e.y / TS)}) homeY ${Math.round(e.homeY)}${e.under ? ' under' : ''}${e.summoned ? ' summoned' : ''}`;
+    expect(linkers.length === 2 && linkers.every(e => e.kind === 'linker' && e.homeY > 10 * TS),
+      `the Linkers should enter together below the catwalk (homeY > ${10 * TS}) after the second Hound is gone: ` +
+      `${linkers.length} alive [${linkers.map(foe).join('; ')}], ${g.campaignSquads.length} squads and ${g.campaignReserve} reserve left, ` +
+      (linkersDue ? `${Math.round(g.time.now - linkersDue)} ms after the break ended` : 'no break was pending after the clear'));
     advance();
     expect(alive().map(e => e.kind).sort().join() === 'howitzer,welder', 'Heavy Support should arrive in its own pair');
     advance();

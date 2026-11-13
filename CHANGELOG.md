@@ -53,6 +53,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 - `dev/playtest/kinds.js`, run by `run.mjs` and CI: every enemy kind is warped in on its own and must have a codex
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
+- CI runs the four-seed Brutal campaign check (seeds 91, 404, 137 and 729) as its own job. (#96)
+- `node dev/playtest/run.mjs --help` lists the options. An unknown option or a bad `--seeds` value stops with a
+  one-line error and status 2, instead of running the full suite or printing a stack trace. (#110)
+- A stalled campaign check names each survivor's cell and whether the player can see it or how long it has been
+  hidden, plus the operation, reserve, squads still to come and open route station. (#90)
+- The Furnace pacing check's Linker failure names each living foe with its cell, `homeY`, `under` and `summoned`,
+  the squads and reserve left, and the time since the break ended. (#93)
 
 ### Changed
 
