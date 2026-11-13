@@ -55,7 +55,9 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
    grunt patrol falls. Equip the newly issued Shotgun using the **2** shown on its card. Pick a perk with
    **1**, **2** or **3** after Lockdown and confirm the equipped weapon stays put. Check that the Flare Gun
-   arrives before the lights go out.
+   arrives before the lights go out. Press **R** once mid-fight: only the **PRESS R AGAIN** prompt should
+   appear, and it should clear after two seconds. In the pause menu, check that **Restart** and **Quit to
+   Title** each ask for a second pick and that **Esc** cancels without resuming.
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
    same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
