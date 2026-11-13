@@ -51,7 +51,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 - Split later Furnace squads into pairs and stop the vents and rain before the final encounters. The campaign
-  Gunship gives longer warnings, fires shorter bursts with recovery time, and drops one grunt.
+  Gunship gives longer warnings, fires shorter bursts with recovery time, and drops one grunt. The campaign
+  Juggernaut gives a longer warning before its minigun and takes longer to spin it up again.
 - Wall jumps accept buffered input while rising or falling. A stronger upward kick and faster steering make
   it easier to clear a ledge or redirect in the air.
 - **Campaign pacing.** The first five operations build from two to six foes per squad while shortening

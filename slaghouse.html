@@ -723,6 +723,7 @@ const TUNE = {
               boom: { radius: 42, maxDamage: 40, minDamage: 10, enemyDamage: 25, selfDamage: 20, push: 340, maxRise: 460, enemy: true, tileDamage: 60 } },
   WARDEN:  { range: 120, links: 2, soak: 0.25 },
   JUGG:    { speed: 34, spinMs: 650, fireT: 1.8, rate: 0.085, bulletSpeed: 380, damage: 3, turn: 1.4, cd: 2.4 },
+  CAMPAIGN_JUGG: { spinMs: 950, fireT: 1.25, rate: 0.14, turn: 1.1, cd: 3.4 },
   RAMPAGE: { time: 6000, fire: 0.6, damage: 1.25 },
   PRISM:   { cooldown: 420, damage: 30, bounces: 4, range: 900 },
   HOOK:    { cooldown: 650, speed: 720, range: 270, pull: 480, yank: 430, zipT: 0.9 },
@@ -10816,7 +10817,8 @@ class GameScene extends Phaser.Scene {
   // Mini-boss: 0.65 s spin-up (laser tell) then a 2 s minigun sweep that lags behind you - keep moving.
   // Armour cracks off at 66% and 33%; each stage makes it faster and angrier.
   updateJugg(e, dt, now, dx, dy, dist, alive) {
-    const b = e.body, D = e.def, T = TUNE.JUGG, onGround = b.blocked.down || b.touching.down, pb = this.player.body;
+    const b = e.body, D = e.def, onGround = b.blocked.down || b.touching.down, pb = this.player.body;
+    const T = TUNE.JUGG, attack = this.campaign ? TUNE.CAMPAIGN_JUGG : T;
     if (alive && !e.aggro && (e.sees || dist < 200) && dist < D.sight) this.alertEnemy(e, now);
     if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 5);
     const stage = e.hp > D.hp * 0.66 ? 0 : e.hp > D.hp * 0.33 ? 1 : 2;
@@ -10826,14 +10828,15 @@ class GameScene extends Phaser.Scene {
     let da = want - e.aimA; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
     if (e.ai === 'spin') {
       b.velocity.x = approach(b.velocity.x, 0, 400 * dt);
-      e.aimA += clamp(da, -3 * dt, 3 * dt); e.spin = Math.min(1, e.spin + dt / (T.spinMs / 1000));
-      if (now >= e.aiUntil) { e.ai = 'fire'; e.aiUntil = now + T.fireT * 1000; e.shotT = 0; }
+      e.aimA += clamp(da, -3 * dt, 3 * dt); e.spin = Math.min(1, e.spin + dt / (attack.spinMs / 1000));
+      if (now >= e.aiUntil) { e.ai = 'fire'; e.aiUntil = now + attack.fireT * 1000; e.shotT = 0; }
     } else if (e.ai === 'fire') {
       b.velocity.x = approach(b.velocity.x, 0, 400 * dt);
-      e.aimA += clamp(da, -T.turn * (1 + stage * 0.3) * dt, T.turn * (1 + stage * 0.3) * dt);   // the sweep lags behind you
+      const turn = attack.turn * (1 + stage * 0.3) * dt;
+      e.aimA += clamp(da, -turn, turn);                                    // the sweep lags behind you
       e.shotT -= dt;
-      while (e.shotT <= 0) { e.shotT += T.rate; this.juggShoot(e); }
-      if (now >= e.aiUntil) { e.ai = 'walk'; e.atkCd = T.cd; }
+      while (e.shotT <= 0) { e.shotT += attack.rate; this.juggShoot(e); }
+      if (now >= e.aiUntil) { e.ai = 'walk'; e.atkCd = attack.cd; }
     } else {
       e.spin = Math.max(0, e.spin - dt * 1.5);
       if (e.aggro && alive) {
@@ -10841,7 +10844,7 @@ class GameScene extends Phaser.Scene {
         const dir = dx > 0 ? 1 : -1, ground = this.standAt(b.center.x + dir * (b.halfWidth + 4), b.bottom + 4);
         b.velocity.x = approach(b.velocity.x, (ground || dy > 20) && Math.abs(dx) > 60 ? dir * T.speed * (1 + stage * 0.35) : 0, 300 * dt);
         if (onGround && (dir > 0 ? b.blocked.right : b.blocked.left)) b.velocity.y = -300;   // clambers over junk
-        if (e.atkCd <= 0 && e.sees && dist < 320) { e.ai = 'spin'; e.aiUntil = now + T.spinMs; Sfx.charge(0.8); Sfx.growl(true); }
+        if (e.atkCd <= 0 && e.sees && dist < 320) { e.ai = 'spin'; e.aiUntil = now + attack.spinMs; Sfx.charge(0.8); Sfx.growl(true); }
       } else {
         if (onGround) { const ground = this.standAt(b.center.x + e.dir * (b.halfWidth + 4), b.bottom + 4), wall = e.dir > 0 ? b.blocked.right : b.blocked.left; if (!ground || wall) e.dir *= -1; }
         b.velocity.x = approach(b.velocity.x, e.dir * T.speed * 0.6, 200 * dt); e.aimA = e.dir > 0 ? 0.2 : Math.PI - 0.2;
