@@ -122,9 +122,13 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.progression())).fails;
   });
-  await check('Furnace rain clears before the Gunship, fires clear at the break and Hounds arrive in separate squads', async ctx => {
+  await check('Furnace squads arrive in stages and the Gunship warns before attacking', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.furnacePacing())).fails;
+  });
+  await check('upper catwalks and responsive wall jumps', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.traversal())).fails;
   });
   await check('late campaign stages hazard warnings, weapon issues and boss machinery', async ctx => {
     const page = await open(ctx, ['checkpoint']);

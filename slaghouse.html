@@ -529,13 +529,15 @@
     Campaign encounters . LOCKDOWN opens with grunts. BLACKOUT cuts the lights on the second squad. In the
                           FURNACE, the vents are already active when the second squad brings SLAG RAIN. Showers
                           last 7 to 9 s, with 5 to 7 s clear and 1.2 s warning. They spare platforms and drums.
-                          The rain clears before the Gunship arrives. GRAVITY LOSS starts with a grunt, one Hound
-                          and a Blinker before the second Hound joins the next squad. SORTING SHIFT starts the belts.
+                          The rain and vents stop before the Demolition Team. The Gunship gets its own fight.
+                          GRAVITY LOSS introduces the Hounds in separate squads, then the Linkers, Heavy Support,
+                          and Containment Crew in pairs before the Juggernaut. SORTING SHIFT starts the belts.
                           MELTDOWN stops the presses before the tide and drains the floor for the Wyrm.
                           DEMOLITION and LIVE CIRCUIT give time to reach safe ground before machinery starts.
                           The Foreman releases the ball and the Smelter charges the rails in phase two.
-                          The first five operations grow from 2 to 6 enemies per squad. Breaks shorten from
-                          3.2 to 1.6 s, spawn spacing narrows, and incoming damage climbs from 80% to full.
+                          The first five operations move from a two-grunt patrol to six foes in the Sorting Line.
+                          The Furnace uses smaller squads and gives bosses a longer warning. Incoming damage
+                          climbs from 80% to full across these five operations.
                           Lockdown and Slag Rain clear with health restored to at least 75 and 65,
                           except with the Vampire mutator. Machinery and ground fires clear between operations.
                           Medkits restock between waves.
@@ -546,8 +548,8 @@
                           and dashes ignite, SCAVENGER 15% orb drops, SHOWBOAT style x1.5, VOLATILE 1 in 4 kills
                           explode (radius 40), ADRENALINE +50% damage under 35 HP, BARBED PLATE contact hurts the
                           toucher for 20. They last the run (and ride the lift); the HUD lists them.
-    Wall slide / jump ... falling while pushing into a wall caps the fall at 90 px/s; jump off it (or within 140 ms of
-                          letting go) for 230 px/s out and 95% of a jump up, with 160 ms of locked sideways speed.
+    Wall slide / jump ... push into a wall while falling to slide. Jump near a wall while rising or falling, or just
+                          after leaving it. A jump pressed just before contact is buffered, and you can steer away immediately.
     Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
                           bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
                           New pipes every wave.
@@ -721,6 +723,7 @@ const TUNE = {
               boom: { radius: 42, maxDamage: 40, minDamage: 10, enemyDamage: 25, selfDamage: 20, push: 340, maxRise: 460, enemy: true, tileDamage: 60 } },
   WARDEN:  { range: 120, links: 2, soak: 0.25 },
   JUGG:    { speed: 34, spinMs: 650, fireT: 1.8, rate: 0.085, bulletSpeed: 380, damage: 3, turn: 1.4, cd: 2.4 },
+  CAMPAIGN_JUGG: { spinMs: 950, fireT: 1.25, rate: 0.14, turn: 1.1, cd: 3.4 },
   RAMPAGE: { time: 6000, fire: 0.6, damage: 1.25 },
   PRISM:   { cooldown: 420, damage: 30, bounces: 4, range: 900 },
   HOOK:    { cooldown: 650, speed: 720, range: 270, pull: 480, yank: 430, zipT: 0.9 },
@@ -730,6 +733,8 @@ const TUNE = {
              tank: { radius: 48, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 360, maxRise: 460, burn: 3, tileDamage: 70 } },
   GUNSHIP: { speed: 75, alt: 124, volleyCd: 4, dropCd: 9, strafeCd: 6.5,
              crash: { radius: 90, maxDamage: 120, minDamage: 30, selfDamage: 30, push: 520, maxRise: 640, tileDamage: 140 } },
+  CAMPAIGN_GUNSHIP: { hp: 360, firstVolley: 3.5, volleyCd: 5.5, rocketTellMs: 950, rockets: 2, rocketGapMs: 520,
+                       firstDrop: 12, firstStrafe: 8, strafeTellMs: 700, strafeCd: 8, rounds: 9, shotGap: 0.14, recovery: 2.8 },
   // ---- overdrive round ----
   DASH:    { speed: 440, time: 0.15, cd: 0.55, iframes: 0.2, keep: 0.55 },
   RIPPER:  { cooldown: 55, damage: 5, reach: 24, half: 7, heal: 6, tile: 9 },
@@ -782,7 +787,7 @@ const TUNE = {
   TURRET:  { fireCd: 1.3, tellMs: 300, speed: 300, dmg: 6 },
   DUELIST: { windupMs: 300, comboMs: 170, lunge: 300 },
   VOLATILE:{ radius: 40, maxDamage: 35, minDamage: 10, selfDamage: 0, push: 220, maxRise: 300, tileDamage: 15 },
-  WALL:    { slide: 90, jumpX: 230, jumpK: 0.95, grace: 140, lock: 160 },
+  WALL:    { slide: 90, reach: 3, jumpX: 215, jumpK: 1.07, grace: 160, lock: 90 },
   // ---- ironclad round ----
   FLARE:   { cooldown: 700, speed: 330, burn: 6, dps: 10, igniteR: 22, lightR: 90, max: 4 },
   LIMPET:  { cooldown: 300, speed: 300, holdMs: 350, max: 5, gap: 0.06 },
@@ -4862,18 +4867,21 @@ const CAMPAIGN = [
     { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['tarspit', 'G'], ['mender', 'A']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT' }] },
   { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'],
-    breakMs: 2400, spawnGap: 800, damageScale: 0.9, hazardContactMs: 425, recovery: 65, squads: [
+    breakMs: 2800, spawnGap: 950, damageScale: 0.9, hazardContactMs: 425, recovery: 65, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
-    { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A'], ['golem', 'G']] },
-    { name: 'FURNACE GUARD', foes: [['enforcer', 'G'], ['pyro', 'G'], ['rocketeer', 'G'], ['spotter', 'A']] },
-    { incoming: 'GUNSHIP', mod: null, foes: [['gunship', 'A']] },
+    { name: 'SALVAGE CREW', mod: 'slag', foes: [['lugger', 'G'], ['wasp', 'A']] },
+    { name: 'FURNACE GUARD', foes: [['golem', 'G'], ['enforcer', 'G']] },
+    { name: 'DEMOLITION TEAM', mod: null, machinery: null, foes: [['pyro', 'G'], ['rocketeer', 'G']] },
+    { incoming: 'GUNSHIP', breakMs: 4200, foes: [['gunship', 50, 6]] },
   ] },
   { name: 'GRAVITY LOSS', brief: 'TAKE THE HIGH GROUND IN LOW GRAVITY', mod: 'lowg', machinery: 'vents', unlock: ['rail', 'cryo', 'hornet'],
-    breakMs: 2000, spawnGap: 650, damageScale: 0.95, hazardContactMs: 350, elites: 1, squads: [
+    breakMs: 2500, spawnGap: 850, damageScale: 0.95, hazardContactMs: 350, squads: [
     { foes: [['grunt', 'G'], ['hound', 'G'], ['blinker', 'A']] },
-    { name: 'GRAVITY SURGE', foes: [['hound', 'G'], ['pogo', 'G'], ['linker', 'A'], ['linker', 'A']] },
-    { name: 'HEAVY SUPPORT', foes: [['howitzer', 'G'], ['welder', 'G'], ['blimp', 'A'], ['slug', 'G'], ['chiller', 'G']] },
-    { foes: [['jugg', 'G']] },
+    { name: 'GRAVITY SURGE', foes: [['hound', 'G'], ['pogo', 'G']] },
+    { name: 'LINKER PAIR', foes: [['linker', 33, 17], ['linker', 39, 17]] },
+    { name: 'HEAVY SUPPORT', foes: [['welder', 'G'], ['howitzer', 'G']] },
+    { name: 'CONTAINMENT CREW', foes: [['slug', 'G'], ['chiller', 'G']] },
+    { incoming: 'JUGGERNAUT', breakMs: 3500, machinery: null, foes: [['jugg', 'G']] },
   ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT' }] },
   { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'],
     breakMs: 1600, spawnGap: 550, elites: 1, squads: [
@@ -5004,12 +5012,16 @@ function buildLevel2() {
   fill(41, 22, 3, 3, 'x'); fill(56, 22, 3, 3, 'x');                                  // crate steps up to it
   fill(23, 14, 3, 11); fill(74, 14, 3, 11);                                           // towers
   fill(42, 2, 1, 8); fill(57, 2, 1, 8);                                               // pillars the catwalk hangs from
-  fill(36, 10, 28, 1, 'g');                                                           // the catwalk
+  fill(36, 10, 28, 1, 'g');
+  fill(47, 10, 6, 1, '=');                                                            // jump through the center of the catwalk
+  fill(46, 16, 5, 1, '='); fill(49, 13, 5, 1, '=');                                   // permanent steps from the furnace top
   fill(5, 21, 7, 1, '='); fill(14, 21, 6, 1, 'g'); fill(80, 21, 6, 1, 'g'); fill(88, 21, 7, 1, '=');
   fill(9, 17, 6, 1, 'g'); fill(17, 17, 6, 1, '='); fill(77, 17, 6, 1, '='); fill(85, 17, 6, 1, 'g');
   fill(29, 14, 6, 1, '='); fill(65, 14, 6, 1, '=');
   fill(2, 13, 6, 1); fill(92, 13, 6, 1);
   fill(12, 9, 6, 1, '='); fill(82, 9, 6, 1, '=');
+  fill(60, 17, 5, 1, '='); fill(59, 13, 5, 1, '='); fill(59, 10, 5, 1, '=');
+  fill(70, 18, 4, 1, '='); fill(77, 13, 5, 1, '='); fill(89, 13, 3, 1, '=');
   fill(8, 23, 2, 2, 'x'); fill(33, 24, 2, 1, 'x'); fill(65, 24, 2, 1, 'x'); fill(90, 23, 2, 2, 'x');
   return g;
 }
@@ -5035,7 +5047,9 @@ function buildLevel3() {                             // ARENA 03 :: THE SORTING 
   fill(44, 21, 12, 4);                                                                // control block (stand on it at row 20)
   fill(41, 23, 3, 2, 'x'); fill(56, 23, 3, 2, 'x');                                  // crate steps
   fill(8, 17, 22, 1); fill(70, 17, 22, 1);                                            // the upper belts (solid, presses hang under them)
-  fill(35, 2, 1, 12); fill(64, 2, 1, 12); fill(36, 13, 28, 1, 'g');                   // catwalk on its pillars
+  fill(35, 2, 1, 12); fill(64, 2, 1, 12); fill(36, 13, 28, 1, 'g');
+  fill(41, 13, 6, 1, '='); fill(53, 13, 6, 1, '=');                                   // access either side of the central press
+  fill(41, 17, 6, 1, '='); fill(53, 17, 6, 1, '=');
   fill(3, 21, 5, 1, '='); fill(92, 21, 5, 1, '='); fill(32, 19, 6, 1, '='); fill(62, 19, 6, 1, '=');   // gratings up
   fill(2, 11, 8, 1); fill(90, 11, 8, 1);                                              // side ledges
   fill(14, 13, 6, 1, '='); fill(80, 13, 6, 1, '=');
@@ -5073,6 +5087,9 @@ function buildLevel4(campaign = false) {
   fill(32, 11, 6, 1, '='); fill(62, 11, 6, 1, '=');
   fill(2, 9, 7, 1); fill(91, 9, 7, 1);                                                // side ledges
   fill(28, 24, 2, 1, 'x'); fill(70, 24, 2, 1, 'x');
+  fill(10, 18, 6, 1, '='); fill(84, 18, 6, 1, '=');
+  fill(9, 11, 6, 1, '='); fill(85, 11, 6, 1, '=');
+  fill(28, 15, 6, 1, '='); fill(66, 15, 6, 1, '=');
   if (campaign) { fill(35, 22, 5, 1, '='); fill(60, 22, 5, 1, '='); }   // keep a route over the dais after the crates break
   return g;
 }
@@ -5097,8 +5114,13 @@ function buildLevel5(campaign = false) {
   fill(44, 17, 12, 8); fill(41, 22, 3, 3, 'x'); fill(56, 22, 3, 3, 'x');             // the generator (stand on it at row 16) + crate steps
   fill(8, 20, 16, 1, '='); fill(76, 20, 16, 1, '='); fill(28, 20, 10, 1, '='); fill(62, 20, 10, 1, '=');   // walkways over the rails
   fill(14, 15, 8, 1); fill(78, 15, 8, 1); fill(30, 12, 8, 1, '='); fill(62, 12, 8, 1, '=');
-  fill(46, 9, 8, 1, 'g'); fill(2, 10, 7, 1); fill(91, 10, 7, 1);
+  fill(46, 9, 8, 1, '='); fill(2, 10, 7, 1); fill(91, 10, 7, 1);
   fill(24, 23, 2, 2, 'x'); fill(74, 23, 2, 2, 'x');
+  fill(22, 17, 5, 1, '='); fill(73, 17, 5, 1, '=');
+  fill(9, 13, 5, 1, '='); fill(86, 13, 5, 1, '=');
+  fill(30, 16, 8, 1, '='); fill(62, 16, 8, 1, '=');
+  fill(40, 19, 4, 1, '='); fill(56, 19, 4, 1, '=');
+  fill(46, 13, 8, 1, '=');
   if (campaign) {                                                       // permanent steps to the catwalks over every rail bank
     for (const x of [5, 30, 64, 87]) fill(x, 23, 6, 1, '=');
   }
@@ -6497,7 +6519,10 @@ class GameScene extends Phaser.Scene {
       e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x50b0ff).setScale(0.4).setAlpha(0.6).setDepth(18);
     } else if (kind === 'gunship') {
       e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'cruise', side: 1, sideT: 3, volT: 2.5, dropT: 4, strT: 6, drops: 0, shots: 0, shotT: 0, strDir: 1 });
+      const profile = this.campaign ? TUNE.CAMPAIGN_GUNSHIP : null;
+      if (profile) { e.def = { ...D, hp: profile.hp }; e.hp = profile.hp; }
+      Object.assign(e, { ai: 'cruise', side: 1, sideT: 3, volT: profile?.firstVolley ?? 2.5, dropT: profile?.firstDrop ?? 4,
+        strT: profile?.firstStrafe ?? 6, drops: 0, shots: 0, shotT: 0, strDir: 1, attackRest: 0 });
       e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.7).setAlpha(0.6).setDepth(18);
       e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6ab0ff).setScale(1.6).setAlpha(0.5).setDepth(18);
     } else if (kind === 'screamer') {
@@ -7036,7 +7061,7 @@ class GameScene extends Phaser.Scene {
     const jumpHeld = K.SPACE.isDown || K.W.isDown || K.UP.isDown || PAD.down(0);
     const jumpPressed = this.jd.SPACE || this.jd.W || this.jd.UP || PAD.jd(0);
     const onGround = b.blocked.down || b.touching.down;
-    if (onGround) this.lastGround = now;
+    if (onGround) { this.lastGround = now; this.wallT = -1e9; this.wallLockUntil = 0; }
     if (jumpPressed) this.jumpBuffer = now;
 
     // horizontal: snappy accel on ground, softer in air, rocket-jump momentum decays slowly
@@ -7047,7 +7072,7 @@ class GameScene extends Phaser.Scene {
     if (onGround) vx = approach(vx, target, (speedUp ? T.GROUND_ACCEL : T.GROUND_DECEL) * dt * (this.onIce ? (speedUp ? T.CHILLER.grip : T.CHILLER.slide) : 1));   // ice: slow to get going, slower to stop or turn
     else if (Math.abs(vx) > T.RUN_SPEED && (dir === 0 || dir === Math.sign(vx))) vx = approach(vx, Math.sign(vx) * T.RUN_SPEED, T.AIR_MOMENTUM_DECAY * dt);
     else vx = approach(vx, target, (dir ? T.AIR_ACCEL : T.AIR_DECEL) * dt);
-    if (now >= this.wallLockUntil) b.setVelocityX(vx);                  // a wall jump owns your sideways speed for a moment
+    if (now >= this.wallLockUntil || dir * this.wallSide < 0) b.setVelocityX(vx);  // briefly resist steering back into the launch wall
 
     // jump: buffered + coyote time; S/Down + jump drops through gratings
     let jumped = false;
@@ -7057,27 +7082,32 @@ class GameScene extends Phaser.Scene {
       b.setVelocityY(-T.JUMP_VELOCITY * (this.tarT > 0 ? T.TARSPIT.jump : 1)); this.jumpBuffer = -1e9; this.lastGround = -1e9; this.jumpCuttable = true; jumped = true;
       Sfx.jump(); this.fxDust(p.x, b.bottom, 5); this.squash(0.72, 1.3);
     }
-    // wall slide: falling while pushing into a wall caps the fall; jump off it (or within 140 ms of letting go)
-    const W2 = T.WALL, onWallL = (b.blocked.left || b.touching.left) && left, onWallR = (b.blocked.right || b.touching.right) && right;
-    this.sliding = !onGround && (onWallL || onWallR) && b.velocity.y > 0;
+    const W2 = T.WALL;
+    let wall = 0;
+    if (!onGround && now >= this.wallLockUntil) {
+      const nearWall = x => this.solidAt(x, b.top + 4) || this.solidAt(x, b.center.y) || this.solidAt(x, b.bottom - 5);
+      const leftWall = nearWall(b.left - W2.reach), rightWall = nearWall(b.right + W2.reach);
+      wall = leftWall && rightWall ? dir || this.wallSide : leftWall ? -1 : rightWall ? 1 : 0;
+      if (wall) { this.wallSide = wall; this.wallT = now; }
+    }
+    this.sliding = wall !== 0 && wall === dir && b.velocity.y > 0;
     if (this.sliding) {
-      this.wallSide = onWallL ? -1 : 1; this.wallT = now;
       if (b.velocity.y > W2.slide) b.setVelocityY(W2.slide);
       if ((this.slideFxT -= dt) <= 0) { this.slideFxT = 0.06; this.fx.emit(p.x + this.wallSide * 5, b.bottom - 4, { n: 1, angle: -Math.PI / 2, spread: 0.8, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0x8a8580, 0x5a5652], alpha: [0.6, 0], g: -20 }); }
     }
-    if (jumpPressed && !jumped && !onGround && now - this.lastGround > T.COYOTE_MS) {
+    if (now - this.jumpBuffer <= T.JUMP_BUFFER_MS && !jumped && !onGround && now - this.lastGround > T.COYOTE_MS) {
       if (now - this.wallT < W2.grace && this.wallSide) {                 // wall jump
         b.setVelocity(-this.wallSide * W2.jumpX, -T.JUMP_VELOCITY * W2.jumpK); this.wallLockUntil = now + W2.lock;
         this.jumpBuffer = -1e9; this.wallT = -1e9; this.jumpCuttable = true; this.djUsed = false; jumped = true;
         Sfx.jump(); this.squash(0.75, 1.3); this.fxDust(p.x + this.wallSide * 5, p.y + 4, 5); this.addStyle(8);
-      } else if (this.perks.djump && !this.djUsed) {                      // double jump (perk)
+      } else if (jumpPressed && this.perks.djump && !this.djUsed) {                      // double jump (perk)
         b.setVelocityY(-T.JUMP_VELOCITY * 0.88); this.djUsed = true; this.jumpBuffer = -1e9; this.jumpCuttable = true; jumped = true;
         Sfx.jump(); this.squash(0.8, 1.25); this.spawnLight(p.x, b.bottom, 'ring', 0xc8a0ff, 0.2, 0.9, 0.8, 0.18);
         this.fx.emit(p.x, b.bottom, { n: 8, angle: Math.PI / 2, spread: 1.4, speed: [30, 90], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xd0b8ff, 0x8a60ff], add: true });
       }
     }
     if (onGround) this.djUsed = false;
-    if (this.jumpCuttable && !jumpHeld && b.velocity.y < -80) { b.setVelocityY(b.velocity.y * T.JUMP_CUT); this.jumpCuttable = false; }
+    if (this.jumpCuttable && !jumpHeld && now >= this.wallLockUntil && b.velocity.y < -80) { b.setVelocityY(b.velocity.y * T.JUMP_CUT); this.jumpCuttable = false; }
     if (b.velocity.y >= 0) this.jumpCuttable = false;
     b.setGravityY(b.velocity.y > 0 ? T.FALL_EXTRA : 0);
     if (b.velocity.y > T.MAX_FALL) b.setVelocityY(T.MAX_FALL);
@@ -10787,7 +10817,8 @@ class GameScene extends Phaser.Scene {
   // Mini-boss: 0.65 s spin-up (laser tell) then a 2 s minigun sweep that lags behind you - keep moving.
   // Armour cracks off at 66% and 33%; each stage makes it faster and angrier.
   updateJugg(e, dt, now, dx, dy, dist, alive) {
-    const b = e.body, D = e.def, T = TUNE.JUGG, onGround = b.blocked.down || b.touching.down, pb = this.player.body;
+    const b = e.body, D = e.def, onGround = b.blocked.down || b.touching.down, pb = this.player.body;
+    const T = TUNE.JUGG, attack = this.campaign ? TUNE.CAMPAIGN_JUGG : T;
     if (alive && !e.aggro && (e.sees || dist < 200) && dist < D.sight) this.alertEnemy(e, now);
     if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 5);
     const stage = e.hp > D.hp * 0.66 ? 0 : e.hp > D.hp * 0.33 ? 1 : 2;
@@ -10797,14 +10828,15 @@ class GameScene extends Phaser.Scene {
     let da = want - e.aimA; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
     if (e.ai === 'spin') {
       b.velocity.x = approach(b.velocity.x, 0, 400 * dt);
-      e.aimA += clamp(da, -3 * dt, 3 * dt); e.spin = Math.min(1, e.spin + dt / (T.spinMs / 1000));
-      if (now >= e.aiUntil) { e.ai = 'fire'; e.aiUntil = now + T.fireT * 1000; e.shotT = 0; }
+      e.aimA += clamp(da, -3 * dt, 3 * dt); e.spin = Math.min(1, e.spin + dt / (attack.spinMs / 1000));
+      if (now >= e.aiUntil) { e.ai = 'fire'; e.aiUntil = now + attack.fireT * 1000; e.shotT = 0; }
     } else if (e.ai === 'fire') {
       b.velocity.x = approach(b.velocity.x, 0, 400 * dt);
-      e.aimA += clamp(da, -T.turn * (1 + stage * 0.3) * dt, T.turn * (1 + stage * 0.3) * dt);   // the sweep lags behind you
+      const turn = attack.turn * (1 + stage * 0.3) * dt;
+      e.aimA += clamp(da, -turn, turn);                                    // the sweep lags behind you
       e.shotT -= dt;
-      while (e.shotT <= 0) { e.shotT += T.rate; this.juggShoot(e); }
-      if (now >= e.aiUntil) { e.ai = 'walk'; e.atkCd = T.cd; }
+      while (e.shotT <= 0) { e.shotT += attack.rate; this.juggShoot(e); }
+      if (now >= e.aiUntil) { e.ai = 'walk'; e.atkCd = attack.cd; }
     } else {
       e.spin = Math.max(0, e.spin - dt * 1.5);
       if (e.aggro && alive) {
@@ -10812,7 +10844,7 @@ class GameScene extends Phaser.Scene {
         const dir = dx > 0 ? 1 : -1, ground = this.standAt(b.center.x + dir * (b.halfWidth + 4), b.bottom + 4);
         b.velocity.x = approach(b.velocity.x, (ground || dy > 20) && Math.abs(dx) > 60 ? dir * T.speed * (1 + stage * 0.35) : 0, 300 * dt);
         if (onGround && (dir > 0 ? b.blocked.right : b.blocked.left)) b.velocity.y = -300;   // clambers over junk
-        if (e.atkCd <= 0 && e.sees && dist < 320) { e.ai = 'spin'; e.aiUntil = now + T.spinMs; Sfx.charge(0.8); Sfx.growl(true); }
+        if (e.atkCd <= 0 && e.sees && dist < 320) { e.ai = 'spin'; e.aiUntil = now + attack.spinMs; Sfx.charge(0.8); Sfx.growl(true); }
       } else {
         if (onGround) { const ground = this.standAt(b.center.x + e.dir * (b.halfWidth + 4), b.bottom + 4), wall = e.dir > 0 ? b.blocked.right : b.blocked.left; if (!ground || wall) e.dir *= -1; }
         b.velocity.x = approach(b.velocity.x, e.dir * T.speed * 0.6, 200 * dt); e.aimA = e.dir > 0 ? 0.2 : Math.PI - 0.2;
@@ -11063,23 +11095,39 @@ class GameScene extends Phaser.Scene {
   updateGunship(e, dt, now, dx, dy, dist, alive) {
     const b = e.body, T = TUNE.GUNSHIP, pb = this.player.body, hpF = e.hp / e.def.hp;
     if (alive) e.aggro = true;
-    e.volT -= dt; e.dropT -= dt; e.strT -= dt; e.sideT -= dt;
+    const profile = this.campaign ? TUNE.CAMPAIGN_GUNSHIP : null;
+    e.volT -= dt; e.dropT -= dt; e.strT -= dt; e.sideT -= dt; e.attackRest -= dt;
     if (e.sideT <= 0) { e.sideT = rand(4, 6); e.side *= -1; }
     let tx = clamp(pb.center.x + e.side * 110, 80, LW - 80), spd = T.speed;
     const ty = T.alt + Math.sin(e.t * 1.3) * 5;
-    if (e.ai === 'tell') { if (now >= e.aiUntil) { e.ai = 'volley'; e.shots = 3; e.aiUntil = now; } }
-    else if (e.ai === 'volley') {
-      if (now >= e.aiUntil && e.shots > 0) { e.shots--; e.aiUntil = now + 220; this.gunshipRocket(e); if (e.shots <= 0) { e.ai = 'cruise'; e.volT = T.volleyCd * (hpF < 0.5 ? 0.7 : 1); } }
+    if (e.ai === 'tell') {
+      if (now >= e.aiUntil) { e.ai = 'volley'; e.shots = profile?.rockets ?? 3; e.aiUntil = now; }
+    } else if (e.ai === 'volley') {
+      if (now >= e.aiUntil && e.shots > 0) {
+        e.shots--; e.aiUntil = now + (profile?.rocketGapMs ?? 220); this.gunshipRocket(e);
+        if (e.shots === 0) {
+          e.ai = 'cruise'; e.volT = profile?.volleyCd ?? T.volleyCd * (hpF < 0.5 ? 0.7 : 1);
+          e.attackRest = profile?.recovery ?? 0;
+        }
+      }
+    } else if (e.ai === 'strafeTell') {
+      if (now >= e.aiUntil) { e.ai = 'strafe'; e.shots = profile.rounds; e.shotT = 0; }
     } else if (e.ai === 'strafe') {
       e.shotT -= dt;
-      while (e.shotT <= 0 && e.shots > 0) { e.shotT += 0.08; e.shots--; this.gunshipGun(e); }
+      while (e.shotT <= 0 && e.shots > 0) { e.shotT += profile?.shotGap ?? 0.08; e.shots--; this.gunshipGun(e); }
       tx = e.x + e.strDir * 200; spd *= 1.6;
-      if (e.shots <= 0) { e.ai = 'cruise'; e.strT = T.strafeCd; }
-    } else {
+      if (e.shots === 0) { e.ai = 'cruise'; e.strT = profile?.strafeCd ?? T.strafeCd; e.attackRest = profile?.recovery ?? 0; }
+    } else if (alive && e.attackRest <= 0) {
       e.ai = 'cruise';
-      if (alive && e.volT <= 0 && dist < 520) { e.ai = 'tell'; e.aiUntil = now + 600; Sfx.charge(0.9); }
-      else if (alive && e.dropT <= 0 && e.drops < 3) { e.dropT = T.dropCd; e.drops++; this.gunshipDrop(e); }
-      else if (alive && e.strT <= 0 && Math.abs(dx) < 220) { e.ai = 'strafe'; e.shots = 18; e.shotT = 0; e.strDir = dx >= 0 ? 1 : -1; Sfx.charge(0.5); }
+      if (e.volT <= 0 && dist < 520) {
+        e.ai = 'tell'; e.aiUntil = now + (profile?.rocketTellMs ?? 600); Sfx.charge(0.9);
+      } else if (e.dropT <= 0 && e.drops < (profile ? 1 : 3)) {
+        e.dropT = T.dropCd; e.drops++; this.gunshipDrop(e); e.attackRest = profile?.recovery ?? 0;
+      } else if (e.strT <= 0 && Math.abs(dx) < 220) {
+        e.strDir = dx >= 0 ? 1 : -1; Sfx.charge(0.5);
+        if (profile) { e.ai = 'strafeTell'; e.aiUntil = now + profile.strafeTellMs; }
+        else { e.ai = 'strafe'; e.shots = 18; e.shotT = 0; }
+      }
     }
     const k = Math.min(1, dt * 1.6);
     b.velocity.x += (clamp((tx - b.center.x) * 1.5, -spd, spd) - b.velocity.x) * k;
@@ -11101,11 +11149,12 @@ class GameScene extends Phaser.Scene {
     const bl = this.ebullets.getFirstDead(false); if (!bl) return;
     bl.setTexture('ebullet'); bl.enableBody(true, sx, sy, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
     bl.setRotation(a); bl.setVelocity(Math.cos(a) * 380, Math.sin(a) * 380);
-    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: 4, snipe: false });
+    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: this.campaign ? 3 : 4, snipe: false });
   }
   gunshipDrop(e) {
-    const kind = Math.random() < 0.5 ? 'grunt' : 'tick';
-    for (let i = 0; i < 2; i++) {
+    const kind = this.campaign || Math.random() < 0.5 ? 'grunt' : 'tick';
+    const count = this.campaign ? 1 : 2;
+    for (let i = 0; i < count; i++) {
       const t = this.spawnEnemy(kind, clamp(Math.floor(e.x / TS), 2, MAP_W - 3), clamp(Math.floor((e.body.bottom + 4) / TS), 2, MAP_H - 3));
       t.body.reset(e.x + (i ? 8 : -8), e.body.bottom + 8); t.body.setVelocity(rand(-60, 60), 40);
       t.summoned = true; t.aggro = true; t.aggroT = 6;
@@ -18385,8 +18434,10 @@ class GameScene extends Phaser.Scene {
       if (e.kind === 'cloaker') { e.glow.setPosition(e.x + e.dir * 5, e.y - 8 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'reveal' ? 0.7 : 0.3).setAlpha(0.3 + 0.6 * (e.cloakA ?? 0)); continue; }
       if (e.kind === 'pyro') { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 8 : 6), e.y + (w ? -12 : -1)).setScale(w ? 0.7 + Math.random() * 0.2 : 0.3).setTint(w ? 0xff8a20 : 0xffb040); continue; }
       if (e.kind === 'gunship') {
-        const tell = e.ai === 'tell' || e.ai === 'volley';
-        e.glow.setPosition(e.x + e.dir * 2, e.body.bottom + 1).setScale(tell ? 1 + Math.sin(now / 40) * 0.25 : 0.5).setAlpha(tell ? 0.9 : 0.4);
+        const strafe = e.ai === 'strafeTell' || e.ai === 'strafe';
+        const tell = strafe || e.ai === 'tell' || e.ai === 'volley';
+        e.glow.setPosition(e.x + e.dir * (strafe ? 22 : 2), e.body.bottom + 1)
+          .setTint(strafe ? 0xffd080 : 0xff3020).setScale(tell ? 1 + Math.sin(now / 40) * 0.25 : 0.5).setAlpha(tell ? 0.9 : 0.4);
         e.thr.setPosition(e.x, e.body.bottom + 4).setScale(1.4 + Math.random() * 0.4, 0.8).setAlpha(0.45);
         continue;
       }

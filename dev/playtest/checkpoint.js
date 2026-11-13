@@ -77,10 +77,11 @@ window.CP = (() => {
     expect(hud.wheelIcons.filter(icon => icon.visible).length === 1, 'the weapon wheel exposed unissued slots');
 
     const opening = CAMPAIGN.slice(0, 5);
-    expect(opening.every((op, i) => Math.max(...op.squads.map(s => s.foes.length)) === i + 2),
-      'the first five operations must grow from two to six foes per squad');
-    expect(opening.slice(1).every((op, i) => op.breakMs < opening[i].breakMs && op.spawnGap < opening[i].spawnGap),
-      'each of the first five operations must reduce the delay between threats');
+    const squadCaps = [2, 3, 3, 3, 6];
+    expect(opening.every((op, i) => Math.max(...op.squads.map(s => s.foes.length)) <= squadCaps[i]),
+      'an early operation exceeded its squad size limit');
+    expect(opening.slice(1).every((op, i) => op.breakMs <= opening[i].breakMs && op.spawnGap <= opening[i].spawnGap),
+      'early operation breaks and spawn gaps must hold or shorten');
     expect(opening.slice(1).every((op, i) => (op.damageScale ?? 1) > opening[i].damageScale),
       'incoming damage must rise through the first five operations');
     const hp = g.hp;
@@ -133,11 +134,11 @@ window.CP = (() => {
     const alive = () => g.enemies.getChildren().filter(e => e.alive);
     const clear = () => { for (const e of alive()) g.killEnemy(e, 1, 0, 'nail'); };
     const gunship = () => alive().find(e => e.kind === 'gunship');
-    g.startWave(2); T.run(3300); clear();
+    g.startWave(2); T.run(4200); clear();
     const rainBreak = CAMPAIGN[2].breakMs;
-    T.run(rainBreak + 3300);
-    expect(g.mod === 'slag', 'Slag Rain did not start with Salvage Crew');
-    clear(); T.run(rainBreak + 4100);
+    T.run(rainBreak + 2700);
+    expect(g.mod === 'slag' && alive().length === 2, 'Slag Rain did not start with the Salvage Crew pair');
+    clear(); T.run(rainBreak + 2700);
     expect(g.mod === 'slag' && !gunship(), 'the rain should still be active during Furnace Guard');
 
     const { x, body } = g.player;
@@ -148,13 +149,32 @@ window.CP = (() => {
     expect(g.puddles.some(p => p.rain) && g.puddles.some(p => p.fire), 'test setup did not create rain and fire puddles');
     clear();
     expect(g.mod === null && !drop.active && !drop.glow.visible && !g.puddles.some(p => p.rain),
-      'the Gunship break did not clear the rain, airborne slag and rain puddles');
+      'the Demolition Team break did not clear the rain, airborne slag and rain puddles');
     expect(g.puddles.some(p => p.fire), 'ending the rain removed fire from a different source');
-    T.run(rainBreak - 300);
-    expect(!gunship(), 'the Gunship skipped the reinforcement break');
+    expect(g.campaignMachinery === null, 'the Furnace vents stayed active for the Demolition Team');
+    T.run(rainBreak + 2700);
+    expect(alive().map(e => e.kind).sort().join() === 'pyro,rocketeer', 'the Demolition Team did not arrive as a pair');
+    clear();
+    const bossBreak = CAMPAIGN[2].squads.at(-1).breakMs;
+    T.run(bossBreak - 300);
+    expect(!gunship(), 'the Gunship skipped its warning');
     T.run(2000);
-    expect(gunship() && g.mod === null, 'the Gunship did not arrive in clear weather');
+    expect(gunship() && g.mod === null && alive().length === 1, 'the Gunship did not arrive alone in clear weather');
     if (!gunship()) return { fails };
+
+    const ship = gunship(), rockets = [];
+    const launch = g.gunshipRocket;
+    g.gunshipRocket = () => rockets.push(g.time.now);
+    ship.volT = 0;
+    ship.dropT = 0;
+    const fired = g.time.now;
+    g.updateGunship(ship, 0, fired, 0, 0, 200, true);
+    T.run(800);
+    expect(!rockets.length && ship.ai === 'tell', 'the Gunship launched before its warning was readable');
+    T.run(900);
+    expect(rockets.length === 2 && rockets[1] - rockets[0] >= 500, 'the Gunship did not space its two rockets');
+    expect(!ship.drops, 'the Gunship dropped troops during the volley recovery');
+    g.gunshipRocket = launch;
 
     g.spawnFirePatch(g.player.x, g.player.body.bottom - 5);
     g.hp = 10;
@@ -183,15 +203,63 @@ window.CP = (() => {
     }
     expect(g.wave === 3 && !g.wrecks.length && !g.puddles.length && g.stats.taken === taken,
       'the old Gunship wreck damaged the player or reignited the arena after the next operation started');
-    T.run(2950);
+    T.run(4350);
     const hounds = () => alive().filter(e => e.kind === 'hound').length;
-    expect(g.wave === 3 && g.mod === 'lowg' && g.physics.world.gravity.y === TUNE.GRAVITY * 0.5 && hounds() === 1,
+    expect(g.wave === 3 && g.mod === 'lowg' && g.physics.world.gravity.y === TUNE.GRAVITY * 0.5 && hounds() === 1 && alive().length === 3,
       'Gravity Loss did not open in low gravity with one Hound');
     clear();
     T.run(CAMPAIGN[3].breakMs - 300);
     expect(g.activeHostiles() === 0 && hounds() === 0 && g.mod === 'lowg', 'the second Hound skipped the low-gravity break');
-    T.run(2000);
-    expect(hounds() === 1 && g.mod === 'lowg', 'the second Hound did not arrive with Gravity Surge');
+    T.run(2800);
+    expect(hounds() === 1 && g.mod === 'lowg' && alive().length === 2, 'the second Hound and Pogo did not arrive with Gravity Surge');
+    const advance = () => { clear(); T.run(CAMPAIGN[3].breakMs + 2700); };
+    advance();
+    expect(alive().length === 2 && alive().every(e => e.kind === 'linker' && e.homeY > 10 * TS),
+      'the Linkers should enter together below the catwalk after the second Hound is gone');
+    advance();
+    expect(alive().map(e => e.kind).sort().join() === 'howitzer,welder', 'Heavy Support should arrive in its own pair');
+    advance();
+    expect(alive().map(e => e.kind).sort().join() === 'chiller,slug', 'the Containment Crew should arrive after Heavy Support');
+    clear();
+    expect(g.campaignMachinery === null, 'the Furnace vents did not shut down for the Juggernaut');
+    return { fails };
+  };
+
+  CP.traversal = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1;
+    T.boot();
+    const pressJump = g => { g.keys.SPACE.isDown = true; g.keys.SPACE._justDown = true; };
+
+    // Real jumps through one-way platforms in the former sealed center pockets.
+    for (const [arena, x, y, hops, top] of [[1, 50, 18, 3, 10], [2, 45, 20, 2, 13]]) {
+      const g = T.setup(arena);
+      g.setCampaignMachinery(null);
+      g.applyMod(null);
+      T.tp(x, y); T.run(200);
+      for (let i = 0; i < hops; i++) {
+        pressJump(g); T.run(650);
+        g.keys.SPACE.isDown = false; T.run(50);
+      }
+      expect(g.player.body.blocked.down && Math.abs(g.player.body.bottom - top * TS) < 1,
+        `${g.A.sub} upper catwalk cannot be reached with normal jumps`);
+    }
+
+    const g = T.setup(0), b = g.player.body;
+    b.reset(38, 160); b.setVelocityY(-80);
+    g.lastGround = -Infinity;
+    pressJump(g); T.run(17);
+    expect(b.velocity.x > 0 && b.velocity.y < -TUNE.JUMP_VELOCITY,
+      'a jump while rising next to a wall did not kick away without directional input');
+
+    g.keys.SPACE.isDown = false;
+    b.reset(51, 160); b.setVelocity(-165, 20);
+    g.wallLockUntil = 0;
+    g.keys.A.isDown = true;
+    pressJump(g); T.run(17);
+    expect(b.velocity.x < 0, 'the jump fired before reaching the wall');
+    T.run(85);
+    expect(b.velocity.x > 0 && b.velocity.y < -200, 'a jump pressed just before contact did not launch away from the wall');
     return { fails };
   };
 
