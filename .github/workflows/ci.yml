@@ -39,3 +39,17 @@ jobs:
         run: npm ci --prefix dev/playtest
       - name: Two-tab, DAILY and checkpoint checks, then a full campaign run
         run: node dev/playtest/run.mjs
+
+  brutal:
+    name: Brutal campaign seeds
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install playwright-core (uses the runner's Chrome, no browser download)
+        run: npm ci --prefix dev/playtest
+      - name: Full campaigns on Brutal, seeds 91, 404, 137 and 729
+        run: node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729

@@ -28,7 +28,8 @@ request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save
 isolation, sweeps the weapon and enemy catalogs and arena hazards, and runs the save, DAILY and campaign regression
-checks. The final checks clear all ten operations on Normal seeds 91, 404 and 137.
+checks. The final checks clear all ten operations on Normal seeds 91, 404 and 137. A separate CI job clears them
+on Brutal seeds 91, 404, 137 and 729.
 To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
 `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 

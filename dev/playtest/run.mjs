@@ -13,6 +13,7 @@
 //   node dev/playtest/run.mjs           (all checks)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
+//   node dev/playtest/run.mjs --help    (every option; an unknown option or a bad --seeds exits with status 2)
 // It uses the installed Google Chrome (Playwright's 'chrome' channel). Set PLAYTEST_CHROME to a browser's path to
 // use another. It needs network access once: it fetches Phaser from jsDelivr (with retries), checks it against the
 // tag's integrity hash, and serves that copy to every page, so a fresh profile doesn't refetch it each time.
@@ -24,15 +25,30 @@ import { chromium } from 'playwright-core';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
-const quick = process.argv.includes('--quick');
-const labOnly = process.argv.includes('--lab');
-const sweepOnly = process.argv.includes('--lab-sweep');
-const campaignOnly = process.argv.includes('--campaign');
-const brutal = process.argv.includes('--brutal');
-const seedArg = process.argv.find(arg => arg.startsWith('--seeds='));
+const USAGE = `Usage: node dev/playtest/run.mjs [options]
+  (no options)       every check, then the Normal campaigns
+  --quick            every check except the full campaigns
+  --campaign         full campaigns only
+  --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers)
+  --brutal           play the full campaigns on Brutal
+  --lab              Lab sweeps, menu controls, presets, snapshots, reset and save isolation
+  --lab-sweep        weapon, enemy and hazard sweeps only
+  --help             print this and exit`;
+const usageError = (msg, usage = false) => { console.error(`run.mjs: ${msg}` + (usage ? `\n\n${USAGE}` : '')); process.exit(2); };
+const args = process.argv.slice(2);
+if (args.includes('--help') || args.includes('-h')) { console.log(USAGE); process.exit(0); }
+for (const arg of args) {
+  if (!['--quick', '--lab', '--lab-sweep', '--campaign', '--brutal'].includes(arg) && !arg.startsWith('--seeds=')) usageError(`unknown option ${arg}`, true);
+}
+const quick = args.includes('--quick');
+const labOnly = args.includes('--lab');
+const sweepOnly = args.includes('--lab-sweep');
+const campaignOnly = args.includes('--campaign');
+const brutal = args.includes('--brutal');
+const seedArg = args.findLast(arg => arg.startsWith('--seeds='));
 const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
 if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
-  throw new Error('--seeds expects comma-separated unsigned 32-bit integers');
+  usageError(`--seeds expects comma-separated unsigned 32-bit integers, got ${seedArg}`);
 }
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.css': 'text/css' };
 
@@ -315,6 +331,7 @@ try {
       if (r.leftBehind.length) fails.push('enemies left at act transitions: ' + r.leftBehind.join('; '));
       if (r.bossCleanup.length) fails.push('summons alive when the Smelter fell: ' + r.bossCleanup.join('; '));
       if (r.state !== 'won') fails.push('controller: ' + JSON.stringify({ ...r.control, hp: r.hp, killer: r.killer }));
+      if (r.state !== 'won') fails.push('campaign: ' + JSON.stringify(r.campaign));
       fails.push(...r.errs.map(e => 'harness error: ' + e));
       return fails;
     });

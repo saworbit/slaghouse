@@ -202,7 +202,7 @@ keeps your best score.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
   any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
-- **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal campaigns. Use the
+- **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal and Brutal campaigns. Use the
   [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) and [Lab smoke check](CONTRIBUTING.md#lab-smoke-check)
   to test at real speed. The [playtest guide](dev/playtest/README.md) covers the browser API and the Brutal run command.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
