@@ -64,8 +64,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `run.mjs` checks mid-run **R** and the pause menu's restart and quit confirms with real key and pad input:
   the prompt, its timeout, pausing clearing it, no wrap at either end, and each way out of an ask. (#112)
 
+- `run.mjs` checks the title pages with real mouse input (wheel paging, the PAGE counter, BACK, right click, stray
+  clicks) and the touch-only notice. (#104, #103)
+
 ### Changed
 
+- The title OPTIONS page has CONTROLS, the same list as the pause menu's, and its shared rows run in the pause
+  menu's order. Its rows are one list (`OPTION_ITEMS`) found by id. (#105)
+- On a touch-only device with no pad, the title says the game needs a keyboard and mouse or a gamepad and holds
+  runs until a key press or pad input arrives. In portrait it also suggests turning the device. (#103)
 - Breaking a prop no longer bumps an unread `propsBroken` counter. (#91)
 - The pause menu has a FLASHES row, and its rows follow the title OPTIONS order: RESUME, RESTART, MUSIC, SFX,
   SHAKE, POST FX, FLASHES, CONTROLS, QUIT TO TITLE. The rows are one list (`PAUSE_ITEMS`), and every handler
@@ -127,6 +134,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- The title screen no longer runs its text together. The menu sits in two columns below the floor line, play
+  modes on the left and extras on the right, with DAILY and BOSS RUSH tags beside their rows. The records line
+  clears DIFFICULTY, the subtitle lists all five acts from the act table, the CODEX counter clears the selection
+  frame, the key hint and checkpoint note are larger, medal requirements are brighter, and the tab reads
+  SLAGHOUSE. (#101)
+- Mouse users can reach CODEX page 2: the wheel pages it, and PAGE 1/2 is clickable. The wheel also steps through
+  ARMORY, OPTIONS and the menu. Pages close only through **< BACK**, a right click, **Esc** or Backspace, not
+  through any click that misses an icon. (#104)
 - An ammo crate's cook-off rounds, a scrap golem's shards and drum or prop blasts no longer count as hits, so they
   don't lift run accuracy or the grade. Only the player's own shots, blasts and strikes count. (#88)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the

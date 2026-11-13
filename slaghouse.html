@@ -592,8 +592,11 @@
     Lifetime ............ kills, runs, deaths and time played are kept (localStorage) and shown on the ARMORY page.
     Title menu .......... CAMPAIGN, OVERTIME, DAILY, BOSS RUSH, CODEX, ARMORY (every gun with its line, key, kills and mastery
                           pips), MEDALS, OPTIONS. CODEX: every foe, a grey silhouette until you've met it, with a line on
-                          each; 66 to a page, Q/E turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS (difficulty, music, SFX, shake, post
-                          FX, mutator, flashes: FULL or REDUCED, which drops impact frames and dims screen flashes). Keyboard, mouse or pad; Esc / B backs out. Met foes are kept in localStorage.
+                          each; 66 to a page, Q/E, the mouse wheel or a click on PAGE turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS
+                          (OPTION_ITEMS: difficulty, music, SFX, shake, post FX, flashes: FULL or REDUCED, which drops impact frames and dims screen
+                          flashes, mutator, controls). Play modes in the left column, extras in the right. Keyboard, mouse or pad; Esc / B, < BACK
+                          or a right click backs out. A touch-only device with no pad is told it needs a keyboard and mouse or a gamepad, and runs
+                          wait for a key press or pad input. Met foes are kept in localStorage.
     Gamepad ............. standard-mapping pads: LS move (down + A drops), RS aim (crosshair rides 70 px out), RT fire,
                           LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB for the wheel (RS picks), D-pad
                           up/down cycle, Start pause. Menus: D-pad / LS, A pick, B back. Rumble follows screen shake.
@@ -651,7 +654,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SLAGHOUSE - Arena Prototype</title>
+<title>SLAGHOUSE</title>
 <style>
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
   #game { width: 100vw; height: 100vh; }
@@ -1051,6 +1054,8 @@ const Store = {
   },
 };
 const isObj = o => !!o && typeof o === 'object' && !Array.isArray(o);
+// A phone or tablet with no fine pointer can tap through the title but can't play a run without a keyboard or a pad.
+const touchOnly = () => { try { return matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches; } catch (err) { return false; } };
 const loadRec = key => { try { const o = JSON.parse(localStorage.getItem(key) || 'null'); return o && typeof o === 'object' && isFinite(o.score) ? o : null; } catch (err) { return null; } };   // a saved record, or null if it's missing or mangled
 const loadMedals = () => { try { const a = JSON.parse(localStorage.getItem('slaghouse.medals') || '[]'); return Array.isArray(a) ? a : []; } catch (err) { return []; } };
 // ---- perks: after each wave you pick one of three (they stay for the run) ----
@@ -2345,6 +2350,17 @@ const PAUSE_ITEMS = [
   { id: 'flash', toggle: true, label: () => 'FLASHES: ' + (OPTS.flash ? 'FULL' : 'REDUCED') },
   { id: 'controls', label: gs => (gs.lab ? 'LAB CONTROLS' : 'CONTROLS') },
   { id: 'quit', confirm: true, label: () => 'QUIT TO TITLE' },
+];
+const OPTION_ITEMS = [                                // the title OPTIONS page, top to bottom; handlers find rows by id
+  { id: 'diff', label: () => 'DIFFICULTY  ' + DIFFS[OPTS.diff].name },
+  { id: 'music', step: 'music', label: () => 'MUSIC  ' + (Sfx.muted ? 'MUTED' : PAUSE_PCT(OPTS.music)) },
+  { id: 'sfx', step: 'sfx', label: () => 'SFX  ' + (Sfx.muted ? 'MUTED' : PAUSE_PCT(OPTS.sfx)) },
+  { id: 'shake', step: 'shake', label: () => 'SHAKE  ' + PAUSE_PCT(OPTS.shake) },
+  { id: 'postfx', label: () => 'POST FX  ' + (POSTFX.on ? 'ON' : 'OFF') },
+  { id: 'flash', label: () => 'FLASHES  ' + (OPTS.flash ? 'FULL' : 'REDUCED') },
+  { id: 'mut', label: () => 'MUTATOR  ' + MUTATORS[OPTS.mut].name },
+  { id: 'controls', label: () => 'CONTROLS' },
+  { id: 'back', label: () => 'BACK' },
 ];
 const PAUSE_Y0 = 200, PAUSE_GAP = 27;                 // nine rows fit between the PAUSED title and the hint line
 const TRACE_NAIL = [0xffe46a, 0xff8a1f], TRACE_PELLET = [0xfff0a0, 0xffa030], TRACE_ENEMY = [0xff6a4a, 0xc02010], TRACE_PARRY = [0xffffff, 0xffe14a];
@@ -6074,28 +6090,34 @@ class TitleScene extends Phaser.Scene {
     const de = this.add.image(868, 280, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(1.6).setAlpha(0.7);
     this.tweens.add({ targets: [dr, de], y: 296, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     // text
-    new PixelLabel(this, 480, 92, 'title_logo', { text: 'SLAGHOUSE', scale: 10, rows: LOGO_ROWS, shadow: '#000000', originY: 0.5 });
-    new PixelLabel(this, 480, 160, 'title_sub',{ text: 'THE MELT FLOOR  >  THE FURNACE  >  THE SORTING LINE', scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });
+    new PixelLabel(this, 480, 84, 'title_logo', { text: 'SLAGHOUSE', scale: 10, rows: LOGO_ROWS, shadow: '#000000', originY: 0.5 });
+    new PixelLabel(this, 480, 150, 'title_sub',{ text: CAMPAIGN_ACTS.map(a => a.name).join(' > '), scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });   // every act, from the act table
     let best = loadRec('slaghouse.best');
     const medN = loadMedals().length;
-    if (best || medN) new PixelLabel(this, 480, 186, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + mutTag(best) + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
+    if (best || medN) new PixelLabel(this, 480, 172, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + mutTag(best) + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
     let otb = loadRec('slaghouse.bestEndless');
-    if (otb) new PixelLabel(this, 480, 203, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score + mutTag(otb), scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
+    if (otb) new PixelLabel(this, 480, 190, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score + mutTag(otb), scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
     this.buildMenu();
-    new PixelLabel(this, 480, 138, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
+    new PixelLabel(this, 480, 128, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
     // difficulty: A/D or the arrows (or click the arrows) before starting; remembered between visits
     const DCOL = ['#5cff7a', '#ffb347', '#ff4a3a'], DSUB = ['THEY HIT SOFTER. YOU LAST LONGER.', 'AS THE FOUNDRY INTENDED.', 'MORE PAIN. TOUGHER MEAT. x1.5 SCORE.'];
-    new PixelLabel(this, 480, 220, 'title_dlbl', { text: 'DIFFICULTY', scale: 2, color: '#8f9bab', shadow: '#000000', originY: 0.5 });
-    const dl = new PixelLabel(this, 480, 246, 'title_diff', { maxChars: 12, scale: 3, color: '#ffb347', shadow: '#000000', originY: 0.5 });
-    const ds = new PixelLabel(this, 480, 272, 'title_dsub', { maxChars: 40, scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
+    new PixelLabel(this, 480, 214, 'title_dlbl', { text: 'DIFFICULTY', scale: 2, color: '#8f9bab', shadow: '#000000', originY: 0.5 });
+    const dl = new PixelLabel(this, 480, 238, 'title_diff', { maxChars: 12, scale: 3, color: '#ffb347', shadow: '#000000', originY: 0.5 });
+    const ds = new PixelLabel(this, 480, 262, 'title_dsub', { maxChars: 40, scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
     const showDiff = () => { dl.setText('<  ' + DIFFS[OPTS.diff].name + '  >').setStyle({ color: DCOL[OPTS.diff] }); ds.setText(DSUB[OPTS.diff]); };
     const stepDiff = d => { if (this.started) return; OPTS.diff = (OPTS.diff + d + 3) % 3; saveOpt('diff'); Sfx.init(); Sfx.swap(); showDiff(); this.tweens.add({ targets: dl, scale: { from: 3.5, to: 3 }, duration: 160 }); };
     showDiff();
     this.stepDiff = stepDiff;
-    this.mutLbl = new PixelLabel(this, 480, 292, 'title_mut', { maxChars: 30, scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 }).setText(OPTS.mut ? 'MUTATOR: ' + MUTATORS[OPTS.mut].name : '');
+    this.mutLbl = new PixelLabel(this, 480, 282, 'title_mut', { maxChars: 30, scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 }).setText(OPTS.mut ? 'MUTATOR: ' + MUTATORS[OPTS.mut].name : '');
     this.fx = new FX(this, 300, 5);
+    this.touchGate = touchOnly() && !PAD.on;                              // cleared by the first key press or pad input
+    this.touchNote = new PixelLabel(this, 480, 22, 'title_touch', { text: 'SLAGHOUSE NEEDS A KEYBOARD AND MOUSE OR A GAMEPAD', scale: 2, color: '#ff8a5a', shadow: '#000000', originY: 0.5 }).setDepth(30).setVisible(this.touchGate);
+    this.rotateNote = new PixelLabel(this, 480, 40, 'title_rotate', { text: 'TURN YOUR DEVICE SIDEWAYS FOR A BIGGER VIEW', scale: 1.5, color: '#ffb347', shadow: '#000000', originY: 0.5 }).setDepth(30).setVisible(false);
+    this.coarse = touchOnly();
+    if (this.input.mouse) this.input.mouse.disableContextMenu();          // right click backs out of a page
     const start = (checkpoint = null, runId = null) => {
       if (this.started) return;
+      if (this.touchGate) { this.wantEndless = this.wantDaily = this.wantRush = false; this.nudgeTouch(); return; }   // held: forget the pick so a later one starts what it says
       RUNMODE = this.wantDaily ? 'daily' : this.wantEndless ? 'endless' : this.wantRush ? 'bossrush' : 'campaign'; this.wantEndless = false; this.wantDaily = false; this.wantRush = false;
       this.started = true;
       Sfx.init(); Sfx.startHum(); Sfx.ui(); Music.start();
@@ -6108,6 +6130,7 @@ class TitleScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', ev => this.onTitleKey(ev.keyCode));
     this.input.on('pointermove', p => this.onTitlePointer(p, false));
     this.input.on('pointerdown', p => { Sfx.init(); this.onTitlePointer(p, true); });
+    this.input.on('wheel', (p, over, dx, dy) => this.onTitleWheel(dy));
     if (LAB_PANEL.initialRoom) {
       this.menuSel = this.menuItems.length - 1;
       const room = LAB_PANEL.initialRoom;
@@ -6120,31 +6143,36 @@ class TitleScene extends Phaser.Scene {
     const sh = '#000000';
     this.menuSel = 0; this.sub = null; this.subSel = 0;
     this.menuG = this.add.graphics().setDepth(5);
-    this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS', 'LAB'].map((t, i) => new PixelLabel(this, 480, 400 + i * 15, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
+    // play modes on the left, the extras on the right; W/S walks down the left column, then the right
+    this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS', 'LAB'].map((t, i) =>
+      new PixelLabel(this, i < 4 ? 300 : 660, 420 + (i < 4 ? i : i - 4) * 22, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
+    const tag = (row, key, text, color) => new PixelLabel(this, row.x + row.displayWidth / 2 + 28, row.y, key, { text, align: 'left', scale: 1.5, color, shadow: sh, originY: 0.5 }).setDepth(6);
     let dly = loadRec('slaghouse.daily');
     let rsh = loadRec('slaghouse.bestRush');
-    if (rsh && rsh.won) new PixelLabel(this, 650, this.menuItems[3].y, 'title_rsh', { text: 'CLEARED ' + rsh.grade + mutTag(rsh), align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
-    if (dly && dly.date === dayKey()) new PixelLabel(this, 650, this.menuItems[2].y, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
-    this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { maxChars: 72, text: this.menuHintText(), scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
+    if (rsh && rsh.won) tag(this.menuItems[3], 'title_rsh', 'CLEARED ' + rsh.grade + mutTag(rsh), '#ffb347');
+    if (dly && dly.date === dayKey()) tag(this.menuItems[2], 'title_dly', 'TODAY W' + dly.wave, '#c8a0ff');
+    this.menuHint = new PixelLabel(this, 480, 530, 'title_mhint', { maxChars: 72, text: this.menuHintText(), scale: 1.5, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6);
     this.subG = this.add.graphics().setDepth(20);
     this.subTitle = new PixelLabel(this, 480, 64, 'title_subt', { maxChars: 10, scale: 4, rows: CALL_ROWS, shadow: sh, originY: 0.5 }).setDepth(21);
     this.subHint = new PixelLabel(this, 480, 514, 'title_subh', { maxChars: 56, scale: 2, color: '#6a7380', shadow: sh, originY: 0.5 }).setDepth(21);
+    this.subBack = new PixelLabel(this, 52, 64, 'title_subback', { text: '< BACK', align: 'left', scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);   // the click target for leaving a page
+    this.ctlLines = CONTROL_LINES.map(([t, c], i) => new PixelLabel(this, 480, 124 + i * 30, 'title_ctl' + i, { maxChars: 80, text: t, scale: 1.75, color: c || '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));   // the pause menu's CONTROLS page
     this.codexImgs = CODEX.map(([kind, name, fr], i) => {                 // 66 to a page (11 x 6)
       const D = ENEMY[kind], j = i % 66, col = j % 11, row = Math.floor(j / 11), sc = Math.min(2, 38 / D.fh, 60 / D.fw);
-      const img = this.add.image(480 + (col - 5) * 72, 122 + row * 54, D.key, fr).setScale(sc).setDepth(21);
+      const img = this.add.image(480 + (col - 5) * 72, 126 + row * 54, D.key, fr).setScale(sc).setDepth(21);
       img.page = Math.floor(i / 66);
       if (!SEEN.has(kind)) { img.setTint(0x2a2e35); if (img.setTintMode && Phaser.TintModes) img.setTintMode(Phaser.TintModes.FILL); } else if (kind === 'echo') img.setTint(0x70e8ff);   // unmet: a flat grey silhouette
       return img;
     });
     this.codexName = new PixelLabel(this, 480, 438, 'title_cxn', { maxChars: 20, scale: 3, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.codexDesc = new PixelLabel(this, 480, 470, 'title_cxd', { maxChars: 64, scale: 2, color: '#d8dee6', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.codexCount = new PixelLabel(this, 480, 96, 'title_cxc', { maxChars: 24, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
+    this.codexCount = new PixelLabel(this, 480, 88, 'title_cxc', { maxChars: 24, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     const got = loadMedals();
     this.medalRows = MEDALS.map((m, i) => {
       const x = 52 + (i % 3) * 300, y = 116 + Math.floor(i / 3) * 44, on = got.includes(m.id);
       return { x, y, on,
         name: new PixelLabel(this, x + 26, y - 6, 'title_mn' + i, { text: m.name, align: 'left', scale: 2, color: on ? '#ffd040' : '#5a636e', shadow: sh }).setDepth(21),
-        desc: new PixelLabel(this, x + 26, y + 12, 'title_md' + i, { text: m.d, align: 'left', scale: 1, color: on ? '#d8dee6' : '#4a525c' }).setDepth(21) };
+        desc: new PixelLabel(this, x + 26, y + 12, 'title_md' + i, { text: m.d, align: 'left', scale: 1, color: on ? '#e8ecf0' : '#8f9bab' }).setDepth(21) };
     });
     this.medalCount = new PixelLabel(this, 480, 96, 'title_mc', { text: 'COLLECTED ' + got.length + '/' + MEDALS.length, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armImgs = WEAPONS.map((w, i) => this.add.image(480 + (i % 13 - 6) * 66, 124 + Math.floor(i / 13) * 56, 'icon_' + w.gun).setScale(Math.min(2, 52 / GUNS[w.gun].w)).setDepth(21));   // every gun, 13 to a row
@@ -6154,7 +6182,7 @@ class TitleScene extends Phaser.Scene {
     this.armLife = new PixelLabel(this, 480, 490, 'title_arl', { maxChars: 60, scale: 1, color: '#c8a0ff', originY: 0.5 }).setDepth(21);
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.optLbls = [0, 1, 2, 3, 4, 5, 6, 7].map(i => new PixelLabel(this, 480, 132 + i * 40, 'title_op' + i, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
+    this.optLbls = OPTION_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, 124 + i * 38, 'title_op_' + id, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
     this.campaignCards = CAMPAIGN_ACTS.map((act, i) => {
       const x = 136 + i * 172, text = (y, key, opts) => new PixelLabel(this, x, y, 'title_route_' + key + i, opts).setDepth(21);
       return {
@@ -6170,14 +6198,15 @@ class TitleScene extends Phaser.Scene {
     this.campaignSettings = new PixelLabel(this, 480, 330, 'title_route_settings', { maxChars: 48, scale: 1, color: '#9aa6b4' }).setDepth(21);
     this.campaignButtons = ['CONTINUE', 'NEW CAMPAIGN'].map((text, i) =>
       new PixelLabel(this, 346 + 268 * i, 397, 'title_route_pick' + i, { text, scale: 3, originY: 0.5 }).setDepth(21));
-    this.campaignNote = new PixelLabel(this, 480, 451, 'title_route_note', { maxChars: 58, scale: 1, color: '#ffb347' }).setDepth(21);
+    this.campaignNote = new PixelLabel(this, 480, 451, 'title_route_note', { maxChars: 58, scale: 1.5, color: '#ffb347' }).setDepth(21);
     this.showSub(null);
   }
   showSub(name) {
     this.sub = name; this.subSel = 0;
-    const cx = name === 'codex', md = name === 'medals', op = name === 'options', ar = name === 'armory';
+    const cx = name === 'codex', md = name === 'medals', op = name === 'options', ar = name === 'armory', ct = name === 'controls';
     const cp = name === 'campaign';
-    this.subTitle.setVisible(!!name).setText(cp ? 'CAMPAIGN' : cx ? 'CODEX' : md ? 'MEDALS' : op ? 'OPTIONS' : ar ? 'ARMORY' : '');
+    this.subTitle.setVisible(!!name).setText(cp ? 'CAMPAIGN' : cx ? 'CODEX' : md ? 'MEDALS' : op ? 'OPTIONS' : ar ? 'ARMORY' : ct ? 'CONTROLS' : '');
+    this.subBack.setVisible(!!name); this.ctlLines.forEach(o => o.setVisible(ct));
     for (const { act, title, first, last, status } of this.campaignCards) [act, title, first, last, status].forEach(o => o.setVisible(cp));
     [this.campaignJob, this.campaignSettings, this.campaignNote, ...this.campaignButtons].forEach(o => o.setVisible(cp));
     if (cp) {
@@ -6188,7 +6217,7 @@ class TitleScene extends Phaser.Scene {
     this.armImgs.forEach((o, i) => o.setVisible(ar).setTint(masteryStars(WEAPONS[i].id) >= 3 ? 0xffe080 : 0xffffff));
     if (this.armLife) { const h = Math.floor(LIFE.time / 3600), m = Math.floor(LIFE.time / 60) % 60; this.armLife.setVisible(ar).setText('LIFETIME  KILLS ' + LIFE.kills + '   RUNS ' + LIFE.runs + '   DEATHS ' + LIFE.deaths + '   TIME ' + (h ? h + 'H' : '') + m + 'M'); } this.armName.setVisible(ar); this.armDesc.setVisible(ar); this.armStat.setVisible(ar);
     this.armCount.setVisible(ar).setText('STARS ' + WEAPONS.reduce((n, w) => n + masteryStars(w.id), 0) + '/' + WEAPONS.length * 3 + '   GUNS ' + WEAPONS.length);
-    this.subHint.setVisible(!!name).setText(cp ? 'A/D CHOOSE   ENTER SELECT   ESC BACK' : cx ? 'ARROWS BROWSE   Q/E PAGE   ESC BACK' : ar ? 'ARROWS BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC BACK');
+    this.subHint.setVisible(!!name).setText(cp ? 'A/D CHOOSE   ENTER SELECT   ESC BACK' : cx ? 'ARROWS BROWSE   Q/E OR WHEEL PAGE   ESC BACK' : ar ? 'ARROWS OR WHEEL BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC OR RIGHT CLICK BACK');
     this.codexImgs.forEach(o => o.setVisible(cx)); this.codexName.setVisible(cx); this.codexDesc.setVisible(cx); this.codexCount.setVisible(cx).setText('MET ' + CODEX.filter(c => SEEN.has(c[0])).length + '/' + CODEX.length);
     this.medalRows.forEach(r => { r.name.setVisible(md); r.desc.setVisible(md); }); this.medalCount.setVisible(md);
     this.optLbls.forEach(o => o.setVisible(op)); this.mutDesc.setVisible(op);
@@ -6223,14 +6252,17 @@ class TitleScene extends Phaser.Scene {
       this.armName.setText(w.name); this.armDesc.setText(BLURBS[w.id] || '');
       this.armStat.setText((key ? 'KEY ' + (key === '<' ? 'BKSP' : key) : 'WHEEL') + '   KILLS ' + k + '   ' + (nx ? 'NEXT STAR AT ' + nx : 'MASTERED'));
     } else if (this.sub === 'options') {
-      const pc = v => Math.round(v * 100) + '%';
-      ['DIFFICULTY  ' + DIFFS[OPTS.diff].name, 'MUSIC  ' + pc(OPTS.music), 'SFX  ' + pc(OPTS.sfx), 'SHAKE  ' + pc(OPTS.shake), 'POST FX  ' + (POSTFX.on ? 'ON' : 'OFF'),         'FLASHES  ' + (OPTS.flash ? 'FULL' : 'REDUCED'), 'MUTATOR  ' + MUTATORS[OPTS.mut].name, 'BACK']
-        .forEach((t, i) => this.optLbls[i].setText(i === this.subSel ? '< ' + t + ' >' : t).setStyle({ color: i === this.subSel ? '#ffe46a' : i === 6 && OPTS.mut ? '#c8a0ff' : '#8f9bab' }));
-      this.mutDesc.setText(this.subSel === 6 || OPTS.mut ? MUTATORS[OPTS.mut].d : '');
+      OPTION_ITEMS.forEach(({ id, label }, i) => this.optLbls[i].setText(i === this.subSel ? '< ' + label() + ' >' : label())
+        .setStyle({ color: i === this.subSel ? '#ffe46a' : id === 'mut' && OPTS.mut ? '#c8a0ff' : '#8f9bab' }));
+      this.mutDesc.setText(OPTION_ITEMS[this.subSel].id === 'mut' || OPTS.mut ? MUTATORS[OPTS.mut].d : '');
     }
   }
   subKey(a) {
     if (!a) return;
+    if (this.sub === 'controls') {                                       // back (or Enter) returns to OPTIONS on the CONTROLS row
+      if (a === 'back' || a === 'ok') { Sfx.ui(); this.showSub('options'); this.subSel = OPTION_ITEMS.findIndex(o => o.id === 'controls'); this.refreshSub(); }
+      return;
+    }
     if (a === 'back') { Sfx.ui(); this.showSub(null); return; }
     if (this.sub === 'campaign') {
       if (a === 'ok') {
@@ -6257,15 +6289,17 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'options') {
-      if (a === 'up' || a === 'down') { this.subSel = (this.subSel + (a === 'up' ? 7 : 1)) % 8; Sfx.swap(); }
+      const N = OPTION_ITEMS.length;
+      if (a === 'up' || a === 'down') { this.subSel = (this.subSel + (a === 'up' ? N - 1 : 1)) % N; Sfx.swap(); }
       else if (a === 'left' || a === 'right' || a === 'ok') {
-        const dir = a === 'left' ? -1 : 1, i = this.subSel;
-        if (i === 0) this.stepDiff(dir);
-        else if (i >= 1 && i <= 3) { const key = ['music', 'sfx', 'shake'][i - 1]; let v = Math.round(OPTS[key] * 4) + (a === 'ok' ? -1 : dir); if (a === 'ok' && v < 0) v = 4; OPTS[key] = clamp(v, 0, 4) / 4; saveOpt(key); if (key !== 'shake') Sfx.applyVolume(); Sfx.ui(); }
-        else if (i === 4) { POSTFX.on = !POSTFX.on; try { localStorage.setItem('slaghouse.postfx', POSTFX.on ? '1' : '0'); } catch (err) { /* private mode */ } Sfx.ui(); }
-        else if (i === 5) { OPTS.flash = OPTS.flash ? 0 : 1; saveOpt('flash'); Sfx.ui(); }
-        else if (i === 6) { OPTS.mut = (OPTS.mut + (a === 'left' ? -1 : 1) + MUTATORS.length) % MUTATORS.length; saveOpt('mut'); Sfx.ui(); }
-        else if (a === 'ok') { Sfx.ui(); this.showSub(null); return; }
+        const dir = a === 'left' ? -1 : 1, id = OPTION_ITEMS[this.subSel].id;
+        if (id === 'diff') this.stepDiff(dir);
+        else if (OPTION_ITEMS[this.subSel].step) { const key = OPTION_ITEMS[this.subSel].step; if (key !== 'shake' && Sfx.muted) Sfx.toggleMute(); let v = Math.round(OPTS[key] * 4) + (a === 'ok' ? -1 : dir); if (a === 'ok' && v < 0) v = 4; OPTS[key] = clamp(v, 0, 4) / 4; saveOpt(key); if (key !== 'shake') Sfx.applyVolume(); Sfx.ui(); }
+        else if (id === 'postfx') { POSTFX.on = !POSTFX.on; try { localStorage.setItem('slaghouse.postfx', POSTFX.on ? '1' : '0'); } catch (err) { /* private mode */ } Sfx.ui(); }
+        else if (id === 'flash') { OPTS.flash = OPTS.flash ? 0 : 1; saveOpt('flash'); Sfx.ui(); }
+        else if (id === 'mut') { OPTS.mut = (OPTS.mut + (a === 'left' ? -1 : 1) + MUTATORS.length) % MUTATORS.length; saveOpt('mut'); Sfx.ui(); }
+        else if (a === 'ok' && id === 'controls') { Sfx.ui(); this.showSub('controls'); return; }
+        else if (a === 'ok' && id === 'back') { Sfx.ui(); this.showSub(null); return; }
       }
       this.refreshSub();
       return;
@@ -6279,11 +6313,11 @@ class TitleScene extends Phaser.Scene {
     else if (i === 1) { this.wantEndless = true; this.startRun(); }
     else if (i === 2) { this.wantDaily = true; this.startRun(); }
     else if (i === 3) { this.wantRush = true; this.startRun(); }
-    else if (i === this.menuItems.length - 1) this.time.delayedCall(0, () => LAB_PANEL.open());
+    else if (i === this.menuItems.length - 1) { if (this.touchGate) this.nudgeTouch(); else this.time.delayedCall(0, () => LAB_PANEL.open()); }
     else { Sfx.ui(); this.showSub(['codex', 'armory', 'medals', 'options'][i - 4]); }
   }
   onTitleKey(k) {
-    Sfx.init();
+    Sfx.init(); this.clearTouchGate();
     if (this.started || LAB_PANEL.isOpen()) return;
     const up = k === 38 || k === 87, down = k === 40 || k === 83, left = k === 37 || k === 65, right = k === 39 || k === 68, ok = k === 13 || k === 32, back = k === 27 || k === 8;
     if (this.sub) { this.subKey(up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : ok ? 'ok' : back ? 'back' : k === 81 || k === 33 ? 'pgup' : k === 69 || k === 34 ? 'pgdn' : null); return; }
@@ -6293,9 +6327,23 @@ class TitleScene extends Phaser.Scene {
     else if (k === 69) this.menuPick(1);
     else if (k === 77) { Sfx.toggleMute(); this.menuHint.setText(this.menuHintText()); }
   }
+  clearTouchGate() { if (this.touchGate) { this.touchGate = false; this.touchNote.setVisible(false); } }
+  nudgeTouch() { Sfx.ui(); this.tweens.add({ targets: this.touchNote, scale: { from: 2.6, to: 2 }, duration: 220 }); }
+  onTitleWheel(dy) {                                                    // the wheel pages the CODEX and steps through the other lists
+    if (this.started || LAB_PANEL.isOpen() || !dy || this.time.now < (this.wheelAt || 0)) return;
+    this.wheelAt = this.time.now + 120;                                  // a trackpad sends a burst of deltas per swipe
+    const down = dy > 0;
+    if (this.sub === 'codex') this.subKey(down ? 'pgdn' : 'pgup');
+    else if (this.sub === 'armory' || this.sub === 'options') this.subKey(down ? 'down' : 'up');
+    else if (!this.sub) { const n = this.menuItems.length; this.menuSel = (this.menuSel + (down ? 1 : n - 1)) % n; Sfx.swap(); }
+  }
   menuHintText() { return 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   ' + (Sfx.muted ? 'M SOUND ON (MUTED)' : 'M MUTE'); }
   onTitlePointer(p, click) {
     if (this.started || LAB_PANEL.isOpen()) return;
+    if (this.sub && click) {                                             // a page closes only through its BACK or a right click
+      const b = this.subBack;
+      if (p.rightButtonDown() || (p.x >= b.x - 8 && p.x <= b.x + b.displayWidth + 8 && Math.abs(p.y - b.y) < 16)) { this.subKey('back'); return; }
+    }
     if (this.sub === 'campaign') {
       const i = this.campaignButtons.findIndex(o => Math.abs(p.x - o.x) < 116 && Math.abs(p.y - o.y) < 25);
       if (i >= 0 && (i !== 0 || this.checkpoint)) {
@@ -6307,31 +6355,31 @@ class TitleScene extends Phaser.Scene {
     if (this.sub === 'codex') {
       const i = this.codexImgs.findIndex(o => o.visible && Math.abs(p.x - o.x) < 35 && Math.abs(p.y - o.y) < 26);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
-      if (click && i < 0) this.subKey('back');
+      const c = this.codexCount;                                         // click MET n/94  PAGE 1/2 for the other page
+      if (click && i < 0 && CODEX.length > 66 && Math.abs(p.y - c.y) < 12 && Math.abs(p.x - 480) < c.displayWidth / 2 + 10) this.subKey(this.subSel < 66 ? 'pgdn' : 'pgup');
       return;
     }
     if (this.sub === 'armory') {
       const i = this.armImgs.findIndex(o => Math.abs(p.x - o.x) < 32 && Math.abs(p.y - o.y) < 28);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
-      if (click && i < 0) this.subKey('back');
       return;
     }
     if (this.sub === 'options') {
-      const i = this.optLbls.findIndex(o => Math.abs(p.y - o.y) < 18 && Math.abs(p.x - 480) < 220);
+      const i = this.optLbls.findIndex(o => Math.abs(p.y - o.y) < 19 && Math.abs(p.x - 480) < 220);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
-      if (click) { if (i >= 0) this.subKey(i === 7 ? 'ok' : p.x < 480 ? 'left' : 'right'); else this.subKey('back'); }
+      if (click && i >= 0) { const id = OPTION_ITEMS[i].id; this.subKey(id === 'controls' || id === 'back' ? 'ok' : p.x < 480 ? 'left' : 'right'); }
       return;
     }
-    if (this.sub) { if (click) this.subKey('back'); return; }
-    if (click && Math.abs(p.y - 246) < 18 && Math.abs(p.x - 480) < 140) { this.stepDiff(p.x < 480 ? -1 : 1); return; }   // the difficulty arrows
-    const i = this.menuItems.findIndex(o => Math.abs(p.y - o.y) < 7.5 && Math.abs(p.x - 480) < 120);
+    if (this.sub) return;
+    if (click && Math.abs(p.y - 238) < 18 && Math.abs(p.x - 480) < 140) { this.stepDiff(p.x < 480 ? -1 : 1); return; }   // the difficulty arrows
+    const i = this.menuItems.findIndex(o => Math.abs(p.y - o.y) < 11 && Math.abs(p.x - o.x) < 130);
     if (i >= 0 && i !== this.menuSel) { this.menuSel = i; Sfx.swap(); }
     if (click && i >= 0) this.menuPick(i);
   }
   drawMenu(time) {
     const g = this.menuG; g.clear();
     this.menuItems.forEach((o, i) => o.setStyle({ color: i === this.menuSel ? '#ffe46a' : '#8f9bab' }));
-    if (!this.sub) { const o = this.menuItems[this.menuSel], w = o.displayWidth / 2 + 14, bob = Math.round(Math.sin(time / 120) * 2); g.fillStyle(0xffe46a, 1); g.fillTriangle(480 - w - 6 + bob, o.y - 5, 480 - w - 6 + bob, o.y + 5, 480 - w + bob, o.y); g.fillTriangle(480 + w + 6 - bob, o.y - 5, 480 + w + 6 - bob, o.y + 5, 480 + w - bob, o.y); }
+    if (!this.sub) { const o = this.menuItems[this.menuSel], w = o.displayWidth / 2 + 14, bob = Math.round(Math.sin(time / 120) * 2); g.fillStyle(0xffe46a, 1); g.fillTriangle(o.x - w - 6 + bob, o.y - 5, o.x - w - 6 + bob, o.y + 5, o.x - w + bob, o.y); g.fillTriangle(o.x + w + 6 - bob, o.y - 5, o.x + w + 6 - bob, o.y + 5, o.x + w - bob, o.y); }
     const sg = this.subG; sg.clear();
     if (!this.sub) return;
     sg.fillStyle(0x05060a, 1); sg.fillRect(30, 30, 900, 500); sg.fillStyle(0xff8a1f, 1); sg.fillRect(30, 30, 900, 2); sg.fillRect(30, 528, 900, 2);
@@ -6359,6 +6407,8 @@ class TitleScene extends Phaser.Scene {
   }
   update(time, delta) {
     const dt = Math.min(delta, 50) / 1000;
+    if (this.touchGate && PAD.active) this.clearTouchGate();
+    if (this.rotateNote) this.rotateNote.setVisible(this.coarse && window.innerHeight > window.innerWidth);
     if (this.menuItems && !this.started && !LAB_PANEL.isOpen()) {        // the pad drives the menu and its pages
       const my = PAD.menuY(), mx = PAD.menuX();
       if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
