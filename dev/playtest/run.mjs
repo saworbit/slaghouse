@@ -1,4 +1,4 @@
-// Headless runner for the play-test harness (#45, #39). Serves the repo, opens slaghouse.html in headless Chrome
+// Headless runner for the play-test harness (#45, #39). Routes repo files into headless Chrome
 // and runs, each in a fresh browser profile:
 //   - the two-tab check (twotab.js) and the DAILY midnight check (daily.js)
 //   - every enemy kind (kinds.js), warped in one at a time: a codex row, its start frame, then it runs, takes a hit
@@ -7,16 +7,16 @@
 //     again to a blast without an error
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
 //     the act, and a few damaged saves that must fall back to New Campaign
-//   - a full VB.campaign(1500) run (vibe.js), which must end won; foes the bot couldn't reach are listed as a note
+//   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors
 // Any page error or console error fails the run too. Exits 1 and names each failure.
 //   npm ci --prefix dev/playtest        (once: installs playwright-core, no browser download)
-//   node dev/playtest/run.mjs           (all of it, about 30 s; the campaign run is most of that)
+//   node dev/playtest/run.mjs           (all checks)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
+//   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
 // It uses the installed Google Chrome (Playwright's 'chrome' channel). Set PLAYTEST_CHROME to a browser's path to
 // use another. It needs network access once: it fetches Phaser from jsDelivr (with retries), checks it against the
 // tag's integrity hash, and serves that copy to every page, so a fresh profile doesn't refetch it each time.
 import { createHash } from 'node:crypto';
-import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,18 +25,27 @@ import { chromium } from 'playwright-core';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
 const quick = process.argv.includes('--quick');
+const labOnly = process.argv.includes('--lab');
+const sweepOnly = process.argv.includes('--lab-sweep');
+const campaignOnly = process.argv.includes('--campaign');
+const brutal = process.argv.includes('--brutal');
+const seedArg = process.argv.find(arg => arg.startsWith('--seeds='));
+const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
+if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
+  throw new Error('--seeds expects comma-separated unsigned 32-bit integers');
+}
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.css': 'text/css' };
 
-const server = createServer(async (req, res) => {
-  const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  if (path === '/favicon.ico') { res.writeHead(204).end(); return; }  // the game has no icon; don't log a 404 as an error
+const origin = 'http://slaghouse.test';
+const url = origin + '/slaghouse.html';
+async function serveRepo(route) {
+  const path = decodeURIComponent(new URL(route.request().url()).pathname);
+  if (path === '/favicon.ico') return route.fulfill({ status: 204 });
   const file = normalize(join(root, path));
-  if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
-  try { const body = await readFile(file); res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream' }).end(body); }
-  catch { res.writeHead(404).end(); }
-});
-await new Promise(ok => server.listen(0, '127.0.0.1', ok));
-const url = `http://127.0.0.1:${server.address().port}/slaghouse.html`;
+  if (!file.startsWith(root + sep)) return route.fulfill({ status: 403 });
+  try { return route.fulfill({ body: await readFile(file), contentType: TYPES[extname(file)] || 'application/octet-stream' }); }
+  catch { return route.fulfill({ status: 404 }); }
+}
 
 // Phaser, fetched once: every check opens a fresh profile with an empty cache, and a CDN fetch that stalls on a CI
 // runner would otherwise time a page load out. The browser still checks the integrity hash on the copy it's given.
@@ -44,15 +53,19 @@ const tag = (await readFile(join(root, 'slaghouse.html'), 'utf8')).match(/<scrip
 if (!tag) throw new Error('slaghouse.html: no CDN <script> with an integrity hash (node dev/check.mjs says why)');
 const [, cdnSrc, hashAlg, hashB64] = tag;
 let phaser = null, served = 0;
+const verifiedPhaser = body => {
+  const got = createHash(hashAlg).update(body).digest('base64');
+  if (got !== hashB64) throw new Error(`its ${hashAlg} is ${got}, the tag wants ${hashB64}`);
+  return body;
+};
+if (process.env.PLAYTEST_PHASER) phaser = verifiedPhaser(await readFile(process.env.PLAYTEST_PHASER));
 for (let attempt = 1; !phaser; attempt++) {
   try {
     const r = await fetch(cdnSrc, { signal: AbortSignal.timeout(30000) });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const body = Buffer.from(await r.arrayBuffer()), got = createHash(hashAlg).update(body).digest('base64');
-    if (got !== hashB64) throw new Error(`its ${hashAlg} is ${got}, the tag wants ${hashB64}`);
-    phaser = body;
+    phaser = verifiedPhaser(Buffer.from(await r.arrayBuffer()));
   } catch (err) {
-    if (attempt === 3) { server.close(); throw new Error(`couldn't fetch ${cdnSrc}: ${err.message}`); }
+    if (attempt === 3) throw new Error(`couldn't fetch ${cdnSrc}: ${err.message}`);
     console.log(`note  fetching ${cdnSrc} failed (${err.message}); trying again`);
   }
 }
@@ -62,7 +75,7 @@ const browser = await chromium.launch({
   ...(process.env.PLAYTEST_CHROME ? { executablePath: process.env.PLAYTEST_CHROME } : { channel: 'chrome' }),
   args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'],
 });
-const scripts = Object.fromEntries(await Promise.all(['harness', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
+const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
 const failures = [];
 const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(0) + 's';
 const report = (name, fails) => {
@@ -71,7 +84,7 @@ const report = (name, fails) => {
 };
 
 // a fresh profile, the page on its title screen, the harness files loaded; page errors and console errors collected
-async function open(ctx, files) {
+async function open(ctx, files, query = '') {
   const page = ctx.pages()[0] || await ctx.newPage();
   if (!page._errs) {
     page._errs = [];
@@ -82,11 +95,11 @@ async function open(ctx, files) {
     for (const ev of ['requestfinished', 'requestfailed']) page.on(ev, r => page._pending.delete(r));
   }
   const stuck = err => {
-    const open = [...page._pending].map(([r, t]) => `${r.url().replace(/^https?:\/\/127\.0\.0\.1:\d+/, '').slice(0, 70)} (${((Date.now() - t) / 1000).toFixed(0)}s)`);
+    const open = [...page._pending].map(([r, t]) => `${r.url().replace(origin, '').slice(0, 70)} (${((Date.now() - t) / 1000).toFixed(0)}s)`);
     return new Error(`${String(err.message).split('\n')[0]}; requests still open: ${open.join(', ') || 'none'}`);
   };
   // the game only needs its scripts (all parser-blocking, so DOMContentLoaded waits for them) and then its title screen
-  try { await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }); } catch (err) { throw stuck(err); }
+  try { await page.goto(url + query, { waitUntil: 'domcontentloaded', timeout: 60000 }); } catch (err) { throw stuck(err); }
   try { await page.waitForFunction(() => window.game && game.scene && game.scene.getScene('Title') && game.scene.getScene('Title').sys.isActive(), null, { timeout: 60000 }); }
   catch (err) { throw stuck(err); }
   // No drawing: nothing here reads pixels, and on a runner without a GPU every stepped frame is software WebGL in
@@ -98,6 +111,8 @@ async function open(ctx, files) {
 }
 async function check(name, fn) {
   const ctx = await browser.newContext();
+  ctx.setDefaultTimeout(8000);
+  await ctx.route(origin + '/**', serveRepo);
   await ctx.route(cdnSrc, r => { served++; return r.fulfill({ status: 200, contentType: 'text/javascript', headers: { 'Access-Control-Allow-Origin': '*' }, body: phaser }); });
   try {
     const fails = await fn(ctx);
@@ -105,11 +120,82 @@ async function check(name, fn) {
     report(name, fails);
   } catch (err) {
     const errs = ctx.pages().flatMap(p => p._errs || []);
-    report(name, ['threw: ' + String(err && err.message || err).split('\n')[0], ...errs]);
+    report(name, ['threw: ' + String(err && err.message || err).split('\n').slice(0, 5).join(' | '),
+      ...(err.stack ? err.stack.split('\n').filter(line => line.includes('run.mjs:')).slice(0, 1) : []), ...errs]);
   } finally { await ctx.close(); }
 }
 
 try {
+  if (!campaignOnly) for (const section of ['weapons', 'mobs', 'hazards']) await check('Lab sweep: ' + section, async ctx => {
+    const page = await open(ctx, ['lab-sweep']);
+    const result = await page.evaluate(section => labSweep(section), section);
+    console.log(`      ${result.count} ${section} exercised`);
+    return result.fails;
+  });
+  if (!sweepOnly && !campaignOnly) {
+  await check('Lab menu, keyboard controls and in-room redeploy', async ctx => {
+    const page = await open(ctx, []);
+    const fail = [];
+    const wait = async (what, predicate) => {
+      try { await page.waitForFunction(predicate); }
+      catch (err) {
+        const info = await page.evaluate(() => ({ menu: game.scene.getScene('Title').menuSel,
+          lab: SlagLab.snapshot()?.config.room, paused: SlagLab.snapshot()?.paused,
+          ready: SlagLab.snapshot()?.ready, weapon: SlagLab.snapshot()?.player.weapon,
+          error: document.getElementById('lab-error').textContent, focus: document.activeElement?.name }));
+        throw new Error(`${what}: ${JSON.stringify(info)} (${err.message.split('\n')[0]})`);
+      }
+    };
+    await page.keyboard.down('w'); // wrap from Campaign to Lab
+    await wait('select Lab', () => game.scene.getScene('Title').menuSel === 8);
+    await page.keyboard.up('w');
+    // Phaser retains input events through post-step. Separate the two title actions by a game frame.
+    await page.evaluate(() => new Promise(resolve => game.events.once('poststep', resolve)));
+    await page.keyboard.press('Enter');
+    const panel = page.getByRole('dialog', { name: 'Slaghouse Lab' });
+    await wait('open Lab from title', () => document.getElementById('lab-panel').open);
+    await wait('focus Room', () => document.activeElement?.name === 'room');
+    await page.keyboard.press('Tab');
+    await wait('Tab to starting weapon', () => document.activeElement?.name === 'weapon');
+    await panel.getByLabel('Room', { exact: true }).selectOption('encounter');
+    await panel.getByLabel('Starting weapon').selectOption('rail');
+    await panel.getByLabel('Invulnerable player').check();
+    await panel.getByRole('button', { name: 'Deploy room' }).click();
+    await wait('deploy Combat Pit', () => SlagLab.snapshot()?.ready);
+    let s = await page.evaluate(() => SlagLab.snapshot());
+    if (s.config.room !== 'encounter' || s.player.weapon !== 'rail' || s.enemies.length !== 7) fail.push('Combat Pit did not apply its roster and starting weapon');
+    await page.keyboard.down('2');
+    try { await wait('equip shotgun', () => SlagLab.snapshot()?.player.weapon === 'shotgun'); }
+    finally { await page.keyboard.up('2'); }
+    await page.keyboard.down('r');
+    try { await wait('reset Combat Pit', () => SlagLab.snapshot()?.ready && SlagLab.snapshot().player.weapon === 'rail'); }
+    finally { await page.keyboard.up('r'); }
+    await page.keyboard.press('F2');
+    await panel.waitFor({ state: 'visible' });
+    await wait('pause on F2', () => SlagLab.snapshot()?.paused);
+    await page.keyboard.press('Escape');
+    await panel.waitFor({ state: 'hidden' });
+    await wait('resume on Escape', () => !SlagLab.snapshot()?.paused);
+    await page.keyboard.press('F2');
+    await panel.getByLabel('Room', { exact: true }).selectOption('breakables');
+    await panel.getByRole('button', { name: 'Deploy room' }).click();
+    await wait('redeploy Breakables Bay', () => SlagLab.snapshot()?.config.room === 'breakables' && SlagLab.snapshot().ready);
+    s = await page.evaluate(() => SlagLab.snapshot());
+    if (!s.props.some(p => p.id === 'ladle' && p.state === 'ok')) fail.push('Breakables Bay did not build its props');
+    await page.getByRole('button', { name: 'Lab controls' }).click();
+    await panel.getByRole('button', { name: 'Exit to title' }).click();
+    await wait('exit to title', () => game.scene.getScene('Title').sys.isActive());
+    if (await page.evaluate(() => SlagLab.snapshot()) !== null) fail.push('Exit left the Lab running');
+    await open(ctx, [], '?lab=yard');
+    await wait('open linked room', () => document.getElementById('lab-panel').open && document.querySelector('#lab-form [name=room]').value === 'yard');
+    return fail;
+  });
+  await check('Lab presets, combat, snapshots, clean reset and save isolation', async ctx => {
+    const page = await open(ctx, ['lab']);
+    return page.evaluate(() => checkLab());
+  });
+  }
+  if (!labOnly && !sweepOnly && !campaignOnly) {
   await check('two tabs: lifetime stats, codex and campaign save', async ctx => {
     const page = await open(ctx, ['twotab']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return TT.check(); })).fails;
@@ -150,6 +236,23 @@ try {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.campaignContactDamage());
   });
+  await check('campaign bot clears the Blackout ceiling creeper and disguised mimic', async ctx => {
+    const page = await open(ctx, ['campaign-bot']);
+    return page.evaluate(() => {
+      Math.random = seeded(91);
+      RUNMODE = 'campaign'; T.boot(); T.run(300);
+      const g = T.g();
+      g.time.removeAllEvents(); g.wave = 1; g.enemiesLeft = 2; g.applyMod('dark');
+      const creeper = g.spawnEnemy('creeper', 68, 2), mimic = g.spawnEnemy('mimic', 95, 24);
+      const fails = [];
+      const drive = campaignBot();
+      for (let i = 0; i < 3600 && g.enemiesLeft && g.state === 'play'; i++) { drive(g); T.run(17); }
+      if (creeper.alive || mimic.alive || g.enemiesLeft || g.stats.kills !== 2) {
+        fails.push(`Blackout stalled with ${creeper.hp} creeper HP, ${mimic.hp} mimic HP and ${g.stats.kills}/2 kills`);
+      }
+      return [...fails, ...T.errs];
+    });
+  });
   let saved = null;
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {
     let page = await open(ctx, ['checkpoint']);
@@ -189,24 +292,36 @@ try {
       return (await page.evaluate(() => CP.damaged())).fails;
     });
   }
-  if (!quick) {
-    await check('VB.campaign(1500) plays all five acts', async ctx => {
-      const page = await open(ctx, ['vibe']);
-      const r = await page.evaluate(async () => { RUNMODE = 'campaign'; T.boot(); T.run(300); return await VB.campaign(1500); });
-      console.log(`      ${r.state}, ${r.kills}/${r.total} kills, ${r.simFps} sim fps; ${r.waves.join('; ')}`);
+  }
+  if (campaignOnly || (!quick && !labOnly && !sweepOnly)) for (const seed of campaignSeeds) {
+    await check(`${brutal ? 'Brutal' : 'Normal'} campaign seed ${seed} clears all five acts`, async ctx => {
+      const page = await open(ctx, ['campaign-bot', 'vibe']);
+      const r = await page.evaluate(async ({ seed, brutal }) => {
+        // Hold the simulation clock and game RNG steady across fresh browser profiles.
+        Math.random = seeded(seed);
+        Sfx.muted = true;
+        game.loop.now = game.loop.time = 10000;
+        OPTS.diff = DIFFS.findIndex(d => d.name === (brutal ? 'BRUTAL' : 'NORMAL'));
+        RUNMODE = 'campaign'; T.boot(); T.run(300);
+        return await VB.campaign(1500);
+      }, { seed, brutal });
+      console.log(`      seed ${seed}: ${r.state}, ${r.kills}/${r.total} kills, ${r.pending} pending, ${r.remaining.length} survivors, ${Math.round(r.hp)} HP at finish (${Math.round(r.minHp)} minimum), ${r.simFps} sim fps; ${r.waves.join('; ')}`);
       const fails = [];
+      if (r.difficulty !== (brutal ? 'BRUTAL' : 'NORMAL')) fails.push(`unexpected difficulty: ${r.difficulty}`);
       if (r.state !== 'won') fails.push(`state ${r.state}, want won (stopped at ${r.kills}/${r.total} kills)`);
-      if ([1, 2, 3, 4, 5].some(a => !r.waves.some(w => w.includes('/a' + a + ' ')))) fails.push('campaign did not visit all five arenas');
-      // a removal is the bot failing to reach a foe (a mimic hiding as a drum, say), not the game failing: report it
-      if (r.removed.length) console.log(`note  the bot couldn't reach ${r.removed.length} foe(s), so VB.campaign removed them: ${r.removed.join('; ')}`);
+      for (let i = 1; i <= 10; i++) if (!r.waves.some(w => w.startsWith(`w${i}/`))) fails.push(`campaign skipped operation ${i}`);
+      if (r.kills !== r.total || r.pending !== 0) fails.push(`${r.kills}/${r.total} kills and ${r.pending} pending`);
+      if (r.remaining.length) fails.push('survivors: ' + r.remaining.join('; '));
+      if (r.leftBehind.length) fails.push('enemies left at act transitions: ' + r.leftBehind.join('; '));
+      if (r.bossCleanup.length) fails.push('summons alive when the Smelter fell: ' + r.bossCleanup.join('; '));
+      if (r.state !== 'won') fails.push('controller: ' + JSON.stringify({ ...r.control, hp: r.hp, killer: r.killer }));
       fails.push(...r.errs.map(e => 'harness error: ' + e));
       return fails;
     });
   }
 } finally {
   await browser.close();
-  server.close();
 }
-console.log(`\nnote  Phaser was fetched once and served to ${served} page load(s).`);
+console.log(`\nnote  Verified Phaser was served to ${served} page load(s).`);
 if (failures.length) { console.log(`${failures.length} check(s) failed.`); process.exit(1); }
 console.log(`All play-test checks passed (${secs()}).`);

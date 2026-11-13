@@ -26,8 +26,9 @@ to an exact version and carry an integrity hash. If you bump Phaser, put the new
 note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
 request.
 
-CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks multi-tab saves, DAILY,
-enemy types, props, campaign checkpoints, progression and traversal, then runs through all five campaign acts.
+CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save
+isolation, sweeps the weapon and enemy catalogs and arena hazards, and runs the save, DAILY and campaign regression
+checks. The final checks clear all ten operations on Normal seeds 91, 404 and 137.
 To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
 `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
@@ -39,8 +40,15 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Add `--quick` to skip the full campaign run while keeping the scripted checks. Use the smoke check below to
-verify the cues, traversal and difficulty at real speed.
+Add `--quick` to skip the full campaigns while keeping the scripted checks, or use `--lab` to run just the Lab
+checks. To run the four-seed Brutal campaign check, use the following command.
+
+```bash
+node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729
+```
+
+A full campaign check requires every operation, the full kill count, and zero survivors. The bot uses game
+inputs and ordinary in-game healing. A failed run prints the surviving mobs and the bot's position and goal.
 
 ### Campaign smoke check
 
@@ -67,6 +75,15 @@ verify the cues, traversal and difficulty at real speed.
    and confirm the results appear and Continue is unavailable on the campaign screen.
 6. Start OVERTIME, DAILY and BOSS RUSH. Check that the full arsenal is available and each mode has its own
    wave, boss or daily perk setup.
+
+### Lab smoke check
+
+1. Choose **Lab** on the title screen. Tab through the setup, select **Firing Range**, choose a starting weapon
+   and deploy. Confirm the targets stay in place and that you can equip another weapon and hit them.
+2. Open **Lab controls** with **F2**, deploy **Breakables Bay** and break a prop. Press **R** and confirm the
+   starting weapon, player health and intact props return.
+3. Deploy **Furnace Vents** with invulnerability off and watch for the warning before a jet fires. Use
+   **Lab controls → Exit to title**. If you started with a campaign checkpoint, confirm **Continue** still opens it.
 
 ## Workflow
 

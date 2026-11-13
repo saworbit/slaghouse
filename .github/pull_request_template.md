@@ -9,7 +9,7 @@
 ## Testing
 
 - [ ] `node dev/check.mjs` passes
-- [ ] Played the affected mode(s) in a browser (campaign / OVERTIME / DAILY / BOSS RUSH)
+- [ ] Played the affected mode(s) in a browser (campaign / OVERTIME / DAILY / BOSS RUSH / Lab)
 - [ ] No errors in the browser console
 
 ## Checklist

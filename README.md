@@ -34,6 +34,21 @@ Lights Out and Vampire mutators.
 `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
 automatically. Both are optional; without them the game uses its built-in procedural audio.
 
+## Lab
+
+Choose **LAB** on the title screen to practice with the full arsenal. Pick the **Firing Range** for stationary targets,
+the **Combat Pit** for a mixed fight, the **Boss Chamber** for a single boss, or the **Breakables Bay** and
+**Traversal Course** for scenery and movement. **Machinery Floor**, **Furnace Vents**, **Wrecking Yard** and
+**Live Rails** let you practice the arena hazards. A URL such as `slaghouse.html?lab=furnace` opens the room picker
+with Furnace Vents selected.
+
+Choose a starting weapon, build a roster of up to 16 enemies including at most one boss, and set the difficulty,
+hazard modifier, stationary enemies and invulnerability. Choose **Deploy room** to start. **F2** or the
+**Lab controls** button reopens the setup during play. **R** resets terrain, props, health, weapon and enemies
+to the deployed setup. Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
+Use a keyboard or pointer in the Lab setup dialog. The regular gamepad controls work during play.
+See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted room control and observations.
+
 ## Controls
 
 | Action | Keys |
@@ -168,7 +183,7 @@ keeps your best score.
 | `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
 | `dev/audiolib/` | `loud.py`, the K-weighted loudness both audio pipelines level against. |
 | `dev/build/` | One-off scripts and code snippets that applied each update round to `slaghouse.html`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
-| `dev/playtest/` | In-page test harness: step the game by hand, a bot, arena storms and a timed campaign run; see its README. |
+| `dev/playtest/` | Lab fixtures, arena stress tests, virtual-time stepping and seeded campaign clears. |
 | `dev/screenshots/` | Screenshots from playtesting. |
 | `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
 | `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |
@@ -186,9 +201,9 @@ keeps your best score.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
   any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
-- **Testing:** CI runs static checks and a headless campaign suite. Use the
-  [campaign smoke checklist](CONTRIBUTING.md#campaign-smoke-check) to check progression and pacing at real speed.
-  See the [playtest guide](dev/playtest/README.md) for local commands and what the automated run covers.
+- **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal campaigns. Use the
+  [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) and [Lab smoke check](CONTRIBUTING.md#lab-smoke-check)
+  to test at real speed. The [playtest guide](dev/playtest/README.md) covers the browser API and the Brutal run command.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
   need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
   venv comes from `dev/synthwave/requirements.txt`.

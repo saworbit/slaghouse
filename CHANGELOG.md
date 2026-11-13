@@ -6,6 +6,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+
+- **Lab practice mode.** Choose from nine rooms, equip any weapon, and build encounters with enemies, elites,
+  bosses and hazards. Reset a room to repeat the setup. Lab practice leaves campaign saves and progression intact.
+- `SlagLab` browser controls let test scripts list presets, deploy or reset a room, and inspect the player, enemies
+  and props. Headless sweeps exercise the full weapon catalog, enemy roster, boss phases and arena hazards.
 - **Twenty kinds of breakable scenery**, restocked every wave: neon signs, strip lights, floodlights, fuse boxes,
   capacitor banks, propane tanks, toxic and oil drums, cryo and water tanks, a steam boiler, wall fans, slag ladles,
   vending machines, terminals, ammo crates, flare cases, extinguishers, control-room windows and PA horns. Each goes
@@ -50,6 +55,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+
+- Headless campaign checks run three fixed Normal seeds by default. Use `--campaign --brutal --seeds=91,404,137,729`
+  to repeat the Brutal matrix. Each run uses normal traversal, combat and in-game healing, and verifies all ten
+  operations, the full kill count and zero survivors at lifts and victory.
 - Refreshed the player and enemy sprites, including the Gunship and its wreck. (#77)
 - Hold toward a wall for a shorter sideways kick, so repeated wall jumps can climb the same wall.
 - Slag Rain gives 6.2 seconds to find cover after the Demolition Team clears and before the Gunship arrives.
@@ -95,6 +104,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+
+- The campaign bot reaches the Blackout ceiling creeper and disguised mimic, and reroutes after failed platform
+  jumps that previously stalled the Furnace on seed 91.
 - Gravity Loss Linkers stay below the Furnace catwalk. If pushed above it, they fly back down through a nearby opening.
 - Opened the upper catwalks in the Furnace and Sorting Line and added steps to upper decks in the Wrecking
   Yard and Powerhouse.
