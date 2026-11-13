@@ -61,9 +61,19 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The Furnace pacing check's Linker failure names each living foe with its cell, `homeY`, `under` and `summoned`,
   the squads and reserve left, and the time since the break ended. (#93)
 
+- `run.mjs` checks mid-run **R** and the pause menu's restart and quit confirms with real key and pad input:
+  the prompt, its timeout, pausing clearing it, no wrap at either end, and each way out of an ask. (#112)
+
 ### Changed
 
 - Breaking a prop no longer bumps an unread `propsBroken` counter. (#91)
+- The pause menu has a FLASHES row, and its rows follow the title OPTIONS order: RESUME, RESTART, MUSIC, SFX,
+  SHAKE, POST FX, FLASHES, CONTROLS, QUIT TO TITLE. The rows are one list (`PAUSE_ITEMS`), and every handler
+  finds a row by id, so adding one no longer shifts the restart and quit confirms. (#105, #113)
+- The run pauses when the window loses focus while still visible (another monitor, DevTools), as it does for a
+  hidden tab. Coming back waits on the menu. (#100)
+- **M** says MUTED or SOUND ON, is remembered across reloads, and works in the pause menu. While muted the HUD
+  shows MUTED, the pause menu's MUSIC and SFX rows read MUTED, and changing either volume unmutes. (#106)
 - **Restarting asks first.** Mid-run, **R** shows "PRESS R AGAIN TO RESTART" (or "RETRY ACT") under the objective
   banner, and only a second press within two seconds restarts. In the pause menu, RESTART / RETRY ACT and QUIT TO
   TITLE turn red with a question mark and need a second pick; moving off, Esc or B cancels. The pause list no longer
@@ -121,6 +131,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   don't lift run accuracy or the grade. Only the player's own shots, blasts and strikes count. (#88)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
+- Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The
+  weapon wheel hides a wave card that would show through it. (#99)
+- With FLASHES set to REDUCED, the results screen's grade stamp flash is reduced like every other flash. (#105)
 - The campaign bot reaches the Blackout ceiling creeper and disguised mimic, and reroutes after failed platform
   jumps that previously stalled the Furnace on seed 91.
 - Gravity Loss Linkers stay below the Furnace catwalk. If pushed above it, they fly back down through a nearby opening.

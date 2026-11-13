@@ -615,17 +615,18 @@
                           jingles. Stage loops are muffled until you're noticed and open up as the fight heats
                           up. B flips to the procedural 132 BPM drum + bass loop (the fallback without the bank).
     SFX ................. AudioGen sample bank from sfx_bank.js (dev/sfxgen) over the procedural synth; N flips
-                          to the synth versions (the fallback without the bank). M mutes all audio, and all
-                          audio pauses while the tab is hidden.
+                          to the synth versions (the fallback without the bank). M mutes all audio (remembered; the
+                          HUD shows MUTED), and all audio pauses while the tab is hidden.
     Hearing ............. gunfire alerts enemies within 210-270 px, explosions within 300 px
     Player .............. 100 HP, 750 ms i-frames; contact dmg grunt 12 / heavy 20,
                           heavy stomp 15, drone bolt 10; four +30 health packs in the arena
-    Pause (Esc / P) ..... pause menu: resume, retry act or restart, post FX on/off, screen shake, music and SFX volume (0-100%
-                          in quarter steps with A/D or Enter; remembered), controls (every key and pad binding), quit. Retry / restart
+    Pause (Esc / P) ..... pause menu (PAUSE_ITEMS): resume, retry act or restart, music and SFX volume, screen shake (0-100%
+                          in quarter steps with A/D or Enter; remembered), post FX on/off, flashes full/reduced, controls
+                          (every key and pad binding), quit. Retry / restart
                           and quit need a second pick (moving off, Esc or B cancels), and the list stops at both ends. Physics, timers and weapon
                           loops stop and the music muffles; buffs, i-frames and enemy tells pick up where they left
-                          off, and paused time doesn't count toward the run time. Hiding the tab pauses too, and
-                          coming back waits on the menu. Esc on the results screen goes back to the title.
+                          off, and paused time doesn't count toward the run time. Hiding the tab or moving focus to
+                          another window pauses too, and coming back waits on the menu. Esc on the results screen goes back to the title.
     Post FX (V) ......... Phaser 4 camera filters on the world (not the HUD): bloom, a barrel-warp pulse on nearby
                           blasts, colour grading (rampage saturation, low-health desaturation, grey on death and
                           while paused). The choice is remembered in localStorage.
@@ -971,7 +972,7 @@ const DIFFS = [                                        // title screen: left / r
   { name: 'BRUTAL', dmg: 1.4, hp: 1.25, score: 1.5 },
 ];
 const optNum = (key, def, lo, hi) => { try { const v = parseFloat(localStorage.getItem('slaghouse.' + key)); return v >= lo && v <= hi ? v : def; } catch (err) { return def; } };
-const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1), mut: optNum('mut', 0, 0, 5) | 0 };   // pause menu / title options, remembered
+const OPTS = { shake: optNum('shake', 1, 0, 1), music: optNum('music', 1, 0, 1), sfx: optNum('sfx', 1, 0, 1), diff: optNum('diff', 1, 0, 2) | 0, flash: optNum('flash', 1, 0, 1), mut: optNum('mut', 0, 0, 5) | 0, muted: optNum('muted', 0, 0, 1) | 0 };   // pause menu / title options, remembered
 // run mutators (OPTIONS): one at a time, remembered
 const MUTATORS = [
   { id: 'none', name: 'NONE', d: 'THE FOUNDRY AS IT COMES.' },
@@ -1499,7 +1500,7 @@ const numCss = n => cssCache[n] || (cssCache[n] = '#' + n.toString(16).padStart(
 //  procedural synth version as the fallback, and N flips between the two in game.
 // =============================================================================
 const Sfx = {
-  ctx: null, out: null, crunch: null, noiseBuf: null, muted: false, last: {}, hum: null,
+  ctx: null, out: null, crunch: null, noiseBuf: null, muted: !!OPTS.muted, last: {}, hum: null,
   bank: {}, bankGain: {}, bankJit: {}, bankLast: {}, bankLoading: false, bankDone: false, useBank: true,
   buildShared(c) {                                 // the noise buffer and soft-clip every booming sound uses; dev/sfxgen/calib.js builds its renders with this too
     const len = (c.sampleRate * 1.5) | 0;
@@ -1519,7 +1520,7 @@ const Sfx = {
         const c = this.ctx = new AC();
         const comp = c.createDynamicsCompressor();
         comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.2;
-        this.master = c.createGain(); this.master.gain.value = 0.55; this.master.connect(comp); comp.connect(c.destination);
+        this.master = c.createGain(); this.master.gain.value = this.muted ? 0 : 0.55; this.master.connect(comp); comp.connect(c.destination);
         this.out = c.createGain(); this.out.gain.value = OPTS.sfx; this.out.connect(this.master);   // every effect goes through here (SFX volume)
         this.buildShared(c);
         this.loadBank();
@@ -2116,9 +2117,10 @@ const Sfx = {
     h.g.gain.cancelScheduledValues(t); h.g.gain.setTargetAtTime(0.0001, t, 0.6); h.nodes.forEach(n => n.stop(t + 4));
     this.startHum(1.2);
   },
-  toggleMute() {
-    this.muted = !this.muted;
+  toggleMute() {                                   // M, remembered across reloads; returns the new state
+    this.muted = !this.muted; OPTS.muted = this.muted ? 1 : 0; saveOpt('muted');
     if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.55, this.ctx.currentTime, 0.02);
+    return this.muted;
   },
   applyVolume() { if (this.out) this.out.gain.setTargetAtTime(OPTS.sfx, this.ctx.currentTime, 0.03); Music.applyVolume();
   },
@@ -2327,6 +2329,24 @@ const CONTROL_LINES = [                              // the pause menu's CONTROL
   ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
   ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK'],
 ];
+// Pause menu rows, top to bottom. Handlers find a row by its id or fields, never by position, so a row can be added
+// or moved without breaking the others. The rows the title OPTIONS page shares run in the same order there.
+//   confirm: picking it loses the run, so it takes a second pick (not in the Lab)
+//   step:    an OPTS volume in quarter steps; A/D change it, Enter wraps 0 back to 100
+//   toggle:  A/D flip it, the same as Enter
+const PAUSE_PCT = v => Math.round(v * 100) + '%';
+const PAUSE_ITEMS = [
+  { id: 'resume', label: () => 'RESUME' },
+  { id: 'restart', confirm: true, label: gs => (gs.chapterStart ? 'RETRY ACT' : 'RESTART') },
+  { id: 'music', step: 'music', label: () => 'MUSIC: ' + (Sfx.muted ? 'MUTED' : PAUSE_PCT(OPTS.music)) },
+  { id: 'sfx', step: 'sfx', label: () => 'SFX: ' + (Sfx.muted ? 'MUTED' : PAUSE_PCT(OPTS.sfx)) },
+  { id: 'shake', step: 'shake', label: () => 'SHAKE: ' + PAUSE_PCT(OPTS.shake) },
+  { id: 'postfx', toggle: true, label: () => 'POST FX: ' + (POSTFX.on ? 'ON' : 'OFF') },
+  { id: 'flash', toggle: true, label: () => 'FLASHES: ' + (OPTS.flash ? 'FULL' : 'REDUCED') },
+  { id: 'controls', label: gs => (gs.lab ? 'LAB CONTROLS' : 'CONTROLS') },
+  { id: 'quit', confirm: true, label: () => 'QUIT TO TITLE' },
+];
+const PAUSE_Y0 = 200, PAUSE_GAP = 27;                 // nine rows fit between the PAUSED title and the hint line
 const TRACE_NAIL = [0xffe46a, 0xff8a1f], TRACE_PELLET = [0xfff0a0, 0xffa030], TRACE_ENEMY = [0xff6a4a, 0xc02010], TRACE_PARRY = [0xffffff, 0xffe14a];
 const TRACE_SNIPE = [0xffffff, 0x9adcff];
 
@@ -6105,7 +6125,7 @@ class TitleScene extends Phaser.Scene {
     let rsh = loadRec('slaghouse.bestRush');
     if (rsh && rsh.won) new PixelLabel(this, 650, this.menuItems[3].y, 'title_rsh', { text: 'CLEARED ' + rsh.grade + mutTag(rsh), align: 'left', scale: 1, color: '#ffb347' }).setDepth(6);
     if (dly && dly.date === dayKey()) new PixelLabel(this, 650, this.menuItems[2].y, 'title_dly', { text: 'TODAY W' + dly.wave, align: 'left', scale: 1, color: '#c8a0ff' }).setDepth(6);
-    this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { text: 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   M MUTE', scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
+    this.menuHint = new PixelLabel(this, 480, 532, 'title_mhint', { maxChars: 72, text: this.menuHintText(), scale: 1, color: '#6a7380', originY: 0.5 }).setDepth(6);
     this.subG = this.add.graphics().setDepth(20);
     this.subTitle = new PixelLabel(this, 480, 64, 'title_subt', { maxChars: 10, scale: 4, rows: CALL_ROWS, shadow: sh, originY: 0.5 }).setDepth(21);
     this.subHint = new PixelLabel(this, 480, 514, 'title_subh', { maxChars: 56, scale: 2, color: '#6a7380', shadow: sh, originY: 0.5 }).setDepth(21);
@@ -6271,8 +6291,9 @@ class TitleScene extends Phaser.Scene {
     else if (left || right) this.stepDiff(left ? -1 : 1);
     else if (ok) this.menuPick(this.menuSel);
     else if (k === 69) this.menuPick(1);
-    else if (k === 77) Sfx.toggleMute();
+    else if (k === 77) { Sfx.toggleMute(); this.menuHint.setText(this.menuHintText()); }
   }
+  menuHintText() { return 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   ' + (Sfx.muted ? 'M SOUND ON (MUTED)' : 'M MUTE'); }
   onTitlePointer(p, click) {
     if (this.started || LAB_PANEL.isOpen()) return;
     if (this.sub === 'campaign') {
@@ -7184,7 +7205,7 @@ class GameScene extends Phaser.Scene {
       }
       this.musicAhead(c?.wave ?? 0);
     }
-    if (this.jd.M) Sfx.toggleMute();
+    if (this.jd.M) BUS.emit('callout', Sfx.toggleMute() ? 'MUTED' : 'SOUND ON');
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.stopLoops(); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
@@ -18806,7 +18827,7 @@ class HudScene extends Phaser.Scene {
     this.wcSub = new PixelLabel(this, 480, 286, 'hud_wcs', { maxChars: 36, scale: 2, color: '#ffd8a0', shadow, originY: 0.5 }).setDepth(4.6).setVisible(false);
     this.pG = this.add.graphics().setDepth(10);
     this.pTitle = new PixelLabel(this, 480, 150, 'hud_pt', { text: 'PAUSED', scale: 8, rows: LOGO_ROWS, shadow, originY: 0.5 }).setDepth(11);
-    this.pItems = ['RESUME', 'RESTART', 'POST FX: ON', 'SHAKE: 100%', 'MUSIC: 100%', 'SFX: 100%', 'CONTROLS', 'QUIT TO TITLE'].map((t, i) => new PixelLabel(this, 480, 206 + i * 30, 'hud_pi' + i, { maxChars: 14, text: t, scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
+    this.pItems = PAUSE_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, PAUSE_Y0 + i * PAUSE_GAP, 'hud_pi_' + id, { maxChars: 17, text: id.toUpperCase(), scale: 3, color: '#c6ced8', shadow, originY: 0.5 }).setDepth(11));
     this.wheelG = this.add.graphics().setDepth(11.5);                   // Tab: weapon wheel
     this.wheelIcons = WEAPONS.map(w => this.add.image(0, 0, 'icon_' + w.gun).setDepth(12).setVisible(false));
     this.wheelBlurb = new PixelLabel(this, 480, 328, 'hud_wb', { maxChars: 40, scale: 1, color: '#c8d0da', originY: 0.5 }).setDepth(12).setVisible(false);
@@ -18820,6 +18841,7 @@ class HudScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', ev => this.onPauseKey(ev));
     this.input.on('pointermove', p => this.onPausePointer(p, false));
     this.input.on('pointerdown', p => this.onPausePointer(p, true));
+    this.lblMute = new PixelLabel(this, 26, 196, 'hud_mute', { text: 'MUTED  M SOUND ON', align: 'left', scale: 2, color: '#8f9bab', shadow }).setDepth(3).setVisible(false);
     this.lblRamp = new PixelLabel(this, 944, 214, 'hud_ramp', { maxChars: 8, text: 'RAMPAGE', align: 'right', scale: 2, color: '#ff7a2a', shadow }).setDepth(3).setVisible(false); this.rampA = 0;
     this.add.image(784, 40, 'skull').setScale(3).setDepth(3);
     new PixelLabel(this, 932, 20, 'hud_hostlbl', { text: 'HOSTILES', align: 'right', scale: 2, color: '#8f9bab', shadow }).setDepth(3);
@@ -18900,9 +18922,11 @@ class HudScene extends Phaser.Scene {
     this.setPerkUi(true);
   }
   setPerkUi(on) {
-    this.perkOn = on; this.perkTitle.setVisible(on);
-    this.perkCards.forEach((C, i) => { const v = on && i < this.perkIds.length; C.name.setVisible(v); C.d.forEach(l => l.setVisible(v)); C.key.setVisible(v); });
-    if (!on) this.perkG.clear();
+    this.perkOn = on;
+    const show = on && !this.pauseOn;                                   // paused mid-draft: the cards wait behind the menu
+    this.perkTitle.setVisible(show);
+    this.perkCards.forEach((C, i) => { const v = show && i < this.perkIds.length; C.name.setVisible(v); C.d.forEach(l => l.setVisible(v)); C.key.setVisible(v); });
+    if (!show) this.perkG.clear();
   }
   pickPerk(i) { if (!this.perkOn || i < 0 || i >= this.perkIds.length) return; const id = this.perkIds[i]; this.setPerkUi(false); BUS.emit('perkpick', id); }
   onPerkKey(ev) {
@@ -18939,6 +18963,7 @@ class HudScene extends Phaser.Scene {
   onPause(on) { this.setPause(on); if (on) { this.pArm = this.hudFrame; this.pSel = 0; this.input.setDefaultCursor('default'); } }
   setPause(on) {
     this.pauseOn = on; this.pShownSel = -1; this.ctlOn = false; this.pConfirm = -1;
+    if (this.perkOn) this.setPerkUi(true);                              // the pause menu hides a perk draft until RESUME
     [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(on));
     this.ctlLines.forEach(o => o.setVisible(false));
     if (on) this.pLabels();
@@ -18950,27 +18975,26 @@ class HudScene extends Phaser.Scene {
     this.ctlLines.forEach(o => o.setVisible(on));
   }
   pausePick(i) {
-    const gs = this.scene.get('Game'); Sfx.ui();
-    if ((i === 1 || i === 7) && !gs.lab && this.pConfirm !== i) { this.pConfirm = i; this.pShownSel = -1; this.pLabels(); return; }   // restart and quit lose the run: pick them twice
-    if (i === 0) { this.setPause(false); this.scene.resume('Game'); BUS.emit('pause', false); }
-    else if (i === 1) { this.setPause(false); gs.restartRun(); }
-    else if (i === 2) { gs.togglePostFx(); this.pLabels(); }
-    else if (i >= 3 && i <= 5) this.pStep(i, -1, true);
-    else if (i === 6) { if (gs.lab) LAB_PANEL.open(); else this.setControls(true); }
-    else { this.setPause(false); gs.quitToTitle(); }
+    const gs = this.scene.get('Game'), item = PAUSE_ITEMS[i]; Sfx.ui();
+    if (item.confirm && !gs.lab && this.pConfirm !== i) { this.pConfirm = i; this.pShownSel = -1; this.pLabels(); return; }   // restart and quit lose the run: pick them twice
+    if (item.step) { this.pStep(i, -1, true); return; }
+    switch (item.id) {
+      case 'resume': this.setPause(false); this.scene.resume('Game'); BUS.emit('pause', false); break;
+      case 'restart': this.setPause(false); gs.restartRun(); break;
+      case 'postfx': gs.togglePostFx(); this.pLabels(); break;
+      case 'flash': OPTS.flash = OPTS.flash ? 0 : 1; saveOpt('flash'); this.pLabels(); break;   // the effects read OPTS.flash live
+      case 'controls': if (gs.lab) LAB_PANEL.open(); else this.setControls(true); break;
+      case 'quit': this.setPause(false); gs.quitToTitle(); break;
+    }
   }
   pLabels() {
-    const pc = v => Math.round(v * 100) + '%';
-    const ask = i => (this.pConfirm === i ? '?' : '');
-    this.pItems[1].setText((this.scene.get('Game').chapterStart ? 'RETRY ACT' : 'RESTART') + ask(1));
-    this.pItems[2].setText(POSTFX.on ? 'POST FX: ON' : 'POST FX: OFF');
-    this.pItems[6].setText(this.scene.get('Game').lab ? 'LAB CONTROLS' : 'CONTROLS');
-    this.pItems[7].setText('QUIT TO TITLE' + ask(7));
+    const gs = this.scene.get('Game');
+    PAUSE_ITEMS.forEach((item, i) => this.pItems[i].setText(item.label(gs) + (this.pConfirm === i ? '?' : '')));
     this.pHint.setText(this.pConfirm >= 0 ? 'PRESS AGAIN TO CONFIRM  :  ESC CANCEL' : 'W/S PICK  :  A/D CHANGE  :  ESC BACK');
-    this.pItems[3].setText('SHAKE: ' + pc(OPTS.shake)); this.pItems[4].setText('MUSIC: ' + pc(OPTS.music)); this.pItems[5].setText('SFX: ' + pc(OPTS.sfx));
   }
-  pStep(i, dir, wrap) {                                                // shake / music / sfx in quarter steps; Enter wraps 0 back to 100
-    const key = ['shake', 'music', 'sfx'][i - 3]; if (!key) return;
+  pStep(i, dir, wrap) {                                                // a volume row in quarter steps; Enter wraps 0 back to 100
+    const key = PAUSE_ITEMS[i].step; if (!key) return;
+    if (key !== 'shake' && Sfx.muted) Sfx.toggleMute();                 // changing a volume while muted unmutes, so you hear it
     let v = Math.round(OPTS[key] * 4) + dir;
     if (wrap && v < 0) v = 4;
     OPTS[key] = Math.max(0, Math.min(4, v)) / 4; saveOpt(key);
@@ -18988,18 +19012,20 @@ class HudScene extends Phaser.Scene {
     if (!this.pauseOn || this.hudFrame === this.pArm || LAB_PANEL.isOpen()) return;
     const k = ev.keyCode;
     if (this.ctlOn) { if (k === 13 || k === 32 || k === 27 || k === 80 || k === 8) { this.setControls(false); Sfx.ui(); } return; }
+    const item = PAUSE_ITEMS[this.pSel], side = k === 37 || k === 65 ? -1 : k === 39 || k === 68 ? 1 : 0;
     if (k === 38 || k === 87) this.pMove(this.pSel - 1);
     else if (k === 40 || k === 83) this.pMove(this.pSel + 1);
     else if ((k === 27 || k === 80) && this.pConfirm >= 0) this.pCancel();
-    else if ((k === 37 || k === 65 || k === 39 || k === 68) && this.pSel >= 3 && this.pSel <= 5) { this.pStep(this.pSel, k === 37 || k === 65 ? -1 : 1, false); Sfx.ui(); }
-    else if ((k === 37 || k === 65 || k === 39 || k === 68) && this.pSel === 2) this.pausePick(2);
+    else if (side && item.step) { this.pStep(this.pSel, side, false); Sfx.ui(); }
+    else if (side && item.toggle) this.pausePick(this.pSel);
+    else if (k === 77) { Sfx.toggleMute(); this.pLabels(); }            // M works here too; the volume rows say MUTED
     else if (k === 13 || k === 32) this.pausePick(this.pSel);
     else if (k === 27 || k === 80) this.pausePick(0);
   }
   onPausePointer(p, click) {
     if (!this.pauseOn || LAB_PANEL.isOpen()) return;
     if (this.ctlOn) { if (click && this.hudFrame !== this.pArm) { this.setControls(false); Sfx.ui(); } return; }
-    const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < 15 && Math.abs(p.x - 480) < 190);
+    const i = this.pItems.findIndex(o => Math.abs(p.y - o.y) < PAUSE_GAP / 2 && Math.abs(p.x - 480) < 190);
     if (i < 0) return;
     this.pMove(i);
     if (click && this.hudFrame !== this.pArm) this.pausePick(i);
@@ -19037,10 +19063,10 @@ class HudScene extends Phaser.Scene {
     this.wheelName.setText(WEAPONS[sel].name); this.wheelBlurb.setText(BLURBS[WEAPONS[sel].id] || '');
     const ms = masteryStars(WEAPONS[sel].id); this.wheelKey.setText((SLOT_KEYS[sel].trim() ? 'KEY ' + SLOT_KEYS[sel] : 'WHEEL') + '  ' + '*'.repeat(ms) + '-'.repeat(3 - ms));
   }
-  drawWaveCard(dt) {
+  drawWaveCard(dt, hidden) {                                           // hidden: the weapon wheel is open over it; the card still runs out
     const g = this.wcG; g.clear();
-    if (this.wcT <= 0) { this.wcTitle.setVisible(false); this.wcSub.setVisible(false); return; }
-    this.wcT -= dt;
+    if (this.wcT > 0) this.wcT -= dt;
+    if (this.wcT <= 0 || hidden) { this.wcTitle.setVisible(false); this.wcSub.setVisible(false); return; }
     const kin = clamp((this.wcDur - this.wcT) / 0.25, 0, 1), kout = clamp(this.wcT / 0.3, 0, 1), k = Math.min(kin, kout), e = 1 - Math.pow(1 - k, 3);
     const h = Math.round(92 * e), y = 262 - h / 2, slide = (1 - kin) * -140 + (1 - kout) * 140;
     g.fillStyle(0x000000, 0.55 * e); g.fillRect(0, y, VIEW_W, h);
@@ -19218,7 +19244,7 @@ class HudScene extends Phaser.Scene {
     this.ovMedals.setText(d.medals && d.medals.length ? 'MEDALS  ' + d.medals.slice(0, 3).join('  ') + (d.medals.length > 3 ? '  +' + (d.medals.length - 3) : '') : '').setAlpha(t > 1.9 ? 1 : 0);
     this.ovBest.setText(d.newBest ? 'NEW BEST!' : 'BEST ' + d.best).setAlpha(t > 1.6 ? (d.newBest ? (Math.floor(t * 4) % 2 ? 1 : 0.45) : 0.8) : 0);
     if (t > 0.1 && t < 1.6 && (this.ovTick -= dt) <= 0) { this.ovTick = 0.06; Sfx.tink(0.35); }
-    if (t >= 1.7 && !this.ovGradeShown) { this.ovGradeShown = true; this.ovGrade.setVisible(true); this.gradePop = 0.4; Sfx.rankUp(); this.flashA = Math.max(this.flashA, 0.3); this.panelShake = 0.3; }
+    if (t >= 1.7 && !this.ovGradeShown) { this.ovGradeShown = true; this.ovGrade.setVisible(true); this.gradePop = 0.4; Sfx.rankUp(); this.onFlash(0.3); this.panelShake = 0.3; }
     if (this.ovGradeShown) { this.gradePop = Math.max(0, this.gradePop - dt); this.ovGrade.setScale(14 + this.gradePop * 25); }
   }
   setOverlay(on) {
@@ -19245,6 +19271,7 @@ class HudScene extends Phaser.Scene {
       if (this.rArmF > 0) this.rArmLbl.setText('PRESS R AGAIN TO ' + (gsr.chapterStart ? 'RETRY ACT' : 'RESTART'));
     } else { this.rampA = 0; this.rArmF = 0; }
     this.rArmLbl.setVisible(this.rArmF > 0);
+    this.lblMute.setVisible(Sfx.muted && !this.overOn);
     this.lblRamp.setVisible(this.rampA > 0 && !this.overOn).setAlpha(Math.floor(time / 150) % 2 ? 1 : 0.55);
     this.dispHp = this.dispHp > this.hp ? Math.max(this.hp, this.dispHp - 30 * dt) : this.hp;
     this.hurtA = Math.max(0, this.hurtA - dt * 1.8); this.healA = Math.max(0, this.healA - dt * 2);
@@ -19256,7 +19283,7 @@ class HudScene extends Phaser.Scene {
     this.draw(time);
     this.drawSplats(dt);
     this.drawBoss(dt);
-    this.drawWaveCard(dt);
+    this.drawWaveCard(dt, !!(gsr && gsr.sys.isActive() && gsr.wheelOn));
     this.drawIndicators(gsr, time);
     if (this.pauseOn) this.drawPause(time);
     // hit marker: four ticks round the crosshair; red + wider on a kill, yellow ring on a headshot
@@ -19328,7 +19355,7 @@ class HudScene extends Phaser.Scene {
       this.lblPower.setText(parts.join('  ')).setVisible(!this.overOn);
       if (parts.length) this.lblPower.setStyle({ color: nw < gsr.dmgUntil ? '#ff6070' : nw < gsr.hasteUntil ? '#ffe040' : '#60c0ff' });
     }
-    if (this.perkOn) {                                                   // perk cards: draw, and let the pad pick
+    if (this.perkOn && !this.pauseOn) {                                  // perk cards: draw, and let the pad pick
       this.drawPerks(time);
       if (!this.pauseOn && this.hudFrame !== this.perkArm) { const mx = PAD.menuX(), N = this.perkIds.length; if (mx) { this.perkSel = (this.perkSel + N + mx) % N; Sfx.swap(); } if (PAD.jd(0)) this.pickPerk(this.perkSel); }
     }
@@ -19337,7 +19364,9 @@ class HudScene extends Phaser.Scene {
       if (this.ctlOn) { if (PAD.jd(0) || PAD.jd(1) || PAD.jd(9)) { this.setControls(false); Sfx.ui(); } }   // the CONTROLS page: any of A / B / Start goes back
       else {
         if (my) this.pMove(this.pSel + my);
-        if (mx && this.pSel >= 2 && this.pSel <= 5) { if (this.pSel === 2) this.pausePick(2); else { this.pStep(this.pSel, mx, false); Sfx.ui(); } }
+        const item = PAUSE_ITEMS[this.pSel];
+        if (mx && item.step) { this.pStep(this.pSel, mx, false); Sfx.ui(); }
+        else if (mx && item.toggle) this.pausePick(this.pSel);
         if (PAD.jd(0)) this.pausePick(this.pSel);
         else if (PAD.jd(1) || PAD.jd(9)) { if (this.pConfirm >= 0) this.pCancel(); else this.pausePick(0); }   // B / Start back out of a pending restart / quit first
       }
@@ -19641,6 +19670,10 @@ game.events.on('hidden', () => {
   if (gs && gs.sys.isActive() && gs.state === 'play' && !gs.paused) gs.pauseGame();
   flushLife();
   if (Sfx.ctx && Sfx.ctx.state === 'running') Sfx.ctx.suspend().catch(() => {});
+});
+game.events.on('blur', () => {                                         // focus left a visible window (another monitor, DevTools): pause too
+  const gs = game.scene.getScene('Game');
+  if (gs && gs.sys.isActive() && gs.state === 'play' && !gs.paused) gs.pauseGame();
 });
 game.events.on('visible', () => { if (Sfx.ctx && Sfx.ctx.state === 'suspended') Sfx.ctx.resume().catch(() => {}); });
 </script>

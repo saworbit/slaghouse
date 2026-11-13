@@ -212,6 +212,144 @@ try {
   });
   }
   if (!labOnly && !sweepOnly && !campaignOnly) {
+  await check('mid-run R and the pause menu ask before restarting or quitting', async ctx => {
+    // Real key and pad input on the live game loop. Each key is held across a frame: keyboard.press() lands keydown
+    // and keyup in one frame, and Phaser's Key.onUp clears _justDown before JustDown sees it.
+    const page = await open(ctx, []);
+    const fail = [];
+    const wait = async (what, predicate, arg) => {
+      try { await page.waitForFunction(predicate, arg); }
+      catch (err) {
+        const info = await page.evaluate(() => { const g = T.g(), h = game.scene.getScene('Hud'); return { title: game.scene.getScene('Title').sys.isActive(), state: g?.state, paused: g?.paused, pauseOn: h?.pauseOn, pSel: h?.pSel, pConfirm: h?.pConfirm, armed: h?.rArmLbl.visible }; });
+        throw new Error(`${what}: ${JSON.stringify(info)} (${err.message.split('\n')[0]})`);
+      }
+    };
+    const hold = async key => { await page.keyboard.down(key); await page.waitForTimeout(70); await page.keyboard.up(key); await page.waitForTimeout(60); };
+    const pad = async button => {
+      await page.evaluate(b => { window.__pad.buttons[b].value = 1; }, button); await page.waitForTimeout(70);
+      await page.evaluate(b => { window.__pad.buttons[b].value = 0; }, button); await page.waitForTimeout(60);
+    };
+    const hud = () => page.evaluate(() => { const h = game.scene.getScene('Hud'); return { pSel: h.pSel, pConfirm: h.pConfirm, pauseOn: h.pauseOn, id: PAUSE_ITEMS[h.pSel].id }; });
+    const sameRun = () => page.evaluate(() => T.g().stats === window.__run);
+    const startCampaign = async () => {
+      await page.evaluate(() => { const ts = game.scene.getScene('Title'); ts.showSub('campaign'); ts.subSel = 1; ts.subKey('ok'); });
+      await wait('start a campaign', () => T.g()?.sys.isActive() && T.g().state === 'play' && !T.g().needReset);
+      await page.evaluate(() => { T.g().hurtPlayer = () => false; window.__run = T.g().stats; });   // the stub outlives scene.restart()
+    };
+    const newRun = async what => {
+      await wait(what, () => T.g().stats !== window.__run && T.g().state === 'play' && !T.g().needReset && !T.g().paused);
+      await page.evaluate(() => { window.__run = T.g().stats; });
+    };
+    const pickRow = async id => {                                       // walk the pause list to a row with W / S
+      for (let n = 0; n < PAUSE_ROWS && (await hud()).id !== id; n++) await hold((await hud()).pSel < await page.evaluate(i => PAUSE_ITEMS.findIndex(r => r.id === i), id) ? 's' : 'w');
+      if ((await hud()).id !== id) throw new Error(`could not reach the ${id} row`);
+    };
+    const PAUSE_ROWS = await page.evaluate(() => PAUSE_ITEMS.length);
+    await page.evaluate(() => {                                         // a standard-mapped pad, so B and Start can be pressed
+      window.__pad = { connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ value: 0 })) };
+      navigator.getGamepads = () => [window.__pad];
+    });
+    await startCampaign();
+
+    // one R arms the prompt and keeps the run; it clears after RESTART_CONFIRM_MS; two R inside the window restart
+    await hold('r');
+    await wait('first R shows the prompt', () => game.scene.getScene('Hud').rArmLbl.visible);
+    if (!await sameRun()) fail.push('the first R restarted the run');
+    await wait('the prompt clears', () => !game.scene.getScene('Hud').rArmLbl.visible, null);
+    if (!await sameRun()) fail.push('the run restarted when the R prompt ran out');
+    await hold('r'); await hold('r');
+    await newRun('two R presses restart');
+    // pausing clears a pending R
+    await hold('r');
+    await wait('R armed before pausing', () => game.scene.getScene('Hud').rArmLbl.visible);
+    await hold('Escape');
+    await wait('Esc pauses', () => game.scene.getScene('Hud').pauseOn);
+    if (await page.evaluate(() => T.g().restartArmUntil) !== 0) fail.push('pausing left the R prompt armed');
+    await hold('Escape');
+    await wait('Esc resumes', () => !game.scene.getScene('Hud').pauseOn && !T.g().paused);
+    await hold('r');
+    await wait('R after resuming only asks', () => game.scene.getScene('Hud').rArmLbl.visible);
+    if (!await sameRun()) fail.push('R after resuming restarted at once: the pause did not clear the pending R');
+    await wait('the prompt clears', () => !game.scene.getScene('Hud').rArmLbl.visible, null);
+
+    // the pause menu: ends don't wrap, RESTART and QUIT ask once, and every way out of the ask keeps the game paused
+    await hold('Escape');
+    await wait('pause', () => game.scene.getScene('Hud').pauseOn);
+    await hold('w');
+    if ((await hud()).id !== 'resume') fail.push('W on RESUME moved the selection');
+    await pickRow('quit');
+    await hold('s');
+    if ((await hud()).id !== 'quit') fail.push('S on QUIT TO TITLE moved the selection');
+    await pickRow('restart');
+    const asks = async how => {
+      await hold('Enter');
+      const h = await hud();
+      if (h.pConfirm !== h.pSel || !h.pauseOn || !await sameRun()) fail.push(`the first RESTART pick did not ask (${how})`);
+    };
+    const cancelled = async how => {
+      const h = await hud();
+      if (h.pConfirm !== -1 || !h.pauseOn || !await page.evaluate(() => T.g().paused) || !await sameRun()) fail.push(`${how} did not cancel the RESTART ask and stay paused: ${JSON.stringify(h)}`);
+    };
+    await asks('before moving off'); await hold('s'); await cancelled('moving off'); await hold('w');
+    await asks('before Esc'); await hold('Escape'); await cancelled('Esc');
+    await asks('before B'); await pad(1); await cancelled('B');
+    await asks('before Start'); await pad(9); await cancelled('Start');
+    await asks('before the second pick'); await hold('Enter');
+    await newRun('a second RESTART pick restarts');
+    await hold('Escape');
+    await wait('pause again', () => game.scene.getScene('Hud').pauseOn);
+    await pickRow('quit');
+    await hold('Enter');
+    if ((await hud()).pConfirm !== (await hud()).pSel) fail.push('the first QUIT TO TITLE pick did not ask');
+    if (await page.evaluate(() => game.scene.getScene('Title').sys.isActive())) fail.push('the first QUIT TO TITLE pick quit');
+    await hold('Enter');
+    await wait('a second QUIT pick reaches the title', () => game.scene.getScene('Title').sys.isActive());
+
+    // R on the results screen still acts on the first press (the Lab's single-press R is in the Lab menu check)
+    await startCampaign();
+    await wait('the first squad', () => T.g().enemiesLeft > 0);        // a campaign spares the player while no foe is due
+    await page.evaluate(() => { const g = T.g(); delete g.hurtPlayer; g.hurtPlayer(9999, g.player.x, { iframes: false }); });
+    await wait('the results screen', () => T.g().overShown, null);
+    await hold('r');
+    await newRun('R on the results screen restarts at once');
+    await page.evaluate(() => { delete T.g().hurtPlayer; });
+    return fail;
+  });
+  await check('the pause menu hides a perk draft, blur pauses, and mute shows and is remembered', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [], expect = (ok, msg) => { if (!ok) fails.push(msg); };
+      RUNMODE = 'endless'; T.boot(); T.run(300);
+      const g = T.g(), hud = game.scene.getScene('Hud'), row = id => PAUSE_ITEMS.findIndex(r => r.id === id);
+      BUS.emit('perks', PERKS.slice(0, 3).map(p => p.id)); T.run(50);
+      expect(hud.perkOn && hud.perkTitle.visible, 'fixture: the perk draft did not show');
+      g.pauseGame(); T.run(50);
+      expect(hud.pauseOn && !hud.perkTitle.visible && !hud.perkCards.some(c => c.name.visible), 'the perk draft stayed visible under the pause menu');
+      hud.pausePick(row('resume')); T.run(50);
+      expect(!hud.pauseOn && hud.perkOn && hud.perkTitle.visible && hud.perkCards[0].name.visible, 'the perk draft did not come back after RESUME');
+      hud.pickPerk(0); T.run(50);
+      BUS.emit('wavecard', 'OVERTIME 2', 'TEST'); g.keys.TAB.isDown = true; T.run(100);   // hold Tab: the wheel opens
+      expect(g.wheelOn && !hud.wcTitle.visible, 'the wave card showed through the open weapon wheel');
+      g.keys.TAB.isDown = false; T.run(50);
+      expect(hud.wcTitle.visible, 'the wave card did not come back when the wheel closed');
+      window.dispatchEvent(new Event('blur')); T.run(50);
+      expect(g.paused && hud.pauseOn, 'a window blur did not pause the run');
+      hud.pausePick(row('resume')); T.run(50);
+      const flash = OPTS.flash; OPTS.flash = 0; hud.flashA = 0; hud.onFlash(0.3);
+      expect(Math.abs(hud.flashA - 0.075) < 1e-9, `a REDUCED flash came out at ${hud.flashA}`);
+      OPTS.flash = flash;
+      expect(!Sfx.muted, 'fixture: a fresh profile starts muted');
+      g.keys.M.isDown = true; g.keys.M._justDown = true; T.run(17); g.keys.M.isDown = false;
+      expect(Sfx.muted && localStorage.getItem('slaghouse.muted') === '1', 'M did not mute and remember it');
+      T.run(17);
+      expect(hud.lblMute.visible, 'the HUD showed no MUTED marker');
+      g.pauseGame(); T.run(50);
+      expect(hud.pItems[row('music')]._text === 'MUSIC: MUTED' && hud.pItems[row('sfx')]._text === 'SFX: MUTED', `the pause menu volume rows read ${hud.pItems[row('music')]._text} / ${hud.pItems[row('sfx')]._text}`);
+      hud.pSel = row('music'); hud.pStep(row('music'), -1, false);
+      expect(!Sfx.muted && localStorage.getItem('slaghouse.muted') === '0', 'changing a volume while muted did not unmute');
+      return [...fails, ...T.errs];
+    });
+  });
   await check('two tabs: lifetime stats, codex and campaign save', async ctx => {
     const page = await open(ctx, ['twotab']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return TT.check(); })).fails;
