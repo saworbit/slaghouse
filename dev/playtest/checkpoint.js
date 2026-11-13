@@ -251,11 +251,15 @@ window.CP = (() => {
       T.run(150);
       T.trig(true);
       for (let shot = 0; shot < 70 && linker.alive; shot++) {
+        // Keep the test in its firing lane when return fire knocks the gravity-free player away.
+        player.reset(firingX, 187);
         T.aimAt(linker.body.center.x, linker.body.center.y);
         T.run(50);
       }
       T.trig(false);
-      expect(!linker.alive && g.stats.kills === 1, `the player could not clear the Linker from the ${bay} lane with normal fire`);
+      const target = `(${Math.round(linker.body.center.x)}, ${Math.round(linker.body.center.y)})`;
+      expect(!linker.alive && g.stats.kills === 1,
+        `the player could not clear the Linker from the ${bay} lane with normal fire: ${g.stats.hits}/${g.stats.shots} shots hit, ${linker.hp} HP at ${target}`);
     }
     return { fails };
   };
