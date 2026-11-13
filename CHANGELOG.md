@@ -50,6 +50,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+- Split later Furnace squads into pairs and stop the vents and rain before the final encounters. The campaign
+  Gunship gives longer warnings, fires shorter bursts with recovery time, and drops one grunt.
+- Wall jumps accept buffered input while rising or falling. A stronger upward kick and faster steering make
+  it easier to clear a ledge or redirect in the air.
 - **Campaign pacing.** The first five operations build from two to six foes per squad while shortening
   reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
   more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
@@ -87,6 +91,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Opened the upper catwalks in the Furnace and Sorting Line and added steps to upper decks in the Wrecking
+  Yard and Powerhouse.
 - Floor fire, electrified water, and sustained prop jets share a damage interval in Blackout, Slag Rain, and
   Gravity Loss. The interval shortens each round, and a ladle's stream and overlapping pools can't hit all at once.
 - Ground fires go out when a campaign round clears. Late explosions and fire patches can no longer damage the
