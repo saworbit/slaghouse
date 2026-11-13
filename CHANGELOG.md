@@ -50,17 +50,18 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
 
 ### Changed
+- Refreshed the player and enemy sprites, including the Gunship and its wreck. (#77)
 - Hold toward a wall for a shorter sideways kick, so repeated wall jumps can climb the same wall.
-- Slag Rain gives two extra seconds to reposition after the Demolition Team and before the Gunship.
+- Slag Rain gives 6.2 seconds to find cover after the Demolition Team clears and before the Gunship arrives.
 - Split later Furnace squads into pairs and stop the vents and rain before the final encounters. The campaign
   Gunship gives longer warnings, fires shorter bursts with recovery time, and drops one grunt. The campaign
   Juggernaut gives a longer warning before its minigun and takes longer to spin it up again.
 - Wall jumps accept buffered input while rising or falling. A stronger upward kick and faster steering make
   it easier to clear a ledge or redirect in the air.
-- **Campaign pacing.** The first five operations build from two to six foes per squad while shortening
-  reinforcement breaks and raising incoming damage in steps. The first heavy enters alone, slag rain gives
-  more time to reach cover and clears before the Gunship, and Gravity Loss brings in the Hounds in separate squads.
-  Lockdown and Slag Rain restore a minimum amount of health after a clear.
+- **Campaign pacing.** Start with a two-grunt patrol and meet squads of up to six by Sorting Shift.
+  The Furnace introduces later threats in pairs and gives bosses longer preparation breaks.
+  Incoming damage rises in steps through the first five operations. Lockdown and Slag Rain restore a
+  minimum amount of health after a clear.
 - Later campaign squads wait for the current fight to end. Meltdown separates presses, rising slag and the
   Wyrm. Demolition and Live Circuit give players time to reach safe ground before the wrecking ball or rails
   activate. The Foreman and Smelter start their arena machinery in phase two.
