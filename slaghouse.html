@@ -11170,6 +11170,7 @@ class GameScene extends Phaser.Scene {
     BUS.emit('callout', 'RAMPAGE!'); BUS.emit('flash', 0.35); Sfx.rampage();
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
+  modOn(m) { return this.mod === m || this.mutator === m; }             // a scripted hazard, or MOON BOOTS / LIGHTS OUT for the whole run
   applyMod(m) {                                                         // wave modifiers: chaos with rules
     if (this.campaign && this.mod === 'slag' && m !== 'slag') {
       for (const s of this.slagList) if (s.active && s.rain) {
@@ -11181,7 +11182,7 @@ class GameScene extends Phaser.Scene {
     const rainLead = this.campaign ? 3 : 1.5;
     this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
     this.rainPhaseT = rainLead + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
-    this.physics.world.gravity.y = m === 'lowg' ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;
+    this.physics.world.gravity.y = this.modOn('lowg') ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;   // a hazard starting or clearing keeps the mutator's
     if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
   }
   updateSlagRain(dt) {                                                  // molten drips from the ceiling in showers, marked where they'll land
@@ -18836,7 +18837,7 @@ class GameScene extends Phaser.Scene {
       for (let i = 1; i < n; i++) this.laserG.fillStyle(i % 2 ? 0xc8d0d8 : 0x8a94a0, 1).fillRect(Math.round(gx + (hk.x - gx) * i / n) - 1, Math.round(gy + (hk.y - gy) * i / n) - 1, 2, 2);
       this.hookImg.setVisible(true).setPosition(hk.x, hk.y).setRotation(Math.atan2(hk.y - gy, hk.x - gx));
     } else this.hookImg.setVisible(false);
-    const dT = this.mod === 'dark' && this.state !== 'dead' ? 1 : 0;      // blackout: vision shrinks to a pool round you; gunfire strobes it wider
+    const dT = this.modOn('dark') && this.state !== 'dead' ? 1 : 0;       // blackout: vision shrinks to a pool round you; gunfire strobes it wider
     this.darkA += (dT - this.darkA) * Math.min(1, Math.min(this.game.loop.delta || 16.7, 50) / 1000 * 1.5);
     if (this.darkA > 0.01) this.darkImg.setVisible(true).setAlpha(this.darkA * (0.92 + Math.random() * 0.08)).setScale(now < this.mflashUntil ? 1.3 : 1).setPosition(this.pv.x, this.pv.y - 12);
     else this.darkImg.setVisible(false);

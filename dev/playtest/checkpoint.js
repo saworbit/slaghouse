@@ -230,6 +230,34 @@ window.CP = (() => {
     return { fails };
   };
 
+  // MOON BOOTS and LIGHTS OUT promise every wave: Slag Rain's scripted rain starting and clearing must not drop them.
+  CP.mutatorHazards = () => {
+    const [fails, expect] = checker();
+    for (const id of ['lowg', 'dark']) {
+      Math.random = seeded(426);
+      OPTS.mut = MUTATORS.findIndex(m => m.id === id);
+      const [g] = startFromTitle(1);
+      g.scene.restart({ arena: 1 }); T.run(100);
+      g.time.removeAllEvents();
+      const alive = () => g.enemies.getChildren().filter(e => e.alive);
+      const clear = () => { for (const e of alive()) g.killEnemy(e, 1, 0, 'nail'); };
+      const on = () => (id === 'lowg' ? g.physics.world.gravity.y === TUNE.GRAVITY * 0.5 : g.darkA > 0.5);
+      const name = MUTATORS[OPTS.mut].name, rainBreak = CAMPAIGN[2].breakMs;
+      g.startWave(2); T.run(4200);
+      expect(on(), `${name} was off in the Slag Rain opener (mod ${g.mod})`);
+      clear(); T.run(rainBreak + 2700);
+      expect(g.mod === 'slag' && on(), `${name} was off once the Salvage Crew brought the rain (mod ${g.mod})`);
+      clear(); T.run(rainBreak + 2700);
+      clear(); T.run(1500);
+      expect(g.mod === null && on(), `${name} was off after the rain cleared for the Demolition Team (mod ${g.mod})`);
+      T.run(rainBreak + 1200); clear(); T.run(5600);
+      expect(on(), `${name} was off in the break before the Gunship (mod ${g.mod})`);
+      g.quitToTitle(); T.run(300);
+    }
+    OPTS.mut = 0;
+    return { fails };
+  };
+
   CP.linkerRecovery = () => {
     const [fails, expect] = checker();
     RUNMODE = 'campaign'; OPTS.diff = 1;
