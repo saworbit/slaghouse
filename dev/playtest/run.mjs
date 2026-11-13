@@ -138,6 +138,10 @@ try {
     const page = await open(ctx, ['props']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return PR.check(); })).fails;
   });
+  await check('early campaign prop contact damage on Normal', async ctx => {
+    const page = await open(ctx, ['props']);
+    return page.evaluate(() => PR.campaignContactDamage());
+  });
   let saved = null;
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {
     let page = await open(ctx, ['checkpoint']);

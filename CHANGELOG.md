@@ -87,6 +87,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Floor fire, electrified water, and sustained prop jets share a damage interval in Blackout, Slag Rain, and
+  Gravity Loss. The interval shortens each round, and a ladle's stream and overlapping pools can't hit all at once.
 - Ground fires go out when a campaign round clears. Late explosions and fire patches can no longer damage the
   player while choosing a perk or waiting for the next round.
 - A Gunship wreck that lands after the campaign round clears can no longer start new fires, including after
