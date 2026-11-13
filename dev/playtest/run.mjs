@@ -467,6 +467,10 @@ try {
     const page = await open(ctx, ['props']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return PR.check(); })).fails;
   });
+  await check('spills stop at a ledge, and electric hits light spilt water', async ctx => {
+    const page = await open(ctx, ['props']);
+    return page.evaluate(() => PR.spills());
+  });
   await check('early campaign prop contact damage on Normal', async ctx => {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.campaignContactDamage());

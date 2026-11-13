@@ -224,8 +224,10 @@
       Window 12 ......... cracks, then shatters: glass rains 18 on whoever is below.
       PA horn 12 ........ a feedback shriek: stuns and shoves foes in 104 px and breaks any glass in earshot.
       Water tank 40 ..... leaks where shot; bursts in a wave (shoves, puts fires out) and floods the floor for 12 s.
-                          Water conducts: a fuse box, capacitor or terminal going off near it, or a live rail
-                          under it, electrifies the puddle (10 + stun a tick to foes in it, 5 to you).
+                          Water conducts: a fuse box, capacitor or terminal going off near it, a live rail under
+                          it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker link, Arc Pylon,
+                          Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle (10 + stun a
+                          tick to foes in it, 5 to you).
       Fire cooks off the propane, oil, ammo and flares: a flame jet, fire puddle, burning foe or flare near them.
       In the campaign's BLACKOUT, SLAG RAIN and GRAVITY LOSS, your hits from fire puddles, live puddles, the propane
                           jet, boiler steam and the ladle's pour share one interval (hazardContactMs: 500 / 425 / 350 ms).
@@ -7865,6 +7867,7 @@ class GameScene extends Phaser.Scene {
     }
     if (Math.random() < 0.5) this.fxSparks(ex, ey, 2, a + Math.PI, 2, [40, 140]);
     if (Math.random() < 0.3) this.spawnLight(ex, ey, 'glow', 0x6ad0ff, 0.8, 1.3, 0.8, 0.08);
+    if (this.waters.length) for (const [x0, y0, x1, y1] of segs) this.electrifyLine(x0, y0, x1, y1, 24);   // an arc that reaches a puddle lights it
     this.arcSegs = segs; this.arcUntil = now + 70;
     this.shake(30, 0.0008);
   }
@@ -8220,7 +8223,7 @@ class GameScene extends Phaser.Scene {
   slagImpact(x, y, rain) {                                              // rain burns and shoves but leaves floors and drums alone, so a shower can't dig you into a pit
     this.explode(x, y, rain ? this.rainBlast || (this.rainBlast = { ...TUNE.BOSS.slag, tileDamage: 0, drums: false }) : TUNE.BOSS.slag);
     if (rain && this.campaign && this.mod !== 'slag') return;           // the impact itself can clear the squad and end the rain
-    for (let yy = y; yy < y + 40; yy += 2) if (this.standAt(x, yy)) { const sy = Math.floor(yy / TS) * TS; this.puddles.push({ x, y: sy, w: 34, t: 2.6, tick: 0.2, rain }); this.paintScorch(x, sy + 2, 10); break; }
+    for (let yy = y; yy < y + 40; yy += 2) if (this.standAt(x, yy)) { const sy = Math.floor(yy / TS) * TS, [px, pw] = this.spanOn(x, sy, 34); this.puddles.push({ x: px, y: sy, w: pw, t: 2.6, tick: 0.2, rain }); this.paintScorch(x, sy + 2, 10); break; }
   }
 
   // ------------------------------------------------------------------- ticks ----
@@ -8954,7 +8957,10 @@ class GameScene extends Phaser.Scene {
     if (e.kind === 'wraith') { this.fx.emit(cx, cy, { n: 26, speed: [30, 140], life: [0.4, 0.9], size: [3, 1], cols: [0xffffff, 0xd8c8ff, 0x8a6ad0], add: true, g: -80 }); this.spawnLight(cx, cy, 'glow', 0xb090ff, 1.2, 0.3, 0.8, 0.3); Sfx.wail(0.6); }
     if (e.gravT > 0 || e.gravSlam) { e.gravT = 0; e.gravSlam = false; b.setAllowGravity(true); e.rotation = 0; }
     if (e.kind === 'leech' && e.ai === 'latched') this.leechN = Math.max(0, (this.leechN || 0) - 1);
-    if (e.kind === 'slug') for (let i = 0; i < 3; i++) this.acids.push({ x: cx + rand(-12, 12), y: e.body.bottom, w: 18, t: TUNE.SLUG.pool * 1.5 });
+    if (e.kind === 'slug') for (let i = 0; i < 3; i++) {
+      const ax = cx + rand(-12, 12), fy = this.floorBelow(ax, e.body.bottom - 6, 40);
+      if (fy !== null) { const [px, pw] = this.spanOn(ax, fy, 18); this.acids.push({ x: px, y: fy, w: pw, t: TUNE.SLUG.pool * 1.5 }); }
+    }
     if (e.kind === 'echo') { this.fx.emit(cx, cy, { n: 30, speed: [30, 160], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0x9af0ff, 0x46b8f0], add: true }); this.spawnLight(cx, cy, 'player', 0x60e0ff, 1, 1.4, 0.6, 0.3, e.fr, e.dir < 0); }
     if (e.kind === 'pilferer') { if (e.gunImg) e.gunImg.destroy(); if (e.stolen >= 0) { this.locked.delete(e.stolen); BUS.emit('locked', [...this.locked]); BUS.emit('callout', 'GUN RECOVERED'); this.addStyle(40); } }
     if (e.kind === 'golem') { this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.time.delayedCall(60, () => { this.explode(cx, cy, TUNE.GOLEM.scrap); for (let i = 0; i < 10; i++) { const b = this.spawnBullet('shard', cx, cy - 6, i / 10 * Math.PI * 2 + rand(-0.2, 0.2), rand(220, 340), 9, 0.5); if (b) { b.bounces = 1; b.free = true; } } BUS.emit('callout', 'SCRAPPED'); }); }
@@ -9526,7 +9532,7 @@ class GameScene extends Phaser.Scene {
       const pb = this.player.body;
       if (this.state !== 'dead' && x > pb.left - 6 && x < pb.right + 6 && y > pb.top - 6 && y < pb.bottom + 6) { this.hurtPlayer(6, x, { knock: false, srcY: y }); this.pCorrodeT = TUNE.SLUG.corrode; }
       this.fx.emit(x, y, { n: 12, speed: [40, 140], life: [0.3, 0.6], size: [2, 1], cols: [0xe0ff90, 0x9aff4a, 0x4aa020], add: true, g: 500, mode: 1 });
-      const fy = this.floorBelow(x, y - 4); if (fy !== null && fy - y < 60) this.acids.push({ x, y: fy, w: 22, t: TUNE.SLUG.pool });
+      const fy = this.floorBelow(x, y - 4); if (fy !== null && fy - y < 60) { const [px, pw] = this.spanOn(x, fy, 22); this.acids.push({ x: px, y: fy, w: pw, t: TUNE.SLUG.pool }); }
       Sfx.squelch(); return;
     }
     if (p.pk === 'scrap') { p.disableBody(true, true); p.glow.setVisible(false); this.explode(x, y, TUNE.GOLEM.scrap); for (let i = 0; i < 3; i++) this.spawnGib('g_shard', x, y - 2, rand(-120, 120), rand(-220, -100), 'metal'); return; }
@@ -10293,9 +10299,17 @@ class GameScene extends Phaser.Scene {
   }
   addZap(x0, y0, x1, y1, t, c0 = 0x4ab8ff, c1 = 0xe8f8ff) { this.zaps.push({ x0, y0, x1, y1, t, c0, c1 }); }
   electrifyWater(x, y, r) {
-    let lit = false;
-    for (const W of this.waters) if (Math.hypot(Math.max(0, Math.abs(W.x - x) - W.w / 2), W.y - y) < r) { if (W.zap <= 0) this.addZap(x, y, clamp(x, W.x - W.w / 2, W.x + W.w / 2), W.y - 1, 0.15); W.zap = Math.max(W.zap, 1.8); lit = true; }
-    if (lit) Sfx.zap();
+    let lit = false, fresh = false;                                    // fresh: a puddle that wasn't live yet (only that crackles, so a held beam doesn't buzz)
+    for (const W of this.waters) if (Math.hypot(Math.max(0, Math.abs(W.x - x) - W.w / 2), W.y - y) < r) { if (W.zap <= 0) { this.addZap(x, y, clamp(x, W.x - W.w / 2, W.x + W.w / 2), W.y - 1, 0.15); fresh = true; } W.zap = Math.max(W.zap, 1.8); lit = true; }
+    if (fresh) Sfx.zap();
+    return lit;
+  }
+  electrifyLine(x0, y0, x1, y1, r) {                                   // a beam or bolt lights a puddle it ends in or passes through
+    let lit = this.electrifyWater(x1, y1, r);
+    for (const W of this.waters) if ((y0 - W.y) * (y1 - W.y) < 0) {
+      const xc = x0 + (x1 - x0) * (W.y - y0) / (y1 - y0);
+      if (Math.abs(xc - W.x) <= W.w / 2) lit = this.electrifyWater(xc, W.y, 4) || lit;
+    }
     return lit;
   }
   spanOn(x, fy, w) {                                                   // a spill only covers the floor it lands on
@@ -10770,7 +10784,7 @@ class GameScene extends Phaser.Scene {
       G.fillStyle(0xc0340a, 0.9).fillRect(lx - 2 * k + wb, ly, 4 * k, fy - ly); G.fillStyle(0xff8a20, 1).fillRect(lx - 1.2 * k + wb, ly, 2.4 * k, fy - ly); G.fillStyle(0xffe68a, 1).fillRect(lx - 0.5 + wb, ly, 1, fy - ly);
       this.fx.emit(lx, fy - 1, { n: 3, angle: -Math.PI / 2, spread: 1.6, speed: [60, 180], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20, 0xc03010], add: true, g: 500, mode: 1 });
       if (Math.random() < 0.3) this.spawnLight(lx, fy - 4, 'glow', 0xff7a20, 1.4, 2.2, 0.6, 0.12);
-      if ((p.pudT -= dt) <= 0) { p.pudT = 0.5; this.puddles.push({ x: lx, y: fy, w: 30, t: 3.2, tick: 0.1, fire: true }); this.paintScorch(lx, fy + 2, 8); if (Math.random() < 0.5) Sfx.sizzle(); }
+      if ((p.pudT -= dt) <= 0) { p.pudT = 0.5; if (fy < LH) { const [px, pw] = this.spanOn(lx, fy, 30); this.puddles.push({ x: px, y: fy, w: pw, t: 3.2, tick: 0.1, fire: true }); } this.paintScorch(lx, fy + 2, 8); if (Math.random() < 0.5) Sfx.sizzle(); }
       if ((p.tick2 -= dt) <= 0) {
         p.tick2 = 0.15; const pb = this.player.body;
         for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right > lx - 5 && b.left < lx + 5 && b.bottom > ly && b.top < fy) { this.ignite(e, 2.5); this.propHurt(p, e, 8, 0, 1, 'flame'); } }
@@ -10792,7 +10806,7 @@ class GameScene extends Phaser.Scene {
     const fy = Math.floor((p.y + 18) / TS) * TS, x = p.x;
     p.y = fy - 18; p.rot = -p.dir * 0.22;
     this.explode(x, fy - 6, PROP_BLAST.slag);
-    this.puddles.push({ x, y: fy, w: 40, t: 4, tick: 0.1, fire: true }); this.paintScorch(x, fy + 2, 14);
+    { const [px, pw] = this.spanOn(x, fy, 40); this.puddles.push({ x: px, y: fy, w: pw, t: 4, tick: 0.1, fire: true }); } this.paintScorch(x, fy + 2, 14);
     for (let k = 0; k < 8; k++) this.spawnGib(k % 2 ? 'g_slag' : 'g_crust', x, fy - 6, rand(-220, 220), rand(-320, -100), 'slag');
     Sfx.smash('x'); this.shake(180, 0.008);
     this.wreckProp(p, 3); p.cool = 6;
@@ -11375,7 +11389,8 @@ class GameScene extends Phaser.Scene {
   spawnFirePatch(x, y) {
     for (let yy = y - 4; yy < y + 70; yy += 2) if (this.standAt(x, yy)) {
       const sy = Math.floor(yy / TS) * TS;
-      this.puddles.push({ x, y: sy, w: 38, t: 4, tick: 0.15, fire: true }); this.paintScorch(x, sy + 2, 12); Sfx.ignite();
+      const [px, pw] = this.spanOn(x, sy, 38);
+      this.puddles.push({ x: px, y: sy, w: pw, t: 4, tick: 0.15, fire: true }); this.paintScorch(x, sy + 2, 12); Sfx.ignite();
       return;
     }
   }
@@ -13135,10 +13150,10 @@ class GameScene extends Phaser.Scene {
   // a blast, burning bodies, fire puddles) lights a puddle into a long burn, and it spreads to touching tar.
   spawnTarPatch(x, y, w = 40) {
     for (let yy = y - 4; yy < y + 70; yy += 2) if (this.standAt(x, yy)) {
-      const sy = Math.floor(yy / TS) * TS;
-      const P = this.tars.find(q => Math.abs(q.y - sy) < 2 && Math.abs(q.x - x) < (q.w + w) / 2);
-      if (P) { const l = Math.min(P.x - P.w / 2, x - w / 2), r = Math.max(P.x + P.w / 2, x + w / 2); P.x = (l + r) / 2; P.w = Math.min(110, r - l); P.t = Math.max(P.t, 14); }
-      else this.tars.push({ x, y: sy, w, t: 14, grow: 0, bub: rand(0.2, 0.8), seed: Math.random() * 1000, gone: false });
+      const sy = Math.floor(yy / TS) * TS, [sx, sw] = this.spanOn(x, sy, w);
+      const P = this.tars.find(q => Math.abs(q.y - sy) < 2 && Math.abs(q.x - sx) < (q.w + sw) / 2);
+      if (P) { const l = Math.min(P.x - P.w / 2, sx - sw / 2), r = Math.max(P.x + P.w / 2, sx + sw / 2); [P.x, P.w] = this.spanOn((l + r) / 2, sy, Math.min(110, r - l)); P.t = Math.max(P.t, 14); }
+      else this.tars.push({ x: sx, y: sy, w: sw, t: 14, grow: 0, bub: rand(0.2, 0.8), seed: Math.random() * 1000, gone: false });
       this.fx.emit(x, sy - 1, { n: 10, angle: -Math.PI / 2, spread: 1.6, speed: [40, 140], life: [0.3, 0.6], size: [2, 1], cols: [0x2a2018, 0x140e0a, 0x4a3c30], g: 600, mode: 1 });
       Sfx.splat(1);
       return;
@@ -13281,7 +13296,7 @@ class GameScene extends Phaser.Scene {
     e.spinA += b.velocity.x * dt * 0.12;
     if (onG && Math.abs(e.x - e.lastTrailX) >= 18) {                      // the fire trail
       e.lastTrailX = e.x; const fy = Math.floor((b.bottom + 2) / TS) * TS;
-      if (this.standAt(e.x, fy + 2)) this.puddles.push({ x: e.x, y: fy, w: 14, t: T.trail, tick: 0.2, fire: true });
+      if (this.standAt(e.x, fy + 2)) { const [px, pw] = this.spanOn(e.x, fy, 14); this.puddles.push({ x: px, y: fy, w: pw, t: T.trail, tick: 0.2, fire: true }); }
     }
   }
 
@@ -14101,6 +14116,7 @@ class GameScene extends Phaser.Scene {
         const y0 = b.bottom, y1 = e.strikeY, hw = T.w / 2;
         this.pylonZaps.push({ x0: e.x, y0, x1: e.x + rand(-3, 3), y1, t: now }); this.spawnLight(e.x, y1, 'glow', 0xa0c8ff, 1.6, 0.4, 0.9, 0.25); this.paintScorch(e.x, y1 + 2, 7);
         Sfx.thunder(); BUS.emit('flash', 0.12); this.shake(140, 0.006); this.fxSparks(e.x, y1 - 2, 10, -Math.PI / 2, 1.4, [60, 200]);
+        this.electrifyLine(e.x, y0, e.x, y1, 28);                        // a strike on a puddle lights it, under the player too
         if (alive && this.state !== 'dead' && Math.abs(pb.center.x - e.x) < hw + pb.halfWidth && pb.bottom > y0 && pb.top < y1) this.hurtPlayer(T.dmg, e.x, { srcY: y0 });
         for (const o of this.enemies.getChildren()) if (o.alive && o !== e && Math.abs(o.body.center.x - e.x) < hw + o.body.halfWidth && o.body.bottom > y0 && o.body.top < y1) this.damageEnemy(o, T.edmg, 0, 1, 'arc');
         for (const k of this.barrelList) if (k.active && Math.abs(k.x - e.x) < hw + 4 && k.y > y0 && k.y < y1 + 4) this.igniteBarrel(k);
@@ -14297,6 +14313,7 @@ class GameScene extends Phaser.Scene {
         const pb = this.player.body, ok = alive && this.state !== 'dead' && Math.hypot(pb.center.x - e.x, pb.center.y - top) < T.range && this.los(e.x, top, pb.center.x, pb.center.y);
         const x1 = ok ? pb.center.x : e.x + clamp(dx, -T.range, T.range) * 0.7, y1 = ok ? pb.center.y : (this.floorBelow(x1, b.top) || b.bottom);
         this.pylonZaps.push({ x0: e.x, y0: top, x1, y1, t: now }); Sfx.pylonZap(); this.shake(90, 0.005); this.spawnLight(x1, y1, 'glow', 0x80c8ff, 1.2, 0.3, 0.9, 0.2);
+        this.electrifyLine(e.x, top, x1, y1, 28);
         if (ok) this.hurtPlayer(T.dmg, e.x, { srcY: top });
         for (const o of this.enemies.getChildren()) if (o.alive && o !== e && Math.hypot(o.body.center.x - x1, o.body.center.y - y1) < 40) { this.pylonZaps.push({ x0: x1, y0: y1, x1: o.body.center.x, y1: o.body.center.y, t: now }); this.damageEnemy(o, T.chain, 0, -1, 'arc'); }
       }
@@ -14992,7 +15009,7 @@ class GameScene extends Phaser.Scene {
     if (onG && Math.abs(e.x - e.lastTrailX) >= 14) {                    // a trail of fire behind it
       e.lastTrailX = e.x;
       const fy = Math.floor((b.bottom + 2) / TS) * TS;
-      if (this.standAt(e.x, fy + 2)) { this.puddles.push({ x: e.x, y: fy, w: 16, t: T.trail, tick: 0.2, fire: true }); this.paintScorch(e.x, fy + 2, 6); }
+      if (this.standAt(e.x, fy + 2)) { const [px, pw] = this.spanOn(e.x, fy, 16); this.puddles.push({ x: px, y: fy, w: pw, t: T.trail, tick: 0.2, fire: true }); this.paintScorch(e.x, fy + 2, 6); }
     }
     if (now >= e.aiUntil || !alive) { e.ai = 'rest'; e.aiUntil = now + T.rest * 1000; }
   }
@@ -15154,7 +15171,8 @@ class GameScene extends Phaser.Scene {
   }
   spawnIce(x, y, w) {
     const fy = this.floorBelow(x, y - 4); if (fy === null || fy - y > 70) return;
-    for (const I of this.ices) if (Math.abs(I.y - fy) < 4 && Math.abs(I.x - x) < (I.w + w) / 2 - 10) { I.x = (I.x + x) / 2; I.w = Math.min(160, Math.max(I.w, w) + 20); I.t = TUNE.CHILLER.iceT; return; }   // joins a sheet it lands on
+    [x, w] = this.spanOn(x, fy, w);
+    for (const I of this.ices) if (Math.abs(I.y - fy) < 4 && Math.abs(I.x - x) < (I.w + w) / 2 - 10) { [I.x, I.w] = this.spanOn((I.x + x) / 2, fy, Math.min(160, Math.max(I.w, w) + 20)); I.t = TUNE.CHILLER.iceT; return; }   // joins a sheet it lands on
     this.ices.push({ x, y: fy, w, t: TUNE.CHILLER.iceT, grow: 0, glint: rand(0, 6) });
   }
   updateIces(dt, now) {
@@ -15650,7 +15668,12 @@ class GameScene extends Phaser.Scene {
     if (alive && !e.aggro && (e.sees || dist < 180) && dist < e.def.sight) this.alertEnemy(e, now);
     if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'crawl';
     e.spitCd -= dt;
-    if (onG && (e.trailT -= dt) <= 0) { e.trailT = T.trail; this.acids.push({ x: b.center.x - e.dir * 4, y: b.bottom, w: 14, t: T.pool }); if (this.acids.length > 60) this.acids.shift(); }
+    if (onG && (e.trailT -= dt) <= 0) {
+      e.trailT = T.trail;
+      const tx = b.center.x - e.dir * 4, fy = this.floorBelow(tx, b.bottom - 4, 12);
+      if (fy !== null) { const [px, pw] = this.spanOn(tx, fy, 14); this.acids.push({ x: px, y: fy, w: pw, t: T.pool }); }
+      if (this.acids.length > 60) this.acids.shift();
+    }
     if (e.ai === 'spit') { b.velocity.x = 0; e.fr = 'spit'; if (now >= e.aiUntil) { this.slugSpit(e); e.ai = 'crawl'; e.spitCd = T.spitCd * rand(0.8, 1.2); } return; }
     if (e.stunT > 0) return;
     if (e.aggro && alive) {
@@ -16089,6 +16112,7 @@ class GameScene extends Phaser.Scene {
       const a = sp[i], c = sp[j], ax = a.x, ay = a.y - 3, cx = c.x, cy = c.y - 3;
       if (Math.hypot(cx - ax, cy - ay) > T.link || !this.los(ax, ay, cx, cy)) continue;
       this.sparkLinks.push([ax, ay, cx, cy]);
+      if (this.waters.length) { const n = Math.ceil(Math.hypot(cx - ax, cy - ay) / 12); for (let k = 0; k <= n; k++) this.electrifyWater(ax + (cx - ax) * k / n, ay + (cy - ay) * k / n, 10); }
       if (this.state !== 'dead' && now > this.sparkHitT && this.segDist(pb.center.x, pb.center.y, ax, ay, cx, cy)[0] < 8) {
         this.sparkHitT = now + 500; this.hurtPlayer(T.dmg, pb.center.x, { knock: false }); Sfx.zap(); this.fxSparks(pb.center.x, pb.center.y, 6, 0, Math.PI * 2, [60, 160]);
       }
@@ -16384,6 +16408,7 @@ class GameScene extends Phaser.Scene {
     for (let i = this.empRings.length - 1; i >= 0; i--) {
       const R2 = this.empRings[i]; R2.r += T.ring * dt;
       if (R2.r >= T.reach) { this.empRings.splice(i, 1); continue; }
+      if (this.waters.length) this.electrifyWater(R2.x, R2.y, R2.r);
       if (!R2.hitP && this.state !== 'dead' && Math.abs(Math.hypot(pb.center.x - R2.x, pb.center.y - R2.y) - R2.r) < 10) {
         R2.hitP = true;
         if (now < this.dashIUntil) { this.dashDodge(); continue; }              // dashed through the ring
@@ -16722,6 +16747,7 @@ class GameScene extends Phaser.Scene {
     this.shockBeams.push({ x0: ox, y0: oy, x1: ex, y1: ey, t: 0, dur: combo ? 0.3 : 0.18, combo: !!combo });
     Sfx.shockBeam(); this.recoil = 6; this.addKick(-ca * 4, -sa * 4); this.shake(80, 0.004); this.muzzle(mx, my, a, 1, 50);
     this.spawnLight(ex, ey, 'glow', 0x9ae8ff, 0.6, 1.4, 0.9, 0.12);
+    this.electrifyLine(ox, oy, ex, ey, 24);
     if (combo) this.shockCombo(combo);
     else if (hitE) {
       const hs = isHumanoid(hitE) && ey < hitE.body.top + 5; this.stats.hits++;
@@ -16732,7 +16758,7 @@ class GameScene extends Phaser.Scene {
   shockCombo(o) {
     const now = this.time.now, x = o.x, y = o.y;
     this.removeShockOrb(o);
-    this.explode(x, y, TUNE.SHOCK_COMBO);
+    this.explode(x, y, TUNE.SHOCK_COMBO); this.electrifyWater(x, y, 40);
     this.spawnLight(x, y, 'ring', 0x80f0ff, 0.3, 3.4, 1, 0.35); this.spawnLight(x, y, 'glow', 0x60d0ff, 2, 5, 1, 0.3);
     for (let i = 0; i < 8; i++) { const th = i / 8 * Math.PI * 2; this.fx.emit(x, y, { n: 3, angle: th, spread: 0.2, speed: [160, 320], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0x9ae8ff, 0x4080ff], add: true, drag: 1 }); }
     BUS.emit('callout', 'SHOCK COMBO!'); BUS.emit('flash', 0.3); this.impactFrame(3); if (++this.ms.combos >= 3) this.award('jockey'); this.zoomPunch = Math.max(this.zoomPunch, 0.09);
@@ -16747,7 +16773,7 @@ class GameScene extends Phaser.Scene {
       if (Math.random() < 0.5) this.fx.emit(o.x, o.y, { n: 1, speed: [0, 15], life: [0.15, 0.3], size: [2, 1], cols: [0xffffff, 0x9ae8ff, 0x40a0ff], add: true });
     }
   }
-  shockPop(o, x, y) { this.removeShockOrb(o); this.explode(x, y, TUNE.SHOCK_ORB); Sfx.zap(); this.spawnLight(x, y, 'ring', 0x80f0ff, 0.2, 1.2, 0.9, 0.18); }
+  shockPop(o, x, y) { this.removeShockOrb(o); this.explode(x, y, TUNE.SHOCK_ORB); this.electrifyWater(x, y, 32); Sfx.zap(); this.spawnLight(x, y, 'ring', 0x80f0ff, 0.2, 1.2, 0.9, 0.18); }
   removeShockOrb(o) { const i = this.shockOrbs.indexOf(o); if (i >= 0) this.shockOrbs.splice(i, 1); o.img.destroy(); o.glow.destroy(); }
 
   // ---------------------------------------------------------------- needler ----
