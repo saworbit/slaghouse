@@ -11839,6 +11839,17 @@ class GameScene extends Phaser.Scene {
       ty = P ? e.trackY + (e.phase === 'live' ? Math.sin(now / 520) * 12 : -4) : pb.top - 40 + Math.sin(e.t * 2) * 8;
       if (this.solidAt(tx, ty)) ty -= 18;
     } else { tx = e.homeX + Math.sin(e.t * 0.7) * 24; ty = e.homeY + Math.sin(e.t * 1.7) * 6; }
+    if (this.campaign && this.A.id === 2 && this.wave === 3) {
+      const catwalkY = 10 * TS;
+      ty = Math.max(ty, catwalkY + TS + b.halfHeight + 3);
+      // Commit to the opening in this bay until the entire Linker clears the underside.
+      if (b.top >= catwalkY + TS) e.catwalkExit = null;
+      else if (b.center.y < catwalkY && e.catwalkExit == null) {
+        const exit = b.center.x < 42 * TS ? 35 : b.center.x < 57 * TS ? 50 : 61;
+        e.catwalkExit = (exit + 0.5) * TS;
+      }
+      tx = e.catwalkExit ?? tx;
+    }
     if (e.stunT <= 0) { const k = Math.min(1, dt * 2.4), sp = T.speed; b.velocity.x += (clamp((tx - b.center.x) * 2, -sp, sp) - b.velocity.x) * k; b.velocity.y += (clamp((ty - b.center.y) * 2, -sp, sp) - b.velocity.y) * k; }
     else { const f = Math.pow(0.05, dt); b.velocity.x *= f; b.velocity.y *= f; }
     e.dir = P ? (P.x >= e.x ? 1 : -1) : (dx >= 0 ? 1 : -1);             // prongs face the partner

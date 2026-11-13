@@ -94,6 +94,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+- Gravity Loss Linkers stay below the Furnace catwalk. If pushed above it, they fly back down through a nearby opening.
 - Opened the upper catwalks in the Furnace and Sorting Line and added steps to upper decks in the Wrecking
   Yard and Powerhouse.
 - Floor fire, electrified water, and sustained prop jets share a damage interval in Blackout, Slag Rain, and
