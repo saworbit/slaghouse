@@ -150,8 +150,8 @@ campaign clears it. A campaign left running in another tab keeps playing but sto
 
 Press **R** after defeat to retry the saved act. During play, press **R** twice within two seconds; the first
 press only shows a prompt. In Act I or after victory, **R** starts a fresh run. The pause menu shows **Retry Act**
-when a checkpoint is available. **Retry Act**, **Restart** and **Quit to Title** each need a second pick to confirm. Speedrunner requires a clear under
-10 minutes without using **Continue** or retrying from a checkpoint.
+when a checkpoint is available. **Retry Act**, **Restart** and **Quit to Title** each need a second pick to
+confirm. Speedrunner requires a clear under 10 minutes without using **Continue** or retrying from a checkpoint.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
 a boss every sixth (the Smelter and THE FOREMAN, a four-legged crane walker, take turns), a perk after each wave and a new arena every three, including THE WRECKING YARD,
