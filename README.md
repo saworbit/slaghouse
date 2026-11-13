@@ -179,6 +179,10 @@ keeps your best score.
 ## Development notes
 
 - **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
+- **Breakable props:** how each kind plays (HP, mounting, what it does when it breaks) is in `PROPS` and
+  `PROP_BLAST`, its art in `PROP_ART`, and where each arena puts them in `PROP_SPOTS`. The header comment's
+  Breakables entry lists their numbers; `dev/playtest/props.js` checks every spot in both the campaign and
+  OVERTIME layouts.
 - **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
   any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
