@@ -201,8 +201,12 @@
     Hanging lamps ....... shoot the lamp or its chain: it drops, crushes whatever is under it (80) and goes out.
     Breakables .......... twenty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
                           each. Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw blades,
-                          the hose and the wrecking ball wear them down; things that hang swing when hit and drop
-                          if you cut what holds them (or blow it away). First kill by each callouts its name.
+                          the hose, the wrecking ball and every melee, cone and burst weapon that hits drums wear
+                          them down; fire vents, the slag tide, Torchers and Thundercloud strikes cook off what
+                          burns, and the Bulldozer's plow and the Foreman's slam break them. The tractor, the scrap
+                          vacuum, the Lugger and the Foreman's magnet only move loose things and leave props be.
+                          Things that hang swing when hit and drop if you cut what holds them (or blow it away).
+                          First kill by each callouts its name.
       Neon sign 20 ...... a letter pops every 5; the last drops the sign: 40 to anything it lands on, 25 around.
       Strip light 6 ..... strobes 0.3 s, bursts: glass rains 14 on whoever is under it. Cut a cable: it drops (30).
       Floodlight 30 ..... lens blows, it topples the way it was hit and brings its head down for 45.
@@ -7840,6 +7844,7 @@ class GameScene extends Phaser.Scene {
       ex = x; ey = y; hitE = this.enemyAt(x, y, 2);
       const keg = this.barrelList.find(k => k.active && Math.abs(k.x - x) < 6 && Math.abs(k.y - y) < 8);
       if (keg) { this.damageBarrel(keg, W.damage); break; }
+      if (this.props && this.hitPropsAt(x, y, ca, sa)) break;
       if (hitE) break;
       const rh = this.ragdolls.length ? this.ragAt(x, y, 1) : null;
       if (rh) { this.hitRagdoll(rh.rd, x, y, W.damage, ca, sa, 'arc', rh.pi); break; }
@@ -10275,6 +10280,16 @@ class GameScene extends Phaser.Scene {
     }
     return hit;
   }
+  propsIn(inside, dmg, src, ca, sa, beam) {                            // a cone, arc or radius hits the scenery the way it hits drums
+    if (!this.props) return false;
+    const now = this.time.now; let hit = false;
+    for (const p of this.props) {
+      if (p.st !== 'ok' || !inside(p.cx, p.cy, Math.max(p.hw, p.hh))) continue;
+      if (beam) { if (now < p.beamT) continue; p.beamT = now + 110; }   // a held beam or flood wears a prop down at a steady pace
+      this.hitProp(p, dmg, src, p.cx, p.cy, ca, sa); hit = true;
+    }
+    return hit;
+  }
   heatProps(inCone, dmg) {                                             // the hose: cooks off what burns, wears down the rest
     for (const p of this.props || []) if (p.st === 'ok' && inCone(p.cx, p.cy, p.hw)) { this.igniteProp(p); this.hitProp(p, dmg, 'flame'); }
   }
@@ -12211,6 +12226,8 @@ class GameScene extends Phaser.Scene {
         if (e.kind === 'tick') this.tickBoom(e); else this.ignite(e, 1.5);
       }
       for (const k of this.barrelList) if (k.active && k.y + 6 > lvl) this.damageBarrel(k, 30, 0.4);
+      for (const pr of this.props || []) if (pr.st === 'ok' && pr.cy + pr.hh > lvl) this.igniteProp(pr);   // the slag cooks off what burns...
+      this.propsIn((px, py, r) => py + r > lvl, 8, 'flame', 0, -1, true);                                   // ...and wears down the rest
       for (const rd of this.ragdolls) if (rd.pts[2].y > lvl) rd.burnT = Math.max(rd.burnT || 0, 1.5);
     }
     if (deep) for (const g of this.gibList) if (g.active && g.y > lvl + 1 && !(g.hot > 0)) {   // meat sizzles away
@@ -12386,6 +12403,7 @@ class GameScene extends Phaser.Scene {
     for (const g of this.gibList) if (g.active && Math.abs(g.x - x) < range && Math.abs(g.y - fy) < 30) { if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); } g.body.velocity.y = -rand(200, 380); g.body.velocity.x += Math.sign(g.x - x) * rand(40, 140); g.body.angularVelocity = rand(-900, 900); }
     for (const rd of this.ragdolls) if (Math.abs(rd.pts[2].x - x) < range && Math.abs(rd.pts[2].y - fy) < 40) { for (const q of rd.pts) { q.vy = -rand(220, 360); q.vx += Math.sign(q.x - x) * rand(40, 120); } rd.asleep = false; }
     for (const kg of this.barrelList) if (kg.active && Math.abs(kg.x - x) < range && Math.abs(kg.y - fy) < 20) { kg.body.velocity.y = -300; this.damageBarrel(kg, 12); }
+    this.propsIn((px, py, r) => Math.abs(px - x) < range + r && Math.abs(py - fy) < 20 + r, 12, 'kick', this.facing, -1);
     Sfx.hammerSlam(k); this.makeNoise(x, fy, 300, true);
     this.shake(260, 0.01 + 0.008 * k); this.addKick(0, 6); this.hitStop(60 + 40 * k); this.zoomPunch = Math.max(this.zoomPunch, 0.06 + 0.04 * k); this.warpPulse(0.06 + 0.05 * k);
     if (dive) { BUS.emit('callout', 'METEOR!'); this.addStyle(70); }
@@ -12817,7 +12835,7 @@ class GameScene extends Phaser.Scene {
       if (sc < bs && this.los(sx, sy, x, y)) { bs = sc; best = { kind, o }; }
     };
     for (const e of this.enemies.getChildren()) if (e.alive && !e.under && this.tractorable(e)) consider('enemy', e, e.body.center.x, e.body.center.y);
-    for (const k of this.barrelList) if (k.active) consider('barrel', k, k.x, k.y);
+    for (const k of this.barrelList) if (k.active) consider('barrel', k, k.x, k.y);   // props are bolted down: the beam can't lift them, so it skips them
     for (const c of this.chargeList) if (c.active) consider('charge', c, c.x, c.y);
     for (const k of this.canisterList) if (k.active && k.state === 'idle') consider('canister', k, k.x, k.y);
     for (const rd of this.ragdolls) if (!rd.gone && !rd.pin && !rd.claimed) consider('rag', rd, rd.pts[2].x, rd.pts[2].y);
@@ -12979,6 +12997,7 @@ class GameScene extends Phaser.Scene {
       this.damageEnemy(e, W.damage * (e.def.mech ? 1.25 : 1), ca, sa, 'acid');
     }
     for (const k of this.barrelList) if (k.active && inCone(k.x, k.y, 6)) this.damageBarrel(k, 0.5);
+    this.propsIn(inCone, W.damage, 'acid', ca, sa, true);
     for (const rd of this.ragdolls.slice()) { const c = rd.pts[2]; if (inCone(c.x, c.y, 6)) this.hitRagdoll(rd, c.x, c.y, W.damage, ca, sa, 'flame', 2); }
     if (hitAny) this.stats.hits++;
     if (now > this.acidPaintT) {                                         // the spray eats what it lands on
@@ -13436,6 +13455,7 @@ class GameScene extends Phaser.Scene {
     if ((e.dozeT = (e.dozeT || 0) - dt) <= 0) { e.dozeT = 0.6; Sfx.dozer(); }
     const x0 = e.dir > 0 ? b.right : b.left - 14, x1 = x0 + 14, y0 = b.top - 2, y1 = b.bottom;   // the plow's push zone
     for (const k of this.barrelList) if (k.active && k.x > x0 - 2 && k.x < x1 + 2 && k.y > y0 && k.y < y1 + 4) k.body.velocity.x = e.dir * T.speed * 1.3;
+    this.propsIn((px, py, r) => px + r > x0 && px - r < x1 && py + r > y0 && py - r < y1 + 4, 10, 'kick', e.dir, 0, true);   // the plow grinds through scenery
     for (const gb of this.gibList) if (gb.active && gb.x > x0 && gb.x < x1 && gb.y > y0 && gb.y < y1 + 4) { gb.body.velocity.x = e.dir * T.speed * 1.5; if (gb.stuckT > 0) { gb.stuckT = 0; gb.body.setAllowGravity(true); } }
     for (const rd of this.ragdolls) { const c = rd.pts[2]; if (c.x > x0 - 4 && c.x < x1 + 4 && c.y > y0 - 6 && c.y < y1 + 6) { for (const q of rd.pts) q.vx = e.dir * T.speed * 1.4; rd.asleep = false; } }
     for (const o of this.enemies.getChildren()) { if (!o.alive || o === e || o.under || FLIERS.has(o.kind) || o.def.kb < 0.3) continue; const ob = o.body; if (ob.right > x0 && ob.left < x1 && ob.bottom > y0 && ob.top < y1) ob.velocity.x = e.dir * T.speed * 1.4; }
@@ -13980,6 +14000,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.GAUNTLET, pb = this.player.body, [ux, uy] = this.punchDir, fx = pb.center.x + ux * 10, fy = pb.center.y + uy * 8;
     if (Math.random() < 0.8) this.fxFire(pb.center.x - ux * 8, pb.center.y - uy * 8, 1);
     for (const k of this.barrelList) if (k.active && Math.abs(k.x - fx) < 10 && Math.abs(k.y - fy) < 12) { k.body.velocity.x = ux * 480; k.body.velocity.y = -200; k.kicked = true; }
+    if (this.props) this.hitPropsAt(fx, fy, ux, uy, T.dmg, 'punch' + this.punchUntil);
     for (const e of this.enemies.getChildren()) {
       if (!e.alive || e.under) continue;
       const b = e.body; if (fx < b.left - 6 || fx > b.right + 6 || fy < b.top - 8 || fy > b.bottom + 8) continue;
@@ -14104,6 +14125,7 @@ class GameScene extends Phaser.Scene {
         if (alive && this.state !== 'dead' && Math.abs(pb.center.x - e.x) < hw + pb.halfWidth && pb.bottom > y0 && pb.top < y1) this.hurtPlayer(T.dmg, e.x, { srcY: y0 });
         for (const o of this.enemies.getChildren()) if (o.alive && o !== e && Math.abs(o.body.center.x - e.x) < hw + o.body.halfWidth && o.body.bottom > y0 && o.body.top < y1) this.damageEnemy(o, T.edmg, 0, 1, 'arc');
         for (const k of this.barrelList) if (k.active && Math.abs(k.x - e.x) < hw + 4 && k.y > y0 && k.y < y1 + 4) this.igniteBarrel(k);
+        for (const pr of this.props || []) if (pr.st === 'ok' && Math.abs(pr.cx - e.x) < hw + pr.hw && pr.cy + pr.hh > y0 && pr.cy - pr.hh < y1) { this.igniteProp(pr); this.hitProp(pr, T.edmg, 'arc', e.x, pr.cy, 0, 1); }
         e.ai = 'drift'; e.cd = T.cd * rand(0.9, 1.1);
       }
       return;
@@ -14148,7 +14170,7 @@ class GameScene extends Phaser.Scene {
     if (e.ai === 'magnet') {
       b.velocity.x = 0; e.fr = 'magnet';
       if (alive && dist < 300 && this.state !== 'dead') { const ux = -dx / (dist || 1), uy = -dy / (dist || 1); p.x += ux * T.pull * dt; if (!pb.blocked.down) pb.velocity.y += uy * 220 * dt; }
-      for (const k of this.barrelList) if (k.active && Math.abs(k.x - e.x) < 300) k.body.velocity.x += Math.sign(e.x - k.x) * 220 * dt;
+      for (const k of this.barrelList) if (k.active && Math.abs(k.x - e.x) < 300) k.body.velocity.x += Math.sign(e.x - k.x) * 220 * dt;   // props are bolted down: the magnet can't drag them
       if (now >= e.aiUntil) e.ai = 'walk';
       return;
     }
@@ -14388,6 +14410,7 @@ class GameScene extends Phaser.Scene {
       const c = this.tileAt(tx, ty); if (c === 'x' || c === 'g') { this.damageTile(tx, ty, 999); Sfx.wreckHit(); }
     }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - bx, k.y - by) < R0 + 6) { k.body.velocity.x = ux * 420; k.body.velocity.y = -260; k.kicked = true; this.igniteBarrel(k); }
+    for (const pr of this.props || []) if (pr.st === 'ok' && Math.hypot(pr.cx - bx, pr.cy - by) < R0 + Math.max(pr.hw, pr.hh)) { this.igniteProp(pr); this.hitProp(pr, 40, 'kick', bx, by, ux, -0.5); }
     for (const p of this.props) if (p.st === 'ok' && Math.hypot(p.cx - bx, p.cy - by) < R0 + Math.max(p.hw, p.hh)) this.hitProp(p, 80, 'crush', bx, by, ux, 0);
     for (const g2 of this.gibList) if (g2.active && Math.hypot(g2.x - bx, g2.y - by) < R0 + 3) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.x = vx * 1.2; g2.body.velocity.y = vy * 1.2 - 120; }
     for (const rd of this.ragdolls) if (Math.hypot(rd.pts[2].x - bx, rd.pts[2].y - by) < R0 + 6) { for (const q of rd.pts) { q.vx = vx * 1.1; q.vy = vy * 1.1 - 150; } rd.asleep = false; rd.stillT = 0; }
@@ -14467,6 +14490,7 @@ class GameScene extends Phaser.Scene {
         if (alive && inCone(pb.center.x, pb.center.y) && this.los(fx0, fy0, pb.center.x, pb.center.y)) this.hurtPlayer(T.dmg, e.x, { knock: false, burn: true, iframes: false, srcY: e.y });
         for (const o of this.enemies.getChildren()) if (o.alive && o !== e && inCone(o.body.center.x, o.body.center.y)) this.ignite(o, 1.5);
         for (const k2 of this.barrelList) if (k2.active && inCone(k2.x, k2.y)) this.igniteBarrel(k2);
+        for (const pr of this.props || []) if (pr.st === 'ok' && inCone(pr.cx, pr.cy)) this.igniteProp(pr);
         for (const rd of this.ragdolls) if (inCone(rd.pts[2].x, rd.pts[2].y)) rd.burnT = Math.max(rd.burnT, 2);
         if (Math.random() < 0.5) Sfx.ignite();
       }
@@ -14644,6 +14668,7 @@ class GameScene extends Phaser.Scene {
         if (Math.hypot(c.x - nx, c.y - ny) < 18) this.gibRagdoll(rd, ca, sa, 'kick');
       }
       for (const k of this.barrelList) if (k.active) { const d = cone(k.x, k.y); if (d) k.body.velocity.x += (nx - k.x) / d * 200 * dt; }
+      // props are bolted down and the suction does no damage, so the vacuum leaves them alone
       for (const e of this.enemies.getChildren()) {
         if (!e.alive || e.under || e.def.kb < 0.5 || e.hp > 90 || e.def.noClip || ['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg'].includes(e.kind)) continue;
         const d = cone(e.body.center.x, e.body.center.y); if (!d) continue;
@@ -14818,7 +14843,8 @@ class GameScene extends Phaser.Scene {
       const F = this.fireworks[i]; F.t -= dt; F.wob += dt * 18;
       F.a += Math.sin(F.wob) * dt * 3 + rand(-1, 1) * dt * 2; F.sp = Math.min(F.sp + 500 * dt, 520);   // it wanders like a real one
       const nx = F.x + Math.cos(F.a) * F.sp * dt, ny = F.y + Math.sin(F.a) * F.sp * dt, e = this.enemyAt(nx, ny, 3);
-      if (F.t <= 0 || this.solidAt(nx, ny) || (e && !e.under)) {
+      const prop = this.props && this.props.some(q => q.st === 'ok' && Math.abs(nx - q.cx) <= q.hw && Math.abs(ny - q.cy) <= q.hh);   // it pops on scenery too
+      if (F.t <= 0 || this.solidAt(nx, ny) || (e && !e.under) || prop) {
         if (e && !e.under) { this.damageEnemy(e, TUNE.FIREWORK.dmg, Math.cos(F.a), Math.sin(F.a), 'rocket'); this.stats.hits++; }
         this.fireworkBurst(F.x, F.y, F.col); this.fireworks.splice(i, 1); continue;
       }
@@ -14843,6 +14869,7 @@ class GameScene extends Phaser.Scene {
     for (let k = 0; k < T.stars; k++) { const a = k / T.stars * Math.PI * 2 + rand(-0.15, 0.15), v = rand(T.starSpeed[0], T.starSpeed[1]); this.stars.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, t: rand(T.starLife[0], T.starLife[1]), col: k % 3 ? col[0] : col[1], hit: new Set() }); }
     for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - x, e.body.center.y - y); if (d < 28 + e.body.halfWidth) this.damageEnemy(e, T.blast, Math.sign(e.body.center.x - x) || 1, -0.3, 'pellet'); }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < 24) this.damageBarrel(k, 12);
+    this.propsIn((px, py, r) => Math.hypot(px - x, py - y) < 24 + r, 12, 'shot');
     this.spawnLight(x, y, 'glow', col[0], 1.6, 3.2, 1, 0.35); this.spawnLight(x, y, 'ring', col[1], 0.2, 1.4, 0.9, 0.25);
     this.fx.emit(x, y, { n: 18, speed: [60, 240], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, col[1], col[0]], add: true, g: 60 });
     Sfx.fireworkPop(); this.shake(60, 0.003);
@@ -14883,6 +14910,7 @@ class GameScene extends Phaser.Scene {
       this.fxSparks(q.x, q.y, 10, a, 1.4, [80, 240]); this.fx.emit(q.x, q.y, { n: 6, speed: [30, 90], life: [0.3, 0.6], size: [3, 6], cols: [0x77706a, 0x55504c], alpha: [0.5, 0], g: -30 });
     }
     for (const k of this.barrelList) if (k.active && inArc(k.x, k.y, 6)) this.damageBarrel(k, 30);
+    this.propsIn(inArc, 30, 'slash', Math.cos(a), Math.sin(a));
     for (const D of this.discs) if (!D.mine && inArc(D.x, D.y, 6)) { D.mine = true; D.st = 'back'; refl++; }
     for (let i = this.spores.length - 1; i >= 0; i--) if (inArc(this.spores[i].x, this.spores[i].y, 4)) this.popSpore(i);
     for (const gb of this.gibList) if (gb.active && inArc(gb.x, gb.y, 4)) { gb.body.velocity.x = Math.cos(a) * rand(240, 380); gb.body.velocity.y = Math.sin(a) * rand(240, 380) - 120; if (gb.stuckT > 0) { gb.stuckT = 0; gb.body.setAllowGravity(true); } }
@@ -15026,6 +15054,7 @@ class GameScene extends Phaser.Scene {
     for (const rd of this.ragdolls) if (Math.hypot(rd.pts[2].x - x, rd.pts[2].y - y) < T.radius) for (const q of rd.pts) q.vy = -rand(260, 360);
     for (const g2 of this.gibList) if (g2.active && Math.hypot(g2.x - x, g2.y - y) < T.radius) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.y = -rand(250, 420); }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < T.radius) { k.body.velocity.y = -360; k.kicked = true; }
+    this.propsIn((px, py, r) => Math.hypot(px - x, py - y) < T.radius + r, T.dmg, 'kick', 0, -1);
     this.gravFx.push({ x, y, t: 0 });
     Sfx.gravPulse(); this.warpPulse(0.5); this.shake(120, 0.005); this.spawnLight(x, y, 'glow', 0x9a60ff, 1.6, 0.4, 0.9, 0.3);
     this.fx.emit(x, y, { n: 24, speed: [40, 160], life: [0.4, 0.8], size: [2, 1], cols: [0xe0c8ff, 0x9a60ff, 0x5a20c0], add: true, g: -120 });
@@ -15095,6 +15124,7 @@ class GameScene extends Phaser.Scene {
       ball.setTint(Phaser.Display.Color.GetColor(255, Math.round(255 - 130 * heat), Math.round(255 - 230 * heat)));
       if (sp > 120 && Math.random() < 0.6) this.fx.emit(ball.x, ball.y, { n: 1, speed: [0, 0], life: [0.08, 0.16], size: [3, 1], cols: heat > 0.5 ? [0xffa030, 0xff5a1a] : [0xc8d0da, 0x8a94a0], add: true });
       for (const k of this.barrelList) if (k.active && Math.abs(k.x - ball.x) < 8 && Math.abs(k.y - ball.y) < 10 && !(ball.hitMap.get(k) > now)) { ball.hitMap.set(k, now + 300); this.damageBarrel(k, 20 + 6 * ball.bounces); }
+      if (this.props && !(ball.propT > now) && this.hitPropsAt(ball.x, ball.y, Math.sign(v.x) || 1, 0, 20 + 6 * ball.bounces)) ball.propT = now + 300;
     }
   }
 
@@ -15265,6 +15295,7 @@ class GameScene extends Phaser.Scene {
     for (const q of this.eprojList) if (q.active && inCone(q.x, q.y, 4)) { q.body.velocity.x = Math.cos(a) * 300; q.body.velocity.y = Math.sin(a) * 300 - 60; }
     for (const g2 of this.gibList) if (g2.active && inCone(g2.x, g2.y, 6)) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.x = Math.cos(a) * 420; g2.body.velocity.y = Math.sin(a) * 420 - 120; }
     for (const k of this.barrelList) if (k.active && inCone(k.x, k.y, 6)) { k.body.velocity.x = Math.cos(a) * 320; k.body.velocity.y = -180; k.kicked = true; }
+    this.propsIn(inCone, W.dmg, 'sonic', Math.cos(a), Math.sin(a));
     for (const rd of this.ragdolls) if (inCone(rd.pts[2].x, rd.pts[2].y, 6)) for (const q of rd.pts) { q.vx = Math.cos(a) * 380; q.vy = Math.sin(a) * 380 - 160; }
     this.sonics.push({ x: sx, y: sy, a, t: 0 });
     Sfx.sonic(); this.recoil = 7; this.shake(140, 0.007); this.warpPulse(0.35); this.addKick(-Math.cos(a) * 6, -Math.sin(a) * 6);
@@ -15487,6 +15518,7 @@ class GameScene extends Phaser.Scene {
     const tip = pts[pts.length - 1];
     for (const gb of this.gibList) if (gb.active && Math.hypot(gb.x - tip[0], gb.y - tip[1]) < 20) { gb.body.velocity.x = (sx - gb.x) * 6; gb.body.velocity.y = (sy - gb.y) * 6 - 100; }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - tip[0], k.y - tip[1]) < 18) { k.body.velocity.x = (sx - k.x) * 5; k.body.velocity.y = -160; }
+    if (this.props) { const tok = 'whip' + now; for (const [x, y] of pts) this.hitPropsAt(x, y, ca, sa, W.dmg, tok); }   // the whole lash, once per prop a crack
     if (hitSet.size) { Sfx.kickHit(); this.hitStop(35); if (hitSet.size >= 3) { BUS.emit('callout', 'WHIPLASH'); this.addStyle(40); } }
     Sfx.whip(); this.recoil = 4; this.shake(50, 0.002); this.spawnLight(tip[0], tip[1], 'glow', 0xff40c0, 0.6, 1.4, 0.8, 0.1);
   }
@@ -16833,6 +16865,7 @@ class GameScene extends Phaser.Scene {
       }
       for (const rd of this.ragdolls) { const c = rd.pts[2]; if (c.x > x0 && c.x < x1 && c.y > y0 && c.y < y1) rd.burnT = Math.max(rd.burnT, 2); }
       for (const k of this.barrelList) if (k.active && k.x > x0 && k.x < x1 && k.y > y0 && k.y < y1) this.igniteBarrel(k);
+      for (const pr of this.props || []) if (pr.st === 'ok' && pr.cx > x0 && pr.cx < x1 && pr.cy > y0 && pr.cy < y1) this.igniteProp(pr);
       for (const P of this.tars.slice()) if (Math.abs(P.y - jet.y) < 6 && Math.abs(P.x - jet.x) < P.w / 2 + 9) this.igniteTar(P);
     }
     if (J.t <= 0) { J.st = 'idle'; J.t = T.idle * rand(0.85, 1.2); for (const jet of this.jets) jet.lit = false; }

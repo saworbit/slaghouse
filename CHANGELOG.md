@@ -134,6 +134,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- Every weapon that hits drums hits breakable props too: the Arc Caster, Corroder, Plasma Katana, Laser Whip, Sonic
+  Blaster, Pinball Cannon, Firework Launcher (which now pops on scenery), Rocket Gauntlet, Forge Hammer slam and
+  Grav Bomb. Furnace fire vents, the Meltdown slag, Torchers and Thundercloud strikes cook off what burns, and the
+  Bulldozer's plow and the Foreman's slam break props. The tractor, the scrap vacuum, the Lugger and the Foreman's
+  magnet only move loose things, so they leave props alone on purpose. (#86)
 - The title screen no longer runs its text together. The menu sits in two columns below the floor line, play
   modes on the left and extras on the right, with DAILY and BOSS RUSH tags beside their rows. The records line
   clears DIFFICULTY, the subtitle lists all five acts from the act table, the CODEX counter clears the selection

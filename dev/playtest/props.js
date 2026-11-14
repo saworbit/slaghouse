@@ -88,6 +88,29 @@ window.PR = (() => {
     if (g.stats.hits !== hits0 + 2) fails.push(`a player's bullet and rocket added ${g.stats.hits - hits0} hits, want 2`);
     return [...fails, ...T.errs];
   };
+  // Every weapon that hits drums hits props too (#86): each fires at a vending machine on its own and must hurt it.
+  // The tractor beam and the scrap vacuum only move loose things, so they leave props alone on purpose.
+  PR.weapons = () => {
+    const fails = [];
+    RUNMODE = 'endless'; T.boot();
+    const range = { arc: 60, acid: 50, katana: 20, whip: 40, sonic: 50, pinball: 70, firework: 60, gauntlet: 34, hammer: 18, grav: 60 };
+    const hold = { arc: 450, acid: 450, hammer: 850 };
+    for (const [id, dist] of Object.entries(range)) {
+      const g = T.setup(0), p = g.props.find(q => q.kind === 'vending');
+      g.props = [p]; p.hp = 999;
+      g.player.body.reset(p.cx - dist, (p.ty + 1) * TS - 12); g.facing = 1;
+      g.setWeapon(weaponSlot(id)); T.run(250);
+      const pointer = g.input.activePointer, original = pointer.positionToCamera;
+      pointer.positionToCamera = (_camera, out) => out.set(p.cx, p.cy);
+      g.aimMode = 'mouse';
+      try {
+        g.keys.J.isDown = true; T.run(hold[id] || 250); g.keys.J.isDown = false;
+        for (let t = 0; t < 2500 && p.hp >= 999 && p.st === 'ok'; t += 50) T.run(50);
+      } finally { g.keys.J.isDown = false; pointer.positionToCamera = original; }
+      if (p.hp >= 999 && p.st === 'ok') fails.push(`${WEAPONS[weaponSlot(id)].name} fired at a vending machine ${dist} px away did nothing to it`);
+    }
+    return [...fails, ...T.errs];
+  };
   PR.campaignContactDamage = () => {
     const fails = [];
     OPTS.diff = 1;
