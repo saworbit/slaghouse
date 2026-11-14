@@ -30,12 +30,14 @@ window.RMC = (() => {
     }
     for (const mode of Object.values(RUN_MODES)) {                     // every rule the scene asks a record for; the Lab runs no waves
       const need = ['difficulty', 'mutator', 'begin', 'restartData', 'music'];
-      if (mode.id !== 'lab') need.push('startArena', 'squads', 'rng', 'modifier', 'card', 'elites');
+      if (mode.id !== 'lab') need.push('startArena', 'squads', 'rng', 'modifier', 'card', 'elites', 'writeRecord');
       if (mode.id !== 'lab' && mode.id !== 'campaign') need.push('liftAfter');   // the campaign rides its route stations instead
       if (mode.openTotal) need.push('foeRng');
       for (const f of need) if (typeof mode[f] !== 'function') fails.push(`${mode.id}: RUN_MODES record has no ${f}()`);
       if (!Number.isInteger(mode.total)) fails.push(`${mode.id}: RUN_MODES record needs a whole-number total`);
-      for (const f of ['openTotal', 'lifetime', 'dated', 'confirmRestart']) if (typeof mode[f] !== 'boolean') fails.push(`${mode.id}: RUN_MODES record needs ${f} true or false`);
+      for (const f of ['openTotal', 'lifetime', 'dated', 'confirmRestart', 'smelterCard']) if (typeof mode[f] !== 'boolean') fails.push(`${mode.id}: RUN_MODES record needs ${f} true or false`);
+      if (typeof mode.winCallout !== 'string' || !Number.isFinite(mode.waveScore)) fails.push(`${mode.id}: RUN_MODES record needs a winCallout and a waveScore`);
+      if ((mode.id === 'lab') !== Array.isArray(mode.endCard)) fails.push(`${mode.id}: ${mode.endCard ? 'has an endCard, so it would skip its results screen' : 'needs an endCard in place of a results screen'}`);
     }
     T.start();
     for (const mode of Object.values(RUN_MODES)) {

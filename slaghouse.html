@@ -5099,9 +5099,11 @@ function campaignCheckpoint(save = loadCampaign()) {
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
 // BOSS RUSH: five bosses back to back across the three arenas, a perk between each
-// Run modes (#128): one record per mode for the facts the scene used to work out from RUNMODE and the Lab flag at each
-// check. GameScene.create sets this.mode from RUNMODE (or the Lab), and still derives this.campaign / endless / daily /
-// bossrush from it while the remaining checks move onto the records a few at a time.
+// Run modes (#128): one record per mode holding every rule that differs between modes, from its waves and music to its
+// start, restart and results. GameScene.create sets this.mode from RUNMODE (or the Lab) and asks it. this.campaign and
+// this.lab stay as flags for the campaign's own systems (squads, routes, checkpoints) and the Lab's (its roster and
+// switches), which are features of those modes rather than rules. A new mode is a new record here; modes.js checks
+// that it carries every rule the scene asks for.
 //   waves     operations in a run; 0 for endless modes (and the Lab, which counts no waves)
 //   total     foes the run starts out counting
 //   openTotal each wave adds its foes to the total as it starts (the endless modes)
@@ -5109,11 +5111,18 @@ function campaignCheckpoint(save = loadCampaign()) {
 //   record    the localStorage key its results screen writes; null for none
 //   dated     the run plays one UTC day's seeded waves, kept through its restarts (DAILY)
 //   confirmRestart  mid-run R and the pause menu's RESTART / QUIT ask first (all but the Lab)
+//   winCallout      the callout a won run ends on
+//   smelterCard     the Smelter's fall puts up its VICTORY card (the endless modes carry on instead)
+//   waveScore       score per wave reached, on top of the shared formula (OVERTIME and DAILY)
+//   endCard         [title, subtitle] shown in place of a results screen (the Lab, which keeps no score)
 // and, as functions of the scene g:
 //   difficulty(g), mutator(g)   the run's difficulty index and MUTATORS index (a campaign checkpoint carries its own)
 //   begin(g, carry, now)        the first frame of a run or an arena: its wave card, music and first wave
 //   restartData(g, checkpoint)  the data R / RESTART restarts the scene with
 //   startArena(day)             the arena a fresh run starts in (DAILY: the day's)
+//   onWin(g)                    a won run's mode medals (the campaign's speed, Ironclad and mutant; BOSS RUSH's Rusher)
+//   writeRecord(g, result)      files the run's record under its key; returns { best, newBest } and its own fields
+//                               for the results screen (result is { score, grade, time, won })
 // and, for the modes that run waves (i is the wave from 0):
 //   squads(g, i)        the wave's authored squads, each { foes: [[kind, point], ...] } plus any campaign squad fields
 //   rng(g, i)           the random source for its modifier and elites (DAILY: seeded by the day, the same for everyone)
@@ -5129,9 +5138,23 @@ const liftArrival = (g, c) => {                                      // down the
   BUS.emit('wavecard', g.A.name, g.A.sub); Music.track(g.waveTrack(c.wave));
   g.time.delayedCall(2000, () => { if (g.state === 'play') g.startWave(c.wave); });
 };
+const bestRecord = (g, r) => {                                       // the best score: a mutator run is marked, not kept apart
+  const key = g.mode.record, best = loadRec(key), newBest = r.score > 0 && (!best || r.score > best.score);
+  if (newBest) try { localStorage.setItem(key, JSON.stringify({ score: r.score, grade: r.grade, time: Math.round(r.time), won: r.won, diff: DIFFS[g.runDiff].name, mut: g.mutator !== 'none' ? g.mutator : undefined })); } catch (err) { /* private mode: no record */ }
+  return { best: best ? best.score : 0, newBest, won: r.won, rush: false, checkpoint: !r.won && !!g.chapterStart };
+};
 const standardRestart = (g, cp) => ({ arena: cp?.arena ?? g.mode.startArena(g.day), carry: cp, retry: !!cp, runId: g.campaignRunId, day: g.day });   // the same run again: it keeps (or still lacks) the save
 const overtimeMode = (id, record, dated) => ({                       // OVERTIME and DAILY: endless waves, the same rules
   id, waves: 0, total: 0, openTotal: true, lifetime: true, record, dated, confirmRestart: true,
+  winCallout: 'ARENA CLEARED', smelterCard: false, waveScore: 600,
+  writeRecord: (g, r) => {                                            // the wave you reached; DAILY's is kept per day
+    let ob = loadRec(record);
+    const later = dated && ob && ob.date > g.day;                     // a newer day's record stays, even if this run's day ended mid-run
+    if (dated && ob && ob.date !== g.day) ob = null;                  // another day's daily doesn't count
+    const nb = !later && (!ob || g.wave + 1 > ob.wave || (g.wave + 1 === ob.wave && r.score > ob.score));
+    if (nb) try { localStorage.setItem(record, JSON.stringify(dated ? { date: g.day, wave: g.wave + 1, score: r.score } : { wave: g.wave + 1, score: r.score, mut: g.mutator !== 'none' ? g.mutator : undefined })); } catch (err) { /* private mode */ }
+    return { best: ob ? ob.score : 0, newBest: nb, won: false, endless: true, daily: dated, waves: g.wave + 1 };
+  },
   difficulty: () => OPTS.diff, mutator: () => (dated ? 0 : OPTS.mut),      // DAILY is the same run for everyone: no mutator
   rng: dated ? (g, i) => seeded(g.day * 31 + i) : () => Math.random,
   foeRng: dated ? (g, i) => seeded(g.day * 131 + i * 7919) : () => Math.random,
@@ -5163,8 +5186,21 @@ const overtimeMode = (id, record, dated) => ({                       // OVERTIME
 const campaignMusic = (g, i) => { const op = CAMPAIGN[Math.min(i, CAMPAIGN.length - 1)]; return op.music || (i < CAMPAIGN_ACTS[1].first ? 'stage1' : 'stage2'); };
 const RUN_MODES = {
   campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, get total() { return CAMPAIGN_TOTAL; }, openTotal: false, lifetime: true, record: 'slaghouse.best',
-    dated: false, confirmRestart: true,
+    dated: false, confirmRestart: true, winCallout: 'FOUNDRY DOWN', smelterCard: true, waveScore: 0,
     difficulty: g => (g.carry ? g.carry.diff : OPTS.diff), mutator: g => (g.carry ? g.carry.mut : OPTS.mut),   // a checkpoint keeps the run's settings
+    onWin: g => {
+      if (!g.campaignRetried && g.runTime() < 600) g.award('speed');
+      if (g.runDiff === 2) g.award('ironclad');
+      if (g.runMut) g.award('mutant');
+    },
+    writeRecord: (g, r) => {
+      const out = bestRecord(g, r);
+      if (r.won) {                                                    // the campaign is cleared
+        const save = loadCampaign(), checkpoint = campaignCheckpoint(save);
+        writeCampaign({ ...save, checkpoint: checkpoint?.runId === g.campaignRunId ? null : checkpoint, cleared: true, revision: CAMPAIGN_REVISION });   // keeps the owner, so a stale tab's win leaves the newer run's save
+      }
+      return out;
+    },
     startArena: () => 0, restartData: standardRestart,
     begin: (g, c, now) => {                                           // each act opens on its card, then its first operation
       BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
@@ -5180,7 +5216,10 @@ const RUN_MODES = {
   endless: overtimeMode('endless', 'slaghouse.bestEndless', false),                                   // OVERTIME
   daily: overtimeMode('daily', 'slaghouse.daily', true),
   bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, get total() { return RUSH.length; }, openTotal: false, lifetime: true, record: 'slaghouse.bestRush',
-    dated: false, confirmRestart: true, difficulty: () => OPTS.diff, mutator: () => OPTS.mut,
+    dated: false, confirmRestart: true, winCallout: 'ARENA CLEARED', smelterCard: true, waveScore: 0,
+    difficulty: () => OPTS.diff, mutator: () => OPTS.mut,
+    onWin: g => g.award('rusher'),
+    writeRecord: (g, r) => ({ ...bestRecord(g, r), rush: true }),     // its own record, apart from the campaign's
     startArena: () => 0, restartData: standardRestart,
     begin: (g, c) => {                                                // straight into the first boss (or the next one, down the lift)
       BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
@@ -5193,6 +5232,7 @@ const RUN_MODES = {
     card: (g, i) => ['BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]], elites: () => 0, music: () => WAVE_MUSIC[WAVE_MUSIC.length - 1] },
   lab: { id: 'lab', waves: 0, total: 0, openTotal: false, lifetime: false, record: null, dated: false,   // runs no waves: its roster warps in at once
     confirmRestart: false,                                            // R resets the room at once
+    winCallout: 'ARENA CLEARED', smelterCard: true, waveScore: 0, endCard: ['TEST ENDED', 'R RESET / F2 CONTROLS / ESC EXIT'],
     difficulty: g => g.lab.difficulty ?? OPTS.diff, mutator: () => 0,
     restartData: g => ({ lab: g.lab, spawns: g.labRoster }),
     begin: g => {
@@ -6583,10 +6623,7 @@ class GameScene extends Phaser.Scene {
     this.A = this.lab ? LAB_ROOMS[this.lab.room].arena : ARENAS[data?.arena ?? 0];
     this.carry = data?.carry ?? null; this.descending = false;
     this.mode = this.lab ? RUN_MODES.lab : (RUNMODE !== 'lab' && RUN_MODES[RUNMODE]) || RUN_MODES.campaign;   // any other RUNMODE plays the campaign, as before
-    this.daily = this.mode.id === 'daily';                              // the old flags, derived while checks move onto this.mode
-    this.endless = this.daily || this.mode.id === 'endless';
-    this.bossrush = this.mode.id === 'bossrush';
-    this.campaign = this.mode.id === 'campaign';
+    this.campaign = this.mode.id === 'campaign';                        // for the campaign's own systems: squads, routes, checkpoints
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
     this.day = this.mode.dated ? data?.day ?? dayKey() : null;         // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
     this.runDiff = this.mode.difficulty(this);
@@ -9123,7 +9160,7 @@ class GameScene extends Phaser.Scene {
       this.camFocus = { x: cx, y: cy, until: this.time.now + 2200 }; this.impactFrame(4); this.shake(1600, 0.01);   // the fall: the camera holds on it
       for (let i = 0; i < 6; i++) this.time.delayedCall(1100 + i * 110, () => this.boomFx(cx + rand(-30, 30), cy + rand(-26, 20), rand(0.8, 1.3)));
       for (let i = 0; i < 12; i++) this.spawnGib(pick(['g_plate', 'g_shard', 'g_shard2', 'g_wire']), cx + rand(-16, 16), cy + rand(-16, 10), rand(-320, 320), rand(-460, -200), 'metal');
-      if (!this.endless) this.time.delayedCall(700, () => BUS.emit('wavecard', 'VICTORY', 'THE SMELTER FALLS'));
+      if (this.mode.smelterCard) this.time.delayedCall(700, () => BUS.emit('wavecard', 'VICTORY', 'THE SMELTER FALLS'));
     }
     if (D.molten) {                                                   // slag bursts: molten spatter, scorch, no blood
       const t = D.tier + 1;
@@ -17402,13 +17439,8 @@ class GameScene extends Phaser.Scene {
     this.state = 'won'; this.wheelOn = false;
     this.slowmoUntil = this.time.now + 700;
     this.award('slayer');
-    if (this.campaign) {
-      if (!this.campaignRetried && this.runTime() < 600) this.award('speed');
-      if (this.runDiff === 2) this.award('ironclad');
-      if (this.runMut) this.award('mutant');
-    }
-    if (this.bossrush) this.award('rusher');
-    BUS.emit('callout', this.campaign ? 'FOUNDRY DOWN' : 'ARENA CLEARED');
+    this.mode.onWin?.(this);
+    BUS.emit('callout', this.mode.winCallout);
     if (!Music.jingle('win', 'title')) Sfx.win();
     Music.need(this.waveTrack(0));                                       // ready for R on the results screen
     this.time.delayedCall(1500, () => this.showOver(true));
@@ -17416,40 +17448,21 @@ class GameScene extends Phaser.Scene {
   showOver(won) {
     this.savePlayTime();
     this.overShown = true;
-    if (this.lab) { BUS.emit('wavecard', 'TEST ENDED', 'R RESET / F2 CONTROLS / ESC EXIT'); return; }
+    if (this.mode.endCard) { BUS.emit('wavecard', ...this.mode.endCard); return; }
     const s = this.stats, time = this.runTime(), acc = s.shots ? Math.round(Math.min(1, s.hits / s.shots) * 100) : 0;
     const comp = this.totalEnemies ? s.kills / this.totalEnemies : 0;   // grade: completion, accuracy, style, damage taken
     const idx = clamp(comp * 0.4 + Math.min(1, acc / 55) * 0.15 + this.style.best / 6 * 0.25 + Math.max(0, 1 - s.taken / 500) * 0.2, 0, 1) * (won ? 1 : 0.85);
     const grade = idx >= 0.85 ? 'S' : idx >= 0.7 ? 'A' : idx >= 0.55 ? 'B' : idx >= 0.4 ? 'C' : 'D';
-    const score = Math.max(0, Math.round(s.kills * 100 + this.headshots * 50 + s.executes * 150 + this.bestCombo * 60 + s.dodges * 25 + this.style.best * 500 + (this.endless ? this.wave * 600 : 0)
+    const score = Math.max(0, Math.round(s.kills * 100 + this.headshots * 50 + s.executes * 150 + this.bestCombo * 60 + s.dodges * 25 + this.style.best * 500 + this.mode.waveScore * this.wave
                                          + (won ? Math.max(0, 900 - time) * 10 : 0) - s.taken * 4) * DIFFS[this.runDiff].score);
     const favId = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a])[0], fav = favId ? WEAPONS.find(w => w.id === favId).name : '-';
     saveLife();                                        // lifetime stats (savePlayTime above added the time played)
     const topGuns = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a]).slice(0, 3).map(id => [WEAPONS.find(w => w.id === id).name, s.wk[id]]);
     saveMastery();
-    if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
-      const key = this.mode.record;
-      let ob = loadRec(key);
-      const later = this.daily && ob && ob.date > this.day;                    // a newer day's record stays, even if this run's day ended mid-run
-      if (this.daily && ob && ob.date !== this.day) ob = null;                 // another day's daily doesn't count
-      const nb = !later && (!ob || this.wave + 1 > ob.wave || (this.wave + 1 === ob.wave && score > ob.score));
-      if (nb) try { localStorage.setItem(key, JSON.stringify(this.daily ? { date: this.day, wave: this.wave + 1, score } : { wave: this.wave + 1, score, mut: this.mutator !== 'none' ? this.mutator : undefined })); } catch (err) { /* private mode */ }
-      BUS.emit('over', { won: false, endless: true, daily: this.daily, waves: this.wave + 1, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
-                         style: STYLE_RANKS[this.style.best].n, taken: Math.round(s.taken), executes: s.executes, dodges: s.dodges, fav, top: topGuns, big: Math.round(s.big || 0), killer: won ? null : this.killer || null, score, grade,
-                         best: ob ? ob.score : 0, newBest: nb, diff: DIFFS[this.runDiff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
-      return;
-    }
-    const bkey = this.mode.record;                                      // BOSS RUSH keeps its own record
-    let best = loadRec(bkey);
-    const newBest = score > 0 && (!best || score > best.score);
-    if (newBest) try { localStorage.setItem(bkey, JSON.stringify({ score, grade, time: Math.round(time), won, diff: DIFFS[this.runDiff].name, mut: this.mutator !== 'none' ? this.mutator : undefined })); } catch (err) { /* private mode: no record */ }   // a mutator run is marked, not kept apart
-    if (won && this.campaign) {
-      const save = loadCampaign(), checkpoint = campaignCheckpoint(save);
-      writeCampaign({ ...save, checkpoint: checkpoint?.runId === this.campaignRunId ? null : checkpoint, cleared: true, revision: CAMPAIGN_REVISION });   // keeps the owner, so a stale tab's win leaves the newer run's save
-    }
-    BUS.emit('over', { won, rush: this.bossrush, checkpoint: !won && !!this.chapterStart, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
+    const rec = this.mode.writeRecord(this, { score, grade, time, won });   // each mode files its own record
+    BUS.emit('over', { ...rec, time, kills: s.kills, total: this.totalEnemies, shots: s.shots, acc, combo: this.bestCombo, headshots: this.headshots,
                        style: STYLE_RANKS[this.style.best].n, taken: Math.round(s.taken), executes: s.executes, dodges: s.dodges, fav, top: topGuns, big: Math.round(s.big || 0), killer: won ? null : this.killer || null, score, grade,
-                       best: best ? best.score : 0, newBest, diff: DIFFS[this.runDiff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
+                       diff: DIFFS[this.runDiff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
   }
 
   onBoltHit(p, b) {

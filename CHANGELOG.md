@@ -74,6 +74,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
+  day, the campaign also marking itself cleared), its mode medals on a win, its win callout, OVERTIME's score per
+  wave, whether the Smelter's fall puts up VICTORY, and the Lab's TEST ENDED card. The scene no longer keeps
+  `endless`, `daily` or `bossrush` flags; only `campaign` and `lab` remain, for those modes' own systems. Results,
+  records, medals and cards come out exactly as before in every mode. (#128)
 - Each run mode's start and restart rules moved onto its record as well: its opening card, music and first wave
   (`begin`), what R and RESTART restart with, whether mid-run R asks first, its difficulty and mutator (a campaign
   checkpoint keeps its own), DAILY's day and starting arena, OVERTIME's roster seeding, when the lift comes, its
