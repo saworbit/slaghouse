@@ -73,6 +73,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   opening, navigating, deploying and backing out with a stubbed pad. (#94)
 - Dependabot watches `dev/synthwave/requirements.txt` as well, monthly with a `Synthwave:` prefix, so a security
   fix in numpy, scipy, numba or soundfile shows up as a pull request. (#129)
+- `node dev/playtest/compare.mjs [ref]` runs the working tree and a git ref (default `origin/main`) side by side and
+  lists every enemy kind whose spawn, drawing in any AI state or death came out different, and how. Each kind is
+  spawned three ways, drawn in every AI state and killed seventeen ways on seeded, pinned clocks, so two identical
+  builds report nothing. It takes about 40 seconds. The play-test README has the repeatability rules. (#147)
 
 ### Changed
 
