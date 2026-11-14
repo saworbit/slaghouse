@@ -33,11 +33,12 @@ node dev/playtest/run.mjs
 Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time
 for runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the pause menu's restart and quit confirms
 with real key and pad input, the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
-placement, breakage, restocking and overlapping hazard damage on Normal. Campaign checks
+placement, breakage, restocking and overlapping hazard damage on Normal. Every arena's navigation graph, counting
+the player's long drops and wall climbs, must let every standing cell reach the start and get back. Campaign checks
 cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for
-Normal seeds 91, 404 and 137. Each run must complete all ten operations, win with the
+Normal seeds 91, 404, 137 and 5. Each run must complete all ten operations, win with the
 full kill count, and leave zero survivors at the lifts and at victory. Smelter summons must be dead before
 its scripted death sequence.
 

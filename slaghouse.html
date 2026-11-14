@@ -240,7 +240,9 @@
                           solid metal) and drop anything more than 3 tiles out. Blasts (x(1.15 - d/R)),
                           bullets 3-5, saw ricochets 14, kicks 18, rails punch through 3 tiles, the
                           rammer bulldozes, boss slams cave things in. Falling blocks crush for 80.
-                          Only grey '#' metal is permanent; enemy pathing re-plans as it breaks.
+                          Only grey '#' metal is permanent; enemy pathing re-plans as it breaks. The nav graph also
+                          holds moves only the player makes (drops of 3-6 rows, climbs up an unbroken wall), at
+                          Infinity cost to enemies; with them every arena lets you get back to the start.
     Ragdolls ............ grunts, enforcers, stalkers, snipers and bulwarks killed with <= 26 overkill and
                           no blast drop as point-and-stick ragdolls (cut from their own sprites; headshot
                           kills leave a headless body that spurts). Corpses take hits, kicks, fire, saws,
@@ -5450,15 +5452,30 @@ function buildNav(grid) {
       if (solid(x, yy)) break;
       const m = id(x, yy); if (m >= 0) { n.edges.push({ to: m, type: 'fall', cost: 1.5 + (yy - y) * 0.25 }); break; }
     }
-    for (let dy = -4; dy <= 2; dy++) for (let dx = -5; dx <= 5; dx++) {
+    for (let dy = -4; dy <= 6; dy++) for (let dx = -5; dx <= 5; dx++) {
       if ((dx === 0 && dy >= 0) || (dy === 0 && Math.abs(dx) === 1)) continue;
+      if (dy > 2 && Math.abs(dx) > 3) continue;                         // a longer drop: step off and drift up to three columns
       const m = id(x + dx, y + dy); if (m < 0) continue;
       if (dy >= 0) {                                       // only hop where there's an actual gap
         let gap = false;
         for (let i = 1; i < Math.abs(dx); i++) if (id(x + Math.sign(dx) * i, y) < 0) gap = true;
         if (!gap || !clearAcross(x, y, x + dx, y + dy)) continue;
       } else if (!clearUp(x, y, x + dx, y + dy)) continue;
-      n.edges.push({ to: m, type: 'jump', cost: 2 + Math.abs(dx) * 0.5 + Math.max(0, -dy) * 0.8 });
+      const cost = 2 + Math.abs(dx) * 0.5 + Math.max(0, -dy) * 0.8;
+      n.edges.push(dy > 2 ? { to: m, type: 'jump', cost: Infinity, playerCost: cost } : { to: m, type: 'jump', cost });
+    }
+    // Moves only the player makes: the longer drops above (dy 3-6) and wall climbs. Holding into a wall and jumping
+    // again off it climbs any unbroken face, so the player can scale a wall too tall to jump and step onto its top.
+    // These edges cost Infinity, so enemy pathing never takes them; playerCost prices them for the player. With them,
+    // every standing cell can reach the arena's start and get back (run.mjs checks). The campaign bot doesn't plan
+    // with them yet.
+    for (const d of [-1, 1]) {
+      if (!solid(x + d, y) || !solid(x + d, y - 1)) continue;
+      let t = y - 1;
+      while (solid(x + d, t) && !solid(x, t)) t--;
+      if (solid(x, t) || solid(x, t - 1) || y - t < 5) continue;
+      const m = id(x + d, t); if (m < 0) continue;
+      n.edges.push({ to: m, type: 'climb', cost: Infinity, playerCost: 2 + (y - t) * 0.6 });
     }
   }
   return { nodes, id, solid };
