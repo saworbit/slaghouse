@@ -663,7 +663,14 @@
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
   #game { width: 100vw; height: 100vh; }
   canvas { image-rendering: pixelated; display: block; }
-  .nophaser { color: #ddd; font: 16px monospace; padding: 2em; }
+  #boot { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; padding: 0 16px; background: #000; color: #ff8a1f; font: bold clamp(34px, 9vw, 96px)/1 ui-monospace, Consolas, monospace;
+    letter-spacing: .12em; text-shadow: 0 4px 0 #6a2a08; }
+  #boot small { font-size: clamp(13px, 2.4vw, 18px); color: #8f9bab; letter-spacing: .3em; text-shadow: none; animation: boot-pulse 1.2s ease-in-out infinite; }
+  #boot.failed small { animation: none; max-width: 34em; color: #ff9c87; letter-spacing: .04em; line-height: 1.5; text-align: center; }
+  #boot button { cursor: pointer; padding: 8px 18px; border: 1px solid #ff9b3e; background: #ffad5c; color: #17110b; font: bold 16px ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+  @keyframes boot-pulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { #boot small { animation: none; } }
   #lab-dock, #lab-panel { color: #e0e7ee; background: #13181e; font: 14px/1.45 ui-monospace, Consolas, monospace; }
   #lab-dock { position: fixed; right: 8px; bottom: 8px; }
   #lab-panel { box-sizing: border-box; width: min(680px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto;
@@ -689,11 +696,9 @@
   #lab-panel #lab-error { color: #ff9c87; margin: 8px 0 0; }
   @media (max-width: 480px) { #lab-panel .lab-group { grid-template-columns: minmax(0, 1fr) 7ch; } }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" integrity="sha384-kyUQ5+cxc6+X89xEG6DhcXLcDU9T3Z+o/45VdT6pgAwtG6gxtAzYTEn0Wwj/BKZd" crossorigin="anonymous"></script>  <!-- SRI: a changed file won't run; re-hash on a version bump -->
-<script src="sfx_bank.js"></script>  <!-- optional AudioGen sample bank (dev/sfxgen); synth fallback without it -->
-<script src="music_bank.js"></script>  <!-- optional synthwave soundtrack (dev/synthwave); procedural loop without it -->
 </head>
 <body>
+<div id="boot" role="status" aria-live="polite">SLAGHOUSE<small>LOADING</small></div>  <!-- painted while the scripts below load; the title removes it -->
 <div id="game"></div>
 <button id="lab-dock" type="button" hidden>Lab controls · F2</button>
 <dialog id="lab-panel" aria-labelledby="lab-title">
@@ -723,10 +728,17 @@
     </div>
   </form>
 </dialog>
+<!-- Below the boot screen so it paints first. The banks are deferred: they don't block that paint, and they still run
+     before Phaser boots on DOMContentLoaded, so the title's Sfx.init finds them. -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" integrity="sha384-kyUQ5+cxc6+X89xEG6DhcXLcDU9T3Z+o/45VdT6pgAwtG6gxtAzYTEn0Wwj/BKZd" crossorigin="anonymous"></script>  <!-- SRI: a changed file won't run; re-hash on a version bump -->
+<script src="sfx_bank.js" defer></script>  <!-- optional AudioGen sample bank (dev/sfxgen); synth fallback without it -->
+<script src="music_bank.js" defer></script>  <!-- optional synthwave soundtrack (dev/synthwave); procedural loop without it -->
 <script>
 'use strict';
 if (!window.Phaser) {
-  document.getElementById('game').innerHTML = '<p class="nophaser">Phaser could not be loaded from the CDN. This prototype needs an internet connection to fetch phaser.min.js, and the file must match its integrity hash.</p>';
+  const boot = document.getElementById('boot');
+  boot.classList.add('failed');
+  boot.innerHTML = 'SLAGHOUSE<small>Phaser could not be loaded, so the game can\'t start. It comes from the jsDelivr CDN, so check your connection and try again. The file must also match its integrity hash.</small><button type="button" onclick="location.reload()">RETRY</button>';
   throw new Error('Phaser missing');
 }
 
@@ -6097,6 +6109,7 @@ class TitleScene extends Phaser.Scene {
     this.started = false;
     this.input.setDefaultCursor('default');
     // title theme: plays at once if the browser already allows audio, otherwise from the first key / click
+    document.getElementById('boot')?.remove();                          // the static loading screen gives way to the title
     Sfx.init(); Music.start(); Music.track('title'); Music.keep(Music.TITLE_SET);
     this.input.keyboard.on('keydown', () => Sfx.init());
     const far = this.add.image(0, -40, 'bgFar').setOrigin(0).setScale(2);
