@@ -15,6 +15,38 @@ window.campaignBot = () => {
     return Math.abs(delta) < 3 ? 0 : Math.sign(delta);
   };
 
+  // Ground that hurts to stand on, with the same tests the scene uses plus a little margin: fire and slag puddles,
+  // acid, a foe's gas, a cooking propane prop's jet, a tipped ladle's slag stream and live water. feet is the bottom
+  // of the player's body.
+  function hazardAt(g, x, feet) {
+    const top = feet - 24, cy = feet - 12;
+    for (const P of g.puddles) if (Math.abs(x - P.x) < P.w / 2 + 9 && Math.abs(feet - P.y) < 8) return true;
+    for (const A of g.acids) if (Math.abs(x - A.x) < A.w / 2 + 7 && Math.abs(feet - A.y) < 6) return true;
+    for (const C of g.clouds) if (!C.mine && Math.hypot(x - C.x, cy - C.y) < C.r + 8) return true;
+    for (const W of g.waters) if (W.zap > 0 && Math.abs(x - W.x) < W.w / 2 * W.grow + 7 && Math.abs(feet - W.y) < 7) return true;
+    for (const p of g.props) if (p.st === 'live') {
+      if (p.kind === 'propane') {
+        const vx = p.x + p.jd * 2, vy = p.y - 16, x0 = Math.min(vx, vx + p.jd * 50), x1 = Math.max(vx, vx + p.jd * 50);
+        if (x + 10 > x0 && x - 10 < x1 && feet > vy - 10 && top < vy + 10) return true;
+      } else if (p.kind === 'ladle' && p.phase === 'pour') {               // the slag stream, from the lip to the floor
+        const r = -p.sw + p.rot, lx = p.x - 11 * p.dir * Math.cos(r) - 6 * Math.sin(r), ly = p.y - 11 * p.dir * Math.sin(r) + 6 * Math.cos(r);
+        if (Math.abs(x - lx) < 16 && feet > ly && top < (g.floorBelow(lx, ly) ?? LH)) return true;
+      }
+    }
+    return false;
+  }
+  // the nearest floor beside the player, within reach along this floor, that isn't hazardous
+  function safeGround(g, b) {
+    for (let d = 16; d <= 176; d += 16) for (const side of [1, -1]) {
+      const x = b.center.x + side * d;
+      if (g.solidAt(x, b.center.y) || !g.standAt(x, b.bottom + 3) || hazardAt(g, x, b.bottom)) continue;
+      let clear = true;
+      for (let s = 8; s < d && clear; s += 8) if (g.solidAt(b.center.x + side * s, b.center.y) || !g.standAt(b.center.x + side * s, b.bottom + 3)) clear = false;
+      if (clear) return x;
+    }
+    return null;
+  }
+
   function nearestNode(b) {
     const current = navAt(b.center.x, b.bottom);
     if (current >= 0) return current;
@@ -182,8 +214,10 @@ window.campaignBot = () => {
     const rail = g.weaponSlots.includes(weaponSlot('rail'));
     const targets = foes.filter(e => visible(e.body.center.x, e.body.center.y) ||
       (rail && Math.hypot(e.x - px, e.y - py) < 420 && g.losHard(px, py - 2, e.body.center.x, e.body.center.y)));
+    // summons wait while the boss fights on, but go first once the Smelter is nearly down, so none outlive it
+    const finish = g.boss?.kind === 'boss' && g.boss.alive && g.boss.hp < g.boss.def.hp * 0.2;
     const target = targets.reduce((best, e) => {
-      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? 100 : 0) - (g.canExecute(o) ? 20 : 0);
+      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? (finish ? -150 : 100) : 0) - (g.canExecute(o) ? 20 : 0);
       return !best || rank(e) < rank(best) ? e : best;
     }, null);
     const objective = g.campaignRoute[0];
@@ -194,22 +228,25 @@ window.campaignBot = () => {
     if (focus !== foe || foe?.hp < lastHp) { focus = foe; lastHp = foe?.hp; progress = now; anchor = null; }
     const stall = now - progress > 2200;
     let gx = px, gy = b.bottom, direct = false;
+    const out = ground && hazardAt(g, px, b.bottom) ? safeGround(g, b) : null;
     if (objective && Math.abs(py - (objective.y - 12)) < 8 && visible(objective.x, objective.y - 12)) {
       gx = objective.x; direct = true;
+    } else if (out !== null) {                                         // standing in fire, acid, gas or a jet: step out first
+      gx = out; direct = true;
     } else if (heal && Math.abs(heal.y - py) < 16 && visible(heal.x, heal.y) && (!foe || Math.abs(heal.x - px) < 200)) {
       gx = heal.x; direct = true;
     } else if (foe && target && !objective && (!heal || foe === g.boss) && (!stall || foe === g.boss) && Math.abs(foe.y - py) < 55 && !g.tide) {
       const dx = foe.x - px, dist = Math.abs(dx), side = Math.sign(dx) || 1;
       const space = g.canExecute(foe) ? 15 : (foe === g.boss ? 185 : 130);
       gx = px + side * (dist - space);
-      if (!g.solidAt(px + Math.sign(gx - px) * 22, py) && (dist > 65 || g.standAt(gx, b.bottom + 3))) direct = true;
+      if (!g.solidAt(px + Math.sign(gx - px) * 22, py) && (dist > 65 || g.standAt(gx, b.bottom + 3)) && !hazardAt(g, gx, b.bottom)) direct = true;
     }
     if (!direct && !action && ground && (now > timeout || !plan)) {
       const tide = g.mod === 'melt' ? TUNE.TIDE.top : LH;
       const goal = objective || heal;
       const targetX = foe?.body.center.x, targetY = foe?.body.center.y;
       plan = choosePosition(g, start, (x, y) => {
-        const hazard = y + 14 > tide ? 140 : 0;
+        const hazard = (y + 14 > tide ? 140 : 0) + (hazardAt(g, x, y + 14) ? 160 : 0);
         if (goal) return Math.abs(x - goal.x) * 1.8 + Math.abs(y - (objective ? goal.y - 14 : goal.y)) * 3 + hazard;
         if (!foe) return Math.abs(x - px) + Math.abs(y - py) + hazard;
         if (foe === buried) return Math.abs(x - (foe.ux ?? px)) * 0.16 + (LH - y) * 2 + hazard;
