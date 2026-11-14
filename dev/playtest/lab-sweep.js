@@ -45,7 +45,7 @@ window.labSweep = section => {
           for (let i = 0; i < 4; i++) g.spawnGib('g_shard', ox + i * 2, oy, 0, 0, 'metal');
         }
         if (id === 'shield') g.spawnEBullet(g.player.x + 55, g.shoulder.y, Math.PI, 150, 8);
-        const start = g.stats.shots;
+        const start = g.stats.shots, hits0 = g.stats.hits;
         trigger(g, true); T.run(hold[id] || 250);
         if (id === 'hornet' && !g.locks.includes(target)) fail('did not acquire a target lock');
         if (id === 'tractor' && g.tb?.o !== target) fail('did not grab the target');
@@ -70,6 +70,8 @@ window.labSweep = section => {
           return applied;
         }, 3400, 50);
         if (!applied) fail('no hit or status effect registered');
+        const hurt = !target.alive || target.hp < target.def.hp;          // accuracy: a shot that hurt the target counts a hit (#126)
+        if (hurt && g.stats.shots > start && g.stats.hits === hits0) fail(`hurt the target but counted ${g.stats.shots - start} shots and no hits`);
         T.run(1000);
         if (g.state !== 'play' || g.hp !== TUNE.PLAYER_HP) fail('invulnerable player took damage or died');
         checkScene(g, fail);
