@@ -8639,7 +8639,7 @@ class GameScene extends Phaser.Scene {
     this.killRocket(r); this.explode(x, y);
   }
 
-  explode(x, y, W = TUNE.ROCKET) {
+  explode(x, y, W = TUNE.ROCKET, countHit = true) {                      // countHit false: the shot behind it already counted its hit
     const R = W.radius, killsBefore = this.stats.kills, byPlayer = !W.enemy, now = this.time.now;
     let damaged = false;
     for (const e of this.enemies.getChildren()) {
@@ -8656,7 +8656,7 @@ class GameScene extends Phaser.Scene {
       if (W.burn) this.ignite(e, W.burn);
       this.damageEnemy(e, dmg, Math.cos(ang), Math.sin(ang), 'rocket');
     }
-    if (damaged && byPlayer && !W.scenery) this.stats.hits++;           // a drum or prop going off isn't a shot that hit
+    if (damaged && byPlayer && !W.scenery && countHit) this.stats.hits++;   // a drum or prop going off isn't a shot that hit
     for (const { rd, f } of this.pushRagdolls(x, y, R + 10, 620, 400)) { // corpses fly; close ones burst
       const c = rd.pts[2];
       if (W.burn) rd.burnT = Math.max(rd.burnT, W.burn);
@@ -12458,11 +12458,12 @@ class GameScene extends Phaser.Scene {
     if (fizzle) { this.fxSparks(c.x, c.y, 8); this.spawnLight(c.x, c.y, 'glow', 0x6ad0ff, 0.8, 1.6, 0.8, 0.15); Sfx.snap(); }
     c.img.destroy(); c.glow.destroy();
   }
+  coilHit(c) { if (!c.hit) { c.hit = true; this.stats.hits++; } }       // a coil is one shot: its first zap or fence hit counts
   overloadCoils() {
     const T = TUNE.COIL; BUS.emit('callout', 'OVERLOAD!');
     this.coils.slice().forEach((c, i) => this.time.delayedCall(i * 70, () => {
       if (!this.coils.includes(c)) return;
-      this.removeCoil(c, false); this.explode(c.tx, c.ty, T.burst); Sfx.coilBoom();
+      this.removeCoil(c, false); this.explode(c.tx, c.ty, T.burst, !c.hit); Sfx.coilBoom();
       for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.hypot(e.body.center.x - c.tx, e.body.center.y - c.ty) < T.burst.radius) e.stunT = Math.max(e.stunT, 1.5);
     }));
   }
@@ -12493,7 +12494,7 @@ class GameScene extends Phaser.Scene {
           const d = Math.hypot(e.body.center.x - c.tx, e.body.center.y - c.ty);
           if (d < bd && this.los(c.tx, c.ty, e.body.center.x, e.body.center.y)) { bd = d; best = e; }
         }
-        if (best) { c.zapTo = { x: best.body.center.x, y: best.body.center.y, t: 0.12 }; this.damageEnemy(best, T.zapDmg, Math.sign(best.x - c.tx) || 1, 0, 'arc'); Sfx.zap(); }
+        if (best) { c.zapTo = { x: best.body.center.x, y: best.body.center.y, t: 0.12 }; this.damageEnemy(best, T.zapDmg, Math.sign(best.x - c.tx) || 1, 0, 'arc'); this.coilHit(c); Sfx.zap(); }
       }
       if (c.zapTo && (c.zapTo.t -= dt) > 0) this.zap(g, c.tx, c.ty, c.zapTo.x, c.zapTo.y);
     }
@@ -12507,7 +12508,13 @@ class GameScene extends Phaser.Scene {
     if ((this.fenceT -= dt) <= 0 && links.length) {                      // the fence fries whatever crosses it
       this.fenceT = 0.1;
       const crosses = (x, y, r) => links.some(([a, b]) => this.segDist(x, y, a.tx, a.ty, b.tx, b.ty)[0] < r);
-      for (const e of this.enemies.getChildren()) if (e.alive && !e.under && crosses(e.body.center.x, e.body.center.y, Math.max(e.body.halfWidth, e.body.halfHeight))) this.damageEnemy(e, T.fenceDps * 0.1, 0, -1, 'arc');
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under) continue;
+        const r = Math.max(e.body.halfWidth, e.body.halfHeight), on = links.filter(([a, b]) => this.segDist(e.body.center.x, e.body.center.y, a.tx, a.ty, b.tx, b.ty)[0] < r);
+        if (!on.length) continue;
+        this.damageEnemy(e, T.fenceDps * 0.1, 0, -1, 'arc');
+        for (const [a, b] of on) { this.coilHit(a); this.coilHit(b); }   // both coils it runs between connected
+      }
       for (const rd of this.ragdolls) { const q = rd.pts[2]; if (crosses(q.x, q.y, 8)) this.hitRagdoll(rd, q.x, q.y, 2, 0, -1, 'arc'); }
     }
   }
@@ -12906,7 +12913,8 @@ class GameScene extends Phaser.Scene {
     const vx = ca * T.throw + pb.velocity.x * 0.3, vy = sa * T.throw + pb.velocity.y * 0.2 - 40;
     this.nextFire = now + T.cooldown; this.stats.shots++;
     this.tbRelease(H);
-    const q = { kind: H.kind, o: H.o, t: 1.2, hits: new Set() };
+    const q = { kind: H.kind, o: H.o, t: 1.2, hits: new Set(), counted: H.kind === 'enemy' };   // a foe in the beam has already been hit
+    if (q.counted) this.stats.hits++;
     if (H.kind === 'rag') { for (const p of H.o.pts) { p.vx = vx * rand(0.92, 1.05); p.vy = vy * rand(0.92, 1.05); } this.thrown.push(q); }
     else {
       const o = H.o; o.body.setVelocity(vx, vy);
@@ -12939,6 +12947,7 @@ class GameScene extends Phaser.Scene {
         if (!e.alive || e === q.o || e.under || q.hits.has(e)) continue;
         const b = e.body; if (pos.x < b.left - 5 || pos.x > b.right + 5 || pos.y < b.top - 5 || pos.y > b.bottom + 5) continue;
         q.hits.add(e);
+        if (!q.counted) { q.counted = true; this.stats.hits++; }         // the throw connected
         if (q.kind === 'barrel') { this.explodeBarrel(q.o); break; }
         if (q.kind === 'charge') { this.detonateCharge(q.o); break; }
         const dmg = q.kind === 'gib' ? 10 : TUNE.TRACTOR.impact, ux = v.x / sp, uy = v.y / sp;
@@ -13849,8 +13858,9 @@ class GameScene extends Phaser.Scene {
         W.hitT.set(e, now + 700); W.n++;
         const zx = W.ux ? b.center.x : W.x, zy = W.ux ? W.y : b.center.y;
         this.damageEnemy(e, T.zap, 0, -1, 'arc'); if (e.alive) e.stunT = Math.max(e.stunT, 0.5);
+        if (!W.counted) { W.counted = true; this.stats.hits++; }        // one emitter, one shot
         this.fxSparks(zx, zy, 8); this.pylonZaps.push({ x0: W.x, y0: W.y, x1: zx, y1: zy, t: now }); Sfx.pylonZap();
-        if (W.n >= T.trips) { this.explode(W.x, W.y, T.boom); this.trips.splice(i, 1); gone = true; break; }
+        if (W.n >= T.trips) { this.explode(W.x, W.y, T.boom, !W.counted); this.trips.splice(i, 1); gone = true; break; }
       }
       if (gone) continue;
     }
@@ -14829,7 +14839,7 @@ class GameScene extends Phaser.Scene {
   fireFirework(now, ox, oy, a, mx, my) {
     const cols = [[0xff4a6a, 0xffc0d0], [0x4ae0ff, 0xd0f8ff], [0xffd040, 0xfff4c0], [0x7aff5a, 0xe0ffd0], [0xc070ff, 0xf0d8ff]], T = TUNE.FIREWORK;
     this.stats.shots++;
-    this.fireworks.push({ x: ox, y: oy, a: a + rand(-0.08, 0.08), sp: T.speed, t: rand(T.fuse[0], T.fuse[1]), wob: rand(0, 6), col: cols[randi(0, cols.length - 1)] });
+    this.fireworks.push({ x: ox, y: oy, a: a + rand(-0.08, 0.08), sp: T.speed, t: rand(T.fuse[0], T.fuse[1]), wob: rand(0, 6), col: cols[randi(0, cols.length - 1)], shot: { counted: false } });
     Sfx.firework(); this.recoil = 3; this.muzzle(mx, my, a, 0.7, 40); this.fxSmoke(mx, my, 3); this.addKick(-Math.cos(a) * 2, -Math.sin(a) * 2);
   }
   updateFireworks(dt, now) {
@@ -14838,8 +14848,8 @@ class GameScene extends Phaser.Scene {
       F.a += Math.sin(F.wob) * dt * 3 + rand(-1, 1) * dt * 2; F.sp = Math.min(F.sp + 500 * dt, 520);   // it wanders like a real one
       const nx = F.x + Math.cos(F.a) * F.sp * dt, ny = F.y + Math.sin(F.a) * F.sp * dt, e = this.enemyAt(nx, ny, 3);
       if (F.t <= 0 || this.solidAt(nx, ny) || (e && !e.under)) {
-        if (e && !e.under) { this.damageEnemy(e, TUNE.FIREWORK.dmg, Math.cos(F.a), Math.sin(F.a), 'rocket'); this.stats.hits++; }
-        this.fireworkBurst(F.x, F.y, F.col); this.fireworks.splice(i, 1); continue;
+        if (e && !e.under) { this.damageEnemy(e, TUNE.FIREWORK.dmg, Math.cos(F.a), Math.sin(F.a), 'rocket'); this.fireworkHit(F.shot); }
+        this.fireworkBurst(F.x, F.y, F.col, F.shot); this.fireworks.splice(i, 1); continue;
       }
       F.x = nx; F.y = ny;
       this.fx.emit(F.x, F.y, { n: 2, angle: F.a + Math.PI, spread: 0.5, speed: [20, 80], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, F.col[0], 0xffa030], add: true, g: 120 });
@@ -14851,16 +14861,17 @@ class GameScene extends Phaser.Scene {
       for (const e of this.enemies.getChildren()) {
         if (!e.alive || e.under || S.hit.has(e)) continue;
         const b = e.body; if (S.x < b.left - 2 || S.x > b.right + 2 || S.y < b.top - 2 || S.y > b.bottom + 2) continue;
-        S.hit.add(e); this.damageEnemy(e, TUNE.FIREWORK.starDmg, Math.sign(S.vx) || 1, 0, 'needle'); this.stats.hits++;
+        S.hit.add(e); this.damageEnemy(e, TUNE.FIREWORK.starDmg, Math.sign(S.vx) || 1, 0, 'needle'); this.fireworkHit(S.shot);
         if (e.alive && Math.random() < 0.35) this.ignite(e, 1.2);
       }
       if (Math.random() < 0.4) this.fx.emit(S.x, S.y, { n: 1, speed: [0, 10], life: [0.1, 0.25], size: [1, 1], cols: [S.col, 0xffffff], add: true, g: 40 });
     }
   }
-  fireworkBurst(x, y, col) {
+  fireworkHit(shot) { if (!shot.counted) { shot.counted = true; this.stats.hits++; } }   // a rocket is one shot: its hit, burst or stars count once
+  fireworkBurst(x, y, col, shot = { counted: false }) {
     const T = TUNE.FIREWORK;
-    for (let k = 0; k < T.stars; k++) { const a = k / T.stars * Math.PI * 2 + rand(-0.15, 0.15), v = rand(T.starSpeed[0], T.starSpeed[1]); this.stars.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, t: rand(T.starLife[0], T.starLife[1]), col: k % 3 ? col[0] : col[1], hit: new Set() }); }
-    for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - x, e.body.center.y - y); if (d < 28 + e.body.halfWidth) this.damageEnemy(e, T.blast, Math.sign(e.body.center.x - x) || 1, -0.3, 'pellet'); }
+    for (let k = 0; k < T.stars; k++) { const a = k / T.stars * Math.PI * 2 + rand(-0.15, 0.15), v = rand(T.starSpeed[0], T.starSpeed[1]); this.stars.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, t: rand(T.starLife[0], T.starLife[1]), col: k % 3 ? col[0] : col[1], hit: new Set(), shot }); }
+    for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - x, e.body.center.y - y); if (d < 28 + e.body.halfWidth) { this.damageEnemy(e, T.blast, Math.sign(e.body.center.x - x) || 1, -0.3, 'pellet'); this.fireworkHit(shot); } }
     for (const k of this.barrelList) if (k.active && Math.hypot(k.x - x, k.y - y) < 24) this.damageBarrel(k, 12);
     this.spawnLight(x, y, 'glow', col[0], 1.6, 3.2, 1, 0.35); this.spawnLight(x, y, 'ring', col[1], 0.2, 1.4, 0.9, 0.25);
     this.fx.emit(x, y, { n: 18, speed: [60, 240], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, col[1], col[0]], add: true, g: 60 });
@@ -15048,6 +15059,7 @@ class GameScene extends Phaser.Scene {
     this.gravFx.push({ x, y, t: 0 });
     Sfx.gravPulse(); this.warpPulse(0.5); this.shake(120, 0.005); this.spawnLight(x, y, 'glow', 0x9a60ff, 1.6, 0.4, 0.9, 0.3);
     this.fx.emit(x, y, { n: 24, speed: [40, 160], life: [0.4, 0.8], size: [2, 1], cols: [0xe0c8ff, 0x9a60ff, 0x5a20c0], add: true, g: -120 });
+    if (n) this.stats.hits++;                                           // the bomb's one hit: the pulse that lifts foes
     if (n >= 3) { BUS.emit('callout', 'LIFTOFF'); this.addStyle(40); }
   }
   updateGravved(e, dt, now) {                                           // floating helpless, then slammed back down
@@ -15080,7 +15092,7 @@ class GameScene extends Phaser.Scene {
     ball.enableBody(true, ox, oy, true, true);
     ball.body.setCircle(4); ball.body.setAllowGravity(true); ball.body.setGravityY(-this.physics.world.gravity.y * 0.45); ball.body.setBounce(T.bounce, T.bounce);
     ball.setVelocity(Math.cos(a) * T.speed, Math.sin(a) * T.speed);
-    Object.assign(ball, { born: now, life: T.life, bounces: 0, hitMap: new Map(), pvx: Math.cos(a) * T.speed, pvy: Math.sin(a) * T.speed, slowT: 0, called: false });
+    Object.assign(ball, { born: now, life: T.life, bounces: 0, hitMap: new Map(), pvx: Math.cos(a) * T.speed, pvy: Math.sin(a) * T.speed, slowT: 0, called: false, counted: false });
     ball.setTint(0xffffff);
     Sfx.pinball(0); this.recoil = 6; this.muzzle(mx, my, a, 1.1, 60); this.fxSparks(mx, my, 5, a, 0.6, [60, 200]); this.shake(70, 0.004); this.addKick(-Math.cos(a) * 4, -Math.sin(a) * 4);
   }
@@ -15089,6 +15101,7 @@ class GameScene extends Phaser.Scene {
     const now = this.time.now, T = TUNE.PINBALL; if ((ball.hitMap.get(e) || 0) > now) return; ball.hitMap.set(e, now + 220);
     const v = ball.body.velocity, sp = Math.hypot(v.x, v.y) || 1, ux = v.x / sp, uy = v.y / sp;
     this.damageEnemy(e, (T.dmg + T.perBounce * ball.bounces) * clamp(sp / 420, 0.5, 1.3), ux, uy, 'pellet');
+    if (!ball.counted) { ball.counted = true; this.stats.hits++; }      // a ball is one shot however often it bounces into foes
     if (e.alive && e.def.kb > 0 && e.kind !== 'boss') { e.body.velocity.x += ux * 260 * e.def.kb; e.body.velocity.y -= 120 * e.def.kb; }
     const b = e.body, nx0 = ball.x - b.center.x, ny0 = ball.y - b.center.y, nl = Math.hypot(nx0, ny0) || 1, nx = nx0 / nl, ny = ny0 / nl;   // carom off it
     const dot = v.x * nx + v.y * ny; if (dot < 0) { v.x -= 2 * dot * nx; v.y -= 2 * dot * ny; }
@@ -15281,6 +15294,7 @@ class GameScene extends Phaser.Scene {
       this.damageEnemy(e, W.dmg, ux, uy, 'kick'); n++;
       if (e.alive && e.def.kb > 0) { b.velocity.x = ux * W.push * e.def.kb; b.velocity.y = Math.min(-120, uy * W.push * e.def.kb) * 0.8; e.kickedT = 0.7; e.stunT = Math.max(e.stunT, 0.6); }
     }
+    if (n) this.stats.hits++;                                           // one shot, one hit, however many it shoves
     for (const list of [this.ebulletList, this.boltList]) for (const b of list) if (b.active && inCone(b.x, b.y, 4)) { const x = b.x, y = b.y; b.disableBody(true, true); this.fxSparks(x, y, 3); }
     for (const q of this.eprojList) if (q.active && inCone(q.x, q.y, 4)) { q.body.velocity.x = Math.cos(a) * 300; q.body.velocity.y = Math.sin(a) * 300 - 60; }
     for (const g2 of this.gibList) if (g2.active && inCone(g2.x, g2.y, 6)) { if (g2.stuckT > 0) { g2.stuckT = 0; g2.body.setAllowGravity(true); } g2.body.velocity.x = Math.cos(a) * 420; g2.body.velocity.y = Math.sin(a) * 420 - 120; }
@@ -15621,7 +15635,9 @@ class GameScene extends Phaser.Scene {
       const x = hit ? hit.x : n.x, y = hit ? hit.y : n.y;
       this.napalms.splice(i, 1); n.img.destroy();
       for (const dx of [-30, 0, 30]) this.spawnFirePatch(x + dx, y - 6);
-      for (const o of this.enemies.getChildren()) if (o.alive && !o.under && Math.hypot(o.body.center.x - x, o.body.center.y - y) < W.splash) { this.ignite(o, W.burn); this.damageEnemy(o, 10, Math.sign(o.x - x) || 1, -0.5, 'flame'); }
+      let burned = false;
+      for (const o of this.enemies.getChildren()) if (o.alive && !o.under && Math.hypot(o.body.center.x - x, o.body.center.y - y) < W.splash) { this.ignite(o, W.burn); this.damageEnemy(o, 10, Math.sign(o.x - x) || 1, -0.5, 'flame'); burned = true; }
+      if (burned) this.stats.hits++;
       for (let k = 0; k < 8; k++) this.fxFire(x + rand(-30, 30), y - 2, 3);
       this.spawnLight(x, y, 'glow', 0xff8a20, 2, 4, 0.9, 0.3); Sfx.tarIgnite(); this.shake(120, 0.005);
       for (const T of this.tars.slice()) if (Math.abs(T.x - x) < T.w / 2 + 40 && Math.abs(T.y - y) < 20) this.igniteTar(T);
@@ -15992,7 +16008,7 @@ class GameScene extends Phaser.Scene {
           o.netT = boss ? W.hold * 0.4 : W.hold; o.netTick = 0; caught++;
           if (FLIERS.has(o.kind) && !boss) o.body.setAllowGravity(true);
         }
-        if (caught) { Sfx.zap(); if (caught >= 3) { BUS.emit('callout', 'NET HAUL'); this.addStyle(60); } }
+        if (caught) { this.stats.hits++; Sfx.zap(); if (caught >= 3) { BUS.emit('callout', 'NET HAUL'); this.addStyle(60); } }
         continue;
       }
       n.img.setPosition(n.x, n.y).setRotation(n.x / 6);
@@ -16194,7 +16210,7 @@ class GameScene extends Phaser.Scene {
       if (!F.stuck) {
         const px = F.x, py = F.y; F.vy += G * 0.6 * dt; F.x += F.vx * dt; F.y += F.vy * dt;
         const hit = this.sweep(px, py, F.x, F.y), e = this.enemyAt(F.x, F.y, 2);
-        if (e && !e.under) { F.stuck = true; F.e = e; F.ox = F.x - e.x; F.oy = F.y - e.y; this.ignite(e, 3); Sfx.stick(); }
+        if (e && !e.under) { F.stuck = true; F.e = e; F.ox = F.x - e.x; F.oy = F.y - e.y; this.ignite(e, 3); this.stats.hits++; Sfx.stick(); }
         else if (hit) { F.stuck = true; F.x = hit.x; F.y = hit.y; Sfx.stick(); }
       } else if (F.e) {
         if (!F.e.alive) { F.e = null; F.stuck = false; F.vx = 0; F.vy = 0; }
@@ -16589,7 +16605,7 @@ class GameScene extends Phaser.Scene {
       if (C.gone || (C.tick -= dt) > 0) continue;
       C.tick = 0.4;
       if (!C.mine && this.state !== 'dead' && Math.hypot(pb.center.x - C.x, pb.center.y - C.y) < C.r) this.hurtPlayer(T.dmg, C.x, { knock: false, iframes: false, burn: true, srcY: C.y });
-      for (const e of this.enemies.getChildren()) if (e.alive && !e.under && e.kind !== 'gasbag' && (!e.def.mech || C.mine) && Math.hypot(e.body.center.x - C.x, e.body.center.y - C.y) < C.r) { this.damageEnemy(e, C.mine ? 5 : 3, 0, 0, 'gas'); if (C.mine && e.alive) e.corrodeT = Math.max(e.corrodeT, 1.5); }
+      for (const e of this.enemies.getChildren()) if (e.alive && !e.under && e.kind !== 'gasbag' && (!e.def.mech || C.mine) && Math.hypot(e.body.center.x - C.x, e.body.center.y - C.y) < C.r) { this.damageEnemy(e, C.mine ? 5 : 3, 0, 0, 'gas'); if (C.mine && e.alive) e.corrodeT = Math.max(e.corrodeT, 1.5); if (C.mine && !C.counted) { C.counted = true; this.stats.hits++; } }
     }
   }
   igniteCloud(C) {

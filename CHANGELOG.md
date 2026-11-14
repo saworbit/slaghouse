@@ -145,6 +145,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- Ten weapons counted shots but never hits, so leaning on them dragged accuracy and the grade down: the Sonic
+  Blaster, Pinball Cannon, Napalm Launcher, Storm Coil, Tractor, Flare Gun, Net Gun, Grav Bomb, Tripwire and
+  Gas Launcher. Each now counts one hit per shot that connects: a blast, ball, can, coil, throw, flare, net, pulse,
+  wire or cloud that first hurts or catches a foe. A blast that follows a shot which already scored (a tripwire's
+  last zap, a coil overload) doesn't count again. A Firework Launcher rocket counts one hit whether its direct hit,
+  burst or stars land; before, a burst beside a foe counted none and each star counted its own. The Lab weapon sweep
+  fails any weapon that hurts its dummy without counting a hit. (#126)
 - Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
   longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
 - In the Lab setup, changing **Room** keeps the weapon, difficulty, modifier, checkboxes and roster you already set,
