@@ -1315,141 +1315,143 @@ const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, r
 const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit']);
 // One record per foe kind: stats, hitbox and gibs, plus what the scene looks up by kind: frame0 is the frame it
 // spawns on, flier means no gravity and air spawn points, humanoid means head shots, cover and alerts, and update
-// names the GameScene method that runs it each frame (updateWalker for the plain ones). FLIERS and isHumanoid
-// below are built from these, and dev/playtest/kinds.js checks every kind (#52).
+// names the GameScene method that runs it each frame (updateWalker for the plain ones). visuals names the method
+// that draws its own glow, beams and tells each frame (none for the plain ones), and marks says which shared status
+// marks draw over it first: all of them (a net, a microwave's swell, a bubble, stasis) unless it says 'net' for only
+// the net or 'none'. FLIERS and isHumanoid below are built from these, and dev/playtest/kinds.js checks every kind (#52).
 const ENEMY = {
   grunt: { key: 'grunt', frame0: 'w0', update: 'updateWalker', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
            gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15] },
-  heavy: { key: 'heavy', frame0: 'w0', update: 'updateWalker', fw: 28, fh: 28, bw: 18, bh: 24, hp: 120, patrol: 30, chase: 92, jumpV: 330, leapV: 330, sight: 220, range: 60, touch: 20, kb: 0.35,
+  heavy: { key: 'heavy', frame0: 'w0', update: 'updateWalker', visuals: 'visHeavy', fw: 28, fh: 28, bw: 18, bh: 24, hp: 120, patrol: 30, chase: 92, jumpV: 330, leapV: 330, sight: 220, range: 60, touch: 20, kb: 0.35,
            gibs: ['g_core', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
-  drone: { key: 'drone', frame0: 'd0', flier: true, update: 'updateDrone', fw: 18, fh: 16, bw: 12, bh: 12, hp: 30, sight: 240, touch: 8, kb: 1.3,
+  drone: { key: 'drone', frame0: 'd0', flier: true, update: 'updateDrone', visuals: 'visDrone', fw: 18, fh: 16, bw: 12, bh: 12, hp: 30, sight: 240, touch: 8, kb: 1.3,
            gibs: ['g_eye', 'g_plateL', 'g_plate', 'g_wire', 'g_wire', 'g_plate', 'g_chunk', 'g_flesh1'], gibN: [9, 12] },
-  enforcer: { key: 'enforcer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 10, bh: 20, hp: 60, speed: 120, sight: 300, touch: 8, kb: 0.8, dodge: 0.5, dodgeCd: 1.6, head: 'g_ehelm',
+  enforcer: { key: 'enforcer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 60, speed: 120, sight: 300, touch: 8, kb: 0.8, dodge: 0.5, dodgeCd: 1.6, head: 'g_ehelm',
               gibs: ['g_earmor', 'g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
-  stalker: { key: 'stalker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 20, fh: 24, bw: 10, bh: 20, hp: 40, speed: 175, sight: 260, touch: 10, lungeDmg: 16, kb: 1, dodge: 0.55, dodgeCd: 1.2, head: 'g_hood',
+  stalker: { key: 'stalker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visStalker', fw: 20, fh: 24, bw: 10, bh: 20, hp: 40, speed: 175, sight: 260, touch: 10, lungeDmg: 16, kb: 1, dodge: 0.55, dodgeCd: 1.2, head: 'g_hood',
              gibs: ['g_blade', 'g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 15] },
-  bulwark: { key: 'bulwark', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', fw: 22, fh: 24, bw: 12, bh: 20, hp: 100, speed: 80, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_bhelm',
+  bulwark: { key: 'bulwark', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 100, speed: 80, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_bhelm',
              gibs: ['g_shield', 'g_plateL', 'g_shard', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [14, 18] },
-  mender: { key: 'mender', frame0: 'm0', flier: true, update: 'updateMender', fw: 18, fh: 16, bw: 12, bh: 12, hp: 40, sight: 260, touch: 6, kb: 1.2,
+  mender: { key: 'mender', frame0: 'm0', flier: true, update: 'updateMender', visuals: 'visMender', marks: 'none', fw: 18, fh: 16, bw: 12, bh: 12, hp: 40, sight: 260, touch: 6, kb: 1.2,
             gibs: ['g_mcore', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2', 'g_wire'], gibN: [9, 12] },
   tick: { key: 'tick', frame0: 'k0', update: 'updateTick', fw: 14, fh: 10, bw: 10, bh: 8, hp: 12, speed: 150, sight: 260, touch: 0, kb: 1.4, gibs: ['g_chunk', 'g_chunk', 'g_flesh1'], gibN: [4, 6] },
-  sniper: { key: 'sniper', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 110, sight: 520, touch: 6, kb: 0.9, dodge: 0.4, dodgeCd: 2, head: 'g_shood',
+  sniper: { key: 'sniper', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 110, sight: 520, touch: 6, kb: 0.9, dodge: 0.4, dodgeCd: 2, head: 'g_shood',
             gibs: ['g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  rocketeer: { key: 'rocketeer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 95, sight: 340, touch: 8, kb: 0.6, dodge: 0.3, dodgeCd: 2, head: 'g_rhelm',
+  rocketeer: { key: 'rocketeer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 95, sight: 340, touch: 8, kb: 0.6, dodge: 0.3, dodgeCd: 2, head: 'g_rhelm',
                gibs: ['g_rarmor', 'g_rarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
-  wasp: { key: 'wasp', frame0: 'p0', flier: true, update: 'updateWasp', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, sight: 320, touch: 8, kb: 1,
+  wasp: { key: 'wasp', frame0: 'p0', flier: true, update: 'updateWasp', visuals: 'visWasp', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, sight: 320, touch: 8, kb: 1,
           gibs: ['g_wing', 'g_wing', 'g_plate', 'g_wire', 'g_eye', 'g_plateL', 'g_chunk'], gibN: [9, 12] },
-  rammer: { key: 'rammer', frame0: 'w0', update: 'updateRammer', fw: 30, fh: 22, bw: 22, bh: 18, hp: 170, patrol: 28, chase: 70, sight: 260, touch: 18, kb: 0.15,
+  rammer: { key: 'rammer', frame0: 'w0', update: 'updateRammer', visuals: 'visRammer', fw: 30, fh: 22, bw: 22, bh: 18, hp: 170, patrol: 28, chase: 70, sight: 260, touch: 18, kb: 0.15,
             gibs: ['g_horn', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
-  jet: { key: 'jet', frame0: 'j0', flier: true, update: 'updateJet', fw: 20, fh: 24, bw: 10, bh: 18, hp: 55, sight: 320, touch: 6, kb: 0.9, head: 'g_jhelm',
+  jet: { key: 'jet', frame0: 'j0', flier: true, update: 'updateJet', visuals: 'visJet', fw: 20, fh: 24, bw: 10, bh: 18, hp: 55, sight: 320, touch: 6, kb: 0.9, head: 'g_jhelm',
          gibs: ['g_jarmor', 'g_jarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_wire', 'g_plate'], gibN: [12, 15] },
-  sapper: { key: 'sapper', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, speed: 150, sight: 280, touch: 6, kb: 1, dodge: 0.45, dodgeCd: 1.5, head: 'g_smask',
+  sapper: { key: 'sapper', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visSapper', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, speed: 150, sight: 280, touch: 6, kb: 1, dodge: 0.45, dodgeCd: 1.5, head: 'g_smask',
             gibs: ['g_satchel', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  brood: { key: 'brood', frame0: 'w0', update: 'updateBrood', fw: 34, fh: 26, bw: 26, bh: 20, hp: 170, sight: 260, touch: 14, kb: 0.2,
+  brood: { key: 'brood', frame0: 'w0', update: 'updateBrood', visuals: 'visBrood', fw: 34, fh: 26, bw: 26, bh: 20, hp: 170, sight: 260, touch: 14, kb: 0.2,
            gibs: ['g_egg', 'g_egg', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_rib', 'g_bone'], gibN: [22, 28] },
-  cloaker: { key: 'cloaker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 190, sight: 300, touch: 0, kb: 1, dodge: 0.5, dodgeCd: 1.4, head: 'g_chood',
+  cloaker: { key: 'cloaker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visCloaker', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 190, sight: 300, touch: 0, kb: 1, dodge: 0.5, dodgeCd: 1.4, head: 'g_chood',
              gibs: ['g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  pyro: { key: 'pyro', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
+  pyro: { key: 'pyro', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visPyro', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
           gibs: ['g_tank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  gunship: { key: 'gunship', frame0: 'g0', flier: true, update: 'updateGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
+  gunship: { key: 'gunship', frame0: 'g0', flier: true, update: 'updateGunship', visuals: 'visGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
              gibs: ['g_plateL', 'g_plateL', 'g_plateL', 'g_jplate', 'g_jplate', 'g_wire', 'g_wire', 'g_shard', 'g_shard2', 'g_plate', 'g_core'], gibN: [20, 26] },
-  screamer: { key: 'screamer', frame0: 's0', flier: true, update: 'updateScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
-  warden: { key: 'warden', frame0: 'v0', flier: true, update: 'updateWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
-  jugg: { key: 'jugg', frame0: 's0w0', update: 'updateJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
+  screamer: { key: 'screamer', frame0: 's0', flier: true, update: 'updateScreamer', visuals: 'visScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
+  warden: { key: 'warden', frame0: 'v0', flier: true, update: 'updateWarden', visuals: 'visWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
+  jugg: { key: 'jugg', frame0: 's0w0', update: 'updateJugg', visuals: 'visJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
           gibs: ['g_jplate', 'g_jplate', 'g_jplate', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk', 'g_core'], gibN: [24, 30] },
-  boss: { key: 'boss', frame0: 'w0', update: 'updateBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
+  boss: { key: 'boss', frame0: 'w0', update: 'updateBoss', visuals: 'visBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
           gibs: ['g_core', 'g_core', 'g_core', 'g_plateL', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2',
                  'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40] },
   // ---- overdrive round ----
-  slagling: { key: 'slagling', frame0: 'a', update: 'updateSlagling', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
+  slagling: { key: 'slagling', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_crust', 'g_slag', 'g_slag', 'g_crust'], gibN: [10, 13] },
-  slagmid:  { key: 'slagmid', frame0: 'a', update: 'updateSlagling', fw: 18, fh: 14, bw: 14, bh: 10, hp: 30, sight: 300, touch: 8, kb: 0.8, tier: 1, child: 'slagbit', molten: true,
+  slagmid:  { key: 'slagmid', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 18, fh: 14, bw: 14, bh: 10, hp: 30, sight: 300, touch: 8, kb: 0.8, tier: 1, child: 'slagbit', molten: true,
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_slag'], gibN: [6, 8] },
-  slagbit:  { key: 'slagbit', frame0: 'a', update: 'updateSlagling', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
-  burrower: { key: 'burrower', frame0: 'sw0', update: 'updateBurrower', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
+  slagbit:  { key: 'slagbit', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
+  burrower: { key: 'burrower', frame0: 'sw0', update: 'updateBurrower', visuals: 'visBurrower', marks: 'none', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
               gibs: ['g_wormseg', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_core', 'g_wormseg'], gibN: [16, 20] },
-  harpooner: { key: 'harpooner', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
+  harpooner: { key: 'harpooner', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visHarpooner', marks: 'none', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
                gibs: ['g_chain', 'g_chain', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  linker: { key: 'linker', frame0: 'l0', flier: true, update: 'updateLinker', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
+  linker: { key: 'linker', frame0: 'l0', flier: true, update: 'updateLinker', visuals: 'visLinker', marks: 'none', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
             gibs: ['g_emitter', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [8, 10] },
   // ---- crucible round ----
-  mirror: { key: 'mirror', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', fw: 22, fh: 24, bw: 12, bh: 20, hp: 90, speed: 85, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_mhelm',
+  mirror: { key: 'mirror', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 90, speed: 85, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_mhelm',
             gibs: ['g_glass', 'g_glass', 'g_glass', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [14, 18] },
-  hive: { key: 'hive', frame0: 'h0', flier: true, update: 'updateHive', fw: 22, fh: 22, bw: 16, bh: 16, hp: 90, sight: 300, touch: 8, kb: 0.4,
+  hive: { key: 'hive', frame0: 'h0', flier: true, update: 'updateHive', visuals: 'visHive', fw: 22, fh: 22, bw: 16, bh: 16, hp: 90, sight: 300, touch: 8, kb: 0.4,
           gibs: ['g_hive', 'g_hive', 'g_hive', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_flesh3'], gibN: [12, 16] },
-  gnat: { key: 'gnat', frame0: 'n0', flier: true, update: 'updateGnat', fw: 7, fh: 6, bw: 5, bh: 4, hp: 4, sight: 420, touch: 0, kb: 2, tiny: true, gibs: ['g_chunk'], gibN: [0, 1] },
-  stitcher: { key: 'stitcher', frame0: 's0', flier: true, update: 'updateStitcher', fw: 18, fh: 16, bw: 12, bh: 12, hp: 55, sight: 300, touch: 6, kb: 1.1, mech: true,
+  gnat: { key: 'gnat', frame0: 'n0', flier: true, update: 'updateGnat', marks: 'none', fw: 7, fh: 6, bw: 5, bh: 4, hp: 4, sight: 420, touch: 0, kb: 2, tiny: true, gibs: ['g_chunk'], gibN: [0, 1] },
+  stitcher: { key: 'stitcher', frame0: 's0', flier: true, update: 'updateStitcher', visuals: 'visStitcher', fw: 18, fh: 16, bw: 12, bh: 12, hp: 55, sight: 300, touch: 6, kb: 1.1, mech: true,
               gibs: ['g_needle', 'g_needle', 'g_plate', 'g_wire', 'g_skull', 'g_shard'], gibN: [9, 12] },
-  wyrm: { key: 'wyrm', frame0: 'c', flier: true, update: 'updateWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
+  wyrm: { key: 'wyrm', frame0: 'c', flier: true, update: 'updateWyrm', visuals: 'visWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
           gibs: ['g_wyrmplate', 'g_wyrmplate', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_core', 'g_core', 'g_chunk'], gibN: [20, 26] },
-  wyrmseg: { key: 'wyrmseg', frame0: 'a', flier: true, update: 'updateWyrmseg', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
+  wyrmseg: { key: 'wyrmseg', frame0: 'a', flier: true, update: 'updateWyrmseg', visuals: 'visWyrm', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
              gibs: ['g_wyrmplate', 'g_wormseg', 'g_flesh1', 'g_chunk', 'g_wormseg'], gibN: [5, 7] },
   // ---- furnace round ----
-  buzzsaw: { key: 'buzzsaw', frame0: 'z0', flier: true, update: 'updateBuzzsaw', fw: 16, fh: 16, bw: 12, bh: 12, hp: 50, sight: 420, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_shard', 'g_eye', 'g_wire'], gibN: [8, 10] },
-  magnet: { key: 'magnet', frame0: 'm0', flier: true, update: 'updateMagnet', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, sight: 320, touch: 6, kb: 0.6, mech: true, gibs: ['g_magnet', 'g_magnet', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [9, 12] },
-  mimic: { key: 'mimic', frame0: 'h', update: 'updateMimic', fw: 14, fh: 18, bw: 10, bh: 13, hp: 60, speed: 150, sight: 200, touch: 15, kb: 0.8, gibs: ['g_barrel', 'g_barrel', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [10, 13] },
-  howitzer: { key: 'howitzer', frame0: 'w0', update: 'updateHowitzer', fw: 26, fh: 22, bw: 16, bh: 18, hp: 160, speed: 34, sight: 420, touch: 10, kb: 0.35, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_eye', 'g_wire'], gibN: [10, 13] },
-  blinker: { key: 'blinker', frame0: 'b0', flier: true, update: 'updateBlinker', fw: 16, fh: 20, bw: 10, bh: 16, hp: 45, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_wire', 'g_flesh3'], gibN: [8, 11] },
-  gasbag: { key: 'gasbag', frame0: 'g0', flier: true, update: 'updateGasbag', fw: 18, fh: 20, bw: 14, bh: 14, hp: 30, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk'], gibN: [5, 7] },
-  welder: { key: 'welder', frame0: 'w0', update: 'updateWelder', fw: 18, fh: 20, bw: 12, bh: 18, hp: 70, speed: 70, sight: 320, touch: 8, kb: 0.7, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_wire', 'g_eye'], gibN: [8, 11] },
-  turret: { key: 'turret', frame0: 't0', update: 'updateTurret', fw: 14, fh: 10, bw: 12, bh: 9, hp: 30, sight: 300, touch: 0, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [4, 6] },
-  duelist: { key: 'duelist', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 10, bh: 20, hp: 65, speed: 130, chase: 190, sight: 320, touch: 0, kb: 0.8, dodge: 0.75, dodgeCd: 0.7, head: 'g_dmask', lungeDmg: 12,
+  buzzsaw: { key: 'buzzsaw', frame0: 'z0', flier: true, update: 'updateBuzzsaw', visuals: 'visBuzzsaw', marks: 'none', fw: 16, fh: 16, bw: 12, bh: 12, hp: 50, sight: 420, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_shard', 'g_eye', 'g_wire'], gibN: [8, 10] },
+  magnet: { key: 'magnet', frame0: 'm0', flier: true, update: 'updateMagnet', visuals: 'visMagnet', marks: 'none', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, sight: 320, touch: 6, kb: 0.6, mech: true, gibs: ['g_magnet', 'g_magnet', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [9, 12] },
+  mimic: { key: 'mimic', frame0: 'h', update: 'updateMimic', visuals: 'visMimic', fw: 14, fh: 18, bw: 10, bh: 13, hp: 60, speed: 150, sight: 200, touch: 15, kb: 0.8, gibs: ['g_barrel', 'g_barrel', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [10, 13] },
+  howitzer: { key: 'howitzer', frame0: 'w0', update: 'updateHowitzer', visuals: 'visHowitzer', fw: 26, fh: 22, bw: 16, bh: 18, hp: 160, speed: 34, sight: 420, touch: 10, kb: 0.35, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_eye', 'g_wire'], gibN: [10, 13] },
+  blinker: { key: 'blinker', frame0: 'b0', flier: true, update: 'updateBlinker', visuals: 'visBlinker', fw: 16, fh: 20, bw: 10, bh: 16, hp: 45, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_wire', 'g_flesh3'], gibN: [8, 11] },
+  gasbag: { key: 'gasbag', frame0: 'g0', flier: true, update: 'updateGasbag', visuals: 'visGasbag', fw: 18, fh: 20, bw: 14, bh: 14, hp: 30, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk'], gibN: [5, 7] },
+  welder: { key: 'welder', frame0: 'w0', update: 'updateWelder', visuals: 'visWelder', fw: 18, fh: 20, bw: 12, bh: 18, hp: 70, speed: 70, sight: 320, touch: 8, kb: 0.7, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_wire', 'g_eye'], gibN: [8, 11] },
+  turret: { key: 'turret', frame0: 't0', update: 'updateTurret', visuals: 'visTurret', fw: 14, fh: 10, bw: 12, bh: 9, hp: 30, sight: 300, touch: 0, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [4, 6] },
+  duelist: { key: 'duelist', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visDuelist', fw: 18, fh: 24, bw: 10, bh: 20, hp: 65, speed: 130, chase: 190, sight: 320, touch: 0, kb: 0.8, dodge: 0.75, dodgeCd: 0.7, head: 'g_dmask', lungeDmg: 12,
              gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [12, 15] },
-  creeper: { key: 'creeper', frame0: 'c0', flier: true, update: 'updateCreeper', fw: 16, fh: 10, bw: 12, bh: 8, hp: 40, sight: 360, touch: 14, kb: 1, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [7, 9] },
-  roller: { key: 'roller', frame0: 'r0', update: 'updateRoller', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 40, sight: 320, touch: 10, kb: 0.5, gibs: ['g_plate', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [10, 13] },
-  jammer: { key: 'jammer', frame0: 'j0', flier: true, update: 'updateJammer', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 340, touch: 6, kb: 0.9, mech: true, gibs: ['g_shard', 'g_wire', 'g_shard2', 'g_eye', 'g_wire'], gibN: [7, 9] },
-  claw: { key: 'claw', frame0: 'open', flier: true, update: 'updateClaw', fw: 16, fh: 12, bw: 12, bh: 10, hp: 120, sight: 420, touch: 0, kb: 0, mech: true, noClip: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_wire'], gibN: [8, 10] },
-  sparker: { key: 'sparker', frame0: 's0', update: 'updateSparker', fw: 12, fh: 12, bw: 10, bh: 10, hp: 30, sight: 320, touch: 8, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
-  golem: { key: 'golem', frame0: 'g0', update: 'updateGolem', fw: 28, fh: 30, bw: 20, bh: 28, hp: 260, speed: 45, sight: 360, touch: 16, kb: 0.25, mech: true, gibs: ['g_plate', 'g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_barrel', 'g_wire'], gibN: [14, 18] },
-  echo: { key: 'echo', frame0: 'idle0', flier: true, update: 'updateEcho', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, sight: 400, touch: 0, kb: 0, mech: true, gibs: [], gibN: [0, 0] },
-  pilferer: { key: 'pilferer', frame0: 'p0', flier: true, update: 'updatePilferer', fw: 14, fh: 10, bw: 10, bh: 8, hp: 25, sight: 420, touch: 0, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
-  pogo: { key: 'pogo', frame0: 'c', update: 'updatePogo', fw: 16, fh: 18, bw: 12, bh: 16, hp: 70, sight: 360, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 9] },
-  beacon: { key: 'beacon', frame0: 'b0', flier: true, update: 'updateBeacon', fw: 14, fh: 16, bw: 10, bh: 12, hp: 35, sight: 360, touch: 0, kb: 0.7, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye', 'g_shard2'], gibN: [5, 7] },
-  slug: { key: 'slug', frame0: 's0', update: 'updateSlug', fw: 18, fh: 10, bw: 14, bh: 8, hp: 80, sight: 300, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_flesh1'], gibN: [8, 11] },
+  creeper: { key: 'creeper', frame0: 'c0', flier: true, update: 'updateCreeper', visuals: 'visCreeper', fw: 16, fh: 10, bw: 12, bh: 8, hp: 40, sight: 360, touch: 14, kb: 1, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [7, 9] },
+  roller: { key: 'roller', frame0: 'r0', update: 'updateRoller', visuals: 'visRoller', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 40, sight: 320, touch: 10, kb: 0.5, gibs: ['g_plate', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [10, 13] },
+  jammer: { key: 'jammer', frame0: 'j0', flier: true, update: 'updateJammer', visuals: 'visJammer', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 340, touch: 6, kb: 0.9, mech: true, gibs: ['g_shard', 'g_wire', 'g_shard2', 'g_eye', 'g_wire'], gibN: [7, 9] },
+  claw: { key: 'claw', frame0: 'open', flier: true, update: 'updateClaw', visuals: 'visClaw', marks: 'net', fw: 16, fh: 12, bw: 12, bh: 10, hp: 120, sight: 420, touch: 0, kb: 0, mech: true, noClip: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_wire'], gibN: [8, 10] },
+  sparker: { key: 'sparker', frame0: 's0', update: 'updateSparker', visuals: 'visSparker', fw: 12, fh: 12, bw: 10, bh: 10, hp: 30, sight: 320, touch: 8, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
+  golem: { key: 'golem', frame0: 'g0', update: 'updateGolem', visuals: 'visGolem', fw: 28, fh: 30, bw: 20, bh: 28, hp: 260, speed: 45, sight: 360, touch: 16, kb: 0.25, mech: true, gibs: ['g_plate', 'g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_barrel', 'g_wire'], gibN: [14, 18] },
+  echo: { key: 'echo', frame0: 'idle0', flier: true, update: 'updateEcho', visuals: 'visEcho', marks: 'net', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, sight: 400, touch: 0, kb: 0, mech: true, gibs: [], gibN: [0, 0] },
+  pilferer: { key: 'pilferer', frame0: 'p0', flier: true, update: 'updatePilferer', visuals: 'visPilferer', fw: 14, fh: 10, bw: 10, bh: 8, hp: 25, sight: 420, touch: 0, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
+  pogo: { key: 'pogo', frame0: 'c', update: 'updatePogo', visuals: 'visPogo', fw: 16, fh: 18, bw: 12, bh: 16, hp: 70, sight: 360, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 9] },
+  beacon: { key: 'beacon', frame0: 'b0', flier: true, update: 'updateBeacon', visuals: 'visBeacon', fw: 14, fh: 16, bw: 10, bh: 12, hp: 35, sight: 360, touch: 0, kb: 0.7, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye', 'g_shard2'], gibN: [5, 7] },
+  slug: { key: 'slug', frame0: 's0', update: 'updateSlug', visuals: 'visSlug', fw: 18, fh: 10, bw: 14, bh: 8, hp: 80, sight: 300, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_flesh1'], gibN: [8, 11] },
   leech: { key: 'leech', frame0: 'l0', flier: true, update: 'updateLeech', fw: 10, fh: 8, bw: 8, bh: 6, hp: 20, sight: 320, touch: 0, kb: 1, gibs: ['g_flesh1', 'g_flesh2'], gibN: [3, 4] },
-  grenadier: { key: 'grenadier', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 11, bh: 20, hp: 65, speed: 100, sight: 320, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_gmask',
+  grenadier: { key: 'grenadier', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visGrenadier', marks: 'net', fw: 18, fh: 24, bw: 11, bh: 20, hp: 65, speed: 100, sight: 320, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_gmask',
              gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  spikeball: { key: 'spikeball', frame0: 'k0', update: 'updateSpikeball', fw: 14, fh: 14, bw: 12, bh: 12, hp: 60, sight: 320, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_plate', 'g_shard'], gibN: [6, 8] },
-  para: { key: 'para', frame0: 'drop', update: 'updatePara', fw: 16, fh: 22, bw: 10, bh: 18, hp: 50, sight: 400, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3', 'g_chunk'], gibN: [10, 13] },
-  lugger: { key: 'lugger', frame0: 'w0', update: 'updateLugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
-  blimp: { key: 'blimp', frame0: 'b0', flier: true, update: 'updateBlimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
-  strider: { key: 'strider', frame0: 'w0', update: 'updateStrider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
-  cinder: { key: 'cinder', frame0: 'w0', update: 'updateCinder', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 150, sight: 420, touch: 12, kb: 0.5, mech: true, gibs: ['g_plate', 'g_shard', 'g_shard2'], gibN: [6, 8] },
-  gatling: { key: 'gatling', frame0: 'w0', update: 'updateGatling', fw: 22, fh: 24, bw: 14, bh: 20, hp: 150, speed: 35, sight: 420, touch: 10, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
-  banner: { key: 'banner', frame0: 'w0', update: 'updateBanner', fw: 16, fh: 26, bw: 10, bh: 20, hp: 80, speed: 40, sight: 420, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  bulldozer: { key: 'bulldozer', frame0: 'w0', update: 'updateBulldozer', fw: 26, fh: 20, bw: 22, bh: 16, hp: 180, speed: 50, sight: 380, touch: 14, kb: 0.05, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [10, 14] },
-  copycat: { key: 'copycat', frame0: 'c0', flier: true, update: 'updateCopycat', fw: 16, fh: 14, bw: 12, bh: 10, hp: 70, speed: 60, sight: 480, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 8] },
-  jelly: { key: 'jelly', frame0: 'j0', flier: true, update: 'updateJelly', fw: 16, fh: 20, bw: 12, bh: 10, hp: 50, speed: 30, sight: 400, touch: 0, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2'], gibN: [5, 7] },
-  porcupine: { key: 'porcupine', frame0: 'w0', update: 'updatePorcupine', fw: 20, fh: 16, bw: 16, bh: 12, hp: 90, speed: 45, sight: 380, touch: 10, kb: 0.5, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  sponge: { key: 'sponge', frame0: 'w0', update: 'updateSponge', fw: 20, fh: 20, bw: 16, bh: 16, hp: 100, speed: 50, sight: 380, touch: 8, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [9, 12] },
-  leaper: { key: 'leaper', frame0: 'w0', update: 'updateLeaper', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, speed: 60, sight: 420, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  zealot: { key: 'zealot', frame0: 'w0', update: 'updateZealot', fw: 16, fh: 24, bw: 10, bh: 20, hp: 80, speed: 45, sight: 420, touch: 8, kb: 0.7, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  spikeball: { key: 'spikeball', frame0: 'k0', update: 'updateSpikeball', visuals: 'visSpikeball', fw: 14, fh: 14, bw: 12, bh: 12, hp: 60, sight: 320, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_plate', 'g_shard'], gibN: [6, 8] },
+  para: { key: 'para', frame0: 'drop', update: 'updatePara', visuals: 'visPara', fw: 16, fh: 22, bw: 10, bh: 18, hp: 50, sight: 400, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3', 'g_chunk'], gibN: [10, 13] },
+  lugger: { key: 'lugger', frame0: 'w0', update: 'updateLugger', visuals: 'visLugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
+  blimp: { key: 'blimp', frame0: 'b0', flier: true, update: 'updateBlimp', visuals: 'visBlimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
+  strider: { key: 'strider', frame0: 'w0', update: 'updateStrider', visuals: 'visStrider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
+  cinder: { key: 'cinder', frame0: 'w0', update: 'updateCinder', visuals: 'visCinder', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 150, sight: 420, touch: 12, kb: 0.5, mech: true, gibs: ['g_plate', 'g_shard', 'g_shard2'], gibN: [6, 8] },
+  gatling: { key: 'gatling', frame0: 'w0', update: 'updateGatling', visuals: 'visGatling', fw: 22, fh: 24, bw: 14, bh: 20, hp: 150, speed: 35, sight: 420, touch: 10, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
+  banner: { key: 'banner', frame0: 'w0', update: 'updateBanner', visuals: 'visBanner', fw: 16, fh: 26, bw: 10, bh: 20, hp: 80, speed: 40, sight: 420, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  bulldozer: { key: 'bulldozer', frame0: 'w0', update: 'updateBulldozer', visuals: 'visBulldozer', fw: 26, fh: 20, bw: 22, bh: 16, hp: 180, speed: 50, sight: 380, touch: 14, kb: 0.05, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [10, 14] },
+  copycat: { key: 'copycat', frame0: 'c0', flier: true, update: 'updateCopycat', visuals: 'visCopycat', fw: 16, fh: 14, bw: 12, bh: 10, hp: 70, speed: 60, sight: 480, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 8] },
+  jelly: { key: 'jelly', frame0: 'j0', flier: true, update: 'updateJelly', visuals: 'visJelly', fw: 16, fh: 20, bw: 12, bh: 10, hp: 50, speed: 30, sight: 400, touch: 0, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2'], gibN: [5, 7] },
+  porcupine: { key: 'porcupine', frame0: 'w0', update: 'updatePorcupine', visuals: 'visPorcupine', fw: 20, fh: 16, bw: 16, bh: 12, hp: 90, speed: 45, sight: 380, touch: 10, kb: 0.5, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  sponge: { key: 'sponge', frame0: 'w0', update: 'updateSponge', visuals: 'visSponge', fw: 20, fh: 20, bw: 16, bh: 16, hp: 100, speed: 50, sight: 380, touch: 8, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [9, 12] },
+  leaper: { key: 'leaper', frame0: 'w0', update: 'updateLeaper', visuals: 'visLeaper', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, speed: 60, sight: 420, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  zealot: { key: 'zealot', frame0: 'w0', update: 'updateZealot', visuals: 'visZealot', fw: 16, fh: 24, bw: 10, bh: 20, hp: 80, speed: 45, sight: 420, touch: 8, kb: 0.7, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
   minelayer: { key: 'minelayer', frame0: 'm0', flier: true, update: 'updateMinelayer', fw: 20, fh: 12, bw: 16, bh: 9, hp: 50, speed: 70, sight: 500, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
   ratking: { key: 'ratking', frame0: 'w0', update: 'updateRatking', fw: 22, fh: 16, bw: 18, bh: 13, hp: 90, speed: 50, sight: 380, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [8, 11] },
   ratbot: { key: 'ratbot', frame0: 'r0', update: 'updateRatbot', fw: 8, fh: 6, bw: 6, bh: 5, hp: 8, speed: 130, sight: 420, touch: 4, kb: 1, tiny: true, mech: true, gibs: ['g_shard'], gibN: [1, 2] },
-  headsman: { key: 'headsman', frame0: 'w0', update: 'updateHeadsman', fw: 24, fh: 28, bw: 14, bh: 24, hp: 200, speed: 40, sight: 360, touch: 12, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [14, 18] },
-  berserker: { key: 'berserker', frame0: 'w0', update: 'updateBerserker', fw: 18, fh: 24, bw: 12, bh: 20, hp: 100, speed: 70, sight: 380, touch: 10, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [10, 13] },
+  headsman: { key: 'headsman', frame0: 'w0', update: 'updateHeadsman', visuals: 'visHeadsman', fw: 24, fh: 28, bw: 14, bh: 24, hp: 200, speed: 40, sight: 360, touch: 12, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [14, 18] },
+  berserker: { key: 'berserker', frame0: 'w0', update: 'updateBerserker', visuals: 'visBerserker', fw: 18, fh: 24, bw: 12, bh: 20, hp: 100, speed: 70, sight: 380, touch: 10, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [10, 13] },
   bastion: { key: 'bastion', frame0: 'w0', update: 'updateBastion', fw: 18, fh: 22, bw: 12, bh: 18, hp: 120, speed: 40, sight: 400, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [8, 11] },
   shellback: { key: 'shellback', frame0: 'w0', update: 'updateShellback', fw: 22, fh: 16, bw: 18, bh: 12, hp: 110, speed: 40, sight: 360, touch: 12, kb: 0.3, gibs: ['g_flesh1', 'g_chunk', 'g_plate', 'g_shard'], gibN: [9, 12] },
   shinobi: { key: 'shinobi', frame0: 'w0', update: 'updateShinobi', fw: 16, fh: 22, bw: 10, bh: 18, hp: 55, speed: 120, sight: 460, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  thundercloud: { key: 'thundercloud', frame0: 'c0', flier: true, update: 'updateThunder', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
-  foreman: { key: 'foreman', frame0: 'w0', update: 'updateForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
-  vortex: { key: 'vortex', frame0: 'v0', flier: true, update: 'updateVortex', fw: 18, fh: 18, bw: 14, bh: 14, hp: 80, speed: 45, sight: 460, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  pylon: { key: 'pylon', frame0: 'p0', update: 'updatePylon', fw: 16, fh: 28, bw: 12, bh: 26, hp: 100, speed: 0, sight: 420, touch: 6, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_wire', 'g_shard'], gibN: [8, 11] },
+  thundercloud: { key: 'thundercloud', frame0: 'c0', flier: true, update: 'updateThunder', visuals: 'visThundercloud', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
+  foreman: { key: 'foreman', frame0: 'w0', update: 'updateForeman', visuals: 'visForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
+  vortex: { key: 'vortex', frame0: 'v0', flier: true, update: 'updateVortex', visuals: 'visVortex', fw: 18, fh: 18, bw: 14, bh: 14, hp: 80, speed: 45, sight: 460, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  pylon: { key: 'pylon', frame0: 'p0', update: 'updatePylon', visuals: 'visPylon', fw: 16, fh: 28, bw: 12, bh: 26, hp: 100, speed: 0, sight: 420, touch: 6, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_wire', 'g_shard'], gibN: [8, 11] },
   scavenger: { key: 'scavenger', frame0: 'w0', update: 'updateScavenger', fw: 20, fh: 18, bw: 14, bh: 14, hp: 60, speed: 110, sight: 400, touch: 10, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  torcher: { key: 'torcher', frame0: 'w0', update: 'updateTorcher', fw: 22, fh: 24, bw: 14, bh: 20, hp: 140, speed: 45, sight: 340, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
+  torcher: { key: 'torcher', frame0: 'w0', update: 'updateTorcher', visuals: 'visTorcher', fw: 22, fh: 24, bw: 14, bh: 20, hp: 140, speed: 45, sight: 340, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
   discus: { key: 'discus', frame0: 'w0', update: 'updateDiscus', fw: 16, fh: 24, bw: 10, bh: 20, hp: 65, speed: 70, sight: 420, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  sporepod: { key: 'sporepod', frame0: 'p0', update: 'updateSporepod', fw: 20, fh: 18, bw: 16, bh: 14, hp: 90, speed: 0, sight: 380, touch: 6, kb: 0, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [8, 11] },
+  sporepod: { key: 'sporepod', frame0: 'p0', update: 'updateSporepod', visuals: 'visSporepod', fw: 20, fh: 18, bw: 16, bh: 14, hp: 90, speed: 0, sight: 380, touch: 6, kb: 0, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [8, 11] },
   grappler: { key: 'grappler', frame0: 'w0', update: 'updateGrappler', fw: 22, fh: 26, bw: 14, bh: 22, hp: 160, speed: 55, sight: 360, touch: 0, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [12, 16] },
-  spotter: { key: 'spotter', frame0: 's0', flier: true, update: 'updateSpotter', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, speed: 70, sight: 520, touch: 0, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
-  hound: { key: 'hound', frame0: 'r0', update: 'updateHound', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, speed: 190, sight: 420, touch: 10, kb: 0.9, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [6, 9] },
-  orbiter: { key: 'orbiter', frame0: 'o0', flier: true, update: 'updateOrbiter', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 55, sight: 420, touch: 10, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [6, 9] },
-  swapper: { key: 'swapper', frame0: 'w0', update: 'updateSwapper', fw: 16, fh: 24, bw: 11, bh: 20, hp: 70, speed: 60, sight: 400, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  scorcher: { key: 'scorcher', frame0: 'r0', update: 'updateScorcher', fw: 18, fh: 22, bw: 10, bh: 18, hp: 55, speed: 150, sight: 380, touch: 12, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  wraith: { key: 'wraith', frame0: 'f0', flier: true, update: 'updateWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
-  chiller: { key: 'chiller', frame0: 'w0', update: 'updateChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
+  spotter: { key: 'spotter', frame0: 's0', flier: true, update: 'updateSpotter', visuals: 'visSpotter', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, speed: 70, sight: 520, touch: 0, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
+  hound: { key: 'hound', frame0: 'r0', update: 'updateHound', visuals: 'visHound', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, speed: 190, sight: 420, touch: 10, kb: 0.9, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [6, 9] },
+  orbiter: { key: 'orbiter', frame0: 'o0', flier: true, update: 'updateOrbiter', visuals: 'visOrbiter', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 55, sight: 420, touch: 10, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [6, 9] },
+  swapper: { key: 'swapper', frame0: 'w0', update: 'updateSwapper', visuals: 'visSwapper', fw: 16, fh: 24, bw: 11, bh: 20, hp: 70, speed: 60, sight: 400, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  scorcher: { key: 'scorcher', frame0: 'r0', update: 'updateScorcher', visuals: 'visScorcher', fw: 18, fh: 22, bw: 10, bh: 18, hp: 55, speed: 150, sight: 380, touch: 12, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  wraith: { key: 'wraith', frame0: 'f0', flier: true, update: 'updateWraith', visuals: 'visWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
+  chiller: { key: 'chiller', frame0: 'w0', update: 'updateChiller', visuals: 'visChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
   warhorn: { key: 'warhorn', frame0: 'w0', update: 'updateWarhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
-  tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, update: 'updateHumanoid', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
+  tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
 };
 const KEEPER_HOP = 290;                             // ranged keepers' hop when blocked: clears the 3-tile step stepOk lets them take (48 px needs 277 at gravity 800)
@@ -18581,88 +18583,15 @@ class GameScene extends Phaser.Scene {
         const tx = e.body.center.x, ty = e.body.top - 5 + Math.sin(now / 150);
         g.fillStyle(0xffd040, Math.floor(now / 90) % 4 ? 0.95 : 0.5); g.fillTriangle(tx - 3, ty - 3, tx + 3, ty - 3, tx, ty); g.fillRect(tx - 3, ty - 5, 6, 1);
       }
-      if (e.def.molten) { e.glow.setPosition(e.x, e.y + 2).setScale((0.5 + e.def.tier * 0.35) * (0.9 + Math.sin(now / 120 + e.x) * 0.1)); continue; }
-      if (e.kind === 'burrower') {
-        if (e.under) continue;
-        e.rotation = e.ai === 'erupt' ? Math.atan2(e.body.velocity.y, e.body.velocity.x) + Math.PI / 2 : Math.sin(e.t * 6) * 0.12;   // nose-first through the air
-        e.glow.setPosition(e.x + Math.sin(e.rotation) * 10, e.y - Math.cos(e.rotation) * 10).setScale(e.ai === 'erupt' ? 0.9 : 0.6);
-        continue;
-      }
-      if (e.kind === 'linker') {
-        e.glow.setPosition(e.x + e.dir * 2, e.y).setScale(e.phase !== 'off' ? 0.6 + Math.random() * 0.15 : 0.4);
-        const B = e.beam;
-        if (B && B.live) {                                               // live fence: hot core, wobbling halo, the odd arc
-          g.lineStyle(6, 0x1a8ad0, 0.3).lineBetween(B.x0, B.y0, B.x1, B.y1);
-          g.lineStyle(3, 0x60e0ff, 0.75).lineBetween(B.x0, B.y0 + rand(-1, 1), B.x1, B.y1 + rand(-1, 1));
-          g.lineStyle(1, 0xffffff, 1).lineBetween(B.x0, B.y0, B.x1, B.y1);
-          if (Math.random() < 0.25) this.zap(g, B.x0, B.y0, B.x1, B.y1);
-        } else if (B && Math.random() < 0.75) {                          // charging: thin dashed flicker
-          const len = Math.hypot(B.x1 - B.x0, B.y1 - B.y0) || 1, ux = (B.x1 - B.x0) / len, uy = (B.y1 - B.y0) / len, ph = (now / 25) % 8;
-          this.laserG.lineStyle(1, 0x60e0ff, 0.3 + Math.random() * 0.4);
-          for (let d = ph; d < len; d += 8) this.laserG.lineBetween(B.x0 + ux * d, B.y0 + uy * d, B.x0 + ux * Math.min(len, d + 4), B.y0 + uy * Math.min(len, d + 4));
-        }
-        continue;
-      }
-      if (e.kind === 'harpooner') {
-        e.glow.setPosition(e.x + e.dir * 5, e.y - 9 + (e.fr === 'crouch' ? 1 : 0)).setScale(e.ai === 'windup' ? 0.7 : 0.3);
-        const hx = e.x + e.dir * 4, hy = e.y - 6;
-        if (e.hk) {                                                      // the chain
-          const hk = e.hk, n = Math.max(1, Math.floor(Math.hypot(hk.x - hx, hk.y - hy) / 3));
-          this.laserG.lineStyle(1, 0x4a525c, 0.9).lineBetween(hx, hy, hk.x, hk.y);
-          for (let i = 1; i < n; i++) this.laserG.fillStyle(i % 2 ? 0xa0aab6 : 0x5a636e, 1).fillRect(Math.round(hx + (hk.x - hx) * i / n) - 1, Math.round(hy + (hk.y - hy) * i / n) - 1, 2, 2);
-        } else if (e.ai === 'windup') {                                  // dotted sight line, blinks once it locks
-          const k = clamp(1 - (e.aiUntil - now) / TUNE.HARPOON.windMs, 0, 1), locked = k > 0.7, ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
-          const col = locked ? 0xffffa0 : 0xffd040, a = locked ? (Math.floor(now / 40) % 2 ? 0.9 : 0.4) : 0.25 + 0.4 * k;
-          for (let d = 6; d < 30 + 70 * k; d += 5) this.laserG.fillStyle(col, a).fillRect(Math.round(hx + ca * d), Math.round(hy + sa * d), 2, 1);
-        }
-        continue;
-      }
-      if (e.kind === 'mender') {
-        e.glow.setPosition(e.x, e.y + 2).setScale(e.healing ? 0.9 + Math.sin(now / 50) * 0.15 : 0.6);
-        const pt = e.patient;
-        if (e.healing && pt && pt.alive) {                               // healing tether: wavy green line
-          const x0 = e.x, y0 = e.y + 5, x1 = pt.body.center.x, y1 = pt.body.center.y, len = Math.hypot(x1 - x0, y1 - y0) || 1;
-          const nx = -(y1 - y0) / len, ny = (x1 - x0) / len, n = Math.max(3, Math.round(len / 6));
-          let px = x0, py = y0;
-          for (let i = 1; i <= n; i++) {
-            const t = i / n, w = Math.sin(t * 9 - now / 60) * 2.5 * Math.sin(t * Math.PI), qx = x0 + (x1 - x0) * t + nx * w, qy = y0 + (y1 - y0) * t + ny * w;
-            g.lineStyle(3, 0x30ff80, 0.25).lineBetween(px, py, qx, qy); g.lineStyle(1, 0xc8ffe0, 0.85).lineBetween(px, py, qx, qy);
-            px = qx; py = qy;
-          }
-        }
-        continue;
-      }
-      if (e.kind === 'gnat') continue;
-      if (e.kind === 'buzzsaw') {                                        // spins (set here, after updateEnemies' wobble decay); cyan while it's yours
-        e.rotation = (now / (e.owned > 0 ? 20 : 34)) % (Math.PI * 2);
-        e.glow.setPosition(e.x, e.y).setTint(e.owned > 0 ? 0x46e6ff : 0xff8a20).setScale(0.5 + Math.random() * 0.12);
-        continue;
-      }
-      if (e.kind === 'magnet') {                                         // the field: a slow ring of red/blue ticks; it tightens and flares on the tell
-        const tell = e.ai === 'tell', k = tell ? clamp(1 - (e.aiUntil - now) / TUNE.MAGNET.tellMs, 0, 1) : 0, R = TUNE.MAGNET.field * (1 - 0.35 * k), cx = e.body.center.x, cy = e.body.center.y;
-        e.glow.setPosition(cx, cy).setScale(tell ? 0.8 + k * 0.6 : 0.55 + Math.sin(now / 200) * 0.05).setAlpha(tell ? 0.9 : 0.55);
-        const n = 20, ph = now / 900;
-        for (let i = 0; i < n; i++) {
-          const th = ph + i / n * Math.PI * 2, x0 = cx + Math.cos(th) * R, y0 = cy + Math.sin(th) * R;
-          g.lineStyle(1, i % 2 ? 0xff4a3a : 0x4a7aff, tell ? 0.45 + 0.5 * k : 0.34).lineBetween(x0, y0, cx + Math.cos(th + 0.12) * R, cy + Math.sin(th + 0.12) * R);
-        }
-        if (tell) g.lineStyle(1, 0xc8d8ff, 0.3 + 0.5 * k).strokeCircle(cx, cy, R * 0.45);
-        continue;
-      }
+      const vis = e.def.visuals, marks = e.def.marks;                // its own drawing, after whichever shared marks it takes
+      if (marks === 'none') { if (vis) this[vis](e, g, now); continue; }
       if (e.netT > 0) {                                                  // a net over it: a lattice of cord
         const b = e.body, l = b.left - 1, r2 = b.right + 1, t = b.top - 1, bt = b.bottom + 1;
         this.laserG.lineStyle(1, 0xc8c0a8, 0.85);
         for (let x = l; x <= r2; x += 4) this.laserG.lineBetween(x, t, x + 3, bt);
         for (let x = l + 3; x <= r2 + 3; x += 4) this.laserG.lineBetween(x, t, x - 3, bt);
       }
-      if (e.kind === 'claw') {                                           // trolley, cable and the claw on the end
-        this.laserG.fillStyle(0x3a3f47, 1).fillRect(Math.round(e.x) - 7, Math.round(e.homeY) - 14, 14, 6); this.laserG.fillStyle(0xe8b422, 1).fillRect(Math.round(e.x) - 7, Math.round(e.homeY) - 9, 14, 1);
-        this.laserG.lineStyle(1, 0x8a94a0, 1).lineBetween(e.x, e.homeY - 8, e.x, e.body.top);
-        e.glow.setPosition(e.x, e.homeY - 11).setScale(e.ai === 'drop' ? 0.5 : 0.3).setTint(e.ai === 'drop' ? 0xff3020 : 0xffb040);
-        continue;
-      }
-      if (e.kind === 'echo') { e.setAlpha(0.45 + Math.random() * 0.25); e.glow.setPosition(e.x, e.y); continue; }
-      if (e.kind === 'grenadier') { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 5 : 2), e.y - 8).setScale(w ? 0.5 : 0.25); continue; }
+      if (marks === 'net') { if (vis) this[vis](e, g, now); continue; }
       if (e.cook > 0 || e.cookOn) {                                      // being microwaved: it swells and glows, then pops
         e.cookOn = e.cook > 0;
         e.setScale((e.shrunkOn ? 0.5 : 1) * (1 + 0.25 * e.cook) * (e.growS || 1));
@@ -18674,304 +18603,7 @@ class GameScene extends Phaser.Scene {
         g.fillStyle(0xc8f0ff, 0.08).fillCircle(bx, by, r); g.lineStyle(1, 0xd8f8ff, 0.75).strokeCircle(bx, by, r); g.fillStyle(0xffffff, 0.85).fillRect(bx - r * 0.5, by - r * 0.6, 2, 1);
       }
       if (e.stasisT > 0) { g.lineStyle(1, 0xc8e8ff, 0.8); g.strokeRect(e.body.left - 2, e.body.top - 2, e.body.width + 4, e.body.height + 4); }
-      if (e.kind === 'cinder') { e.rotation = e.spinA; e.glow.setPosition(e.x, e.y).setScale(e.owned > 0 ? 0.8 : 0.55); if (Math.random() < 0.6) this.fxFire(e.x + rand(-4, 4), e.y - 2, 1); continue; }
-      if (e.kind === 'banner' && e.ai === 'plant') {                     // the banner's healing ring
-        const R0 = TUNE.BANNER.radius; g.lineStyle(1, 0x5cff7a, 0.35 + 0.15 * Math.sin(now / 200));
-        for (let j = 0; j < 24; j += 2) { const a0 = j / 24 * Math.PI * 2 + now / 1500; g.beginPath(); g.arc(e.x, e.y, R0, a0, a0 + Math.PI / 24, false); g.strokePath(); }
-      }
-      if (e.kind === 'gatling' && (e.ai === 'spin' || e.ai === 'fire')) { const a = e.aimA, mx = e.x + Math.cos(a) * 14, my = e.y - 4 + Math.sin(a) * 14; if (e.ai === 'spin') this.laserG.lineStyle(1, 0xff3020, 0.15 + 0.3 * Math.random()).lineBetween(mx, my, mx + Math.cos(a) * 200, my + Math.sin(a) * 200); }
-      if (e.kind === 'gatling' && e.ai === 'hot' && Math.random() < 0.4) this.fx.emit(e.x + e.dir * 12, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.4, 0.8], size: [3, 6], cols: [0xe8e8e8, 0xb8b8b8], alpha: [0.4, 0], g: -30 });
-      if (e.kind === 'jelly') {                                          // tendrils trailing beneath it
-        e.glow.setPosition(e.x, e.y - 2).setScale(0.45 + 0.08 * Math.sin(now / 160));
-        for (let k = -1; k <= 1; k++) { let px = e.x + k * 4, py = e.body.bottom; for (let j = 1; j <= 6; j++) { const qx = e.x + k * 4 + Math.sin(now / 140 + j * 0.9 + k) * 2.5, qy = e.body.bottom + j * TUNE.JELLY.drop / 6; g.lineStyle(1, e.zapping ? 0xffffff : 0xff90e8, e.zapping ? 0.9 : 0.5).lineBetween(px, py, qx, qy); px = qx; py = qy; } }
-        continue;
-      }
-      if (e.kind === 'copycat') {                                        // it carries a copy of your gun under it
-        e.icon.setPosition(e.x, e.body.bottom + 4).setFlipX(e.dir < 0);
-        if (e.ai === 'aim') { const pb = this.player.body; this.laserG.lineStyle(1, 0xff3020, 0.3 + 0.5 * Math.random()).lineBetween(e.x, e.y, pb.center.x, pb.center.y); }
-        continue;
-      }
-      if (e.kind === 'bulldozer') { if (Math.abs(e.body.velocity.x) > 5 && Math.random() < 0.3) this.fxSmoke(e.x - e.dir * 10, e.body.top + 2, 1, 0.5); continue; }
-      if (e.kind === 'sponge' && e.charge > 0) { const k = e.charge / TUNE.SPONGE.cap; e.setScale((e.growS || 1) * (1 + 0.25 * k)); if (Math.random() < k * 0.5) this.fx.emit(e.body.center.x + rand(-6, 6), e.body.center.y + rand(-6, 6), { n: 1, speed: [5, 20], life: [0.2, 0.4], size: [2, 1], cols: [0xffe46a, 0xffa030], add: true }); continue; }
-      if (e.kind === 'leaper' && (e.ai === 'crouch' || e.ai === 'air')) {   // the target ring on the floor where it'll land
-        const k = e.ai === 'crouch' ? 1 - (e.aiUntil - now) / TUNE.LEAPER.tellMs : 1, r = 18 - 8 * k;
-        g.lineStyle(1, 0xff3020, 0.5 + 0.4 * Math.sin(now / 50)); g.strokeEllipse(e.tx, e.ty - 1, r * 2, r * 0.6); g.lineBetween(e.tx - 3, e.ty - 1, e.tx + 3, e.ty - 1);
-        continue;
-      }
-      if (e.kind === 'porcupine' && e.ai === 'bristle' && Math.random() < 0.5) this.fxSparks(e.x + rand(-8, 8), e.body.top + rand(0, 4), 1, -Math.PI / 2, 1.2, [20, 60]);
-      if (e.kind === 'zealot') {                                         // its halo brightens with every soul it drinks
-        e.glow.setPosition(e.x, e.body.top - 3).setScale(0.3 + e.souls * 0.12).setAlpha(0.5 + e.souls * 0.12);
-        g.lineStyle(1, 0xffe080, 0.6 + e.souls * 0.12); g.strokeEllipse(e.x + e.dir, e.body.top - 3, 10 + e.souls * 2, 3);
-        continue;
-      }
-      if (e.kind === 'berserker') { e.glow.setPosition(e.x, e.y).setAlpha(e.rage ? 0.55 + 0.2 * Math.sin(now / 80) : 0); if (e.rage && Math.random() < 0.3) this.fx.emit(e.x + rand(-4, 4), e.body.top, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.3, 0.6], size: [2, 4], cols: [0xff6060, 0xc02020], alpha: [0.5, 0], g: -20 }); continue; }
-      if (e.kind === 'headsman' && e.ai === 'raise' && Math.floor(now / 90) % 2) { g.lineStyle(1, 0xff3020, 0.7); g.strokeRect(e.x + e.dir * 20 - 22, e.body.top - 4, 44, e.body.height + 8); }
-      if (e.kind === 'thundercloud') {                                   // while it charges, a flickering line to the floor where it'll strike
-        if (e.ai === 'charge') for (let y = e.body.bottom; y < e.strikeY; y += 8) this.laserG.lineStyle(1, 0xa0c8ff, 0.2 + 0.4 * Math.random()).lineBetween(e.x, y, e.x, y + 4);
-        if (Math.random() < 0.12) this.fx.emit(e.x + rand(-10, 10), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [80, 120], life: [0.3, 0.5], size: [1, 1], cols: [0x80a8d0], alpha: [0.6, 0] });
-        continue;
-      }
-      if (e.kind === 'foreman') {
-        if (e.phase >= 2 && Math.random() < 0.3) this.fxSmoke(e.x + rand(-12, 12), e.body.top + 4, 1, 0.6);
-        if (e.phase === 3 && Math.random() < 0.25) this.fxSparks(e.x + rand(-14, 14), e.body.center.y + rand(-8, 8), 2, 0, Math.PI * 2, [40, 140]);
-        if (e.ai === 'magnet' && this.state !== 'dead') { const pb = this.player.body, mx = e.x + e.dir * 22, my = e.y - 2; for (let k = 0; k < 3; k++) { const t = (now / 300 + k / 3) % 1; g.lineStyle(1, 0x80c8ff, 0.6 * (1 - t)).lineBetween(mx + (pb.center.x - mx) * t, my + (pb.center.y - my) * t - 4, mx + (pb.center.x - mx) * t, my + (pb.center.y - my) * t + 4); } }
-        if (e.ai === 'slamTell' && Math.floor(now / 80) % 2) { g.lineStyle(1, 0xff3020, 0.7); g.strokeRect(e.body.left - 3, e.body.top - 3, e.body.width + 6, e.body.height + 6); }
-        continue;
-      }
-      if (e.kind === 'vortex') {
-        e.glow.setPosition(e.x, e.y).setScale(e.ai === 'spin' ? 0.8 + Math.random() * 0.2 : e.ai === 'tell' ? 0.5 + 0.3 * Math.random() : 0.35);
-        if (e.ai === 'spin') { const R0 = TUNE.VORTEX.range; for (let k = 0; k < 3; k++) { const r = R0 * (1 - ((now / 700 + k / 3) % 1)), a0 = now / 180 + k * 2; g.lineStyle(1, 0x9ad8ff, 0.45 * (1 - r / R0) + 0.1); g.beginPath(); g.arc(e.x, e.y, r, a0, a0 + 1.6, false); g.strokePath(); } }
-        continue;
-      }
-      if (e.kind === 'pylon') {
-        const k = e.chargeT / TUNE.PYLON.charge;
-        e.glow.setPosition(e.x, e.body.top + 2).setScale(0.3 + 0.7 * k + (k > 0 ? Math.random() * 0.15 : 0));
-        if (k > 0.4) { g.lineStyle(1, 0x80c8ff, 0.25 + 0.35 * k); const R0 = TUNE.PYLON.range; for (let j = 0; j < 24; j += 2) { const a0 = j / 24 * Math.PI * 2 + now / 900; g.beginPath(); g.arc(e.x, e.body.top + 2, R0, a0, a0 + Math.PI / 24, false); g.strokePath(); } }
-        if (k > 0 && Math.random() < k) this.zap(g, e.x, e.body.top + 2, e.x + rand(-10, 10), e.body.top + rand(-8, 6));
-        continue;
-      }
-      if (e.kind === 'torcher') {                                        // the pilot light, and the flame when it sprays
-        e.glow.setPosition(e.x + e.dir * 10, e.y - 2).setScale(e.ai === 'spray' ? 0.7 + Math.random() * 0.2 : 0.25).setAlpha(e.ai === 'cool' ? 0.3 : 0.8);
-        continue;
-      }
-      if (e.kind === 'sporepod') { e.glow.setPosition(e.x, e.y).setScale(0.5 + 0.15 * Math.sin(now / 300) + (e.fr === 'puff' ? 0.3 : 0)); continue; }
-      if (e.kind === 'spotter') {                                        // the red eye, and its searchlight on you
-        e.glow.setPosition(e.x + e.dir * 2, e.y + 1).setScale(0.25 + 0.35 * (e.lockT / TUNE.SPOTTER.lock));
-        if (e.lockT > 0 && e.sees && this.state !== 'dead') {
-          const pb = this.player.body, ang = Math.atan2(pb.center.y - e.y, pb.center.x - e.x), L = Math.hypot(pb.center.x - e.x, pb.center.y - e.y) + 10, px = -Math.sin(ang) * 13, py = Math.cos(ang) * 13, ex2 = e.x + Math.cos(ang) * L, ey2 = e.y + Math.sin(ang) * L;
-          this.laserG.fillStyle(0xff2020, 0.05 + 0.12 * e.lockT / TUNE.SPOTTER.lock).fillTriangle(e.x, e.y, ex2 + px, ey2 + py, ex2 - px, ey2 - py);
-        }
-        continue;
-      }
-      if (e.kind === 'hound') { if (e.ai === 'leap' && Math.random() < 0.6) this.fx.emit(e.x + e.dir * 8, e.y - 3, { n: 1, speed: [0, 5], life: [0.1, 0.2], size: [2, 1], cols: [0xff3020, 0xff8a60], add: true }); continue; }
-      if (e.kind === 'orbiter') {                                        // its plates, spinning round the core
-        const R0 = TUNE.ORBITER.radius, np = e.plates.length;
-        e.glow.setPosition(e.x + e.dir * 1, e.y).setScale(e.fr === 'fire' ? 0.6 : 0.35);
-        for (let k = 0; k < np; k++) {
-          if (e.plates[k] <= 0) continue;
-          const a = e.spin + k * Math.PI * 2 / np, hit = now < e.plateHit[k], ax = e.x + Math.cos(a - 0.34) * R0, ay = e.y + Math.sin(a - 0.34) * R0, bx = e.x + Math.cos(a + 0.34) * R0, by = e.y + Math.sin(a + 0.34) * R0;
-          g.lineStyle(5, hit ? 0xffffff : 0x2a2e35, 1).lineBetween(ax, ay, bx, by);
-          g.lineStyle(2, hit ? 0xffffff : e.plates[k] < TUNE.ORBITER.plateHp * 0.5 ? 0xff8a40 : 0x9aa4b0, 1).lineBetween(ax, ay, bx, by);
-        }
-        continue;
-      }
-      if (e.kind === 'swapper') {
-        if (e.ai === 'tell') {                                           // the tether: violet dashes crawling from it to you
-          const pb = this.player.body, x0 = e.body.center.x, y0 = e.body.center.y, x1 = pb.center.x, y1 = pb.center.y, L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(2, Math.floor(L / 6)), off = Math.floor(now / 50) % 2;
-          g.lineStyle(1, 0xc890ff, 0.85);
-          for (let j = off; j < n; j += 2) { const t0 = j / n, t1 = Math.min(1, (j + 1) / n); g.lineBetween(x0 + (x1 - x0) * t0, y0 + (y1 - y0) * t0, x0 + (x1 - x0) * t1, y0 + (y1 - y0) * t1); }
-          const k = clamp((e.aiUntil - now) / TUNE.SWAPPER.tellMs, 0, 1);
-          g.lineStyle(1, 0xf0d8ff, 0.9); g.strokeCircle(x1, y1, 6 + 14 * k); g.strokeCircle(x0, y0, 6 + 14 * k);
-        }
-        continue;
-      }
-      if (e.kind === 'scorcher') { if (e.ai === 'run' || Math.random() < 0.3) this.fxFire(e.x + e.dir * 3, e.body.top - 1, 1); continue; }
-      if (e.kind === 'spikeball') { e.rotation = e.spinA; continue; }
-      if (e.kind === 'wraith') {
-        const st = e.ai === 'tell' || e.ai === 'lunge';
-        e.setAlpha(e.inWall ? 0.22 : e.ai === 'fade' ? 0.45 : st ? 1 : 0.72 + Math.sin(now / 200) * 0.1);
-        e.glow.setPosition(e.x, e.y - 2).setScale(st ? 0.8 + Math.random() * 0.2 : 0.4).setAlpha(e.inWall ? 0.3 : 0.75);
-        if (e.ai === 'lunge' || Math.random() < 0.15) this.fx.emit(e.x + rand(-4, 4), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.6, speed: [5, 25], life: [0.3, 0.6], size: [2, 1], cols: [0xd8c8ff, 0x8a6ad0], alpha: [0.6, 0], add: true });
-        continue;
-      }
-      if (e.kind === 'chiller') { if (Math.random() < 0.12) this.fx.emit(e.x - e.dir * 6, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [5, 20], life: [0.3, 0.6], size: [2, 3], cols: [0xe8f8ff, 0xb8e0f0], alpha: [0.5, 0], g: -10 }); continue; }
-      if (e.kind === 'lugger') { if (e.carryImg) e.carryImg.setPosition(e.x + e.dir * 2, e.body.top - 8); continue; }
-      if (e.kind === 'blimp') { e.glow.setPosition(e.x + e.dir * 4, e.body.bottom + 3).setScale(e.bombT < 0.3 ? 0.6 : 0.3); if (e.crash) e.rotation = Math.min(0.8, (e.rotation || 0) + 0.02); continue; }
-      if (e.kind === 'strider') {
-        const ex2 = e.x + e.dir * 4, ey2 = e.body.top + 5;
-        e.glow.setPosition(ex2, ey2).setScale(e.ai === 'tell' ? 0.5 + Math.random() * 0.2 : e.ai === 'sweep' ? 0.8 : 0.35);
-        if (e.ai === 'tell' || e.ai === 'sweep') {
-          const ca = Math.cos(e.beamA), sa = Math.sin(e.beamA); let lx = ex2, ly = ey2;
-          for (let k = 0; k < 120 && !this.solidAt(lx + ca * 4, ly + sa * 4); k++) { lx += ca * 4; ly += sa * 4; }
-          if (e.ai === 'tell') this.laserG.lineStyle(1, 0xff3020, Math.floor(now / 60) % 2 ? 0.7 : 0.3).lineBetween(ex2, ey2, lx, ly);
-          else { g.lineStyle(5, 0xff2010, 0.35).lineBetween(ex2, ey2, lx, ly); g.lineStyle(2, 0xff8060, 0.9).lineBetween(ex2, ey2, lx, ly); g.lineStyle(1, 0xffffff, 1).lineBetween(ex2, ey2, lx, ly); if (Math.random() < 0.5) this.fxSparks(lx, ly, 2, e.beamA + Math.PI, 1.2, [40, 140]); }
-        }
-        continue;
-      }
-      if (e.kind === 'para') {
-        e.glow.setPosition(e.x + e.dir * 5, e.y - 6).setScale(e.shotT > 0 ? 0.5 : 0.25);
-        if (e.ai === 'drop' && e.chute) {                                // the canopy and its lines
-          const cx = e.x, cy = e.body.top - 22, sw = Math.sin(now / 400 + e.t) * 2;
-          this.laserG.lineStyle(1, 0xc8c0a8, 0.8).lineBetween(e.x - 4, e.body.top + 2, cx - 11 + sw, cy + 4).lineBetween(e.x + 4, e.body.top + 2, cx + 11 + sw, cy + 4);
-          this.laserG.fillStyle(0x6a7a40, 1).fillRect(Math.round(cx - 13 + sw), Math.round(cy), 26, 4); this.laserG.fillStyle(0x8a9a58, 1).fillRect(Math.round(cx - 11 + sw), Math.round(cy - 2), 22, 2);
-          this.laserG.fillStyle(0x4a5a2a, 1).fillRect(Math.round(cx - 13 + sw), Math.round(cy + 4), 4, 1).fillRect(Math.round(cx + 9 + sw), Math.round(cy + 4), 4, 1);
-        }
-        continue;
-      }
-      if (e.kind === 'beacon') {
-        const call = e.ai === 'call', k = call ? clamp(1 - (e.aiUntil - now) / TUNE.BEACON.callMs, 0, 1) : 0;
-        e.glow.setPosition(e.x, e.y - 3).setScale(call ? 0.4 + k * 0.8 : 0.35).setAlpha(call && Math.floor(now / (200 - 150 * k)) % 2 ? 1 : 0.6);
-        if (call) { g.lineStyle(2, 0xff3020, 0.25 + 0.5 * k).lineBetween(e.x, e.y - 8, e.x, e.y - 40 - 200 * k); g.lineStyle(1, 0xffb0a0, 0.6 * k).strokeCircle(e.x, e.y, 10 + 30 * (1 - ((now / 400) % 1))); }
-        continue;
-      }
-      if (e.kind === 'slug') { e.glow.setPosition(e.x + e.dir * 6, e.y - 1).setScale(e.ai === 'spit' ? 0.7 : 0.4); continue; }
-      if (e.kind === 'pilferer') { e.glow.setPosition(e.x + e.dir * 4, e.y); if (e.gunImg) e.gunImg.setPosition(e.x, e.y + 7).setFlipX(e.dir < 0); continue; }
-      if (e.kind === 'pogo') { e.glow.setPosition(e.x, e.y - 4).setScale(e.slamming ? 0.6 : 0.3); continue; }
-      if (e.kind === 'sparker') { e.glow.setPosition(e.x, e.y - 2).setScale(0.3 + Math.random() * 0.1); continue; }
-      if (e.kind === 'golem') { const c = e.ai === 'slam' || e.ai === 'throw'; e.glow.setPosition(e.x + e.dir * 2, e.y - 2).setScale(c ? 0.9 + Math.random() * 0.2 : 0.7); continue; }
-      if (e.kind === 'creeper') { e.flipY = e.ai === 'ceil'; e.glow.setPosition(e.x + e.dir * 4, e.y + (e.ai === 'ceil' ? 1 : -1)).setScale(e.ai === 'drop' ? 0.5 : 0.3); continue; }
-      if (e.kind === 'roller') {
-        if (e.ai === 'roll' || e.ai === 'curl') e.rotation = e.spinA; else if (e.ai !== 'dizzy') e.rotation = 0;
-        e.glow.setPosition(e.x, e.y).setScale(e.ai === 'curl' ? 0.6 + Math.random() * 0.2 : 0.3).setVisible(e.ai !== 'roll');
-        if (e.ai === 'dizzy') for (let i = 0; i < 3; i++) { const th = now / 150 + i * 2.1; this.laserG.fillStyle(0xffe46a, 0.9).fillRect(Math.round(e.x + Math.cos(th) * 8), Math.round(e.body.top - 4 + Math.sin(th) * 2), 2, 2); }
-        continue;
-      }
-      if (e.kind === 'jammer') {
-        const tell = e.ai === 'tell', k = tell ? clamp(1 - (e.aiUntil - now) / TUNE.JAMMER.tellMs, 0, 1) : 0;
-        e.glow.setPosition(e.x, e.y).setScale(0.4 + k * 0.6).setAlpha(0.6 + k * 0.3);
-        if (tell) for (let i = 0; i < 2; i++) g.lineStyle(1, 0x60ff9a, 0.3 + 0.5 * k).strokeCircle(e.x, e.y, 6 + (1 - ((now / 120 + i * 0.5) % 1)) * 16 * (1 - k * 0.5));
-        continue;
-      }
-      if (e.kind === 'gasbag') {
-        const sw = e.ai === 'swell', k = sw ? clamp(1 - (e.aiUntil - now) / TUNE.GASBAG.swellMs, 0, 1) : 0;
-        e.setScale(1 + k * 0.35 + (sw ? Math.sin(now / 30) * 0.05 : 0));
-        e.glow.setPosition(e.x, e.y).setScale(0.6 + k * 0.6).setAlpha(0.3 + k * 0.4);
-        continue;
-      }
-      if (e.kind === 'welder') {
-        e.glow.setPosition(e.x + e.dir * 3, e.y - 5).setScale(e.ai === 'weld' || e.ai === 'build' ? 0.5 + Math.random() * 0.2 : 0.3);
-        const pt = e.patient;
-        if (e.ai === 'weld' && pt && pt.alive) this.zapCol(g, e.x + e.dir * 7, e.y - 1, pt.body.center.x, pt.body.center.y, 0xffc040, 0xffffff);
-        continue;
-      }
-      if (e.kind === 'turret') {
-        const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA), tx = e.x, ty = e.y - 2;
-        this.laserG.lineStyle(3, 0x22262c, 1).lineBetween(tx, ty, tx + ca * 7, ty + sa * 7); this.laserG.lineStyle(1, 0x8a94a0, 1).lineBetween(tx, ty - 1, tx + ca * 7, ty + sa * 7 - 1);
-        e.glow.setPosition(tx, ty).setScale(e.ai === 'aim' ? 0.45 : 0.25);
-        if (e.ai === 'aim') { let ex = tx + ca * 8, ey = ty + sa * 8; for (let i = 0; i < 60 && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; } this.laserG.lineStyle(1, 0xff3020, Math.floor(now / 50) % 2 ? 0.7 : 0.3).lineBetween(tx + ca * 8, ty + sa * 8, ex, ey); }
-        continue;
-      }
-      if (e.kind === 'duelist') {
-        e.glow.setPosition(e.x + e.dir * 3, e.y - 8 + (e.fr === 'crouch' ? 2 : 0)).setScale(e.ai === 'windup' ? 0.7 : 0.3);
-        if (e.ai === 'lunge') {                                         // the cut: a pale crescent ahead of the blade
-          const cx = e.x + e.dir * 9, cy = e.y - 2;
-          for (let j = 0; j < 7; j++) { const th = -1.1 + j * 0.37, r = 11; g.fillStyle(0xffd0e0, 0.75 - j * 0.06).fillRect(Math.round(cx + e.dir * Math.cos(th) * r * 0.6), Math.round(cy + Math.sin(th) * r), 2, 2); }
-        }
-        continue;
-      }
-      if (e.kind === 'mimic') { e.glow.setPosition(e.x + e.dir * 2, e.y - 1).setAlpha(e.ai === 'hide' ? 0 : 0.7 + Math.random() * 0.2); continue; }
-      if (e.kind === 'howitzer') {
-        const pl = e.ai === 'plant' || e.ai === 'fire';
-        e.glow.setPosition(e.x - e.dir * 3, e.y - 1 + (pl ? 2 : 0)).setScale(pl ? 0.6 + Math.random() * 0.1 : 0.35);
-        continue;
-      }
-      if (e.kind === 'blinker') { e.glow.setVisible(!e.under).setPosition(e.x + e.dir * 1.5, e.y - 4).setScale(e.ai === 'tell' ? 0.45 + Math.random() * 0.1 : 0.25); continue; }
-      if (e.kind === 'tarspit') {
-        const w = e.ai === 'windup';
-        e.glow.setPosition(e.x + e.dir * (w ? 6 : 1), e.y - 7).setScale(w ? 0.55 + Math.random() * 0.15 : 0.25).setTint(w ? 0xff7a20 : 0xffa040);
-        continue;
-      }
-      if (e.kind === 'hive') { e.glow.setPosition(e.x, e.y).setScale(1 + Math.sin(now / 150) * 0.1); continue; }
-      if (e.kind === 'stitcher') {
-        e.glow.setPosition(e.x, e.y + 5).setScale(e.ai === 'channel' ? 0.8 + Math.random() * 0.2 : 0.45);
-        if (e.ai === 'channel' && e.corpse && !e.corpse.gone) { const q = e.corpse.pts[2]; this.zapCol(g, e.x, e.y + 6, q.x, q.y, 0x30ff60, 0xd8ffd8); }
-        continue;
-      }
-      if (e.kind === 'wyrm' || e.kind === 'wyrmseg') {                   // rotation along the path (set here, after updateEnemies' wobble decay)
-        const th = e.wyrmAng || 0, left = Math.cos(th) < 0;
-        e.flipX = left; e.rotation = left ? th - Math.PI : th;
-        if (e.kind === 'wyrm') e.glow.setVisible(!e.under).setPosition(e.x + Math.cos(th) * 10, e.y + Math.sin(th) * 10).setScale(e.ai === 'leap' ? 1.3 : 0.9);
-        continue;
-      }
-      if (e.kind === 'bulwark' || e.kind === 'mirror') {
-        const wind = e.ai === 'windup' || e.ai === 'charge';
-        e.glow.setPosition(e.x + e.dir * 4, e.y - 8).setScale(wind ? 0.8 + Math.sin(now / 30) * 0.2 : 0.35).setTint(wind ? 0xffe060 : e.kind === 'mirror' ? 0xe080ff : 0xff9a2a);
-        continue;
-      }
-      if (isRifleman(e)) {
-        const sn = e.kind === 'sniper', rk = e.kind === 'rocketeer', sx = e.x + (e.dir > 0 ? 0 : -1), sy = e.y - 2, ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
-        e.gun.setPosition(Math.round(sx - ca * e.recoil), Math.round(sy - sa * e.recoil)).setRotation(e.aimA);
-        e.gun.scaleY = ca < 0 ? -1 : 1;
-        e.glow.setPosition(e.x + e.dir * 4, e.y - 7).setScale((sn || rk) && e.ai === 'aim' ? 0.6 : 0.3);
-        if (e.ai === 'aim') {                                          // laser sight: tracks, then blinks when locked
-          const ms = sn ? TUNE.SNIPER.aimMs : rk ? TUNE.ROCKETEER.aimMs : TUNE.ENFORCER.aimMs, lock = sn ? TUNE.SNIPER.lockAt : rk ? TUNE.ROCKETEER.lockAt : 0.7, len = sn ? 31 : rk ? 22 : 21;
-          const k = clamp((now - e.aimStart) / ms, 0, 1), mx = sx + ca * len, my = sy + sa * len;
-          let ex = mx, ey = my;
-          for (let i = 0; i < (sn ? 150 : 90) && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; }
-          const locked = k >= lock, a = locked ? (Math.floor(now / 40) % 2 ? 0.95 : 0.45) : 0.2 + 0.45 * k;
-          const col = sn ? (locked ? 0xd0f4ff : 0x40a0ff) : rk ? (locked ? 0xffe080 : 0xff8a20) : (locked ? 0xff9090 : 0xff2020);
-          this.laserG.lineStyle(sn && locked ? 2 : 1, col, a).lineBetween(mx, my, ex, ey);
-          this.laserG.fillStyle(col, a).fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 2, 2);
-        }
-        continue;
-      }
-      if (e.kind === 'cloaker') { e.glow.setPosition(e.x + e.dir * 5, e.y - 8 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'reveal' ? 0.7 : 0.3).setAlpha(0.3 + 0.6 * (e.cloakA ?? 0)); continue; }
-      if (e.kind === 'pyro') { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 8 : 6), e.y + (w ? -12 : -1)).setScale(w ? 0.7 + Math.random() * 0.2 : 0.3).setTint(w ? 0xff8a20 : 0xffb040); continue; }
-      if (e.kind === 'gunship') {
-        const strafe = e.ai === 'strafeTell' || e.ai === 'strafe';
-        const tell = strafe || e.ai === 'tell' || e.ai === 'volley';
-        e.glow.setPosition(e.x + e.dir * (strafe ? 22 : 2), e.body.bottom + 1)
-          .setTint(strafe ? 0xffd080 : 0xff3020).setScale(tell ? 1 + Math.sin(now / 40) * 0.25 : 0.5).setAlpha(tell ? 0.9 : 0.4);
-        e.thr.setPosition(e.x, e.body.bottom + 4).setScale(1.4 + Math.random() * 0.4, 0.8).setAlpha(0.45);
-        continue;
-      }
-      if (e.kind === 'screamer') { e.glow.setPosition(e.x + e.dir * 3, e.y - 2).setScale(e.ai === 'wind' ? 0.9 + Math.random() * 0.3 : e.ai === 'dive' ? 0.8 : 0.5); continue; }
-      if (e.kind === 'warden') {
-        e.glow.setPosition(e.x, e.y + 1).setScale(0.5 + Math.sin(now / 90) * 0.06);
-        for (const o of e.links) {                                       // tethers + bubbles on its wards
-          if (!o.alive || o.shieldBy !== e || now > o.shieldT) continue;
-          const hit = now - (o.shieldHit || -1e9) < 120, r = Math.max(o.body.halfWidth, o.body.halfHeight) + 6, ox = o.body.center.x, oy = o.body.center.y;
-          g.lineStyle(1, 0x60e0ff, 0.55).lineBetween(e.x, e.y + 2, ox, oy);
-          g.lineStyle(hit ? 2 : 1, hit ? 0xffffff : 0x60e0ff, hit ? 0.9 : 0.35 + Math.sin(now / 120) * 0.1).strokeCircle(ox, oy, r);
-          if (hit) g.fillStyle(0x60e0ff, 0.15).fillCircle(ox, oy, r);
-        }
-        continue;
-      }
-      if (e.kind === 'jugg') {
-        const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA), sx = e.x + e.dir * 2, sy = e.y - 1;
-        const key = e.spin > 0.05 && Math.floor(now / (70 - 45 * e.spin)) % 2 ? 'gun_jugg2' : 'gun_jugg';
-        if (e.gun.texture.key !== key) e.gun.setTexture(key);
-        e.gun.setPosition(Math.round(sx - ca * e.recoil), Math.round(sy - sa * e.recoil)).setRotation(e.aimA); e.gun.scaleY = ca < 0 ? -1 : 1;
-        e.glow.setPosition(e.x + e.dir * 3, e.body.top + 4).setScale(e.ai === 'spin' ? 0.8 : 0.4);
-        if (e.ai === 'spin') {                                           // laser tell while the barrels wind up
-          let ex = sx + ca * 28, ey = sy + sa * 28;
-          for (let i = 0; i < 80 && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; }
-          this.laserG.lineStyle(1, 0xff3020, 0.25 + 0.5 * e.spin).lineBetween(sx + ca * 28, sy + sa * 28, ex, ey);
-        }
-        continue;
-      }
-      if (e.kind === 'jet') {
-        const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
-        e.gun.setPosition(Math.round(e.x - ca * e.recoil), Math.round(e.y + 1 - sa * e.recoil)).setRotation(e.aimA); e.gun.scaleY = ca < 0 ? -1 : 1;
-        e.glow.setPosition(e.x + e.dir * 4, e.y - 8).setScale(e.ai === 'tell' ? 0.8 + Math.sin(now / 30) * 0.2 : 0.3);
-        e.thr.setPosition(e.x - e.dir * 4, e.y + 10).setScale(0.6 + Math.random() * 0.35);
-        continue;
-      }
-      if (e.kind === 'sapper') { e.glow.setPosition(e.x + e.dir * 5, e.y - 7 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'plant' ? 0.6 : 0.3); continue; }
-      if (e.kind === 'brood') { const sw = e.ai === 'birth'; e.glow.setPosition(e.x - e.dir * 2, e.y - 4).setScale(sw ? 1.8 + Math.sin(now / 40) * 0.2 : 1.3 + Math.sin(now / 300) * 0.1).setAlpha(sw ? 0.55 : 0.3); continue; }
-      if (e.kind === 'wasp') {
-        e.glow.setPosition(e.x + e.dir * 8, e.y).setScale(e.ai === 'run' ? 0.7 : 0.45);
-        e.thr.setPosition(e.x - e.dir * 2, e.y - 6).setAlpha(0.2 + Math.random() * 0.25);   // wing shimmer
-        if (e.ai === 'run' && e.bombs > 0) {                            // bomb sight: blinking line to the ground
-          let ey = e.body.bottom + 2; while (ey < e.y + 260 && !this.standAt(e.x, ey)) ey += 4;
-          const a = Math.floor(now / 60) % 2 ? 0.75 : 0.3;
-          this.laserG.lineStyle(1, 0xff3020, a).lineBetween(e.x, e.body.bottom + 2, e.x, ey);
-          this.laserG.fillStyle(0xff3020, a).fillRect(e.x - 3, ey - 1, 7, 2);
-        }
-        continue;
-      }
-      if (e.kind === 'rammer') {
-        const hot = e.ai === 'wind' || e.ai === 'charge';
-        e.glow.setPosition(e.x + e.dir * 8, e.y - 2).setScale(hot ? 0.8 + Math.sin(now / 30) * 0.15 : 0.4).setTint(e.ai === 'dizzy' ? 0xffe14a : 0xff3b1f);
-        continue;
-      }
-      if (e.kind === 'boss') {
-        const hot = e.ai === 'mortarWind' || e.ai === 'breathWind' || e.ai === 'breath';
-        e.glow.setPosition(e.x + e.dir, e.y - 1).setScale(hot ? 2.3 + Math.sin(now / 30) * 0.25 : 1.6 + Math.sin(now / 200) * 0.12).setAlpha(e.phase >= 3 ? 0.7 : hot ? 0.6 : 0.42).setTint(e.phase === 4 ? (Math.floor(now / 90) % 2 ? 0xffffff : 0xff3010) : e.phase === 3 ? 0xff4a20 : 0xff8a20);
-        continue;
-      }
-      if (e.kind === 'stalker') {
-        e.glow.setPosition(e.x + e.dir * 4, e.y - 6 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'windup' ? 0.75 : 0.3);
-        continue;
-      }
-      if (e.kind === 'drone') {
-        const charge = e.ai === 'charge';
-        e.glow.setPosition(e.x + e.dir * 3, e.y).setScale(charge ? 0.9 + Math.sin(now / 30) * 0.2 : 0.55).setTint(charge ? 0xffc040 : 0xff3020);
-        e.thr.setPosition(e.x, e.y + 8).setAlpha(0.4 + Math.random() * 0.3);
-      } else if (e.kind === 'heavy') {
-        const wind = e.ai === 'windup' || e.ai === 'leap';
-        e.glow.setPosition(e.x + e.dir, e.y - 1).setScale(wind ? 1.4 + Math.sin(now / 40) * 0.2 : 0.8 + Math.sin(now / 300) * 0.08);
-      }
+      if (vis) this[vis](e, g, now);
     }
     for (const r of this.rocketList) if (r.active) r.glow.setPosition(r.x, r.y);
     if (this.locks.length || this.hornetHeld) {                           // hornet locks: corner brackets that snap in, one pip per missile
@@ -19001,6 +18633,351 @@ class GameScene extends Phaser.Scene {
     for (const q of this.eprojList) if (q.active && q.pk !== 'nade') q.glow.setPosition(q.x, q.y).setAlpha(q.pk === 'bomb' ? (Math.floor(now / 70) % 2 ? 0.9 : 0.3) : 0.75); else if (q.active) q.glow.setPosition(q.x, q.y);
     for (const g of this.grenadeList) if (g.active) g.glow.setPosition(g.x, g.y).setAlpha(g.blinkOn ? 0.95 : 0.15).setScale(g.blinkOn ? 0.6 : 0.4);
     this.applyCamera(Math.min(this.game.loop.delta, 50) / 1000);
+  }
+
+  // Each foe kind's own drawing: glows, beams, tells and the parts it carries. Its ENEMY record names the method as
+  // visuals, and syncVisuals calls it every frame after the shared marks. g is the arc layer (this.laserG is the
+  // other) and now the scene clock.
+  visMolten(e, g, now) { e.glow.setPosition(e.x, e.y + 2).setScale((0.5 + e.def.tier * 0.35) * (0.9 + Math.sin(now / 120 + e.x) * 0.1)); }
+  visBurrower(e, g, now) {
+    if (e.under) return;
+    e.rotation = e.ai === 'erupt' ? Math.atan2(e.body.velocity.y, e.body.velocity.x) + Math.PI / 2 : Math.sin(e.t * 6) * 0.12;       // nose-first through the air
+    e.glow.setPosition(e.x + Math.sin(e.rotation) * 10, e.y - Math.cos(e.rotation) * 10).setScale(e.ai === 'erupt' ? 0.9 : 0.6);
+  }
+  visLinker(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 2, e.y).setScale(e.phase !== 'off' ? 0.6 + Math.random() * 0.15 : 0.4);
+    const B = e.beam;
+    if (B && B.live) {                                                   // live fence: hot core, wobbling halo, the odd arc
+      g.lineStyle(6, 0x1a8ad0, 0.3).lineBetween(B.x0, B.y0, B.x1, B.y1);
+      g.lineStyle(3, 0x60e0ff, 0.75).lineBetween(B.x0, B.y0 + rand(-1, 1), B.x1, B.y1 + rand(-1, 1));
+      g.lineStyle(1, 0xffffff, 1).lineBetween(B.x0, B.y0, B.x1, B.y1);
+      if (Math.random() < 0.25) this.zap(g, B.x0, B.y0, B.x1, B.y1);
+    } else if (B && Math.random() < 0.75) {                              // charging: thin dashed flicker
+      const len = Math.hypot(B.x1 - B.x0, B.y1 - B.y0) || 1, ux = (B.x1 - B.x0) / len, uy = (B.y1 - B.y0) / len, ph = (now / 25) % 8;
+      this.laserG.lineStyle(1, 0x60e0ff, 0.3 + Math.random() * 0.4);
+      for (let d = ph; d < len; d += 8) this.laserG.lineBetween(B.x0 + ux * d, B.y0 + uy * d, B.x0 + ux * Math.min(len, d + 4), B.y0 + uy * Math.min(len, d + 4));
+    }
+  }
+  visHarpooner(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 5, e.y - 9 + (e.fr === 'crouch' ? 1 : 0)).setScale(e.ai === 'windup' ? 0.7 : 0.3);
+    const hx = e.x + e.dir * 4, hy = e.y - 6;
+    if (e.hk) {                                                          // the chain
+      const hk = e.hk, n = Math.max(1, Math.floor(Math.hypot(hk.x - hx, hk.y - hy) / 3));
+      this.laserG.lineStyle(1, 0x4a525c, 0.9).lineBetween(hx, hy, hk.x, hk.y);
+      for (let i = 1; i < n; i++) this.laserG.fillStyle(i % 2 ? 0xa0aab6 : 0x5a636e, 1).fillRect(Math.round(hx + (hk.x - hx) * i / n) - 1, Math.round(hy + (hk.y - hy) * i / n) - 1, 2, 2);
+    } else if (e.ai === 'windup') {                                      // dotted sight line, blinks once it locks
+      const k = clamp(1 - (e.aiUntil - now) / TUNE.HARPOON.windMs, 0, 1), locked = k > 0.7, ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
+      const col = locked ? 0xffffa0 : 0xffd040, a = locked ? (Math.floor(now / 40) % 2 ? 0.9 : 0.4) : 0.25 + 0.4 * k;
+      for (let d = 6; d < 30 + 70 * k; d += 5) this.laserG.fillStyle(col, a).fillRect(Math.round(hx + ca * d), Math.round(hy + sa * d), 2, 1);
+    }
+  }
+  visMender(e, g, now) {
+    e.glow.setPosition(e.x, e.y + 2).setScale(e.healing ? 0.9 + Math.sin(now / 50) * 0.15 : 0.6);
+    const pt = e.patient;
+    if (e.healing && pt && pt.alive) {                                   // healing tether: wavy green line
+      const x0 = e.x, y0 = e.y + 5, x1 = pt.body.center.x, y1 = pt.body.center.y, len = Math.hypot(x1 - x0, y1 - y0) || 1;
+      const nx = -(y1 - y0) / len, ny = (x1 - x0) / len, n = Math.max(3, Math.round(len / 6));
+      let px = x0, py = y0;
+      for (let i = 1; i <= n; i++) {
+        const t = i / n, w = Math.sin(t * 9 - now / 60) * 2.5 * Math.sin(t * Math.PI), qx = x0 + (x1 - x0) * t + nx * w, qy = y0 + (y1 - y0) * t + ny * w;
+        g.lineStyle(3, 0x30ff80, 0.25).lineBetween(px, py, qx, qy); g.lineStyle(1, 0xc8ffe0, 0.85).lineBetween(px, py, qx, qy);
+        px = qx; py = qy;
+      }
+    }
+  }
+  visBuzzsaw(e, g, now) {                                              // spins (set here, after updateEnemies' wobble decay); cyan while it's yours
+    e.rotation = (now / (e.owned > 0 ? 20 : 34)) % (Math.PI * 2);
+    e.glow.setPosition(e.x, e.y).setTint(e.owned > 0 ? 0x46e6ff : 0xff8a20).setScale(0.5 + Math.random() * 0.12);
+  }
+  visMagnet(e, g, now) {                                               // the field: a slow ring of red/blue ticks; it tightens and flares on the tell
+    const tell = e.ai === 'tell', k = tell ? clamp(1 - (e.aiUntil - now) / TUNE.MAGNET.tellMs, 0, 1) : 0, R = TUNE.MAGNET.field * (1 - 0.35 * k), cx = e.body.center.x, cy = e.body.center.y;
+    e.glow.setPosition(cx, cy).setScale(tell ? 0.8 + k * 0.6 : 0.55 + Math.sin(now / 200) * 0.05).setAlpha(tell ? 0.9 : 0.55);
+    const n = 20, ph = now / 900;
+    for (let i = 0; i < n; i++) {
+      const th = ph + i / n * Math.PI * 2, x0 = cx + Math.cos(th) * R, y0 = cy + Math.sin(th) * R;
+      g.lineStyle(1, i % 2 ? 0xff4a3a : 0x4a7aff, tell ? 0.45 + 0.5 * k : 0.34).lineBetween(x0, y0, cx + Math.cos(th + 0.12) * R, cy + Math.sin(th + 0.12) * R);
+    }
+    if (tell) g.lineStyle(1, 0xc8d8ff, 0.3 + 0.5 * k).strokeCircle(cx, cy, R * 0.45);
+  }
+  visClaw(e, g, now) {                                                 // trolley, cable and the claw on the end
+    this.laserG.fillStyle(0x3a3f47, 1).fillRect(Math.round(e.x) - 7, Math.round(e.homeY) - 14, 14, 6); this.laserG.fillStyle(0xe8b422, 1).fillRect(Math.round(e.x) - 7, Math.round(e.homeY) - 9, 14, 1);
+    this.laserG.lineStyle(1, 0x8a94a0, 1).lineBetween(e.x, e.homeY - 8, e.x, e.body.top);
+    e.glow.setPosition(e.x, e.homeY - 11).setScale(e.ai === 'drop' ? 0.5 : 0.3).setTint(e.ai === 'drop' ? 0xff3020 : 0xffb040);
+  }
+  visEcho(e, g, now) { e.setAlpha(0.45 + Math.random() * 0.25); e.glow.setPosition(e.x, e.y); }
+  visGrenadier(e, g, now) { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 5 : 2), e.y - 8).setScale(w ? 0.5 : 0.25); }
+  visCinder(e, g, now) { e.rotation = e.spinA; e.glow.setPosition(e.x, e.y).setScale(e.owned > 0 ? 0.8 : 0.55); if (Math.random() < 0.6) this.fxFire(e.x + rand(-4, 4), e.y - 2, 1); }
+  visBanner(e, g, now) {                                               // the banner's healing ring
+    if (e.ai === 'plant') {
+      const R0 = TUNE.BANNER.radius; g.lineStyle(1, 0x5cff7a, 0.35 + 0.15 * Math.sin(now / 200));
+      for (let j = 0; j < 24; j += 2) { const a0 = j / 24 * Math.PI * 2 + now / 1500; g.beginPath(); g.arc(e.x, e.y, R0, a0, a0 + Math.PI / 24, false); g.strokePath(); }
+    }
+  }
+  visGatling(e, g, now) {
+    if (e.ai === 'spin' || e.ai === 'fire') { const a = e.aimA, mx = e.x + Math.cos(a) * 14, my = e.y - 4 + Math.sin(a) * 14; if (e.ai === 'spin') this.laserG.lineStyle(1, 0xff3020, 0.15 + 0.3 * Math.random()).lineBetween(mx, my, mx + Math.cos(a) * 200, my + Math.sin(a) * 200); }
+    if (e.ai === 'hot' && Math.random() < 0.4) this.fx.emit(e.x + e.dir * 12, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.4, 0.8], size: [3, 6], cols: [0xe8e8e8, 0xb8b8b8], alpha: [0.4, 0], g: -30 });
+  }
+  visJelly(e, g, now) {                                                // tendrils trailing beneath it
+    e.glow.setPosition(e.x, e.y - 2).setScale(0.45 + 0.08 * Math.sin(now / 160));
+    for (let k = -1; k <= 1; k++) { let px = e.x + k * 4, py = e.body.bottom; for (let j = 1; j <= 6; j++) { const qx = e.x + k * 4 + Math.sin(now / 140 + j * 0.9 + k) * 2.5, qy = e.body.bottom + j * TUNE.JELLY.drop / 6; g.lineStyle(1, e.zapping ? 0xffffff : 0xff90e8, e.zapping ? 0.9 : 0.5).lineBetween(px, py, qx, qy); px = qx; py = qy; } }
+  }
+  visCopycat(e, g, now) {                                              // it carries a copy of your gun under it
+    e.icon.setPosition(e.x, e.body.bottom + 4).setFlipX(e.dir < 0);
+    if (e.ai === 'aim') { const pb = this.player.body; this.laserG.lineStyle(1, 0xff3020, 0.3 + 0.5 * Math.random()).lineBetween(e.x, e.y, pb.center.x, pb.center.y); }
+  }
+  visBulldozer(e, g, now) { if (Math.abs(e.body.velocity.x) > 5 && Math.random() < 0.3) this.fxSmoke(e.x - e.dir * 10, e.body.top + 2, 1, 0.5); }
+  visSponge(e, g, now) {
+    if (e.charge > 0) { const k = e.charge / TUNE.SPONGE.cap; e.setScale((e.growS || 1) * (1 + 0.25 * k)); if (Math.random() < k * 0.5) this.fx.emit(e.body.center.x + rand(-6, 6), e.body.center.y + rand(-6, 6), { n: 1, speed: [5, 20], life: [0.2, 0.4], size: [2, 1], cols: [0xffe46a, 0xffa030], add: true }); }
+  }
+  visLeaper(e, g, now) {                                               // the target ring on the floor where it'll land
+    if (e.ai === 'crouch' || e.ai === 'air') {
+      const k = e.ai === 'crouch' ? 1 - (e.aiUntil - now) / TUNE.LEAPER.tellMs : 1, r = 18 - 8 * k;
+      g.lineStyle(1, 0xff3020, 0.5 + 0.4 * Math.sin(now / 50)); g.strokeEllipse(e.tx, e.ty - 1, r * 2, r * 0.6); g.lineBetween(e.tx - 3, e.ty - 1, e.tx + 3, e.ty - 1);
+    }
+  }
+  visPorcupine(e, g, now) { if (e.ai === 'bristle' && Math.random() < 0.5) this.fxSparks(e.x + rand(-8, 8), e.body.top + rand(0, 4), 1, -Math.PI / 2, 1.2, [20, 60]); }
+  visZealot(e, g, now) {                                               // its halo brightens with every soul it drinks
+    e.glow.setPosition(e.x, e.body.top - 3).setScale(0.3 + e.souls * 0.12).setAlpha(0.5 + e.souls * 0.12);
+    g.lineStyle(1, 0xffe080, 0.6 + e.souls * 0.12); g.strokeEllipse(e.x + e.dir, e.body.top - 3, 10 + e.souls * 2, 3);
+  }
+  visBerserker(e, g, now) {
+    e.glow.setPosition(e.x, e.y).setAlpha(e.rage ? 0.55 + 0.2 * Math.sin(now / 80) : 0); if (e.rage && Math.random() < 0.3) this.fx.emit(e.x + rand(-4, 4), e.body.top, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 30], life: [0.3, 0.6], size: [2, 4], cols: [0xff6060, 0xc02020], alpha: [0.5, 0], g: -20 });
+  }
+  visHeadsman(e, g, now) { if (e.ai === 'raise' && Math.floor(now / 90) % 2) { g.lineStyle(1, 0xff3020, 0.7); g.strokeRect(e.x + e.dir * 20 - 22, e.body.top - 4, 44, e.body.height + 8); } }
+  visThundercloud(e, g, now) {                                         // while it charges, a flickering line to the floor where it'll strike
+    if (e.ai === 'charge') for (let y = e.body.bottom; y < e.strikeY; y += 8) this.laserG.lineStyle(1, 0xa0c8ff, 0.2 + 0.4 * Math.random()).lineBetween(e.x, y, e.x, y + 4);
+    if (Math.random() < 0.12) this.fx.emit(e.x + rand(-10, 10), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [80, 120], life: [0.3, 0.5], size: [1, 1], cols: [0x80a8d0], alpha: [0.6, 0] });
+  }
+  visForeman(e, g, now) {
+    if (e.phase >= 2 && Math.random() < 0.3) this.fxSmoke(e.x + rand(-12, 12), e.body.top + 4, 1, 0.6);
+    if (e.phase === 3 && Math.random() < 0.25) this.fxSparks(e.x + rand(-14, 14), e.body.center.y + rand(-8, 8), 2, 0, Math.PI * 2, [40, 140]);
+    if (e.ai === 'magnet' && this.state !== 'dead') { const pb = this.player.body, mx = e.x + e.dir * 22, my = e.y - 2; for (let k = 0; k < 3; k++) { const t = (now / 300 + k / 3) % 1; g.lineStyle(1, 0x80c8ff, 0.6 * (1 - t)).lineBetween(mx + (pb.center.x - mx) * t, my + (pb.center.y - my) * t - 4, mx + (pb.center.x - mx) * t, my + (pb.center.y - my) * t + 4); } }
+    if (e.ai === 'slamTell' && Math.floor(now / 80) % 2) { g.lineStyle(1, 0xff3020, 0.7); g.strokeRect(e.body.left - 3, e.body.top - 3, e.body.width + 6, e.body.height + 6); }
+  }
+  visVortex(e, g, now) {
+    e.glow.setPosition(e.x, e.y).setScale(e.ai === 'spin' ? 0.8 + Math.random() * 0.2 : e.ai === 'tell' ? 0.5 + 0.3 * Math.random() : 0.35);
+    if (e.ai === 'spin') { const R0 = TUNE.VORTEX.range; for (let k = 0; k < 3; k++) { const r = R0 * (1 - ((now / 700 + k / 3) % 1)), a0 = now / 180 + k * 2; g.lineStyle(1, 0x9ad8ff, 0.45 * (1 - r / R0) + 0.1); g.beginPath(); g.arc(e.x, e.y, r, a0, a0 + 1.6, false); g.strokePath(); } }
+  }
+  visPylon(e, g, now) {
+    const k = e.chargeT / TUNE.PYLON.charge;
+    e.glow.setPosition(e.x, e.body.top + 2).setScale(0.3 + 0.7 * k + (k > 0 ? Math.random() * 0.15 : 0));
+    if (k > 0.4) { g.lineStyle(1, 0x80c8ff, 0.25 + 0.35 * k); const R0 = TUNE.PYLON.range; for (let j = 0; j < 24; j += 2) { const a0 = j / 24 * Math.PI * 2 + now / 900; g.beginPath(); g.arc(e.x, e.body.top + 2, R0, a0, a0 + Math.PI / 24, false); g.strokePath(); } }
+    if (k > 0 && Math.random() < k) this.zap(g, e.x, e.body.top + 2, e.x + rand(-10, 10), e.body.top + rand(-8, 6));
+  }
+  visTorcher(e, g, now) {                                              // the pilot light, and the flame when it sprays
+    e.glow.setPosition(e.x + e.dir * 10, e.y - 2).setScale(e.ai === 'spray' ? 0.7 + Math.random() * 0.2 : 0.25).setAlpha(e.ai === 'cool' ? 0.3 : 0.8);
+  }
+  visSporepod(e, g, now) { e.glow.setPosition(e.x, e.y).setScale(0.5 + 0.15 * Math.sin(now / 300) + (e.fr === 'puff' ? 0.3 : 0)); }
+  visSpotter(e, g, now) {                                              // the red eye, and its searchlight on you
+    e.glow.setPosition(e.x + e.dir * 2, e.y + 1).setScale(0.25 + 0.35 * (e.lockT / TUNE.SPOTTER.lock));
+    if (e.lockT > 0 && e.sees && this.state !== 'dead') {
+      const pb = this.player.body, ang = Math.atan2(pb.center.y - e.y, pb.center.x - e.x), L = Math.hypot(pb.center.x - e.x, pb.center.y - e.y) + 10, px = -Math.sin(ang) * 13, py = Math.cos(ang) * 13, ex2 = e.x + Math.cos(ang) * L, ey2 = e.y + Math.sin(ang) * L;
+      this.laserG.fillStyle(0xff2020, 0.05 + 0.12 * e.lockT / TUNE.SPOTTER.lock).fillTriangle(e.x, e.y, ex2 + px, ey2 + py, ex2 - px, ey2 - py);
+    }
+  }
+  visHound(e, g, now) { if (e.ai === 'leap' && Math.random() < 0.6) this.fx.emit(e.x + e.dir * 8, e.y - 3, { n: 1, speed: [0, 5], life: [0.1, 0.2], size: [2, 1], cols: [0xff3020, 0xff8a60], add: true }); }
+  visOrbiter(e, g, now) {                                              // its plates, spinning round the core
+    const R0 = TUNE.ORBITER.radius, np = e.plates.length;
+    e.glow.setPosition(e.x + e.dir * 1, e.y).setScale(e.fr === 'fire' ? 0.6 : 0.35);
+    for (let k = 0; k < np; k++) {
+      if (e.plates[k] <= 0) continue;
+      const a = e.spin + k * Math.PI * 2 / np, hit = now < e.plateHit[k], ax = e.x + Math.cos(a - 0.34) * R0, ay = e.y + Math.sin(a - 0.34) * R0, bx = e.x + Math.cos(a + 0.34) * R0, by = e.y + Math.sin(a + 0.34) * R0;
+      g.lineStyle(5, hit ? 0xffffff : 0x2a2e35, 1).lineBetween(ax, ay, bx, by);
+      g.lineStyle(2, hit ? 0xffffff : e.plates[k] < TUNE.ORBITER.plateHp * 0.5 ? 0xff8a40 : 0x9aa4b0, 1).lineBetween(ax, ay, bx, by);
+    }
+  }
+  visSwapper(e, g, now) {
+    if (e.ai === 'tell') {                                               // the tether: violet dashes crawling from it to you
+      const pb = this.player.body, x0 = e.body.center.x, y0 = e.body.center.y, x1 = pb.center.x, y1 = pb.center.y, L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(2, Math.floor(L / 6)), off = Math.floor(now / 50) % 2;
+      g.lineStyle(1, 0xc890ff, 0.85);
+      for (let j = off; j < n; j += 2) { const t0 = j / n, t1 = Math.min(1, (j + 1) / n); g.lineBetween(x0 + (x1 - x0) * t0, y0 + (y1 - y0) * t0, x0 + (x1 - x0) * t1, y0 + (y1 - y0) * t1); }
+      const k = clamp((e.aiUntil - now) / TUNE.SWAPPER.tellMs, 0, 1);
+      g.lineStyle(1, 0xf0d8ff, 0.9); g.strokeCircle(x1, y1, 6 + 14 * k); g.strokeCircle(x0, y0, 6 + 14 * k);
+    }
+  }
+  visScorcher(e, g, now) { if (e.ai === 'run' || Math.random() < 0.3) this.fxFire(e.x + e.dir * 3, e.body.top - 1, 1); }
+  visSpikeball(e, g, now) { e.rotation = e.spinA; }
+  visWraith(e, g, now) {
+    const st = e.ai === 'tell' || e.ai === 'lunge';
+    e.setAlpha(e.inWall ? 0.22 : e.ai === 'fade' ? 0.45 : st ? 1 : 0.72 + Math.sin(now / 200) * 0.1);
+    e.glow.setPosition(e.x, e.y - 2).setScale(st ? 0.8 + Math.random() * 0.2 : 0.4).setAlpha(e.inWall ? 0.3 : 0.75);
+    if (e.ai === 'lunge' || Math.random() < 0.15) this.fx.emit(e.x + rand(-4, 4), e.body.bottom, { n: 1, angle: Math.PI / 2, spread: 0.6, speed: [5, 25], life: [0.3, 0.6], size: [2, 1], cols: [0xd8c8ff, 0x8a6ad0], alpha: [0.6, 0], add: true });
+  }
+  visChiller(e, g, now) {
+    if (Math.random() < 0.12) this.fx.emit(e.x - e.dir * 6, e.y - 4, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [5, 20], life: [0.3, 0.6], size: [2, 3], cols: [0xe8f8ff, 0xb8e0f0], alpha: [0.5, 0], g: -10 });
+  }
+  visLugger(e, g, now) { if (e.carryImg) e.carryImg.setPosition(e.x + e.dir * 2, e.body.top - 8); }
+  visBlimp(e, g, now) { e.glow.setPosition(e.x + e.dir * 4, e.body.bottom + 3).setScale(e.bombT < 0.3 ? 0.6 : 0.3); if (e.crash) e.rotation = Math.min(0.8, (e.rotation || 0) + 0.02); }
+  visStrider(e, g, now) {
+    const ex2 = e.x + e.dir * 4, ey2 = e.body.top + 5;
+    e.glow.setPosition(ex2, ey2).setScale(e.ai === 'tell' ? 0.5 + Math.random() * 0.2 : e.ai === 'sweep' ? 0.8 : 0.35);
+    if (e.ai === 'tell' || e.ai === 'sweep') {
+      const ca = Math.cos(e.beamA), sa = Math.sin(e.beamA); let lx = ex2, ly = ey2;
+      for (let k = 0; k < 120 && !this.solidAt(lx + ca * 4, ly + sa * 4); k++) { lx += ca * 4; ly += sa * 4; }
+      if (e.ai === 'tell') this.laserG.lineStyle(1, 0xff3020, Math.floor(now / 60) % 2 ? 0.7 : 0.3).lineBetween(ex2, ey2, lx, ly);
+      else { g.lineStyle(5, 0xff2010, 0.35).lineBetween(ex2, ey2, lx, ly); g.lineStyle(2, 0xff8060, 0.9).lineBetween(ex2, ey2, lx, ly); g.lineStyle(1, 0xffffff, 1).lineBetween(ex2, ey2, lx, ly); if (Math.random() < 0.5) this.fxSparks(lx, ly, 2, e.beamA + Math.PI, 1.2, [40, 140]); }
+    }
+  }
+  visPara(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 5, e.y - 6).setScale(e.shotT > 0 ? 0.5 : 0.25);
+    if (e.ai === 'drop' && e.chute) {                                    // the canopy and its lines
+      const cx = e.x, cy = e.body.top - 22, sw = Math.sin(now / 400 + e.t) * 2;
+      this.laserG.lineStyle(1, 0xc8c0a8, 0.8).lineBetween(e.x - 4, e.body.top + 2, cx - 11 + sw, cy + 4).lineBetween(e.x + 4, e.body.top + 2, cx + 11 + sw, cy + 4);
+      this.laserG.fillStyle(0x6a7a40, 1).fillRect(Math.round(cx - 13 + sw), Math.round(cy), 26, 4); this.laserG.fillStyle(0x8a9a58, 1).fillRect(Math.round(cx - 11 + sw), Math.round(cy - 2), 22, 2);
+      this.laserG.fillStyle(0x4a5a2a, 1).fillRect(Math.round(cx - 13 + sw), Math.round(cy + 4), 4, 1).fillRect(Math.round(cx + 9 + sw), Math.round(cy + 4), 4, 1);
+    }
+  }
+  visBeacon(e, g, now) {
+    const call = e.ai === 'call', k = call ? clamp(1 - (e.aiUntil - now) / TUNE.BEACON.callMs, 0, 1) : 0;
+    e.glow.setPosition(e.x, e.y - 3).setScale(call ? 0.4 + k * 0.8 : 0.35).setAlpha(call && Math.floor(now / (200 - 150 * k)) % 2 ? 1 : 0.6);
+    if (call) { g.lineStyle(2, 0xff3020, 0.25 + 0.5 * k).lineBetween(e.x, e.y - 8, e.x, e.y - 40 - 200 * k); g.lineStyle(1, 0xffb0a0, 0.6 * k).strokeCircle(e.x, e.y, 10 + 30 * (1 - ((now / 400) % 1))); }
+  }
+  visSlug(e, g, now) { e.glow.setPosition(e.x + e.dir * 6, e.y - 1).setScale(e.ai === 'spit' ? 0.7 : 0.4); }
+  visPilferer(e, g, now) { e.glow.setPosition(e.x + e.dir * 4, e.y); if (e.gunImg) e.gunImg.setPosition(e.x, e.y + 7).setFlipX(e.dir < 0); }
+  visPogo(e, g, now) { e.glow.setPosition(e.x, e.y - 4).setScale(e.slamming ? 0.6 : 0.3); }
+  visSparker(e, g, now) { e.glow.setPosition(e.x, e.y - 2).setScale(0.3 + Math.random() * 0.1); }
+  visGolem(e, g, now) { const c = e.ai === 'slam' || e.ai === 'throw'; e.glow.setPosition(e.x + e.dir * 2, e.y - 2).setScale(c ? 0.9 + Math.random() * 0.2 : 0.7); }
+  visCreeper(e, g, now) { e.flipY = e.ai === 'ceil'; e.glow.setPosition(e.x + e.dir * 4, e.y + (e.ai === 'ceil' ? 1 : -1)).setScale(e.ai === 'drop' ? 0.5 : 0.3); }
+  visRoller(e, g, now) {
+    if (e.ai === 'roll' || e.ai === 'curl') e.rotation = e.spinA; else if (e.ai !== 'dizzy') e.rotation = 0;
+    e.glow.setPosition(e.x, e.y).setScale(e.ai === 'curl' ? 0.6 + Math.random() * 0.2 : 0.3).setVisible(e.ai !== 'roll');
+    if (e.ai === 'dizzy') for (let i = 0; i < 3; i++) { const th = now / 150 + i * 2.1; this.laserG.fillStyle(0xffe46a, 0.9).fillRect(Math.round(e.x + Math.cos(th) * 8), Math.round(e.body.top - 4 + Math.sin(th) * 2), 2, 2); }
+  }
+  visJammer(e, g, now) {
+    const tell = e.ai === 'tell', k = tell ? clamp(1 - (e.aiUntil - now) / TUNE.JAMMER.tellMs, 0, 1) : 0;
+    e.glow.setPosition(e.x, e.y).setScale(0.4 + k * 0.6).setAlpha(0.6 + k * 0.3);
+    if (tell) for (let i = 0; i < 2; i++) g.lineStyle(1, 0x60ff9a, 0.3 + 0.5 * k).strokeCircle(e.x, e.y, 6 + (1 - ((now / 120 + i * 0.5) % 1)) * 16 * (1 - k * 0.5));
+  }
+  visGasbag(e, g, now) {
+    const sw = e.ai === 'swell', k = sw ? clamp(1 - (e.aiUntil - now) / TUNE.GASBAG.swellMs, 0, 1) : 0;
+    e.setScale(1 + k * 0.35 + (sw ? Math.sin(now / 30) * 0.05 : 0));
+    e.glow.setPosition(e.x, e.y).setScale(0.6 + k * 0.6).setAlpha(0.3 + k * 0.4);
+  }
+  visWelder(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 3, e.y - 5).setScale(e.ai === 'weld' || e.ai === 'build' ? 0.5 + Math.random() * 0.2 : 0.3);
+    const pt = e.patient;
+    if (e.ai === 'weld' && pt && pt.alive) this.zapCol(g, e.x + e.dir * 7, e.y - 1, pt.body.center.x, pt.body.center.y, 0xffc040, 0xffffff);
+  }
+  visTurret(e, g, now) {
+    const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA), tx = e.x, ty = e.y - 2;
+    this.laserG.lineStyle(3, 0x22262c, 1).lineBetween(tx, ty, tx + ca * 7, ty + sa * 7); this.laserG.lineStyle(1, 0x8a94a0, 1).lineBetween(tx, ty - 1, tx + ca * 7, ty + sa * 7 - 1);
+    e.glow.setPosition(tx, ty).setScale(e.ai === 'aim' ? 0.45 : 0.25);
+    if (e.ai === 'aim') { let ex = tx + ca * 8, ey = ty + sa * 8; for (let i = 0; i < 60 && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; } this.laserG.lineStyle(1, 0xff3020, Math.floor(now / 50) % 2 ? 0.7 : 0.3).lineBetween(tx + ca * 8, ty + sa * 8, ex, ey); }
+  }
+  visDuelist(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 3, e.y - 8 + (e.fr === 'crouch' ? 2 : 0)).setScale(e.ai === 'windup' ? 0.7 : 0.3);
+    if (e.ai === 'lunge') {                                             // the cut: a pale crescent ahead of the blade
+      const cx = e.x + e.dir * 9, cy = e.y - 2;
+      for (let j = 0; j < 7; j++) { const th = -1.1 + j * 0.37, r = 11; g.fillStyle(0xffd0e0, 0.75 - j * 0.06).fillRect(Math.round(cx + e.dir * Math.cos(th) * r * 0.6), Math.round(cy + Math.sin(th) * r), 2, 2); }
+    }
+  }
+  visMimic(e, g, now) { e.glow.setPosition(e.x + e.dir * 2, e.y - 1).setAlpha(e.ai === 'hide' ? 0 : 0.7 + Math.random() * 0.2); }
+  visHowitzer(e, g, now) {
+    const pl = e.ai === 'plant' || e.ai === 'fire';
+    e.glow.setPosition(e.x - e.dir * 3, e.y - 1 + (pl ? 2 : 0)).setScale(pl ? 0.6 + Math.random() * 0.1 : 0.35);
+  }
+  visBlinker(e, g, now) { e.glow.setVisible(!e.under).setPosition(e.x + e.dir * 1.5, e.y - 4).setScale(e.ai === 'tell' ? 0.45 + Math.random() * 0.1 : 0.25); }
+  visTarspit(e, g, now) {
+    const w = e.ai === 'windup';
+    e.glow.setPosition(e.x + e.dir * (w ? 6 : 1), e.y - 7).setScale(w ? 0.55 + Math.random() * 0.15 : 0.25).setTint(w ? 0xff7a20 : 0xffa040);
+  }
+  visHive(e, g, now) { e.glow.setPosition(e.x, e.y).setScale(1 + Math.sin(now / 150) * 0.1); }
+  visStitcher(e, g, now) {
+    e.glow.setPosition(e.x, e.y + 5).setScale(e.ai === 'channel' ? 0.8 + Math.random() * 0.2 : 0.45);
+    if (e.ai === 'channel' && e.corpse && !e.corpse.gone) { const q = e.corpse.pts[2]; this.zapCol(g, e.x, e.y + 6, q.x, q.y, 0x30ff60, 0xd8ffd8); }
+  }
+  visWyrm(e, g, now) {                                                 // rotation along the path (set here, after updateEnemies' wobble decay)
+    const th = e.wyrmAng || 0, left = Math.cos(th) < 0;
+    e.flipX = left; e.rotation = left ? th - Math.PI : th;
+    if (e.kind === 'wyrm') e.glow.setVisible(!e.under).setPosition(e.x + Math.cos(th) * 10, e.y + Math.sin(th) * 10).setScale(e.ai === 'leap' ? 1.3 : 0.9);
+  }
+  visBulwark(e, g, now) {
+    const wind = e.ai === 'windup' || e.ai === 'charge';
+    e.glow.setPosition(e.x + e.dir * 4, e.y - 8).setScale(wind ? 0.8 + Math.sin(now / 30) * 0.2 : 0.35).setTint(wind ? 0xffe060 : e.kind === 'mirror' ? 0xe080ff : 0xff9a2a);
+  }
+  visRifleman(e, g, now) {
+    const sn = e.kind === 'sniper', rk = e.kind === 'rocketeer', sx = e.x + (e.dir > 0 ? 0 : -1), sy = e.y - 2, ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
+    e.gun.setPosition(Math.round(sx - ca * e.recoil), Math.round(sy - sa * e.recoil)).setRotation(e.aimA);
+    e.gun.scaleY = ca < 0 ? -1 : 1;
+    e.glow.setPosition(e.x + e.dir * 4, e.y - 7).setScale((sn || rk) && e.ai === 'aim' ? 0.6 : 0.3);
+    if (e.ai === 'aim') {                                              // laser sight: tracks, then blinks when locked
+      const ms = sn ? TUNE.SNIPER.aimMs : rk ? TUNE.ROCKETEER.aimMs : TUNE.ENFORCER.aimMs, lock = sn ? TUNE.SNIPER.lockAt : rk ? TUNE.ROCKETEER.lockAt : 0.7, len = sn ? 31 : rk ? 22 : 21;
+      const k = clamp((now - e.aimStart) / ms, 0, 1), mx = sx + ca * len, my = sy + sa * len;
+      let ex = mx, ey = my;
+      for (let i = 0; i < (sn ? 150 : 90) && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; }
+      const locked = k >= lock, a = locked ? (Math.floor(now / 40) % 2 ? 0.95 : 0.45) : 0.2 + 0.45 * k;
+      const col = sn ? (locked ? 0xd0f4ff : 0x40a0ff) : rk ? (locked ? 0xffe080 : 0xff8a20) : (locked ? 0xff9090 : 0xff2020);
+      this.laserG.lineStyle(sn && locked ? 2 : 1, col, a).lineBetween(mx, my, ex, ey);
+      this.laserG.fillStyle(col, a).fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 2, 2);
+    }
+  }
+  visCloaker(e, g, now) { e.glow.setPosition(e.x + e.dir * 5, e.y - 8 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'reveal' ? 0.7 : 0.3).setAlpha(0.3 + 0.6 * (e.cloakA ?? 0)); }
+  visPyro(e, g, now) { const w = e.ai === 'windup'; e.glow.setPosition(e.x + e.dir * (w ? 8 : 6), e.y + (w ? -12 : -1)).setScale(w ? 0.7 + Math.random() * 0.2 : 0.3).setTint(w ? 0xff8a20 : 0xffb040); }
+  visGunship(e, g, now) {
+    const strafe = e.ai === 'strafeTell' || e.ai === 'strafe';
+    const tell = strafe || e.ai === 'tell' || e.ai === 'volley';
+    e.glow.setPosition(e.x + e.dir * (strafe ? 22 : 2), e.body.bottom + 1)
+      .setTint(strafe ? 0xffd080 : 0xff3020).setScale(tell ? 1 + Math.sin(now / 40) * 0.25 : 0.5).setAlpha(tell ? 0.9 : 0.4);
+    e.thr.setPosition(e.x, e.body.bottom + 4).setScale(1.4 + Math.random() * 0.4, 0.8).setAlpha(0.45);
+  }
+  visScreamer(e, g, now) { e.glow.setPosition(e.x + e.dir * 3, e.y - 2).setScale(e.ai === 'wind' ? 0.9 + Math.random() * 0.3 : e.ai === 'dive' ? 0.8 : 0.5); }
+  visWarden(e, g, now) {
+    e.glow.setPosition(e.x, e.y + 1).setScale(0.5 + Math.sin(now / 90) * 0.06);
+    for (const o of e.links) {                                           // tethers + bubbles on its wards
+      if (!o.alive || o.shieldBy !== e || now > o.shieldT) continue;
+      const hit = now - (o.shieldHit || -1e9) < 120, r = Math.max(o.body.halfWidth, o.body.halfHeight) + 6, ox = o.body.center.x, oy = o.body.center.y;
+      g.lineStyle(1, 0x60e0ff, 0.55).lineBetween(e.x, e.y + 2, ox, oy);
+      g.lineStyle(hit ? 2 : 1, hit ? 0xffffff : 0x60e0ff, hit ? 0.9 : 0.35 + Math.sin(now / 120) * 0.1).strokeCircle(ox, oy, r);
+      if (hit) g.fillStyle(0x60e0ff, 0.15).fillCircle(ox, oy, r);
+    }
+  }
+  visJugg(e, g, now) {
+    const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA), sx = e.x + e.dir * 2, sy = e.y - 1;
+    const key = e.spin > 0.05 && Math.floor(now / (70 - 45 * e.spin)) % 2 ? 'gun_jugg2' : 'gun_jugg';
+    if (e.gun.texture.key !== key) e.gun.setTexture(key);
+    e.gun.setPosition(Math.round(sx - ca * e.recoil), Math.round(sy - sa * e.recoil)).setRotation(e.aimA); e.gun.scaleY = ca < 0 ? -1 : 1;
+    e.glow.setPosition(e.x + e.dir * 3, e.body.top + 4).setScale(e.ai === 'spin' ? 0.8 : 0.4);
+    if (e.ai === 'spin') {                                               // laser tell while the barrels wind up
+      let ex = sx + ca * 28, ey = sy + sa * 28;
+      for (let i = 0; i < 80 && !this.solidAt(ex + ca * 4, ey + sa * 4); i++) { ex += ca * 4; ey += sa * 4; }
+      this.laserG.lineStyle(1, 0xff3020, 0.25 + 0.5 * e.spin).lineBetween(sx + ca * 28, sy + sa * 28, ex, ey);
+    }
+  }
+  visJet(e, g, now) {
+    const ca = Math.cos(e.aimA), sa = Math.sin(e.aimA);
+    e.gun.setPosition(Math.round(e.x - ca * e.recoil), Math.round(e.y + 1 - sa * e.recoil)).setRotation(e.aimA); e.gun.scaleY = ca < 0 ? -1 : 1;
+    e.glow.setPosition(e.x + e.dir * 4, e.y - 8).setScale(e.ai === 'tell' ? 0.8 + Math.sin(now / 30) * 0.2 : 0.3);
+    e.thr.setPosition(e.x - e.dir * 4, e.y + 10).setScale(0.6 + Math.random() * 0.35);
+  }
+  visSapper(e, g, now) { e.glow.setPosition(e.x + e.dir * 5, e.y - 7 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'plant' ? 0.6 : 0.3); }
+  visBrood(e, g, now) { const sw = e.ai === 'birth'; e.glow.setPosition(e.x - e.dir * 2, e.y - 4).setScale(sw ? 1.8 + Math.sin(now / 40) * 0.2 : 1.3 + Math.sin(now / 300) * 0.1).setAlpha(sw ? 0.55 : 0.3); }
+  visWasp(e, g, now) {
+    e.glow.setPosition(e.x + e.dir * 8, e.y).setScale(e.ai === 'run' ? 0.7 : 0.45);
+    e.thr.setPosition(e.x - e.dir * 2, e.y - 6).setAlpha(0.2 + Math.random() * 0.25);       // wing shimmer
+    if (e.ai === 'run' && e.bombs > 0) {                                // bomb sight: blinking line to the ground
+      let ey = e.body.bottom + 2; while (ey < e.y + 260 && !this.standAt(e.x, ey)) ey += 4;
+      const a = Math.floor(now / 60) % 2 ? 0.75 : 0.3;
+      this.laserG.lineStyle(1, 0xff3020, a).lineBetween(e.x, e.body.bottom + 2, e.x, ey);
+      this.laserG.fillStyle(0xff3020, a).fillRect(e.x - 3, ey - 1, 7, 2);
+    }
+  }
+  visRammer(e, g, now) {
+    const hot = e.ai === 'wind' || e.ai === 'charge';
+    e.glow.setPosition(e.x + e.dir * 8, e.y - 2).setScale(hot ? 0.8 + Math.sin(now / 30) * 0.15 : 0.4).setTint(e.ai === 'dizzy' ? 0xffe14a : 0xff3b1f);
+  }
+  visBoss(e, g, now) {
+    const hot = e.ai === 'mortarWind' || e.ai === 'breathWind' || e.ai === 'breath';
+    e.glow.setPosition(e.x + e.dir, e.y - 1).setScale(hot ? 2.3 + Math.sin(now / 30) * 0.25 : 1.6 + Math.sin(now / 200) * 0.12).setAlpha(e.phase >= 3 ? 0.7 : hot ? 0.6 : 0.42).setTint(e.phase === 4 ? (Math.floor(now / 90) % 2 ? 0xffffff : 0xff3010) : e.phase === 3 ? 0xff4a20 : 0xff8a20);
+  }
+  visStalker(e, g, now) { e.glow.setPosition(e.x + e.dir * 4, e.y - 6 + (e.fr === 'crouch' ? 3 : 0)).setScale(e.ai === 'windup' ? 0.75 : 0.3); }
+  visDrone(e, g, now) {
+    const charge = e.ai === 'charge';
+    e.glow.setPosition(e.x + e.dir * 3, e.y).setScale(charge ? 0.9 + Math.sin(now / 30) * 0.2 : 0.55).setTint(charge ? 0xffc040 : 0xff3020);
+    e.thr.setPosition(e.x, e.y + 8).setAlpha(0.4 + Math.random() * 0.3);
+  }
+  visHeavy(e, g, now) {
+    const wind = e.ai === 'windup' || e.ai === 'leap';
+    e.glow.setPosition(e.x + e.dir, e.y - 1).setScale(wind ? 1.4 + Math.sin(now / 40) * 0.2 : 0.8 + Math.sin(now / 300) * 0.08);
   }
 }
 
