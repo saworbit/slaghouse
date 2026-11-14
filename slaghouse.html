@@ -1203,7 +1203,7 @@ const saveMastery = () => {
   const all = Store.update('slaghouse.mastery', isObj, {}, o => addCounts(o, MASTERY, masteryBase));
   if (all) { Object.assign(MASTERY, all); masteryBase = { ...MASTERY }; }
 };
-let RUNMODE = 'campaign';                                // 'campaign' or 'endless' (OVERTIME), picked on the title screen
+let RUNMODE = 'campaign';                                // the title's pick: a key of RUN_MODES ('campaign', 'endless' for OVERTIME, 'daily', 'bossrush')
 const saveOpt = key => { try { localStorage.setItem('slaghouse.' + key, String(OPTS[key])); } catch (err) { /* private mode */ } };
 const WEAPONS = [
   Object.assign({ id: 'nail', name: 'NAILGUN', gun: 'nail' }, TUNE.NAIL),
@@ -5086,6 +5086,19 @@ function campaignCheckpoint(save = loadCampaign()) {
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
 // BOSS RUSH: five bosses back to back across the three arenas, a perk between each
+// Run modes (#128): one record per mode for the facts the scene used to work out from RUNMODE and the Lab flag at each
+// check. GameScene.create sets this.mode from RUNMODE (or the Lab), and still derives this.campaign / endless / daily /
+// bossrush from it while the remaining checks move onto the records a few at a time.
+//   waves     operations in a run; 0 for endless modes (and the Lab, which counts no waves)
+//   lifetime  the run counts toward lifetime runs, kills, deaths, time played, weapon mastery, medals and codex sightings
+//   record    the localStorage key its results screen writes; null for none
+const RUN_MODES = {
+  campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, lifetime: true, record: 'slaghouse.best' },
+  endless:  { id: 'endless', waves: 0, lifetime: true, record: 'slaghouse.bestEndless' },   // OVERTIME
+  daily:    { id: 'daily', waves: 0, lifetime: true, record: 'slaghouse.daily' },
+  bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, lifetime: true, record: 'slaghouse.bestRush' },
+  lab:      { id: 'lab', waves: 0, lifetime: false, record: null },
+};
 const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
 const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
 // what a copycat copies: lobs, spreads and beams; anything else is a rapid burst
@@ -6115,10 +6128,10 @@ class TitleScene extends Phaser.Scene {
     // text
     new PixelLabel(this, 480, 84, 'title_logo', { text: 'SLAGHOUSE', scale: 10, rows: LOGO_ROWS, shadow: '#000000', originY: 0.5 });
     new PixelLabel(this, 480, 150, 'title_sub',{ text: CAMPAIGN_ACTS.map(a => a.name).join(' > '), scale: 2, color: '#ff8a1f', shadow: '#000000', originY: 0.5 });   // every act, from the act table
-    let best = loadRec('slaghouse.best');
+    let best = loadRec(RUN_MODES.campaign.record);
     const medN = loadMedals().length;
     if (best || medN) new PixelLabel(this, 480, 172, 'title_best', { text: (best ? 'BEST RUN  ' + best.grade + '  ' + best.score + (best.diff ? '  ' + best.diff : '') + mutTag(best) + '    ' : '') + 'MEDALS ' + medN + '/' + MEDALS.length, scale: 2, color: '#ffe14a', shadow: '#000000', originY: 0.5 });
-    let otb = loadRec('slaghouse.bestEndless');
+    let otb = loadRec(RUN_MODES.endless.record);
     if (otb) new PixelLabel(this, 480, 190, 'title_otbest', { text: 'OVERTIME BEST  WAVE ' + otb.wave + '  ' + otb.score + mutTag(otb), scale: 2, color: '#c8a0ff', shadow: '#000000', originY: 0.5 });
     this.buildMenu();
     new PixelLabel(this, 480, 128, 'title_tag',{ text: 'NAILS. SHELLS. GRENADES. ROCKETS. MEAT.', scale: 2, color: '#c6ced8', shadow: '#000000', originY: 0.5 });
@@ -6170,8 +6183,8 @@ class TitleScene extends Phaser.Scene {
     this.menuItems = ['CAMPAIGN', 'OVERTIME', 'DAILY', 'BOSS RUSH', 'CODEX', 'ARMORY', 'MEDALS', 'OPTIONS', 'LAB'].map((t, i) =>
       new PixelLabel(this, i < 4 ? 300 : 660, 420 + (i < 4 ? i : i - 4) * 22, 'title_m' + i, { text: t, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6));
     const tag = (row, key, text, color) => new PixelLabel(this, row.x + row.displayWidth / 2 + 28, row.y, key, { text, align: 'left', scale: 1.5, color, shadow: sh, originY: 0.5 }).setDepth(6);
-    let dly = loadRec('slaghouse.daily');
-    let rsh = loadRec('slaghouse.bestRush');
+    let dly = loadRec(RUN_MODES.daily.record);
+    let rsh = loadRec(RUN_MODES.bossrush.record);
     if (rsh && rsh.won) tag(this.menuItems[3], 'title_rsh', 'CLEARED ' + rsh.grade + mutTag(rsh), '#ffb347');
     if (dly && dly.date === dayKey()) tag(this.menuItems[2], 'title_dly', 'TODAY W' + dly.wave, '#c8a0ff');
     this.menuHint = new PixelLabel(this, 480, 530, 'title_mhint', { maxChars: 72, text: this.menuHintText(), scale: 1.5, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(6);
@@ -6460,10 +6473,11 @@ class GameScene extends Phaser.Scene {
     this.labPending = 0;
     this.A = this.lab ? LAB_ROOMS[this.lab.room].arena : ARENAS[data?.arena ?? 0];
     this.carry = data?.carry ?? null; this.descending = false;
-    this.daily = !this.lab && RUNMODE === 'daily';
-    this.endless = this.daily || (!this.lab && RUNMODE === 'endless');
-    this.bossrush = !this.lab && RUNMODE === 'bossrush';
-    this.campaign = !this.lab && !this.endless && !this.bossrush;
+    this.mode = this.lab ? RUN_MODES.lab : (RUNMODE !== 'lab' && RUN_MODES[RUNMODE]) || RUN_MODES.campaign;   // any other RUNMODE plays the campaign, as before
+    this.daily = this.mode.id === 'daily';                              // the old flags, derived while checks move onto this.mode
+    this.endless = this.daily || this.mode.id === 'endless';
+    this.bossrush = this.mode.id === 'bossrush';
+    this.campaign = this.mode.id === 'campaign';
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
     this.day = this.daily ? data?.day ?? dayKey() : null;              // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
     this.runDiff = this.lab?.difficulty ?? (this.campaign && this.carry ? this.carry.diff : OPTS.diff);
@@ -6760,7 +6774,7 @@ class GameScene extends Phaser.Scene {
     this.applyGunTexture();
     this.visor = this.add.image(px, py, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.35).setAlpha(0.55).setDepth(18);
     this.enemies = this.physics.add.group();
-    if (!this.carry && !this.lab) LIFE.runs++;                            // a fresh scored run (not a trip down the lift)
+    if (!this.carry && this.mode.lifetime) LIFE.runs++;                  // a fresh scored run (not a trip down the lift)
     this.enemiesLeft = 0;
     this.spawnBarrels(false); this.spawnCanisters(false);
     this.pickups = this.A.spawns.health.map(([cx, cy]) => {
@@ -6774,7 +6788,7 @@ class GameScene extends Phaser.Scene {
   spawnEnemy(kind, cx, cy) {
     const D = ENEMY[kind], x = cx * TS + 8, flier = !!D.flier;
     const y = flier ? cy * TS + 8 : (cy + 1) * TS - D.fh / 2;
-    if (!this.lab) markSeen(kind);
+    if (this.mode.lifetime) markSeen(kind);
     const e = this.enemies.create(x, y, D.key, D.frame0);
     e.body.setSize(D.bw, D.bh).setOffset((D.fw - D.bw) / 2, flier ? (D.fh - D.bh) / 2 : D.fh - D.bh);
     e.setDepth(5).setCollideWorldBounds(true);
@@ -7253,7 +7267,7 @@ class GameScene extends Phaser.Scene {
         BUS.emit('enemies', this.enemiesLeft);
         for (const { kind, cell, flying, elite } of spawns) this.warpIn(kind, cell, flying, elite);
         Music.track(this.waveTrack(0), true);
-      } else BUS.emit('wave', (c ? c.wave : 0) + 1, this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN.length);
+      } else BUS.emit('wave', (c ? c.wave : 0) + 1, this.mode.waves);
       if (this.campaign) {
         this.stats.t0 = now;
         const act = CAMPAIGN_ACTS[this.A.id - 1];
@@ -8910,8 +8924,8 @@ class GameScene extends Phaser.Scene {
     const wid = WEAPONS[this.weapon].id;
     if (this.style.lastWeapon && this.style.lastWeapon !== wid) style += 30;      // reward mixing weapons
     this.style.lastWeapon = wid;
-    if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; if (!this.lab) LIFE.kills++; }
-    if (!this.lab && !e.summoned && wid) {                                // lifetime mastery for the gun in hand
+    if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; if (this.mode.lifetime) LIFE.kills++; }
+    if (this.mode.lifetime && !e.summoned && wid) {                                // lifetime mastery for the gun in hand
       const before = masteryStars(wid); MASTERY[wid] = (MASTERY[wid] || 0) + 1; const after = masteryStars(wid);
       if (after > before) { BUS.emit('callout', (WEAPONS.find(w => w.id === wid) || {}).name + ' ' + '*'.repeat(after)); Sfx.rankUp(); saveMastery(); if (after >= 3) { this.award('goldsmith'); this.time.delayedCall(900, () => BUS.emit('callout', 'GOLD-PLATED')); } }
     }
@@ -9084,7 +9098,7 @@ class GameScene extends Phaser.Scene {
     if (this.campaign && this.state === 'play') this.releaseCampaignSquad();
     BUS.emit('enemies', this.activeHostiles());
     if (this.enemiesLeft === 0) {
-      if (this.endless || this.wave < (this.bossrush ? RUSH.length : CAMPAIGN.length) - 1) this.waveCleared(e.body.center.x, e.body.center.y);
+      if (!this.mode.waves || this.wave < this.mode.waves - 1) this.waveCleared(e.body.center.x, e.body.center.y);
       else if (e.kind === 'boss') this.time.delayedCall(1900, () => this.win());
       else this.win();
     } else if (this.enemiesLeft === 1 && e.kind !== 'tick') BUS.emit('callout', 'ONE LEFT');
@@ -11557,7 +11571,7 @@ class GameScene extends Phaser.Scene {
     this.scene.stop('Hud'); this.scene.start('Title');
   }
   savePlayTime() {                                                      // the scene clock holds still in the pause menu, so this.time.now is right either way
-    if (this.lab || this.overShown || this.needReset) return;           // after the results screen the run's time is already in
+    if (!this.mode.lifetime || this.overShown || this.needReset) return;   // after the results screen the run's time is already in
     const ms = Math.max(0, this.time.now - this.stats.t0 - this.playSaved);
     LIFE.time += ms / 1000; this.playSaved += ms;
     saveLife(); saveMastery();
@@ -16199,7 +16213,7 @@ class GameScene extends Phaser.Scene {
   // ================================================================== ironclad round ====
   // ---------------------------------------------------------------- medals ----
   award(id) {
-    if (this.lab || this.medals.has(id)) return;
+    if (!this.mode.lifetime || this.medals.has(id)) return;
     this.medals.add(id);
     const m = MEDALS.find(q => q.id === id); if (!m) return;
     BUS.emit('medal', m);
@@ -17149,7 +17163,7 @@ class GameScene extends Phaser.Scene {
     this.enemiesLeft = entries.length;
     if (this.endless) this.totalEnemies += entries.length;
     if (op) this.totalEnemies += entries.length - authored.reduce((n, squad) => n + squad.foes.length, 0);
-    BUS.emit('wave', i + 1, this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN.length);
+    BUS.emit('wave', i + 1, this.mode.waves);
     if (this.endless) BUS.emit('wavecard', 'OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND');
     else if (this.bossrush) BUS.emit('wavecard', 'BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]);
     else {
@@ -17302,7 +17316,7 @@ class GameScene extends Phaser.Scene {
     return true;
   }
   killPlayer() {
-    this.state = 'dead'; if (!this.lab) LIFE.deaths++; this.wheelOn = false;
+    this.state = 'dead'; if (this.mode.lifetime) LIFE.deaths++; this.wheelOn = false;
     if (this.campaign) BUS.emit('perkdone');
     const p = this.player, b = p.body, cx = b.center.x, cy = b.center.y;
     for (const t of ['g_helm', 'g_armor', 'g_armor', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1', 'g_armor'])
@@ -17347,7 +17361,7 @@ class GameScene extends Phaser.Scene {
     const topGuns = Object.keys(s.wk).sort((a, b) => s.wk[b] - s.wk[a]).slice(0, 3).map(id => [WEAPONS.find(w => w.id === id).name, s.wk[id]]);
     saveMastery();
     if (this.endless) {                                                   // OVERTIME (and DAILY) keep their own records: the wave you reached
-      const key = this.daily ? 'slaghouse.daily' : 'slaghouse.bestEndless';
+      const key = this.mode.record;
       let ob = loadRec(key);
       const later = this.daily && ob && ob.date > this.day;                    // a newer day's record stays, even if this run's day ended mid-run
       if (this.daily && ob && ob.date !== this.day) ob = null;                 // another day's daily doesn't count
@@ -17358,7 +17372,7 @@ class GameScene extends Phaser.Scene {
                          best: ob ? ob.score : 0, newBest: nb, diff: DIFFS[this.runDiff].name, medals: [...this.medals].map(id => MEDALS.find(m => m.id === id).name) });
       return;
     }
-    const bkey = this.bossrush ? 'slaghouse.bestRush' : 'slaghouse.best';   // BOSS RUSH keeps its own record
+    const bkey = this.mode.record;                                      // BOSS RUSH keeps its own record
     let best = loadRec(bkey);
     const newBest = score > 0 && (!best || score > best.score);
     if (newBest) try { localStorage.setItem(bkey, JSON.stringify({ score, grade, time: Math.round(time), won, diff: DIFFS[this.runDiff].name, mut: this.mutator !== 'none' ? this.mutator : undefined })); } catch (err) { /* private mode: no record */ }   // a mutator run is marked, not kept apart

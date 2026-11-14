@@ -74,6 +74,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Run modes have one record each (`RUN_MODES`: campaign, OVERTIME, DAILY, BOSS RUSH and the Lab), and the scene
+  holds `this.mode`. The run's wave total, what counts toward lifetime stats (runs, kills, deaths, time, mastery,
+  medals, codex sightings) and which record the results screen writes now come from it instead of separate flag
+  checks. Nothing plays differently; `dev/playtest/modes.js` checks every mode. The remaining mode checks move over
+  in later steps. (#128)
 - `main` is protected: a pull request merges only after the Static checks, Headless play-test and Brutal campaign
   seeds jobs pass, and auto-merge is on, so `gh pr merge --auto` queues the merge until then. CONTRIBUTING.md
   says so. (#42)
