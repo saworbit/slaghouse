@@ -145,6 +145,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   shared status marks draw over it (`marks`). `syncVisuals` calls that method instead of testing each foe against
   about 80 kind branches every frame, and `kinds.js` fails a record that names a missing method or an unknown
   `marks`. Every kind draws exactly as before. (#52)
+- Each enemy record also names the method for its own death effects (`death`): a tick's blast, a tarspit's
+  puddle, a buzzsaw's loose blade, a boss's fall. `killEnemy` calls it once, right after an elite's burst, instead
+  of testing the kind 44 times, and `kinds.js` fails a record that names a missing method. A plain kill does
+  exactly what it did, and the seeded campaigns play out the same. A few rarer kills run the same effects in
+  another order: an elite of the kinds whose effects came before its burst (a tick, brood, chiller and the like), a
+  kick kill of the foreman, juggernaut, sapper, linker, burrower or Smelter, a ripper kill of the Smelter, and some
+  foes with limpets on them. Where those effects draw random numbers, which gibs fly or whether a sapper drops its charge can come out
+  differently on a given seed; the odds are the same. (#52)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.

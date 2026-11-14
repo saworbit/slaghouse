@@ -2,8 +2,8 @@
 // KC.check() goes through every kind in ENEMY. Each one is warped in on its own, in a fresh ARENA 01 stage, the way
 // a wave brings it in. It must:
 //   - have a CODEX row (body parts of another foe aside) and a texture holding its start frame and codex frame
-//   - name an update method the scene has (its per-frame brain), and if it names visuals, a method the scene has
-//     too, with marks left out, 'net' or 'none'
+//   - name an update method the scene has (its per-frame brain), and if it names visuals or death, a method the
+//     scene has too, with marks left out, 'net' or 'none'
 //   - spawn on its start frame
 //   - run for a while beside the player, take a hit, die and clear away without an error
 // KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
@@ -26,7 +26,8 @@ window.KC = (() => {
 
       const g = T.setup(1);
       if (typeof g[D.update] !== 'function') { say(`update '${D.update}' isn't a GameScene method`); continue; }
-      if (D.visuals !== undefined && typeof g[D.visuals] !== 'function') { say(`visuals '${D.visuals}' isn't a GameScene method`); continue; }
+      const missing = ['visuals', 'death'].filter(f => D[f] !== undefined && typeof g[D[f]] !== 'function');
+      if (missing.length) { for (const f of missing) say(`${f} '${D[f]}' isn't a GameScene method`); continue; }
       if (D.marks !== undefined && D.marks !== 'net' && D.marks !== 'none') say(`marks '${D.marks}' should be left out, 'net' or 'none'`);
       T.errs.length = 0;
       const air = FLIERS.has(kind), px = g.player.x, py = g.player.y;
