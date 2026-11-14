@@ -142,6 +142,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- The navigation graph models the player's longer drops (3-6 rows, up to three columns out) and climbs up an unbroken
+  wall. With them, every standing cell in every arena reaches the start and gets back; before, ARENA 02 had no way
+  from right of the Furnace pillar back to the left, and ARENA 04's OVERTIME layout had a deck the graph couldn't
+  reach. The new edges cost Infinity for enemies, so enemy pathing is unchanged, and the campaign bot doesn't plan
+  with them yet. `run.mjs` checks every arena, and Normal seed 5 joins the default campaign seeds. (#125)
 - Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
   longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
 - In the Lab setup, changing **Room** keeps the weapon, difficulty, modifier, checkboxes and roster you already set,
