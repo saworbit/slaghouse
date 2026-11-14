@@ -1525,7 +1525,7 @@ const numCss = n => cssCache[n] || (cssCache[n] = '#' + n.toString(16).padStart(
 //  procedural synth version as the fallback, and N flips between the two in game.
 // =============================================================================
 const Sfx = {
-  ctx: null, out: null, crunch: null, noiseBuf: null, muted: !!OPTS.muted, last: {}, hum: null,
+  ctx: null, out: null, crunch: null, noiseBuf: null, muted: false, last: {}, hum: null,
   bank: {}, bankGain: {}, bankJit: {}, bankLast: {}, bankLoading: false, bankDone: false, useBank: true,
   buildShared(c) {                                 // the noise buffer and soft-clip every booming sound uses; dev/sfxgen/calib.js builds its renders with this too
     const len = (c.sampleRate * 1.5) | 0;
@@ -2150,6 +2150,7 @@ const Sfx = {
   applyVolume() { if (this.out) this.out.gain.setTargetAtTime(OPTS.sfx, this.ctx.currentTime, 0.03); Music.applyVolume();
   },
 };
+Sfx.muted = !!OPTS.muted;                            // remembered mute (M), set out here: the block above reads no page globals at load (dev/sfxgen/calibcheck.mjs evaluates it alone)
 
 // Music. With music_bank.js loaded (synthwave soundtrack rendered by dev/synthwave) the game plays sampled
 // Tracks: title, stage1, stage2 and boss loops, plus win and lose jingles. GameScene.waveTrack picks by mode.

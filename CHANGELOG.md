@@ -149,6 +149,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   the scripts moved below it, and the audio banks are deferred so they don't hold up that paint (they still load
   before the title starts its audio). If Phaser can't load, the same screen says so in the game's colours with a
   RETRY button, and no longer calls the game a prototype. `run.mjs` checks both states. (#102)
+- `dev/sfxgen/calibcheck.mjs` works again, so `build.py` keeps its stale-calibration check. The `Sfx` block read
+  `OPTS` while loading (the remembered mute); the mute is now applied just after the block. `dev/check.mjs`, and
+  so CI, now fails if the block can't load on its own or a `calib.json` entry is stale, and `run.mjs` checks that
+  a saved mute is applied on load. (#124)
 - Ten weapons counted shots but never hits, so leaning on them dragged accuracy and the grade down: the Sonic
   Blaster, Pinball Cannon, Napalm Launcher, Storm Coil, Tractor, Flare Gun, Net Gun, Grav Bomb, Tripwire and
   Gas Launcher. Each now counts one hit per shot that connects: a blast, ball, can, coil, throw, flare, net, pulse,

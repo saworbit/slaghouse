@@ -41,7 +41,7 @@ Each entry is `[loudness, peak, fingerprint]`. The fingerprint hashes the source
 measurement played and the `Sfx` methods it calls. `build.py` first runs `calibcheck.mjs` (needs node), which
 recomputes the fingerprints from the current `slaghouse.html` and lists every entry whose procedural sound has
 changed since it was measured, so you know what to re-measure. `node calibcheck.mjs --strict` exits 1 when
-anything is stale. `slagCalib` renders through `Sfx.buildShared`, the same noise buffer and crunch curve the game
+anything is stale, and `node dev/check.mjs` (run by CI) fails on the same stale entries. `slagCalib` renders through `Sfx.buildShared`, the same noise buffer and crunch curve the game
 builds in `init`, and every sound that uses `this.crunch` or `this.noiseBuf` has `buildShared` in its fingerprint,
 so a change there marks those entries stale. When that code moved out of `init` (#48), the fingerprints were
 recomputed without re-measuring, since the curve and noise themselves didn't change.
