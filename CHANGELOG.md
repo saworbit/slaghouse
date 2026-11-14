@@ -74,6 +74,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- CONTRIBUTING.md explains how to add an enemy kind or a run mode, now that each is one record checked by
+  `kinds.js` or `modes.js`. The play-test README lists the gas canister and the fixed seed in `PR.accuracy()`.
 - The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
   day, the campaign also marking itself cleared), its mode medals on a win, its win callout, OVERTIME's score per
   wave, whether the Smelter's fall puts up VICTORY, and the Lab's TEST ENDED card. The scene no longer keeps

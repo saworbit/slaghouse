@@ -103,6 +103,20 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    the **Static checks**, **Headless play-test** and **Brutal campaign seeds** jobs, so `gh pr merge --auto --squash`
    waits for all three before it merges.
 
+## Adding an enemy kind or a run mode
+
+An enemy kind is one record in `ENEMY` in `slaghouse.html` plus its own `GameScene` methods. The comment above
+`ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names for its
+`setup` when it spawns, its `update` each frame, its `visuals` and its `death`. Give it a `CODEX` row too.
+`dev/playtest/kinds.js` warps in every kind and fails one with a missing codex row, start frame or method, so run
+`node dev/playtest/run.mjs --quick` after adding one. Special armour (a plate, a weak spot, a hit counter) still goes
+in `damageEnemy`, where its place in the damage order matters.
+
+A run mode is one record in `RUN_MODES`. The comment above it lists every rule a record carries: its waves and
+music, its start and restart, its difficulty and mutator, and its results screen. `dev/playtest/modes.js` plays every
+record and fails one that's missing a rule or writes another mode's record key. Add the new mode to the `SPEC` pinned
+in that file as well.
+
 ## Releasing
 
 Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip.
