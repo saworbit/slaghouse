@@ -107,7 +107,8 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 
 An enemy kind is one record in `ENEMY` in `slaghouse.html` plus its own `GameScene` methods. The comment above
 `ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names for its
-`setup` when it spawns, its `update` each frame, its `visuals` and its `death`. Give it a `CODEX` row too.
+`setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death reads (a
+ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.
 `dev/playtest/kinds.js` warps in every kind and fails one with a missing codex row, start frame or method, so run
 `node dev/playtest/run.mjs --quick` after adding one. Special armour (a plate, a weak spot, a hit counter) still goes
 in `damageEnemy`, where its place in the damage order matters.

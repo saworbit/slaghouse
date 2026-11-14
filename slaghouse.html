@@ -1322,49 +1322,56 @@ const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship
 // the ones that just burst). setup names the method that gives it its own fields, images and start position when it
 // spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). FLIERS
 // and isHumanoid below are built from these, and dev/playtest/kinds.js checks every kind (#52).
+// The rest are values killEnemy reads, all left out on most kinds: ragdoll drops it as a ragdoll you can keep shooting
+// on a light kill (it needs RAG art), haywire sends its jetpack off on one, noAirStyle skips the airborne kill bonus,
+// deathFlash is the colours of a flash as it dies, killZoom a camera punch, gibPower the least force its gibs fly
+// with and gibSpread how far apart they start (5 px otherwise), noGibs none at all, burstSparks and burstFire add
+// sparks or fire to its blood burst, killShake is [ms, intensity] and killStop the hit stop in ms (120 / 45
+// otherwise), dropGun the icon its gun drops as (icon_rifle otherwise), winDelay holds the win that long when it's
+// the last foe, and skipOneLeft skips the ONE LEFT callout it would set off (#145).
 const ENEMY = {
   grunt: { key: 'grunt', frame0: 'w0', update: 'updateWalker', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
-           gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15] },
+           gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15], ragdoll: true },
   heavy: { key: 'heavy', frame0: 'w0', setup: 'setupHeavy', update: 'updateWalker', visuals: 'visHeavy', fw: 28, fh: 28, bw: 18, bh: 24, hp: 120, patrol: 30, chase: 92, jumpV: 330, leapV: 330, sight: 220, range: 60, touch: 20, kb: 0.35,
-           gibs: ['g_core', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
+           gibs: ['g_core', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [18, 24], killZoom: 0.08, burstFire: true, killShake: [220, 0.01], killStop: 90 },
   drone: { key: 'drone', frame0: 'd0', flier: true, setup: 'setupDrone', update: 'updateDrone', visuals: 'visDrone', fw: 18, fh: 16, bw: 12, bh: 12, hp: 30, sight: 240, touch: 8, kb: 1.3,
-           gibs: ['g_eye', 'g_plateL', 'g_plate', 'g_wire', 'g_wire', 'g_plate', 'g_chunk', 'g_flesh1'], gibN: [9, 12] },
+           gibs: ['g_eye', 'g_plateL', 'g_plate', 'g_wire', 'g_wire', 'g_plate', 'g_chunk', 'g_flesh1'], gibN: [9, 12], noAirStyle: true, burstSparks: true },
   enforcer: { key: 'enforcer', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 60, speed: 120, sight: 300, touch: 8, kb: 0.8, dodge: 0.5, dodgeCd: 1.6, head: 'g_ehelm',
-              gibs: ['g_earmor', 'g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
+              gibs: ['g_earmor', 'g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16], ragdoll: true },
   stalker: { key: 'stalker', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visStalker', fw: 20, fh: 24, bw: 10, bh: 20, hp: 40, speed: 175, sight: 260, touch: 10, lungeDmg: 16, kb: 1, dodge: 0.55, dodgeCd: 1.2, head: 'g_hood',
-             gibs: ['g_blade', 'g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 15] },
+             gibs: ['g_blade', 'g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 15], ragdoll: true },
   bulwark: { key: 'bulwark', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 100, speed: 80, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_bhelm',
-             gibs: ['g_shield', 'g_plateL', 'g_shard', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [14, 18] },
+             gibs: ['g_shield', 'g_plateL', 'g_shard', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [14, 18], ragdoll: true, killZoom: 0.08 },
   mender: { key: 'mender', frame0: 'm0', flier: true, setup: 'setupMender', update: 'updateMender', visuals: 'visMender', marks: 'none', fw: 18, fh: 16, bw: 12, bh: 12, hp: 40, sight: 260, touch: 6, kb: 1.2,
-            gibs: ['g_mcore', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2', 'g_wire'], gibN: [9, 12] },
-  tick: { key: 'tick', frame0: 'k0', setup: 'setupTick', update: 'updateTick', death: 'deathTick', fw: 14, fh: 10, bw: 10, bh: 8, hp: 12, speed: 150, sight: 260, touch: 0, kb: 1.4, gibs: ['g_chunk', 'g_chunk', 'g_flesh1'], gibN: [4, 6] },
+            gibs: ['g_mcore', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2', 'g_wire'], gibN: [9, 12], noAirStyle: true, deathFlash: [0xffffff, 0xa0ffc8, 0x40ff90] },
+  tick: { key: 'tick', frame0: 'k0', setup: 'setupTick', update: 'updateTick', death: 'deathTick', fw: 14, fh: 10, bw: 10, bh: 8, hp: 12, speed: 150, sight: 260, touch: 0, kb: 1.4, gibs: ['g_chunk', 'g_chunk', 'g_flesh1'], gibN: [4, 6], skipOneLeft: true },
   sniper: { key: 'sniper', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 110, sight: 520, touch: 6, kb: 0.9, dodge: 0.4, dodgeCd: 2, head: 'g_shood',
-            gibs: ['g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
+            gibs: ['g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14], ragdoll: true, dropGun: 'icon_sniper' },
   rocketeer: { key: 'rocketeer', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 95, sight: 340, touch: 8, kb: 0.6, dodge: 0.3, dodgeCd: 2, head: 'g_rhelm',
-               gibs: ['g_rarmor', 'g_rarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
+               gibs: ['g_rarmor', 'g_rarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16], ragdoll: true, dropGun: 'icon_rlaunch' },
   wasp: { key: 'wasp', frame0: 'p0', flier: true, setup: 'setupWasp', update: 'updateWasp', visuals: 'visWasp', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, sight: 320, touch: 8, kb: 1,
           gibs: ['g_wing', 'g_wing', 'g_plate', 'g_wire', 'g_eye', 'g_plateL', 'g_chunk'], gibN: [9, 12] },
   rammer: { key: 'rammer', frame0: 'w0', setup: 'setupRammer', update: 'updateRammer', visuals: 'visRammer', fw: 30, fh: 22, bw: 22, bh: 18, hp: 170, patrol: 28, chase: 70, sight: 260, touch: 18, kb: 0.15,
             gibs: ['g_horn', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
   jet: { key: 'jet', frame0: 'j0', flier: true, setup: 'setupJet', update: 'updateJet', visuals: 'visJet', fw: 20, fh: 24, bw: 10, bh: 18, hp: 55, sight: 320, touch: 6, kb: 0.9, head: 'g_jhelm',
-         gibs: ['g_jarmor', 'g_jarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_wire', 'g_plate'], gibN: [12, 15] },
+         gibs: ['g_jarmor', 'g_jarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_wire', 'g_plate'], gibN: [12, 15], haywire: true, dropGun: 'icon_smg' },
   sapper: { key: 'sapper', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visSapper', death: 'deathSapper', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, speed: 150, sight: 280, touch: 6, kb: 1, dodge: 0.45, dodgeCd: 1.5, head: 'g_smask',
-            gibs: ['g_satchel', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
+            gibs: ['g_satchel', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14], ragdoll: true },
   brood: { key: 'brood', frame0: 'w0', setup: 'setupBrood', update: 'updateBrood', visuals: 'visBrood', death: 'deathBrood', fw: 34, fh: 26, bw: 26, bh: 20, hp: 170, sight: 260, touch: 14, kb: 0.2,
            gibs: ['g_egg', 'g_egg', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_rib', 'g_bone'], gibN: [22, 28] },
   cloaker: { key: 'cloaker', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visCloaker', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 190, sight: 300, touch: 0, kb: 1, dodge: 0.5, dodgeCd: 1.4, head: 'g_chood',
-             gibs: ['g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
+             gibs: ['g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14], ragdoll: true },
   pyro: { key: 'pyro', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visPyro', death: 'deathPyro', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
-          gibs: ['g_tank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
+          gibs: ['g_tank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15], ragdoll: true },
   gunship: { key: 'gunship', frame0: 'g0', flier: true, setup: 'setupGunship', update: 'updateGunship', visuals: 'visGunship', death: 'deathGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
-             gibs: ['g_plateL', 'g_plateL', 'g_plateL', 'g_jplate', 'g_jplate', 'g_wire', 'g_wire', 'g_shard', 'g_shard2', 'g_plate', 'g_core'], gibN: [20, 26] },
+             gibs: ['g_plateL', 'g_plateL', 'g_plateL', 'g_jplate', 'g_jplate', 'g_wire', 'g_wire', 'g_shard', 'g_shard2', 'g_plate', 'g_core'], gibN: [20, 26], noGibs: true },
   screamer: { key: 'screamer', frame0: 's0', flier: true, setup: 'setupScreamer', update: 'updateScreamer', visuals: 'visScreamer', death: 'deathScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
   warden: { key: 'warden', frame0: 'v0', flier: true, setup: 'setupWarden', update: 'updateWarden', visuals: 'visWarden', death: 'deathWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
   jugg: { key: 'jugg', frame0: 's0w0', setup: 'setupJugg', update: 'updateJugg', visuals: 'visJugg', death: 'deathJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
           gibs: ['g_jplate', 'g_jplate', 'g_jplate', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk', 'g_core'], gibN: [24, 30] },
   boss: { key: 'boss', frame0: 'w0', setup: 'setupBoss', update: 'updateBoss', visuals: 'visBoss', death: 'deathBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
           gibs: ['g_core', 'g_core', 'g_core', 'g_plateL', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2',
-                 'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40] },
+                 'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40], gibPower: 1.7, gibSpread: 18, winDelay: 1900 },
   // ---- overdrive round ----
   slagling: { key: 'slagling', frame0: 'a', setup: 'setupMolten', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_crust', 'g_slag', 'g_slag', 'g_crust'], gibN: [10, 13] },
@@ -1372,7 +1379,7 @@ const ENEMY = {
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_slag'], gibN: [6, 8] },
   slagbit:  { key: 'slagbit', frame0: 'a', setup: 'setupMolten', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
   burrower: { key: 'burrower', frame0: 'sw0', setup: 'setupBurrower', update: 'updateBurrower', visuals: 'visBurrower', marks: 'none', death: 'deathBurrower', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
-              gibs: ['g_wormseg', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_core', 'g_wormseg'], gibN: [16, 20] },
+              gibs: ['g_wormseg', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_core', 'g_wormseg'], gibN: [16, 20], burstFire: true },
   harpooner: { key: 'harpooner', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visHarpooner', marks: 'none', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
                gibs: ['g_chain', 'g_chain', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
   linker: { key: 'linker', frame0: 'l0', flier: true, setup: 'setupLinker', update: 'updateLinker', visuals: 'visLinker', marks: 'none', death: 'deathLinker', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
@@ -9130,7 +9137,7 @@ class GameScene extends Phaser.Scene {
     this.flushDmg(e, e.lastHs ? 'Y' : 'R');
     if (!e.summoned && e.kind !== 'wyrmseg') this.multiKill(now0);
     const grounded = b.blocked.down || b.touching.down, playerAir = !(this.player.body.blocked.down || this.player.body.touching.down);
-    let style = 60 + (e.lastHs ? 50 : 0) + (!grounded && e.kind !== 'drone' && e.kind !== 'mender' ? 40 : 0) + (playerAir ? 25 : 0);
+    let style = 60 + (e.lastHs ? 50 : 0) + (!grounded && !D.noAirStyle ? 40 : 0) + (playerAir ? 25 : 0);
     const wid = WEAPONS[this.weapon].id;
     if (this.style.lastWeapon && this.style.lastWeapon !== wid) style += 30;      // reward mixing weapons
     this.style.lastWeapon = wid;
@@ -9140,9 +9147,9 @@ class GameScene extends Phaser.Scene {
       if (after > before) { BUS.emit('callout', (WEAPONS.find(w => w.id === wid) || {}).name + ' ' + '*'.repeat(after)); Sfx.rankUp(); saveMastery(); if (after >= 3) { this.award('goldsmith'); this.time.delayedCall(900, () => BUS.emit('callout', 'GOLD-PLATED')); } }
     }
     // little overkill and no blast: it drops as a ragdoll you can keep shooting; otherwise it bursts now
-    const rag = !!RAG[e.kind] && src !== 'rocket' && src !== 'tickboom' && src !== 'crush' && src !== 'shatter' && src !== 'execute' && -e.hp <= 26;   // (the heavy always bursts)
+    const rag = !!D.ragdoll && src !== 'rocket' && src !== 'tickboom' && src !== 'crush' && src !== 'shatter' && src !== 'execute' && -e.hp <= 26;   // (the heavy always bursts)
     const rd = rag ? this.spawnRagdoll(e, dx, dy, src, !!(D.head && e.lastHs)) : null;
-    const hay = e.kind === 'jet' && src !== 'rocket' && src !== 'crush' && src !== 'shatter' && -e.hp <= 40 && this.spawnHaywire(e, dx);   // clean kill: the jetpack goes haywire
+    const hay = !!D.haywire && src !== 'rocket' && src !== 'crush' && src !== 'shatter' && -e.hp <= 40 && this.spawnHaywire(e, dx);   // clean kill: the jetpack goes haywire
     if (D.head) {                                                     // heads: popped clean off on a headshot kill
       if (e.lastHs) {
         this.spawnGib(D.head, cx, b.top, dx * 80 + rand(-40, 40), -rand(380, 470));
@@ -9151,15 +9158,15 @@ class GameScene extends Phaser.Scene {
         BUS.emit('callout', 'HEADSHOT!');
       } else if (!rag && !hay) this.spawnGib(D.head, cx, cy - 4, dx * 120 + rand(-80, 80), -rand(160, 300));
     }
-    if (e.kind === 'mender') { this.fx.emit(cx, cy, { n: 22, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xa0ffc8, 0x40ff90], add: true, drag: 2 }); this.spawnLight(cx, cy, 'glow', 0x40ff90, 2, 3.5, 0.9, 0.3); }
-    if (e.kind === 'heavy' || e.kind === 'bulwark') this.zoomPunch = Math.max(this.zoomPunch, 0.08);
+    if (D.deathFlash) { this.fx.emit(cx, cy, { n: 22, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: D.deathFlash, add: true, drag: 2 }); this.spawnLight(cx, cy, 'glow', D.deathFlash.at(-1), 2, 3.5, 0.9, 0.3); }
+    if (D.killZoom) this.zoomPunch = Math.max(this.zoomPunch, D.killZoom);
     if (!rag && !D.molten && !D.mech && Math.hypot(this.player.x - cx, this.player.y - cy) < 70) BUS.emit('splat', src === 'rocket' || src === 'ripper' ? 6 : 3);   // too close: it gets on the lens
-    const power = src === 'rocket' || src === 'execute' || e.kind === 'boss' ? 1.7 : src === 'pellet' ? 1.25 : 1, charred = e.burnT > 0, shat = src === 'shatter';
+    const power = Math.max(D.gibPower || 1, src === 'rocket' || src === 'execute' ? 1.7 : src === 'pellet' ? 1.25 : 1), charred = e.burnT > 0, shat = src === 'shatter';
     if (shat) {                                                       // frozen solid: it goes like glass
       this.fx.emit(cx, cy, { n: 30, speed: [60, 260], life: [0.4, 0.9], size: [2, 1], cols: [0xffffff, 0xe0f8ff, 0x9adcff, 0x5aa8e0], g: 500, mode: 1, drag: 0.6 });
       this.spawnLight(cx, cy, 'glow', 0xa0e0ff, 1.5, 3, 0.9, 0.25); Sfx.shatter(); BUS.emit('callout', 'SHATTERED!'); this.addStyle(60);
     }
-    const n = rag || hay || e.kind === 'gunship' ? 0 : randi(D.gibN[0], D.gibN[1]) + (src === 'rocket' ? 4 : 0), spread = e.kind === 'boss' ? 18 : 5;
+    const n = rag || hay || D.noGibs ? 0 : randi(D.gibN[0], D.gibN[1]) + (src === 'rocket' ? 4 : 0), spread = D.gibSpread || 5;
     for (let i = 0; i < n; i++) {
       const tex = shat && i % 2 === 0 ? pick(['g_ice1', 'g_ice2', 'g_ice3']) : i < D.gibs.length ? D.gibs[i] : pick(D.gibs);
       const g = this.spawnGib(tex, cx + rand(-spread, spread), cy + rand(-spread, spread), dx * rand(60, 220) * power + rand(-130, 130) * power, (dy * 120 - rand(140, 330)) * power, shat ? 'metal' : D.molten ? 'slag' : D.mech ? 'metal' : undefined);
@@ -9197,16 +9204,16 @@ class GameScene extends Phaser.Scene {
       this.fxBlood(cx, cy, Math.round((rag ? 10 : 38) * power), -Math.PI / 2, Math.PI * 2, [60, 300]);
       this.fxBlood(cx, cy, 14, Math.atan2(dy, dx), 0.8, [150, 380]);
       this.fxMist(cx, cy, 10);
-      if (e.kind === 'drone') { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.fxSmoke(cx, cy, 6); }
-      if (e.kind === 'heavy' || e.kind === 'burrower') { this.fxFire(cx, cy, 16); this.spawnLight(cx, cy, 'glow', 0xff7a1a, 2, 4, 0.9, 0.4); }
+      if (D.burstSparks) { this.fxSparks(cx, cy, 16, 0, Math.PI * 2, [80, 260]); this.fxSmoke(cx, cy, 6); }
+      if (D.burstFire) { this.fxFire(cx, cy, 16); this.spawnLight(cx, cy, 'glow', 0xff7a1a, 2, 4, 0.9, 0.4); }
       this.paintSplatAround(cx, b.bottom - 2, rag ? 4 : 10 + 6 * power);
       if (rag) { Sfx.squish(); Sfx.land(0.5); } else Sfx.gib(power);
     }
-    this.shake(e.kind === 'heavy' ? 220 : 120, e.kind === 'heavy' ? 0.01 : 0.005 * power);
-    this.hitStop(e.kind === 'heavy' ? 90 : 45);
+    this.shake(...(D.killShake || [120, 0.005 * power]));
+    this.hitStop(D.killStop || 45);
     if (e.glow) e.glow.setVisible(false);
     if (e.thr) e.thr.setVisible(false);
-    if (e.gun) { e.gun.setVisible(false); this.spawnGib(e.kind === 'sniper' ? 'icon_sniper' : e.kind === 'rocketeer' ? 'icon_rlaunch' : e.kind === 'jet' ? 'icon_smg' : 'icon_rifle', cx, cy, dx * 150 + rand(-60, 60), -rand(200, 300), 'metal'); }
+    if (e.gun) { e.gun.setVisible(false); this.spawnGib(D.dropGun || 'icon_rifle', cx, cy, dx * 150 + rand(-60, 60), -rand(200, 300), 'metal'); }
     e.setScale(1);
     if (!rag && !hay) this.spawnLight(e.x, e.y, e.def.key + '_w', 0xffffff, 1, 1.8, 0.9, 0.14, e.fr, e.flipX);   // white silhouette "pop"
     e.disableBody(true, true);
@@ -9237,9 +9244,9 @@ class GameScene extends Phaser.Scene {
     BUS.emit('enemies', this.activeHostiles());
     if (this.enemiesLeft === 0) {
       if (!this.mode.waves || this.wave < this.mode.waves - 1) this.waveCleared(e.body.center.x, e.body.center.y);
-      else if (e.kind === 'boss') this.time.delayedCall(1900, () => this.win());
+      else if (D.winDelay) this.time.delayedCall(D.winDelay, () => this.win());
       else this.win();
-    } else if (this.enemiesLeft === 1 && e.kind !== 'tick') BUS.emit('callout', 'ONE LEFT');
+    } else if (this.enemiesLeft === 1 && !D.skipOneLeft) BUS.emit('callout', 'ONE LEFT');
   }
 
   // Each foe kind's own death: its blasts, spills, loose parts and a boss's fall. Its ENEMY record names the

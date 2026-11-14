@@ -4,6 +4,8 @@
 //   - have a CODEX row (body parts of another foe aside) and a texture holding its start frame and codex frame
 //   - name an update method the scene has (its per-frame brain), and if it names setup, visuals or death, a method
 //     the scene has too, with marks left out, 'net' or 'none'
+//   - carry the right type for each value killEnemy reads off the record, and ragdoll: true exactly when RAG has
+//     ragdoll art for it
 //   - spawn on its start frame
 //   - run for a while beside the player, take a hit, die and clear away without an error
 // KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
@@ -29,6 +31,14 @@ window.KC = (() => {
       const missing = ['setup', 'visuals', 'death'].filter(f => D[f] !== undefined && typeof g[D[f]] !== 'function');
       if (missing.length) { for (const f of missing) say(`${f} '${D[f]}' isn't a GameScene method`); continue; }
       if (D.marks !== undefined && D.marks !== 'net' && D.marks !== 'none') say(`marks '${D.marks}' should be left out, 'net' or 'none'`);
+      // the values killEnemy reads off the record (#145)
+      const show = v => JSON.stringify(v);
+      for (const f of ['ragdoll', 'haywire', 'noAirStyle', 'noGibs', 'burstSparks', 'burstFire', 'skipOneLeft']) if (D[f] !== undefined && D[f] !== true) say(`${f} should be true or left out, got ${show(D[f])}`);
+      for (const f of ['killZoom', 'killStop', 'gibPower', 'gibSpread', 'winDelay']) if (D[f] !== undefined && !(typeof D[f] === 'number' && D[f] > 0)) say(`${f} should be a number above 0, got ${show(D[f])}`);
+      if (D.killShake !== undefined && !(Array.isArray(D.killShake) && D.killShake.length === 2 && D.killShake.every(v => typeof v === 'number' && v > 0))) say(`killShake should be [ms, intensity], got ${show(D.killShake)}`);
+      if (D.deathFlash !== undefined && !(Array.isArray(D.deathFlash) && D.deathFlash.length && D.deathFlash.every(c => Number.isInteger(c) && c >= 0 && c <= 0xffffff))) say(`deathFlash should be a list of colours, got ${show(D.deathFlash)}`);
+      if (D.dropGun !== undefined && !(typeof D.dropGun === 'string' && game.textures.exists(D.dropGun))) say(`dropGun ${show(D.dropGun)} isn't a texture`);
+      if (!!D.ragdoll !== !!RAG[kind]) say(D.ragdoll ? 'ragdoll is set but RAG has no ragdoll art for it' : 'RAG has ragdoll art for it but its record has no ragdoll: true');
       T.errs.length = 0;
       const air = FLIERS.has(kind), px = g.player.x, py = g.player.y;
       // the nearest spawn point of its type that isn't on top of the player, so it meets the player straight away
