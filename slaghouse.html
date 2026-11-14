@@ -5103,14 +5103,41 @@ function campaignCheckpoint(save = loadCampaign()) {
 // check. GameScene.create sets this.mode from RUNMODE (or the Lab), and still derives this.campaign / endless / daily /
 // bossrush from it while the remaining checks move onto the records a few at a time.
 //   waves     operations in a run; 0 for endless modes (and the Lab, which counts no waves)
+//   total     foes the run starts out counting (endless modes add each wave's as it comes)
 //   lifetime  the run counts toward lifetime runs, kills, deaths, time played, weapon mastery, medals and codex sightings
+//   mutators  the run takes the mutator picked under OPTIONS
 //   record    the localStorage key its results screen writes; null for none
+// and, for the modes that run waves (g is the scene, i the wave from 0):
+//   squads(g, i)        the wave's authored squads, each { foes: [[kind, point], ...] } plus any campaign squad fields
+//   rng(g, i)           the random source for its modifier and elites (DAILY: seeded by the day, the same for everyone)
+//   modifier(g, i, rng) the wave's modifier: 'dark', 'slag', 'lowg', 'melt' or null
+//   card(g, i, mod)     the wave card's [title, subtitle]
+//   elites(g, i)        how many of its foes become elites
+//   music(g, i)         the soundtrack track for the wave
+const MOD_ROLL = ['dark', 'slag', 'lowg', 'melt'];
+const overtimeMode = (id, record, rng) => ({                         // OVERTIME and DAILY: endless waves, the same rules
+  id, waves: 0, total: 0, lifetime: true, mutators: id !== 'daily', record, rng,
+  squads: (g, i) => [{ foes: g.endlessWave(i) }],
+  modifier: (g, i, rng) => {                                          // a boss every sixth wave, otherwise 45% a modifier, never twice running
+    let mod = i % 6 === 5 ? null : rng() < 0.45 ? MOD_ROLL[Math.floor(rng() * 4)] : null;
+    if (mod && mod === g.lastMod) mod = MOD_ROLL.filter(m => m !== mod)[Math.floor(rng() * 3)];
+    return mod;
+  },
+  card: (g, i, mod) => ['OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND'],
+  elites: (g, i) => Math.min(6, Math.floor(i / 2)),
+  music: (g, i) => WAVE_MUSIC[i % WAVE_MUSIC.length],                // round the six-wave cycle
+});
+const campaignMusic = (g, i) => { const op = CAMPAIGN[Math.min(i, CAMPAIGN.length - 1)]; return op.music || (i < CAMPAIGN_ACTS[1].first ? 'stage1' : 'stage2'); };
 const RUN_MODES = {
-  campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, lifetime: true, record: 'slaghouse.best' },
-  endless:  { id: 'endless', waves: 0, lifetime: true, record: 'slaghouse.bestEndless' },   // OVERTIME
-  daily:    { id: 'daily', waves: 0, lifetime: true, record: 'slaghouse.daily' },
-  bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, lifetime: true, record: 'slaghouse.bestRush' },
-  lab:      { id: 'lab', waves: 0, lifetime: false, record: null },
+  campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, get total() { return CAMPAIGN_TOTAL; }, lifetime: true, mutators: true, record: 'slaghouse.best',
+    squads: (g, i) => CAMPAIGN[i].squads, rng: () => Math.random, modifier: (g, i) => CAMPAIGN[i].mod ?? null,
+    card: (g, i) => [CAMPAIGN[i].name, CAMPAIGN[i].brief], elites: (g, i) => CAMPAIGN[i].elites ?? 0, music: campaignMusic },
+  endless: overtimeMode('endless', 'slaghouse.bestEndless', () => Math.random),                       // OVERTIME
+  daily: overtimeMode('daily', 'slaghouse.daily', (g, i) => seeded(g.day * 31 + i)),
+  bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, get total() { return RUSH.length; }, lifetime: true, mutators: true, record: 'slaghouse.bestRush',
+    squads: (g, i) => [{ foes: RUSH[i] }], rng: () => Math.random, modifier: () => null,
+    card: (g, i) => ['BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]], elites: () => 0, music: () => WAVE_MUSIC[WAVE_MUSIC.length - 1] },
+  lab: { id: 'lab', waves: 0, total: 0, lifetime: false, mutators: false, record: null, music: campaignMusic },   // runs no waves: its roster warps in at once
 };
 const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
 const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
@@ -6495,7 +6522,7 @@ class GameScene extends Phaser.Scene {
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
     this.day = this.daily ? data?.day ?? dayKey() : null;              // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
     this.runDiff = this.lab?.difficulty ?? (this.campaign && this.carry ? this.carry.diff : OPTS.diff);
-    this.runMut = this.daily || this.lab ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
+    this.runMut = !this.mode.mutators ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
     this.mutator = MUTATORS[this.runMut].id;
     this.chapterStart = this.campaign ? this.carry : null;
     this.campaignElapsed = this.chapterStart?.elapsed ?? 0;
@@ -6521,7 +6548,7 @@ class GameScene extends Phaser.Scene {
     this.kick = { x: 0, y: 0 }; this.combo = 0; this.bestCombo = 0; this.lastKillT = -1e9; this.swapT = 0; this.heartT = 0; this.lastShotT = -1e9;
     this.zoomPunch = 0; this.arcActiveUntil = 0; this.arcUntil = 0; this.arcSegs = []; this.beams = []; this.fountains = []; this.dmgNums = [];
     this.style = { pts: 0, rank: 0, best: 0, lastWeapon: null }; this.headshots = 0; this.wave = 0; this.noiseT = 0;
-    this.totalEnemies = this.lab || this.endless ? 0 : this.bossrush ? RUSH.length : CAMPAIGN_TOTAL;
+    this.totalEnemies = this.mode.total;
     this.kickReady = 0; this.kickUntil = 0; this.kickQueued = false; this.flameActiveUntil = 0; this.scorchT = 0;
     this.hazardContactUntil = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
@@ -17152,39 +17179,27 @@ class GameScene extends Phaser.Scene {
     BUS.emit('callout', station.done);
   }
   activeHostiles() { return this.enemiesLeft - this.campaignReserve; }
-  waveTrack(i) {                                                        // campaign: one track per wave; OVERTIME and DAILY go round the six-wave cycle
-    if (this.bossrush) return WAVE_MUSIC[WAVE_MUSIC.length - 1];
-    if (this.endless) return WAVE_MUSIC[i % WAVE_MUSIC.length];
-    const op = CAMPAIGN[Math.min(i, CAMPAIGN.length - 1)];
-    return op.music || (i < CAMPAIGN_ACTS[1].first ? 'stage1' : 'stage2');
-  }
+  waveTrack(i) { return this.mode.music(this, i); }                    // campaign: one track per wave; OVERTIME and DAILY go round the six-wave cycle
   restartTrack() { return this.waveTrack(this.chapterStart ? CAMPAIGN_ACTS[this.chapterStart.arena].first : 0); }   // the first track R or RESTART plays
   musicAhead(i) { Music.keep([this.waveTrack(i), this.waveTrack(i + 1), 'win', 'lose']); }   // decode this wave's track, the next one and the jingles; drop the rest
   startWave(i) {
     this.wave = i;
-    const op = this.campaign ? CAMPAIGN[i] : null;
-    const authored = op ? op.squads : [{ foes: this.endless ? this.endlessWave(i) : RUSH[i] }];
+    const M = this.mode, op = this.campaign ? CAMPAIGN[i] : null;     // op: the campaign operation, for its machinery, weapons and squad timing
+    const authored = M.squads(this, i);
     const squads = authored.map(squad => {
       const foes = squad.foes;
       const extras = this.mutator === 'swarm' ? foes.filter(([k]) => !SWARM_SKIP.has(k) && Math.random() < 0.5) : [];
       return { ...squad, spawns: foes.concat(extras).map(foe => ({ foe })) };
     });
     const entries = squads.flatMap(squad => squad.spawns);
-    const mr = this.daily ? seeded(this.day * 31 + i) : Math.random;
-    let mod = this.endless ? (i % 6 === 5 ? null : mr() < 0.45 ? ['dark', 'slag', 'lowg', 'melt'][Math.floor(mr() * 4)] : null) : op?.mod ?? null;
-    if (this.endless && mod && mod === this.lastMod) mod = ['dark', 'slag', 'lowg', 'melt'].filter(m => m !== mod)[Math.floor(mr() * 3)];
+    const mr = M.rng(this, i), mod = M.modifier(this, i, mr);
     this.lastMod = mod;
     this.enemiesLeft = entries.length;
     if (this.endless) this.totalEnemies += entries.length;
     if (op) this.totalEnemies += entries.length - authored.reduce((n, squad) => n + squad.foes.length, 0);
-    BUS.emit('wave', i + 1, this.mode.waves);
-    if (this.endless) BUS.emit('wavecard', 'OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND');
-    else if (this.bossrush) BUS.emit('wavecard', 'BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]);
-    else {
-      BUS.emit('wavecard', op.name, op.brief);
-      this.setCampaignMachinery(op.machinery);
-      this.issueWeapons(op.unlock);
-    }
+    BUS.emit('wave', i + 1, M.waves);
+    BUS.emit('wavecard', ...M.card(this, i, mod));
+    if (op) { this.setCampaignMachinery(op.machinery); this.issueWeapons(op.unlock); }
     this.spawnBarrels(true); this.spawnCanisters(true); this.restockProps();
     this.applyMod(mod || (this.mutator === 'lowg' ? 'lowg' : this.mutator === 'dark' ? 'dark' : null));
     for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }
@@ -17194,7 +17209,7 @@ class GameScene extends Phaser.Scene {
       k.taken = false; k.img.setVisible(true); k.glow.setVisible(true);
       this.fx.emit(k.x, k.y, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x7dff8a], add: true, g: -40 });
     }
-    const nE = this.endless ? Math.min(6, Math.floor(i / 2)) : op?.elites ?? 0;
+    const nE = M.elites(this, i);
     const eliteEntries = op && squads.length > 1 ? squads.slice(1).flatMap(squad => squad.spawns) : entries;
     const pool = eliteEntries.filter(({ foe: [kind] }) => ENEMY[kind].hp >= 40 && !NO_ELITE.has(kind));
     for (let n = 0; n < nE && pool.length; n++) {
