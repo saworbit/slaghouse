@@ -83,6 +83,12 @@ window.PR = (() => {
     if (g.stats.hits !== hits0) fails.push('a drum blast counted as a hit');
     g.explode(...at(), TUNE.CANISTER);
     if (g.stats.hits !== hits0) fails.push('a gas canister blast counted as a hit');
+    // a dead foe's wreck or tank going off isn't a shot either; the shot that killed it already counted (#144)
+    for (const [what, W] of [['gunship wreck', TUNE.GUNSHIP.crash], ['torcher tank', TUNE.TORCHER.boom], ['pyro tank', TUNE.PYRO.tank], ['haywire jetpack', TUNE.JET.boom]]) {
+      const h = g.stats.hits;
+      g.explode(...at(), W);
+      if (g.stats.hits !== h) fails.push(`a ${what} blast counted as a hit`);
+    }
     const round = g.spawnBullet('nail', ...at(), 0, 400, 1, 1); round.free = true;
     g.onBulletHit(round, e);
     if (g.stats.hits !== hits0) fails.push('a free round counted as a hit');
