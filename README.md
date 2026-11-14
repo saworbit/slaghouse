@@ -44,13 +44,16 @@ Choose **LAB** on the title screen to practice with the full arsenal. Pick the *
 the **Combat Pit** for a mixed fight, the **Boss Chamber** for a single boss, or the **Breakables Bay** and
 **Traversal Course** for scenery and movement. **Machinery Floor**, **Furnace Vents**, **Wrecking Yard** and
 **Live Rails** let you practice the arena hazards. A URL such as `slaghouse.html?lab=furnace` opens the room picker
-with Furnace Vents selected.
+with Furnace Vents selected; an unknown room name opens the Firing Range and says so.
 
 Choose a starting weapon, build a roster of up to 16 enemies including at most one boss, and set the difficulty,
-hazard modifier, stationary enemies and invulnerability. Choose **Deploy room** to start. **F2** or the
+hazard modifier, stationary enemies and invulnerability. Changing **Room** afterwards keeps what you set and fills
+the rest from the new room's preset. A tally beside **Add group** counts enemies and bosses, and **Deploy room** waits
+while the roster is over. Choose **Deploy room** to start. **F2** or the
 **Lab controls** button reopens the setup during play. **R** resets terrain, props, health, weapon and enemies
 to the deployed setup. Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
-Use a keyboard or pointer in the Lab setup dialog. The regular gamepad controls work during play.
+The setup dialog takes a keyboard, a pointer or a gamepad: the D-pad moves between fields and changes them, **A**
+picks and **B** goes back. The regular gamepad controls work during play.
 See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted room control and observations.
 
 ## Controls

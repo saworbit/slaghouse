@@ -260,6 +260,76 @@ try {
     catch { fail.push('OVERTIME did not start after a key press on a touch device'); }
     return fail;
   });
+  await check('Lab setup keeps your changes across rooms, tallies the roster, and works with a gamepad', async ctx => {
+    const fail = [];
+    let page = await open(ctx, []);
+    const panel = page.getByRole('dialog', { name: 'Slaghouse Lab' });
+    const form = () => page.evaluate(() => { const f = document.getElementById('lab-form').elements; return { room: f.room.value, weapon: f.weapon.value, difficulty: f.difficulty.value, groups: document.getElementById('lab-groups').children.length, tally: document.getElementById('lab-tally').textContent, deploy: !document.querySelector('#lab-form button[type=submit]').disabled, focus: document.activeElement?.name || document.activeElement?.textContent, notice: document.getElementById('lab-error').textContent }; });
+    await page.evaluate(() => game.scene.getScene('Title').menuPick(8));
+    await panel.waitFor({ state: 'visible' });
+    // changing Room keeps what you set; untouched fields take the new room's preset
+    await panel.getByLabel('Starting weapon').selectOption('rail');
+    await panel.getByLabel('Difficulty').selectOption('2');
+    await panel.getByRole('button', { name: 'Add group' }).click();
+    const before = await form();
+    await panel.getByLabel('Room', { exact: true }).selectOption('encounter');
+    let f = await form();
+    if (f.weapon !== 'rail' || f.difficulty !== '2' || f.groups !== before.groups) fail.push(`changing Room dropped the setup: ${JSON.stringify({ before, after: f })}`);
+    // a live tally, and Deploy waits while the roster is over the limit
+    await page.locator('#lab-groups [data-field=count]').last().fill('20');
+    f = await form();
+    if (!/Enemies \d+ \/ 16/.test(f.tally) || f.deploy) fail.push(`a roster over 16 left Deploy on or showed no tally: ${f.tally}`);
+    await page.locator('#lab-groups [data-field=count]').last().fill('1');
+    if (!(await form()).deploy) fail.push('Deploy stayed off once the roster fit again');
+    await panel.getByRole('button', { name: 'Back' }).click();
+    await panel.waitFor({ state: 'hidden' });
+    // ?lab= with an unknown room says so
+    page = await open(ctx, [], '?lab=nowhere');
+    await panel.waitFor({ state: 'visible' });
+    f = await form();
+    if (!f.notice.includes('nowhere') || f.room !== 'range') fail.push(`?lab=nowhere opened ${f.room} with notice '${f.notice}'`);
+    await page.keyboard.press('Escape');
+    await panel.waitFor({ state: 'hidden' });
+    // a standard-mapped pad opens the Lab, moves and changes fields, deploys, and backs out of LAB CONTROLS
+    page = await open(ctx, []);                                       // a plain title: the cursor starts on CAMPAIGN
+    await page.evaluate(() => {
+      window.__pad = { connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ value: 0 })) };
+      navigator.getGamepads = () => [window.__pad];
+    });
+    const down = b => page.evaluate(b => { window.__pad.buttons[b].value = 1; }, b), up = b => page.evaluate(b => { window.__pad.buttons[b].value = 0; }, b);
+    const pad = async b => { await down(b); await page.waitForTimeout(80); await up(b); await page.waitForTimeout(80); };
+    await pad(12);                                                    // D-pad up from CAMPAIGN wraps to LAB
+    if (await page.evaluate(() => game.scene.getScene('Title').menuSel) !== 8) fail.push('D-pad up did not reach LAB');
+    await down(0);
+    await panel.waitFor({ state: 'visible' });
+    await page.waitForTimeout(150);                                   // A still held: the dialog must not act on it
+    f = await form();
+    if (f.focus !== 'room' || f.room !== 'range') fail.push(`the A press that opened the Lab also acted in it: ${JSON.stringify(f)}`);
+    await up(0); await page.waitForTimeout(80);
+    await pad(13);
+    if ((await form()).focus !== 'weapon') fail.push('D-pad down did not move to Starting weapon');
+    const w0 = (await form()).weapon;
+    await pad(15);
+    const w1 = (await form()).weapon;
+    if (w1 === w0) fail.push('D-pad right did not change the starting weapon');
+    await pad(12); await pad(12); await pad(12);                      // weapon -> room -> Back -> Deploy room
+    if ((await form()).focus !== 'Deploy room') fail.push(`D-pad up did not wrap round to Deploy room: focus ${(await form()).focus}`);
+    await pad(0);
+    try { await page.waitForFunction(w => SlagLab.snapshot()?.ready && SlagLab.snapshot().player.weapon === w, w1); }
+    catch { fail.push('A on Deploy room did not deploy with the chosen weapon'); return fail; }
+    if (await panel.isVisible()) fail.push('the dialog stayed open after deploying');
+    await pad(9);                                                     // Start pauses the run
+    await page.waitForFunction(() => game.scene.getScene('Hud').pauseOn);
+    for (let n = 0; n < 12 && await page.evaluate(() => PAUSE_ITEMS[game.scene.getScene('Hud').pSel].id) !== 'controls'; n++) await pad(13);
+    await pad(0);
+    await panel.waitFor({ state: 'visible' });
+    await pad(1);                                                     // B closes LAB CONTROLS and leaves the pause menu up
+    await panel.waitFor({ state: 'hidden' });
+    await page.waitForTimeout(120);
+    const after = await page.evaluate(() => ({ pauseOn: game.scene.getScene('Hud').pauseOn, paused: SlagLab.snapshot()?.paused }));
+    if (!after.pauseOn || !after.paused) fail.push(`B on LAB CONTROLS also left the pause menu: ${JSON.stringify(after)}`);
+    return fail;
+  });
   await check('Lab presets, combat, snapshots, clean reset and save isolation', async ctx => {
     const page = await open(ctx, ['lab']);
     return page.evaluate(() => checkLab());
