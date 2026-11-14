@@ -3,7 +3,8 @@
 // screen, then Quit to Title. For each mode it checks that the scene runs as that mode and reports its wave total,
 // that lifetime runs and time played move only when the record says the mode counts toward lifetime stats, and that
 // the results screen writes the record's own localStorage key and no other. The Lab goes in through SlagLab. The
-// table itself is checked against SPEC below, so a record key can't move without this failing.
+// table itself is checked against SPEC below, so a record key can't move without this failing, and every record must
+// carry the wave rules startWave asks it for.
 // Returns { fails: [...] }; an empty list is a pass. It writes slaghouse.* keys, so use a throwaway profile.
 window.RMC = (() => {
   const RMC = {};
@@ -26,6 +27,11 @@ window.RMC = (() => {
       if (!want || !mode) { fails.push(`${id}: ${want ? 'missing from RUN_MODES' : 'a new mode with no entry in modes.js SPEC'}`); continue; }
       if (mode.id !== id || mode.record !== want.record || mode.lifetime !== want.lifetime || mode.waves !== want.waves())
         fails.push(`${id}: RUN_MODES has ${JSON.stringify({ id: mode.id, record: mode.record, lifetime: mode.lifetime, waves: mode.waves })}, want ${JSON.stringify({ id, record: want.record, lifetime: want.lifetime, waves: want.waves() })}`);
+    }
+    for (const mode of Object.values(RUN_MODES)) {                     // a mode that runs waves needs every wave rule; the Lab only its music
+      const need = mode.id === 'lab' ? ['music'] : ['squads', 'rng', 'modifier', 'card', 'elites', 'music'];
+      for (const f of need) if (typeof mode[f] !== 'function') fails.push(`${mode.id}: RUN_MODES record has no ${f}()`);
+      if (!Number.isInteger(mode.total) || typeof mode.mutators !== 'boolean') fails.push(`${mode.id}: RUN_MODES record needs a whole-number total and a true/false mutators`);
     }
     T.start();
     for (const mode of Object.values(RUN_MODES)) {
