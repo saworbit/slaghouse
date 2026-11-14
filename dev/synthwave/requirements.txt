@@ -1,6 +1,6 @@
 # dev/synthwave: renderer and packer (Python 3.11). This is the tested set; no torch or GPU needed.
 # ffmpeg with libopus must also be on PATH.
 numpy==1.26.4
-scipy==1.17.1
+scipy==1.18.1
 numba==0.68.1
 soundfile==0.14.0
