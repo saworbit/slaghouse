@@ -71,6 +71,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   and counts, **A** presses buttons and ticks boxes, and **B** or **Start** backs out. The press that opens the
   dialog can't act in it, and presses it uses don't reach the title, pause menu or a fresh run. `run.mjs` checks
   opening, navigating, deploying and backing out with a stubbed pad. (#94)
+- Dependabot watches `dev/synthwave/requirements.txt` as well, monthly with a `Synthwave:` prefix, so a security
+  fix in numpy, scipy, numba or soundfile shows up as a pull request. (#129)
 
 ### Changed
 
