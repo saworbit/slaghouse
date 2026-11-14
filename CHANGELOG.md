@@ -145,6 +145,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- The page no longer sits black while about 6 MB of scripts load. A static SLAGHOUSE / LOADING screen paints first,
+  the scripts moved below it, and the audio banks are deferred so they don't hold up that paint (they still load
+  before the title starts its audio). If Phaser can't load, the same screen says so in the game's colours with a
+  RETRY button, and no longer calls the game a prototype. `run.mjs` checks both states. (#102)
 - The navigation graph models the player's longer drops (3-6 rows, up to three columns out) and climbs up an unbroken
   wall. With them, every standing cell in every arena reaches the start and gets back; before, ARENA 02 had no way
   from right of the Furnace pillar back to the left, and ARENA 04's OVERTIME layout had a deck the graph couldn't

@@ -116,7 +116,8 @@ async function open(ctx, files, query = '') {
     const open = [...page._pending].map(([r, t]) => `${r.url().replace(origin, '').slice(0, 70)} (${((Date.now() - t) / 1000).toFixed(0)}s)`);
     return new Error(`${String(err.message).split('\n')[0]}; requests still open: ${open.join(', ') || 'none'}`);
   };
-  // the game only needs its scripts (all parser-blocking, so DOMContentLoaded waits for them) and then its title screen
+  // the game only needs its scripts (Phaser blocks the parser and the banks are deferred, so DOMContentLoaded waits
+  // for all three) and then its title screen
   try { await page.goto(url + query, { waitUntil: 'domcontentloaded', timeout: 60000 }); } catch (err) { throw stuck(err); }
   try { await page.waitForFunction(() => window.game && game.scene && game.scene.getScene('Title') && game.scene.getScene('Title').sys.isActive(), null, { timeout: 60000 }); }
   catch (err) { throw stuck(err); }
@@ -498,6 +499,30 @@ try {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' })); T.run(50); want(false, 'after a key press');
       return [...fails, ...T.errs];
     });
+  });
+  await check('a loading screen shows while Phaser loads, and a failed load offers a retry', async ctx => {
+    const fail = [];
+    await ctx.unroute(cdnSrc);                                         // hold Phaser back so the page has to wait on it
+    await ctx.route(cdnSrc, async r => { await new Promise(res => setTimeout(res, 1500)); return r.fulfill({ status: 200, contentType: 'text/javascript', headers: { 'Access-Control-Allow-Origin': '*' }, body: phaser }); });
+    let page = await ctx.newPage();
+    await page.goto(url, { waitUntil: 'commit' });
+    try { await page.waitForFunction(() => document.getElementById('boot') && !window.Phaser, null, { timeout: 1200 }); }
+    catch { fail.push('the loading screen was not in the page while Phaser was still loading'); }
+    await page.waitForFunction(() => window.game?.scene?.getScene?.('Title')?.sys.isActive(), null, { timeout: 60000 });
+    const up = await page.evaluate(() => ({ boot: !!document.getElementById('boot'), sfx: !!window.SLAG_SFX, sfxLoading: !!Sfx.bankLoading, music: !!window.SLAG_MUSIC,
+      musicAsked: Object.keys(Music.pend).length + Object.keys(Music.bank).length }));
+    if (up.boot) fail.push('the loading screen stayed up over the title');
+    if (!up.sfx || !up.sfxLoading || !up.music || !up.musicAsked) fail.push(`the deferred audio banks weren't ready when the title started its audio: ${JSON.stringify(up)}`);
+    await page.close();
+    await ctx.unroute(cdnSrc);
+    await ctx.route(cdnSrc, r => r.abort());                           // no Phaser at all
+    page = await ctx.newPage();
+    page.on('pageerror', () => {});                                    // the expected "Phaser missing" throw
+    await page.goto(url, { waitUntil: 'load' });
+    const down = await page.evaluate(() => ({ failed: document.getElementById('boot')?.classList.contains('failed'), retry: !!document.querySelector('#boot button'), text: document.getElementById('boot')?.textContent || '' }));
+    if (!down.failed || !down.retry || /prototype/i.test(down.text)) fail.push(`a blocked Phaser left ${JSON.stringify(down)}`);
+    await page.close();
+    return fail;
   });
   await check('two tabs: lifetime stats, codex and campaign save', async ctx => {
     const page = await open(ctx, ['twotab']);
