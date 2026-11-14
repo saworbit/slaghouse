@@ -1,6 +1,7 @@
 // Headless runner for the play-test harness (#45, #39). Routes repo files into headless Chrome
 // and runs, each in a fresh browser profile:
 //   - the two-tab check (twotab.js) and the DAILY midnight check (daily.js)
+//   - every run mode (modes.js): its wave total, what it adds to lifetime stats and which record it writes
 //   - every enemy kind (kinds.js), warped in one at a time: a codex row, its start frame, then it runs, takes a hit
 //     and dies without an error
 //   - every breakable prop in every arena (props.js): it sits where it can, breaks and goes off, restocks and breaks
@@ -93,7 +94,7 @@ const browser = await chromium.launch({
   ...(process.env.PLAYTEST_CHROME ? { executablePath: process.env.PLAYTEST_CHROME } : { channel: 'chrome' }),
   args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'],
 });
-const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
+const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep', 'modes'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
 const failures = [];
 const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(0) + 's';
 const report = (name, fails) => {
@@ -556,6 +557,10 @@ try {
   await check('late campaign stages hazard warnings, weapon issues and boss machinery', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.latePacing())).fails;
+  });
+  await check('every run mode keeps its own wave total, lifetime stats and record', async ctx => {
+    const page = await open(ctx, ['modes']);
+    return (await page.evaluate(() => RMC.check())).fails;
   });
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
