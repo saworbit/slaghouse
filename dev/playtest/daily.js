@@ -9,7 +9,7 @@ window.DY = (() => {
     const RealDate = Date, rec0 = localStorage.getItem('slaghouse.daily');
     try {
       const g = T.g(), day = g.day, rosters = () => [0, 1, 2, 3, 4, 5].map(i => g.endlessWave(i).map(e => e[0]).join(',')).join(' | ');
-      expect(g.daily && day === dayKey(), `not a DAILY run on today's day (daily ${g.daily}, day ${day}, today ${dayKey()})`);
+      expect(g.mode.id === 'daily' && day === dayKey(), `not a DAILY run on today's day (mode ${g.mode.id}, day ${day}, today ${dayKey()})`);
       const before = rosters(), next = RealDate.UTC(Math.floor(day / 10000), Math.floor(day / 100) % 100 - 1, day % 100 + 1, 0, 1);
       window.Date = class extends RealDate { constructor(...a) { if (a.length) super(...a); else super(next); } };
       expect(dayKey() !== day, 'the mocked clock did not reach the next UTC day');
