@@ -74,6 +74,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Each run mode's start and restart rules moved onto its record as well: its opening card, music and first wave
+  (`begin`), what R and RESTART restart with, whether mid-run R asks first, its difficulty and mutator (a campaign
+  checkpoint keeps its own), DAILY's day and starting arena, OVERTIME's roster seeding, when the lift comes, its
+  growing foe total and HP. Starts, restarts, lifts and HP play out exactly as before in every mode. (#128)
 - A wave's rules now come from its run mode's record too: where its foes come from, its random source (DAILY's is
   seeded by the day), its modifier, the wave card, how many elites it gets, its music, the run's starting foe count
   and whether the OPTIONS mutator applies. `startWave` and `waveTrack` ask `this.mode` instead of branching on the
