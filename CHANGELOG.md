@@ -74,6 +74,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- `main` is protected: a pull request merges only after the Static checks, Headless play-test and Brutal campaign
+  seeds jobs pass, and auto-merge is on, so `gh pr merge --auto` queues the merge until then. CONTRIBUTING.md
+  says so. (#42)
 - Spilt water conducts more than props: an Arc Caster or Shock Rifle beam or orb reaching a puddle, a Sparker link
   over it, and an Arc Pylon, Thundercloud or Jammer EMP strike landing on it all electrify it, the player included.
   Only a puddle that wasn't live already crackles, so a held beam doesn't buzz. (#87)

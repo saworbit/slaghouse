@@ -97,7 +97,9 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    `Fix ...` for bug fixes, in the imperative.
 3. Update `CHANGELOG.md` under `[Unreleased]` (Added / Changed / Fixed).
 4. If you change a value in `TUNE`, update the header comment at the top of `slaghouse.html` to match.
-5. Open a pull request with the template filled in. CI must pass, and the owner reviews every change.
+5. Open a pull request with the template filled in. CI must pass, and the owner reviews every change. `main` requires
+   the **Static checks**, **Headless play-test** and **Brutal campaign seeds** jobs, so `gh pr merge --auto --squash`
+   waits for all three before it merges.
 
 ## Releasing
 
