@@ -5103,20 +5103,53 @@ function campaignCheckpoint(save = loadCampaign()) {
 // check. GameScene.create sets this.mode from RUNMODE (or the Lab), and still derives this.campaign / endless / daily /
 // bossrush from it while the remaining checks move onto the records a few at a time.
 //   waves     operations in a run; 0 for endless modes (and the Lab, which counts no waves)
-//   total     foes the run starts out counting (endless modes add each wave's as it comes)
+//   total     foes the run starts out counting
+//   openTotal each wave adds its foes to the total as it starts (the endless modes)
 //   lifetime  the run counts toward lifetime runs, kills, deaths, time played, weapon mastery, medals and codex sightings
-//   mutators  the run takes the mutator picked under OPTIONS
 //   record    the localStorage key its results screen writes; null for none
-// and, for the modes that run waves (g is the scene, i the wave from 0):
+//   dated     the run plays one UTC day's seeded waves, kept through its restarts (DAILY)
+//   confirmRestart  mid-run R and the pause menu's RESTART / QUIT ask first (all but the Lab)
+// and, as functions of the scene g:
+//   difficulty(g), mutator(g)   the run's difficulty index and MUTATORS index (a campaign checkpoint carries its own)
+//   begin(g, carry, now)        the first frame of a run or an arena: its wave card, music and first wave
+//   restartData(g, checkpoint)  the data R / RESTART restarts the scene with
+//   startArena(day)             the arena a fresh run starts in (DAILY: the day's)
+// and, for the modes that run waves (i is the wave from 0):
 //   squads(g, i)        the wave's authored squads, each { foes: [[kind, point], ...] } plus any campaign squad fields
 //   rng(g, i)           the random source for its modifier and elites (DAILY: seeded by the day, the same for everyone)
 //   modifier(g, i, rng) the wave's modifier: 'dark', 'slag', 'lowg', 'melt' or null
 //   card(g, i, mod)     the wave card's [title, subtitle]
 //   elites(g, i)        how many of its foes become elites
 //   music(g, i)         the soundtrack track for the wave
+//   foeRng(g, i)        the endless modes' random source for a wave's roster (DAILY: seeded by the day)
+//   liftAfter(g)        after this wave's perk, ride the lift to the next arena (the non-campaign modes)
+//   hpScale(g)          foes' HP multiplier this wave (OVERTIME grows it; others leave it out)
 const MOD_ROLL = ['dark', 'slag', 'lowg', 'melt'];
-const overtimeMode = (id, record, rng) => ({                         // OVERTIME and DAILY: endless waves, the same rules
-  id, waves: 0, total: 0, lifetime: true, mutators: id !== 'daily', record, rng,
+const liftArrival = (g, c) => {                                      // down the lift: the arena card, then the next wave
+  BUS.emit('wavecard', g.A.name, g.A.sub); Music.track(g.waveTrack(c.wave));
+  g.time.delayedCall(2000, () => { if (g.state === 'play') g.startWave(c.wave); });
+};
+const standardRestart = (g, cp) => ({ arena: cp?.arena ?? g.mode.startArena(g.day), carry: cp, retry: !!cp, runId: g.campaignRunId, day: g.day });   // the same run again: it keeps (or still lacks) the save
+const overtimeMode = (id, record, dated) => ({                       // OVERTIME and DAILY: endless waves, the same rules
+  id, waves: 0, total: 0, openTotal: true, lifetime: true, record, dated, confirmRestart: true,
+  difficulty: () => OPTS.diff, mutator: () => (dated ? 0 : OPTS.mut),      // DAILY is the same run for everyone: no mutator
+  rng: dated ? (g, i) => seeded(g.day * 31 + i) : () => Math.random,
+  foeRng: dated ? (g, i) => seeded(g.day * 131 + i * 7919) : () => Math.random,
+  startArena: dated ? day => dailyArena(day) : () => 0,
+  restartData: standardRestart,
+  begin: (g, c) => {                                                  // no placed wave: it starts straight in
+    BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
+    if (c) { liftArrival(g, c); return; }
+    if (dated) {                                                      // DAILY: two seeded starting perks
+      const r = seeded(g.day + 77), pool = PERKS.slice();
+      for (let k = 0; k < 2; k++) g.perks[pool.splice(Math.floor(r() * pool.length), 1)[0].id] = true;
+      BUS.emit('perklist', Object.keys(g.perks));
+    }
+    BUS.emit('wavecard', dated ? 'DAILY ' + g.day : 'OVERTIME', dated ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(g.waveTrack(0), true);
+    g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(0); });
+  },
+  liftAfter: g => (g.wave + 1) % TUNE.ENDLESS.cycle === 0,
+  hpScale: g => (g.wave > 0 ? 1 + TUNE.ENDLESS.hpPer * g.wave : 1),  // tougher every wave
   squads: (g, i) => [{ foes: g.endlessWave(i) }],
   modifier: (g, i, rng) => {                                          // a boss every sixth wave, otherwise 45% a modifier, never twice running
     let mod = i % 6 === 5 ? null : rng() < 0.45 ? MOD_ROLL[Math.floor(rng() * 4)] : null;
@@ -5129,15 +5162,50 @@ const overtimeMode = (id, record, rng) => ({                         // OVERTIME
 });
 const campaignMusic = (g, i) => { const op = CAMPAIGN[Math.min(i, CAMPAIGN.length - 1)]; return op.music || (i < CAMPAIGN_ACTS[1].first ? 'stage1' : 'stage2'); };
 const RUN_MODES = {
-  campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, get total() { return CAMPAIGN_TOTAL; }, lifetime: true, mutators: true, record: 'slaghouse.best',
+  campaign: { id: 'campaign', get waves() { return CAMPAIGN.length; }, get total() { return CAMPAIGN_TOTAL; }, openTotal: false, lifetime: true, record: 'slaghouse.best',
+    dated: false, confirmRestart: true,
+    difficulty: g => (g.carry ? g.carry.diff : OPTS.diff), mutator: g => (g.carry ? g.carry.mut : OPTS.mut),   // a checkpoint keeps the run's settings
+    startArena: () => 0, restartData: standardRestart,
+    begin: (g, c, now) => {                                           // each act opens on its card, then its first operation
+      BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
+      g.stats.t0 = now;
+      const act = CAMPAIGN_ACTS[g.A.id - 1];
+      if (!act) throw new Error(`campaign run in ARENA 0${g.A.id}, which has no act (only OVERTIME and DAILY go there)`);
+      BUS.emit('wavecard', 'ACT 0' + g.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
+      Music.track(g.waveTrack(act.first), !c);
+      g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(act.first); });
+    },
     squads: (g, i) => CAMPAIGN[i].squads, rng: () => Math.random, modifier: (g, i) => CAMPAIGN[i].mod ?? null,
     card: (g, i) => [CAMPAIGN[i].name, CAMPAIGN[i].brief], elites: (g, i) => CAMPAIGN[i].elites ?? 0, music: campaignMusic },
-  endless: overtimeMode('endless', 'slaghouse.bestEndless', () => Math.random),                       // OVERTIME
-  daily: overtimeMode('daily', 'slaghouse.daily', (g, i) => seeded(g.day * 31 + i)),
-  bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, get total() { return RUSH.length; }, lifetime: true, mutators: true, record: 'slaghouse.bestRush',
+  endless: overtimeMode('endless', 'slaghouse.bestEndless', false),                                   // OVERTIME
+  daily: overtimeMode('daily', 'slaghouse.daily', true),
+  bossrush: { id: 'bossrush', get waves() { return RUSH.length; }, get total() { return RUSH.length; }, openTotal: false, lifetime: true, record: 'slaghouse.bestRush',
+    dated: false, confirmRestart: true, difficulty: () => OPTS.diff, mutator: () => OPTS.mut,
+    startArena: () => 0, restartData: standardRestart,
+    begin: (g, c) => {                                                // straight into the first boss (or the next one, down the lift)
+      BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
+      if (c) { liftArrival(g, c); return; }
+      BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(g.waveTrack(0), true);
+      g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(0); });
+    },
+    liftAfter: g => g.wave >= g.A.last,
     squads: (g, i) => [{ foes: RUSH[i] }], rng: () => Math.random, modifier: () => null,
     card: (g, i) => ['BOSS ' + (i + 1) + ' OF ' + RUSH.length, RUSH_SUBS[i]], elites: () => 0, music: () => WAVE_MUSIC[WAVE_MUSIC.length - 1] },
-  lab: { id: 'lab', waves: 0, total: 0, lifetime: false, mutators: false, record: null, music: campaignMusic },   // runs no waves: its roster warps in at once
+  lab: { id: 'lab', waves: 0, total: 0, openTotal: false, lifetime: false, record: null, dated: false,   // runs no waves: its roster warps in at once
+    confirmRestart: false,                                            // R resets the room at once
+    difficulty: g => g.lab.difficulty ?? OPTS.diff, mutator: () => 0,
+    restartData: g => ({ lab: g.lab, spawns: g.labRoster }),
+    begin: g => {
+      const room = LAB_ROOMS[g.lab.room];
+      BUS.emit('wave', 'LAB'); BUS.emit('wavecard', room.name.toUpperCase(), 'F2 CONTROLS / R RESET ROOM');
+      g.applyMod(g.lab.modifier === 'none' ? null : g.lab.modifier);
+      const spawns = g.labRoster;
+      g.labPending = g.enemiesLeft = g.totalEnemies = spawns.length;
+      BUS.emit('enemies', g.enemiesLeft);
+      for (const { kind, cell, flying, elite } of spawns) g.warpIn(kind, cell, flying, elite);
+      Music.track(g.waveTrack(0), true);
+    },
+    music: campaignMusic },
 };
 const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
 const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
@@ -6199,8 +6267,8 @@ class TitleScene extends Phaser.Scene {
       this.started = true;
       Sfx.init(); Sfx.startHum(); Sfx.ui(); Music.start();
       this.cameras.main.fadeOut(240, 0, 0, 0);
-      const day = RUNMODE === 'daily' ? dayKey() : null;                 // read once, when DAILY is picked: the whole run plays this day
-      const data = { arena: checkpoint?.arena ?? (day ? dailyArena(day) : 0), carry: checkpoint, retry: !!checkpoint, runId, day };
+      const mode = RUN_MODES[RUNMODE], day = mode.dated ? dayKey() : null;   // read once, when DAILY is picked: the whole run plays this day
+      const data = { arena: checkpoint?.arena ?? mode.startArena(day), carry: checkpoint, retry: !!checkpoint, runId, day };
       this.time.delayedCall(260, () => { this.scene.start('Game', data); this.scene.launch('Hud'); });
     };
     this.startRun = start;
@@ -6520,9 +6588,9 @@ class GameScene extends Phaser.Scene {
     this.bossrush = this.mode.id === 'bossrush';
     this.campaign = this.mode.id === 'campaign';
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
-    this.day = this.daily ? data?.day ?? dayKey() : null;              // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
-    this.runDiff = this.lab?.difficulty ?? (this.campaign && this.carry ? this.carry.diff : OPTS.diff);
-    this.runMut = !this.mode.mutators ? 0 : this.campaign && this.carry ? this.carry.mut : OPTS.mut;
+    this.day = this.mode.dated ? data?.day ?? dayKey() : null;         // the DAILY's day, fixed for the run (and its restarts) even across 00:00 UTC
+    this.runDiff = this.mode.difficulty(this);
+    this.runMut = this.mode.mutator(this);
     this.mutator = MUTATORS[this.runMut].id;
     this.chapterStart = this.campaign ? this.carry : null;
     this.campaignElapsed = this.chapterStart?.elapsed ?? 0;
@@ -7299,47 +7367,16 @@ class GameScene extends Phaser.Scene {
       const c = this.carry;
       BUS.emit('reset', { hp: this.hp, weapon: this.weapon, enemies: this.enemiesLeft, carry: !!c });
       BUS.emit('mines', TUNE.MINE.max); BUS.emit('perklist', Object.keys(this.perks));
-      if (this.lab) {
-        const room = LAB_ROOMS[this.lab.room];
-        BUS.emit('wave', 'LAB'); BUS.emit('wavecard', room.name.toUpperCase(), 'F2 CONTROLS / R RESET ROOM');
-        this.applyMod(this.lab.modifier === 'none' ? null : this.lab.modifier);
-        const spawns = this.labRoster;
-        this.labPending = this.enemiesLeft = this.totalEnemies = spawns.length;
-        BUS.emit('enemies', this.enemiesLeft);
-        for (const { kind, cell, flying, elite } of spawns) this.warpIn(kind, cell, flying, elite);
-        Music.track(this.waveTrack(0), true);
-      } else BUS.emit('wave', (c ? c.wave : 0) + 1, this.mode.waves);
-      if (this.campaign) {
-        this.stats.t0 = now;
-        const act = CAMPAIGN_ACTS[this.A.id - 1];
-        if (!act) throw new Error(`campaign run in ARENA 0${this.A.id}, which has no act (only OVERTIME and DAILY go there)`);
-        BUS.emit('wavecard', 'ACT 0' + this.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
-        Music.track(this.waveTrack(act.first), !c);
-        this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(act.first); });
-      } else if (c) {                                                        // arrived down the lift: arena card, then the next wave
-        BUS.emit('wavecard', this.A.name, this.A.sub); Music.track(this.waveTrack(c.wave));
-        this.time.delayedCall(2000, () => { if (this.state === 'play') this.startWave(c.wave); });
-      } else if (this.bossrush) {                                      // BOSS RUSH: straight into the first boss
-        BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(this.waveTrack(0), true);
-        this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
-      } else if (this.endless) {                                       // OVERTIME: no placed wave, it starts straight in
-        if (this.daily) {                                                // DAILY: two seeded starting perks
-          const r = seeded(this.day + 77), pool = PERKS.slice();
-          for (let k = 0; k < 2; k++) this.perks[pool.splice(Math.floor(r() * pool.length), 1)[0].id] = true;
-          BUS.emit('perklist', Object.keys(this.perks));
-        }
-        BUS.emit('wavecard', this.daily ? 'DAILY ' + this.day : 'OVERTIME', this.daily ? 'SAME WAVES FOR EVERYONE TODAY' : 'SURVIVE AS LONG AS YOU CAN'); Music.track(this.waveTrack(0), true);
-        this.time.delayedCall(1800, () => { if (this.state === 'play') this.startWave(0); });
-      }
+      this.mode.begin(this, c, now);                                    // the mode's own start: its card, music and first wave
       this.musicAhead(c?.wave ?? 0);
     }
     if (this.jd.M) BUS.emit('callout', Sfx.toggleMute() ? 'MUTED' : 'SOUND ON');
     if (this.jd.B && window.SLAG_MUSIC) BUS.emit('callout', !Music.toggle() ? 'SYNTH MUSIC' : Music.sampled() ? 'SAMPLED MUSIC' : 'MUSIC TRACK UNAVAILABLE');
     if (this.jd.N && window.SLAG_SFX) { Sfx.useBank = !Sfx.useBank; Sfx.stopLoops(); Sfx.swapHum(); BUS.emit('callout', !Sfx.useBank ? 'SYNTH SFX' : Sfx.bankOk() ? 'SAMPLED SFX' : 'SFX BANK UNAVAILABLE'); }
     if (this.jd.V) { this.togglePostFx(); BUS.emit('callout', POSTFX.on ? 'POST FX ON' : 'POST FX OFF'); }
-    if (this.jd.R && !this.lab && this.state === 'play' && this.time.now >= this.restartArmUntil) {   // R sits among the combat keys: mid-run, the first press only asks
+    if (this.jd.R && this.mode.confirmRestart && this.state === 'play' && this.time.now >= this.restartArmUntil) {   // R sits among the combat keys: mid-run, the first press only asks
       this.restartArmUntil = this.time.now + RESTART_CONFIRM_MS; Sfx.ui();
-    } else if ((this.jd.R && (this.lab || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
+    } else if ((this.jd.R && (!this.mode.confirmRestart || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
     if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
     else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
@@ -11603,8 +11640,8 @@ class GameScene extends Phaser.Scene {
     this.savePlayTime();
     const checkpoint = this.state === 'won' ? null : this.chapterStart;
     Sfx.stopLoops(); Music.paused = false;
-    if (this.lab) { this.labTransition = true; this.scene.restart({ lab: this.lab, spawns: this.labRoster }); return; }
-    this.scene.restart({ arena: checkpoint?.arena ?? (this.daily ? dailyArena(this.day) : 0), carry: checkpoint, retry: !!checkpoint, runId: this.campaignRunId, day: this.day });   // a restart is the same run, so it keeps (or still lacks) the save
+    if (this.lab) this.labTransition = true;                            // the Lab redeploys in place
+    this.scene.restart(this.mode.restartData(this, checkpoint));
   }
   quitToTitle() {
     this.savePlayTime();
@@ -15834,7 +15871,7 @@ class GameScene extends Phaser.Scene {
   // every 6th. Enemy HP +7% a wave. A random modifier 45% of the time. A new arena every 3 waves.
   endlessWave(i) {
     const E = TUNE.ENDLESS, n = Math.min(E.base + i * E.per, E.max), t2 = Math.min(0.7, 0.15 + i * 0.06), out = [];
-    const rnd = this.daily ? seeded(this.day * 131 + i * 7919) : Math.random, pk = a => a[Math.floor(rnd() * a.length)];
+    const rnd = this.mode.foeRng(this, i), pk = a => a[Math.floor(rnd() * a.length)];
     const T1 = ['grunt', 'drone', 'stalker', 'enforcer', 'tick', 'heavy', 'sniper', 'mender', 'slagling', 'gasbag', 'sparker', 'mimic', 'creeper', 'pogo', 'grenadier', 'spikeball', 'slug'];
     const T2 = ['bulwark', 'rocketeer', 'wasp', 'sapper', 'screamer', 'cloaker', 'pyro', 'harpooner', 'tarspit', 'buzzsaw', 'roller', 'duelist', 'blinker', 'magnet',
                 'welder', 'jammer', 'howitzer', 'hive', 'brood', 'mirror', 'stitcher', 'rammer', 'jet', 'warden', 'golem', 'echo', 'pilferer', 'linker',
@@ -17128,7 +17165,7 @@ class GameScene extends Phaser.Scene {
           else this.startWave(this.wave + 1);
         });
       } else {
-        this.offerPerks(() => { if (this.endless ? (this.wave + 1) % TUNE.ENDLESS.cycle === 0 : this.wave >= this.A.last) this.descend(); else this.startWave(this.wave + 1); });
+        this.offerPerks(() => { if (this.mode.liftAfter(this)) this.descend(); else this.startWave(this.wave + 1); });
       }
     });
   }
@@ -17195,7 +17232,7 @@ class GameScene extends Phaser.Scene {
     const mr = M.rng(this, i), mod = M.modifier(this, i, mr);
     this.lastMod = mod;
     this.enemiesLeft = entries.length;
-    if (this.endless) this.totalEnemies += entries.length;
+    if (M.openTotal) this.totalEnemies += entries.length;
     if (op) this.totalEnemies += entries.length - authored.reduce((n, squad) => n + squad.foes.length, 0);
     BUS.emit('wave', i + 1, M.waves);
     BUS.emit('wavecard', ...M.card(this, i, mod));
@@ -17288,7 +17325,8 @@ class GameScene extends Phaser.Scene {
       }
       const e = this.spawnEnemy(kind, cx, cy), now = this.time.now;
       e.aggro = true; e.aggroT = 6;
-      if (this.endless && this.wave > 0) { const k = 1 + TUNE.ENDLESS.hpPer * this.wave; e.def = Object.assign({}, e.def, { hp: e.def.hp * k }); e.hp = e.def.hp; }   // OVERTIME: tougher every wave
+      const hpK = this.mode.hpScale ? this.mode.hpScale(this) : 1;
+      if (hpK !== 1) { e.def = Object.assign({}, e.def, { hp: e.def.hp * hpK }); e.hp = e.def.hp; }   // OVERTIME: tougher every wave
       if (this.mutator === 'swarm' && !SWARM_SKIP.has(kind)) { e.def = Object.assign({}, e.def, { hp: e.def.hp * 0.67 }); e.hp = e.def.hp; }
       if (elite) this.makeElite(e, elite);
       if (isHumanoid(e)) { e.lkx = this.player.x; e.lky = this.player.y; e.lkT = now; this.alertHumanoid(e, now, false); }
