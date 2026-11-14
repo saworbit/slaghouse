@@ -69,6 +69,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Spilt water conducts more than props: an Arc Caster or Shock Rifle beam or orb reaching a puddle, a Sparker link
+  over it, and an Arc Pylon, Thundercloud or Jammer EMP strike landing on it all electrify it, the player included.
+  Only a puddle that wasn't live already crackles, so a held beam doesn't buzz. (#87)
 - The title OPTIONS page has CONTROLS, the same list as the pause menu's, and its shared rows run in the pause
   menu's order. Its rows are one list (`OPTION_ITEMS`) found by id. (#105)
 - On a touch-only device with no pad, the title says the game needs a keyboard and mouse or a gamepad and holds
@@ -134,6 +137,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
+  longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
 - The title screen no longer runs its text together. The menu sits in two columns below the floor line, play
   modes on the left and extras on the right, with DAILY and BOSS RUSH tags beside their rows. The records line
   clears DIFFICULTY, the subtitle lists all five acts from the act table, the CODEX counter clears the selection

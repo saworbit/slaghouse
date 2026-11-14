@@ -88,6 +88,56 @@ window.PR = (() => {
     if (g.stats.hits !== hits0 + 2) fails.push(`a player's bullet and rocket added ${g.stats.hits - hits0} hits, want 2`);
     return [...fails, ...T.errs];
   };
+  // Spills stop at the end of the floor they land on (#89); electric shots and strikes light spilt water (#87).
+  PR.spills = () => {
+    const fails = [];
+    RUNMODE = 'endless'; T.boot();
+    const g = T.setup(0);
+    g.props = [];
+    const rows = g.grid.length, cols = g.grid[0].length;
+    let edge = null;                                                    // the right end of a floor with a long drop beside it
+    for (let ty = 3; ty < rows - 1 && !edge; ty++) for (let tx = 3; tx < cols - 3 && !edge; tx++) {
+      const fy = ty * TS, ex = (tx + 1) * TS;
+      if (g.standAt(ex - 3, fy + 1) && !g.solidAt(ex - 3, fy - 2) && !g.standAt(ex + 3, fy + 1) && !g.solidAt(ex + 3, fy - 2) &&
+          !g.solidAt(ex + 3, fy - 24) && (g.floorBelow(ex + 3, fy + 2) ?? LH) > fy + 4 * TS) edge = { x: ex, fy };
+    }
+    if (!edge) return ['fixture: no ledge with a long drop in ARENA 01'];
+    const cx = edge.x - 6;
+    const stops = (P, what) => {
+      if (!P) fails.push(`fixture: no ${what} was made`);
+      else if (P.y === edge.fy && P.x + P.w / 2 > edge.x + 1) fails.push(`${what} reaches ${Math.round(P.x + P.w / 2 - edge.x)} px past the ledge at (${edge.x},${edge.fy})`);
+    };
+    g.spawnFirePatch(cx, edge.fy - 4); stops(g.puddles.at(-1), 'a fire patch');
+    g.spawnTarPatch(cx, edge.fy - 4, 40); stops(g.tars.at(-1), 'a tar patch');
+    g.spawnTarPatch(cx - 20, edge.fy - 4, 40); stops(g.tars.at(-1), 'a merged tar patch');
+    g.spawnIce(cx, edge.fy - 4, 40); stops(g.ices.at(-1), 'an ice sheet');
+    g.spawnIce(cx - 16, edge.fy - 4, 40); stops(g.ices.at(-1), 'a merged ice sheet');
+    g.slagImpact(cx, edge.fy - 4, true); stops(g.puddles.at(-1), 'a slag puddle');
+    const slug = g.spawnEnemy('slug', Math.floor(edge.x / TS) - 1, edge.fy / TS - 1); T.run(100);
+    slug.body.reset(edge.x - 6, edge.fy - slug.body.halfHeight); g.killEnemy(slug, 1, 0, 'nail');
+    const pools = g.acids.filter(A => A.y === edge.fy);
+    if (!pools.length) fails.push('fixture: the slug left no pool on the ledge');
+    for (const A of pools) stops(A, 'a slug acid pool');
+    // electrified water: an Arc Caster beam into it, a shock orb popping on it, a Thundercloud strike over it
+    g.puddles.length = 0; g.tars.length = 0; g.ices.length = 0; g.acids.length = 0;
+    const fx = edge.x - 40;
+    g.spawnWater(fx, edge.fy - 4, 50);
+    const W = g.waters.at(-1);
+    if (!W) return [...fails, 'fixture: no puddle'];
+    const reset = () => { W.zap = 0; T.run(17); };
+    g.player.body.reset(W.x, W.y - 13); T.run(50);
+    reset(); g.fireArc(g.time.now, g.shoulder.x, g.shoulder.y, Math.PI / 2, false);
+    if (!(W.zap > 0)) fails.push('an Arc Caster beam into a puddle did not electrify it');
+    reset(); g.shockPop({ img: { destroy() {} }, glow: { destroy() {} } }, W.x, W.y - 4);
+    if (!(W.zap > 0)) fails.push('a shock orb popping on a puddle did not electrify it');
+    reset(); g.shockPop({ img: { destroy() {} }, glow: { destroy() {} } }, W.x, W.y - 90);
+    if (W.zap > 0) fails.push('a shock orb popping 90 px above a puddle electrified it');
+    reset();
+    const cloud = g.spawnEnemy('thundercloud', Math.floor(W.x / TS), edge.fy / TS - 6); T.run(17);
+    cloud.body.reset(W.x, W.y - 70); cloud.ai = 'charge'; cloud.aiUntil = g.time.now; T.run(17);
+    if (!(W.zap > 0)) fails.push('a Thundercloud strike on a puddle did not electrify it');
+    return [...fails, ...T.errs];
+  };
   PR.campaignContactDamage = () => {
     const fails = [];
     OPTS.diff = 1;
