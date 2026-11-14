@@ -47,7 +47,7 @@ its scripted death sequence.
 | `--campaign` | Full campaigns only |
 | `--seeds=91,404` | Selects the seeds for any full campaigns in the run. Use comma-separated unsigned 32-bit integers |
 | `--brutal` | Sets the difficulty of the full campaigns to Brutal |
-| `--lab` | Lab sweeps, menu controls, presets, snapshots, reset and save isolation |
+| `--lab` | Lab sweeps, menu and gamepad controls, room changes and the roster tally, presets, snapshots, reset and save isolation |
 | `--lab-sweep` | Weapon, enemy and hazard sweeps only |
 | `--help` | Prints the options. An unknown option or a bad `--seeds` value exits with status 2 |
 

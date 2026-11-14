@@ -675,7 +675,9 @@
   #lab-panel button, #lab-dock { cursor: pointer; padding: 7px 12px; }
   #lab-panel button[type=submit] { background: #ffad5c; border-color: #ffad5c; color: #17110b; font-weight: bold; }
   #lab-panel button:disabled { opacity: .5; cursor: default; }
-  #lab-panel :focus-visible, #lab-dock:focus-visible { outline: 2px solid #72e5ed; outline-offset: 2px; }
+  #lab-panel :focus-visible, #lab-dock:focus-visible, #lab-panel.lab-pad :focus { outline: 2px solid #72e5ed; outline-offset: 2px; }
+  #lab-panel #lab-tally { margin-left: 12px; color: #acbac8; }
+  #lab-panel #lab-tally.over { color: #ff9c87; }
   #lab-panel select, #lab-panel input[type=number] { display: block; box-sizing: border-box; width: 100%; margin: 3px 0 0; padding: 5px 6px; }
   #lab-panel label { display: block; min-width: 0; }
   #lab-panel .lab-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
@@ -707,9 +709,9 @@
     <fieldset>
       <legend>Enemy groups</legend>
       <div id="lab-groups"></div>
-      <button id="lab-add" type="button">Add group</button>
+      <button id="lab-add" type="button">Add group</button><span id="lab-tally" aria-live="polite"></span>
     </fieldset>
-    <p>All weapons are available in play. Press F2 for controls or R to reset the room.</p>
+    <p>All weapons are available in play. Press F2 for controls or R to reset the room. On a gamepad, the D-pad moves and changes, A picks and B goes back.</p>
     <p id="lab-error" role="alert" hidden></p>
     <div class="lab-actions">
       <button type="submit">Deploy room</button>
@@ -19595,8 +19597,10 @@ const LAB_PANEL = (() => {
   const reset = document.getElementById('lab-reset'), exit = document.getElementById('lab-exit');
   const resume = document.getElementById('lab-resume'), add = document.getElementById('lab-add');
   const error = document.getElementById('lab-error'), detail = document.getElementById('lab-room-detail');
+  const tallyLbl = document.getElementById('lab-tally'), deploy = form.querySelector('button[type=submit]');
   const { room, weapon, difficulty, modifier, stationary, invulnerable } = form.elements;
-  let resumeGame = null;
+  const touched = new Set();                                          // fields changed since the room's preset loaded: a new room keeps them
+  let resumeGame = null, padArmed = false;
   const fillSelect = (select, choices) => select.replaceChildren(...choices.map(([value, label]) => new Option(label, value)));
   fillSelect(room, Object.entries(LAB_ROOMS).map(([id, data]) => [id, data.name]));
   fillSelect(weapon, WEAPONS.map(w => [w.id, w.name]));
@@ -19619,16 +19623,39 @@ const LAB_PANEL = (() => {
     fillSelect(rank, [['', 'Standard'], ...ELITE_KINDS.map(id => [id, id === 'regen' ? 'Regenerating' : id[0].toUpperCase() + id.slice(1)])]);
     rank.value = elite || ''; updateElite(); enemy.addEventListener('change', updateElite);
     remove.type = 'button'; remove.textContent = 'Remove';
-    remove.addEventListener('click', () => { row.remove(); add.disabled = false; add.focus(); });
+    remove.addEventListener('click', () => { row.remove(); add.disabled = false; add.focus(); touched.add('groups'); tally(); });
     row.append(field('Enemy', enemy), field('Count', qty), field('Elite', rank), remove);
     list.append(row); add.disabled = list.children.length >= LAB_MAX_ENEMIES;
+    tally();
     return enemy;
+  }
+  function tally() {                                                  // live totals beside Add group; Deploy waits while the roster is over
+    let total = 0, bosses = 0;
+    for (const row of list.children) {
+      const n = Math.max(0, Math.floor(Number(row.querySelector('[data-field=count]').value) || 0));
+      total += n; if (LAB_BOSSES.has(row.querySelector('[data-field=kind]').value)) bosses += n;
+    }
+    const over = total > LAB_MAX_ENEMIES || bosses > 1;
+    tallyLbl.textContent = `Enemies ${total} / ${LAB_MAX_ENEMIES} · Bosses ${bosses} / 1`;
+    tallyLbl.classList.toggle('over', over); deploy.disabled = over;
   }
   function load(config) {
     room.value = config.room; weapon.value = config.weapon; difficulty.value = config.difficulty;
     modifier.value = config.modifier; stationary.checked = config.stationary; invulnerable.checked = config.invulnerable;
     detail.textContent = LAB_ROOMS[config.room].detail;
-    list.replaceChildren(); add.disabled = false; config.groups.forEach(addGroup); report('');
+    list.replaceChildren(); add.disabled = false; config.groups.forEach(addGroup); report(''); tally();
+    touched.clear();
+  }
+  function changeRoom() {                                             // the new room's preset fills only the fields you haven't changed
+    const preset = labConfig(room.value);
+    detail.textContent = LAB_ROOMS[room.value].detail;
+    if (!touched.has('weapon')) weapon.value = preset.weapon;
+    if (!touched.has('difficulty')) difficulty.value = preset.difficulty;
+    if (!touched.has('modifier')) modifier.value = preset.modifier;
+    if (!touched.has('stationary')) stationary.checked = preset.stationary;
+    if (!touched.has('invulnerable')) invulnerable.checked = preset.invulnerable;
+    if (!touched.has('groups')) { list.replaceChildren(); add.disabled = false; preset.groups.forEach(addGroup); }
+    report(''); tally();
   }
   function open(initial = 'range') {
     if (dialog.open) return;
@@ -19641,6 +19668,30 @@ const LAB_PANEL = (() => {
     resume.textContent = resumeGame ? 'Resume' : 'Back';
     dialog.showModal();
     room.focus();
+    padArmed = false;                                                 // the press that opened the dialog can't also pick a field
+    if (unknownRoom) { report(`There is no Lab room called "${unknownRoom}". Opened the ${LAB_ROOMS.range.name}.`); unknownRoom = null; }
+  }
+  const focusable = () => Array.from(dialog.querySelectorAll('button, select, input')).filter(el => !el.disabled && !el.hidden);
+  // A standard-mapped pad drives the dialog: D-pad or left stick up/down moves between fields, left/right changes a
+  // list or a count, A presses a button or ticks a box, B or Start backs out like Esc. Runs after PAD.poll each step,
+  // and swallows the presses it uses so the title, pause menu or a fresh run don't act on them too.
+  function pad() {
+    if (!dialog.open || !PAD.on) return;
+    if (!padArmed) { if (!PAD.b.some(v => v > 0.4)) padArmed = true; return; }
+    const my = PAD.menuY(), mx = PAD.menuX(), a = PAD.jd(0), back = PAD.jd(1) || PAD.jd(9);
+    if (!my && !mx && !a && !back) return;
+    dialog.classList.add('lab-pad');
+    const fields = focusable(), el = document.activeElement, at = fields.indexOf(el);
+    if (my) (fields[(at + my + fields.length) % fields.length] || fields[0])?.focus();
+    else if (mx && el?.tagName === 'SELECT') {
+      const i = clamp(el.selectedIndex + mx, 0, el.options.length - 1);
+      if (i !== el.selectedIndex) { el.selectedIndex = i; el.dispatchEvent(new Event('change', { bubbles: true })); }
+    } else if (mx && el?.type === 'number') {
+      el.value = clamp((Number(el.value) || 0) + mx, Number(el.min), Number(el.max)); el.dispatchEvent(new Event('input', { bubbles: true }));
+    } else if (a && el?.type === 'checkbox') { el.checked = !el.checked; el.dispatchEvent(new Event('change', { bubbles: true })); }
+    else if (a && el?.tagName === 'BUTTON') el.click();
+    else if (back) close();
+    PAD.prev = PAD.b.slice(); PAD.prevStickY = PAD.stickY; PAD.prevStickX = PAD.stickX;
   }
   function close(shouldResume = true) {
     if (!dialog.open) return;
@@ -19653,6 +19704,10 @@ const LAB_PANEL = (() => {
   }
   // Phaser listens on window. Keep the dialog's keyboard navigation and clicks inside the controls.
   for (const event of ['keydown', 'keyup', 'pointerdown', 'pointerup']) dialog.addEventListener(event, e => e.stopPropagation());
+  for (const event of ['keydown', 'pointerdown']) dialog.addEventListener(event, () => dialog.classList.remove('lab-pad'));
+  for (const el of [weapon, difficulty, modifier, stationary, invulnerable]) el.addEventListener('change', () => touched.add(el.name));
+  list.addEventListener('change', () => { touched.add('groups'); tally(); });
+  list.addEventListener('input', () => { touched.add('groups'); tally(); });
   dialog.addEventListener('cancel', e => { e.preventDefault(); close(); });
   dialog.addEventListener('keydown', e => {
     if (e.key === 'F2') { e.preventDefault(); close(); }
@@ -19663,8 +19718,8 @@ const LAB_PANEL = (() => {
       e.preventDefault();
     }
   });
-  room.addEventListener('change', () => load(labConfig(room.value)));
-  add.addEventListener('click', () => addGroup()?.focus());
+  room.addEventListener('change', changeRoom);
+  add.addEventListener('click', () => { touched.add('groups'); addGroup()?.focus(); });
   resume.addEventListener('click', () => close());
   reset.addEventListener('click', () => { const live = activeLab(); if (live) deployLab(live.lab.room, live.lab); });
   exit.addEventListener('click', () => { const live = activeLab(); close(false); live?.quitToTitle(); });
@@ -19684,7 +19739,8 @@ const LAB_PANEL = (() => {
     } catch (err) { report(err.message); }
   });
   const initial = new URLSearchParams(location.search).get('lab');
-  return { open, close, isOpen: () => dialog.open, dock, initialRoom: initial === null ? null : Object.hasOwn(LAB_ROOMS, initial) ? initial : 'range' };
+  let unknownRoom = initial !== null && !Object.hasOwn(LAB_ROOMS, initial) ? initial : null;   // ?lab= named no room: say so when the Lab opens
+  return { open, close, pad, isOpen: () => dialog.open, dock, initialRoom: initial === null ? null : Object.hasOwn(LAB_ROOMS, initial) ? initial : 'range' };
 })();
 
 window.SlagLab = Object.freeze({
@@ -19735,7 +19791,7 @@ window.game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   scene: [BootScene, TitleScene, GameScene, HudScene],
 });
-game.events.on('prestep', () => PAD.poll());
+game.events.on('prestep', () => { PAD.poll(); LAB_PANEL.pad(); });
 // A hidden tab stops the game loop but not our own Web Audio graph: without this the music, the hum and any
 // weapon loop that was running (hose, arc, cryo, minigun motor) keep playing over a frozen game.
 // Hiding or closing the tab credits the time played so far and writes the lifetime counts and mastery, so a run

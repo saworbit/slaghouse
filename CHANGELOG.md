@@ -67,6 +67,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `run.mjs` checks the title pages with real mouse input (wheel paging, the PAGE counter, BACK, right click, stray
   clicks) and the touch-only notice. (#104, #103)
 
+- The Lab setup dialog works with a standard gamepad: the D-pad or left stick moves between fields and changes lists
+  and counts, **A** presses buttons and ticks boxes, and **B** or **Start** backs out. The press that opens the
+  dialog can't act in it, and presses it uses don't reach the title, pause menu or a fresh run. `run.mjs` checks
+  opening, navigating, deploying and backing out with a stubbed pad. (#94)
+
 ### Changed
 
 - Spilt water conducts more than props: an Arc Caster or Shock Rifle beam or orb reaching a puddle, a Sparker link
@@ -139,6 +144,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 - Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
   longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
+- In the Lab setup, changing **Room** keeps the weapon, difficulty, modifier, checkboxes and roster you already set,
+  and fills only the untouched fields from the room's preset. A live tally beside **Add group** shows enemies and
+  bosses against the limits, and **Deploy room** waits while the roster is over. `?lab=` with an unknown room says
+  so when the Firing Range opens. (#107)
 - The title screen no longer runs its text together. The menu sits in two columns below the floor line, play
   modes on the left and extras on the right, with DAILY and BOSS RUSH tags beside their rows. The records line
   clears DIFFICULTY, the subtitle lists all five acts from the act table, the CODEX counter clears the selection

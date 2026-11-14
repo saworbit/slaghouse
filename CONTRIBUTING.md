@@ -87,6 +87,8 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    starting weapon, player health and intact props return.
 3. Deploy **Furnace Vents** with invulnerability off and watch for the warning before a jet fires. Use
    **Lab controls → Exit to title**. If you started with a campaign checkpoint, confirm **Continue** still opens it.
+4. With a gamepad, open **Lab** from the title, change the starting weapon with the D-pad, and deploy with **A**.
+   Pause with **Start**, open **Lab controls**, and back out with **B**.
 
 ## Workflow
 
