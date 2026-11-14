@@ -15,6 +15,8 @@ Load them from DevTools or use the headless runner. The game's built-in `SlagLab
 | `checkpoint.js` | `window.CP` checks campaign saves, including legacy checkpoints, and scripted pacing via `CP.progression()`, `CP.furnacePacing()` and `CP.latePacing()`. `CP.linkerRecovery()` checks escape from the Furnace ceiling pockets. `CP.traversal()` checks catwalk access and wall jumps. `CP.mutatorHazards()` checks that MOON BOOTS and LIGHTS OUT stay on through Slag Rain's scripted rain. |
 | `lab.js` | `checkLab()` verifies presets, snapshots, roster validation, reset and save isolation through the browser API. |
 | `lab-sweep.js` | `labSweep('weapons' \| 'mobs' \| 'hazards')` fires weapons through player input and uses controlled fixtures to exercise enemy AI, boss phases, machinery, breakables and traversal. A weapon that hurts its dummy must count a hit for each shot that connected, so accuracy stays fair. |
+| `dump.js` | `window.KD`: `KD.run(kinds, states)` spawns, draws and kills each kind on a seeded RNG and pinned clocks and returns what each step did, line by line, for `compare.mjs` to diff. `KD.kinds()` and `KD.states()` list the build's kinds and the AI states its scene tests for |
+| `compare.mjs` | Runs `dump.js` in the working tree and in a git ref side by side and lists the kinds and cases that differ. See [Comparing two builds](#comparing-two-builds) |
 | `run.mjs` | Serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on pushes to `main` and on pull requests. |
 | `campaign-bot.js` | The campaign controller follows platforms, jumps, grapples, dodges fire and seeks medkits using normal game mechanics. |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
@@ -63,6 +65,38 @@ node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729
 Page errors and console errors fail the check. The runner exits with status 1 and names the failing checks.
 It fetches Phaser from jsDelivr once and verifies it against the game's integrity hash. Set `PLAYTEST_PHASER`
 to a local copy of `phaser.min.js` to run offline. The same integrity check applies.
+
+## Comparing two builds
+
+`compare.mjs` checks a refactor or a balance pass against another build, kind by kind. It serves the working tree and
+a git ref side by side, runs the same dumps for every enemy kind in both and lists what differs:
+
+```bash
+node dev/playtest/compare.mjs
+```
+
+```bash
+node dev/playtest/compare.mjs HEAD~1 --kinds=heavy,boss
+```
+
+The ref defaults to `origin/main`. Each kind is spawned in the campaign, in OVERTIME and in a stationary Lab room,
+drawn once in every AI state the scene tests for (status marks off and on, plain and busy state fields), and killed
+by bullet, pellet, rocket, shatter, tick blast, crush, kick, execute and ripper, with a big overkill, a headshot, as
+an elite, burning, while held, as the second last foe, as the last foe of a wave and as the last foe of the run.
+It records every field a spawn sets, the body and attached images, both graphics layers' command buffers, BUS
+events, timers, gib, light, blast, spawn, fx, shake and hit stop calls, and how many random draws each step used.
+Cases with the same change print once with a count. Lines that match but come in another order are called out,
+since a moved random draw is enough to change a seeded campaign. It takes about 40 seconds, exits 0 when nothing
+differs, 1 when anything does or a page throws, and 2 on a bad option or ref.
+
+Both pages run the working tree's `harness.js` and `dump.js`. What keeps a dump the same between page loads:
+
+- pin `game.loop.now` before `T.boot`, set `Sfx.muted`, and seed `Math.random` before each spawn and each step
+- pin the scene clock (`g.time.now`) after `T.setup`, and point `Date.now` at the loop clock
+- after a spawn or a kill, fire only the scene clock's timers (`g.time.preUpdate` and `g.time.update`); full
+  `T.run` steps don't repeat between page loads
+- give both builds the same list of kinds in the same order, since state carries over from one kind to the next.
+  `compare.mjs` uses the ref's order and adds any kinds only the working tree has at the end
 
 ## Running it in a browser
 
