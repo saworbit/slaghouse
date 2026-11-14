@@ -145,6 +145,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- `dev/sfxgen/calibcheck.mjs` works again, so `build.py` keeps its stale-calibration check. The `Sfx` block read
+  `OPTS` while loading (the remembered mute); the mute is now applied just after the block. `dev/check.mjs`, and
+  so CI, now fails if the block can't load on its own or a `calib.json` entry is stale, and `run.mjs` checks that
+  a saved mute is applied on load. (#124)
 - Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
   longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
 - In the Lab setup, changing **Room** keeps the weapon, difficulty, modifier, checkboxes and roster you already set,

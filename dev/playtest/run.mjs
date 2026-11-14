@@ -497,6 +497,12 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('a saved mute is applied when the page loads', async ctx => {
+    await ctx.addInitScript(() => { try { localStorage.setItem('slaghouse.muted', '1'); } catch (err) { /* no storage */ } });
+    const page = await open(ctx, []);
+    const r = await page.evaluate(() => ({ muted: Sfx.muted, opt: OPTS.muted, hint: game.scene.getScene('Title').menuHint._text }));
+    return r.muted === true && r.opt === 1 && r.hint.includes('MUTED') ? [] : [`slaghouse.muted = 1 loaded as ${JSON.stringify(r)}`];
+  });
   await check('two tabs: lifetime stats, codex and campaign save', async ctx => {
     const page = await open(ctx, ['twotab']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return TT.check(); })).fails;

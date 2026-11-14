@@ -23,7 +23,9 @@ node dev/check.mjs
 
 This compiles the game script and both audio banks, checks that local scripts exist and that CDN scripts are pinned
 to an exact version and carry an integrity hash. If you bump Phaser, put the new file's sha384 hash in the tag. It also notes any sampled sound name the game asks for that `sfx_bank.js` doesn't have (a
-note, not a failure: the synth plays instead). CI runs the same script on every push to `main` and on every pull
+note, not a failure: the synth plays instead). It fails if the `Sfx` block in `slaghouse.html` can't load on its own
+(it must not read page globals such as `OPTS` while loading) or if a `dev/sfxgen/calib.json` entry was measured
+against an older version of its procedural sound. CI runs the same script on every push to `main` and on every pull
 request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save

@@ -3,6 +3,7 @@
 // - the optional audio banks compile
 // - every local <script src> exists, and CDN scripts are pinned to an exact version with an integrity hash
 // - notes any sampled sound name the game asks for that sfx_bank.js doesn't have (the synth plays instead)
+// - the Sfx block loads on its own and every dev/sfxgen/calib.json entry matches its procedural sound (calibcheck)
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,6 +57,17 @@ for (const bank of ['sfx_bank.js', 'music_bank.js']) {
   if (missing.length) console.log(`note  ${missing.length} sampled sound(s) not in sfx_bank.js, so the synth plays: ${missing.join(' ')}`);
   else ok(`every sampled sound name the game asks for is in sfx_bank.js`);
 }
+
+// sfxgen calibration (#124): calibcheck.mjs evaluates the `const Sfx = { ... };` block with no page globals, the
+// way build.py's stale check does. A block that can't load that way, or a calib.json entry measured against an older
+// version of its procedural sound, fails here (re-run slagCalib in the browser for stale ones; see dev/sfxgen/README.md).
+try {
+  const { fingerprints } = await import('./sfxgen/calibcheck.mjs');
+  const now = fingerprints(html), calib = JSON.parse(readFileSync(join(root, 'dev', 'sfxgen', 'calib.json'), 'utf8'));
+  const stale = Object.entries(calib).filter(([name, entry]) => name in now && entry[2] && entry[2] !== now[name]).map(([name]) => name);
+  if (stale.length) fail(`calib.json: ${stale.length} entries were measured against an older procedural sound: ${stale.join(' ')}`);
+  else ok(`calib.json: all ${Object.keys(calib).length} entries match the Sfx block`);
+} catch (err) { fail(`dev/sfxgen/calibcheck.mjs could not load the Sfx block from slaghouse.html: ${err.message}`); }
 
 if (failures.length) {
   console.log(`\n${failures.length} check(s) failed.`);
