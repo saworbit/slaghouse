@@ -5,6 +5,8 @@
 //     and dies without an error
 //   - every breakable prop in every arena (props.js): it sits where it can, breaks and goes off, restocks and breaks
 //     again to a blast without an error
+//   - every arena's nav graph, with the player's long drops and wall climbs: each standing cell reaches the start
+//     and gets back (#125)
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
 //     the act, and a few damaged saves that must fall back to New Campaign
 //   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors
@@ -46,7 +48,7 @@ const sweepOnly = args.includes('--lab-sweep');
 const campaignOnly = args.includes('--campaign');
 const brutal = args.includes('--brutal');
 const seedArg = args.findLast(arg => arg.startsWith('--seeds='));
-const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
+const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
 if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
   usageError(`--seeds expects comma-separated unsigned 32-bit integers, got ${seedArg}`);
 }
@@ -520,6 +522,26 @@ try {
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;
+  });
+  await check('every arena lets the player reach every standing cell and get back to the start', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      // the player's graph, long drops and wall climbs included (#125): every standing cell reaches the start and back
+      const graphs = [...ARENAS.map(A => [A.name, A.grid]), ...CAMPAIGN_ARENAS.filter((A, i) => A.grid !== ARENAS[i].grid).map(A => [A.name + ' (campaign)', A.grid])];
+      for (const [name, grid] of graphs) {
+        const nav = buildNav(grid), N = nav.nodes.length, fwd = nav.nodes.map(() => []), back = nav.nodes.map(() => []);
+        nav.nodes.forEach((n, k) => n.edges.forEach(e => { fwd[k].push(e.to); back[e.to].push(k); }));
+        const s = nav.id(4, 24);
+        if (s < 0) { fails.push(`${name}: no standing cell at the start (4,24)`); continue; }
+        const bfs = adj => { const seen = new Uint8Array(N); seen[s] = 1; const q = [s]; while (q.length) for (const t of adj[q.shift()]) if (!seen[t]) { seen[t] = 1; q.push(t); } return seen; };
+        const f = bfs(fwd), b = bfs(back), cell = k => `(${nav.nodes[k].x},${nav.nodes[k].y})`;
+        const away = [...Array(N).keys()].filter(k => !f[k]), stuck = [...Array(N).keys()].filter(k => !b[k]);
+        if (away.length) fails.push(`${name}: ${away.length} cells can't be reached from the start, e.g. ${away.slice(0, 4).map(cell).join(' ')}`);
+        if (stuck.length) fails.push(`${name}: ${stuck.length} cells have no way back to the start, e.g. ${stuck.slice(0, 4).map(cell).join(' ')}`);
+      }
+      return [...fails, ...T.errs];
+    });
   });
   await check('upper catwalks and responsive wall jumps', async ctx => {
     const page = await open(ctx, ['checkpoint']);
