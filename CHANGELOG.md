@@ -145,6 +145,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- `dev/sfxgen/calibcheck.mjs` works again, so `build.py` keeps its stale-calibration check. The `Sfx` block read
+  `OPTS` while loading (the remembered mute); the mute is now applied just after the block. `dev/check.mjs`, and
+  so CI, now fails if the block can't load on its own or a `calib.json` entry is stale, and `run.mjs` checks that
+  a saved mute is applied on load. (#124)
 - Ten weapons counted shots but never hits, so leaning on them dragged accuracy and the grade down: the Sonic
   Blaster, Pinball Cannon, Napalm Launcher, Storm Coil, Tractor, Flare Gun, Net Gun, Grav Bomb, Tripwire and
   Gas Launcher. Each now counts one hit per shot that connects: a blast, ball, can, coil, throw, flare, net, pulse,
