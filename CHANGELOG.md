@@ -161,6 +161,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   the glow, gun or thruster images it carries, and where it really starts. `spawnEnemy` calls it instead of
   walking an 82-branch chain, and `kinds.js` fails a record that names a missing method. Every kind spawns
   exactly as before. (#52)
+- The last kind checks in `killEnemy` that only picked a value moved onto the records as plain fields: `ragdoll`,
+  the jet's `haywire`, `noAirStyle`, the mender's `deathFlash`, `killZoom`, the boss's `gibPower`, `gibSpread` and
+  `winDelay`, the gunship's `noGibs`, `burstSparks` and `burstFire`, the heavy's `killShake` and `killStop`, each
+  rifleman's `dropGun` and the tick's `skipOneLeft`. Each is read where the old check ran, so every kill draws the
+  same random numbers in the same order and does exactly what it did. `kinds.js` checks each field's type and that
+  `ragdoll` matches the ragdoll art in `RAG`. (#145)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
