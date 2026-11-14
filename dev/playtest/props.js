@@ -61,8 +61,11 @@ window.PR = (() => {
     return { fails, props: count };
   };
   // Rounds the player never fired and scenery blasts must not count as hits: they'd lift run accuracy (#88).
+  // Seeded so the cook-off plays out the same every run. On seed 158 a cook-off round used to send a gas canister
+  // into the grunts, and its blast counted.
   PR.accuracy = () => {
     const fails = [];
+    Math.random = seeded(158); Sfx.muted = true; game.loop.now = game.loop.time = 10000;
     RUNMODE = 'endless'; T.boot();
     const g = T.setup(0), crate = g.props.find(p => p.kind === 'ammo');
     g.props = [crate];
@@ -78,6 +81,8 @@ window.PR = (() => {
     const e = grunts[0], at = () => [e.body.center.x, e.body.center.y];
     g.explode(...at(), TUNE.BARREL);
     if (g.stats.hits !== hits0) fails.push('a drum blast counted as a hit');
+    g.explode(...at(), TUNE.CANISTER);
+    if (g.stats.hits !== hits0) fails.push('a gas canister blast counted as a hit');
     const round = g.spawnBullet('nail', ...at(), 0, 400, 1, 1); round.free = true;
     g.onBulletHit(round, e);
     if (g.stats.hits !== hits0) fails.push('a free round counted as a hit');

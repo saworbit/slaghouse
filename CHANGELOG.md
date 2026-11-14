@@ -216,6 +216,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   switches them back from pad prompts, and pad input switches them to pad prompts again. (#73)
 - An ammo crate's cook-off rounds, a scrap golem's shards and drum or prop blasts no longer count as hits, so they
   don't lift run accuracy or the grade. Only the player's own shots, blasts and strikes count. (#88)
+- A gas canister's blast no longer counts as a hit either. A cook-off round or a stray shot could send one flying
+  into foes and lift run accuracy. The accuracy check in `dev/playtest/props.js` is seeded now, so its cook-off
+  plays out the same every run, and it fails if a canister blast counts. (#88)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The
