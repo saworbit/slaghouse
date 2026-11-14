@@ -12,3 +12,9 @@ updates:
       interval: monthly
     commit-message:
       prefix: "Playtest:"
+  - package-ecosystem: pip
+    directory: /dev/synthwave
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "Synthwave:"
