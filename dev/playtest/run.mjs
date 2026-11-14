@@ -404,6 +404,29 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('weapon cards and the hint strip follow the last input device', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      window.__pad = { connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ value: 0 })) };
+      navigator.getGamepads = () => [window.__pad];
+      const pad = () => { window.__pad.buttons[8].value = 1; T.run(50); window.__pad.buttons[8].value = 0; T.run(50); };   // Back: no action in a run
+      RUNMODE = 'campaign'; T.boot(); T.run(300);
+      const g = T.g(), hud = game.scene.getScene('Hud');
+      g.issueWeapons(['shotgun']); T.run(50);
+      const shown = () => `card '${hud.unlockCards[0].key._text}', hints '${hud.hint1._text.slice(0, 8)}'`;
+      const want = (pad, what) => {
+        const card = hud.unlockCards[0].key._text, hints = hud.hint1._text;
+        if (pad ? card !== 'HOLD LB FOR WHEEL' || hints !== HINT_PAD1 : card !== '2 TO EQUIP' || hints !== HINT1) fails.push(`${what}: ${shown()}`);
+      };
+      want(false, 'before any pad input');
+      pad(); want(true, 'after pad input');
+      window.dispatchEvent(new MouseEvent('mousemove')); T.run(50); want(false, 'after moving the mouse');
+      pad(); want(true, 'after pad input again');
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' })); T.run(50); want(false, 'after a key press');
+      return [...fails, ...T.errs];
+    });
+  });
   await check('two tabs: lifetime stats, codex and campaign save', async ctx => {
     const page = await open(ctx, ['twotab']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return TT.check(); })).fails;

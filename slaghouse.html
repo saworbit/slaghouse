@@ -1014,6 +1014,8 @@ const PAD = {
     try { a.playEffect('dual-rumble', { duration: Math.min(ms, 400), strongMagnitude: clamp(k * OPTS.shake, 0, 1), weakMagnitude: clamp(k * 1.4 * OPTS.shake, 0, 1) }); } catch (err) { /* no rumble */ }
   },
 };
+// The device the player last touched picks the prompts: pad input sets PAD.active in poll(), a key or the mouse clears it.
+for (const ev of ['keydown', 'mousemove', 'mousedown', 'wheel']) window.addEventListener(ev, () => { PAD.active = false; }, { passive: true });
 // ---- medals: earned in a run, collected for good (localStorage) ----
 const MEDALS = [
   { id: 'untouched', name: 'UNTOUCHABLE', d: 'CLEAR A WAVE WITHOUT A SCRATCH' },
@@ -19240,7 +19242,6 @@ class HudScene extends Phaser.Scene {
     this.hp = this.dispHp = d.hp; this.lblHp.setStyle({ color: d.hp > 60 ? '#ffffff' : d.hp > 30 ? '#ffc23a' : '#ff4a3a' }).setText(String(Math.ceil(d.hp)));
     this.applyWeapon(d.weapon); this.count = d.enemies; this.lblCount.setText(String(d.enemies));
     this.setOverlay(false); this.tweens.killTweensOf(this.call); this.call.setAlpha(0);
-    if (PAD.active) { this.hint1.setText(HINT_PAD1); this.hint2.setText(HINT_PAD2); }
     this.setPerkUi(false);
     this.t0 = d.carry ? -1e9 : this.time.now; this.hurtA = 0; this.healA = 0; this.flashA = 0; this.hmT = 0; this.splats = [];
     this.tweens.killTweensOf(this.lblCombo); this.lblCombo.setAlpha(0);
@@ -19323,6 +19324,9 @@ class HudScene extends Phaser.Scene {
     } else { this.rampA = 0; this.rArmF = 0; }
     this.rArmLbl.setVisible(this.rArmF > 0);
     this.lblMute.setVisible(Sfx.muted && !this.overOn);
+    if (this.padHints !== PAD.active) {                                  // the hint strip follows the device in use, as the weapon cards do
+      this.padHints = PAD.active; this.hint1.setText(PAD.active ? HINT_PAD1 : HINT1); this.hint2.setText(PAD.active ? HINT_PAD2 : HINT2);
+    }
     this.lblRamp.setVisible(this.rampA > 0 && !this.overOn).setAlpha(Math.floor(time / 150) % 2 ? 1 : 0.55);
     this.dispHp = this.dispHp > this.hp ? Math.max(this.hp, this.dispHp - 30 * dt) : this.hp;
     this.hurtA = Math.max(0, this.hurtA - dt * 1.8); this.healA = Math.max(0, this.healA - dt * 2);
