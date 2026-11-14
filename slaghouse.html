@@ -791,7 +791,7 @@ const TUNE = {
   STAKE:   { cooldown: 900, speed: 640, damage: 65, life: 1.1, carry: 2 },
   MINE:    { cooldown: 650, max: 4, speed: 230, lift: 90, arm: 0.6, trigger: 30, radius: 52, maxDamage: 85, minDamage: 25, selfDamage: 14, push: 420, maxRise: 540, tileDamage: 90 },
   JET:     { speed: 150, range: 130, height: 56, tellMs: 350, burst: 4, gap: 0.09, bulletSpeed: 400, damage: 5,
-             boom: { radius: 46, maxDamage: 50, minDamage: 14, selfDamage: 16, push: 360, maxRise: 460, tileDamage: 70 } },
+             boom: { radius: 46, maxDamage: 50, minDamage: 14, selfDamage: 16, push: 360, maxRise: 460, tileDamage: 70, scenery: true } },
   SAPPER:  { plantRange: 80, plantMs: 550, fuse: 2.0, cd: 4.5,
              blast: { radius: 54, maxDamage: 40, minDamage: 10, enemyDamage: 30, selfDamage: 28, push: 380, maxRise: 500, enemy: true, tileDamage: 120 } },
   BROOD:   { speed: 26, cd: 3.8, tellMs: 700, spawn: 2, max: 5, burst: 4 },
@@ -809,9 +809,9 @@ const TUNE = {
   CLOAKER: { strikeDmg: 20, revealMs: 350, dash: 320 },
   PYRO:    { windMs: 500, fireCd: 2.6,
              burst: { radius: 26, maxDamage: 12, minDamage: 4, enemyDamage: 10, selfDamage: 8, push: 120, maxRise: 200, enemy: true, burn: 2, tileDamage: 12 },
-             tank: { radius: 48, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 360, maxRise: 460, burn: 3, tileDamage: 70 } },
+             tank: { radius: 48, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 360, maxRise: 460, burn: 3, tileDamage: 70, scenery: true } },
   GUNSHIP: { speed: 75, alt: 124, volleyCd: 4, dropCd: 9, strafeCd: 6.5,
-             crash: { radius: 90, maxDamage: 120, minDamage: 30, selfDamage: 30, push: 520, maxRise: 640, tileDamage: 140 } },
+             crash: { radius: 90, maxDamage: 120, minDamage: 30, selfDamage: 30, push: 520, maxRise: 640, tileDamage: 140, scenery: true } },
   CAMPAIGN_GUNSHIP: { hp: 360, firstVolley: 3.5, volleyCd: 5.5, rocketTellMs: 950, rockets: 2, rocketGapMs: 520,
                        firstDrop: 12, firstStrafe: 8, strafeTellMs: 700, strafeCd: 8, rounds: 9, shotGap: 0.14, recovery: 2.8 },
   // ---- overdrive round ----
@@ -937,7 +937,7 @@ const TUNE = {
   DECOY:    { cooldown: 1400, speed: 280, lift: 90, fuse: 0.7, life: 5, pull: 260,
               boom: { radius: 62, maxDamage: 70, minDamage: 20, selfDamage: 14, push: 420, maxRise: 520 } },
   TORCHER:  { speed: 45, reach: 96, sprayMs: 1400, coolMs: 1100, sweep: 0.55, dmg: 7, back: 1.6,
-              boom: { radius: 58, maxDamage: 60, minDamage: 18, selfDamage: 18, push: 380, maxRise: 480 } },
+              boom: { radius: 58, maxDamage: 60, minDamage: 18, selfDamage: 18, push: 380, maxRise: 480, scenery: true } },
   DISCUS:   { speed: 70, keep: [150, 250], cd: 3.2, disc: 280, range: 260, dmg: 10, kickDmg: 45 },
   SPOREPOD: { cd: 3.2, n: 3, speed: 70, turn: 2.2, life: 4.5, dmg: 6 },
   // ---- armory round ----
@@ -8897,7 +8897,7 @@ class GameScene extends Phaser.Scene {
       if (W.burn) this.ignite(e, W.burn);
       this.damageEnemy(e, dmg, Math.cos(ang), Math.sin(ang), 'rocket');
     }
-    if (damaged && byPlayer && !W.scenery && countHit) this.stats.hits++;   // a drum or prop going off isn't a shot that hit
+    if (damaged && byPlayer && !W.scenery && countHit) this.stats.hits++;   // a drum, prop or dead foe's wreck going off isn't a shot that hit
     for (const { rd, f } of this.pushRagdolls(x, y, R + 10, 620, 400)) { // corpses fly; close ones burst
       const c = rd.pts[2];
       if (W.burn) rd.burnT = Math.max(rd.burnT, W.burn);

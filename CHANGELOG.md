@@ -225,6 +225,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - A gas canister's blast no longer counts as a hit either. A cook-off round or a stray shot could send one flying
   into foes and lift run accuracy. The accuracy check in `dev/playtest/props.js` is seeded now, so its cook-off
   plays out the same every run, and it fails if a canister blast counts. (#88)
+- A dead foe's wreck or tank no longer counts as a hit when its blast catches other foes: the gunship and blimp
+  crash, a torcher's or pyro's tank and a jet's haywire jetpack. The shot that killed it already counted. Nothing
+  else about those blasts changes. `PR.accuracy()` fails if any of the four counts. (#144)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The
