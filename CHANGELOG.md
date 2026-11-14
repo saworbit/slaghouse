@@ -74,6 +74,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- A wave's rules now come from its run mode's record too: where its foes come from, its random source (DAILY's is
+  seeded by the day), its modifier, the wave card, how many elites it gets, its music, the run's starting foe count
+  and whether the OPTIONS mutator applies. `startWave` and `waveTrack` ask `this.mode` instead of branching on the
+  mode flags. Every wave start in every mode plays out exactly as before, and the mode check fails a record that
+  is missing a wave rule. (#128)
 - Run modes have one record each (`RUN_MODES`: campaign, OVERTIME, DAILY, BOSS RUSH and the Lab), and the scene
   holds `this.mode`. The run's wave total, what counts toward lifetime stats (runs, kills, deaths, time, mastery,
   medals, codex sightings) and which record the results screen writes now come from it instead of separate flag
