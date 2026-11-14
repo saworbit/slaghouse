@@ -1319,141 +1319,142 @@ const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship
 // that draws its own glow, beams and tells each frame (none for the plain ones), and marks says which shared status
 // marks draw over it first: all of them (a net, a microwave's swell, a bubble, stasis) unless it says 'net' for only
 // the net or 'none'. death names the method for its own death: blasts, spills, loose parts, a boss's fall (none for
-// the ones that just burst). FLIERS and isHumanoid below are built from these, and dev/playtest/kinds.js checks every
-// kind (#52).
+// the ones that just burst). setup names the method that gives it its own fields, images and start position when it
+// spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). FLIERS
+// and isHumanoid below are built from these, and dev/playtest/kinds.js checks every kind (#52).
 const ENEMY = {
   grunt: { key: 'grunt', frame0: 'w0', update: 'updateWalker', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
            gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15] },
-  heavy: { key: 'heavy', frame0: 'w0', update: 'updateWalker', visuals: 'visHeavy', fw: 28, fh: 28, bw: 18, bh: 24, hp: 120, patrol: 30, chase: 92, jumpV: 330, leapV: 330, sight: 220, range: 60, touch: 20, kb: 0.35,
+  heavy: { key: 'heavy', frame0: 'w0', setup: 'setupHeavy', update: 'updateWalker', visuals: 'visHeavy', fw: 28, fh: 28, bw: 18, bh: 24, hp: 120, patrol: 30, chase: 92, jumpV: 330, leapV: 330, sight: 220, range: 60, touch: 20, kb: 0.35,
            gibs: ['g_core', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
-  drone: { key: 'drone', frame0: 'd0', flier: true, update: 'updateDrone', visuals: 'visDrone', fw: 18, fh: 16, bw: 12, bh: 12, hp: 30, sight: 240, touch: 8, kb: 1.3,
+  drone: { key: 'drone', frame0: 'd0', flier: true, setup: 'setupDrone', update: 'updateDrone', visuals: 'visDrone', fw: 18, fh: 16, bw: 12, bh: 12, hp: 30, sight: 240, touch: 8, kb: 1.3,
            gibs: ['g_eye', 'g_plateL', 'g_plate', 'g_wire', 'g_wire', 'g_plate', 'g_chunk', 'g_flesh1'], gibN: [9, 12] },
-  enforcer: { key: 'enforcer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 60, speed: 120, sight: 300, touch: 8, kb: 0.8, dodge: 0.5, dodgeCd: 1.6, head: 'g_ehelm',
+  enforcer: { key: 'enforcer', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 60, speed: 120, sight: 300, touch: 8, kb: 0.8, dodge: 0.5, dodgeCd: 1.6, head: 'g_ehelm',
               gibs: ['g_earmor', 'g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
-  stalker: { key: 'stalker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visStalker', fw: 20, fh: 24, bw: 10, bh: 20, hp: 40, speed: 175, sight: 260, touch: 10, lungeDmg: 16, kb: 1, dodge: 0.55, dodgeCd: 1.2, head: 'g_hood',
+  stalker: { key: 'stalker', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visStalker', fw: 20, fh: 24, bw: 10, bh: 20, hp: 40, speed: 175, sight: 260, touch: 10, lungeDmg: 16, kb: 1, dodge: 0.55, dodgeCd: 1.2, head: 'g_hood',
              gibs: ['g_blade', 'g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 15] },
-  bulwark: { key: 'bulwark', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 100, speed: 80, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_bhelm',
+  bulwark: { key: 'bulwark', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 100, speed: 80, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_bhelm',
              gibs: ['g_shield', 'g_plateL', 'g_shard', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [14, 18] },
-  mender: { key: 'mender', frame0: 'm0', flier: true, update: 'updateMender', visuals: 'visMender', marks: 'none', fw: 18, fh: 16, bw: 12, bh: 12, hp: 40, sight: 260, touch: 6, kb: 1.2,
+  mender: { key: 'mender', frame0: 'm0', flier: true, setup: 'setupMender', update: 'updateMender', visuals: 'visMender', marks: 'none', fw: 18, fh: 16, bw: 12, bh: 12, hp: 40, sight: 260, touch: 6, kb: 1.2,
             gibs: ['g_mcore', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2', 'g_wire'], gibN: [9, 12] },
-  tick: { key: 'tick', frame0: 'k0', update: 'updateTick', death: 'deathTick', fw: 14, fh: 10, bw: 10, bh: 8, hp: 12, speed: 150, sight: 260, touch: 0, kb: 1.4, gibs: ['g_chunk', 'g_chunk', 'g_flesh1'], gibN: [4, 6] },
-  sniper: { key: 'sniper', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 110, sight: 520, touch: 6, kb: 0.9, dodge: 0.4, dodgeCd: 2, head: 'g_shood',
+  tick: { key: 'tick', frame0: 'k0', setup: 'setupTick', update: 'updateTick', death: 'deathTick', fw: 14, fh: 10, bw: 10, bh: 8, hp: 12, speed: 150, sight: 260, touch: 0, kb: 1.4, gibs: ['g_chunk', 'g_chunk', 'g_flesh1'], gibN: [4, 6] },
+  sniper: { key: 'sniper', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 110, sight: 520, touch: 6, kb: 0.9, dodge: 0.4, dodgeCd: 2, head: 'g_shood',
             gibs: ['g_earmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  rocketeer: { key: 'rocketeer', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visRifleman', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 95, sight: 340, touch: 8, kb: 0.6, dodge: 0.3, dodgeCd: 2, head: 'g_rhelm',
+  rocketeer: { key: 'rocketeer', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visRifleman', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 95, sight: 340, touch: 8, kb: 0.6, dodge: 0.3, dodgeCd: 2, head: 'g_rhelm',
                gibs: ['g_rarmor', 'g_rarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 16] },
-  wasp: { key: 'wasp', frame0: 'p0', flier: true, update: 'updateWasp', visuals: 'visWasp', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, sight: 320, touch: 8, kb: 1,
+  wasp: { key: 'wasp', frame0: 'p0', flier: true, setup: 'setupWasp', update: 'updateWasp', visuals: 'visWasp', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, sight: 320, touch: 8, kb: 1,
           gibs: ['g_wing', 'g_wing', 'g_plate', 'g_wire', 'g_eye', 'g_plateL', 'g_chunk'], gibN: [9, 12] },
-  rammer: { key: 'rammer', frame0: 'w0', update: 'updateRammer', visuals: 'visRammer', fw: 30, fh: 22, bw: 22, bh: 18, hp: 170, patrol: 28, chase: 70, sight: 260, touch: 18, kb: 0.15,
+  rammer: { key: 'rammer', frame0: 'w0', setup: 'setupRammer', update: 'updateRammer', visuals: 'visRammer', fw: 30, fh: 22, bw: 22, bh: 18, hp: 170, patrol: 28, chase: 70, sight: 260, touch: 18, kb: 0.15,
             gibs: ['g_horn', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk'], gibN: [18, 24] },
-  jet: { key: 'jet', frame0: 'j0', flier: true, update: 'updateJet', visuals: 'visJet', fw: 20, fh: 24, bw: 10, bh: 18, hp: 55, sight: 320, touch: 6, kb: 0.9, head: 'g_jhelm',
+  jet: { key: 'jet', frame0: 'j0', flier: true, setup: 'setupJet', update: 'updateJet', visuals: 'visJet', fw: 20, fh: 24, bw: 10, bh: 18, hp: 55, sight: 320, touch: 6, kb: 0.9, head: 'g_jhelm',
          gibs: ['g_jarmor', 'g_jarmor', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_wire', 'g_plate'], gibN: [12, 15] },
-  sapper: { key: 'sapper', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visSapper', death: 'deathSapper', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, speed: 150, sight: 280, touch: 6, kb: 1, dodge: 0.45, dodgeCd: 1.5, head: 'g_smask',
+  sapper: { key: 'sapper', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visSapper', death: 'deathSapper', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, speed: 150, sight: 280, touch: 6, kb: 1, dodge: 0.45, dodgeCd: 1.5, head: 'g_smask',
             gibs: ['g_satchel', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  brood: { key: 'brood', frame0: 'w0', update: 'updateBrood', visuals: 'visBrood', death: 'deathBrood', fw: 34, fh: 26, bw: 26, bh: 20, hp: 170, sight: 260, touch: 14, kb: 0.2,
+  brood: { key: 'brood', frame0: 'w0', setup: 'setupBrood', update: 'updateBrood', visuals: 'visBrood', death: 'deathBrood', fw: 34, fh: 26, bw: 26, bh: 20, hp: 170, sight: 260, touch: 14, kb: 0.2,
            gibs: ['g_egg', 'g_egg', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_rib', 'g_bone'], gibN: [22, 28] },
-  cloaker: { key: 'cloaker', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visCloaker', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 190, sight: 300, touch: 0, kb: 1, dodge: 0.5, dodgeCd: 1.4, head: 'g_chood',
+  cloaker: { key: 'cloaker', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visCloaker', fw: 18, fh: 24, bw: 10, bh: 20, hp: 45, speed: 190, sight: 300, touch: 0, kb: 1, dodge: 0.5, dodgeCd: 1.4, head: 'g_chood',
              gibs: ['g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14] },
-  pyro: { key: 'pyro', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visPyro', death: 'deathPyro', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
+  pyro: { key: 'pyro', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visPyro', death: 'deathPyro', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
           gibs: ['g_tank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  gunship: { key: 'gunship', frame0: 'g0', flier: true, update: 'updateGunship', visuals: 'visGunship', death: 'deathGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
+  gunship: { key: 'gunship', frame0: 'g0', flier: true, setup: 'setupGunship', update: 'updateGunship', visuals: 'visGunship', death: 'deathGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
              gibs: ['g_plateL', 'g_plateL', 'g_plateL', 'g_jplate', 'g_jplate', 'g_wire', 'g_wire', 'g_shard', 'g_shard2', 'g_plate', 'g_core'], gibN: [20, 26] },
-  screamer: { key: 'screamer', frame0: 's0', flier: true, update: 'updateScreamer', visuals: 'visScreamer', death: 'deathScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
-  warden: { key: 'warden', frame0: 'v0', flier: true, update: 'updateWarden', visuals: 'visWarden', death: 'deathWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
-  jugg: { key: 'jugg', frame0: 's0w0', update: 'updateJugg', visuals: 'visJugg', death: 'deathJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
+  screamer: { key: 'screamer', frame0: 's0', flier: true, setup: 'setupScreamer', update: 'updateScreamer', visuals: 'visScreamer', death: 'deathScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
+  warden: { key: 'warden', frame0: 'v0', flier: true, setup: 'setupWarden', update: 'updateWarden', visuals: 'visWarden', death: 'deathWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
+  jugg: { key: 'jugg', frame0: 's0w0', setup: 'setupJugg', update: 'updateJugg', visuals: 'visJugg', death: 'deathJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
           gibs: ['g_jplate', 'g_jplate', 'g_jplate', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk', 'g_core'], gibN: [24, 30] },
-  boss: { key: 'boss', frame0: 'w0', update: 'updateBoss', visuals: 'visBoss', death: 'deathBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
+  boss: { key: 'boss', frame0: 'w0', setup: 'setupBoss', update: 'updateBoss', visuals: 'visBoss', death: 'deathBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
           gibs: ['g_core', 'g_core', 'g_core', 'g_plateL', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2',
                  'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40] },
   // ---- overdrive round ----
-  slagling: { key: 'slagling', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
+  slagling: { key: 'slagling', frame0: 'a', setup: 'setupMolten', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 26, fh: 20, bw: 20, bh: 15, hp: 70, sight: 300, touch: 12, kb: 0.5, tier: 2, child: 'slagmid', molten: true,
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_crust', 'g_slag', 'g_slag', 'g_crust'], gibN: [10, 13] },
-  slagmid:  { key: 'slagmid', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 18, fh: 14, bw: 14, bh: 10, hp: 30, sight: 300, touch: 8, kb: 0.8, tier: 1, child: 'slagbit', molten: true,
+  slagmid:  { key: 'slagmid', frame0: 'a', setup: 'setupMolten', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 18, fh: 14, bw: 14, bh: 10, hp: 30, sight: 300, touch: 8, kb: 0.8, tier: 1, child: 'slagbit', molten: true,
               gibs: ['g_slag', 'g_crust', 'g_slag', 'g_slag'], gibN: [6, 8] },
-  slagbit:  { key: 'slagbit', frame0: 'a', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
-  burrower: { key: 'burrower', frame0: 'sw0', update: 'updateBurrower', visuals: 'visBurrower', marks: 'none', death: 'deathBurrower', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
+  slagbit:  { key: 'slagbit', frame0: 'a', setup: 'setupMolten', update: 'updateSlagling', visuals: 'visMolten', marks: 'none', fw: 12, fh: 10, bw: 9, bh: 7, hp: 12, sight: 300, touch: 5, kb: 1.2, tier: 0, molten: true, gibs: ['g_slag', 'g_crust'], gibN: [3, 5] },
+  burrower: { key: 'burrower', frame0: 'sw0', setup: 'setupBurrower', update: 'updateBurrower', visuals: 'visBurrower', marks: 'none', death: 'deathBurrower', fw: 18, fh: 30, bw: 12, bh: 24, hp: 120, sight: 900, touch: 0, kb: 0.25,
               gibs: ['g_wormseg', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_chunk', 'g_core', 'g_wormseg'], gibN: [16, 20] },
-  harpooner: { key: 'harpooner', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visHarpooner', marks: 'none', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
+  harpooner: { key: 'harpooner', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visHarpooner', marks: 'none', fw: 20, fh: 24, bw: 11, bh: 20, hp: 70, speed: 105, sight: 310, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_hhelm',
                gibs: ['g_chain', 'g_chain', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  linker: { key: 'linker', frame0: 'l0', flier: true, update: 'updateLinker', visuals: 'visLinker', marks: 'none', death: 'deathLinker', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
+  linker: { key: 'linker', frame0: 'l0', flier: true, setup: 'setupLinker', update: 'updateLinker', visuals: 'visLinker', marks: 'none', death: 'deathLinker', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 320, touch: 6, kb: 1.1, mech: true,
             gibs: ['g_emitter', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [8, 10] },
   // ---- crucible round ----
-  mirror: { key: 'mirror', frame0: 'idle0', humanoid: true, update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 90, speed: 85, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_mhelm',
+  mirror: { key: 'mirror', frame0: 'idle0', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visBulwark', fw: 22, fh: 24, bw: 12, bh: 20, hp: 90, speed: 85, sight: 260, touch: 10, kb: 0.3, dodge: 0, dodgeCd: 99, head: 'g_mhelm',
             gibs: ['g_glass', 'g_glass', 'g_glass', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [14, 18] },
-  hive: { key: 'hive', frame0: 'h0', flier: true, update: 'updateHive', visuals: 'visHive', death: 'deathHive', fw: 22, fh: 22, bw: 16, bh: 16, hp: 90, sight: 300, touch: 8, kb: 0.4,
+  hive: { key: 'hive', frame0: 'h0', flier: true, setup: 'setupHive', update: 'updateHive', visuals: 'visHive', death: 'deathHive', fw: 22, fh: 22, bw: 16, bh: 16, hp: 90, sight: 300, touch: 8, kb: 0.4,
           gibs: ['g_hive', 'g_hive', 'g_hive', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_flesh3'], gibN: [12, 16] },
-  gnat: { key: 'gnat', frame0: 'n0', flier: true, update: 'updateGnat', marks: 'none', fw: 7, fh: 6, bw: 5, bh: 4, hp: 4, sight: 420, touch: 0, kb: 2, tiny: true, gibs: ['g_chunk'], gibN: [0, 1] },
-  stitcher: { key: 'stitcher', frame0: 's0', flier: true, update: 'updateStitcher', visuals: 'visStitcher', death: 'deathStitcher', fw: 18, fh: 16, bw: 12, bh: 12, hp: 55, sight: 300, touch: 6, kb: 1.1, mech: true,
+  gnat: { key: 'gnat', frame0: 'n0', flier: true, setup: 'setupGnat', update: 'updateGnat', marks: 'none', fw: 7, fh: 6, bw: 5, bh: 4, hp: 4, sight: 420, touch: 0, kb: 2, tiny: true, gibs: ['g_chunk'], gibN: [0, 1] },
+  stitcher: { key: 'stitcher', frame0: 's0', flier: true, setup: 'setupStitcher', update: 'updateStitcher', visuals: 'visStitcher', death: 'deathStitcher', fw: 18, fh: 16, bw: 12, bh: 12, hp: 55, sight: 300, touch: 6, kb: 1.1, mech: true,
               gibs: ['g_needle', 'g_needle', 'g_plate', 'g_wire', 'g_skull', 'g_shard'], gibN: [9, 12] },
-  wyrm: { key: 'wyrm', frame0: 'c', flier: true, update: 'updateWyrm', visuals: 'visWyrm', death: 'deathWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
+  wyrm: { key: 'wyrm', frame0: 'c', flier: true, setup: 'setupWyrm', update: 'updateWyrm', visuals: 'visWyrm', death: 'deathWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
           gibs: ['g_wyrmplate', 'g_wyrmplate', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_core', 'g_core', 'g_chunk'], gibN: [20, 26] },
-  wyrmseg: { key: 'wyrmseg', frame0: 'a', flier: true, update: 'updateWyrmseg', visuals: 'visWyrm', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
+  wyrmseg: { key: 'wyrmseg', frame0: 'a', flier: true, setup: 'setupWyrmseg', update: 'updateWyrmseg', visuals: 'visWyrm', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
              gibs: ['g_wyrmplate', 'g_wormseg', 'g_flesh1', 'g_chunk', 'g_wormseg'], gibN: [5, 7] },
   // ---- furnace round ----
-  buzzsaw: { key: 'buzzsaw', frame0: 'z0', flier: true, update: 'updateBuzzsaw', visuals: 'visBuzzsaw', marks: 'none', death: 'deathBuzzsaw', fw: 16, fh: 16, bw: 12, bh: 12, hp: 50, sight: 420, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_shard', 'g_eye', 'g_wire'], gibN: [8, 10] },
-  magnet: { key: 'magnet', frame0: 'm0', flier: true, update: 'updateMagnet', visuals: 'visMagnet', marks: 'none', death: 'deathMagnet', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, sight: 320, touch: 6, kb: 0.6, mech: true, gibs: ['g_magnet', 'g_magnet', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [9, 12] },
-  mimic: { key: 'mimic', frame0: 'h', update: 'updateMimic', visuals: 'visMimic', death: 'deathMimic', fw: 14, fh: 18, bw: 10, bh: 13, hp: 60, speed: 150, sight: 200, touch: 15, kb: 0.8, gibs: ['g_barrel', 'g_barrel', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [10, 13] },
-  howitzer: { key: 'howitzer', frame0: 'w0', update: 'updateHowitzer', visuals: 'visHowitzer', death: 'deathHowitzer', fw: 26, fh: 22, bw: 16, bh: 18, hp: 160, speed: 34, sight: 420, touch: 10, kb: 0.35, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_eye', 'g_wire'], gibN: [10, 13] },
-  blinker: { key: 'blinker', frame0: 'b0', flier: true, update: 'updateBlinker', visuals: 'visBlinker', death: 'deathBlinker', fw: 16, fh: 20, bw: 10, bh: 16, hp: 45, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_wire', 'g_flesh3'], gibN: [8, 11] },
-  gasbag: { key: 'gasbag', frame0: 'g0', flier: true, update: 'updateGasbag', visuals: 'visGasbag', death: 'deathGasbag', fw: 18, fh: 20, bw: 14, bh: 14, hp: 30, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk'], gibN: [5, 7] },
-  welder: { key: 'welder', frame0: 'w0', update: 'updateWelder', visuals: 'visWelder', death: 'deathWelder', fw: 18, fh: 20, bw: 12, bh: 18, hp: 70, speed: 70, sight: 320, touch: 8, kb: 0.7, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_wire', 'g_eye'], gibN: [8, 11] },
-  turret: { key: 'turret', frame0: 't0', update: 'updateTurret', visuals: 'visTurret', death: 'deathTurret', fw: 14, fh: 10, bw: 12, bh: 9, hp: 30, sight: 300, touch: 0, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [4, 6] },
-  duelist: { key: 'duelist', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visDuelist', fw: 18, fh: 24, bw: 10, bh: 20, hp: 65, speed: 130, chase: 190, sight: 320, touch: 0, kb: 0.8, dodge: 0.75, dodgeCd: 0.7, head: 'g_dmask', lungeDmg: 12,
+  buzzsaw: { key: 'buzzsaw', frame0: 'z0', flier: true, setup: 'setupBuzzsaw', update: 'updateBuzzsaw', visuals: 'visBuzzsaw', marks: 'none', death: 'deathBuzzsaw', fw: 16, fh: 16, bw: 12, bh: 12, hp: 50, sight: 420, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_shard', 'g_eye', 'g_wire'], gibN: [8, 10] },
+  magnet: { key: 'magnet', frame0: 'm0', flier: true, setup: 'setupMagnet', update: 'updateMagnet', visuals: 'visMagnet', marks: 'none', death: 'deathMagnet', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, sight: 320, touch: 6, kb: 0.6, mech: true, gibs: ['g_magnet', 'g_magnet', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [9, 12] },
+  mimic: { key: 'mimic', frame0: 'h', setup: 'setupMimic', update: 'updateMimic', visuals: 'visMimic', death: 'deathMimic', fw: 14, fh: 18, bw: 10, bh: 13, hp: 60, speed: 150, sight: 200, touch: 15, kb: 0.8, gibs: ['g_barrel', 'g_barrel', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [10, 13] },
+  howitzer: { key: 'howitzer', frame0: 'w0', setup: 'setupHowitzer', update: 'updateHowitzer', visuals: 'visHowitzer', death: 'deathHowitzer', fw: 26, fh: 22, bw: 16, bh: 18, hp: 160, speed: 34, sight: 420, touch: 10, kb: 0.35, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_eye', 'g_wire'], gibN: [10, 13] },
+  blinker: { key: 'blinker', frame0: 'b0', flier: true, setup: 'setupBlinker', update: 'updateBlinker', visuals: 'visBlinker', death: 'deathBlinker', fw: 16, fh: 20, bw: 10, bh: 16, hp: 45, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_wire', 'g_flesh3'], gibN: [8, 11] },
+  gasbag: { key: 'gasbag', frame0: 'g0', flier: true, setup: 'setupGasbag', update: 'updateGasbag', visuals: 'visGasbag', death: 'deathGasbag', fw: 18, fh: 20, bw: 14, bh: 14, hp: 30, sight: 300, touch: 0, kb: 0.9, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk'], gibN: [5, 7] },
+  welder: { key: 'welder', frame0: 'w0', setup: 'setupWelder', update: 'updateWelder', visuals: 'visWelder', death: 'deathWelder', fw: 18, fh: 20, bw: 12, bh: 18, hp: 70, speed: 70, sight: 320, touch: 8, kb: 0.7, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_wire', 'g_eye'], gibN: [8, 11] },
+  turret: { key: 'turret', frame0: 't0', setup: 'setupTurret', update: 'updateTurret', visuals: 'visTurret', death: 'deathTurret', fw: 14, fh: 10, bw: 12, bh: 9, hp: 30, sight: 300, touch: 0, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [4, 6] },
+  duelist: { key: 'duelist', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visDuelist', fw: 18, fh: 24, bw: 10, bh: 20, hp: 65, speed: 130, chase: 190, sight: 320, touch: 0, kb: 0.8, dodge: 0.75, dodgeCd: 0.7, head: 'g_dmask', lungeDmg: 12,
              gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [12, 15] },
-  creeper: { key: 'creeper', frame0: 'c0', flier: true, update: 'updateCreeper', visuals: 'visCreeper', fw: 16, fh: 10, bw: 12, bh: 8, hp: 40, sight: 360, touch: 14, kb: 1, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [7, 9] },
-  roller: { key: 'roller', frame0: 'r0', update: 'updateRoller', visuals: 'visRoller', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 40, sight: 320, touch: 10, kb: 0.5, gibs: ['g_plate', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [10, 13] },
-  jammer: { key: 'jammer', frame0: 'j0', flier: true, update: 'updateJammer', visuals: 'visJammer', death: 'deathJammer', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 340, touch: 6, kb: 0.9, mech: true, gibs: ['g_shard', 'g_wire', 'g_shard2', 'g_eye', 'g_wire'], gibN: [7, 9] },
-  claw: { key: 'claw', frame0: 'open', flier: true, update: 'updateClaw', visuals: 'visClaw', marks: 'net', death: 'deathClaw', fw: 16, fh: 12, bw: 12, bh: 10, hp: 120, sight: 420, touch: 0, kb: 0, mech: true, noClip: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_wire'], gibN: [8, 10] },
-  sparker: { key: 'sparker', frame0: 's0', update: 'updateSparker', visuals: 'visSparker', fw: 12, fh: 12, bw: 10, bh: 10, hp: 30, sight: 320, touch: 8, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
-  golem: { key: 'golem', frame0: 'g0', update: 'updateGolem', visuals: 'visGolem', death: 'deathGolem', fw: 28, fh: 30, bw: 20, bh: 28, hp: 260, speed: 45, sight: 360, touch: 16, kb: 0.25, mech: true, gibs: ['g_plate', 'g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_barrel', 'g_wire'], gibN: [14, 18] },
-  echo: { key: 'echo', frame0: 'idle0', flier: true, update: 'updateEcho', visuals: 'visEcho', marks: 'net', death: 'deathEcho', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, sight: 400, touch: 0, kb: 0, mech: true, gibs: [], gibN: [0, 0] },
-  pilferer: { key: 'pilferer', frame0: 'p0', flier: true, update: 'updatePilferer', visuals: 'visPilferer', death: 'deathPilferer', fw: 14, fh: 10, bw: 10, bh: 8, hp: 25, sight: 420, touch: 0, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
-  pogo: { key: 'pogo', frame0: 'c', update: 'updatePogo', visuals: 'visPogo', fw: 16, fh: 18, bw: 12, bh: 16, hp: 70, sight: 360, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 9] },
-  beacon: { key: 'beacon', frame0: 'b0', flier: true, update: 'updateBeacon', visuals: 'visBeacon', fw: 14, fh: 16, bw: 10, bh: 12, hp: 35, sight: 360, touch: 0, kb: 0.7, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye', 'g_shard2'], gibN: [5, 7] },
-  slug: { key: 'slug', frame0: 's0', update: 'updateSlug', visuals: 'visSlug', death: 'deathSlug', fw: 18, fh: 10, bw: 14, bh: 8, hp: 80, sight: 300, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_flesh1'], gibN: [8, 11] },
-  leech: { key: 'leech', frame0: 'l0', flier: true, update: 'updateLeech', death: 'deathLeech', fw: 10, fh: 8, bw: 8, bh: 6, hp: 20, sight: 320, touch: 0, kb: 1, gibs: ['g_flesh1', 'g_flesh2'], gibN: [3, 4] },
-  grenadier: { key: 'grenadier', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visGrenadier', marks: 'net', fw: 18, fh: 24, bw: 11, bh: 20, hp: 65, speed: 100, sight: 320, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_gmask',
+  creeper: { key: 'creeper', frame0: 'c0', flier: true, setup: 'setupCreeper', update: 'updateCreeper', visuals: 'visCreeper', fw: 16, fh: 10, bw: 12, bh: 8, hp: 40, sight: 360, touch: 14, kb: 1, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3'], gibN: [7, 9] },
+  roller: { key: 'roller', frame0: 'r0', setup: 'setupRoller', update: 'updateRoller', visuals: 'visRoller', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 40, sight: 320, touch: 10, kb: 0.5, gibs: ['g_plate', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [10, 13] },
+  jammer: { key: 'jammer', frame0: 'j0', flier: true, setup: 'setupJammer', update: 'updateJammer', visuals: 'visJammer', death: 'deathJammer', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, sight: 340, touch: 6, kb: 0.9, mech: true, gibs: ['g_shard', 'g_wire', 'g_shard2', 'g_eye', 'g_wire'], gibN: [7, 9] },
+  claw: { key: 'claw', frame0: 'open', flier: true, setup: 'setupClaw', update: 'updateClaw', visuals: 'visClaw', marks: 'net', death: 'deathClaw', fw: 16, fh: 12, bw: 12, bh: 10, hp: 120, sight: 420, touch: 0, kb: 0, mech: true, noClip: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_wire'], gibN: [8, 10] },
+  sparker: { key: 'sparker', frame0: 's0', setup: 'setupSparker', update: 'updateSparker', visuals: 'visSparker', fw: 12, fh: 12, bw: 10, bh: 10, hp: 30, sight: 320, touch: 8, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
+  golem: { key: 'golem', frame0: 'g0', setup: 'setupGolem', update: 'updateGolem', visuals: 'visGolem', death: 'deathGolem', fw: 28, fh: 30, bw: 20, bh: 28, hp: 260, speed: 45, sight: 360, touch: 16, kb: 0.25, mech: true, gibs: ['g_plate', 'g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_barrel', 'g_wire'], gibN: [14, 18] },
+  echo: { key: 'echo', frame0: 'idle0', flier: true, setup: 'setupEcho', update: 'updateEcho', visuals: 'visEcho', marks: 'net', death: 'deathEcho', fw: 18, fh: 24, bw: 10, bh: 20, hp: 50, sight: 400, touch: 0, kb: 0, mech: true, gibs: [], gibN: [0, 0] },
+  pilferer: { key: 'pilferer', frame0: 'p0', flier: true, setup: 'setupPilferer', update: 'updatePilferer', visuals: 'visPilferer', death: 'deathPilferer', fw: 14, fh: 10, bw: 10, bh: 8, hp: 25, sight: 420, touch: 0, kb: 1, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye'], gibN: [4, 6] },
+  pogo: { key: 'pogo', frame0: 'c', setup: 'setupPogo', update: 'updatePogo', visuals: 'visPogo', fw: 16, fh: 18, bw: 12, bh: 16, hp: 70, sight: 360, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 9] },
+  beacon: { key: 'beacon', frame0: 'b0', flier: true, setup: 'setupBeacon', update: 'updateBeacon', visuals: 'visBeacon', fw: 14, fh: 16, bw: 10, bh: 12, hp: 35, sight: 360, touch: 0, kb: 0.7, mech: true, gibs: ['g_shard', 'g_wire', 'g_eye', 'g_shard2'], gibN: [5, 7] },
+  slug: { key: 'slug', frame0: 's0', setup: 'setupSlug', update: 'updateSlug', visuals: 'visSlug', death: 'deathSlug', fw: 18, fh: 10, bw: 14, bh: 8, hp: 80, sight: 300, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_flesh1'], gibN: [8, 11] },
+  leech: { key: 'leech', frame0: 'l0', flier: true, setup: 'setupLeech', update: 'updateLeech', death: 'deathLeech', fw: 10, fh: 8, bw: 8, bh: 6, hp: 20, sight: 320, touch: 0, kb: 1, gibs: ['g_flesh1', 'g_flesh2'], gibN: [3, 4] },
+  grenadier: { key: 'grenadier', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visGrenadier', marks: 'net', fw: 18, fh: 24, bw: 11, bh: 20, hp: 65, speed: 100, sight: 320, touch: 8, kb: 0.7, dodge: 0.3, dodgeCd: 2, head: 'g_gmask',
              gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
-  spikeball: { key: 'spikeball', frame0: 'k0', update: 'updateSpikeball', visuals: 'visSpikeball', fw: 14, fh: 14, bw: 12, bh: 12, hp: 60, sight: 320, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_plate', 'g_shard'], gibN: [6, 8] },
-  para: { key: 'para', frame0: 'drop', update: 'updatePara', visuals: 'visPara', fw: 16, fh: 22, bw: 10, bh: 18, hp: 50, sight: 400, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3', 'g_chunk'], gibN: [10, 13] },
-  lugger: { key: 'lugger', frame0: 'w0', update: 'updateLugger', visuals: 'visLugger', death: 'deathLugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
-  blimp: { key: 'blimp', frame0: 'b0', flier: true, update: 'updateBlimp', visuals: 'visBlimp', death: 'deathBlimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
-  strider: { key: 'strider', frame0: 'w0', update: 'updateStrider', visuals: 'visStrider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
-  cinder: { key: 'cinder', frame0: 'w0', update: 'updateCinder', visuals: 'visCinder', death: 'deathCinder', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 150, sight: 420, touch: 12, kb: 0.5, mech: true, gibs: ['g_plate', 'g_shard', 'g_shard2'], gibN: [6, 8] },
-  gatling: { key: 'gatling', frame0: 'w0', update: 'updateGatling', visuals: 'visGatling', fw: 22, fh: 24, bw: 14, bh: 20, hp: 150, speed: 35, sight: 420, touch: 10, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
-  banner: { key: 'banner', frame0: 'w0', update: 'updateBanner', visuals: 'visBanner', fw: 16, fh: 26, bw: 10, bh: 20, hp: 80, speed: 40, sight: 420, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  bulldozer: { key: 'bulldozer', frame0: 'w0', update: 'updateBulldozer', visuals: 'visBulldozer', fw: 26, fh: 20, bw: 22, bh: 16, hp: 180, speed: 50, sight: 380, touch: 14, kb: 0.05, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [10, 14] },
-  copycat: { key: 'copycat', frame0: 'c0', flier: true, update: 'updateCopycat', visuals: 'visCopycat', death: 'deathCopycat', fw: 16, fh: 14, bw: 12, bh: 10, hp: 70, speed: 60, sight: 480, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 8] },
-  jelly: { key: 'jelly', frame0: 'j0', flier: true, update: 'updateJelly', visuals: 'visJelly', death: 'deathJelly', fw: 16, fh: 20, bw: 12, bh: 10, hp: 50, speed: 30, sight: 400, touch: 0, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2'], gibN: [5, 7] },
-  porcupine: { key: 'porcupine', frame0: 'w0', update: 'updatePorcupine', visuals: 'visPorcupine', fw: 20, fh: 16, bw: 16, bh: 12, hp: 90, speed: 45, sight: 380, touch: 10, kb: 0.5, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  sponge: { key: 'sponge', frame0: 'w0', update: 'updateSponge', visuals: 'visSponge', fw: 20, fh: 20, bw: 16, bh: 16, hp: 100, speed: 50, sight: 380, touch: 8, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [9, 12] },
-  leaper: { key: 'leaper', frame0: 'w0', update: 'updateLeaper', visuals: 'visLeaper', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, speed: 60, sight: 420, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  zealot: { key: 'zealot', frame0: 'w0', update: 'updateZealot', visuals: 'visZealot', fw: 16, fh: 24, bw: 10, bh: 20, hp: 80, speed: 45, sight: 420, touch: 8, kb: 0.7, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  minelayer: { key: 'minelayer', frame0: 'm0', flier: true, update: 'updateMinelayer', fw: 20, fh: 12, bw: 16, bh: 9, hp: 50, speed: 70, sight: 500, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
-  ratking: { key: 'ratking', frame0: 'w0', update: 'updateRatking', death: 'deathRatking', fw: 22, fh: 16, bw: 18, bh: 13, hp: 90, speed: 50, sight: 380, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [8, 11] },
-  ratbot: { key: 'ratbot', frame0: 'r0', update: 'updateRatbot', fw: 8, fh: 6, bw: 6, bh: 5, hp: 8, speed: 130, sight: 420, touch: 4, kb: 1, tiny: true, mech: true, gibs: ['g_shard'], gibN: [1, 2] },
-  headsman: { key: 'headsman', frame0: 'w0', update: 'updateHeadsman', visuals: 'visHeadsman', fw: 24, fh: 28, bw: 14, bh: 24, hp: 200, speed: 40, sight: 360, touch: 12, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [14, 18] },
-  berserker: { key: 'berserker', frame0: 'w0', update: 'updateBerserker', visuals: 'visBerserker', fw: 18, fh: 24, bw: 12, bh: 20, hp: 100, speed: 70, sight: 380, touch: 10, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [10, 13] },
-  bastion: { key: 'bastion', frame0: 'w0', update: 'updateBastion', fw: 18, fh: 22, bw: 12, bh: 18, hp: 120, speed: 40, sight: 400, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [8, 11] },
-  shellback: { key: 'shellback', frame0: 'w0', update: 'updateShellback', fw: 22, fh: 16, bw: 18, bh: 12, hp: 110, speed: 40, sight: 360, touch: 12, kb: 0.3, gibs: ['g_flesh1', 'g_chunk', 'g_plate', 'g_shard'], gibN: [9, 12] },
-  shinobi: { key: 'shinobi', frame0: 'w0', update: 'updateShinobi', fw: 16, fh: 22, bw: 10, bh: 18, hp: 55, speed: 120, sight: 460, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  thundercloud: { key: 'thundercloud', frame0: 'c0', flier: true, update: 'updateThunder', visuals: 'visThundercloud', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
-  foreman: { key: 'foreman', frame0: 'w0', update: 'updateForeman', visuals: 'visForeman', death: 'deathForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
-  vortex: { key: 'vortex', frame0: 'v0', flier: true, update: 'updateVortex', visuals: 'visVortex', fw: 18, fh: 18, bw: 14, bh: 14, hp: 80, speed: 45, sight: 460, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  pylon: { key: 'pylon', frame0: 'p0', update: 'updatePylon', visuals: 'visPylon', fw: 16, fh: 28, bw: 12, bh: 26, hp: 100, speed: 0, sight: 420, touch: 6, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_wire', 'g_shard'], gibN: [8, 11] },
-  scavenger: { key: 'scavenger', frame0: 'w0', update: 'updateScavenger', fw: 20, fh: 18, bw: 14, bh: 14, hp: 60, speed: 110, sight: 400, touch: 10, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  torcher: { key: 'torcher', frame0: 'w0', update: 'updateTorcher', visuals: 'visTorcher', death: 'deathTorcher', fw: 22, fh: 24, bw: 14, bh: 20, hp: 140, speed: 45, sight: 340, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
-  discus: { key: 'discus', frame0: 'w0', update: 'updateDiscus', death: 'deathDiscus', fw: 16, fh: 24, bw: 10, bh: 20, hp: 65, speed: 70, sight: 420, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  sporepod: { key: 'sporepod', frame0: 'p0', update: 'updateSporepod', visuals: 'visSporepod', death: 'deathSporepod', fw: 20, fh: 18, bw: 16, bh: 14, hp: 90, speed: 0, sight: 380, touch: 6, kb: 0, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [8, 11] },
-  grappler: { key: 'grappler', frame0: 'w0', update: 'updateGrappler', fw: 22, fh: 26, bw: 14, bh: 22, hp: 160, speed: 55, sight: 360, touch: 0, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [12, 16] },
-  spotter: { key: 'spotter', frame0: 's0', flier: true, update: 'updateSpotter', visuals: 'visSpotter', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, speed: 70, sight: 520, touch: 0, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
-  hound: { key: 'hound', frame0: 'r0', update: 'updateHound', visuals: 'visHound', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, speed: 190, sight: 420, touch: 10, kb: 0.9, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [6, 9] },
-  orbiter: { key: 'orbiter', frame0: 'o0', flier: true, update: 'updateOrbiter', visuals: 'visOrbiter', death: 'deathOrbiter', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 55, sight: 420, touch: 10, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [6, 9] },
-  swapper: { key: 'swapper', frame0: 'w0', update: 'updateSwapper', visuals: 'visSwapper', fw: 16, fh: 24, bw: 11, bh: 20, hp: 70, speed: 60, sight: 400, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
-  scorcher: { key: 'scorcher', frame0: 'r0', update: 'updateScorcher', visuals: 'visScorcher', death: 'deathScorcher', fw: 18, fh: 22, bw: 10, bh: 18, hp: 55, speed: 150, sight: 380, touch: 12, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
-  wraith: { key: 'wraith', frame0: 'f0', flier: true, update: 'updateWraith', visuals: 'visWraith', death: 'deathWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
-  chiller: { key: 'chiller', frame0: 'w0', update: 'updateChiller', visuals: 'visChiller', death: 'deathChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
-  warhorn: { key: 'warhorn', frame0: 'w0', update: 'updateWarhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
-  tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, update: 'updateHumanoid', visuals: 'visTarspit', death: 'deathTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
+  spikeball: { key: 'spikeball', frame0: 'k0', setup: 'setupSpikeball', update: 'updateSpikeball', visuals: 'visSpikeball', fw: 14, fh: 14, bw: 12, bh: 12, hp: 60, sight: 320, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_plate', 'g_shard'], gibN: [6, 8] },
+  para: { key: 'para', frame0: 'drop', setup: 'setupPara', update: 'updatePara', visuals: 'visPara', fw: 16, fh: 22, bw: 10, bh: 18, hp: 50, sight: 400, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_flesh3', 'g_chunk'], gibN: [10, 13] },
+  lugger: { key: 'lugger', frame0: 'w0', setup: 'setupLugger', update: 'updateLugger', visuals: 'visLugger', death: 'deathLugger', fw: 22, fh: 26, bw: 16, bh: 24, hp: 140, speed: 55, sight: 340, touch: 14, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk', 'g_flesh1'], gibN: [14, 17] },
+  blimp: { key: 'blimp', frame0: 'b0', flier: true, setup: 'setupBlimp', update: 'updateBlimp', visuals: 'visBlimp', death: 'deathBlimp', fw: 34, fh: 20, bw: 28, bh: 14, hp: 220, sight: 500, touch: 0, kb: 0.2, mech: true, noClip: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2', 'g_wire'], gibN: [10, 13] },
+  strider: { key: 'strider', frame0: 'w0', setup: 'setupStrider', update: 'updateStrider', visuals: 'visStrider', fw: 20, fh: 36, bw: 12, bh: 34, hp: 150, sight: 420, touch: 10, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_eye', 'g_plate', 'g_shard2'], gibN: [10, 13] },
+  cinder: { key: 'cinder', frame0: 'w0', setup: 'setupCinder', update: 'updateCinder', visuals: 'visCinder', death: 'deathCinder', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 150, sight: 420, touch: 12, kb: 0.5, mech: true, gibs: ['g_plate', 'g_shard', 'g_shard2'], gibN: [6, 8] },
+  gatling: { key: 'gatling', frame0: 'w0', setup: 'setupGatling', update: 'updateGatling', visuals: 'visGatling', fw: 22, fh: 24, bw: 14, bh: 20, hp: 150, speed: 35, sight: 420, touch: 10, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
+  banner: { key: 'banner', frame0: 'w0', setup: 'setupBanner', update: 'updateBanner', visuals: 'visBanner', fw: 16, fh: 26, bw: 10, bh: 20, hp: 80, speed: 40, sight: 420, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  bulldozer: { key: 'bulldozer', frame0: 'w0', setup: 'setupBulldozer', update: 'updateBulldozer', visuals: 'visBulldozer', fw: 26, fh: 20, bw: 22, bh: 16, hp: 180, speed: 50, sight: 380, touch: 14, kb: 0.05, mech: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [10, 14] },
+  copycat: { key: 'copycat', frame0: 'c0', flier: true, setup: 'setupCopycat', update: 'updateCopycat', visuals: 'visCopycat', death: 'deathCopycat', fw: 16, fh: 14, bw: 12, bh: 10, hp: 70, speed: 60, sight: 480, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 8] },
+  jelly: { key: 'jelly', frame0: 'j0', flier: true, setup: 'setupJelly', update: 'updateJelly', visuals: 'visJelly', death: 'deathJelly', fw: 16, fh: 20, bw: 12, bh: 10, hp: 50, speed: 30, sight: 400, touch: 0, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2'], gibN: [5, 7] },
+  porcupine: { key: 'porcupine', frame0: 'w0', setup: 'setupPorcupine', update: 'updatePorcupine', visuals: 'visPorcupine', fw: 20, fh: 16, bw: 16, bh: 12, hp: 90, speed: 45, sight: 380, touch: 10, kb: 0.5, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  sponge: { key: 'sponge', frame0: 'w0', setup: 'setupSponge', update: 'updateSponge', visuals: 'visSponge', fw: 20, fh: 20, bw: 16, bh: 16, hp: 100, speed: 50, sight: 380, touch: 8, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [9, 12] },
+  leaper: { key: 'leaper', frame0: 'w0', setup: 'setupLeaper', update: 'updateLeaper', visuals: 'visLeaper', fw: 18, fh: 18, bw: 14, bh: 14, hp: 70, speed: 60, sight: 420, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  zealot: { key: 'zealot', frame0: 'w0', setup: 'setupZealot', update: 'updateZealot', visuals: 'visZealot', fw: 16, fh: 24, bw: 10, bh: 20, hp: 80, speed: 45, sight: 420, touch: 8, kb: 0.7, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  minelayer: { key: 'minelayer', frame0: 'm0', flier: true, setup: 'setupMinelayer', update: 'updateMinelayer', fw: 20, fh: 12, bw: 16, bh: 9, hp: 50, speed: 70, sight: 500, touch: 0, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
+  ratking: { key: 'ratking', frame0: 'w0', setup: 'setupRatking', update: 'updateRatking', death: 'deathRatking', fw: 22, fh: 16, bw: 18, bh: 13, hp: 90, speed: 50, sight: 380, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [8, 11] },
+  ratbot: { key: 'ratbot', frame0: 'r0', setup: 'setupRatbot', update: 'updateRatbot', fw: 8, fh: 6, bw: 6, bh: 5, hp: 8, speed: 130, sight: 420, touch: 4, kb: 1, tiny: true, mech: true, gibs: ['g_shard'], gibN: [1, 2] },
+  headsman: { key: 'headsman', frame0: 'w0', setup: 'setupHeadsman', update: 'updateHeadsman', visuals: 'visHeadsman', fw: 24, fh: 28, bw: 14, bh: 24, hp: 200, speed: 40, sight: 360, touch: 12, kb: 0.2, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [14, 18] },
+  berserker: { key: 'berserker', frame0: 'w0', setup: 'setupBerserker', update: 'updateBerserker', visuals: 'visBerserker', fw: 18, fh: 24, bw: 12, bh: 20, hp: 100, speed: 70, sight: 380, touch: 10, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [10, 13] },
+  bastion: { key: 'bastion', frame0: 'w0', setup: 'setupBastion', update: 'updateBastion', fw: 18, fh: 22, bw: 12, bh: 18, hp: 120, speed: 40, sight: 400, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [8, 11] },
+  shellback: { key: 'shellback', frame0: 'w0', setup: 'setupShellback', update: 'updateShellback', fw: 22, fh: 16, bw: 18, bh: 12, hp: 110, speed: 40, sight: 360, touch: 12, kb: 0.3, gibs: ['g_flesh1', 'g_chunk', 'g_plate', 'g_shard'], gibN: [9, 12] },
+  shinobi: { key: 'shinobi', frame0: 'w0', setup: 'setupShinobi', update: 'updateShinobi', fw: 16, fh: 22, bw: 10, bh: 18, hp: 55, speed: 120, sight: 460, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  thundercloud: { key: 'thundercloud', frame0: 'c0', flier: true, setup: 'setupThundercloud', update: 'updateThunder', visuals: 'visThundercloud', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
+  foreman: { key: 'foreman', frame0: 'w0', setup: 'setupForeman', update: 'updateForeman', visuals: 'visForeman', death: 'deathForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
+  vortex: { key: 'vortex', frame0: 'v0', flier: true, setup: 'setupVortex', update: 'updateVortex', visuals: 'visVortex', fw: 18, fh: 18, bw: 14, bh: 14, hp: 80, speed: 45, sight: 460, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  pylon: { key: 'pylon', frame0: 'p0', setup: 'setupPylon', update: 'updatePylon', visuals: 'visPylon', fw: 16, fh: 28, bw: 12, bh: 26, hp: 100, speed: 0, sight: 420, touch: 6, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_wire', 'g_shard'], gibN: [8, 11] },
+  scavenger: { key: 'scavenger', frame0: 'w0', setup: 'setupScavenger', update: 'updateScavenger', fw: 20, fh: 18, bw: 14, bh: 14, hp: 60, speed: 110, sight: 400, touch: 10, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  torcher: { key: 'torcher', frame0: 'w0', setup: 'setupTorcher', update: 'updateTorcher', visuals: 'visTorcher', death: 'deathTorcher', fw: 22, fh: 24, bw: 14, bh: 20, hp: 140, speed: 45, sight: 340, touch: 10, kb: 0.4, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_plate', 'g_bone'], gibN: [11, 14] },
+  discus: { key: 'discus', frame0: 'w0', setup: 'setupDiscus', update: 'updateDiscus', death: 'deathDiscus', fw: 16, fh: 24, bw: 10, bh: 20, hp: 65, speed: 70, sight: 420, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  sporepod: { key: 'sporepod', frame0: 'p0', setup: 'setupSporepod', update: 'updateSporepod', visuals: 'visSporepod', death: 'deathSporepod', fw: 20, fh: 18, bw: 16, bh: 14, hp: 90, speed: 0, sight: 380, touch: 6, kb: 0, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk'], gibN: [8, 11] },
+  grappler: { key: 'grappler', frame0: 'w0', setup: 'setupGrappler', update: 'updateGrappler', fw: 22, fh: 26, bw: 14, bh: 22, hp: 160, speed: 55, sight: 360, touch: 0, kb: 0.3, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_chunk', 'g_bone'], gibN: [12, 16] },
+  spotter: { key: 'spotter', frame0: 's0', flier: true, setup: 'setupSpotter', update: 'updateSpotter', visuals: 'visSpotter', fw: 16, fh: 14, bw: 12, bh: 10, hp: 40, speed: 70, sight: 520, touch: 0, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [5, 7] },
+  hound: { key: 'hound', frame0: 'r0', setup: 'setupHound', update: 'updateHound', visuals: 'visHound', fw: 22, fh: 14, bw: 16, bh: 10, hp: 45, speed: 190, sight: 420, touch: 10, kb: 0.9, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [6, 9] },
+  orbiter: { key: 'orbiter', frame0: 'o0', flier: true, setup: 'setupOrbiter', update: 'updateOrbiter', visuals: 'visOrbiter', death: 'deathOrbiter', fw: 16, fh: 16, bw: 12, bh: 12, hp: 60, speed: 55, sight: 420, touch: 10, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate'], gibN: [6, 9] },
+  swapper: { key: 'swapper', frame0: 'w0', setup: 'setupSwapper', update: 'updateSwapper', visuals: 'visSwapper', fw: 16, fh: 24, bw: 11, bh: 20, hp: 70, speed: 60, sight: 400, touch: 10, kb: 0.6, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
+  scorcher: { key: 'scorcher', frame0: 'r0', setup: 'setupScorcher', update: 'updateScorcher', visuals: 'visScorcher', death: 'deathScorcher', fw: 18, fh: 22, bw: 10, bh: 18, hp: 55, speed: 150, sight: 380, touch: 12, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  wraith: { key: 'wraith', frame0: 'f0', flier: true, setup: 'setupWraith', update: 'updateWraith', visuals: 'visWraith', death: 'deathWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
+  chiller: { key: 'chiller', frame0: 'w0', setup: 'setupChiller', update: 'updateChiller', visuals: 'visChiller', death: 'deathChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
+  warhorn: { key: 'warhorn', frame0: 'w0', setup: 'setupWarhorn', update: 'updateWarhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
+  tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visTarspit', death: 'deathTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
 };
 const KEEPER_HOP = 290;                             // ranged keepers' hop when blocked: clears the 3-tile step stepOk lets them take (48 px needs 277 at gravity 800)
@@ -6948,290 +6949,380 @@ class GameScene extends Phaser.Scene {
       idleT: rand(1.5, 3.5), losT: Math.random() * 0.15, sees: false, wasGround: true, airT: 0, fr: D.frame0,
       dmgAcc: 0, dmgHead: false, dmgFlushAt: 0, healAcc: 0, healFlushAt: 0, lastHs: false,
       burnT: 0, burnTick: 0, spreadT: 0, panicT: 0, panicDir: 1, kickedT: 0, lastVx: 0, summoned: false, corrodeT: 0, tbHeld: false });
-    if (kind === 'tick') {
-      Object.assign(e, { path: null, pathI: 0, navAir: false, navAirT: 0, goalNode: -1, stuckT: 0, repathT: 0, armT: 0, ai: 'idle' });
-    } else if (kind === 'boss') {
-      e.body.setAllowGravity(true);
-      Object.assign(e, { ai: 'walk', phase: 1, atkCd: 2.5, leapCd: 2, introT: 2.4, breathA: 0, mortarN: 0, summonCycle: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(1.5).setAlpha(0.45).setDepth(4.6);   // heat halo behind the hull
-    } else if (kind === 'mender') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { patient: null, retargetT: 0, dodgeCd: 0, healing: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40ff90).setScale(0.7).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'drone') {
-      e.body.setAllowGravity(false);
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.55).setAlpha(0.8).setDepth(18);
-      e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x50b0ff).setScale(0.4).setAlpha(0.6).setDepth(18);
-    } else if (kind === 'gunship') {
-      e.body.setAllowGravity(false);
-      const profile = this.campaign ? TUNE.CAMPAIGN_GUNSHIP : null;
-      if (profile) { e.def = { ...D, hp: profile.hp }; e.hp = profile.hp; }
-      Object.assign(e, { ai: 'cruise', side: 1, sideT: 3, volT: profile?.firstVolley ?? 2.5, dropT: profile?.firstDrop ?? 4,
-        strT: profile?.firstStrafe ?? 6, drops: 0, shots: 0, shotT: 0, strDir: 1, attackRest: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.7).setAlpha(0.6).setDepth(18);
-      e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6ab0ff).setScale(1.6).setAlpha(0.5).setDepth(18);
-    } else if (kind === 'screamer') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'hover', head: 0, spd: 0, atkT: rand(0.6, 1.8) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff5020).setScale(0.5).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'warden') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { links: [], linkT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.5).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'jugg') {
-      Object.assign(e, { ai: 'walk', stage: 0, aimA: 0, spin: 0, atkCd: 2, shotT: 0, recoil: 0, stepK: 0 });
-      e.gun = this.add.image(x, y, 'gun_jugg').setOrigin(4 / 30, 6.5 / 12).setDepth(6);
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.4).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'jet') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'fly', side: Math.random() < 0.5 ? -1 : 1, sideT: rand(2, 4), aimA: 0, recoil: 0, shotsLeft: 0, shotT: 0, fireCd: rand(1, 2) });
-      e.gun = this.add.image(x, y, 'gun_smg').setOrigin(2 / 18, 4.5 / 9).setDepth(6);
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe040).setScale(0.3).setAlpha(0.85).setDepth(18);
-      e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6ab0ff).setScale(0.7).setAlpha(0.6).setDepth(18);
-    } else if (kind === 'brood') {
-      Object.assign(e, { ai: 'crawl', atkCd: 2 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xe8d040).setScale(1.3).setAlpha(0.3).setDepth(4.8);
-    } else if (kind === 'wasp') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'patrol', runDir: 1, runY: y, bombs: 0, bombT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.45).setAlpha(0.8).setDepth(18);
-      e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xc0e0ff).setScale(0.6).setAlpha(0.3).setDepth(18);
-    } else if (kind === 'rammer') {
-      Object.assign(e, { ai: 'patrol', atkCd: 1.5, hitSet: new Set(), hitP: false, stepK: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3b1f).setScale(0.4).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'heavy') {
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7a1a).setScale(0.8).setAlpha(0.55).setDepth(18);
-    } else if (D.molten) {
-      Object.assign(e, { ai: 'hop', hopT: rand(0.4, 1.2), landT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7020).setScale(0.5 + D.tier * 0.35).setAlpha(0.55).setDepth(18);
-    } else if (kind === 'burrower') {
-      Object.assign(e, { ai: 'exposed', aiUntil: this.time.now + 700, under: false, ux: x, floorY: (cy + 1) * TS, cd: 1.5, trailT: 0, rumT: 0, glowT: 0, hitP: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a10).setScale(0.6).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'hive') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { spawnT: 0.8 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xe8d040).setScale(1).setAlpha(0.35).setDepth(18);
-    } else if (kind === 'gnat') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { hive: null, ph: rand(0, 6), panicDie: 0 });
-    } else if (kind === 'stitcher') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'seek', corpse: null, chanT: 0, chanDmg: 0, cd: 1.5, retargetT: 0, humT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff70).setScale(0.5).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'wyrm') {
-      e.body.setAllowGravity(false);
-      const fy = (cy + 1) * TS;
-      Object.assign(e, { ai: 'sink', under: false, ux: x, floorY: fy, cd: 1.2, hist: [], hx: x, hy: fy - 13, vx: 0, vy: 260, sinkT: 0.35, trailT: 0, rumT: 0, spitT: 0, segs: [], pattern: 'breach', wyrmAng: Math.PI / 2, touchCd: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a10).setScale(1.2).setAlpha(0.6).setDepth(18);
-      for (let i = 0; i < TUNE.WYRM.segs; i++) {
-        const sg = this.spawnEnemy('wyrmseg', cx, cy);
-        Object.assign(sg, { head: e, idx: i, summoned: true, under: true, dir: 1 });
-        sg.body.enable = false; sg.setVisible(false); sg.body.reset(x, LH + 300);
-        if (i >= TUNE.WYRM.segs - 2) sg.setScale(0.75);
-        e.segs.push(sg);
-      }
-    } else if (kind === 'wyrmseg') {
-      e.body.setAllowGravity(false);
-    } else if (kind === 'linker') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { lid: ++this.linkerSeq, partner: null, linkT: 0, phase: 'off', beamT: rand(1, 2), trackY: y, beam: null, zapT: 0, fireCd: 1.5 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40f0ff).setScale(0.45).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'buzzsaw') {                                   // ricochets at a constant clip; steers at you off every wall
-      e.body.setAllowGravity(false); e.body.setBounce(1, 1);
-      const a = rand(0, Math.PI * 2), v = TUNE.BUZZSAW.speed * 0.55;
-      e.body.setVelocity(Math.cos(a) * v, Math.sin(a) * v);
-      Object.assign(e, { ai: 'saw', owned: 0, ownHit: false, hitMap: new Map(), bounceT: 0, pHitT: 0, whirT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.55).setAlpha(0.6).setDepth(18);
-    } else if (kind === 'lugger') {
-      Object.assign(e, { ai: 'seek', carry: false, tgtBarrel: null, stepK: 0, carryImg: null, rockCd: 2 });
-    } else if (kind === 'blimp') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', bombT: 1.5, side: Math.random() < 0.5 ? -1 : 1, crash: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'strider') {
-      Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), stepK: 0, a0: 0, beamA: 0, hitT: 0, lastStep: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'cinder') {
-      Object.assign(e, { ai: 'roll', owned: 0, lastTrailX: x, hitMap: new Map(), spinA: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.6).setAlpha(0.7).setDepth(4.9);
-    } else if (kind === 'gatling') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), aimA: 0, shotT: 0 });
-    } else if (kind === 'banner') {
-      Object.assign(e, { ai: 'walk', stepK: 0, plantT: rand(1, 2), healT: 0 });
-    } else if (kind === 'bulldozer') {
-      Object.assign(e, { ai: 'drive', stepK: 0, crushT: 0, stuckT: 0 });
-    } else if (kind === 'copycat') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', cd: rand(1.2, 2), burst: 0, burstT: 0, mode: 'rapid', icon: this.add.image(x, y, 'icon_nail').setDepth(5.1).setScale(0.8).setAlpha(0.85) });
-    } else if (kind === 'jelly') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', zapT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff80e0).setScale(0.5).setAlpha(0.6).setDepth(4.9);
-    } else if (kind === 'porcupine') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(2, 3.5), quillAcc: 0 });
-    } else if (kind === 'sponge') {
-      Object.assign(e, { ai: 'walk', stepK: 0, charge: 0 });
-    } else if (kind === 'leaper') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.5, 2.5), tx: 0, ty: 0 });
-    } else if (kind === 'zealot') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.5, 2.5), souls: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe080).setScale(0.3).setAlpha(0.6).setDepth(4.9);
-    } else if (kind === 'minelayer') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', cd: rand(1, 2) });
-    } else if (kind === 'ratking') {
-      Object.assign(e, { ai: 'walk', stepK: 0, shedT: rand(2, 3.5) });
-    } else if (kind === 'ratbot') {
-      Object.assign(e, { ai: 'run', hopT: rand(0.5, 1.5), jit: rand(-30, 30) });
-    } else if (kind === 'headsman') {
-      Object.assign(e, { ai: 'walk', stepK: 0, chopOk: 0 });
-    } else if (kind === 'berserker') {
-      Object.assign(e, { ai: 'walk', stepK: 0, rage: false, swingCd: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2020).setScale(0.6).setAlpha(0).setDepth(4.9);
-    } else if (kind === 'bastion') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), wall: null });
-    } else if (kind === 'shellback') {
-      Object.assign(e, { ai: 'walk', stepK: 0, bashOk: 0, flipped: false });
-    } else if (kind === 'shinobi') {
-      Object.assign(e, { ai: 'ground', aiUntil: 0, threw: false, leapT: 0, clingOk: 0, clingSide: 0 });
-    } else if (kind === 'thundercloud') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', cd: rand(1.5, 2.5), strikeY: LH });
-    } else if (kind === 'foreman') {
-      Object.assign(e, { ai: 'walk', phase: 1, atkCd: 2.5, atkN: 0, shots: 0, shotT: 0, stepK: 0 });
-    } else if (kind === 'vortex') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', cd: rand(2.5, 4), shredT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9ad8ff).setScale(0.35).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'pylon') {
-      Object.assign(e, { ai: 'idle', cd: rand(1, 2), chargeT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x80c8ff).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'scavenger') {
-      Object.assign(e, { ai: 'run', stepK: 0, growN: 0, meal: null, leapOk: 0 });
-    } else if (kind === 'torcher') {
-      Object.assign(e, { ai: 'walk', stepK: 0, sprayOk: 0, baseA: 0, flameA: 0, tick: 0, tankHitT: -1e9 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.3).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'discus') {
-      Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.2, 2.2), disc: null });
-    } else if (kind === 'sporepod') {
-      Object.assign(e, { ai: 'idle', cd: rand(1, 2.5), puffT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xb8e040).setScale(0.6).setAlpha(0.5).setDepth(4.9);
-    } else if (kind === 'grappler') {
-      Object.assign(e, { ai: 'walk', stepK: 0, grabOk: 0, holdDmg: 0 });
-    } else if (kind === 'spotter') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { lockT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2020).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'hound') {
-      Object.assign(e, { ai: 'run', stepK: 0, leapOk: 0, side: (this.houndN = (this.houndN || 0) + 1) % 2 ? 1 : -1 });
-    } else if (kind === 'orbiter') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { plates: [1, 1, 1].map(() => TUNE.ORBITER.plateHp), plateHit: [0, 0, 0], spin: rand(0, 6), fireFr: 0, fireCd: rand(1.5, 2.5) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.35).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'swapper') {
-      Object.assign(e, { ai: 'walk', cd: rand(3, 4.5), stepK: 0, tellDmg: 0, burst: 0, burstT: 0, fireCd: rand(1, 2) });
-    } else if (kind === 'scorcher') {
-      Object.assign(e, { ai: 'rest', stepK: 0, lastTrailX: x, turned: false });
-    } else if (kind === 'wraith') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', inWall: false, strikeOk: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9a70ff).setScale(0.4).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'chiller') {
-      Object.assign(e, { ai: 'walk', cd: rand(1.5, 2.5), stepK: 0 });
-    } else if (kind === 'warhorn') {
-      Object.assign(e, { ai: 'roll', cd: rand(2.5, 4), stepK: 0 });
-    } else if (kind === 'spikeball') {
-      Object.assign(e, { ai: 'roll', spinA: 0, rage: false });
-    } else if (kind === 'para') {                                        // starts high above the floor under its chute
-      const fy = this.floorBelow(x, y) ?? (cy + 6) * TS;
-      e.body.reset(x, Math.max(40, fy - 260)); e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drop', burstT: rand(0.6, 1.2), shots: 0, shotT: 0, chute: true, stepK: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a20).setScale(0.25).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'beacon') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'hover', cd: rand(1, 2), callT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'slug') {
-      Object.assign(e, { ai: 'crawl', trailT: 0, spitCd: rand(1.5, 3), stepK: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9aff4a).setScale(0.4).setAlpha(0.45).setDepth(18);
-    } else if (kind === 'leech') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'seek', ox: 0, oy: 0, drainT: 0, offT: 0 });
-    } else if (kind === 'echo') {                                      // a hologram replaying where you were 1.5 s ago
-      e.body.setAllowGravity(false); e.setAlpha(0.6);
-      Object.assign(e, { ai: 'replay', fireCd: 1 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.8).setAlpha(0.35).setDepth(18);
-    } else if (kind === 'pilferer') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'seek', stolen: -1, escapeT: TUNE.PILFER.escape, gunImg: null });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff4060).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'pogo') {
-      Object.assign(e, { ai: 'crouch', crouchT: 0.4, slamming: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff9a).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'claw') {                                      // a crane claw on a trolley under the roof
-      e.body.setAllowGravity(false);
-      let ty = y; for (let yy = y; yy > 24; yy -= 8) { if (this.solidAt(x, yy - 10)) { ty = yy; break; } ty = yy; }
-      e.body.reset(x, ty); Object.assign(e, { ai: 'track', homeY: ty, cd: rand(1.5, 2.5), grab: false, grabDmg: 0, liftT: 0 });
-      e.glow = this.add.image(x, ty, 'glow').setBlendMode(ADD).setTint(0xffb040).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'sparker') {
-      Object.assign(e, { ai: 'hop', hopT: rand(0.3, 0.9) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.35).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'golem') {
-      Object.assign(e, { ai: 'walk', throwCd: rand(1.5, 2.5), slamCd: 1, stepK: 0, lastStep: 0, shed: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7a20).setScale(0.7).setAlpha(0.6).setDepth(18);
-    } else if (kind === 'creeper') {                                   // climbs to the nearest ceiling first
-      e.body.setAllowGravity(false); e.body.setVelocity(0, -300);
-      Object.assign(e, { ai: 'climb', climbT: 1.2, groundT: 0, stepK: 0, hitP: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xb0ff40).setScale(0.3).setAlpha(0.8).setDepth(18);
-    } else if (kind === 'roller') {
-      Object.assign(e, { ai: 'walk', cd: rand(1.5, 2.5), stepK: 0, rollDir: 1, rollT: 0, bounces: 0, spinA: 0, hitP: false });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffa040).setScale(0.3).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'jammer') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'hover', cd: rand(2, 3.5), side: Math.random() < 0.5 ? -1 : 1, sideT: rand(3, 5) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff9a).setScale(0.4).setAlpha(0.7).setDepth(18);
-    } else if (kind === 'gasbag') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'drift', ph: rand(0, 6) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9aff4a).setScale(0.6).setAlpha(0.35).setDepth(18);
-    } else if (kind === 'welder') {
-      Object.assign(e, { ai: 'walk', buildCd: rand(3, 6), patient: null, scanT: 0, stepK: 0, turrets: [] });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffd040).setScale(0.3).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'turret') {
-      Object.assign(e, { ai: 'watch', fireCd: rand(0.8, 1.4), aimA: -Math.PI / 2, owner: null });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.25).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'mimic') {                                     // sits among the drums as one of them
-      Object.assign(e, { ai: 'hide', stepK: 0, lonelyT: 0.5, dir: 1 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe040).setScale(0.3).setAlpha(0).setDepth(18);
-    } else if (kind === 'howitzer') {
-      Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), shells: 0, shotT: 0, stepK: 0, lastStep: 0, recoilT: 0 });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'blinker') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'float', cd: rand(1, 2), tx: x, ty: y, dvx: 0, dvy: 0, hitP: false, next: 'strike' });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60f0ff).setScale(0.3).setAlpha(0.85).setDepth(18);
-    } else if (kind === 'magnet') {
-      e.body.setAllowGravity(false);
-      Object.assign(e, { ai: 'hover', pulseT: rand(1.5, 2.5), side: Math.random() < 0.5 ? -1 : 1, sideT: rand(3, 5) });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6a8aff).setScale(0.6).setAlpha(0.6).setDepth(18);
-    } else if (isHumanoid(e)) {
-      Object.assign(e, { ai: 'idle', path: null, pathI: 0, navAir: false, navAirT: 0, lkx: x, lky: y, lkT: -1e9, lastSeenT: -1e9,
-        dodgeCd: 0, fleeT: 0, fleeDir: 1, attackCd: 0, repickT: 0, repathT: 0, retreated: false, bursts: 0, shotsLeft: 0, shotT: 0,
-        reloadT: 0, aimA: e.dir > 0 ? 0.25 : Math.PI - 0.25, aimStart: 0, stuckT: 0, lookT: rand(1, 3), goalNode: -1, recoil: 0, searchUntil: 0,
-        fr: D.frame0, face: e.dir, shieldUp: kind === 'bulwark' || kind === 'mirror', healCheckT: 0, pack: null });
-      e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint({ enforcer: 0xff3020, stalker: 0x7dff4a, bulwark: 0xff9a2a, sniper: 0x60c0ff, rocketeer: 0xff8a20, sapper: 0x7dff4a, cloaker: 0x40f0ff, pyro: 0xffb040, harpooner: 0xffe040, mirror: 0xe080ff, tarspit: 0xffa040, duelist: 0xff2a5a, grenadier: 0xff8a20 }[kind]).setScale(0.3).setAlpha(0.85).setDepth(18);
-      if (kind === 'harpooner') { e.hk = null; e.reelDmg = 0; e.fireCd = rand(1, 2); e.hkImg = this.add.image(x, y, 'harpoon').setDepth(9).setVisible(false); }
-      if (kind === 'enforcer') e.gun = this.add.image(x, y, 'gun_rifle').setOrigin(2 / 24, 5.5 / 11).setDepth(6);
-      if (kind === 'sniper') { e.gun = this.add.image(x, y, 'gun_sniper').setOrigin(2 / 34, 4.5 / 9).setDepth(6); e.fireCd = 1; }
-      if (kind === 'rocketeer') { e.gun = this.add.image(x, y, 'gun_rlaunch').setOrigin(2 / 26, 5.5 / 11).setDepth(6); e.fireCd = 1.5; }
-      if (kind === 'sapper') e.plantCd = rand(1, 2.5);
-    }
+    if (D.setup) this[D.setup](e, x, y, cx, cy);                      // its own fields and parts: glows, guns, timers, segments
     if (this.lab?.stationary) {
       e.body.setAllowGravity(false); e.body.setVelocity(0, 0);
       // Ceiling climbers and paratroopers normally relocate on spawn. Keep their test position.
       if (kind === 'para' || kind === 'claw') e.body.reset(x, y);
     }
     return e;
+  }
+
+  // Each foe kind's own set-up when it spawns: the fields its update reads, the glow, gun or thruster images it
+  // carries, and where it really starts (a ceiling, the air, under the floor). Its ENEMY record names the method
+  // as setup (setupHumanoid for the humanoids without their own, setupMolten for the slag), and spawnEnemy calls
+  // it after the fields every foe shares. x and y are the spawn point, cx and cy its tile.
+  setupTick(e, x, y, cx, cy) {
+    Object.assign(e, { path: null, pathI: 0, navAir: false, navAirT: 0, goalNode: -1, stuckT: 0, repathT: 0, armT: 0, ai: 'idle' });
+  }
+  setupBoss(e, x, y, cx, cy) {
+    e.body.setAllowGravity(true);
+    Object.assign(e, { ai: 'walk', phase: 1, atkCd: 2.5, leapCd: 2, introT: 2.4, breathA: 0, mortarN: 0, summonCycle: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(1.5).setAlpha(0.45).setDepth(4.6);     // heat halo behind the hull
+  }
+  setupMender(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { patient: null, retargetT: 0, dodgeCd: 0, healing: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40ff90).setScale(0.7).setAlpha(0.7).setDepth(18);
+  }
+  setupDrone(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.55).setAlpha(0.8).setDepth(18);
+    e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x50b0ff).setScale(0.4).setAlpha(0.6).setDepth(18);
+  }
+  setupGunship(e, x, y, cx, cy) {
+    const D = e.def;
+    e.body.setAllowGravity(false);
+    const profile = this.campaign ? TUNE.CAMPAIGN_GUNSHIP : null;
+    if (profile) { e.def = { ...D, hp: profile.hp }; e.hp = profile.hp; }
+    Object.assign(e, { ai: 'cruise', side: 1, sideT: 3, volT: profile?.firstVolley ?? 2.5, dropT: profile?.firstDrop ?? 4,
+      strT: profile?.firstStrafe ?? 6, drops: 0, shots: 0, shotT: 0, strDir: 1, attackRest: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.7).setAlpha(0.6).setDepth(18);
+    e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6ab0ff).setScale(1.6).setAlpha(0.5).setDepth(18);
+  }
+  setupScreamer(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'hover', head: 0, spd: 0, atkT: rand(0.6, 1.8) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff5020).setScale(0.5).setAlpha(0.8).setDepth(18);
+  }
+  setupWarden(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { links: [], linkT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.5).setAlpha(0.8).setDepth(18);
+  }
+  setupJugg(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stage: 0, aimA: 0, spin: 0, atkCd: 2, shotT: 0, recoil: 0, stepK: 0 });
+    e.gun = this.add.image(x, y, 'gun_jugg').setOrigin(4 / 30, 6.5 / 12).setDepth(6);
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.4).setAlpha(0.85).setDepth(18);
+  }
+  setupJet(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'fly', side: Math.random() < 0.5 ? -1 : 1, sideT: rand(2, 4), aimA: 0, recoil: 0, shotsLeft: 0, shotT: 0, fireCd: rand(1, 2) });
+    e.gun = this.add.image(x, y, 'gun_smg').setOrigin(2 / 18, 4.5 / 9).setDepth(6);
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe040).setScale(0.3).setAlpha(0.85).setDepth(18);
+    e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6ab0ff).setScale(0.7).setAlpha(0.6).setDepth(18);
+  }
+  setupBrood(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'crawl', atkCd: 2 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xe8d040).setScale(1.3).setAlpha(0.3).setDepth(4.8);
+  }
+  setupWasp(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'patrol', runDir: 1, runY: y, bombs: 0, bombT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.45).setAlpha(0.8).setDepth(18);
+    e.thr = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xc0e0ff).setScale(0.6).setAlpha(0.3).setDepth(18);
+  }
+  setupRammer(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'patrol', atkCd: 1.5, hitSet: new Set(), hitP: false, stepK: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3b1f).setScale(0.4).setAlpha(0.8).setDepth(18);
+  }
+  setupHeavy(e, x, y, cx, cy) {
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7a1a).setScale(0.8).setAlpha(0.55).setDepth(18);
+  }
+  setupMolten(e, x, y, cx, cy) {
+    const D = e.def;
+    Object.assign(e, { ai: 'hop', hopT: rand(0.4, 1.2), landT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7020).setScale(0.5 + D.tier * 0.35).setAlpha(0.55).setDepth(18);
+  }
+  setupBurrower(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'exposed', aiUntil: this.time.now + 700, under: false, ux: x, floorY: (cy + 1) * TS, cd: 1.5, trailT: 0, rumT: 0, glowT: 0, hitP: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a10).setScale(0.6).setAlpha(0.7).setDepth(18);
+  }
+  setupHive(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { spawnT: 0.8 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xe8d040).setScale(1).setAlpha(0.35).setDepth(18);
+  }
+  setupGnat(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { hive: null, ph: rand(0, 6), panicDie: 0 });
+  }
+  setupStitcher(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'seek', corpse: null, chanT: 0, chanDmg: 0, cd: 1.5, retargetT: 0, humT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff70).setScale(0.5).setAlpha(0.7).setDepth(18);
+  }
+  setupWyrm(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    const fy = (cy + 1) * TS;
+    Object.assign(e, { ai: 'sink', under: false, ux: x, floorY: fy, cd: 1.2, hist: [], hx: x, hy: fy - 13, vx: 0, vy: 260, sinkT: 0.35, trailT: 0, rumT: 0, spitT: 0, segs: [], pattern: 'breach', wyrmAng: Math.PI / 2, touchCd: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a10).setScale(1.2).setAlpha(0.6).setDepth(18);
+    for (let i = 0; i < TUNE.WYRM.segs; i++) {
+      const sg = this.spawnEnemy('wyrmseg', cx, cy);
+      Object.assign(sg, { head: e, idx: i, summoned: true, under: true, dir: 1 });
+      sg.body.enable = false; sg.setVisible(false); sg.body.reset(x, LH + 300);
+      if (i >= TUNE.WYRM.segs - 2) sg.setScale(0.75);
+      e.segs.push(sg);
+    }
+  }
+  setupWyrmseg(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+  }
+  setupLinker(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { lid: ++this.linkerSeq, partner: null, linkT: 0, phase: 'off', beamT: rand(1, 2), trackY: y, beam: null, zapT: 0, fireCd: 1.5 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x40f0ff).setScale(0.45).setAlpha(0.8).setDepth(18);
+  }
+  setupBuzzsaw(e, x, y, cx, cy) {                                      // ricochets at a constant clip; steers at you off every wall
+    e.body.setAllowGravity(false); e.body.setBounce(1, 1);
+    const a = rand(0, Math.PI * 2), v = TUNE.BUZZSAW.speed * 0.55;
+    e.body.setVelocity(Math.cos(a) * v, Math.sin(a) * v);
+    Object.assign(e, { ai: 'saw', owned: 0, ownHit: false, hitMap: new Map(), bounceT: 0, pHitT: 0, whirT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.55).setAlpha(0.6).setDepth(18);
+  }
+  setupLugger(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'seek', carry: false, tgtBarrel: null, stepK: 0, carryImg: null, rockCd: 2 });
+  }
+  setupBlimp(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', bombT: 1.5, side: Math.random() < 0.5 ? -1 : 1, crash: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupStrider(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), stepK: 0, a0: 0, beamA: 0, hitT: 0, lastStep: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+  }
+  setupCinder(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'roll', owned: 0, lastTrailX: x, hitMap: new Map(), spinA: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.6).setAlpha(0.7).setDepth(4.9);
+  }
+  setupGatling(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), aimA: 0, shotT: 0 });
+  }
+  setupBanner(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, plantT: rand(1, 2), healT: 0 });
+  }
+  setupBulldozer(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'drive', stepK: 0, crushT: 0, stuckT: 0 });
+  }
+  setupCopycat(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', cd: rand(1.2, 2), burst: 0, burstT: 0, mode: 'rapid', icon: this.add.image(x, y, 'icon_nail').setDepth(5.1).setScale(0.8).setAlpha(0.85) });
+  }
+  setupJelly(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', zapT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff80e0).setScale(0.5).setAlpha(0.6).setDepth(4.9);
+  }
+  setupPorcupine(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(2, 3.5), quillAcc: 0 });
+  }
+  setupSponge(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, charge: 0 });
+  }
+  setupLeaper(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.5, 2.5), tx: 0, ty: 0 });
+  }
+  setupZealot(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.5, 2.5), souls: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe080).setScale(0.3).setAlpha(0.6).setDepth(4.9);
+  }
+  setupMinelayer(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', cd: rand(1, 2) });
+  }
+  setupRatking(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, shedT: rand(2, 3.5) });
+  }
+  setupRatbot(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'run', hopT: rand(0.5, 1.5), jit: rand(-30, 30) });
+  }
+  setupHeadsman(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, chopOk: 0 });
+  }
+  setupBerserker(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, rage: false, swingCd: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2020).setScale(0.6).setAlpha(0).setDepth(4.9);
+  }
+  setupBastion(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1, 2), wall: null });
+  }
+  setupShellback(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, bashOk: 0, flipped: false });
+  }
+  setupShinobi(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'ground', aiUntil: 0, threw: false, leapT: 0, clingOk: 0, clingSide: 0 });
+  }
+  setupThundercloud(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', cd: rand(1.5, 2.5), strikeY: LH });
+  }
+  setupForeman(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', phase: 1, atkCd: 2.5, atkN: 0, shots: 0, shotT: 0, stepK: 0 });
+  }
+  setupVortex(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', cd: rand(2.5, 4), shredT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9ad8ff).setScale(0.35).setAlpha(0.7).setDepth(18);
+  }
+  setupPylon(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'idle', cd: rand(1, 2), chargeT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x80c8ff).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupScavenger(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'run', stepK: 0, growN: 0, meal: null, leapOk: 0 });
+  }
+  setupTorcher(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, sprayOk: 0, baseA: 0, flameA: 0, tick: 0, tankHitT: -1e9 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff8a20).setScale(0.3).setAlpha(0.7).setDepth(18);
+  }
+  setupDiscus(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, cd: rand(1.2, 2.2), disc: null });
+  }
+  setupSporepod(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'idle', cd: rand(1, 2.5), puffT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xb8e040).setScale(0.6).setAlpha(0.5).setDepth(4.9);
+  }
+  setupGrappler(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', stepK: 0, grabOk: 0, holdDmg: 0 });
+  }
+  setupSpotter(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { lockT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2020).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupHound(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'run', stepK: 0, leapOk: 0, side: (this.houndN = (this.houndN || 0) + 1) % 2 ? 1 : -1 });
+  }
+  setupOrbiter(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { plates: [1, 1, 1].map(() => TUNE.ORBITER.plateHp), plateHit: [0, 0, 0], spin: rand(0, 6), fireFr: 0, fireCd: rand(1.5, 2.5) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(0.35).setAlpha(0.8).setDepth(18);
+  }
+  setupSwapper(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', cd: rand(3, 4.5), stepK: 0, tellDmg: 0, burst: 0, burstT: 0, fireCd: rand(1, 2) });
+  }
+  setupScorcher(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'rest', stepK: 0, lastTrailX: x, turned: false });
+  }
+  setupWraith(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', inWall: false, strikeOk: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9a70ff).setScale(0.4).setAlpha(0.7).setDepth(18);
+  }
+  setupChiller(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', cd: rand(1.5, 2.5), stepK: 0 });
+  }
+  setupWarhorn(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'roll', cd: rand(2.5, 4), stepK: 0 });
+  }
+  setupSpikeball(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'roll', spinA: 0, rage: false });
+  }
+  setupPara(e, x, y, cx, cy) {                                         // starts high above the floor under its chute
+    const fy = this.floorBelow(x, y) ?? (cy + 6) * TS;
+    e.body.reset(x, Math.max(40, fy - 260)); e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drop', burstT: rand(0.6, 1.2), shots: 0, shotT: 0, chute: true, stepK: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff6a20).setScale(0.25).setAlpha(0.8).setDepth(18);
+  }
+  setupBeacon(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'hover', cd: rand(1, 2), callT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+  }
+  setupSlug(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'crawl', trailT: 0, spitCd: rand(1.5, 3), stepK: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9aff4a).setScale(0.4).setAlpha(0.45).setDepth(18);
+  }
+  setupLeech(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'seek', ox: 0, oy: 0, drainT: 0, offT: 0 });
+  }
+  setupEcho(e, x, y, cx, cy) {                                         // a hologram replaying where you were 1.5 s ago
+    e.body.setAllowGravity(false); e.setAlpha(0.6);
+    Object.assign(e, { ai: 'replay', fireCd: 1 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.8).setAlpha(0.35).setDepth(18);
+  }
+  setupPilferer(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'seek', stolen: -1, escapeT: TUNE.PILFER.escape, gunImg: null });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff4060).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupPogo(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'crouch', crouchT: 0.4, slamming: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff9a).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupClaw(e, x, y, cx, cy) {                                         // a crane claw on a trolley under the roof
+    e.body.setAllowGravity(false);
+    let ty = y; for (let yy = y; yy > 24; yy -= 8) { if (this.solidAt(x, yy - 10)) { ty = yy; break; } ty = yy; }
+    e.body.reset(x, ty); Object.assign(e, { ai: 'track', homeY: ty, cd: rand(1.5, 2.5), grab: false, grabDmg: 0, liftT: 0 });
+    e.glow = this.add.image(x, ty, 'glow').setBlendMode(ADD).setTint(0xffb040).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupSparker(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'hop', hopT: rand(0.3, 0.9) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60e0ff).setScale(0.35).setAlpha(0.8).setDepth(18);
+  }
+  setupGolem(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', throwCd: rand(1.5, 2.5), slamCd: 1, stepK: 0, lastStep: 0, shed: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff7a20).setScale(0.7).setAlpha(0.6).setDepth(18);
+  }
+  setupCreeper(e, x, y, cx, cy) {                                      // climbs to the nearest ceiling first
+    e.body.setAllowGravity(false); e.body.setVelocity(0, -300);
+    Object.assign(e, { ai: 'climb', climbT: 1.2, groundT: 0, stepK: 0, hitP: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xb0ff40).setScale(0.3).setAlpha(0.8).setDepth(18);
+  }
+  setupRoller(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', cd: rand(1.5, 2.5), stepK: 0, rollDir: 1, rollT: 0, bounces: 0, spinA: 0, hitP: false });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffa040).setScale(0.3).setAlpha(0.7).setDepth(18);
+  }
+  setupJammer(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'hover', cd: rand(2, 3.5), side: Math.random() < 0.5 ? -1 : 1, sideT: rand(3, 5) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60ff9a).setScale(0.4).setAlpha(0.7).setDepth(18);
+  }
+  setupGasbag(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'drift', ph: rand(0, 6) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x9aff4a).setScale(0.6).setAlpha(0.35).setDepth(18);
+  }
+  setupWelder(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', buildCd: rand(3, 6), patient: null, scanT: 0, stepK: 0, turrets: [] });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffd040).setScale(0.3).setAlpha(0.85).setDepth(18);
+  }
+  setupTurret(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'watch', fireCd: rand(0.8, 1.4), aimA: -Math.PI / 2, owner: null });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.25).setAlpha(0.85).setDepth(18);
+  }
+  setupMimic(e, x, y, cx, cy) {                                        // sits among the drums as one of them
+    Object.assign(e, { ai: 'hide', stepK: 0, lonelyT: 0.5, dir: 1 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffe040).setScale(0.3).setAlpha(0).setDepth(18);
+  }
+  setupHowitzer(e, x, y, cx, cy) {
+    Object.assign(e, { ai: 'walk', cd: rand(2, 3.5), shells: 0, shotT: 0, stepK: 0, lastStep: 0, recoilT: 0 });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.35).setAlpha(0.85).setDepth(18);
+  }
+  setupBlinker(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'float', cd: rand(1, 2), tx: x, ty: y, dvx: 0, dvy: 0, hitP: false, next: 'strike' });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x60f0ff).setScale(0.3).setAlpha(0.85).setDepth(18);
+  }
+  setupMagnet(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false);
+    Object.assign(e, { ai: 'hover', pulseT: rand(1.5, 2.5), side: Math.random() < 0.5 ? -1 : 1, sideT: rand(3, 5) });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0x6a8aff).setScale(0.6).setAlpha(0.6).setDepth(18);
+  }
+  setupHumanoid(e, x, y, cx, cy) {
+    const D = e.def, kind = e.kind;
+    Object.assign(e, { ai: 'idle', path: null, pathI: 0, navAir: false, navAirT: 0, lkx: x, lky: y, lkT: -1e9, lastSeenT: -1e9,
+      dodgeCd: 0, fleeT: 0, fleeDir: 1, attackCd: 0, repickT: 0, repathT: 0, retreated: false, bursts: 0, shotsLeft: 0, shotT: 0,
+      reloadT: 0, aimA: e.dir > 0 ? 0.25 : Math.PI - 0.25, aimStart: 0, stuckT: 0, lookT: rand(1, 3), goalNode: -1, recoil: 0, searchUntil: 0,
+      fr: D.frame0, face: e.dir, shieldUp: kind === 'bulwark' || kind === 'mirror', healCheckT: 0, pack: null });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint({ enforcer: 0xff3020, stalker: 0x7dff4a, bulwark: 0xff9a2a, sniper: 0x60c0ff, rocketeer: 0xff8a20, sapper: 0x7dff4a, cloaker: 0x40f0ff, pyro: 0xffb040, harpooner: 0xffe040, mirror: 0xe080ff, tarspit: 0xffa040, duelist: 0xff2a5a, grenadier: 0xff8a20 }[kind]).setScale(0.3).setAlpha(0.85).setDepth(18);
+    if (kind === 'harpooner') { e.hk = null; e.reelDmg = 0; e.fireCd = rand(1, 2); e.hkImg = this.add.image(x, y, 'harpoon').setDepth(9).setVisible(false); }
+    if (kind === 'enforcer') e.gun = this.add.image(x, y, 'gun_rifle').setOrigin(2 / 24, 5.5 / 11).setDepth(6);
+    if (kind === 'sniper') { e.gun = this.add.image(x, y, 'gun_sniper').setOrigin(2 / 34, 4.5 / 9).setDepth(6); e.fireCd = 1; }
+    if (kind === 'rocketeer') { e.gun = this.add.image(x, y, 'gun_rlaunch').setOrigin(2 / 26, 5.5 / 11).setDepth(6); e.fireCd = 1.5; }
+    if (kind === 'sapper') e.plantCd = rand(1, 2.5);
   }
 
   buildColliders() {

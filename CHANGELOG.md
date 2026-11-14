@@ -153,6 +153,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   kick kill of the foreman, juggernaut, sapper, linker, burrower or Smelter, a ripper kill of the Smelter, and some
   foes with limpets on them. Where those effects draw random numbers, which gibs fly or whether a sapper drops its charge can come out
   differently on a given seed; the odds are the same. (#52)
+- Each enemy record also names the method that sets it up when it spawns (`setup`): the fields its update reads,
+  the glow, gun or thruster images it carries, and where it really starts. `spawnEnemy` calls it instead of
+  walking an 82-branch chain, and `kinds.js` fails a record that names a missing method. Every kind spawns
+  exactly as before. (#52)
 - Every continuous weapon sound stops through one `Sfx.stopLoops()`. The run reset, **N**, death, restart, quit,
   pause and lift ride all call it, so the **N** list can no longer fall behind (it was missing the minigun). (#53)
 - Opening the pause menu starts decoding the track RESTART will play and the title theme, so neither starts late.
