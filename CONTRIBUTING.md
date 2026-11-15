@@ -35,8 +35,9 @@ fails if they're out of step.
 node dev/check.mjs
 ```
 
-This compiles the game script and both audio banks, checks that local scripts exist and that CDN scripts are pinned
-to an exact version and carry an integrity hash. If you bump Phaser, put the new file's sha384 hash in the tag. It also notes any sampled sound name the game asks for that `sfx_bank.js` doesn't have (a
+This checks that `slaghouse.html` is exactly what `src/` builds, compiles the game script and the audio banks, checks
+that each AAC bank holds the same sounds and tracks as its Opus bank, and that local scripts exist and CDN scripts are
+pinned to an exact version and carry an integrity hash. If you bump Phaser, put the new file's sha384 hash in the tag. It also notes any sampled sound name the game asks for that `sfx_bank.js` doesn't have (a
 note, not a failure: the synth plays instead). It fails if the `Sfx` block in `slaghouse.html` can't load on its own
 (it must not read page globals such as `OPTS` while loading) or if a `dev/sfxgen/calib.json` entry was measured
 against an older version of its procedural sound. CI runs the same script on every push to `main` and on every pull
@@ -169,7 +170,8 @@ gh workflow run release.yml --ref main -f version=Unreleased
 
 ## Audio
 
-The sound banks are optional; every sampled sound has a synth fallback in the game. To regenerate them, follow
+The sound banks are optional; every sampled sound has a synth fallback in the game. Each has an AAC copy
+(`sfx_bank_aac.js`, `music_bank_aac.js`) for browsers without Ogg Opus, built alongside it. To regenerate them, follow
 [`dev/sfxgen/README.md`](dev/sfxgen/README.md) and [`dev/synthwave/README.md`](dev/synthwave/README.md).
 
 ## Reporting problems
