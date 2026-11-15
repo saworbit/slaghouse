@@ -59,7 +59,7 @@ it summoned, so none may be left a second after it falls.
 CI runs the four-seed Brutal check as its own job. Run this command to repeat it.
 
 ```bash
-node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729
+node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11
 ```
 
 Page errors and console errors fail the check. The runner exits with status 1 and names the failing checks.
