@@ -15,7 +15,7 @@ hum crossfades to the selected version.
 | process | `process.py [names]` | trim / slice / seamless loop, 16 -> 48 kHz with synthesized >8 kHz "air", CLAP ranking -> `out/proc/`, `out/candidates.json`, `out/sheets/` |
 | audition | `review.html` | serve the repo root and open `/dev/sfxgen/review.html`: play every take, tick picks, export `picks.json` |
 | calibrate | `calib.js` -> `calib.json` | renders each procedural sound offline in the browser and measures K-weighted loudness + peak, with a fingerprint of the synth code it measured |
-| build | `build.py` | encodes the picks to Opus, gain-matches each sound to the synth it replaces -> `../../sfx_bank.js` (only re-encodes sounds whose picks or source audio changed, see below) |
+| build | `build.py` | encodes the picks to Opus, gain-matches each sound to the synth it replaces -> `../../sfx_bank.js`, and the same takes as 48 kbps AAC in MP4 -> `../../sfx_bank_aac.js` for browsers without Ogg Opus (only re-encodes sounds whose picks or source audio changed, see below), and keeps `takes/` in step with the picks |
 
 `picks.json` holds hand overrides (sounds where the CLAP ranking chose badly); everything else uses the
 top-ranked takes. `MASTER` in `build.py` trims all samples against the synth mix; `PEAK_CAP` limits how
@@ -48,18 +48,24 @@ recomputed without re-measuring, since the curve and noise themselves didn't cha
 
 ## Rebuilding from a fresh clone
 
-Only `out/candidates.json`, `out/picks_used.json`, `out/keep.json` and `out/bank_src.json` are committed. The processed WAVs that
-`build.py` and `review.html` read (`out/proc/`) are gitignored, so on a fresh clone `build.py` stops before
-writing anything and says so. Run `gen.py` and
-`process.py` first. Each sound's seed is `1000 + its position in sounds.py`. Adding or reordering entries
-shifts the seeds, and different GPU or library versions can also change the takes. After regenerating,
-re-check the `picks.json` overrides in `review.html`.
+`takes/<name>/<id>.flac` holds every take the bank uses: lossless copies of the 16-bit processed WAVs, about 11 MB.
+`build.py` reads a take from `out/proc/` when it's there and from `takes/` otherwise, and after each build `takes/`
+matches the picks exactly (new or changed takes copied in, unused ones dropped). So on a fresh clone `build.py`
+rebuilds `sfx_bank.js` byte for byte with no GPU and no model download. Committed alongside it: `out/candidates.json`,
+`out/picks_used.json`, `out/keep.json` and `out/bank_src.json`.
+
+The processed WAVs of every other candidate (`out/proc/`, which `review.html` plays) stay gitignored. To pick a
+different take, or add a sound, run `gen.py` and `process.py` for those sounds first. Each sound's seed comes from
+its name (`zlib.crc32`), so adding or reordering entries in `sounds.py` doesn't reseed any other sound. Different
+GPU or library versions can still change the takes, so re-check the `picks.json` overrides in `review.html` after
+regenerating.
 
 Rebuilds re-encode only what changed. `out/bank_src.json` records each sound's picked ids, a hash of their
-processed WAVs and the bitrate. A sound whose record still matches keeps its Opus data from the current
+16-bit samples (the same for a WAV and its FLAC copy) and the bitrate. A sound whose record still matches keeps its Opus data from the current
 `sfx_bank.js`, so adding one sound adds a line instead of rewriting the whole bank in git. New encodes are
 bit-exact (`-fflags +bitexact`, no random Ogg serial), so the same input always gives the same bytes. Delete
-`out/bank_src.json` to force a full re-encode.
+`out/bank_src.json` to force a full re-encode. 61 of the current encodes predate the bit-exact flags, so a full re-encode rewrites
+their Ogg headers once (the audio packets come out the same).
 
 Debug helpers: `overview.py` (top take of every sound on one sheet), `rawsheet.py <name>` (raw takes),
 `probe.py <name> "label" ...` / `batchprobe.py` (CLAP zero-shot classification of the candidates;

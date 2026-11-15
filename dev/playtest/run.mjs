@@ -624,6 +624,32 @@ try {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.accuracy());
   });
+  // Where Ogg Opus won't decode (older Safari), the game fetches the AAC copies of both banks and plays sampled sound
+  // from them; a browser that decodes Opus never asks for them (#44).
+  for (const opus of [false, true]) await check(opus ? 'a browser that decodes Ogg Opus never loads the AAC banks'
+    : 'without Ogg Opus the game loads the AAC banks and plays sampled SFX and music', async ctx => {
+    if (!opus) await ctx.addInitScript(() => {                         // decodeAudioData rejects Ogg data, as older Safari does
+      const P = (window.BaseAudioContext || window.AudioContext).prototype, decode = P.decodeAudioData;
+      P.decodeAudioData = function (buf, ok, bad) {
+        if (String.fromCharCode(...new Uint8Array(buf, 0, 4)) !== 'OggS') return decode.call(this, buf, ok, bad);
+        const err = new DOMException('Unable to decode audio data', 'EncodingError');
+        if (bad) bad(err);
+        return Promise.reject(err);
+      };
+    });
+    const asked = [];                                                  // audio can start while the page loads, so listen first
+    ctx.on('request', r => { if (/_aac\.js$/.test(r.url())) asked.push(r.url().split('/').pop()); });
+    const page = await open(ctx, []);
+    await page.evaluate(() => { Sfx.init(); Music.start(); Music.track('title'); });
+    await page.waitForFunction(() => Sfx.bankDone && Music.bank.title && (Sfx.opus !== false || window.SLAG_SFX === window.SLAG_SFX_AAC), null, { timeout: 60000 });
+    const r = await page.evaluate(() => ({ opus: Sfx.opus, aac: window.SLAG_SFX === window.SLAG_SFX_AAC && window.SLAG_MUSIC === window.SLAG_MUSIC_AAC,
+      takes: Object.keys(Sfx.bank).length, sounds: Object.keys(window.SLAG_SFX).length, sfx: Sfx.bankOk(), music: Music.sampled() }));
+    const fails = [];
+    if (opus && (r.opus !== true || asked.length || r.aac)) fails.push(`an Opus browser asked for ${asked.join(', ') || 'nothing'} and ended on ${r.aac ? 'the AAC banks' : 'the Opus banks'} (probe ${r.opus})`);
+    if (!opus && (r.opus !== false || !r.aac || asked.length !== 2)) fails.push(`without Opus the probe said ${r.opus}, the AAC banks ${r.aac ? 'took over' : 'did not take over'}, requests: ${asked.join(', ') || 'none'}`);
+    if (r.takes !== r.sounds || !r.sfx || !r.music) fails.push(`${r.takes} of ${r.sounds} sounds decoded, SFX ${r.sfx ? 'SAMPLED' : 'UNAVAILABLE'}, music ${r.music ? 'SAMPLED' : 'not sampled'}`);
+    return fails;
+  });
   await check('lifetime TIME counts OVERTIME runs that end by R or quit, once each', async ctx => {
     const page = await open(ctx, []);
     return page.evaluate(() => {

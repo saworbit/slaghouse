@@ -5,7 +5,7 @@
 
 Writes out/raw/<name>_<i>.wav (16 kHz mono float).
 """
-import os, sys, time, warnings
+import os, sys, time, zlib, warnings
 warnings.filterwarnings('ignore')
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -30,7 +30,7 @@ for idx, name in enumerate(todo):
     n = s.get('n', 6)
     prompts = s['p'] if isinstance(s['p'], list) else [s['p']]
     batch = [prompts[i % len(prompts)] for i in range(n)]
-    torch.manual_seed(1000 + list(SOUNDS).index(name))
+    torch.manual_seed(zlib.crc32(name.encode()))      # from the name, so adding or moving a sound reseeds no other
     model.set_generation_params(duration=s['d'], top_k=250, cfg_coef=3.0)
     t = time.time()
     with torch.no_grad():

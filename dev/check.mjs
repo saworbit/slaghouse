@@ -1,6 +1,7 @@
 // Static checks for the single-file game, run locally (`node dev/check.mjs`) and in CI.
 // - every inline <script> in slaghouse.html compiles
-// - the optional audio banks compile
+// - the optional audio banks compile, and each AAC copy (loaded where Ogg Opus won't decode) holds the same sounds
+//   and tracks as its Opus bank
 // - every local <script src> exists, and CDN scripts are pinned to an exact version with an integrity hash
 // - notes any sampled sound name the game asks for that sfx_bank.js doesn't have (the synth plays instead)
 // - the Sfx block loads on its own and every dev/sfxgen/calib.json entry matches its procedural sound (calibcheck)
@@ -56,6 +57,18 @@ for (const bank of ['sfx_bank.js', 'music_bank.js']) {
   const missing = [...asked].filter((n) => !have.has(n) && !SYNTH_ONLY.has(n)).sort();
   if (missing.length) console.log(`note  ${missing.length} sampled sound(s) not in sfx_bank.js, so the synth plays: ${missing.join(' ')}`);
   else ok(`every sampled sound name the game asks for is in sfx_bank.js`);
+}
+for (const [bank, aacBank, key] of [['sfx_bank.js', 'sfx_bank_aac.js', 'SLAG_SFX'], ['music_bank.js', 'music_bank_aac.js', 'SLAG_MUSIC']]) {
+  const p = join(root, bank), q = join(root, aacBank);
+  if (!existsSync(p)) continue;
+  if (!existsSync(q)) { fail(`${aacBank} is missing, so browsers without Ogg Opus get no samples (dev/sfxgen or dev/synthwave build.py makes it)`); continue; }
+  const src = readFileSync(q, 'utf8');
+  if (!compile(src, aacBank)) continue;
+  const a = { window: {} }, b = { window: {} };
+  vm.runInNewContext(readFileSync(p, 'utf8'), a); vm.runInNewContext(src, b);
+  const opus = Object.keys(a.window[key] || {}).sort().join(' '), aac = Object.keys(b.window[key + '_AAC'] || {}).sort().join(' ');
+  if (opus !== aac) fail(`${aacBank} is out of step with ${bank}: rebuild it (names differ)`);
+  else ok(`${aacBank} compiles and matches ${bank}`);
 }
 
 // sfxgen calibration (#124): calibcheck.mjs evaluates the `const Sfx = { ... };` block with no page globals, the

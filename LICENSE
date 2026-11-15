@@ -15,8 +15,8 @@ not share it with anyone else.
 Third-party components keep their own licenses and are not covered by this notice:
 
 - Phaser (MIT License) is loaded at runtime from the jsDelivr CDN and is not included in this repository.
-- The sampled sound effects in sfx_bank.js were generated with Meta's AudioGen (facebook/audiogen-medium), whose
-  model weights are licensed CC BY-NC 4.0. See the Licensing section of README.md.
+- The sampled sound effects in sfx_bank.js and sfx_bank_aac.js were generated with Meta's AudioGen
+  (facebook/audiogen-medium), whose model weights are licensed CC BY-NC 4.0. See the Licensing section of README.md.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
