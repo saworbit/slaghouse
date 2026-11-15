@@ -80,6 +80,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- `dev/sfxgen/takes/` holds the 382 takes the SFX bank uses as lossless FLAC (about 11 MB), and `build.py` falls back
+  to them when `out/proc/` is missing, so a fresh clone rebuilds `sfx_bank.js` byte for byte without the GPU
+  pipeline. `build.py` keeps `takes/` matched to the picks. `gen.py` seeds each sound from its name, so adding or
+  reordering sounds no longer reseeds the rest. (#8)
+- `versions/` is gone: its six snapshots of `slaghouse.html` from before git are still in history (for example
+  `git show b51f096:versions/slaghouse.before-sfx.html`), and later rounds are commits and tags. Unchanged bank
+  rebuilds add nothing to history, and the audio stays plain git. (#12)
 - CONTRIBUTING.md explains how to add an enemy kind or a run mode, now that each is one record checked by
   `kinds.js` or `modes.js`. The play-test README lists the gas canister and the fixed seed in `PR.accuracy()`.
 - The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
