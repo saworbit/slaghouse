@@ -264,6 +264,50 @@ try {
     catch { fail.push('OVERTIME did not start after a key press on a touch device'); }
     return fail;
   });
+  // Keys follow physical positions, so a non-US layout keeps WASD and the punctuation weapon keys in place, and
+  // OPTIONS > KEYS rebinds them with real key input (#109): the old key's job swaps over, it's saved, and the hints follow.
+  await check('keys follow the physical layout and rebind from OPTIONS > KEYS', async ctx => {
+    let page = await open(ctx, []);
+    const fail = [], frame = () => page.evaluate(() => new Promise(r => game.events.once('poststep', r)));
+    const tap = async (key, n = 1) => { for (let i = 0; i < n; i++) { await page.keyboard.press(key); await frame(); await frame(); } };
+    const sub = () => page.evaluate(() => game.scene.getScene('Title').sub);
+    await tap('ArrowDown', 7); await tap('Enter');
+    if (await sub() !== 'options') fail.push(`seven downs and Enter opened '${await sub()}', not OPTIONS`);
+    await tap('ArrowDown', await page.evaluate(() => OPTION_ITEMS.findIndex(o => o.id === 'keys'))); await tap('Enter');
+    if (await sub() !== 'keys') fail.push(`the KEYS row opened '${await sub()}'`);
+    await tap('ArrowDown', await page.evaluate(() => BIND_ROWS.findIndex(r => r[0] === 'SPACE'))); await tap('Enter');
+    if (await page.evaluate(() => game.scene.getScene('Title').capture) !== 'SPACE') fail.push('Enter on JUMP did not wait for a key');
+    await tap('KeyK');
+    let r = await page.evaluate(() => ({ space: BINDS.SPACE.join(), k: BINDS.K.join(), saved: JSON.parse(localStorage.getItem('slaghouse.binds') || '{}').SPACE?.join(),
+      hint: HINT1, slot: SLOT_KEYS[SLOT_NAMES.indexOf('K')], capture: game.scene.getScene('Title').capture }));
+    if (r.space !== 'KeyK' || r.k !== 'Space' || r.saved !== 'KeyK' || r.capture) fail.push(`rebinding JUMP to K: JUMP ${r.space}, slot K ${r.k}, saved ${r.saved}, still waiting ${r.capture}`);
+    if (!r.hint.startsWith('A/D MOVE  K JUMP') || r.slot !== 'SP') fail.push(`after the rebind the hint reads '${r.hint.slice(0, 20)}' and slot 24 shows '${r.slot}'`);
+    // a fresh page keeps the binding, and a run reads it: K jumps, Space picks slot 24, and keys go by position
+    page = await open(ctx, []);
+    await page.evaluate(() => { RUNMODE = 'endless'; T.boot(); T.run(300); });
+    const held = async (key, names) => { await page.keyboard.down(key); const v = await page.evaluate(n => { T.run(34); return n.map(x => T.g().keys[x].isDown); }, names); await page.keyboard.up(key); await page.evaluate(() => T.run(34)); return v; };
+    r = { k: await held('KeyK', ['SPACE', 'K']), space: await held('Space', ['K', 'SPACE']) };
+    if (r.k.join() !== 'true,false' || r.space.join() !== 'true,false') fail.push(`after a reload K held [JUMP, slot 24] ${r.k}, Space held [slot 24, JUMP] ${r.space}`);
+    const hud = await page.evaluate(() => game.scene.getScene('Hud').hint1._text);
+    if (!hud.includes('K JUMP')) fail.push(`the HUD hint strip reads '${hud.slice(0, 24)}'`);
+    r = await page.evaluate(() => {                     // AZERTY: the key at W's place prints Z, and the one at [ prints a caret
+      const send = (type, code, key) => window.dispatchEvent(new KeyboardEvent(type, { code, key, bubbles: true }));
+      send('keydown', 'KeyW', 'z'); T.run(34); const w = T.g().keys.W.isDown, z = T.g().keys.Z.isDown; send('keyup', 'KeyW', 'z'); T.run(34);
+      const before = T.g().weapon; send('keydown', 'BracketLeft', '^'); T.run(34); send('keyup', 'BracketLeft', '^'); T.run(34);
+      return { w, z, before, after: T.g().weapon, slot: SLOT_NAMES.indexOf('OPEN_BRACKET') };
+    });
+    if (!r.w || r.z) fail.push(`the key at W's place (printing Z) pressed W ${r.w}, Z ${r.z}`);
+    if (r.after !== r.slot) fail.push(`the key at [ (printing ^) moved from slot ${r.before + 1} to ${r.after + 1}, want ${r.slot + 1}`);
+    // RESET ALL puts every key back
+    page = await open(ctx, []);
+    await tap('ArrowDown', 7); await tap('Enter');
+    await tap('ArrowDown', await page.evaluate(() => OPTION_ITEMS.findIndex(o => o.id === 'keys'))); await tap('Enter');
+    const resetRow = await page.evaluate(() => game.scene.getScene('Title').keyRows.findIndex(x => x[0] === 'reset'));
+    await tap('PageDown', Math.floor(resetRow / 10)); await tap('ArrowDown', resetRow % 10); await tap('Enter');
+    r = await page.evaluate(() => ({ space: BINDS.SPACE.join(), k: BINDS.K.join(), saved: JSON.parse(localStorage.getItem('slaghouse.binds') || '{}').SPACE?.join(), hint: HINT1 }));
+    if (r.space !== 'Space' || r.k !== 'KeyK' || r.saved !== 'Space' || !r.hint.startsWith('A/D MOVE  SPACE JUMP')) fail.push(`RESET ALL left JUMP ${r.space}, slot K ${r.k}, saved ${r.saved}`);
+    return fail;
+  });
   await check('Lab setup keeps your changes across rooms, tallies the roster, and works with a gamepad', async ctx => {
     const fail = [];
     let page = await open(ctx, []);

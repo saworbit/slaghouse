@@ -77,6 +77,12 @@ See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted ro
 | Post-processing on / off | **V** |
 | Mute (remembered; works in the pause menu too) / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
 
+The keys above are the US positions. The game reads keys by where they sit, not what they print, so on a UK, German,
+French or Nordic keyboard WASD and the weapon keys stay in the same places; the hints and the CONTROLS page show
+your keyboard's own labels where the browser offers them. **OPTIONS > KEYS** rebinds any of them: pick a row, press
+Enter, then the new key. A key does one job, so the row that had it takes your old key. **RESET ALL TO DEFAULTS**
+puts everything back, and your bindings are remembered.
+
 On a gamepad: left stick moves (down + **A** drops through a platform), right stick aims, **RT** fires, **LT** throws a
 mine, **A** jumps, **B** dashes, **X** kicks, **Y** fires the hook, **RB** drops the sentry, hold **LB** for the weapon
 wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses. Menus take the D-pad or left stick,
