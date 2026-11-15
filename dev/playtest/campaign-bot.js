@@ -16,7 +16,7 @@ window.campaignBot = () => {
   };
 
   // Ground that hurts to stand on, with the same tests the scene uses plus a little margin: fire and slag puddles,
-  // acid, a foe's gas, a cooking propane prop's jet, a tipped ladle's slag stream and live water. feet is the bottom
+  // acid, a foe's gas, a cooking propane prop's jet, a tipped ladle's slag stream, live water and live rails. feet is the bottom
   // of the player's body.
   function hazardAt(g, x, feet) {
     const top = feet - 24, cy = feet - 12;
@@ -24,6 +24,8 @@ window.campaignBot = () => {
     for (const A of g.acids) if (Math.abs(x - A.x) < A.w / 2 + 7 && Math.abs(feet - A.y) < 6) return true;
     for (const C of g.clouds) if (!C.mine && Math.hypot(x - C.x, cy - C.y) < C.r + 8) return true;
     for (const W of g.waters) if (W.zap > 0 && Math.abs(x - W.x) < W.w / 2 * W.grow + 7 && Math.abs(feet - W.y) < 7) return true;
+    const C = g.railCyc;                                               // ARENA 05's rails: off them from the warning on
+    if (C && C.st !== 'idle') for (const R0 of g.rails) if (R0.g === C.g && x > R0.x0 - 7 && x < R0.x1 + 7 && Math.abs(feet - R0.y) < 6) return true;
     for (const p of g.props) if (p.st === 'live') {
       if (p.kind === 'propane') {
         const vx = p.x + p.jd * 2, vy = p.y - 16, x0 = Math.min(vx, vx + p.jd * 50), x1 = Math.max(vx, vx + p.jd * 50);

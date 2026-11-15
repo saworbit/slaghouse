@@ -257,6 +257,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   and fills only the untouched fields from the room's preset. A live tally beside **Add group** shows enemies and
   bosses against the limits, and **Deploy room** waits while the roster is over. `?lab=` with an unknown room says
   so when the Firing Range opens. (#107)
+- Every weapon that hits drums hits breakable props too: the Arc Caster, Corroder, Plasma Katana, Laser Whip, Sonic
+  Blaster, Pinball Cannon, Firework Launcher (which now pops on scenery), Rocket Gauntlet, Forge Hammer slam and
+  Grav Bomb. Furnace fire vents, the Meltdown slag, Torchers and Thundercloud strikes cook off what burns, and the
+  Bulldozer's plow and the Foreman's slam break props. The tractor, the scrap vacuum, the Lugger and the Foreman's
+  magnet only move loose things, so they leave props alone on purpose. A prop hit never counts toward accuracy.
+  `PR.weapons()` fires each weapon at a vending machine with no drum nearby to stand in for it, and fails by name if
+  the prop takes nothing or the shot counts a hit. (#86)
+- The Smelter's rails stop when it falls. They kept cycling through the wait before VICTORY, so a live rail could
+  kill the player after the final boss was already down. `CP.latePacing()` checks it.
 - The title screen no longer runs its text together. The menu sits in two columns below the floor line, play
   modes on the left and extras on the right, with DAILY and BOSS RUSH tags beside their rows. The records line
   clears DIFFICULTY, the subtitle lists all five acts from the act table, the CODEX counter clears the selection
@@ -282,7 +291,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   climb reaches (the girders behind ARENA 02's pillars) left it heading for a spot it could never reach for the rest
   of the run. Brutal seeds 18 and 20 now clear the campaign. (#154)
 - The campaign bot steps off ground that hurts (fire and slag puddles, acid, a foe's gas, a cooking propane jet, a
-  ladle's pour, live water) and won't pick a spot on it. The campaign check now looks for Smelter summons a second
+  ladle's pour, live water, ARENA 05's rails from their warning on) and won't pick a spot on it. The campaign check now looks for Smelter summons a second
   after it falls, once its death sequence has popped them, instead of on the frame it dies. With both bot changes, 17
   of Brutal seeds 1 to 20 clear the campaign, up from 10. CI's Brutal seeds move from 91, 404, 137 and 729 to 91,
   137, 7 and 11: the pins that kept the most health under the new bot, since 404 now finishes at 11 HP and 729

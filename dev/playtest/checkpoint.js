@@ -415,6 +415,8 @@ window.CP = (() => {
     expect(g.boss?.kind === 'boss' && !g.campaignMachinery, 'the rails were active at the start of the Smelter fight');
     if (g.boss) { g.boss.hp = g.boss.def.hp * 0.60; T.run(100); }
     expect(g.campaignMachinery === 'rails' && g.railCyc.st === 'idle', 'the Smelter phase change did not begin the rail charge');
+    if (g.boss) { g.killEnemy(g.boss, 1, 0, 'nail'); T.run(100); }
+    expect(!g.campaignMachinery, 'the rails kept running after the Smelter fell, so they could still kill the player before VICTORY');
     expect(campaignWeaponSlots(CAMPAIGN.length).length === 27, 'the new issue order changed the campaign arsenal size');
     return { fails };
   };
