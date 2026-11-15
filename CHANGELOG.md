@@ -87,6 +87,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - `versions/` is gone: its six snapshots of `slaghouse.html` from before git are still in history (for example
   `git show b51f096:versions/slaghouse.before-sfx.html`), and later rounds are commits and tags. Unchanged bank
   rebuilds add nothing to history, and the audio stays plain git. (#12)
+- The decoy launcher's hologram, the vortex drone's spin-up, the gatling spin-up, the hardlight shield and the swapper's
+  tell play AudioGen takes, level-matched to their synth versions like the rest of the bank. They were generated but
+  never calibrated, so `build.py` had been leaving them out. Each uses the CLAP ranking's top take; swap one in
+  `picks.json` after a listen if it's wrong. (#15)
 - CONTRIBUTING.md explains how to add an enemy kind or a run mode, now that each is one record checked by
   `kinds.js` or `modes.js`. The play-test README lists the gas canister and the fixed seed in `PR.accuracy()`.
 - The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
