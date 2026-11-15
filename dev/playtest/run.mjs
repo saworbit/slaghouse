@@ -654,6 +654,10 @@ try {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.spills());
   });
+  await check('every weapon that hits drums hits breakable props too', async ctx => {
+    const page = await open(ctx, ['props']);
+    return page.evaluate(() => PR.weapons());
+  });
   await check('early campaign prop contact damage on Normal', async ctx => {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.campaignContactDamage());
