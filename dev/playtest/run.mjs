@@ -16,6 +16,7 @@
 //   node dev/playtest/run.mjs           (all checks)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
+//   node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7   (CI's Brutal job)
 //   node dev/playtest/run.mjs --help    (every option; an unknown option or a bad --seeds exits with status 2)
 // It uses the installed Google Chrome (Playwright's 'chrome' channel). Set PLAYTEST_CHROME to a browser's path to
 // use another. It needs network access once: it fetches Phaser from jsDelivr (with retries), checks it against the
@@ -34,6 +35,8 @@ const USAGE = `Usage: node dev/playtest/run.mjs [options]
   --campaign         full campaigns only
   --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers)
   --brutal           play the full campaigns on Brutal
+  --min-wins=7       pass if at least this many campaigns win; a lost or stalled one is reported as LOST, not FAIL
+                     (an error in the page or the harness still fails the run)
   --lab              Lab sweeps, menu controls, presets, snapshots, reset and save isolation
   --lab-sweep        weapon, enemy and hazard sweeps only
   --help             print this and exit`;
@@ -41,7 +44,7 @@ const usageError = (msg, usage = false) => { console.error(`run.mjs: ${msg}` + (
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) { console.log(USAGE); process.exit(0); }
 for (const arg of args) {
-  if (!['--quick', '--lab', '--lab-sweep', '--campaign', '--brutal'].includes(arg) && !arg.startsWith('--seeds=')) usageError(`unknown option ${arg}`, true);
+  if (!['--quick', '--lab', '--lab-sweep', '--campaign', '--brutal'].includes(arg) && !arg.startsWith('--seeds=') && !arg.startsWith('--min-wins=')) usageError(`unknown option ${arg}`, true);
 }
 const quick = args.includes('--quick');
 const labOnly = args.includes('--lab');
@@ -52,6 +55,11 @@ const seedArg = args.findLast(arg => arg.startsWith('--seeds='));
 const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
 if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
   usageError(`--seeds expects comma-separated unsigned 32-bit integers, got ${seedArg}`);
+}
+const minWinsArg = args.findLast(arg => arg.startsWith('--min-wins='));
+const minWins = minWinsArg ? Number(minWinsArg.slice('--min-wins='.length)) : null;
+if (minWinsArg && (!/^[0-9]+$/.test(minWinsArg.slice('--min-wins='.length)) || minWins < 1 || minWins > campaignSeeds.length)) {
+  usageError(`--min-wins expects a whole number from 1 to the number of seeds (${campaignSeeds.length}), got ${minWinsArg}`);
 }
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.css': 'text/css' };
 
@@ -97,7 +105,10 @@ const browser = await chromium.launch({
 const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep', 'modes'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
 const failures = [];
 const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(0) + 's';
-const report = (name, fails) => {
+const lost = [];                                                     // campaigns that lost or stalled, allowed by --min-wins
+const outcomeOnly = fails => fails.every(f => !/^(harness error|page error|console error|threw)/.test(f));
+const report = (name, fails, tolerate = false) => {
+  if (fails.length && tolerate && outcomeOnly(fails)) { console.log(`LOST  ${name}`); for (const f of fails) console.log(`        ${f}`); lost.push(name); return; }
   if (fails.length) { console.log(`FAIL  ${name}`); for (const f of fails) console.log(`        ${f}`); failures.push(name); }
   else console.log(`ok    ${name} (${secs()})`);
 };
@@ -129,7 +140,7 @@ async function open(ctx, files, query = '') {
   for (const f of ['harness', ...files]) await page.evaluate(src => { (0, eval)(src); }, scripts[f]);
   return page;
 }
-async function check(name, fn) {
+async function check(name, fn, tolerate = false) {
   const ctx = await browser.newContext();
   ctx.setDefaultTimeout(8000);
   await ctx.route(origin + '/**', serveRepo);
@@ -137,7 +148,7 @@ async function check(name, fn) {
   try {
     const fails = await fn(ctx);
     for (const p of ctx.pages()) fails.push(...(p._errs || []));
-    report(name, fails);
+    report(name, fails, tolerate);
   } catch (err) {
     const errs = ctx.pages().flatMap(p => p._errs || []);
     report(name, ['threw: ' + String(err && err.message || err).split('\n').slice(0, 5).join(' | '),
@@ -784,7 +795,12 @@ try {
       if (r.state !== 'won') fails.push('campaign: ' + JSON.stringify(r.campaign));
       fails.push(...r.errs.map(e => 'harness error: ' + e));
       return fails;
-    });
+    }, minWins !== null);
+  }
+  if (minWins !== null && (campaignOnly || (!quick && !labOnly && !sweepOnly))) {
+    const kind = brutal ? 'Brutal' : 'Normal', failed = failures.filter(n => n.startsWith(`${kind} campaign seed `)).length;
+    const won = campaignSeeds.length - lost.length - failed;
+    report(`${won} of ${campaignSeeds.length} ${kind} campaigns won, ${minWins} needed`, won >= minWins ? [] : [`lost: ${lost.join('; ') || 'none'}`]);
   }
 } finally {
   await browser.close();

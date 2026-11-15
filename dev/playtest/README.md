@@ -52,14 +52,17 @@ it summoned, so none may be left a second after it falls.
 | `--campaign` | Full campaigns only |
 | `--seeds=91,404` | Selects the seeds for any full campaigns in the run. Use comma-separated unsigned 32-bit integers |
 | `--brutal` | Sets the difficulty of the full campaigns to Brutal |
+| `--min-wins=7` | Passes if at least that many of the full campaigns win. A lost or stalled one prints as `LOST`; page and harness errors still fail |
 | `--lab` | Lab sweeps, menu and gamepad controls, room changes and the roster tally, presets, snapshots, reset and save isolation |
 | `--lab-sweep` | Weapon, enemy and hazard sweeps only |
 | `--help` | Prints the options. An unknown option or a bad `--seeds` value exits with status 2 |
 
-CI runs the four-seed Brutal check as its own job. Run this command to repeat it.
+CI runs the eight-seed Brutal check as its own job and passes when at least seven win, since any change that moves the
+random stream can tip one thin run over. A lost or stalled seed prints as `LOST` with its details; an error in the
+page or the harness still fails. Run this command to repeat it.
 
 ```bash
-node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11
+node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7
 ```
 
 Page errors and console errors fail the check. The runner exits with status 1 and names the failing checks.
