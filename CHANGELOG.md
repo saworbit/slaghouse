@@ -53,7 +53,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 - `dev/playtest/kinds.js`, run by `run.mjs` and CI: every enemy kind is warped in on its own and must have a codex
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
-- CI runs the four-seed Brutal campaign check (seeds 91, 404, 137 and 729) as its own job. (#96)
+- CI runs the four-seed Brutal campaign check (seeds 91, 137, 7 and 11) as its own job. (#96, #146)
 - `node dev/playtest/run.mjs --help` lists the options. An unknown option or a bad `--seeds` value stops with a
   one-line error and status 2, instead of running the full suite or printing a stack trace. (#110)
 - A stalled campaign check names each survivor's cell and whether the player can see it or how long it has been
@@ -123,7 +123,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   banner, and only a second press within two seconds restarts. In the pause menu, RESTART / RETRY ACT and QUIT TO
   TITLE turn red with a question mark and need a second pick; moving off, Esc or B cancels. The pause list no longer
   wraps from RESUME to QUIT TO TITLE. R on the results screen and in the Lab still acts at once. (#98)
-- Headless campaign checks run three fixed Normal seeds by default. Use `--campaign --brutal --seeds=91,404,137,729`
+- Headless campaign checks run three fixed Normal seeds by default. Use `--campaign --brutal --seeds=91,137,7,11`
   to repeat the Brutal matrix. Each run uses normal traversal, combat and in-game healing, and verifies all ten
   operations, the full kill count and zero survivors at lifts and victory.
 - Refreshed the player and enemy sprites, including the Gunship and its wreck. (#77)
@@ -240,6 +240,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - A dead foe's wreck or tank no longer counts as a hit when its blast catches other foes: the gunship and blimp
   crash, a torcher's or pyro's tank and a jet's haywire jetpack. The shot that killed it already counted. Nothing
   else about those blasts changes. `PR.accuracy()` fails if any of the four counts. (#144)
+- The campaign bot plans with the player's long drops and wall climbs, the same graph `run.mjs` checks, and climbs
+  a wall by holding into it and kicking off again. Before, it priced those moves out, so a foe in a pocket only a
+  climb reaches (the girders behind ARENA 02's pillars) left it heading for a spot it could never reach for the rest
+  of the run. Brutal seeds 18 and 20 now clear the campaign. (#154)
+- The campaign bot steps off ground that hurts (fire and slag puddles, acid, a foe's gas, a cooking propane jet, a
+  ladle's pour, live water) and won't pick a spot on it. The campaign check now looks for Smelter summons a second
+  after it falls, once its death sequence has popped them, instead of on the frame it dies. With both bot changes, 17
+  of Brutal seeds 1 to 20 clear the campaign, up from 10. CI's Brutal seeds move from 91, 404, 137 and 729 to 91,
+  137, 7 and 11: the pins that kept the most health under the new bot, since 404 now finishes at 11 HP and 729
+  dies in Slag Rain. (#146)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The

@@ -5640,8 +5640,8 @@ function buildNav(grid) {
     // Moves only the player makes: the longer drops above (dy 3-6) and wall climbs. Holding into a wall and jumping
     // again off it climbs any unbroken face, so the player can scale a wall too tall to jump and step onto its top.
     // These edges cost Infinity, so enemy pathing never takes them; playerCost prices them for the player. With them,
-    // every standing cell can reach the arena's start and get back (run.mjs checks). The campaign bot doesn't plan
-    // with them yet.
+    // every standing cell can reach the arena's start and get back (run.mjs checks). The campaign bot plans with
+    // them too (#154).
     for (const d of [-1, 1]) {
       if (!solid(x + d, y) || !solid(x + d, y - 1)) continue;
       let t = y - 1;

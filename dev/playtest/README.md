@@ -18,7 +18,7 @@ Load them from DevTools or use the headless runner. The game's built-in `SlagLab
 | `dump.js` | `window.KD`: `KD.run(kinds, states)` spawns, draws and kills each kind on a seeded RNG and pinned clocks and returns what each step did, line by line, for `compare.mjs` to diff. `KD.kinds()` and `KD.states()` list the build's kinds and the AI states its scene tests for |
 | `compare.mjs` | Runs `dump.js` in the working tree and in a git ref side by side and lists the kinds and cases that differ. See [Comparing two builds](#comparing-two-builds) |
 | `run.mjs` | Serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on pushes to `main` and on pull requests. |
-| `campaign-bot.js` | The campaign controller follows platforms, jumps, grapples, dodges fire and seeks medkits using normal game mechanics. |
+| `campaign-bot.js` | The campaign controller follows platforms, jumps, grapples, climbs walls, takes long drops, dodges fire, steps off burning, corrosive, gassed or live ground and seeks medkits using normal game mechanics. It plans on the same graph `run.mjs` checks, the player's long drops and wall climbs included. |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
 ## Running it headless
@@ -43,8 +43,8 @@ cover weapon and preparation prompts, blackout, the Gunship warning and fire cle
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for
 Normal seeds 91, 404, 137 and 5. Each run must complete all ten operations, win with the
-full kill count, and leave zero survivors at the lifts and at victory. Smelter summons must be dead before
-its scripted death sequence.
+full kill count, and leave zero survivors at the lifts and at victory. The Smelter's death sequence pops everything
+it summoned, so none may be left a second after it falls.
 
 | Option | What it runs |
 | --- | --- |
@@ -59,7 +59,7 @@ its scripted death sequence.
 CI runs the four-seed Brutal check as its own job. Run this command to repeat it.
 
 ```bash
-node dev/playtest/run.mjs --campaign --brutal --seeds=91,404,137,729
+node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11
 ```
 
 Page errors and console errors fail the check. The runner exits with status 1 and names the failing checks.

@@ -709,7 +709,7 @@ try {
       if (r.kills !== r.total || r.pending !== 0) fails.push(`${r.kills}/${r.total} kills and ${r.pending} pending`);
       if (r.remaining.length) fails.push('survivors: ' + r.remaining.join('; '));
       if (r.leftBehind.length) fails.push('enemies left at act transitions: ' + r.leftBehind.join('; '));
-      if (r.bossCleanup.length) fails.push('summons alive when the Smelter fell: ' + r.bossCleanup.join('; '));
+      if (r.bossCleanup.length) fails.push('summons still alive a second after the Smelter fell: ' + r.bossCleanup.join('; '));
       if (r.state !== 'won') fails.push('controller: ' + JSON.stringify({ ...r.control, hp: r.hp, killer: r.killer }));
       if (r.state !== 'won') fails.push('campaign: ' + JSON.stringify(r.campaign));
       fails.push(...r.errs.map(e => 'harness error: ' + e));
