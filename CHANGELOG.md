@@ -88,6 +88,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- The source lives in `src/`, split along the code's own section banners into 13 parts, and `node src/join.mjs` joins
+  them into `slaghouse.html` by plain concatenation. The built page is byte for byte the file it replaces, so it
+  plays the same and still ships as one file. `dev/check.mjs`, and so CI, fails if `slaghouse.html` isn't what `src/`
+  builds. `GameScene` stays one part for now. CONTRIBUTING explains the edit-and-join loop. (#7)
 - `dev/sfxgen/takes/` holds the 382 takes the SFX bank uses as lossless FLAC (about 11 MB), and `build.py` falls back
   to them when `out/proc/` is missing, so a fresh clone rebuilds `sfx_bank.js` byte for byte without the GPU
   pipeline. `build.py` keeps `takes/` matched to the picks. `gen.py` seeds each sound from its name, so adding or

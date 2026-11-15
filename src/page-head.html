@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  SLAGHOUSE - pixel-art side-scrolling arena shooter (vertical slice prototype)
+  Single file - Phaser 4.2.1 from CDN - Arcade Physics - all art procedural; audio procedural with
+  optional sample banks beside it (sfx_bank.js, music_bank.js, and AAC copies where Ogg Opus won't decode)
+  that it uses when present
+  =============================================================================
+  FINAL TUNING VALUES  (1 world unit = 1 art pixel; 960x540 canvas, camera zoom 2)
+    Gravity ............. 800 px/s^2  (+250 extra while falling, for snappier arcs)
+    Run speed ........... 200 px/s    (ground accel 2200, ground decel 2600, air accel 1400)
+    Jump velocity ....... 355 px/s    (~79 px apex; releasing jump early cuts upward speed x0.5)
+    Max fall speed ...... 560 px/s    coyote time 90 ms, jump buffer 110 ms
+    Nailgun ............. 8.0 shots/s (125 ms)  560 px/s, 12 dmg, +/-2.5 deg spread
+    Shotgun ............. 1.5 shots/s (667 ms)  5 pellets x 10 dmg, 18 deg fan, 470 px/s, short range
+    Grenade launcher .... 1.25 shots/s (800 ms) 300 px/s lob (+70 up), 1.4 s fuse, bounce 0.55,
+                          bursts on enemy contact; blast radius 56, 75->20 dmg falloff,
+                          self-blast: max 10 dmg + 380 px/s push
+    Rocket launcher ..... 0.8 shots/s (1250 ms) 330 px/s, blast radius 60, 80->25 dmg falloff
+                          self-blast: max 12 dmg + 430 px/s push (rocket jumps work)
+    Arc caster .......... 20 ticks/s (50 ms) 4 dmg (80 DPS), 170 px beam, chains to 2 more enemies
+                          within 70 px for 60%; ignores riot shields
+    Railgun ............. 0.67 shots/s (1500 ms) hitscan, 100 dmg, pierces every body on the line
+    Saw launcher ........ 1.5 shots/s (650 ms) 310 px/s blade, 28 dmg per slice, ricochets 4 times
+    Slag hose ........... 25 ticks/s (40 ms) 3 dmg (75 DPS), 92 px / 18 deg cone; ignites for 3 s at
+                          8 DPS, burning enemies panic-run and spread fire to neighbours
+    Singularity ......... 0.55 shots/s (1800 ms) 170 px/s orb, flies 0.8 s then opens a 1.4 s well
+                          that pulls everything in (110 px/s), then implodes: radius 72, 90->35 dmg
+    Boot kick (F / RMB) . 450 ms cooldown, 25 dmg, 420 px/s launch (+20 dmg wall splat), breaks
+                          shields, punts grenades/barrels/ticks; parries enemy shots back at
+                          the nearest foe as 700 px/s 40-dmg slugs (brief slow-mo)
+    Rivet minigun (0) ... spins up over 0.55 s (fires from 30% spin), then 22 shots/s, 7 dmg, 600 px/s,
+                          spread tightens as it spins; slows you to 60% while spun up; barrels heat-glow
+    Cluster mortar (-) .. 0.7 shots/s (1400 ms) 250 px/s high lob; airbursts at the top of its arc
+                          (radius 30, 30 dmg) into 6 bomblets (0.35-0.8 s fuses, radius 34, 44->12 dmg)
+    Stake driver (=) .... 1.1 shots/s (900 ms) 640 px/s heavy stake, 65 dmg (x2 head). Kills that leave a
+                          body are carried (up to 2) and nailed to the next wall: PINNED / SHISH KEBAB.
+                          Survivors just eat it. Pinned bodies hang until blown off or the wall breaks.
+    Cryo cannon (BKSP) .. 16 ticks/s freezing spray, 110 px / 12 deg cone, 1.5 dmg; each tick adds 11% chill
+                          (slows them), full chill = ice statue for 3.2 s. Statues take x1.5 from chip damage;
+                          any real hit (10+, kicks, blasts, stakes, rails, saws, a hard landing) SHATTERS them.
+                          Frozen fliers drop. Boss only slows; the juggernaut chills at half rate.
+    Prism laser ([) ..... 2.4 shots/s (420 ms) instant beam that ricochets off walls 4 times (900 px total),
+                          piercing everything; 30 dmg (x2 head), each enemy can be hit twice per shot.
+    Ripper (]) .......... held chain blade, 18 bites/s (55 ms) at 24 px reach, 5 dmg a bite (90 DPS, x1.5 head);
+                          holds what it chews in place, shreds corpses, cuts crates (9/bite), eats enemy shots,
+                          grinds through a riot shield in 10 bites. Ripper kills heal you 6 HP.
+    Hornet pod (\) ...... hold to paint locks (one per 150 ms, up to 6, max 3 per target) on enemies within 80 px
+                          of the crosshair and 330 px of you; release to launch one seeker per lock (pop up, then
+                          curl in at 7.5 rad/s, 150 -> 390 px/s). Blast radius 24, 28->10 dmg. A tap with no
+                          locks dumb-fires two. 650 ms reload after a launch.
+    Magma lance (;) ..... hold to charge (1.0 s), release: molten beam, 35->170 dmg by charge (x1.5 head), 2->7 px
+                          wide, pierces everything, bores through up to 5 breakable tiles, ignites (3 s), kicks you
+                          back up to 420 px/s (aim down to lance-jump). Over 85% charge it bursts where it lands
+                          (radius 46, 70->20). Hold a full charge past 2.2 s and it vents: fires and scalds you 8.
+    Glaive (') .......... 470 px/s thrown ring, 200 px out and back, 24 dmg each way (x2 head); catch it and the next
+                          throw is ready at once. Hold fire and it stops at the end of its throw (or on a wall) and
+                          grinds in place for up to 2.4 s: 11 dmg per 140 ms, steerable with the mouse, chews crates.
+    Forge hammer (,) .... tap: a 35-dmg swing in front (320 px/s launch, staggers shields). Hold 0.5 s, release on
+                          the ground: SLAM, 30->75 dmg (x1.4 right under it) plus shockwaves running both ways along
+                          the floor for 50->120 px that launch what stands on them. Release in the air: dive at
+                          640 px/s and slam on landing for +30% (METEOR). 550 ms cooldown.
+    Storm coil (.) ...... throws a tesla coil that sticks to floors, walls and ceilings (3 out; a 4th recycles the
+                          oldest, 12 s life). Each zaps the nearest enemy in 72 px for 9 every 0.45 s; coils within
+                          200 px link into a lightning fence (45 DPS). Hold fire 0.45 s: OVERLOAD, every coil bursts
+                          (radius 50, 45->15) and stuns for 1.5 s.
+    Flak cannon (/) ..... 450 px/s slag shell, 30 dmg on a direct hit; bursts after 0.22 s or on impact into 9 shards
+                          (9 dmg, 26 deg fan) that ricochet twice. 750 ms cooldown.
+    Tractor (Z) ......... gravity gun: hold to catch the nearest loose thing in a 100 px / 0.5 rad cone (drums,
+                          satchels, gas cans, gibs, corpses, enemies with <= 130 HP that aren't heavy) and carry it
+                          at the muzzle; held enemies are crushed for 6 DPS. Release to hurl it at 540 px/s: drums
+                          and satchels go off on impact, gas cans turn into rockets, bodies hit for 30 (gibs 10) and
+                          bowl through a crowd. 300 ms cooldown after a throw.
+    Corroder (X) ........ acid cone, 22 ticks/s (45 ms) x 1.5 dmg, 100 px / 14 deg (x1.25 on mechs). Corroded
+                          enemies drip green and take +40% from everything else for 5 s; 1.6 s of spray melts a
+                          bulwark's or mirror knight's shield for good; crates fizz apart.
+    Shock rifle (K) ..... tap: a 150 px/s plasma orb (2.4 s) that pops on contact (radius 24, 26->10). Hold 0.22 s
+                          (the muzzle spark pops) and release: a hitscan beam, 34 dmg, 420 px. Beam one of your own
+                          orbs for a SHOCK COMBO: radius 76, 130->40, impact frame + slow-mo. 600 ms cooldown.
+    Needler (L) ......... 10.5 needles/s at 360 px/s that curve (6 rad/s) onto the nearest foe within 0.5 rad of
+                          the aim. Each sticks for 4; the 7th in one target sets off a SUPERCOMBINE (radius 36,
+                          75->30). Stuck needles fizzle out 3 s after the last one lands.
+    Drill launcher (U) .. 260 px/s drill bolt that chews through crates, girders and gratings (only grey metal stops
+                          it). It bores into the first body it meets and grinds (40 DPS) for 1.2 s, then blows
+                          (radius 44, 70->20); stuck in metal it blows after 0.6 s. 900 ms cooldown.
+    Trick revolver (I) .. six hitscan rounds, 26 dmg (x2 headshots), 260 ms; hold to fan the hammer (120 ms, +/-6 deg).
+                          A shot into a wall ricochets once at the nearest foe within 220 px for x1.25: TRICK SHOT.
+                          Empty: 1 s reload (the chambers show over your head, six casings fall).
+    Flare gun (O) ....... a lobbed flare (330 px/s) that sticks to whatever it hits and burns 6 s: the body it's in
+                          burns, anything within 22 px catches every 0.5 s, tar, gas and drums go up, and in a
+                          BLACKOUT foes within 90 px are lit up through the dark. 4 out at most. 700 ms cooldown.
+    Limpet launcher (Y) . tap: a sticky bomb (up to 5 out; a 6th sets off the oldest). Hold 0.35 s: they all go off in
+                          a 60 ms ripple (radius 38, 55->15 each). 3+ at once CHAIN DETONATION, 4+ DEMOLITION.
+    Net gun (H) ......... a slow net shell (280 px/s) that bursts on contact (radius 26): everything caught is tangled
+                          for 3 s (bosses 1.2 s): it can't move or attack, fliers drop, it takes 6 DPS of shock and
+                          +25% from everything else. 800 ms cooldown.
+    Chain flail (wheel) . hold: a spiked ball whirls round you on its chain (30 px, winding up over 0.6 s), up to 14 a
+                          hit, swatting enemy shots out of the air. Release: hurl it along your aim (420 px/s, 40,
+                          through two bodies and crates) and the chain yanks it back. No hotkey: wheel or Q/E.
+    Orbital designator .. (wheel) hold to paint a spot for 0.8 s (let go early to cancel). Locked, the strike lands
+                          0.6 s later: a 14 px column from the roof (or the first metal above) to the mark for 1 s,
+                          90 DPS to everything in it (a third to you), igniting and punching through scenery. 5 s cd.
+    Plasma cutter ....... (wheel) a flat plasma blade 20 px across, at right angles to the shot: 420 px/s for 300 px,
+                          cutting every body it crosses once (30) and slicing crates; grey metal stops it. 480 ms.
+    Spider mines ........ (wheel) a little bot that lands and scuttles along the floor at the nearest foe (110 px/s,
+                          hopping steps), blowing when it reaches one (radius 34, 50->15) or after 6 s. 4 out at most.
+    Napalm launcher ..... (wheel) a lobbed fuel can that splashes into three fire patches across 60 px and sets every
+                          foe within 44 px alight (10 + burning). Mind your feet: the fire burns you too. 1.1 s cd.
+    Bee swarm ........... (wheel) a hive pod that bursts after 0.25 s into six bees; each hunts a foe near it and stings
+                          (4 every 0.3 s) for 4 s, buzzing round its target. 900 ms cooldown.
+    Laser whip .......... (wheel) a 74 px crack of plasma along your aim: 28 to everything on it, and it drags them (and
+                          gibs and drums) toward you. 420 ms cooldown.
+    Shrink ray .......... (wheel) a 380 px beam: the first foe it touches shrinks to half size for 8 s (3 s on big ones),
+                          takes x1.5 damage, bites for half and can be squished by landing on it. 700 ms cooldown.
+    Sonic blaster ....... (wheel) a 110 px, 60 degree cone of sound: 10 to everything in it, a huge shove (wall
+                          splats) and a 0.6 s stun; enemy shots in the cone are blown away. 900 ms cooldown.
+    Grav bomb ........... (wheel) a lobbed violet charge (bounces, 0.9 s fuse, pops on a foe). No blast: every grounded
+                          foe within 90 px floats up helpless for 1.4 s (6), then slams down for 30. Corpses, gibs
+                          and drums go up too; fliers and bosses don't. 1 s cooldown.
+    Pinball cannon ...... (wheel) a heavy steel ball (560 px/s, light gravity) that bounces off everything for 5 s: 16 a
+                          hit, +6 per bounce so far (10 max), scaled by its speed, caroming off foes as it glows
+                          hotter. Three out at most. 700 ms cooldown.
+    Firework launcher ... (wheel) an erratic rocket (300 px/s, speeding up and wandering) that bursts after 0.45-0.7 s
+                          or on contact: 18 on a direct hit, 10 within 28 px, and 10 coloured stars that fall and
+                          burn (7 each, one hit a foe; they can set it alight). 650 ms cooldown.
+    Plasma katana ....... (wheel) a 46 px, 110 degree slash every 260 ms (alternating cuts): 30 to everything in it and
+                          a shove; it executes glowing foes. Enemy shots in the arc are batted back at the nearest
+                          foe (30 each); rockets and bombs are cut in two. Slash out of a dash for a DASH CUT: x1.8
+                          damage and half again the reach.
+    Scrap vacuum ........ (wheel) hold: a 170 px intake cone drags gibs, corpses, drums and light foes toward you;
+                          gibs at the nozzle go in the hopper (24, shown over your head) and corpses are torn up for
+                          more. Let go: up to 16 pieces blast out as 9-damage shrapnel and shove you back.
+    Siphon .............. (wheel) a 140 px drain beam that latches onto the foe nearest your aim: ~37 damage a second,
+                          a fifth of it back to you as health; you move at 75% while it drains.
+    Splitter ............ (wheel) a bright bolt (430 px/s) that splits in two whenever it hits: off a wall it reflects and
+                          forks +/-0.3 rad, through a foe it forks on past it. Three generations: 22, then 2 x 14,
+                          4 x 10 and 8 x 7. 650 ms cooldown.
+    Decoy launcher ...... (wheel) a lobbed holo canister (0.7 s fuse) that projects a hologram of you for 5 s. Foes within
+                          260 px that are nearer it than you go for it; the first to reach it, or the timer, sets it
+                          off (70 at the centre, radius 62). One out at a time. 1.4 s cooldown.
+    Stasis grenade ...... (wheel) a lobbed canister (0.8 s fuse) that opens a 70 px field of stopped time for 3 s: foes
+                          inside freeze mid-motion and every hit they take is stored (+25%) and lands all at once when
+                          time starts again; enemy shots inside hang in the air until then. Not bosses. 1.3 s.
+    Microwave ........... (wheel) a 150 px beam that locks onto the foe nearest your aim and cooks it (1.5 a tick). After
+                          about 1.2 s it swells and POPS: 40 + 15% of its max HP, 25 to anything within 40 px. Bosses
+                          cook at a third the speed.
+    Rocket gauntlet ..... (wheel) a thruster punch: you rocket forward along your aim (a dash half again as far, with its
+                          i-frames, that doesn't spend your dash). The first foe in the way takes 45 and is launched
+                          (wall splats), anything else within 34 px takes 15, and you bounce back. 700 ms.
+    Marksman rifle ...... (wheel) a laser-sighted hitscan round (900 px): 80, x3 on a headshot, punching through the
+                          first body into one more (60%). A headshot kill buys a beat of slow-mo. 1 s between shots.
+    Tripwire ............ (wheel) a thrown emitter that sticks to the first surface it hits and projects a laser straight
+                          out from it (to the next wall, 400 px at most): anything crossing it is zapped (25, a 0.5 s
+                          stun); four zaps and it blows. Two can be set; a third sets off the oldest.
+    Drone pod ........... (wheel) two little gun drones orbit you for 10 s, each firing a nail (8) at the nearest foe it
+                          can see within 260 px every 0.4 s. Firing again while they're up tops their timer back up.
+    Gas launcher ........ (wheel) a lobbed canister (1 s fuse, or on contact) that bursts into a big cloud of your own gas:
+                          it spares you, eats metal as well as meat (5 per 0.4 s, corroding what it touches) and goes
+                          up in a fireball if anything lights it. 1.1 s.
+    Bubble gun .......... (wheel) slow soap bubbles that trap the first foe they touch: it floats up helpless for 2.2 s,
+                          then drops (30 when it lands); hit a bubbled foe and the bubble pops early. Fliers, bosses
+                          and anything over 200 HP just take 12.
+    Riot shield ......... (wheel) hold: a plate of hard light in front of you (+/-0.75 rad): enemy shots that reach it
+                          are reflected back along their path as yours, rockets and bombs are stopped dead, discs
+                          are turned; you move at 60%. Let go: a shield bash, 30 and a big shove. 0.5 s.
+    Glue gun ............ (wheel) amber globs: a foe hit is gummed up for 3 s and crawls at 35% (and can barely jump); a
+                          glob that lands on a floor leaves a 6 s puddle that gums up anything walking through it.
+    Mini-nuke ........... (wheel) a slow lobbed shell that goes off on whatever it touches: radius 120, 220 at the centre
+                          falling to 40 (45 to you if you're in it), crates and girders torn up, a blinding flash and
+                          a mushroom of smoke. 3.5 s.
+    Dragon's breath ..... (wheel) a sawn-off loaded with burning buckshot: six pellets (7 each) that set foes alight, and
+                          about a third of the ones that hit a surface light a fire patch. 800 ms.
+    Seed launcher ....... (wheel) a lobbed seed that roots where it lands and sprouts (1 s) into a fungus turret for 9 s:
+                          every 1.6 s it puffs two homing spores (8 each) at the nearest foe it can see within 220 px.
+                          Two can grow at once.
+    Tether gun .......... (wheel) a fast dart (6) that links whatever it hits: up to three foes at once, for 8 s each.
+                          Damage to any linked foe is shared with the others at 60%.
+    Weapon swap ......... 1-9 0 - = BKSP [ ] \ ; ' , . / Z X K L U I O Y H or Q/E / wheel; 120 ms draw. Each gun keeps its own fire
+                          cooldown, so swapping off a slow gun (Singularity, railgun) never delays the next one.
+    Weapon wheel (Tab) .. hold for a ring of all 61 guns at 1/6 speed; point (or Q/E) and let go to switch. A line
+                          under the name says what the gun does. Gold pips
+                          under each gun show its mastery stars.
+    Executions .......... an enemy under 20% health (30+ max HP, no bosses) pulses orange: kick it (or hammer-swing
+                          it) and it bursts with slow-mo and drops 2-3 health orbs (+5 each) that home in on you.
+                          Kick kills drop an orb 20% of the time.
+    Dash (Shift) ........ 440 px/s burst for 0.15 s in the held direction (8-way; down only in the air), 0.2 s of
+                          i-frames, 0.55 s cooldown, one air dash until you land. Anything that goes through you
+                          mid-dash is a DODGE (+style). Kick within 150 ms of a dash: DROPKICK (x1.7 dmg, x1.3
+                          launch). Dashing or kicking snaps a harpoon chain.
+    Grapple hook (C) .... 270 px chain hook (650 ms cooldown). Light enemies, corpses and gas cans get reeled in
+                          to point blank (8 dmg + stun); walls and anything heavy reel YOU in at 480 px/s.
+                          C again lets go mid-haul; you pop up when you arrive (ledge climbing).
+    Sentry (T) .......... drops an auto-turret at your feet: 250 px range, 9 rivets/s at 6 dmg, 14 s life,
+                          12 s recharge; enemy blasts can wreck it early. Its kills count as yours.
+    Prox mines (G/MMB) .. 650 ms throw, max 4 out (a 5th fizzles the oldest); sticks to the first surface or
+                          enemy it touches, arms in 0.6 s, trips at 30 px: radius 52, 85->25 dmg. Stuck to an
+                          enemy it pops after 0.9 s. Shoot one to set it off; blasts chain them.
+    Barrels ............. 20 HP; shots light a short fuse; blast radius 64, 90->25 dmg, chain-react
+    Gas canisters ....... 4 in the arena, restocked each wave. Shoot, kick or blast one and the valve shears:
+                          it rockets about for 1.2-1.8 s, ricocheting and ramming (25 dmg), then explodes
+                          (radius 58, 70->20 dmg).
+    Hanging lamps ....... shoot the lamp or its chain: it drops, crushes whatever is under it (80) and goes out.
+    Breakables .......... twenty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
+                          each. Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw blades,
+                          the hose and the wrecking ball wear them down; things that hang swing when hit and drop
+                          if you cut what holds them (or blow it away). First kill by each callouts its name.
+      Neon sign 20 ...... a letter pops every 5; the last drops the sign: 40 to anything it lands on, 25 around.
+      Strip light 6 ..... strobes 0.3 s, bursts: glass rains 14 on whoever is under it. Cut a cable: it drops (30).
+      Floodlight 30 ..... lens blows, it topples the way it was hit and brings its head down for 45.
+      Fuse box 15 ....... door blows off; arcs at the nearest foe in 96 px every 0.14-0.28 s (8 + stun) for 3 s, pops.
+      Capacitor 40 ...... charges 0.9 s, then chain lightning through up to 5 foes (38 + stun each).
+      Propane tank 22 ... 1 s blowtorch out the valve (ignites, 5 a tick), then radius 72, 85->25, fire on the floor.
+      Toxic drum 22 ..... leaks where shot; bursts into a gas cloud (light it) over a pool that eats feet (5 / 0.4 s).
+      Cryo tank 22 ...... leaks frost; a 74 px nova freezes foes, puts out fires, turns spilt water to ice.
+      Oil drum 18 ....... leaks a slick where shot, spills a 92 px one when it goes; burning, it spills alight.
+      Boiler 50 ......... hits vent steam (6 a tick); the needle climbs; at the top it screams 1.3 s and bursts
+                          (radius 84, 60->15, a huge shove) into a scalding fog.
+      Wall fan 30 ....... its three blades fly off as your saw blades.
+      Slag ladle 36 ..... shoot it or its chain: it tips and pours slag for 2.4 s (8 + burning a tick), then drops (80).
+      Vending 60 ........ every 12 knocks a can out; broken, it sprays 8 fizzing cans (14 each) and 2 health orbs.
+      Terminal 28 ....... the tubes implode: an EMP pop stuns foes in 64 px (machines 1.6 s and 22 damage).
+      Ammo crate 26 ..... cooks off 2.4 s spraying your rounds (9 each) every which way, then pops.
+      Flare case 16 ..... lobs 5 signal flares that stick, burn and light a blackout.
+      Extinguisher 8 .... a 64 px foam cloud: stuns 1.4 s, blinds whatever is in it, puts fires out for 3.6 s.
+      Window 12 ......... cracks, then shatters: glass rains 18 on whoever is below.
+      PA horn 12 ........ a feedback shriek: stuns and shoves foes in 104 px and breaks any glass in earshot.
+      Water tank 40 ..... leaks where shot; bursts in a wave (shoves, puts fires out) and floods the floor for 12 s.
+                          Water conducts: a fuse box, capacitor or terminal going off near it, a live rail under
+                          it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker link, Arc Pylon,
+                          Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle (10 + stun a
+                          tick to foes in it, 5 to you).
+      Fire cooks off the propane, oil, ammo and flares: a flame jet, fire puddle, burning foe or flare near them.
+      In the campaign's BLACKOUT, SLAG RAIN and GRAVITY LOSS, your hits from fire puddles, live puddles, the propane
+                          jet, boiler steam and the ladle's pour share one interval (hazardContactMs: 500 / 425 / 350 ms).
+    Rampage ............. hitting S style rank: 6 s of 40% faster fire (sentry too), +25% damage, afterimages,
+                          orange screen edge and max music. Re-arms once your rank drops below B.
+    Kill-cam ............ 3+ kills inside 350 ms: 0.7 s slow-mo, zoom punch, CARNAGE / MASSACRE.
+                          10+ tiles wrecked inside 2.5 s: CHAOS!
+    Breakable terrain ... crates 55 HP (fall if nothing is under them), girders 80 HP, gratings 30 HP.
+                          Girders/gratings hang from their anchors (original ends or anything bolted to
+                          solid metal) and drop anything more than 3 tiles out. Blasts (x(1.15 - d/R)),
+                          bullets 3-5, saw ricochets 14, kicks 18, rails punch through 3 tiles, the
+                          rammer bulldozes, boss slams cave things in. Falling blocks crush for 80.
+                          Only grey '#' metal is permanent; enemy pathing re-plans as it breaks. The nav graph also
+                          holds moves only the player makes (drops of 3-6 rows, climbs up an unbroken wall), at
+                          Infinity cost to enemies; with them every arena lets you get back to the start.
+    Ragdolls ............ grunts, enforcers, stalkers, snipers and bulwarks killed with <= 26 overkill and
+                          no blast drop as point-and-stick ragdolls (cut from their own sprites; headshot
+                          kills leave a headless body that spurts). Corpses take hits, kicks, fire, saws,
+                          rails and blasts and burst into gibs at 35-55 corpse HP. Max 10, oldest fade.
+                          Rockets, grenades, big overkill, point-blank shotgun and the heavy still gib.
+    Headshots ........... x2 damage on humanoid heads (top quarter of the body); headshot kills pop the head
+    Enemy HP ............ Grunt 45 (4 nails / 1-2 blasts / 1 grenade / 1 rocket)
+                          Drone 30 (3 nails / 1 blast / 1 grenade / 1 rocket)
+                          Heavy 120 (10 nails / 3 blasts / 2 grenades / 2 rockets) - the arena's bruiser
+                          Enforcer 60 (5 nails / 2 blasts / 1 grenade / 1 rocket), Stalker 40
+    Humanoid AI ......... both path-find across platforms (walk / ledge-drop / grating-drop / jump arcs),
+                          remember where they last saw or heard you, radio squadmates, hop over
+                          incoming rockets (50-55%, not point-blank) and run from live grenades.
+                          Enforcer: picks firing spots with line of sight (height + spacing aware),
+                          laser-telegraphed 3-round burst (5 dmg, 380 px/s; leads you, locks 30% before
+                          firing), reloads in cover after 2 bursts, falls back once below 35% HP.
+                          Stalker: 175 px/s hunter, circles behind you when you face it, leaps aside (55%)
+                          when you shoot at it, 280 ms crouch tell then a 16-dmg lunge, backflips away
+                          Bulwark 100 HP: riot shield blocks nails/pellets/saws from the front (heads
+                          still exposed), halves frontal blasts and staggers; turns slowly; 400 ms
+                          tell then an 18-dmg shield bash that launches you. The corroder melts the shield.
+                          Mender 40 HP: hovering medic, heals the most-hurt ally 20 HP/s by tether,
+                          hides behind its patient out of your sight, backs off and jinks when shot at.
+                          Squads spread round you (pincer spots) and hurt ones steal medkits.
+                          Sniper 45 HP: climbs to high perches with long sight lines, 1.1 s blue laser
+                          (locks at 75%), 900 px/s 22-dmg round; backs off if you close within 130 px.
+    Tick 12 HP .......... 150 px/s crawler, 230 px/s leap; arms on contact (350 ms beeping fuse),
+                          blast radius 46, 40->12 dmg; dead ticks still pop, so they chain.
+    Rocketeer 70 HP ..... humanoid launcher trooper; keeps ~165 px away, 0.75 s orange laser (locks at 60%),
+                          175 px/s rocket aimed at your feet (radius 44, 20 dmg, wrecks terrain).
+                          Its rockets can be shot down or kicked back as your own.
+    Wasp 45 HP .......... bomber drone; finds a clear lane 45-95 px over your head, then bomb runs:
+                          blinking bomb sight, 3 bombs (radius 40, 15 dmg) per pass; bombs go through floors.
+    Rammer 170 HP ....... armoured charger; 0.65 s snort/scrape tell, then 330 px/s for 1.7 s: smashes
+                          crates and girders, tramples its own side (40 dmg), 30 dmg + launch on you.
+                          Ram plate takes 40% from the front; hit solid metal = dizzy 1.8 s, double damage.
+    Jet trooper 55 HP ... hovers 130 px off your shoulder, swaps sides every 2.5-4.5 s; 0.35 s visor glint then
+                          a 4-round burst (5 dmg). A clean kill sends the pack haywire: 1.1-1.7 s of careening
+                          (rams its squad for 20), then it blows (radius 46).
+    Sapper 50 HP ........ fast humanoid; runs in close, kneels 0.55 s, drops a 2 s satchel charge (radius 54,
+                          28 dmg to you, wrecks floors) and flees. Shoot the charge to cook it off; kick it
+                          and it goes off where it lands. 35% of sappers drop a live charge when they die.
+    Brood mother 170 HP . slow crawler; swells for 0.7 s and births 2 ticks every 3.8 s (up to 5 alive); bursts
+                          into 4 more when it dies.
+    Screamer 18 HP ...... flaming kamikaze skull: hovers, shrieks (0.5 s), dives at you and blows (radius 42,
+                          20 dmg). Shot down it still explodes; frozen it just shatters.
+    Warden 50 HP ........ shield drone: tethers the 2 nearest allies within 120 px and soaks 75% of what hits
+                          them (bubble flashes). Kill it and the shields drop.
+    Juggernaut 420 HP ... mini-boss with its own health bar: 0.65 s spin-up (laser tell), then a 1.8 s minigun
+                          sweep (12 rounds/s, 3 dmg) that lags behind you. Armour cracks off at 66% / 33%,
+                          each stage faster.
+    Cloaker 45 HP ....... phase-cloaked assassin (6% visible + two cyan eyes); within 64 px it flickers in for
+                          0.35 s, lunges (20 dmg) and fades out to reposition. Any hit reveals it for 1.5 s.
+    Pyro 60 HP .......... fireproof firebomber: 0.5 s windup, lobs a bottle that bursts into a 4 s fire patch
+                          (burns you 7 per 0.35 s, ignites enemies and corpses). Its tank blows when it dies.
+    Gunship 500 HP ...... flying mini-boss (own health bar) under the ceiling: rocket volleys after a 0.6 s pod
+                          glow, chain-gun strafing runs, drops 2 troops (x3). Killed, it spirals down burning,
+                          flattens what it lands on and craters (radius 90) with fire patches.
+    Slagling 70/30/12 HP  hopping molten blob in three sizes: a big one splits into 2 mid, each mid into 2 small
+                          (7 kills; the halves count toward the wave). Contact 12/8/5. Fireproof, scorches where
+                          it lands; frozen ones shatter without splitting.
+    Burrower 120 HP ..... slag worm that swims under whatever floor you stand on (grit trail, rumble), stops under
+                          you for a 0.7 s tell (glow, debris), then erupts at 430 px/s: 22 dmg + launch. Only
+                          hittable once it's out (in the air, then 1 s writhing on the floor) before it digs back
+                          in for 1.2-2.2 s.
+    Harpooner 70 HP ..... humanoid with a chain harpoon: 0.6 s windup (dotted sight line, locks for the last 30%),
+                          430 px/s throw, 260 px reach. Hooked: 6 dmg and you're reeled in at 270 px/s for a
+                          16-dmg slash. Kick, dash or hurt it for 25 to break free.
+    Linker 40 HP ........ fence drones that pair up either side of you and throw a beam between them at your chest
+                          height: 0.8 s flickering charge, 2 s live (12 dmg, fries their own side for 30 DPS),
+                          1.8 s off. Jump it, dash through it, leave the gap or kill one. A lone linker shoots.
+    Mirror knight 90 HP . bulwark brain with a prism shield: frontal shots come back at you as 8-dmg rounds. 80 shield
+                          HP (blocked shots chip it at 35%; rails, lances, stakes, blasts and hammers bite fully),
+                          then it shatters for good. Kicks stagger it like a bulwark.
+    Hive 90 HP .......... floating sac that keeps up to 12 gnats going (one per 0.35 s). Gnats (4 HP) flock - keep
+                          apart, stick together, chase you - and sting for 4, dying as they do. Kill the hive and the
+                          swarm goes frantic and dies off.
+    Stitcher 55 HP ...... reanimator drone: claims a corpse, channels 1.3 s over it (green tether), and raises it as a
+                          revenant at half health (green-tinted; doesn't count toward the wave). Gib the bodies, or
+                          hit it for 15 mid-channel to break the stitch.
+    Slag wyrm 700 HP .... Meltdown mini-boss (own bar): a 9-segment worm that swims under your floor and bursts out
+                          after a 0.9 s tell - a BREACH straight up under you, or a low SKIM across the room through
+                          where you stand (a ring marks where it lands). Head 22 dmg, body 12; the body passes 60% of
+                          damage to the head; only hittable while out. Under half health it spits slag. Dies
+                          segment by segment.
+    Buzzsaw 50 HP ....... saw-blade drone that never stops: ricochets round the room at 230 px/s, curving toward you
+                          and steering at you off every wall; 14 dmg a pass, then it reels off dazed for 0.8 s. It
+                          carves anything it crosses (18; its own side too). Kick it and it's yours for 2.2 s: 437
+                          px/s, seeks the nearest foe, 40 a hit. Killed, its blade spins free as one of your saws.
+    Magnetron 70 HP ..... hovering magnet drone in an 80 px field that turns your bullets, rockets and saws away from
+                          it (beams, blasts, thrown things and boots aren't affected). Every ~3.5 s: 0.5 s tell
+                          (the field tightens and flares), then a pulse that yanks you toward it (300 px/s) and
+                          zaps for 12 if you're within 34 px.
+    Tar spitter 60 HP ... pyro brain with a tar tank: lobs a flat blob (6 on a direct hit) that leaves a 40 px tar
+                          puddle (14 s; puddles merge up to 110 px). Tar halves your run speed and cuts your jump to
+                          72%; walkers wade at 55%. Any fire (the hose, a blast, burning bodies or puddles, slag)
+                          lights it into a 5 s burn that runs along touching tar. Its tank leaves a 64 px puddle,
+                          already alight if it died burning.
+    Mimic 60 HP ......... a drum among the drums, pixel for pixel. Within 46 px (or shot, burnt or grabbed) it bares
+                          its teeth (0.45 s), scuttles after you at 150 px/s, hops obstacles and leaps to bite (15).
+                          It blows like a drum when it dies. The last mimics left in a wave give themselves up.
+    Howitzer 160 HP ..... artillery tripod that keeps 150-260 px off you. Every ~4.5 s it plants (0.55 s) and lobs 3
+                          shells at where you're heading; a red ring marks each landing for its 1.15 s flight
+                          (radius 40, 18). Shells hit cover on the way down.
+    Blinker 45 HP ....... teleporting striker: vanishes, a violet shimmer marks where it'll appear just behind you
+                          (0.45 s), it materialises blade up (0.32 s), dashes through you (16) and hangs exposed for
+                          0.9 s before blinking away. Untouchable while it's gone.
+    Gasbag 30 HP ........ drifting sac that homes in at 42 px/s; within 34 px it swells (0.6 s) and bursts. However it
+                          pops it leaves a toxic cloud (46 px, 6 s, 4 per 0.4 s to you and 3 to foes inside).
+                          Fire, a blast, a burning body or a fire puddle lights the cloud: a fireball (radius 70,
+                          70->20, burns).
+    Welder 70 HP ........ support bot: welds the most damaged mech ally within 250 px back up (20 HP/s from 90 px);
+                          with no patient it builds a mini turret (1.2 s, up to 2, every 12 s). Keeps 110-220 px
+                          off you. Turret 30 HP: tracks you, 0.3 s laser tell, a 6-dmg bolt every 1.3 s.
+    Duelist 65 HP ....... crimson fencer that reads your aim: shoot at it and it sidesteps (75%, retrying fast; even on
+                          guard half the time), slipping shots for 0.25 s, then comes straight back. 0.3 s guard,
+                          a lunge, and up to two more quick cuts (12 each) if you're still in reach.
+    Creeper 40 HP ....... ceiling spider: climbs to the nearest ceiling, scuttles along it after you and drops when you
+                          pass under (14 on landing). On the floor it chases for 4 s, then climbs back up if
+                          there's a ceiling within 130 px.
+    Roller 90 HP ........ armoured grub: plods along taking full damage; every ~2 s it curls (0.4 s tell) and bowls at
+                          you at 260 px/s with armour taking 75% of every hit, bouncing off walls twice (18 + a
+                          launch; it bowls its own side over for 20). The last wall leaves it DIZZY 1.2 s (x2 damage).
+    Jammer 40 HP ........ EMP drone 140 px off your shoulder: every ~5 s a 0.8 s charge, then a ring out to 160 px. If
+                          it reaches you your gun jams for 1.6 s (the HUD glitches) and your sentry shorts out for 3 s;
+                          dash through the ring to dodge it.
+    Claw 120 HP ......... a crane claw on a trolley under the roof: tracks you, and when the drop below is clear it
+                          plunges (420 px/s); if it closes on you it hauls you up 0.8 s (8) and flings you. Kick, dash
+                          or do 30 to it to break free. Cover overhead keeps you safe from it.
+    Sparker 30 HP ....... little hopping capacitors: any two within 110 px with a clear line link with a live arc
+                          (10 to you, twice a second at most; 8 to other foes it crosses).
+    Scrap golem 260 HP .. a heap of junk with a furnace heart: lobs scrap chunks over cover every ~3 s (radius 26, 14),
+                          slams the floor up close (shockwaves both ways), sheds plates at 25/50/75%, and dies in a
+                          scrap blast that throws shrapnel through its own side.
+    Echo 50 HP .......... a hologram walking your path 1.5 s behind you in your own frames; whenever you were shooting
+                          back then, it fires at you now (8 a bolt). Scatters into light when it dies.
+    Pilferer 25 HP ...... a thief drone: zips at you and snatches the gun in your hands (that slot locks, you drop to
+                          the next gun) and flees to the far corner. Kill it for the gun back; otherwise it returns
+                          when the wave ends.
+    Pogo 70 HP .......... a spring bot that never stops bouncing, in big arcs that land near you; once it's over your
+                          head it slams straight down (16, a knock and shockwaves both ways).
+    Beacon 35 HP ........ hovering pylon: once it knows you're near it calls for 3 s (red beam, faster blinking), then
+                          two reinforcements warp in beside it (not counted toward the wave). 8 s to recharge.
+    Slug 80 HP .......... slow acid grub that leaves acid pools (3 s) and spits globs every ~3 s. Acid hurts 3 per
+                          0.4 s and corrodes you for 4 s: +25% damage taken, and you glow green.
+    Leech 20 HP ......... homes in and latches on: drains 3 HP/s and drags your run speed to 80%. Dash or kick to
+                          shake them all off (stunned 1 s).
+    Grenadier 65 HP ..... pyro brain with a bandolier: lobs grenades that bounce on a 1.6 s fuse (radius 40, 22) or pop
+                          on touching you. Kick one back and it flies home as a rocket.
+    Spikeball 60 HP ..... a spiked iron ball rolling its platform end to end at 90 px/s (14 on contact, no knockback).
+                          Hurt it and it rages: 150 px/s, chasing you along the floor.
+    Paratrooper 50 HP ... drops in from high above under a chute (50 px/s), firing 3-round bursts on the way down.
+                          Shoot the canopy and it plummets and splats; landed, it walks at you firing bursts.
+    Lugger 140 HP ....... a brute that walks to the nearest drum, lifts it overhead and hurls it at you from 220 px
+                          (it blows on impact). Shoot the drum it's carrying and it goes off in its hands. No drums
+                          in reach: it throws scrap.
+    Blimp 220 HP ........ a bomber airship cruising 120 px over you (70 once it's the last foe left) at 40 px/s, swapping
+                          sides (it sails through pillars and catwalks); it drops a bomb whenever you're below it. Brought down, it falls burning and blows where it lands.
+    Strider 150 HP ...... a long-legged walker. Every ~4 s it plants, aims a red sight at you for 0.8 s, then sweeps a
+                          laser +/-0.5 rad over 1.2 s from its head (12 a touch; it cuts other foes too). Duck it,
+                          jump it or dash through.
+    Orbiter 60 HP ....... a flying core with three steel plates (40 HP each) spinning round it at 22 px. A plate between
+                          you and the core eats the shot (explosions and fire get round them): fire through the gaps
+                          or shoot the plates off. A 3-shot fan every ~2.2 s; bare, it spins and fires faster.
+    Swapper 70 HP ....... a phase bot that keeps 140-260 px off, plinking at you. Every ~6.5 s it locks on (a 0.9 s
+                          violet tether) and trades places with you, then fires a 3-shot burst. 20 damage during the
+                          tell breaks it.
+    Scorcher 55 HP ...... a fireproof sprinter: dashes 150 px/s for 1.6 s, overshooting you once before it turns, and
+                          leaves a trail of fire (2.4 s); then it stands winded for 1.2 s, taking x1.5. Its fuel pack
+                          bursts into flame when it dies.
+    Grappler 160 HP ..... a hulking brute. Close in, it throws its arms wide (0.42 s) and lunges: catch you and it holds
+                          you up (8) for 0.65 s, then hurls you across the room (14, and 8 more if you hit a wall).
+                          Kick, dash or deal it 35 damage while you're held to break free.
+    Spotter 40 HP ....... a floating eye that hangs high, 180-300 px off, and backs away fast if you close in. Let it
+                          look at you for a second and you're MARKED (a red reticle) while it sees you and 1.5 s
+                          after: every foe comes for you and hits do +25%.
+    Hound 45 HP ......... a lean robot dog, usually in pairs: 190 px/s, each flanking out to one side, then closing in.
+                          Within 110 px it crouches (0.26 s) and pounces (300 px/s, 10 a bite); 0.6 s to recover.
+    Torcher 140 HP ...... a heavy with a flamethrower: within 96 px it plants and sprays for 1.4 s, one sweep up and back
+                          across +/-0.55 rad (7 a tick, setting foes, corpses and drums alight), then vents for 1.1 s.
+                          Fireproof; its fuel tank takes x1.6 from behind, and a kill through the back blows it up.
+    Discus 65 HP ........ a thrower that keeps 150-250 px off and skims a steel disc at you every ~3.2 s (280 px/s, 260
+                          px out) that curves back to its hand, cutting you both ways (10). Kick or slash the disc
+                          and it's yours: 45 to whatever it hits on the way home, its thrower above all.
+    Spore pod 90 HP ..... a rooted fungus that never moves. While it knows you're near it swells and puffs three homing
+                          spores every ~3.2 s (70 px/s, 6 a hit); shots, slashes and walls pop them. Dead, it bursts
+                          into a toxic cloud.
+    Vortex 80 HP ........ a turbine drone 150 px off your shoulder. Every ~6 s it winds up (0.6 s) and spins for 2.5 s:
+                          within 190 px it drags you (and loose gibs) toward it, shredding you within 26 px (6 every
+                          0.3 s). Spinning, it takes x1.25. Dash out.
+    Arc pylon 100 HP .... a rooted tesla tower. While you're within 160 px it charges (1.4 s: the orb swells, a dotted
+                          ring shows its reach), then arcs a bolt at you (14), jumping to any foe near you (10). Out of
+                          reach or out of sight, it strikes the floor.
+    Scavenger 60 HP ..... a hunched ghoul that goes for the nearest corpse within 320 px and eats it (1.5 s, taking x1.5
+                          meanwhile): it heals 30 and grows (+15% size, +20 max HP, three times at most). Nothing to
+                          eat, it runs at you and lunges.
+    Shellback 110 HP .... a crab-tortoise under a riveted shell that faces you: frontal shots do a fifth. It plods at you
+                          and bashes from 60 px (0.4 s tell). A kick, a blast or a crushing blow flips it: belly up
+                          for 3 s, harmless and taking double.
+    Shinobi 55 HP ....... a masked runner that leaps (380 px/s up) to a spot near you every ~1.6 s, throwing three stars
+                          (7 each) at the top of each jump; it clings to any wall it hits for 0.5 s, then kicks off.
+    Thundercloud 70 HP .. a storm drone 120 px over you that drifts after you (60 px/s). Every ~3.2 s, once it's roughly
+                          over you, it charges (0.8 s, a flickering line marks the strike) and drops a bolt straight
+                          down: 16 to you, 20 to any foe in the column, drums lit. Keep moving.
+    Headsman 200 HP ..... a hooded executioner. In reach (44 px) it raises its axe (0.8 s, a red box marks where it'll
+                          land), then chops: 30 to you, 40 to any foe in the box, and a crack runs along the floor
+                          ahead of it (jump it). The axe sticks for 0.9 s: hit it then (x1.5).
+    Berserker 100 HP .... a wiry brute with a saw-blade arm: walks at you (70 px/s) and swings in close (12, every 0.9 s).
+                          Below half health it goes BERSERK for good: 150 px/s and a swing every 0.45 s, but x1.25.
+    Bastion 120 HP ...... a squat bot that keeps 120-220 px off and plinks at you. Every ~6 s it throws up a hard-light
+                          wall in front of it (40 px tall, 4 s, 60 HP) that stops your bullets; beams, blasts and
+                          blades get through. Shoot it down or go round.
+    Zealot 80 HP ........ a robed fanatic that keeps 150-260 px off and casts a slow homing orb every ~3 s (10; shoot it
+                          down). When a foe dies within 180 px its soul flies to the zealot: +20 HP, a brighter halo,
+                          bigger, quicker orbs (three souls at most).
+    Mine layer 50 HP .... a flat drone sweeping 110 px over you, dropping a proximity mine every ~2.5 s (five out at
+                          most): they arm in 0.6 s, then beep (0.35 s) and blow when you come within 26 px. Shoot
+                          them first; they hurt whoever's near.
+    Rat king 90 HP ...... a knot of ratbots that shambles at you, shedding two every ~5 s (six out at most) and bursting
+                          into four more when it dies. Ratbots (8 HP) skitter at 130 px/s, hopping, and nibble (4).
+    Porcupine 90 HP ..... a squat beast under steel quills that plods at you: every 40 damage it takes it fires ten
+                          quills every which way (6 each), and when you're within 140 px it bristles and fires anyway.
+    Sponge 100 HP ....... a pocked blob that drinks bullets (nails, pellets, rivets, shards, needles, revolver rounds):
+                          they only swell it, and at 12 it spits them all back at you. Blasts, fire, acid, beams,
+                          blades and boots hurt it as normal.
+    Leaper 70 HP ........ a frog-legged hopper bot: every ~3.5 s it marks where you stand (a red ring), crouches (0.7 s)
+                          and leaps onto the mark, landing with a slam (18) and a shockwave each way along the floor.
+    Bulldozer 180 HP .... a tracked dozer behind a plow blade that grinds at you (50 px/s), shoving drums, gibs, corpses,
+                          lighter foes and you ahead of it and plowing through crates; pinned against a wall you're
+                          crushed (20 every 0.5 s). The plow takes 30% from the front, the engine x1.5 from behind.
+    Copycat 70 HP ....... a mirror-plated drone 140 px off that copies the gun in your hand (it carries a copy): a lobbing
+                          gun gets you a grenade, a spread gun a five-shot fan, a beam gun a sighted bolt (0.7 s tell,
+                          12), anything else a four-round burst. Every ~2.4 s.
+    Jellyfish 50 HP ..... a shock jelly that drifts in pulses toward a spot just above you, trailing 36 px of tendrils
+                          that zap anything under it (6 every 0.3 s). Popped, it discharges a shock nova (18 within
+                          50 px, you included).
+    Cinder wheel 60 HP .. a burning iron wheel (fireproof) that rolls at you (150 px/s), bouncing off walls and hopping
+                          when you're above it, leaving a trail of fire. Kick it and it's yours for 1.5 s: it rolls
+                          back at 260 px/s, slamming into foes (40 each, and alight).
+    Gatling 150 HP ...... a heavy with a six-barrel gun, 140-260 px off: it spins up (0.9 s, a red sight), then hoses a
+                          stream for 2.2 s (5 a round) that tracks at only 1.2 rad/s; then it overheats for 1.5 s and
+                          takes x1.5. Otherwise its gun shields its front (x0.6).
+    Banner 80 HP ........ a standard-bearer that hangs back 200-300 px and every ~6 s plants its banner: every other foe
+                          within 150 px regenerates 5 HP a second (a green ring), it half that. It moves on if you
+                          close in.
+    Wraith 70 HP ........ a shroud that drifts straight at you through walls and floors (50 px/s), faint while inside
+                          them. In the open and within 85 px it shrieks (0.45 s), lunges (300 px/s, 14 on a touch)
+                          and fades back for 1.4 s. Shoot it when it comes out.
+    Chiller 80 HP ....... a cryo trooper that keeps 140-240 px off and lobs a frost ball at your feet every ~2.8 s:
+                          it ices a 74 px stretch of floor for 8 s (6 and a 1.5 s chill if it lands on you). On ice
+                          you're slow to get going and slower to stop. Fire melts it; its tank ices the floor when
+                          it dies.
+    Warhorn 110 HP ...... a tracked bot with a brass horn that hangs back 170-320 px. Every ~7 s it winds up (0.7 s)
+                          and blasts: every other foe within 230 px takes half damage for 6 s (gold chevrons).
+    THE SMELTER (boss) .. 900 HP, 4 phases (66% / 33% / 15%), rage speeds it up; at 15% it OVERHEATS (armour blows
+                          off, x1.8 speed, a fan of ten slag shells every 4 s); slag mortars (3-5 shells,
+                          landing markers, burning puddles), leap slams that send ground shockwaves,
+                          sweeping slag breath (phase 2+), summons ticks (phase 3); +50% crits on
+                          its head vent. Letterbox intro, boss bar with phase notches.
+    THE FOREMAN (boss) .. Wrecking Yard boss, also in BOSS RUSH and alternating with the Smelter every sixth
+                          wave in OVERTIME and DAILY: a four-legged crane walker,
+                          1400 HP. It stomps after you and cycles attacks every ~2.2 s: SLAM (0.7 s tell, 22 up close
+                          and a floor shockwave each way) and RIVET SPRAY (bursts of five). Below 60% its armour comes
+                          off and it adds MAGNET (drags you in for 1.6 s) and HOUNDS (two at a time, four at most).
+                          Below 25% its core is exposed (x1.3) and it rages. Its hounds die with it.
+    Campaign ............ five acts with two operations each: MELT FLOOR, FURNACE, SORTING LINE, WRECKING YARD
+                          and POWERHOUSE. Each lift carries weapon, perks, stats and settings. Health rises to at
+                          least 60, 75, 75 and 80 on arrival, unless the Vampire mutator is active. In the Sorting
+                          Line, hold at each coolant valve for 0.8 s in order to unlock the lift. Continue or R
+                          restores the act's checkpoint. New Campaign replaces it and victory clears it.
+                          Speedrunner requires a clear in under 10 minutes without Continue or a checkpoint retry.
+    Campaign weapons .... start with the Nailgun, earn the Shotgun after the first patrol, then get new weapons
+                          when operations or reinforcement breaks begin. Weapon cards show the use and equip
+                          control. Hotkeys, cycling and the wheel share the issued arsenal. Earlier checkpoints
+                          keep their equipped weapon. OVERTIME, DAILY and BOSS RUSH start with the full arsenal.
+    Belts + presses ..... ARENA 03: four belts (60 px/s on the floor, 50 on the upper decks) carry you, foes, drums,
+                          gibs and corpses. Three crusher presses (under the upper belts and over the control block)
+                          run on a cycle: 0.6 s tell (red light, dust, creak), 0.1 s slam (40 to you and a fling,
+                          200 to foes, 60 to bosses; drums go off, props under them are crushed, corpses burst),
+                          0.45 s hold, 1 s rise.
+    Live rails .......... ARENA 05: four floor rails in two banks. Every ~4-5.5 s one bank hums (1.2 s, flashing
+                          yellow), then goes live for 2.2 s: 6 per 0.3 s to you if you're standing on it, 12 and a
+                          jolt to any foe on it. The banks take turns; the walkways and decks above are safe.
+    Wrecking ball ....... ARENA 04: an iron ball on a 12-tile chain swings across the middle from a gantry under the roof
+                          (+/-0.95 rad, a 5.2 s period). At speed it hits foes for 60 (scaled by speed) and flings
+                          them, hits you for 25 and knocks you aside, smashes crates and girders and lights and
+                          launches drums. Standing on the dais under it is safe; jumping into it is not.
+    Fire jets ........... ARENA 02: three vents on the furnace top. Every ~9 s the grate flares (1.1 s tell), then they
+                          fire left to right (1.3 s each, 0.3 s apart): 76 px columns that burn you for 9 per 0.25 s
+                          and fling you out, and set alight any foe, corpse, drum or tar up there.
+    Campaign encounters . LOCKDOWN opens with grunts. BLACKOUT cuts the lights on the second squad. In the
+                          FURNACE, the vents are already active when the second squad brings SLAG RAIN. Showers
+                          last 7 to 9 s, with 5 to 7 s clear and 1.2 s warning. They spare platforms and drums.
+                          The rain and vents stop before the Demolition Team. The Gunship gets its own fight.
+                          GRAVITY LOSS introduces the Hounds in separate squads, then the Linkers, Heavy Support,
+                          and Containment Crew in pairs before the Juggernaut. SORTING SHIFT starts the belts.
+                          MELTDOWN stops the presses before the tide and drains the floor for the Wyrm.
+                          DEMOLITION and LIVE CIRCUIT give time to reach safe ground before machinery starts.
+                          The Foreman releases the ball and the Smelter charges the rails in phase two.
+                          The first five operations move from a two-grunt patrol to six foes in the Sorting Line.
+                          The Furnace uses smaller squads and gives bosses a longer warning. Incoming damage
+                          climbs from 80% to full across these five operations.
+                          Lockdown and Slag Rain clear with health restored to at least 75 and 65,
+                          except with the Vampire mutator. Machinery and ground fires clear between operations.
+                          Medkits restock between waves.
+    Perks ............... after every wave but the last, pick 1 of 3 (keys 1-3, click, or the pad). The campaign
+                          opens with a choice of HOLLOW POINTS, VAMPIRE or DOUBLE JUMP. HOLLOW POINTS +20%
+                          damage, HAIR TRIGGER 20% faster fire, VAMPIRE 3 HP a kill, IRON BOOTS double kick damage
+                          and 30% faster kicks, DOUBLE JUMP, BLAST SHIELD self-blasts -75%, AFTERBURNER dash cd -40%
+                          and dashes ignite, SCAVENGER 15% orb drops, SHOWBOAT style x1.5, VOLATILE 1 in 4 kills
+                          explode (radius 40), ADRENALINE +50% damage under 35 HP, BARBED PLATE contact hurts the
+                          toucher for 20. They last the run (and ride the lift); the HUD lists them.
+    Wall slide / jump ... push into a wall while falling to slide. Jump near a wall while rising or falling, or just
+                          after leaving it. Hold toward the wall for a short kick and jump again to climb, or
+                          steer away for a wider jump. A jump pressed just before contact is buffered.
+    Steam pipes ......... valves on the walls at waist height (4 in ARENA 01, 6 in ARENA 02). Shoot or blast one and it
+                          bursts: a 56 px jet of steam for 3.5 s (foes 6 per 0.25 s and shoved, you 5 per 0.3 s).
+                          New pipes every wave.
+    Medals .............. 27 to earn (untouchable wave, 5 trick shots, a x20 combo, 5 executions, 15 burning
+                          kills, 5 crush kills, 3 shock combos, 3 supercombines, 5 wall splats, kills with 15 guns, 3
+                          rampages, a 6-kill chain, 8 katana deflects, 6 elites, 3 wrecking-ball kills, 5 microwave pops, beating the Foreman, a win with a mutator on, 15 ratbots, beating Boss Rush, 5 kills with one mini-nuke, gold-plating a gun, 10 dodges, a 4-limpet detonation, beating the Smelter, a sub-10-minute win in one run, a
+                          Brutal win). A gold toast pops when one lands; the results list the run's medals and the
+                          title counts the collection (localStorage).
+    Last-kill cam ....... the final kill of each wave: 0.9 s of slow-mo, a zoom punch, an impact frame and the camera
+                          on the body.
+    Multikills .......... kills under 650 ms apart chain: DOUBLE KILL, TRIPLE, QUAD, PENTA, then MASSACRE, punched in
+                          under the callouts with a rising sting, style for each and a beat of hit-stop from three.
+    Elites .............. in later campaign squads and OVERTIME (one more every two waves, up to 6) some
+                          foes warp in as elites: +30% HP, a coloured aura and a diamond over the head, and a trait.
+                          ARMORED (steel): double HP. SHIELDED (cyan): a bubble worth 40% of its HP that soaks hits
+                          and comes back 3.5 s after the last one. VOLATILE (orange): blows up 0.4 s after it dies.
+                          REGEN (green): heals 6% a second once it's gone 2 s unhurt. Each drops two health orbs.
+    OVERTIME ............ endless mode (E on the title screen, Y on a pad): no placed wave; 8 foes a wave, +2 each
+                          (22 max), tougher kinds mixing in, a mini-boss every 3rd of 6 waves and a boss every
+                          6th (the Smelter and THE FOREMAN take turns), enemy HP +7% a wave, a random modifier 45% of the time, a perk after every wave and a
+                          new arena every 3 (all five in turn). Every foe type but the bosses can turn up. It ends when you die; the best wave reached is kept and shown on the title.
+    Supply drops ........ ~22 s into a wave and every 40 s after, a crate floats down on a chute near you; touch it for a
+                          power-up. Elites (150+ HP) drop a capsule 30% of the time. OVERDRIVE (x2 damage, 10 s),
+                          HASTE (x1.5 fire rate, +25% run speed, 10 s), AEGIS (soaks the next 60 damage), MEDPACK
+                          (+40 HP). An aura and a HUD line show what's running.
+    Boss rush ........... BOSS RUSH on the title: the Juggernaut, the Gunship, the Slag Wyrm, the Foreman and the
+                          Smelter back to back across the three arenas, a perk between each. Its best run is kept on
+                          its own ('CLEARED' and the grade on the title); the RUSHER medal is for beating it.
+    Daily run ........... DAILY on the title: an OVERTIME run seeded by today's UTC date, so everyone gets the same arena,
+                          the same two starting perks, the same waves and the same wave modifiers. Your best wave
+                          for the day is kept. A run (and R) keeps its day past 00:00 UTC.
+    Mastery ............. every kill with a gun counts toward it for good (localStorage). 25 / 100 / 250 kills earn
+                          its 1st / 2nd / 3rd star, each worth +5% damage with that gun; a callout and a chime mark
+                          a new star, and the wheel shows each gun's stars. Three stars and the gun is gold-plated: it
+                          glints gold in your hand, on the HUD ribbon and in the ARMORY.
+    Lifetime ............ kills, runs, deaths and time played are kept (localStorage) and shown on the ARMORY page.
+    Title menu .......... CAMPAIGN, OVERTIME, DAILY, BOSS RUSH, CODEX, ARMORY (every gun with its line, key, kills and mastery
+                          pips), MEDALS, OPTIONS. CODEX: every foe, a grey silhouette until you've met it, with a line on
+                          each; 66 to a page, Q/E, the mouse wheel or a click on PAGE turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS
+                          (OPTION_ITEMS: difficulty, music, SFX, shake, post FX, flashes: FULL or REDUCED, which drops impact frames and dims screen
+                          flashes, mutator, keys: rebinds the keyboard, controls). Play modes in the left column, extras in the right. Keyboard, mouse or pad; Esc / B, < BACK
+                          or a right click backs out. A touch-only device with no pad is told it needs a keyboard and mouse or a gamepad, and runs
+                          wait for a key press or pad input. Met foes are kept in localStorage.
+    Gamepad ............. standard-mapping pads: LS move (down + A drops), RS aim (crosshair rides 70 px out), RT fire,
+                          LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB for the wheel (RS picks), D-pad
+                          up/down cycle, Start pause. Menus: D-pad / LS, A pick, B back. Rumble follows screen shake.
+                          Radial dead zone 0.22; aim assist leans the aim 60% onto a foe within 0.2 rad / 260 px.
+    Impact frames ....... 2-3 stark black-and-white frames on executions, kill-cams, shock combos, supercombines and
+                          mini-boss deaths (a white flash with post FX off).
+    Difficulty .......... picked on the title screen (A/D, remembered): EASY (you take x0.6, enemies have x0.8
+                          HP, score x0.7), NORMAL, BRUTAL (x1.4 damage taken, x1.25 enemy HP, score x1.5).
+    Mutators ............ OPTIONS > MUTATOR (one at a time, remembered, shown on the title): GLASS CANNON (you deal and
+                          take double), SWARM (each wave half again as big, foes a third weaker), MOON BOOTS (low
+                          gravity every wave), LIGHTS OUT (every wave in the dark), VAMPIRE (every kill heals 4, no
+                          medkits). The MUTANT medal is for winning the campaign with one on.
+    Meltdown tide ....... during LAST SHIFT in the campaign, the floor seams glow for 2.2 s, then slag floods
+                          the ground floor 28 px deep (3 s rise, 6 s hold, 3 s drain). Wading burns 5 per 0.4 s.
+                          Slag ignites anything vulnerable to fire, sets off ticks and drums, and melts gibs.
+    Music ............... synthwave soundtrack from music_bank.js (rendered by dev/synthwave): title theme,
+                          MELT FLOOR (operations 1–2), SLAG RAIN (later operations), THE SMELTER (Foreman and
+                          Smelter fights), clear / game over
+                          jingles. Stage loops are muffled until you're noticed and open up as the fight heats
+                          up. B flips to the procedural 132 BPM drum + bass loop (the fallback without the bank).
+    SFX ................. AudioGen sample bank from sfx_bank.js (dev/sfxgen) over the procedural synth; N flips
+                          to the synth versions (the fallback without the bank). M mutes all audio (remembered; the
+                          HUD shows MUTED), and all audio pauses while the tab is hidden.
+    Hearing ............. gunfire alerts enemies within 210-270 px, explosions within 300 px
+    Player .............. 100 HP, 750 ms i-frames; contact dmg grunt 12 / heavy 20,
+                          heavy stomp 15, drone bolt 10; four +30 health packs in the arena
+    Pause (Esc / P) ..... pause menu (PAUSE_ITEMS): resume, retry act or restart, music and SFX volume, screen shake (0-100%
+                          in quarter steps with A/D or Enter; remembered), post FX on/off, flashes full/reduced, controls
+                          (every key and pad binding), quit. Retry / restart
+                          and quit need a second pick (moving off, Esc or B cancels), and the list stops at both ends. Physics, timers and weapon
+                          loops stop and the music muffles; buffs, i-frames and enemy tells pick up where they left
+                          off, and paused time doesn't count toward the run time. Hiding the tab or moving focus to
+                          another window pauses too, and coming back waits on the menu. Esc on the results screen goes back to the title.
+    Post FX (V) ......... Phaser 4 camera filters on the world (not the HUD): bloom, a barrel-warp pulse on nearby
+                          blasts, colour grading (rampage saturation, low-health desaturation, grey on death and
+                          while paused). The choice is remembered in localStorage.
+    Results ............. stats count up (with your top three guns by kills, the biggest single hit and, if you died,
+                          what killed you, or the hazard that did), then a grade (S-D from completion, accuracy, best
+                          style and damage taken) and a score (x the difficulty's multiplier); the best score is kept in
+                          localStorage and shown on the title screen with its difficulty (and mutator, if one was on). R and Esc wait for the results
+                          (the run's records are saved when they appear). R / Enter retries the checkpoint after a
+                          campaign defeat when one exists. Otherwise it starts a fresh run. Mid-run, R needs a second
+                          press within 2 s (RESTART_CONFIRM_MS); the first shows a prompt under the objective banner.
+                          The Lab's R resets at once.
+    HUD ................. a ribbon of 9 weapon slots, the gun in hand in the middle and four either side, that slides
+                          as you swap (stolen guns grey out); dash meter under the health bar; red markers round you show where a hit
+                          came from; arrows at the screen edge point to off-screen enemies once 5 or fewer are left
+                          (and to a boss), and those last few stop lurking and come looking for you (one stuck
+                          against a wall it can't climb for 4 s warps to the ground point nearest you); lance charge
+                          ring and hornet lock pips at the crosshair. Damage numbers
+                          step aside from ones still rising nearby.
+  =============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLAGHOUSE</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  #game { width: 100vw; height: 100vh; }
+  canvas { image-rendering: pixelated; display: block; }
+  #boot { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; padding: 0 16px; background: #000; color: #ff8a1f; font: bold clamp(34px, 9vw, 96px)/1 ui-monospace, Consolas, monospace;
+    letter-spacing: .12em; text-shadow: 0 4px 0 #6a2a08; }
+  #boot small { font-size: clamp(13px, 2.4vw, 18px); color: #8f9bab; letter-spacing: .3em; text-shadow: none; animation: boot-pulse 1.2s ease-in-out infinite; }
+  #boot.failed small { animation: none; max-width: 34em; color: #ff9c87; letter-spacing: .04em; line-height: 1.5; text-align: center; }
+  #boot button { cursor: pointer; padding: 8px 18px; border: 1px solid #ff9b3e; background: #ffad5c; color: #17110b; font: bold 16px ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+  @keyframes boot-pulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { #boot small { animation: none; } }
+  #lab-dock, #lab-panel { color: #e0e7ee; background: #13181e; font: 14px/1.45 ui-monospace, Consolas, monospace; }
+  #lab-dock { position: fixed; right: 8px; bottom: 8px; }
+  #lab-panel { box-sizing: border-box; width: min(680px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto;
+    padding: clamp(16px, 4vw, 30px); border: 1px solid #485461; border-top: 4px solid #ff9b3e; }
+  #lab-panel::backdrop { background: #040609c9; }
+  #lab-panel h1 { margin: 0; color: #ffb569; font-size: 26px; letter-spacing: .08em; }
+  #lab-panel p { margin: 0 0 14px; color: #acbac8; }
+  #lab-panel button, #lab-panel select, #lab-panel input {
+    color: inherit; background: #222b35; border: 1px solid #586775; border-radius: 3px; font: inherit; }
+  #lab-dock { color: #ffb569; background: #161b20; border: 1px solid #586775; border-radius: 3px; }
+  #lab-panel button, #lab-dock { cursor: pointer; padding: 7px 12px; }
+  #lab-panel button[type=submit] { background: #ffad5c; border-color: #ffad5c; color: #17110b; font-weight: bold; }
+  #lab-panel button:disabled { opacity: .5; cursor: default; }
+  #lab-panel :focus-visible, #lab-dock:focus-visible, #lab-panel.lab-pad :focus { outline: 2px solid #72e5ed; outline-offset: 2px; }
+  #lab-panel #lab-tally { margin-left: 12px; color: #acbac8; }
+  #lab-panel #lab-tally.over { color: #ff9c87; }
+  #lab-panel select, #lab-panel input[type=number] { display: block; box-sizing: border-box; width: 100%; margin: 3px 0 0; padding: 5px 6px; }
+  #lab-panel label { display: block; min-width: 0; }
+  #lab-panel .lab-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+  #lab-panel fieldset { margin: 16px 0; padding: 10px; border: 1px solid #485461; }
+  #lab-panel .lab-group { display: grid; grid-template-columns: minmax(0, 2fr) 7ch minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+  #lab-panel .lab-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  #lab-panel #lab-error { color: #ff9c87; margin: 8px 0 0; }
+  @media (max-width: 480px) { #lab-panel .lab-group { grid-template-columns: minmax(0, 1fr) 7ch; } }
+</style>
+</head>
+<body>
+<div id="boot" role="status" aria-live="polite">SLAGHOUSE<small>LOADING</small></div>  <!-- painted while the scripts below load; the title removes it -->
+<div id="game"></div>
+<button id="lab-dock" type="button" hidden>Lab controls · F2</button>
+<dialog id="lab-panel" aria-labelledby="lab-title">
+  <form id="lab-form">
+    <h1 id="lab-title">Slaghouse Lab</h1>
+    <p id="lab-room-detail"></p>
+    <div class="lab-fields">
+      <label><span id="lab-room-label">Room</span><select name="room" aria-labelledby="lab-room-label" autofocus></select></label>
+      <label><span id="lab-weapon-label">Starting weapon</span><select name="weapon" aria-labelledby="lab-weapon-label"></select></label>
+      <label><span id="lab-difficulty-label">Difficulty</span><select name="difficulty" aria-labelledby="lab-difficulty-label"></select></label>
+      <label><span id="lab-modifier-label">Hazard modifier</span><select name="modifier" aria-labelledby="lab-modifier-label"></select></label>
+      <label><input type="checkbox" name="stationary"> Stationary enemies</label>
+      <label><input type="checkbox" name="invulnerable"> Invulnerable player</label>
+    </div>
+    <fieldset>
+      <legend>Enemy groups</legend>
+      <div id="lab-groups"></div>
+      <button id="lab-add" type="button">Add group</button><span id="lab-tally" aria-live="polite"></span>
+    </fieldset>
+    <p>All weapons are available in play. Press F2 for controls or R to reset the room. On a gamepad, the D-pad moves and changes, A picks and B goes back.</p>
+    <p id="lab-error" role="alert" hidden></p>
+    <div class="lab-actions">
+      <button type="submit">Deploy room</button>
+      <button id="lab-reset" type="button" hidden>Reset room</button>
+      <button id="lab-resume" type="button">Back</button>
+      <button id="lab-exit" type="button" hidden>Exit to title</button>
+    </div>
+  </form>
+</dialog>
+<!-- Below the boot screen so it paints first. The banks are deferred: they don't block that paint, and they still run
+     before Phaser boots on DOMContentLoaded, so the title's Sfx.init finds them. -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js" integrity="sha384-kyUQ5+cxc6+X89xEG6DhcXLcDU9T3Z+o/45VdT6pgAwtG6gxtAzYTEn0Wwj/BKZd" crossorigin="anonymous"></script>  <!-- SRI: a changed file won't run; re-hash on a version bump -->
+<script src="sfx_bank.js" defer></script>  <!-- optional AudioGen sample bank (dev/sfxgen); synth fallback without it -->
+<script src="music_bank.js" defer></script>  <!-- optional synthwave soundtrack (dev/synthwave); procedural loop without it -->
+<script>

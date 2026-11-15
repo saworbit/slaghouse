@@ -6,14 +6,28 @@ holder the right to use, modify and distribute it under any terms, including pro
 
 ## Running the game
 
-The whole game is `slaghouse.html`; there's no build step. It loads Phaser 4.2.1 from the jsDelivr CDN, so you need
-an internet connection. Serve the folder and open the page:
+The whole game ships as one file, `slaghouse.html`, built from the parts in `src/`. Playing it needs no build. It loads
+Phaser 4.2.1 from the jsDelivr CDN, so you need an internet connection. Serve the folder and open the page:
 
 ```bash
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
 Then open <http://127.0.0.1:8765/slaghouse.html>. Use the same URL and browser profile when testing a saved checkpoint.
+
+## Editing the game
+
+Edit the files in `src/`, never `slaghouse.html` itself, then rebuild it:
+
+```bash
+node src/join.mjs
+```
+
+`src/join.mjs` concatenates the parts in a fixed order, with no bundler: `page-head.html` (the page, its loading screen
+and the header comment), `config.js` (`TUNE`, weapons, the `ENEMY` records), `util.js`, `audio.js` (`Sfx`, `Music`),
+`font.js`, `art.js`, `particles.js`, `scenes.js` (boot and title), `game.js` (`GameScene`), `hud.js`, `lab.js`,
+`boot.js` and `page-tail.html`. Commit both `src/` and the rebuilt `slaghouse.html`. `node dev/check.mjs`, and so CI,
+fails if they're out of step.
 
 ## Checks
 
@@ -98,14 +112,14 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 2. Keep commits focused. Subjects follow the existing history: `Add the <name> round: ...` for content rounds,
    `Fix ...` for bug fixes, in the imperative.
 3. Update `CHANGELOG.md` under `[Unreleased]` (Added / Changed / Fixed).
-4. If you change a value in `TUNE`, update the header comment at the top of `slaghouse.html` to match.
+4. If you change a value in `TUNE` (`src/config.js`), update the header comment in `src/page-head.html` to match.
 5. Open a pull request with the template filled in. CI must pass, and the owner reviews every change. `main` requires
    the **Static checks**, **Headless play-test** and **Brutal campaign seeds** jobs, so `gh pr merge --auto --squash`
    waits for all three before it merges.
 
 ## Adding an enemy kind or a run mode
 
-An enemy kind is one record in `ENEMY` in `slaghouse.html` plus its own `GameScene` methods. The comment above
+An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene` methods (`src/game.js`). The comment above
 `ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names for its
 `setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death reads (a
 ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.
