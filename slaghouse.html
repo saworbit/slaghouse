@@ -598,7 +598,7 @@
                           pips), MEDALS, OPTIONS. CODEX: every foe, a grey silhouette until you've met it, with a line on
                           each; 66 to a page, Q/E, the mouse wheel or a click on PAGE turns them), MEDALS (the gallery in three columns, earned in gold), OPTIONS
                           (OPTION_ITEMS: difficulty, music, SFX, shake, post FX, flashes: FULL or REDUCED, which drops impact frames and dims screen
-                          flashes, mutator, controls). Play modes in the left column, extras in the right. Keyboard, mouse or pad; Esc / B, < BACK
+                          flashes, mutator, keys: rebinds the keyboard, controls). Play modes in the left column, extras in the right. Keyboard, mouse or pad; Esc / B, < BACK
                           or a right click backs out. A touch-only device with no pad is told it needs a keyboard and mouse or a gamepad, and runs
                           wait for a key press or pad input. Met foes are kept in localStorage.
     Gamepad ............. standard-mapping pads: LS move (down + A drops), RS aim (crosshair rides 70 px out), RT fire,
@@ -1307,8 +1307,63 @@ const BLURBS = {
   nuke: 'ONE SLOW SHELL. ONE VERY BIG BANG.', dragon: 'BURNING BUCKSHOT. SETS FLOORS ALIGHT.',
   seed: 'PLANTS A FUNGUS THAT SPORES FOES.', tether: 'LINK 3 FOES. HURT ONE, HURT ALL.',
 };
-const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '<', '[', ']', '\\', ';', "'", ',', '.', '/', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];   // HUD labels (< = backspace; the flail has no key: wheel or Q/E)
-while (SLOT_KEYS.length < WEAPONS.length) SLOT_KEYS.push(' ');      // wheel-only guns have no key
+// Keyboard bindings (#109). The scene reads keys by name (this.keys.W, this.jd.SPACE), and each name sits on one or two
+// physical keys by KeyboardEvent.code, so WASD, the number row and the punctuation weapon keys stay where they are on
+// any layout, whatever the keys print. The defaults are the US positions. OPTIONS > KEYS rebinds them (slaghouse.binds),
+// and every hint, the CONTROLS page and the weapon slot labels follow, using the keyboard's own labels where the
+// browser gives them (navigator.keyboard) and the pixel font can draw them.
+const SLOT_NAMES = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'ZERO', 'MINUS', 'PLUS', 'BACKSPACE', 'OPEN_BRACKET',
+  'CLOSED_BRACKET', 'BACK_SLASH', 'SEMICOLON', 'QUOTES', 'COMMA', 'PERIOD', 'FORWARD_SLASH', 'Z', 'X', 'K', 'L', 'U', 'I', 'O', 'Y', 'H'];   // weapon slots 1-30
+const BIND_DEFAULTS = {
+  A: ['KeyA'], D: ['KeyD'], W: ['KeyW'], S: ['KeyS'], LEFT: ['ArrowLeft'], RIGHT: ['ArrowRight'], UP: ['ArrowUp'], DOWN: ['ArrowDown'],
+  SPACE: ['Space'], SHIFT: ['ShiftLeft', 'ShiftRight'], J: ['KeyJ'], F: ['KeyF'], G: ['KeyG'], C: ['KeyC'], T: ['KeyT'], TAB: ['Tab'],
+  Q: ['KeyQ'], E: ['KeyE'], R: ['KeyR'], ESC: ['Escape'], P: ['KeyP'], ENTER: ['Enter', 'NumpadEnter'], M: ['KeyM'], N: ['KeyN'], B: ['KeyB'],
+  V: ['KeyV'], ONE: ['Digit1'], TWO: ['Digit2'], THREE: ['Digit3'], FOUR: ['Digit4'], FIVE: ['Digit5'], SIX: ['Digit6'], SEVEN: ['Digit7'],
+  EIGHT: ['Digit8'], NINE: ['Digit9'], ZERO: ['Digit0'], MINUS: ['Minus'], PLUS: ['Equal'], BACKSPACE: ['Backspace'], OPEN_BRACKET: ['BracketLeft'],
+  CLOSED_BRACKET: ['BracketRight'], BACK_SLASH: ['Backslash'], SEMICOLON: ['Semicolon'], QUOTES: ['Quote'], COMMA: ['Comma'], PERIOD: ['Period'],
+  FORWARD_SLASH: ['Slash'], Z: ['KeyZ'], X: ['KeyX'], K: ['KeyK'], L: ['KeyL'], U: ['KeyU'], I: ['KeyI'], O: ['KeyO'], Y: ['KeyY'], H: ['KeyH'],
+};
+const BIND_ROWS = [                                // the KEYS page, top to bottom
+  ['A', 'MOVE LEFT'], ['D', 'MOVE RIGHT'], ['W', 'UP / JUMP'], ['S', 'DOWN / DROP'], ['LEFT', 'MOVE LEFT 2'], ['RIGHT', 'MOVE RIGHT 2'],
+  ['UP', 'UP / JUMP 2'], ['DOWN', 'DOWN / DROP 2'], ['SPACE', 'JUMP'], ['SHIFT', 'DASH'], ['J', 'FIRE ON KEYS'], ['F', 'KICK'], ['G', 'MINE'],
+  ['C', 'HOOK'], ['T', 'SENTRY'], ['TAB', 'WEAPON WHEEL'], ['Q', 'PREVIOUS WEAPON'], ['E', 'NEXT WEAPON'], ['R', 'RESTART'], ['ESC', 'PAUSE'],
+  ['P', 'PAUSE 2'], ['ENTER', 'CONFIRM'], ['M', 'MUTE'], ['N', 'SAMPLED / SYNTH SFX'], ['B', 'SAMPLED / SYNTH MUSIC'], ['V', 'POST FX'],
+  ...SLOT_NAMES.map((n, i) => [n, (i + 1) + ' ' + WEAPONS[i].name]),
+];
+const CODE_LABELS = { Space: 'SPACE', ShiftLeft: 'SHIFT', ShiftRight: 'RSHIFT', ControlLeft: 'CTRL', ControlRight: 'RCTRL', AltLeft: 'ALT',
+  AltRight: 'RALT', Tab: 'TAB', Escape: 'ESC', Enter: 'ENTER', NumpadEnter: 'ENTER', Backspace: 'BKSP', CapsLock: 'CAPS', ArrowUp: 'UP',
+  ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\',
+  IntlBackslash: 'INTL', Semicolon: ';', Quote: "'", Backquote: 'GRAVE', Comma: ',', Period: '.', Slash: '/', Insert: 'INS', Delete: 'DEL',
+  Home: 'HOME', End: 'END', PageUp: 'PGUP', PageDown: 'PGDN' };
+let KEY_LAYOUT = null;                             // code -> what this keyboard prints on it, where the browser tells us
+function keyLabel(code) {
+  const ch = KEY_LAYOUT && KEY_LAYOUT.get(code);
+  if (ch && ch.trim() && [...ch.toUpperCase()].every(c => FONT[c])) return ch.toUpperCase();   // only what the pixel font can draw
+  if (CODE_LABELS[code]) return CODE_LABELS[code];
+  const m = /^(?:Key|Digit)(\w)$/.exec(code), n = /^Numpad(\w+)$/.exec(code);
+  return m ? m[1] : n ? 'NUM' + n[1].toUpperCase().slice(0, 3) : code.toUpperCase().slice(0, 6);
+}
+function loadBinds() {                             // a saved binding wins only if it's one or two plausible key codes
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('slaghouse.binds') || 'null'); } catch (err) { /* private mode or junk */ }
+  const out = {};
+  for (const [name, def] of Object.entries(BIND_DEFAULTS)) {
+    const v = saved && saved[name];
+    out[name] = Array.isArray(v) && v.length >= 1 && v.length <= 2 && v.every(c => typeof c === 'string' && /^[A-Za-z0-9]{2,24}$/.test(c)) ? v.slice() : def.slice();
+  }
+  return out;
+}
+loadBinds.defaults = () => Object.fromEntries(Object.entries(BIND_DEFAULTS).map(([n, c]) => [n, c.slice()]));
+let BINDS = loadBinds();
+function saveBinds() { try { localStorage.setItem('slaghouse.binds', JSON.stringify(BINDS)); } catch (err) { /* private mode */ } }
+const bindLabel = name => keyLabel(BINDS[name][0]);
+const bindRow = name => (BIND_ROWS.find(r => r[0] === name) || [name, name])[1];
+const SLOT_KEYS = [];                              // the HUD's short label per weapon slot (< = backspace); wheel-only guns get a space
+function slotLabels() {
+  SLOT_KEYS.length = 0;
+  WEAPONS.forEach((w, i) => { const c = SLOT_NAMES[i] && BINDS[SLOT_NAMES[i]][0]; SLOT_KEYS.push(!c ? ' ' : c === 'Backspace' ? '<' : keyLabel(c).slice(0, 2)); });
+}
+slotLabels();
 // elite foes: one trait each, a coloured aura and a diamond over the head
 const ELITE_KINDS = ['armored', 'shielded', 'volatile', 'regen'];
 const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, regen: 0x5cff7a };
@@ -2353,20 +2408,29 @@ const LOGO_ROWS = ['#eef2f6', '#c6ced8', '#9ba6b3', '#ffa040', '#ff7a1a', '#d948
 const CALL_ROWS = ['#fff8c8', '#ffe46a', '#ffd040', '#ffb030', '#ff8a1f', '#ff6a10', '#c84008'];
 const WIN_ROWS = ['#ffffff', '#e6f7ff', '#bfe9ff', '#7dd8ff', '#46b8f0', '#2a86c8', '#1a5a90'];
 const LOSE_ROWS = ['#ffd0c0', '#ff9a80', '#ff6a50', '#ff3a2a', '#d81e14', '#a0100c', '#600808'];
-const HINT1 = 'A/D MOVE  SPACE JUMP  SHIFT DASH  CLICK FIRE  F KICK  G MINE  C HOOK  T SENTRY';
-const HINT2 = 'TAB WHEEL  Q/E CYCLE  KICK GLOWING FOES TO EXECUTE  ESC PAUSE  V FX';
+let HINT1 = '', HINT2 = '';                        // the keyboard hint strips, from the bindings (bindTexts)
 const HINT_PAD1 = 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY';
 const HINT_PAD2 = 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE';
 const RESTART_CONFIRM_MS = 2000;                     // mid-run R arms a restart; a second R inside this window confirms it
-const CONTROL_LINES = [                              // the pause menu's CONTROLS page: the hint strips plus everything they leave out
-  ['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
-  ['WEAPONS  ' + SLOT_KEYS.filter(k => k.trim()).map(k => (k === '<' ? 'BKSP' : k)).join(' ')],
-  ['ARROWS MOVE  W JUMP  S+SPACE DROP  RIGHT CLICK KICK  MIDDLE CLICK MINE'],
-  ['J FIRE ON KEYS  MOUSE WHEEL CYCLE  P PAUSE  R TWICE RESTART  M MUTE'],
-  ['N SAMPLED/SYNTH SFX  B SAMPLED/SYNTH MUSIC'],
-  ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
-  ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK'],
-];
+const CONTROL_LINES = [];                          // the CONTROLS page: the hint strips plus everything they leave out
+function bindTexts() {                             // rebuild every key label from BINDS; with the defaults they read as they always did
+  const k = bindLabel, arrows = ['UP', 'DOWN', 'LEFT', 'RIGHT'].every(n => BINDS[n].join() === BIND_DEFAULTS[n].join());
+  slotLabels();
+  HINT1 = `${k('A')}/${k('D')} MOVE  ${k('SPACE')} JUMP  ${k('SHIFT')} DASH  CLICK FIRE  ${k('F')} KICK  ${k('G')} MINE  ${k('C')} HOOK  ${k('T')} SENTRY`;
+  HINT2 = `${k('TAB')} WHEEL  ${k('Q')}/${k('E')} CYCLE  KICK GLOWING FOES TO EXECUTE  ${k('ESC')} PAUSE  ${k('V')} FX`;
+  CONTROL_LINES.length = 0;
+  CONTROL_LINES.push(['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
+    ['WEAPONS  ' + SLOT_KEYS.filter(s => s.trim()).map(s => (s === '<' ? 'BKSP' : s)).join(' ')],
+    [`${arrows ? 'ARROWS' : k('LEFT') + '/' + k('RIGHT')} MOVE  ${k('W')} JUMP  ${k('S')}+${k('SPACE')} DROP  RIGHT CLICK KICK  MIDDLE CLICK MINE`],
+    [`${k('J')} FIRE ON KEYS  MOUSE WHEEL CYCLE  ${k('P')} PAUSE  ${k('R')} TWICE RESTART  ${k('M')} MUTE`],
+    [`${k('N')} SAMPLED/SYNTH SFX  ${k('B')} SAMPLED/SYNTH MUSIC   OPTIONS > KEYS REBINDS`],
+    ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
+    ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK']);
+}
+bindTexts();
+try {                                              // the keyboard's own key labels, once the browser has them
+  navigator.keyboard?.getLayoutMap?.().then(m => { KEY_LAYOUT = m; bindTexts(); BUS.emit('binds'); }, () => {});
+} catch (err) { /* not offered here */ }
 // Pause menu rows, top to bottom. Handlers find a row by its id or fields, never by position, so a row can be added
 // or moved without breaking the others. The rows the title OPTIONS page shares run in the same order there.
 //   confirm: picking it loses the run, so it takes a second pick (not in the Lab)
@@ -2392,6 +2456,7 @@ const OPTION_ITEMS = [                                // the title OPTIONS page,
   { id: 'postfx', label: () => 'POST FX  ' + (POSTFX.on ? 'ON' : 'OFF') },
   { id: 'flash', label: () => 'FLASHES  ' + (OPTS.flash ? 'FULL' : 'REDUCED') },
   { id: 'mut', label: () => 'MUTATOR  ' + MUTATORS[OPTS.mut].name },
+  { id: 'keys', label: () => 'KEYS' },
   { id: 'controls', label: () => 'CONTROLS' },
   { id: 'back', label: () => 'BACK' },
 ];
@@ -6324,7 +6389,7 @@ class TitleScene extends Phaser.Scene {
       this.time.delayedCall(260, () => { this.scene.start('Game', data); this.scene.launch('Hud'); });
     };
     this.startRun = start;
-    this.input.keyboard.on('keydown', ev => this.onTitleKey(ev.keyCode));
+    this.input.keyboard.on('keydown', ev => (this.sub === 'keys' && this.keysKey(ev)) || this.onTitleKey(ev.keyCode));
     this.input.on('pointermove', p => this.onTitlePointer(p, false));
     this.input.on('pointerdown', p => { Sfx.init(); this.onTitlePointer(p, true); });
     this.input.on('wheel', (p, over, dx, dy) => this.onTitleWheel(dy));
@@ -6379,7 +6444,10 @@ class TitleScene extends Phaser.Scene {
     this.armLife = new PixelLabel(this, 480, 490, 'title_arl', { maxChars: 60, scale: 1, color: '#c8a0ff', originY: 0.5 }).setDepth(21);
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.optLbls = OPTION_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, 124 + i * 38, 'title_op_' + id, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
+    this.optLbls = OPTION_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, 124 + i * 34, 'title_op_' + id, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
+    this.keyRows = [...BIND_ROWS, ['reset', 'RESET ALL TO DEFAULTS'], ['back', 'BACK']];
+    this.keyLbls = Array.from({ length: 12 }, (_, j) => new PixelLabel(this, 480, 106 + j * 29, 'title_key' + j, { maxChars: 44, scale: 2.5, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21));
+    this.keyNote = new PixelLabel(this, 480, 470, 'title_keyn', { maxChars: 64, scale: 1.75, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.campaignCards = CAMPAIGN_ACTS.map((act, i) => {
       const x = 136 + i * 172, text = (y, key, opts) => new PixelLabel(this, x, y, 'title_route_' + key + i, opts).setDepth(21);
       return {
@@ -6400,9 +6468,12 @@ class TitleScene extends Phaser.Scene {
   }
   showSub(name) {
     this.sub = name; this.subSel = 0;
-    const cx = name === 'codex', md = name === 'medals', op = name === 'options', ar = name === 'armory', ct = name === 'controls';
+    const cx = name === 'codex', md = name === 'medals', op = name === 'options', ar = name === 'armory', ct = name === 'controls', ky = name === 'keys';
+    this.capture = null;
+    this.keyLbls.forEach(o => o.setVisible(ky)); this.keyNote.setVisible(ky).setText('');
+    if (ct) CONTROL_LINES.forEach(([t], i) => this.ctlLines[i]?.setText(t));
     const cp = name === 'campaign';
-    this.subTitle.setVisible(!!name).setText(cp ? 'CAMPAIGN' : cx ? 'CODEX' : md ? 'MEDALS' : op ? 'OPTIONS' : ar ? 'ARMORY' : ct ? 'CONTROLS' : '');
+    this.subTitle.setVisible(!!name).setText(cp ? 'CAMPAIGN' : cx ? 'CODEX' : md ? 'MEDALS' : op ? 'OPTIONS' : ar ? 'ARMORY' : ct ? 'CONTROLS' : ky ? 'KEYS' : '');
     this.subBack.setVisible(!!name); this.ctlLines.forEach(o => o.setVisible(ct));
     for (const { act, title, first, last, status } of this.campaignCards) [act, title, first, last, status].forEach(o => o.setVisible(cp));
     [this.campaignJob, this.campaignSettings, this.campaignNote, ...this.campaignButtons].forEach(o => o.setVisible(cp));
@@ -6414,7 +6485,7 @@ class TitleScene extends Phaser.Scene {
     this.armImgs.forEach((o, i) => o.setVisible(ar).setTint(masteryStars(WEAPONS[i].id) >= 3 ? 0xffe080 : 0xffffff));
     if (this.armLife) { const h = Math.floor(LIFE.time / 3600), m = Math.floor(LIFE.time / 60) % 60; this.armLife.setVisible(ar).setText('LIFETIME  KILLS ' + LIFE.kills + '   RUNS ' + LIFE.runs + '   DEATHS ' + LIFE.deaths + '   TIME ' + (h ? h + 'H' : '') + m + 'M'); } this.armName.setVisible(ar); this.armDesc.setVisible(ar); this.armStat.setVisible(ar);
     this.armCount.setVisible(ar).setText('STARS ' + WEAPONS.reduce((n, w) => n + masteryStars(w.id), 0) + '/' + WEAPONS.length * 3 + '   GUNS ' + WEAPONS.length);
-    this.subHint.setVisible(!!name).setText(cp ? 'A/D CHOOSE   ENTER SELECT   ESC BACK' : cx ? 'ARROWS BROWSE   Q/E OR WHEEL PAGE   ESC BACK' : ar ? 'ARROWS OR WHEEL BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC OR RIGHT CLICK BACK');
+    this.subHint.setVisible(!!name).setText(ky ? 'W/S CHOOSE   ENTER REBIND   ESC BACK' : cp ? 'A/D CHOOSE   ENTER SELECT   ESC BACK' : cx ? 'ARROWS BROWSE   Q/E OR WHEEL PAGE   ESC BACK' : ar ? 'ARROWS OR WHEEL BROWSE   ESC BACK' : op ? 'W/S CHOOSE   A/D CHANGE   ESC BACK' : 'ESC OR RIGHT CLICK BACK');
     this.codexImgs.forEach(o => o.setVisible(cx)); this.codexName.setVisible(cx); this.codexDesc.setVisible(cx); this.codexCount.setVisible(cx).setText('MET ' + CODEX.filter(c => SEEN.has(c[0])).length + '/' + CODEX.length);
     this.medalRows.forEach(r => { r.name.setVisible(md); r.desc.setVisible(md); }); this.medalCount.setVisible(md);
     this.optLbls.forEach(o => o.setVisible(op)); this.mutDesc.setVisible(op);
@@ -6448,6 +6519,14 @@ class TitleScene extends Phaser.Scene {
       const w = WEAPONS[this.subSel], k = MASTERY[w.id] || 0, nx = TUNE.MASTERY.find(n => k < n), key = (SLOT_KEYS[this.subSel] || ' ').trim();
       this.armName.setText(w.name); this.armDesc.setText(BLURBS[w.id] || '');
       this.armStat.setText((key ? 'KEY ' + (key === '<' ? 'BKSP' : key) : 'WHEEL') + '   KILLS ' + k + '   ' + (nx ? 'NEXT STAR AT ' + nx : 'MASTERED'));
+    } else if (this.sub === 'keys') {
+      const N = this.keyRows.length, top = clamp(this.subSel - 5, 0, N - this.keyLbls.length);
+      this.keyLbls.forEach((o, j) => {
+        const i = top + j, [name, label] = this.keyRows[i], sel = i === this.subSel;
+        const keys = BINDS[name] ? BINDS[name].map(keyLabel).join(' / ') : '';
+        const text = this.capture === name ? label.padEnd(24) + '...' : keys ? label.padEnd(24) + keys : label;
+        o.setText(sel ? '> ' + text : text).setStyle({ color: this.capture === name ? '#76e8ff' : sel ? '#ffe46a' : '#8f9bab' });
+      });
     } else if (this.sub === 'options') {
       OPTION_ITEMS.forEach(({ id, label }, i) => this.optLbls[i].setText(i === this.subSel ? '< ' + label() + ' >' : label())
         .setStyle({ color: i === this.subSel ? '#ffe46a' : id === 'mut' && OPTS.mut ? '#c8a0ff' : '#8f9bab' }));
@@ -6458,6 +6537,18 @@ class TitleScene extends Phaser.Scene {
     if (!a) return;
     if (this.sub === 'controls') {                                       // back (or Enter) returns to OPTIONS on the CONTROLS row
       if (a === 'back' || a === 'ok') { Sfx.ui(); this.showSub('options'); this.subSel = OPTION_ITEMS.findIndex(o => o.id === 'controls'); this.refreshSub(); }
+      return;
+    }
+    if (this.sub === 'keys') {
+      const N = this.keyRows.length, row = this.keyRows[this.subSel][0];
+      if (a === 'back' || (a === 'ok' && row === 'back')) { Sfx.ui(); this.showSub('options'); this.subSel = OPTION_ITEMS.findIndex(o => o.id === 'keys'); this.refreshSub(); return; }
+      if (a === 'up' || a === 'down' || a === 'pgup' || a === 'pgdn') {
+        const d = { up: -1, down: 1, pgup: -10, pgdn: 10 }[a];
+        this.subSel = Math.abs(d) > 1 ? clamp(this.subSel + d, 0, N - 1) : (this.subSel + d + N) % N; Sfx.swap();
+      } else if (a === 'ok' && row === 'reset') {
+        BINDS = loadBinds.defaults(); this.bindsChanged('ALL KEYS ARE BACK ON THEIR DEFAULTS');
+      } else if (a === 'ok') { this.capture = row; this.keyNote.setText('PRESS A KEY FOR ' + bindRow(row) + '   ESC KEEPS ' + BINDS[row].map(keyLabel).join(' / ')); Sfx.ui(); }
+      this.refreshSub();
       return;
     }
     if (a === 'back') { Sfx.ui(); this.showSub(null); return; }
@@ -6496,6 +6587,7 @@ class TitleScene extends Phaser.Scene {
         else if (id === 'flash') { OPTS.flash = OPTS.flash ? 0 : 1; saveOpt('flash'); Sfx.ui(); }
         else if (id === 'mut') { OPTS.mut = (OPTS.mut + (a === 'left' ? -1 : 1) + MUTATORS.length) % MUTATORS.length; saveOpt('mut'); Sfx.ui(); }
         else if (a === 'ok' && id === 'controls') { Sfx.ui(); this.showSub('controls'); return; }
+        else if (a === 'ok' && id === 'keys') { Sfx.ui(); this.showSub('keys'); return; }
         else if (a === 'ok' && id === 'back') { Sfx.ui(); this.showSub(null); return; }
       }
       this.refreshSub();
@@ -6503,6 +6595,22 @@ class TitleScene extends Phaser.Scene {
     }
     if (a === 'ok') { Sfx.ui(); this.showSub(null); }
   }
+  keysKey(ev) {                                    // true when the KEYS page used the key, so onTitleKey skips it
+    if (!this.capture) return false;
+    const name = this.capture, code = ev.code;
+    this.capture = null;
+    if (!code || code === 'Escape') { Sfx.ui(); this.keyNote.setText(bindRow(name) + ' STAYS ON ' + bindLabel(name)); this.refreshSub(); return true; }
+    const old = BINDS[name][0], other = Object.keys(BINDS).find(n => n !== name && BINDS[n].includes(code));
+    BINDS[name] = [code, ...BINDS[name].slice(1).filter(c => c !== code)];
+    let note = bindRow(name) + ' ON ' + keyLabel(code);
+    if (other && code !== old) {                     // a key does one job: the row that had it takes this row's old key
+      BINDS[other] = BINDS[other].map(c => (c === code ? old : c)).filter((c, i, all) => all.indexOf(c) === i);
+      note += '   ' + bindRow(other) + ' MOVED TO ' + keyLabel(old);
+    }
+    this.bindsChanged(note);
+    return true;
+  }
+  bindsChanged(note) { saveBinds(); bindTexts(); BUS.emit('binds'); Sfx.ui(); this.keyNote.setText(note); this.refreshSub(); }
   menuPick(i) {
     if (this.started) return;
     Sfx.init();
@@ -6531,7 +6639,7 @@ class TitleScene extends Phaser.Scene {
     this.wheelAt = this.time.now + 120;                                  // a trackpad sends a burst of deltas per swipe
     const down = dy > 0;
     if (this.sub === 'codex') this.subKey(down ? 'pgdn' : 'pgup');
-    else if (this.sub === 'armory' || this.sub === 'options') this.subKey(down ? 'down' : 'up');
+    else if (this.sub === 'armory' || this.sub === 'options' || this.sub === 'keys') { if (!this.capture) this.subKey(down ? 'down' : 'up'); }
     else if (!this.sub) { const n = this.menuItems.length; this.menuSel = (this.menuSel + (down ? 1 : n - 1)) % n; Sfx.swap(); }
   }
   menuHintText() { return 'W/S CHOOSE   ENTER PICK   A/D DIFFICULTY   E OVERTIME   ' + (Sfx.muted ? 'M SOUND ON (MUTED)' : 'M MUTE'); }
@@ -6562,9 +6670,17 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'options') {
-      const i = this.optLbls.findIndex(o => Math.abs(p.y - o.y) < 19 && Math.abs(p.x - 480) < 220);
+      const i = this.optLbls.findIndex(o => Math.abs(p.y - o.y) < 17 && Math.abs(p.x - 480) < 220);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
-      if (click && i >= 0) { const id = OPTION_ITEMS[i].id; this.subKey(id === 'controls' || id === 'back' ? 'ok' : p.x < 480 ? 'left' : 'right'); }
+      if (click && i >= 0) { const id = OPTION_ITEMS[i].id; this.subKey(id === 'controls' || id === 'keys' || id === 'back' ? 'ok' : p.x < 480 ? 'left' : 'right'); }
+      return;
+    }
+    if (this.sub === 'keys') {
+      if (this.capture) return;                        // waiting for a key
+      const N = this.keyRows.length, top = clamp(this.subSel - 5, 0, N - this.keyLbls.length);
+      const j = this.keyLbls.findIndex(o => Math.abs(p.y - o.y) < 14 && Math.abs(p.x - 480) < 300), i = j < 0 ? -1 : top + j;
+      if (i >= 0 && i !== this.subSel && !click) { this.subSel = i; this.refreshSub(); }
+      if (click && i >= 0) { this.subSel = i; this.subKey('ok'); }
       return;
     }
     if (this.sub) return;
@@ -7365,7 +7481,7 @@ class GameScene extends Phaser.Scene {
   }
 
   buildInput() {
-    this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,SPACE,J,Q,E,F,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO,MINUS,PLUS,BACKSPACE,OPEN_BRACKET,CLOSED_BRACKET,BACK_SLASH,SEMICOLON,QUOTES,COMMA,PERIOD,FORWARD_SLASH,Z,X,K,L,U,I,O,Y,H,TAB,SHIFT,G,T,C,R,M,N,B,P,V,ENTER,ESC');
+    this.keys = this.bindKeys();
     this.input.on('pointermove', () => { this.aimMode = 'mouse'; });
     this.input.on('pointerdown', ptr => { this.aimMode = 'mouse'; Sfx.init(); if (ptr.rightButtonDown()) this.kickQueued = true; if (ptr.middleButtonDown()) this.mineQueued = true; });
     this.input.on('wheel', (ptr, over, dx, dy) => {
@@ -8857,6 +8973,23 @@ class GameScene extends Phaser.Scene {
   boltPop(x, y) {
     this.fx.emit(x, y, { n: 10, speed: [30, 120], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0xff7ad0, 0xc02080], add: true, g: 200, mode: 1 });
     this.spawnLight(x, y, 'glow', 0xff40b0, 0.8, 1.4, 0.7, 0.15);
+  }
+
+  // One Phaser Key per name in BIND_DEFAULTS, pressed by whichever physical keys BINDS puts it on (by event.code, so
+  // the layout doesn't move it). The rest of the scene reads them exactly as it read addKeys' keys.
+  bindKeys() {
+    const KB = this.input.keyboard, keys = {}, byCode = new Map();
+    for (const name of Object.keys(BIND_DEFAULTS)) {
+      keys[name] = new Phaser.Input.Keyboard.Key(KB, Phaser.Input.Keyboard.KeyCodes[name]);
+      for (const code of BINDS[name]) { if (!byCode.has(code)) byCode.set(code, []); byCode.get(code).push(keys[name]); }
+    }
+    KB.addCapture(Object.keys(BIND_DEFAULTS).join(','));             // the page doesn't scroll or tab on game keys, as before
+    const down = ev => { for (const k of byCode.get(ev.code) || []) k.onDown(ev); };
+    const up = ev => { for (const k of byCode.get(ev.code) || []) k.onUp(ev); };
+    const clear = () => { for (const k of Object.values(keys)) k.reset(); };   // no key stuck down after the window loses focus
+    KB.on('keydown', down); KB.on('keyup', up); this.game.events.on('blur', clear);
+    this.events.once('shutdown', () => { KB.off('keydown', down); KB.off('keyup', up); this.game.events.off('blur', clear); });
+    return keys;
   }
 
   onBulletHit(b, e) {
@@ -19248,6 +19381,7 @@ class HudScene extends Phaser.Scene {
     on('combo', this.onCombo); on('hitmark', this.onHitmark); on('flash', this.onFlash);
     on('wave', this.onWave); on('mines', this.onMines); on('minibar', this.onMinibar); on('splat', this.onSplat); on('rankup', this.onRankUp); on('boss', this.onBoss);
     on('dmgdir', this.onDmgDir); on('wavecard', this.onWaveCard); on('pause', this.onPause);
+    on('binds', () => { this.slotKeys.forEach((o, i) => o.setText(SLOT_KEYS[i] || ' ')); this.hint1.setText(PAD.active ? HINT_PAD1 : HINT1); this.hint2.setText(PAD.active ? HINT_PAD2 : HINT2); });
     on('medal', m => this.medQ.push(m)); on('jam', t => { this.jamT = t; });
     on('locked', ids => { this.lockedIds = ids.slice(); });
     on('perks', this.onPerks); on('perkdone', () => this.setPerkUi(false)); on('perklist', ids => this.lblPerks.setText(ids.length ? 'PERKS ' + ids.map(id => (PERKS.find(q => q.id === id) || {}).tag).join(' ') : ''));
@@ -19310,6 +19444,7 @@ class HudScene extends Phaser.Scene {
     this.ctlOn = on; this.pShownSel = -1;
     [this.pTitle, this.pHint, ...this.pItems].forEach(o => o.setVisible(!on));
     this.ctlLines.forEach(o => o.setVisible(on));
+    if (on) CONTROL_LINES.forEach(([t], i) => this.ctlLines[i + 1]?.setText(t));
   }
   pausePick(i) {
     const gs = this.scene.get('Game'), item = PAUSE_ITEMS[i]; Sfx.ui();

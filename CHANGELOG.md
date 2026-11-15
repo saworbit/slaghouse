@@ -7,6 +7,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Rebindable keys.** OPTIONS > KEYS lists every keyboard action and weapon slot; pick one, press Enter and then the
+  new key. A key does one job, so the row that had it takes the old key, and RESET ALL TO DEFAULTS puts everything
+  back. Bindings are saved under `slaghouse.binds`. Keys now go by where they sit on the keyboard (`KeyboardEvent.code`)
+  rather than what they print, so WASD, the number row and the punctuation weapon keys stay in place on UK, German,
+  French and Nordic layouts. The hint strips, the CONTROLS pages, the weapon slot labels and the weapon cards show the
+  bound keys, with the keyboard's own labels where the browser offers them. With the defaults every hint reads as
+  before. `run.mjs` rebinds JUMP with real key input and checks the swap, the save, a reload, the HUD, an AZERTY key
+  at W's place and RESET ALL. (#109)
 - **Lab practice mode.** Choose from nine rooms, equip any weapon, and build encounters with enemies, elites,
   bosses and hazards. Reset a room to repeat the setup. Lab practice leaves campaign saves and progression intact.
 - `SlagLab` browser controls let test scripts list presets, deploy or reset a room, and inspect the player, enemies

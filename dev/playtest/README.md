@@ -35,7 +35,7 @@ node dev/playtest/run.mjs
 
 Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time
 for runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the pause menu's restart and quit confirms
-with real key and pad input, the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
+with real key and pad input, rebinding keys from OPTIONS > KEYS (and keys going by position on another layout), the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
 placement, breakage, restocking and overlapping hazard damage on Normal. Each run mode keeps its own wave total,
 lifetime stats and record. Every arena's navigation graph, counting
 the player's long drops and wall climbs, must let every standing cell reach the start and get back. Campaign checks
