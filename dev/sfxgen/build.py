@@ -1,4 +1,5 @@
-"""Pack the chosen candidates into ../../sfx_bank.js (base64 Ogg Opus + per-sound gain).
+"""Pack the chosen candidates into ../../sfx_bank.js (base64 Ogg Opus + per-sound gain), and the same takes as AAC in MP4
+into ../../sfx_bank_aac.js, which the game loads only when the browser can't decode Ogg Opus.
 
     .venv/Scripts/python build.py
 
@@ -27,7 +28,9 @@ from loud import loudness
 MASTER = 1.0          # overall sample level relative to the synth versions they replace
 PEAK_CAP = 2.0        # a sample may peak at most this much (+6 dB) above the synth it replaces (protects the master compressor)
 BITRATE = '40k'
+AAC_RATE = '48k'      # AAC needs a little more than Opus to sound as clean
 OUT = os.path.normpath(os.path.join(HERE, '..', '..', 'sfx_bank.js'))
+OUT_AAC = os.path.normpath(os.path.join(HERE, '..', '..', 'sfx_bank_aac.js'))
 PROC = os.path.join(HERE, 'out', 'proc')
 TAKES = os.path.join(HERE, 'takes')
 
@@ -62,6 +65,15 @@ def opus(y):
         return open(dst, 'rb').read()
 
 
+def aac(y):                                     # AAC-LC in MP4, bit-exact like the Opus encodes
+    with tempfile.TemporaryDirectory() as td:
+        src, dst = os.path.join(td, 'a.wav'), os.path.join(td, 'a.m4a')
+        sf.write(src, y, 48000, subtype='PCM_16')
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-c:a', 'aac', '-b:a', AAC_RATE,
+                        '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:a', '+bitexact', '-f', 'mp4', dst], check=True)
+        return open(dst, 'rb').read()
+
+
 def take(name, cid):                            # the processed WAV if there is one, else its committed FLAC copy
     wav = os.path.join(PROC, name, f'{cid}.wav')
     return wav if os.path.exists(wav) else os.path.join(TAKES, name, f'{cid}.flac')
@@ -71,10 +83,10 @@ def samples_hash(path):                         # of the 16-bit samples, so a WA
     return hashlib.sha1(sf.read(path, dtype='int16')[0].tobytes()).hexdigest()[:16]
 
 
-def previous_bank():                            # name -> [base64 takes] from the sfx_bank.js being replaced
+def previous_bank(path=OUT):                   # name -> [base64 takes] from the bank file being replaced
     prev = {}
-    if os.path.exists(OUT):
-        for line in open(OUT, encoding='utf-8'):
+    if os.path.exists(path):
+        for line in open(path, encoding='utf-8'):
             m = re.match(r"\s+(\w+): \{ g: [\d.]+, j: [\d.]+, d: \[(.*)\] \},?$", line.rstrip('\n'))
             if m:
                 prev[m.group(1)] = re.findall(r"'([^']*)'", m.group(2))
@@ -95,8 +107,8 @@ if missing:                                     # checked before anything is wri
              f'gen.py and process.py first (see "Rebuilding from a fresh clone" in README.md).')
 
 SRC_JSON = os.path.join(HERE, 'out', 'bank_src.json')
-prev_data, prev_src = previous_bank(), (json.load(open(SRC_JSON)) if os.path.exists(SRC_JSON) else {})
-bank, total, used, src, reused = {}, 0, {}, {}, 0
+prev_data, prev_aac, prev_src = previous_bank(), previous_bank(OUT_AAC), (json.load(open(SRC_JSON)) if os.path.exists(SRC_JSON) else {})
+bank, bank_aac, total, total_aac, used, src, reused = {}, {}, 0, 0, {}, {}, 0
 for name, spec in SOUNDS.items():
     if name in skipped:
         print(f'skip {name} (no candidates or calibration)'); continue
@@ -107,15 +119,17 @@ for name, spec in SOUNDS.items():
     louds = [loudness(y, 48000, loop=loop) for y in ys]
     common = min(min(l * 0.99 / (np.max(np.abs(y)) + 1e-9) for y, l in zip(ys, louds)), min(louds) * 1.5)
     src[name] = {'ids': used[name], 'wav': [samples_hash(p) for p in paths], 'rate': BITRATE}
-    if prev_src.get(name) == src[name] and len(prev_data.get(name, [])) == len(ys):
-        data = prev_data[name]; reused += 1      # same picks, same source audio: keep the existing encode
-        total += sum(len(base64.b64decode(d)) for d in data)
+    same = prev_src.get(name) == src[name]       # same picks, same source audio: keep the existing encodes
+    if same and len(prev_data.get(name, [])) == len(ys):
+        data = prev_data[name]; reused += 1
     else:
-        data = []
-        for y, l in zip(ys, louds):
-            b = opus((y * (common / l)).astype(np.float32))
-            total += len(b)
-            data.append(base64.b64encode(b).decode())
+        data = [base64.b64encode(opus((y * (common / l)).astype(np.float32))).decode() for y, l in zip(ys, louds)]
+    if same and len(prev_aac.get(name, [])) == len(ys):
+        data_aac = prev_aac[name]
+    else:
+        data_aac = [base64.b64encode(aac((y * (common / l)).astype(np.float32))).decode() for y, l in zip(ys, louds)]
+    total += sum(len(base64.b64decode(d)) for d in data)
+    total_aac += sum(len(base64.b64decode(d)) for d in data_aac)
     target, synth_peak = calib[name][:2]               # [loudness, peak, fingerprint]
     g = MASTER * target / common
     peak = max(float(np.max(np.abs(y * (common / l)))) for y, l in zip(ys, louds))
@@ -123,15 +137,21 @@ for name, spec in SOUNDS.items():
     if capped:
         g = PEAK_CAP * synth_peak / peak
     bank[name] = {'g': round(g, 4), 'j': JIT.get(name, 0.05), 'd': data}
+    bank_aac[name] = {**bank[name], 'd': data_aac}
     print(f'{name:11s} x{len(data)}  gain {g:6.3f}{"  (peak-capped)" if capped else ""}')
 
-with open(OUT, 'w', newline='\n') as f:
-    f.write('// SLAGHOUSE sample bank - generated by dev/sfxgen/build.py from AudioGen (facebook/audiogen-medium) output.\n')
-    f.write('// Optional: if this file is missing the game falls back to its procedural sounds. Do not edit by hand.\n')
-    f.write('window.SLAG_SFX = {\n')
-    for i, (name, s) in enumerate(bank.items()):
-        f.write(f"  {name}: {{ g: {s['g']}, j: {s['j']}, d: [{', '.join(repr(d) for d in s['d'])}] }}{',' if i < len(bank) - 1 else ''}\n")
-    f.write('};\n')
+def write_bank(path, var, sounds, note):
+    with open(path, 'w', newline='\n') as f:
+        f.write('// SLAGHOUSE sample bank - generated by dev/sfxgen/build.py from AudioGen (facebook/audiogen-medium) output.\n')
+        f.write(f'// {note} Do not edit by hand.\n')
+        f.write(f'window.{var} = {{\n')
+        for i, (name, s) in enumerate(sounds.items()):
+            f.write(f"  {name}: {{ g: {s['g']}, j: {s['j']}, d: [{', '.join(repr(d) for d in s['d'])}] }}{',' if i < len(sounds) - 1 else ''}\n")
+        f.write('};\n')
+
+
+write_bank(OUT, 'SLAG_SFX', bank, 'Optional: if this file is missing the game falls back to its procedural sounds.')
+write_bank(OUT_AAC, 'SLAG_SFX_AAC', bank_aac, 'The same takes as AAC, loaded only where Ogg Opus will not decode.')
 # takes/ = exactly the takes the bank uses: copy new or changed picks from out/proc/, drop what no sound uses any more
 added, dropped = 0, 0
 for name, ids in used.items():
@@ -154,5 +174,6 @@ json.dump(used, open(os.path.join(HERE, 'out', 'picks_used.json'), 'w'), indent=
 json.dump({k: v.get('keep', 1) for k, v in SOUNDS.items()}, open(os.path.join(HERE, 'out', 'keep.json'), 'w'))
 json.dump(src, open(SRC_JSON, 'w', newline='\n'), indent=1)
 print(f'wrote {OUT}: {len(bank)} sounds ({reused} reused, {len(bank) - reused} encoded), {total / 1024:.0f} KB opus, {os.path.getsize(OUT) / 1024:.0f} KB file')
+print(f'wrote {OUT_AAC}: {total_aac / 1024:.0f} KB aac, {os.path.getsize(OUT_AAC) / 1024:.0f} KB file')
 if skipped:
     print(f'NOTE: {len(skipped)} sound(s) in sounds.py are not in the bank, so the game plays their synth versions: {" ".join(skipped)}')

@@ -15,7 +15,7 @@ hum crossfades to the selected version.
 | process | `process.py [names]` | trim / slice / seamless loop, 16 -> 48 kHz with synthesized >8 kHz "air", CLAP ranking -> `out/proc/`, `out/candidates.json`, `out/sheets/` |
 | audition | `review.html` | serve the repo root and open `/dev/sfxgen/review.html`: play every take, tick picks, export `picks.json` |
 | calibrate | `calib.js` -> `calib.json` | renders each procedural sound offline in the browser and measures K-weighted loudness + peak, with a fingerprint of the synth code it measured |
-| build | `build.py` | encodes the picks to Opus, gain-matches each sound to the synth it replaces -> `../../sfx_bank.js` (only re-encodes sounds whose picks or source audio changed, see below), and keeps `takes/` in step with the picks |
+| build | `build.py` | encodes the picks to Opus, gain-matches each sound to the synth it replaces -> `../../sfx_bank.js`, and the same takes as 48 kbps AAC in MP4 -> `../../sfx_bank_aac.js` for browsers without Ogg Opus (only re-encodes sounds whose picks or source audio changed, see below), and keeps `takes/` in step with the picks |
 
 `picks.json` holds hand overrides (sounds where the CLAP ranking chose badly); everything else uses the
 top-ranked takes. `MASTER` in `build.py` trims all samples against the synth mix; `PEAK_CAP` limits how

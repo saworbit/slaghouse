@@ -14,5 +14,7 @@
 # Generated or archival files: kept out of GitHub's language stats and collapsed in diffs
 sfx_bank.js linguist-generated
 music_bank.js linguist-generated
+sfx_bank_aac.js linguist-generated
+music_bank_aac.js linguist-generated
 dev/sfxgen/out/** linguist-generated
 dev/sfxgen/takes/** binary linguist-generated

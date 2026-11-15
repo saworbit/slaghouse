@@ -3,7 +3,8 @@
   =============================================================================
   SLAGHOUSE - pixel-art side-scrolling arena shooter (vertical slice prototype)
   Single file - Phaser 4.2.1 from CDN - Arcade Physics - all art procedural; audio procedural with
-  optional sample banks beside it (sfx_bank.js, music_bank.js) that it uses when present
+  optional sample banks beside it (sfx_bank.js, music_bank.js, and AAC copies where Ogg Opus won't decode)
+  that it uses when present
   =============================================================================
   FINAL TUNING VALUES  (1 world unit = 1 art pixel; 960x540 canvas, camera zoom 2)
     Gravity ............. 800 px/s^2  (+250 extra while falling, for snappier arcs)
@@ -1560,6 +1561,7 @@ const Sfx = {
         this.master = c.createGain(); this.master.gain.value = this.muted ? 0 : 0.55; this.master.connect(comp); comp.connect(c.destination);
         this.out = c.createGain(); this.out.gain.value = OPTS.sfx; this.out.connect(this.master);   // every effect goes through here (SFX volume)
         this.buildShared(c);
+        this.probeOpus();
         this.loadBank();
       }
       if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -1578,6 +1580,29 @@ const Sfx = {
       const p = this.ctx.decodeAudioData(u.buffer, res, rej); if (p && p.then) p.then(res, rej);
     });
   },
+  // 20 ms of silence as Ogg Opus. A browser that can't decode it (older Safari) gets the AAC copies of both banks.
+  OPUS_PROBE: 'T2dnUwACAAAAAAAAAAAAAAAAAAAAAAIotXIBE09wdXNIZWFkAQE4AYC7AAAAAABPZ2dTAAAAAAAAAAAAAAAAAAABAAAASZW+VAEuT3B1c1RhZ3MGAAAAZmZtcGVnAQAAABQAAABlbmNvZGVyPUxhdmMgbGlib3B1c09nZ1MABPgEAAAAAAAAAAAAAAIAAAD4eE9GAg8ReAvkwTbsxY2MSUaZpCaweAfJcifhROpV8fDA1d3pUmA=',
+  probeOpus() {
+    this.decode(this.OPUS_PROBE).then(() => { this.opus = true; }, () => { this.opus = false; this.loadAac(); });
+  },
+  loadAac() {                                      // fetch sfx_bank_aac.js and music_bank_aac.js once, then decode from them instead
+    if (this.aacTried) return;
+    this.aacTried = true;
+    const add = (src, done) => {
+      const el = document.createElement('script'); el.src = src; el.onload = done;
+      el.onerror = () => console.warn(`SLAGHOUSE: ${src} didn't load, so this browser plays the synth versions`);
+      document.head.appendChild(el);
+    };
+    add('sfx_bank_aac.js', () => {
+      if (!window.SLAG_SFX_AAC) return;
+      window.SLAG_SFX = window.SLAG_SFX_AAC; this.bank = {}; this.bankDone = this.bankLoading = false; this.loadBank();
+    });
+    add('music_bank_aac.js', () => {
+      if (!window.SLAG_MUSIC_AAC) return;
+      window.SLAG_MUSIC = window.SLAG_MUSIC_AAC; Music.failed = {}; Music.pend = {}; Music.bank = {};
+      if (Music.want) Music.track(Music.want, true);
+    });
+  },
   loadBank() {                                     // decode every take in sfx_bank.js (async; synth covers the gap)
     const B = window.SLAG_SFX; if (!B || this.bankLoading) return;
     this.bankLoading = true;
@@ -1588,7 +1613,7 @@ const Sfx = {
     }
     Promise.all(jobs).then(() => {
       this.bankDone = true;
-      if (bad) console.warn(`SLAGHOUSE: ${bad} of ${jobs.length} SFX takes failed to decode; ${this.bankOk() ? 'those sounds play' : 'every sound plays'} the synth version`);
+      if (bad && this.opus !== false) console.warn(`SLAGHOUSE: ${bad} of ${jobs.length} SFX takes failed to decode; ${this.bankOk() ? 'those sounds play' : 'every sound plays'} the synth version`);
       this.swapHum();
     });
   },

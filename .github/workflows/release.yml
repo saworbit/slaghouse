@@ -30,7 +30,7 @@ jobs:
         run: |
           name="${NAME//\//-}"            # a branch like fix/x makes slaghouse-fix-x.zip; tags have no slash
           mkdir -p dist/slaghouse
-          cp slaghouse.html sfx_bank.js music_bank.js LICENSE README.md CHANGELOG.md dist/slaghouse/
+          cp slaghouse.html sfx_bank.js music_bank.js sfx_bank_aac.js music_bank_aac.js LICENSE README.md CHANGELOG.md dist/slaghouse/
           (cd dist && zip -r -X "slaghouse-${name}.zip" slaghouse)
       - name: Pull this version's notes from the changelog
         env:

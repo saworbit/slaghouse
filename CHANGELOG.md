@@ -91,6 +91,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   tell play AudioGen takes, level-matched to their synth versions like the rest of the bank. They were generated but
   never calibrated, so `build.py` had been leaving them out. Each uses the CLAP ranking's top take; swap one in
   `picks.json` after a listen if it's wrong. (#15)
+- Browsers that can't decode Ogg Opus (older Safari) get the sampled SFX and the synthwave score too. The game
+  decodes a 20 ms Opus clip when audio starts; if that fails it loads `sfx_bank_aac.js` and `music_bank_aac.js`, the
+  same takes and tracks as AAC in MP4 (about 4.6 MB together), and decodes from them. Browsers that decode Opus
+  never ask for them. Both `build.py` scripts write the AAC banks, `dev/check.mjs` fails if one is missing or out
+  of step with its Opus bank, the release zip ships them, and `run.mjs` checks both paths with Opus decoding stubbed
+  to fail. (#44)
 - CONTRIBUTING.md explains how to add an enemy kind or a run mode, now that each is one record checked by
   `kinds.js` or `modes.js`. The play-test README lists the gas canister and the fixed seed in `PR.accuracy()`.
 - The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
