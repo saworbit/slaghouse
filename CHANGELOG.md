@@ -244,6 +244,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   a wall by holding into it and kicking off again. Before, it priced those moves out, so a foe in a pocket only a
   climb reaches (the girders behind ARENA 02's pillars) left it heading for a spot it could never reach for the rest
   of the run. Brutal seeds 18 and 20 now clear the campaign. (#154)
+- The campaign bot steps off ground that hurts (fire and slag puddles, acid, a foe's gas, a cooking propane jet, a
+  ladle's pour, live water) and won't pick a spot on it. The campaign check now looks for Smelter summons a second
+  after it falls, once its death sequence has popped them, instead of on the frame it dies. (#146)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The

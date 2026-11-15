@@ -23,7 +23,7 @@ window.VB = (() => {
       return s ? `hidden ${Math.round(t - (s.seen ?? s.since))}s${s.seen === null ? ' (never seen)' : ''}` : 'hidden';
     };
     const leftBehind = [];
-    let lift = null, bossCleanup = [];
+    let lift = null, bossCleanup = [], bossFell = null, swept = false;
     const waves = [], drive = campaignBot(); let cur = null, control = null, t = 0, minHp = TUNE.PLAYER_HP; const w0 = performance.now();
     try {
       while (t < maxSecs) {
@@ -43,9 +43,9 @@ window.VB = (() => {
           for (const e of lift.foes) if (e.alive) leftBehind.push(`Act ${lift.arena}: ${describe(e)}`);
           lift = null;
         }
-        if (boss && !boss.alive && boss.kind === 'boss') {
-          bossCleanup = g.enemies.getChildren().filter(e => e.alive && e.summoned).map(describe);
-        }
+        if (boss && !boss.alive && boss.kind === 'boss') bossFell = t;
+        // its death sequence pops everything it spawned within 0.7 s; a second on, none may be left
+        if (bossFell !== null && !swept && t - bossFell >= 1) { swept = true; bossCleanup = T.g().enemies.getChildren().filter(e => e.alive && e.summoned).map(describe); }
       }
       const g = T.g(); if (cur) { cur.secs = +(t - cur.t0).toFixed(0); cur.taken = Math.round(g.stats.taken - cur.taken0); waves.push(cur); }
       const frames = Math.max(1, Math.round(t * 60)), ms = performance.now() - w0;

@@ -214,10 +214,8 @@ window.campaignBot = () => {
     const rail = g.weaponSlots.includes(weaponSlot('rail'));
     const targets = foes.filter(e => visible(e.body.center.x, e.body.center.y) ||
       (rail && Math.hypot(e.x - px, e.y - py) < 420 && g.losHard(px, py - 2, e.body.center.x, e.body.center.y)));
-    // summons wait while the boss fights on, but go first once the Smelter is nearly down, so none outlive it
-    const finish = g.boss?.kind === 'boss' && g.boss.alive && g.boss.hp < g.boss.def.hp * 0.2;
     const target = targets.reduce((best, e) => {
-      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? (finish ? -150 : 100) : 0) - (g.canExecute(o) ? 20 : 0);
+      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? 100 : 0) - (g.canExecute(o) ? 20 : 0);
       return !best || rank(e) < rank(best) ? e : best;
     }, null);
     const objective = g.campaignRoute[0];
