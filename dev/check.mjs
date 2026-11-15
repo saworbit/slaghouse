@@ -1,4 +1,5 @@
 // Static checks for the single-file game, run locally (`node dev/check.mjs`) and in CI.
+// - slaghouse.html is exactly what src/ builds (node src/join.mjs)
 // - every inline <script> in slaghouse.html compiles
 // - the optional audio banks compile, and each AAC copy (loaded where Ogg Opus won't decode) holds the same sounds
 //   and tracks as its Opus bank
@@ -9,6 +10,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -22,6 +24,13 @@ function compile(code, filename) {
 
 const htmlPath = join(root, 'slaghouse.html');
 const html = readFileSync(htmlPath, 'utf8');
+
+// src/ (#7): slaghouse.html is built from it by plain concatenation, so the two must match byte for byte
+{
+  const { build, PARTS } = await import(pathToFileURL(join(root, 'src', 'join.mjs')).href);
+  if (Buffer.compare(build(), readFileSync(htmlPath))) fail('slaghouse.html is not what src/ builds: edit the files in src/ and run node src/join.mjs');
+  else ok(`slaghouse.html is what the ${PARTS.length} parts in src/ build`);
+}
 
 const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
 if (!inline.length) fail('slaghouse.html: no inline <script> found');
