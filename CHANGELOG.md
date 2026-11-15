@@ -93,6 +93,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- The pull request template asks for edits in `src/` and a `node src/join.mjs` run, and README's development notes and
+  CONTRIBUTING's checks cover `src/`, the AAC banks and rebuilding the SFX bank without a GPU.
 - The source lives in `src/`, split along the code's own section banners into 13 parts, and `node src/join.mjs` joins
   them into `slaghouse.html` by plain concatenation. The built page is byte for byte the file it replaces, so it
   plays the same and still ships as one file. `dev/check.mjs`, and so CI, fails if `slaghouse.html` isn't what `src/`
@@ -249,8 +251,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The navigation graph models the player's longer drops (3-6 rows, up to three columns out) and climbs up an unbroken
   wall. With them, every standing cell in every arena reaches the start and gets back; before, ARENA 02 had no way
   from right of the Furnace pillar back to the left, and ARENA 04's OVERTIME layout had a deck the graph couldn't
-  reach. The new edges cost Infinity for enemies, so enemy pathing is unchanged, and the campaign bot doesn't plan
-  with them yet. `run.mjs` checks every arena, and Normal seed 5 joins the default campaign seeds. (#125)
+  reach. The new edges cost Infinity for enemies, so enemy pathing is unchanged; the campaign bot plans with them too
+  (#154). `run.mjs` checks every arena, and Normal seed 5 joins the default campaign seeds. (#125)
 - Tar, fire, ice, acid and slag puddles stop at the end of the floor they land on, merges included, so they no
   longer hang off a ledge and burn, slow, freeze or corrode anything in the air beside it. (#89)
 - In the Lab setup, changing **Room** keeps the weapon, difficulty, modifier, checkboxes and roster you already set,
@@ -291,11 +293,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   climb reaches (the girders behind ARENA 02's pillars) left it heading for a spot it could never reach for the rest
   of the run. Brutal seeds 18 and 20 now clear the campaign. (#154)
 - The campaign bot steps off ground that hurts (fire and slag puddles, acid, a foe's gas, a cooking propane jet, a
-  ladle's pour, live water, ARENA 05's rails from their warning on) and won't pick a spot on it. The campaign check now looks for Smelter summons a second
-  after it falls, once its death sequence has popped them, instead of on the frame it dies. With both bot changes, 17
-  of Brutal seeds 1 to 20 clear the campaign, up from 10. CI's Brutal seeds move from 91, 404, 137 and 729 to 91,
-  137, 7 and 11: the pins that kept the most health under the new bot, since 404 now finishes at 11 HP and 729
-  dies in Slag Rain. (#146)
+  ladle's pour, live water, ARENA 05's rails from their warning on) and won't pick a spot on it. The campaign check
+  now looks for Smelter summons a second after it falls, once its death sequence has popped them, instead of on the
+  frame it dies. With both bot changes, 17 of Brutal seeds 1 to 20 clear the campaign, up from 10. CI's Brutal pins
+  404 and 729 (11 HP at their lowest and a Slag Rain death under the new bot) gave way to 7 and 11, the seeds that
+  kept the most health; the job now plays eight seeds and needs seven (`--min-wins`). (#146)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The

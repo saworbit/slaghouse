@@ -12,7 +12,7 @@ ragdolls, destructible terrain, twenty kinds of breakable scenery, 61 weapons wi
 27 medals. The five-act
 campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
 Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
-with no build step.
+as one self-contained page, with no build step to play it.
 
 ## Play
 
@@ -209,20 +209,24 @@ keeps your best score.
 
 ## Development notes
 
-- **Tuning:** change the values in `TUNE` (top of the script) and update the header comment to match.
+- **Source:** edit the files in `src/`, then run `node src/join.mjs` to rebuild `slaghouse.html`; CONTRIBUTING has the
+  details.
+- **Tuning:** change the values in `TUNE` (`src/config.js`) and update the header comment (`src/page-head.html`) to match.
 - **Breakable props:** how each kind plays (HP, mounting, what it does when it breaks) is in `PROPS` and
   `PROP_BLAST`, its art in `PROP_ART`, and where each arena puts them in `PROP_SPOTS`. The header comment's
   Breakables entry lists their numbers; `dev/playtest/props.js` checks every spot in both the campaign and
   OVERTIME layouts.
-- **Checks:** `node dev/check.mjs` compiles the game script and both audio banks, checks the script tags, and notes
-  any sampled sound the game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
+- **Checks:** `node dev/check.mjs` checks that `slaghouse.html` is what `src/` builds, compiles the game script and the
+  audio banks (and that each AAC copy matches its Opus bank), checks the script tags, and notes any sampled sound the
+  game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
   request.
 - **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal and Brutal campaigns. Use the
   [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) and [Lab smoke check](CONTRIBUTING.md#lab-smoke-check)
   to test at real speed. The [playtest guide](dev/playtest/README.md) covers the browser API and the Brutal run command.
 - **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
-  need a Python 3.11 venv and `ffmpeg` with libopus; the SFX pipeline also needs a CUDA GPU, while the soundtrack's
-  venv comes from `dev/synthwave/requirements.txt`.
+  need a Python 3.11 venv and `ffmpeg` with libopus. The SFX pipeline needs a CUDA GPU only to generate new takes;
+  rebuilding the bank from the takes committed in `dev/sfxgen/takes/` doesn't. The soundtrack's venv comes from
+  `dev/synthwave/requirements.txt`.
 - **History:** see [CHANGELOG.md](CHANGELOG.md). Pushing a `vX.Y.Z` tag builds the release and its playable zip
   (`.github/workflows/release.yml`); the steps are in [CONTRIBUTING.md](CONTRIBUTING.md).
 

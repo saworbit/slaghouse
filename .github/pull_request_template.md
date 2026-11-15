@@ -15,6 +15,7 @@
 ## Checklist
 
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
-- [ ] The header comment in `slaghouse.html` matches any `TUNE` change
+- [ ] Edited `src/`, not `slaghouse.html`, and ran `node src/join.mjs`
+- [ ] The header comment (`src/page-head.html`) matches any `TUNE` change
 - [ ] `README.md` updated if controls, weapons, enemies or modes changed
 - [ ] New sounds have a synth fallback (the audio banks are optional)
