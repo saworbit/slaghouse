@@ -240,6 +240,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - A dead foe's wreck or tank no longer counts as a hit when its blast catches other foes: the gunship and blimp
   crash, a torcher's or pyro's tank and a jet's haywire jetpack. The shot that killed it already counted. Nothing
   else about those blasts changes. `PR.accuracy()` fails if any of the four counts. (#144)
+- The campaign bot plans with the player's long drops and wall climbs, the same graph `run.mjs` checks, and climbs
+  a wall by holding into it and kicking off again. Before, it priced those moves out, so a foe in a pocket only a
+  climb reaches (the girders behind ARENA 02's pillars) left it heading for a spot it could never reach for the rest
+  of the run. Brutal seeds 18 and 20 now clear the campaign. (#154)
 - Lifetime TIME counts OVERTIME, DAILY and BOSS RUSH runs that end with R or Quit to Title. Hiding or closing the
   tab saves the time played so far, lifetime counts and mastery, without counting any of it twice. (#108)
 - Pausing during a perk draft hides the cards until RESUME, so the pause menu no longer draws over them. The

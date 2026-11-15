@@ -37,8 +37,9 @@ window.campaignBot = () => {
         if (until <= now) failedEdges.delete(key);
         else expires = Math.min(expires, until);
       }
-      const edgeCost = (from, edge) => edge.cost + (failedEdges.has(from * NAV.nodes.length + edge.to) ? 32 : 0);
-      walk = { start, expires, ...navDijkstra(start, -1, Infinity, failedEdges.size ? edgeCost : undefined) };
+      // the player's own moves count too: long drops and wall climbs, priced by playerCost (enemies can't take them)
+      const edgeCost = (from, edge) => (edge.playerCost ?? edge.cost) + (failedEdges.has(from * NAV.nodes.length + edge.to) ? 32 : 0);
+      walk = { start, expires, ...navDijkstra(start, -1, Infinity, edgeCost) };
     }
     let best = start, score = Infinity;
     for (let i = 0; i < NAV.nodes.length; i++) {
@@ -84,13 +85,20 @@ window.campaignBot = () => {
     }
     if (action) {
       const from = NAV.nodes[action.edge.from], to = NAV.nodes[action.edge.to];
-      if (!from || !to || now > action.t + 1450 || (ground && now > action.t + 100 && (action.air || now > action.t + 430))) {
+      const climb = action.edge.type === 'climb', limit = climb ? 1450 + (from ? from.y - to.y : 0) * 220 : 1450;
+      if (!from || !to || now > action.t + limit || (ground && now > action.t + 100 && (action.air || now > action.t + 430))) {
         const landed = NAV.nodes[start];
         if (!landed || !to || landed.y !== to.y || Math.abs(landed.x - to.x) > 1) avoidEdge(action.edge, now);
         action = null;
         plan = null;
       } else {
         if (!ground) action.air = true;
+        if (climb) {                                                    // hold into the wall and kick off it again until over the top
+          const side = Math.sign(to.x - from.x), over = b.bottom <= feetOf(to) + 2;
+          const kick = !over && !ground && now - g.wallT < TUNE.WALL.grace && b.velocity.y > -120 && now - (action.kick || 0) > 120;
+          if (kick) action.kick = now;
+          return { dir: side, jump: true, press: kick };
+        }
         const up = to.y < from.y;
         const dx = xOf(to) - b.center.x;
         dir = up && b.bottom > feetOf(to) - 5 && b.velocity.y < 0 ? steer(xOf(from) - b.center.x, b.velocity.x, true) : steer(dx, b.velocity.x, true);
@@ -128,7 +136,7 @@ window.campaignBot = () => {
     if (Math.abs(dx) < 5 && Math.abs(b.velocity.x) < 65) {
       action = { edge, t: now, air: false };
       press = true; jump = true; drop = edge.type === 'fall';
-      if (edge.type === 'jump' && to.y >= from.y) dir = Math.sign(to.x - from.x);
+      if ((edge.type === 'jump' && to.y >= from.y) || edge.type === 'climb') dir = Math.sign(to.x - from.x);
     }
     return { dir, jump, press, drop };
   }
