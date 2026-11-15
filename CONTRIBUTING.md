@@ -122,6 +122,11 @@ in that file as well.
 
 Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip.
 
+Before any commercial release, clear the sampled SFX first: `sfx_bank.js` and `sfx_bank_aac.js` come from AudioGen,
+whose weights are CC BY-NC 4.0 (see Licensing in README.md). Either regenerate them from a commercially licensed
+source or leave both files out of the zip; every sampled sound has a synth fallback. AudioGen is credited in
+README.md and LICENSE, and has to be credited anywhere else credits are shown, in-game credits included.
+
 1. In `CHANGELOG.md`, move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading and update the
    version links at the bottom of the file.
 2. Commit, push to `main`, and wait for CI to pass.
@@ -136,7 +141,7 @@ Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip.
    ```
 
 The `Release` workflow (`.github/workflows/release.yml`) takes it from there: it runs `node dev/check.mjs`, builds
-`slaghouse-vX.Y.Z.zip` (a `slaghouse/` folder with the game, both audio banks, LICENSE, README and CHANGELOG) and
+`slaghouse-vX.Y.Z.zip` (a `slaghouse/` folder with the game, both audio banks and their AAC copies, LICENSE, README and CHANGELOG) and
 publishes the release with that version's changelog section as its notes. If the release already exists, it attaches
 the zip to it. Edit the notes on GitHub afterwards to add highlights or how to play.
 

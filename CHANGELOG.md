@@ -97,6 +97,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   never ask for them. Both `build.py` scripts write the AAC banks, `dev/check.mjs` fails if one is missing or out
   of step with its Opus bank, the release zip ships them, and `run.mjs` checks both paths with Opus decoding stubbed
   to fail. (#44)
+- CONTRIBUTING's release steps start with the AudioGen licence: before any commercial release, regenerate the
+  sampled SFX from a commercially licensed source or leave both SFX banks out of the zip, and credit AudioGen
+  wherever credits are shown. LICENSE and README credit it for the AAC bank too. (#6)
 - CONTRIBUTING.md explains how to add an enemy kind or a run mode, now that each is one record checked by
   `kinds.js` or `modes.js`. The play-test README lists the gas canister and the fixed seed in `PR.accuracy()`.
 - The results screen's rules moved onto the run mode records too: each mode writes its own record (DAILY's per
