@@ -30,12 +30,12 @@ the base music level against the SFX, and the pause menu's music volume (`OPTS.m
 | `build.py` | gain-matches the tracks and encodes them to 64 kbps stereo Opus -> `../../music_bank.js` and 64 kbps AAC in MP4 -> `../../music_bank_aac.js` (for browsers without Ogg Opus; each AAC track is levelled once more after encoding, since AAC drops some top end), then checks both banks. `--aac` builds only the AAC bank and leaves `music_bank.js` alone; `--check` alone checks the current Opus bank |
 | `requirements.txt` | the pinned Python packages this folder needs |
 
-It has its own small venv: Python 3.11 with numpy, scipy, numba and soundfile pinned in `requirements.txt` (no torch
+It has its own small venv: Python 3.13 with numpy, scipy, numba and soundfile pinned in `requirements.txt` (no torch
 or GPU), plus `ffmpeg` with libopus on PATH. `render.py` and `build.py` import `loud.py` from `../audiolib`, which
 dev/sfxgen shares.
 
 ```
-uv venv --python 3.11 .venv
+uv venv --python 3.13 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 .venv/Scripts/python render.py
 .venv/Scripts/python build.py
