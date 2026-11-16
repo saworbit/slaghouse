@@ -223,8 +223,8 @@ keeps your best score.
 - **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal and Brutal campaigns. Use the
   [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) and [Lab smoke check](CONTRIBUTING.md#lab-smoke-check)
   to test at real speed. The [playtest guide](dev/playtest/README.md) covers the browser API and the Brutal run command.
-- **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. Both
-  need a Python 3.11 venv and `ffmpeg` with libopus. The SFX pipeline needs a CUDA GPU only to generate new takes;
+- **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. The SFX
+  pipeline needs a Python 3.11 venv and the soundtrack a Python 3.13 one, both with `ffmpeg` and libopus. The SFX pipeline needs a CUDA GPU only to generate new takes;
   rebuilding the bank from the takes committed in `dev/sfxgen/takes/` doesn't. The soundtrack's venv comes from
   `dev/synthwave/requirements.txt`.
 - **History:** see [CHANGELOG.md](CHANGELOG.md). Pushing a `vX.Y.Z` tag builds the release and its playable zip

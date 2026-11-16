@@ -93,6 +93,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- `dev/synthwave` runs on Python 3.13 with numpy 2.5.4 and scipy 1.18.1 (both need 3.12 or newer, so the 3.11 venv
+  couldn't take Dependabot's bumps). Every track re-renders within float rounding of the 3.11 output, the AAC bank
+  rebuilds byte for byte, and `build.py` checks both banks clean. The SFX pipeline stays on 3.11. (#170, #171)
 - The pull request template asks for edits in `src/` and a `node src/join.mjs` run, and README's development notes and
   CONTRIBUTING's checks cover `src/`, the AAC banks and rebuilding the SFX bank without a GPU.
 - The source lives in `src/`, split along the code's own section banners into 13 parts, and `node src/join.mjs` joins
