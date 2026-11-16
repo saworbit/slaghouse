@@ -69,7 +69,7 @@ See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted ro
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher, tether gun, hand cannon, seismic launcher, phase rifle, ball lightning, cyclone launcher, caltrop scatter, spear gun, heat ray, barrage beacon and hydro cannon have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, retry act or restart, volume, screen shake, post FX, flashes, controls, quit to title) | **Esc** or **P** |
@@ -122,7 +122,12 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | wheel | Riot shield (hold to block and reflect shots, let go to bash) |
 | wheel | Glue gun (gums foes up so they crawl) | wheel | Mini-nuke (one slow shell, one very big bang) |
 | wheel | Dragon's breath (burning buckshot) | wheel | Seed launcher (plants a fungus turret that spores foes) |
-| wheel | Tether gun (links three foes: hurt one, hurt all) | | |
+| wheel | Tether gun (links three foes: hurt one, hurt all) | wheel | Hand cannon (an iron ball that plows through foes and crates; cannon-jump on the recoil) |
+| wheel | Seismic launcher (a quake along the floor that pops foes up to juggle) | wheel | Phase rifle (bolts that pass through walls) |
+| wheel | Ball lightning (a drifting orb that arcs to three foes and lights puddles) | wheel | Cyclone launcher (a tornado that whirls foes round, then flings them) |
+| wheel | Caltrop scatter (floor spikes that make foes limp and bleed) | wheel | Spear gun (skewer and reel in, or reel yourself to big ones; pins kills to walls) |
+| wheel | Heat ray (a beam that burns hotter the longer it holds; overheats) | wheel | Barrage beacon (a line of shells walks out from where it lands) |
+| wheel | Hydro cannon (shoves, puts out fires, soaks foes for electric hits) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
