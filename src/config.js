@@ -246,6 +246,19 @@ const TUNE = {
   // ---- gold round ----
   SEED:      { cooldown: 1200, speed: 260, max: 2, grow: 1, life: 9, cd: 1.6, range: 220, dmg: 8, spore: 150 },
   TETHER:    { cooldown: 300, speed: 600, max: 3, share: 0.6, life: 8, dmg: 6 },
+  // ---- expansion: weapons ----
+  CANNON:    { cooldown: 1100, speed: 400, lift: 40, grav: 560, dmg: 60, pierce: 3, keep: 0.72, knock: 360, recoil: 300, jump: 400, maxRise: 520, tile: 80, life: 2.4 },
+  QUAKE:     { cooldown: 900, speed: 280, range: 400, dmg: 24, launch: 390, juggle: 1.4, bonus: 1.5, tile: 10 },
+  PHASE:     { cooldown: 280, speed: 820, dmg: 22, range: 560, pierce: 3, head: 1.5 },
+  BALLLIGHT: { cooldown: 1300, speed: 70, life: 2.5, reach: 80, n: 3, rate: 0.22, dmg: 7,
+               boom: { radius: 44, maxDamage: 45, minDamage: 15, selfDamage: 8, push: 240, maxRise: 320, tileDamage: 20, style: 'arc' } },
+  CYCLONE:   { cooldown: 1500, speed: 260, lift: 60, walk: 70, life: 3, reach: 44, maxHp: 140, dps: 15, fling: 420, max: 2 },
+  CALTROP:   { cooldown: 650, n: 7, speed: 230, fan: 0.5, life: 8, dmg: 9, slow: 0.55, slowT: 1, cd: 0.45, max: 42 },
+  SPEAR:     { cooldown: 950, speed: 640, range: 320, dmg: 35, light: 140, yank: 470, pull: 480, reelT: 0.7, carry: 2 },
+  HEATRAY:   { cooldown: 50, range: 210, dmg0: 1.2, dmg1: 6, ramp: 1.8, heat: 3.2, cool: 1.5, vent: 1.6, burn: 1.5 },
+  BARRAGE:   { cooldown: 2400, speed: 300, lift: 70, delay: 0.7, shells: 6, gap: 0.28, step: 32, tell: 0.55,
+               blast: { radius: 34, maxDamage: 48, minDamage: 14, selfDamage: 10, push: 300, maxRise: 400, tileDamage: 50 } },
+  HYDRO:     { cooldown: 55, range: 140, cone: 8, dmg: 1, push: 340, soak: 5, zap: 1.5, chill: 1.8, pud: 0.3 },
   CINDER:    { speed: 150, hop: 260, trail: 1.6, owned: 1.5, ownSpeed: 260, ownDmg: 40 },
   GATLING:   { speed: 35, keep: [140, 260], spin: 0.9, burst: 2.2, rate: 0.07, dmg: 5, turn: 1.2, cool: 1.5, front: 0.6, hot: 1.5 },
   BANNER:    { speed: 40, keep: [200, 300], radius: 150, heal: 5, plant: 6 },
@@ -543,6 +556,17 @@ const WEAPONS = [
   Object.assign({ id: 'dragon', name: "DRAGON'S BREATH", gun: 'dragon' }, TUNE.DRAGON),
   Object.assign({ id: 'seed', name: 'SEED LAUNCHER', gun: 'seed' }, TUNE.SEED),
   Object.assign({ id: 'tether', name: 'TETHER GUN', gun: 'tether' }, TUNE.TETHER),
+  // ---- expansion: weapons (wheel-only; the campaign never issues them) ----
+  Object.assign({ id: 'cannon', name: 'HAND CANNON', gun: 'cannon' }, TUNE.CANNON),
+  Object.assign({ id: 'quake', name: 'SEISMIC LAUNCHER', gun: 'quake' }, TUNE.QUAKE),
+  Object.assign({ id: 'phase', name: 'PHASE RIFLE', gun: 'phase' }, TUNE.PHASE),
+  Object.assign({ id: 'balllight', name: 'BALL LIGHTNING', gun: 'balllight' }, TUNE.BALLLIGHT),
+  Object.assign({ id: 'cyclone', name: 'CYCLONE LAUNCHER', gun: 'cyclone' }, TUNE.CYCLONE),
+  Object.assign({ id: 'caltrop', name: 'CALTROP SCATTER', gun: 'caltrop' }, TUNE.CALTROP),
+  Object.assign({ id: 'spear', name: 'SPEAR GUN', gun: 'spear' }, TUNE.SPEAR),
+  Object.assign({ id: 'heatray', name: 'HEAT RAY', gun: 'heatray' }, TUNE.HEATRAY),
+  Object.assign({ id: 'barrage', name: 'BARRAGE BEACON', gun: 'barrage' }, TUNE.BARRAGE),
+  Object.assign({ id: 'hydro', name: 'HYDRO CANNON', gun: 'hydro' }, TUNE.HYDRO),
 ];
 // one line per gun for the weapon wheel
 const BLURBS = {
@@ -570,6 +594,12 @@ const BLURBS = {
   shield: 'HOLD: BLOCK, REFLECT. LET GO: BASH.', glue: 'GLUE GLOBS. GUMMED-UP FOES CRAWL.',
   nuke: 'ONE SLOW SHELL. ONE VERY BIG BANG.', dragon: 'BURNING BUCKSHOT. SETS FLOORS ALIGHT.',
   seed: 'PLANTS A FUNGUS THAT SPORES FOES.', tether: 'LINK 3 FOES. HURT ONE, HURT ALL.',
+  // ---- expansion: weapons ----
+  cannon: 'IRON BALL. PLOWS ROWS, CRUSHES CRATES.', quake: 'A FLOOR QUAKE. POPS FOES UP: JUGGLE.',
+  phase: 'BOLTS THAT PASS THROUGH WALLS.', balllight: 'A DRIFTING ORB THAT ARCS TO 3 FOES.',
+  cyclone: 'A TORNADO THAT SPINS FOES, THEN FLINGS.', caltrop: 'FLOOR SPIKES. FOES LIMP AND BLEED.',
+  spear: 'SKEWER, REEL IN, BOOT. PINS THE DEAD.', heatray: 'HOLD ON A FOE: IT BURNS HOTTER. VENTS.',
+  barrage: 'A BEACON. SHELLS WALK OUT FROM IT.', hydro: 'SHOVES, DOUSES, SOAKS. ZAP THE WET.',
 };
 // Keyboard bindings (#109). The scene reads keys by name (this.keys.W, this.jd.SPACE), and each name sits on one or two
 // physical keys by KeyboardEvent.code, so WASD, the number row and the punctuation weapon keys stay where they are on

@@ -27,7 +27,7 @@ window.labSweep = section => {
   }
   const trigger = (g, on) => { g.keys.J.isDown = on; };
   function weapons() {
-    const lob = new Set(['grenade', 'cluster', 'grav', 'napalm', 'decoy', 'stasis', 'gaslaunch', 'tripwire', 'seed', 'nuke']);
+    const lob = new Set(['grenade', 'cluster', 'grav', 'napalm', 'decoy', 'stasis', 'gaslaunch', 'tripwire', 'seed', 'nuke', 'cannon', 'cyclone', 'caltrop', 'barrage']);
     const melee = new Set(['ripper', 'hammer', 'katana', 'shield', 'gauntlet', 'flail', 'whip']);
     const hold = { hornet: 950, lance: 1250, hammer: 850, shock: 650, orbital: 1300, mini: 1300, flail: 950, tractor: 450, vacuum: 550, shield: 350 };
     for (const { id } of catalog.weapons) test(id, fail => {

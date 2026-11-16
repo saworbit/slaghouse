@@ -256,7 +256,8 @@ class HudScene extends Phaser.Scene {
     g.fillStyle(0x06070a, 0.82); g.fillCircle(cx, cy, R0 + 34);
     g.lineStyle(2, 0x3a424d, 1); g.strokeCircle(cx, cy, R0 + 34); g.strokeCircle(cx, cy, R0 - 32);
     for (const [k, i] of slots.entries()) {
-      const a = -Math.PI / 2 + k * Math.PI * 2 / N, x = cx + Math.cos(a) * R0, y = cy + Math.sin(a) * R0, s2 = i === sel;
+      const rr = N > 48 ? (N % 2 && k === N - 1 ? R0 : R0 + (k % 2 ? -13 : 13)) : R0;   // a full arsenal staggers on two rings so neighbours don't overlap
+      const a = -Math.PI / 2 + k * Math.PI * 2 / N, x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr, s2 = i === sel;
       if (s2) {
         g.fillStyle(0x2a1806, 1); g.fillCircle(x, y, 25); g.lineStyle(3, 0xff8a1f, 1); g.strokeCircle(x, y, 25);
         g.lineStyle(2, 0xff8a1f, 0.6); g.lineBetween(cx + Math.cos(a) * 44, cy + Math.sin(a) * 44, cx + Math.cos(a) * (R0 - 28), cy + Math.sin(a) * (R0 - 28));
