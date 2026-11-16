@@ -155,8 +155,9 @@ window.PR = (() => {
   PR.weapons = () => {
     const fails = [];
     RUNMODE = 'endless'; T.boot();
-    const range = { arc: 60, acid: 50, katana: 20, whip: 40, sonic: 50, pinball: 70, firework: 60, gauntlet: 34, hammer: 18, grav: 60 };
-    const hold = { arc: 450, acid: 450, hammer: 850 };
+    const range = { arc: 60, acid: 50, katana: 20, whip: 40, sonic: 50, pinball: 70, firework: 60, gauntlet: 34, hammer: 18, grav: 60,
+      cannon: 50, quake: 60, phase: 90, balllight: 40, cyclone: 60, spear: 70, heatray: 60, barrage: 60, hydro: 50 };
+    const hold = { arc: 450, acid: 450, hammer: 850, heatray: 450, hydro: 450 };
     for (const [id, dist] of Object.entries(range)) {
       const g = T.setup(0), p = g.props.find(q => q.kind === 'vending');
       g.props = [p]; p.hp = 999;
