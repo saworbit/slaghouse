@@ -1980,7 +1980,108 @@ const GUNS = {
     for (let i = 0; i < 4; i++) { R(ctx, '#ff60d0', 7 + i * 3, 1 + (i % 2), 1, 3); R(ctx, '#ffd0f4', 7 + i * 3, 1 + (i % 2), 1, 1); }
     R(ctx, '#4a3a52', 17, 5, 5, 3); R(ctx, '#ff9ae8', 22, 6, 1, 1);
   } },
+  // ---- expansion: weapons ----
+  cannon: { w: 26, h: 14, py: 7, muzzle: 24, draw(ctx, arm) {                 // hand cannon: a banded iron barrel on a wooden grip
+    if (arm) drawArm(ctx, 7);
+    R(ctx, '#5a3a20', 4, 7, 6, 4); R(ctx, '#7a5a30', 4, 7, 6, 1); R(ctx, '#3a2414', 6, 11, 3, 3);                       // stock + grip
+    R(ctx, '#2a2e35', 9, 3, 13, 8); R(ctx, '#4b535e', 9, 3, 13, 2); R(ctx, '#15171a', 9, 10, 13, 1);                    // iron barrel
+    for (const x of [11, 17]) { R(ctx, '#8a6a20', x, 2, 2, 10); R(ctx, '#e0b850', x, 2, 1, 10); }                      // brass bands
+    R(ctx, '#3a3f47', 22, 1, 3, 12); R(ctx, '#6a7380', 22, 1, 3, 1); R(ctx, '#0a0b0d', 23, 4, 2, 6);                    // flared muzzle
+    R(ctx, '#ff8a20', 14, 2, 1, 1); R(ctx, '#ffe080', 14, 1, 1, 1);                                                      // a spark at the touchhole
+  } },
+  quake: { w: 25, h: 14, py: 6, muzzle: 22, draw(ctx, arm) {                   // seismic launcher: a hazard-striped thumper with a piston ram
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 12, 7); R(ctx, '#6a7380', 5, 3, 12, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let i = 0; i < 4; i++) R(ctx, i % 2 ? '#15161a' : '#e8b422', 7 + i * 2, 8, 2, 2);                              // hazard stripes
+    R(ctx, '#7a4a20', 9, 4, 5, 3); R(ctx, '#ffa040', 10, 5, 3, 1); R(ctx, '#ffe080', 11, 5, 1, 1);                       // seismic core
+    R(ctx, '#4b535e', 17, 2, 4, 10); R(ctx, '#8a94a0', 17, 2, 4, 1); R(ctx, '#2a2e35', 17, 11, 4, 1);                    // ram housing
+    R(ctx, '#9aa4b0', 21, 3, 3, 8); R(ctx, '#c8d0d8', 21, 3, 3, 1); R(ctx, '#5a636e', 23, 4, 1, 7);                      // the ram face
+  } },
+  phase: { w: 28, h: 11, py: 5, muzzle: 27, draw(ctx, arm) {                  // phase rifle: a slim black rifle ringed with violet emitters
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#2a2438', 5, 3, 10, 5); R(ctx, '#4a3e66', 5, 3, 10, 1); R(ctx, '#1a1622', 7, 8, 3, 3); R(ctx, '#7a40d0', 8, 5, 5, 1);
+    R(ctx, '#3a3248', 15, 4, 11, 2); R(ctx, '#5a4e78', 15, 4, 11, 1);
+    for (let i = 0; i < 3; i++) { R(ctx, '#a060ff', 16 + i * 3, 2, 1, 6); R(ctx, '#e8d8ff', 16 + i * 3, 2, 1, 1); }      // phase rings
+    R(ctx, '#d8b0ff', 26, 4, 1, 2); R(ctx, '#ffffff', 26, 4, 1, 1);
+  } },
+  balllight: { w: 24, h: 14, py: 6, muzzle: 22, draw(ctx, arm) {              // ball lightning: a caged plasma orb on a copper-wound stock
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 4, 9, 6); R(ctx, '#6a7380', 5, 4, 9, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let i = 0; i < 3; i++) R(ctx, i % 2 ? '#b8732a' : '#e09a48', 7 + i * 2, 5, 1, 4);                              // copper winding
+    for (let y = 2; y < 12; y++) for (let x = 14; x < 21; x++) { const d = Math.hypot(x + 0.5 - 17.5, y + 0.5 - 7); if (d < 3.4) R(ctx, d < 1.3 ? '#ffffff' : d < 2.4 ? '#9ae8ff' : '#2a8ad0', x, y); }   // the orb
+    R(ctx, '#5a636e', 13, 2, 1, 10); R(ctx, '#5a636e', 21, 2, 1, 10); R(ctx, '#8a94a0', 13, 1, 9, 1); R(ctx, '#4b535e', 13, 12, 9, 1); R(ctx, '#5a636e', 17, 2, 1, 1);   // the cage
+  } },
+  cyclone: { w: 26, h: 14, py: 6, muzzle: 24, draw(ctx, arm) {                // cyclone launcher: a turbine drum and a flared vortex nozzle
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 4, 8, 6); R(ctx, '#6a7380', 5, 4, 8, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let y = 1; y < 13; y++) for (let x = 10; x < 20; x++) {                                                       // turbine: six blades in a ring
+      const dx = x + 0.5 - 15, dy = y + 0.5 - 7, d = Math.hypot(dx, dy); if (d >= 5.6) continue;
+      R(ctx, d > 4.5 ? '#5a636e' : d < 1.2 ? '#e8f4ff' : Math.floor(Math.atan2(dy, dx) / (Math.PI / 3) + 6) % 2 ? '#c8d0d8' : '#6a7380', x, y);
+    }
+    R(ctx, '#4b535e', 20, 4, 2, 6); R(ctx, '#8a94a0', 22, 2, 3, 10); R(ctx, '#bfe8f0', 23, 5, 1, 4);                    // nozzle
+  } },
+  caltrop: { w: 24, h: 13, py: 6, muzzle: 22, draw(ctx, arm) {                // caltrop scatter: a hopper of spikes over a short bell-mouthed barrel
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 5, 13, 5); R(ctx, '#6a7380', 5, 5, 13, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    R(ctx, '#4b535e', 8, 2, 7, 3); R(ctx, '#2a2e35', 8, 4, 7, 1);                                                       // hopper
+    for (const [x, y] of [[9, 0], [11, 1], [13, 0]]) { R(ctx, '#eef2f6', x, y, 1, 1); R(ctx, '#9aa4b0', x, y + 1, 1, 1); }   // spikes poking out
+    R(ctx, '#4b535e', 18, 4, 2, 7); R(ctx, '#8a94a0', 18, 4, 2, 1); R(ctx, '#15171a', 20, 5, 2, 5); R(ctx, '#9aa4b0', 22, 3, 1, 9); R(ctx, '#c8d0d8', 22, 3, 1, 1);   // bell mouth
+  } },
+  spear: { w: 30, h: 12, py: 5, muzzle: 28, draw(ctx, arm) {                  // spear gun: a cable reel under a long rail, a barbed spear loaded
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 3, 9, 5); R(ctx, '#6a7380', 5, 3, 9, 1); R(ctx, '#2a2e35', 7, 8, 3, 3);
+    R(ctx, '#5a636e', 9, 7, 5, 4); R(ctx, '#c8a040', 10, 8, 3, 1); R(ctx, '#2a2e35', 11, 9, 1, 1);                       // cable reel
+    R(ctx, '#2a2e35', 14, 5, 12, 2); R(ctx, '#a0aab6', 12, 4, 14, 1);                                                   // rail + shaft
+    R(ctx, '#eef2f6', 26, 3, 2, 3); R(ctx, '#9aa4b0', 25, 2, 1, 1); R(ctx, '#9aa4b0', 25, 6, 1, 1); R(ctx, '#ffffff', 28, 4, 1, 1);   // barbed head
+  } },
+  heatray: { w: 27, h: 13, py: 6, muzzle: 25, draw(ctx, arm) {                // heat ray: radiator fins down a fat emitter, a red lens
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 9, 7); R(ctx, '#6a7380', 5, 3, 9, 1); R(ctx, '#2a2e35', 6, 10, 3, 3); R(ctx, '#e8b422', 7, 5, 4, 1);
+    R(ctx, '#4b535e', 14, 4, 9, 5); R(ctx, '#8a94a0', 14, 4, 9, 1);
+    for (let i = 0; i < 4; i++) { R(ctx, '#2a2e35', 15 + i * 2, 2, 1, 9); R(ctx, '#7c8790', 15 + i * 2, 2, 1, 1); }      // radiator fins
+    R(ctx, '#7a2008', 23, 3, 2, 7); R(ctx, '#ff4a20', 25, 4, 1, 5); R(ctx, '#ffd0a0', 25, 6, 1, 1);                       // lens
+  } },
+  barrage: { w: 24, h: 13, py: 6, muzzle: 22, draw(ctx, arm) {               // barrage beacon: a stubby launcher with a beacon nosed in, its aerial up
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#4a5240', 5, 4, 13, 6); R(ctx, '#6e7a5e', 5, 4, 13, 1); R(ctx, '#2e3428', 5, 9, 13, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    R(ctx, '#e8b422', 11, 6, 4, 1); R(ctx, '#2e3428', 9, 1, 1, 3); R(ctx, '#ff3020', 9, 0, 1, 1);                       // stripe + aerial
+    R(ctx, '#2a2e35', 18, 3, 2, 8); R(ctx, '#3a3f47', 20, 4, 3, 6); R(ctx, '#ff3020', 21, 6, 2, 2); R(ctx, '#ffb0a0', 21, 6, 1, 1);   // the beacon in the mouth
+  } },
+  hydro: { w: 26, h: 13, py: 6, muzzle: 24, draw(ctx, arm) {                 // hydro cannon: a blue pressure tank, a gauge and a brass nozzle
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 11, 5); R(ctx, '#6a7380', 5, 3, 11, 1); R(ctx, '#2a2e35', 6, 8, 3, 4);
+    R(ctx, '#1e4a8a', 9, 8, 7, 4); R(ctx, '#4a90d8', 9, 8, 7, 1); R(ctx, '#9ad0ff', 10, 9, 2, 1);                        // water tank
+    R(ctx, '#d8dee6', 11, 0, 3, 3); R(ctx, '#ff3020', 12, 1, 1, 1);                                                      // pressure gauge
+    R(ctx, '#4b535e', 16, 4, 5, 3); R(ctx, '#8a94a0', 16, 4, 5, 1); R(ctx, '#8a6a20', 21, 3, 3, 5); R(ctx, '#e0b850', 21, 3, 3, 1); R(ctx, '#9ad8ff', 24, 5, 1, 1);   // brass nozzle
+  } },
 };
+// ---- expansion: weapons ---- what the ten wheel-only guns fire and leave behind (the quake's rocks, the cyclone's
+// funnel, the beams and the jet are drawn live in game.js)
+function genExpansionWeaponArt(scene) {
+  addTex(scene, 'xw_ball', makeSprite(9, 9, c => {                                                                      // cannonball: lit iron with a glint
+    for (let y = 1; y < 8; y++) for (let x = 1; x < 8; x++) { const dx = x + 0.5 - 4.5, dy = y + 0.5 - 4.5, d = Math.hypot(dx, dy); if (d < 3.6) R(c, dx + dy < -2.5 ? '#5a636e' : dx + dy > 2.5 ? '#15171a' : '#2e333b', x, y); }
+    R(c, '#c8d0d8', 3, 3, 1, 1); R(c, '#8a94a0', 4, 3, 1, 1); R(c, '#8a94a0', 3, 4, 1, 1);
+  }));
+  for (const f of [0, 1]) addTex(scene, 'xw_lball' + f, makeSprite(13, 13, c => {                                     // ball lightning: a white core in a jagged blue corona
+    for (let y = 0; y < 13; y++) for (let x = 0; x < 13; x++) { const d = Math.hypot(x + 0.5 - 6.5, y + 0.5 - 6.5); if (d < 4) R(c, d < 1.6 ? '#ffffff' : d < 2.8 ? '#c8f4ff' : '#4ab8ff', x, y); }
+    const spikes = f ? [[6, 0], [12, 5], [1, 10], [9, 11], [2, 2]] : [[0, 6], [10, 1], [11, 10], [4, 12], [7, 0]];
+    for (const [sx, sy] of spikes) { R(c, '#9ae8ff', Math.round((sx + 6) / 2), Math.round((sy + 6) / 2)); R(c, '#4ab8ff', sx, sy); }
+  }, null));
+  addTex(scene, 'xw_cyc', makeSprite(8, 7, c => { R(c, '#4b535e', 1, 1, 6, 5); R(c, '#8a94a0', 1, 1, 6, 1); R(c, '#bfe8f0', 2, 3, 1, 2); R(c, '#bfe8f0', 4, 2, 1, 2); R(c, '#2a2e35', 6, 2, 1, 3); }));   // cyclone canister
+  for (const f of [0, 1]) addTex(scene, 'xw_caltrop' + f, makeSprite(7, 7, c => {                                     // caltrop: a spike up, three legs down (two poses to tumble through)
+    if (f) { R(c, '#eef2f6', 1, 1); R(c, '#9aa4b0', 2, 2); R(c, '#5a636e', 3, 3); R(c, '#c8d0d8', 5, 1); R(c, '#9aa4b0', 4, 2); R(c, '#c8d0d8', 3, 4); R(c, '#9aa4b0', 3, 5); R(c, '#c8d0d8', 5, 5); R(c, '#8a94a0', 4, 4); }
+    else { R(c, '#ffffff', 3, 1); R(c, '#c8d0d8', 3, 2); R(c, '#5a636e', 3, 3); R(c, '#9aa4b0', 2, 3); R(c, '#9aa4b0', 4, 3); R(c, '#c8d0d8', 1, 4); R(c, '#c8d0d8', 5, 4); R(c, '#8a94a0', 3, 4); R(c, '#eef2f6', 3, 5); }
+  }));
+  addTex(scene, 'xw_spear', makeSprite(18, 5, c => {                                                                    // spear: a steel shaft, a barbed head
+    R(c, '#5a636e', 1, 2, 2, 1); R(c, '#a0aab6', 3, 2, 9, 1); R(c, '#d8dee6', 4, 2, 6, 1);
+    R(c, '#9aa4b0', 12, 1, 1, 1); R(c, '#9aa4b0', 12, 3, 1, 1); R(c, '#eef2f6', 12, 2, 4, 1); R(c, '#c8d0d8', 13, 1, 2, 3); R(c, '#ffffff', 16, 2, 1, 1);
+  }));
+  for (const f of [0, 1]) addTex(scene, 'xw_beacon' + f, makeSprite(7, 10, c => {                                    // barrage beacon: a squat olive can, an aerial, a red lamp (lit in frame 1)
+    R(c, '#4a5240', 1, 5, 5, 4); R(c, '#6e7a5e', 1, 5, 5, 1); R(c, '#e8b422', 1, 7, 5, 1); R(c, '#2e3428', 3, 1, 1, 4);
+    R(c, f ? '#ff3020' : '#7a1810', 2, 3, 3, 2); if (f) R(c, '#ffd0c0', 3, 3, 1, 1); R(c, '#9aa4b0', 3, 1, 1, 1);
+  }));
+  addTex(scene, 'xw_shell', makeSprite(5, 10, c => { R(c, '#4a5240', 1, 1, 3, 6); R(c, '#6e7a5e', 1, 1, 1, 6); R(c, '#e8b422', 1, 3, 3, 1); R(c, '#2a2e35', 1, 7, 3, 1); R(c, '#8a94a0', 2, 8, 1, 1); }));   // a falling shell, nose down
+}
 function drawGlaiveBlade(ctx, cx, cy) {              // three hooked blades on a ring, centred on (cx, cy)
   for (let y = Math.floor(cy - 9); y < cy + 9; y++) for (let x = Math.floor(cx - 9); x < cx + 9; x++) {
     const px = x + 0.5 - cx, py = y + 0.5 - cy, d = Math.hypot(px, py);
@@ -2861,10 +2962,10 @@ const RUN_MODES = {
 const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
 const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
 // what a copycat copies: lobs, spreads and beams; anything else is a rapid burst
-const CAT_LOB = new Set(['grenade', 'cluster', 'napalm', 'grav', 'gaslaunch', 'stasis', 'decoy', 'limpet', 'coil', 'nuke', 'sing', 'spider', 'tripwire', 'glue', 'bubble']);
-const CAT_SPREAD = new Set(['shotgun', 'flak', 'dragon', 'vacuum', 'splitter', 'bees', 'firework', 'cutter', 'saw']);
-const CAT_BEAM = new Set(['arc', 'rail', 'prism', 'lance', 'siphon', 'microwave', 'cryo', 'flame', 'acid', 'shrink', 'marksman', 'orbital', 'sonic', 'whip', 'shock']);
-const SPONGE_EATS = new Set(['nail', 'pellet', 'rivet', 'shard', 'needle', 'revolver', 'parry', 'prism']);
+const CAT_LOB = new Set(['grenade', 'cluster', 'napalm', 'grav', 'gaslaunch', 'stasis', 'decoy', 'limpet', 'coil', 'nuke', 'sing', 'spider', 'tripwire', 'glue', 'bubble', 'cannon', 'quake', 'balllight', 'cyclone', 'barrage']);
+const CAT_SPREAD = new Set(['shotgun', 'flak', 'dragon', 'vacuum', 'splitter', 'bees', 'firework', 'cutter', 'saw', 'caltrop']);
+const CAT_BEAM = new Set(['arc', 'rail', 'prism', 'lance', 'siphon', 'microwave', 'cryo', 'flame', 'acid', 'shrink', 'marksman', 'orbital', 'sonic', 'whip', 'shock', 'phase', 'spear', 'heatray', 'hydro']);
+const SPONGE_EATS = new Set(['nail', 'pellet', 'rivet', 'shard', 'needle', 'revolver', 'parry', 'prism', 'phase']);
 const WAVE_POINTS = {
   G: [[10, 24], [26, 24], [52, 20], [63, 24], [80, 16], [95, 24], [87, 12], [47, 8], [33, 16], [4, 12], [16, 16], [73, 20]],
   A: [[20, 10], [47, 11], [72, 8], [90, 6], [30, 6], [56, 6], [10, 16], [82, 10]],
@@ -3756,6 +3857,7 @@ function genTextures(scene) {
   addSheet(scene, 'claw', ['open', 'closed'].map(f => ({ name: f, c: makeSprite(16, 12, x => drawClaw(x, f)) })), 16, 12, true);
   addSheet(scene, 'sparker', ['s0', 's1'].map(f => ({ name: f, c: makeSprite(12, 12, x => drawSparker(x, f)) })), 12, 12, true);
   addSheet(scene, 'golem', ['g0', 'g1', 'throw', 'slam'].map(f => ({ name: f, c: makeSprite(28, 30, x => drawGolem(x, f)) })), 28, 30, true);
+  genExpansionWeaponArt(scene);
   addTex(scene, 'netball', makeSprite(7, 7, c => { R(c, '#8a8070', 1, 1, 5, 5); R(c, '#c8c0a8', 1, 1, 5, 1); R(c, '#c8c0a8', 1, 3, 5, 1); R(c, '#c8c0a8', 3, 1, 1, 5); R(c, '#4a4438', 2, 5, 3, 1); }));
   addTex(scene, 'flailball', makeSprite(11, 11, c => { R(c, '#3a3f47', 3, 3, 5, 5); R(c, '#8a94a0', 4, 3, 3, 1); for (const [x, y] of [[5, 0], [5, 9], [0, 5], [9, 5], [1, 1], [8, 1], [1, 8], [8, 8]]) R(c, '#c8ced6', x, y, 2, 2); }));
   addTex(scene, 'scrap', makeSprite(7, 6, c => { R(c, '#5a636e', 1, 1, 5, 4); R(c, '#7a4a30', 2, 2, 3, 2); R(c, '#8a94a0', 1, 1, 3, 1); }));

@@ -113,6 +113,7 @@ class GameScene extends Phaser.Scene {
     // debrief round: bubbles, holy orbs, souls, mines, and who killed you
     this.shieldUntil = 0; this.shieldBlockT = 0; this.shieldHeld = false; this.hustleT = 0; this.lastMod = null; this.globs = []; this.gluePuds = []; this.leapMarks = [];
     this.nukes = [];                                                     // powerhouse round: mini-nuke shells
+    this.initExpansionWeapons();                                          // expansion: weapons (cannonballs, quakes, tornadoes, caltrops...)
     this.seeds = []; this.shrooms = []; this.pspores = []; this.tethered = []; this.sharing = false; this.linkCalled = false;   // gold round
     this.bubbles = []; this.horbs = []; this.souls = []; this.emines = []; this.killer = null; this.bubbled = false; this.empowerSeen = false;
     { const onPick = id => this.onPerkPick(id); BUS.on('perkpick', onPick); this.events.once('shutdown', () => BUS.off('perkpick', onPick)); }
@@ -910,6 +911,7 @@ class GameScene extends Phaser.Scene {
     this.updateSky(dt, now); this.updateBlades(dt, now);
     this.updateSpiders(dt, now); this.updateNapalms(dt, now); this.updateAcids(dt, now);
     this.updateSupplies(dt, now); this.updateBees(dt, now); this.updateStomps(dt, now); this.updateIces(dt, now); this.updateBalls(dt, now); this.updateHorns(dt); this.updateFireworks(dt, now); this.updateHunt(dt, now); this.updateWreck(dt, now); this.updateSplits(dt); this.updateDecoy(dt, now); this.updateDiscs(dt, now); this.updateSpores(dt, now); this.updateStasisFields(dt, now); this.updatePunch(dt, now); this.updateTrips(dt, now); this.updateAllies(dt, now); this.updateWalls(dt, now); this.updateBubbles(dt, now); this.updateHorbs(dt, now); this.updateEMines(dt, now); this.updateGlobs(dt, now); this.updateRails(dt, now); this.updateNukes(dt, now); this.updateSeeds(dt, now); this.updateTethers(dt, now);
+    this.updateExpansionWeapons(dt, now);                                // expansion: weapons
     if (this.state !== 'dead') { this.hist.push({ t: now, x: this.player.x, y: this.player.y, fire: now - this.lastShotT < 140, fr: this.pFrame, face: this.facing }); while (this.hist.length && now - this.hist[0].t > 3000) this.hist.shift(); }
     if (this.revAmmo <= 0 && now >= this.revReloadUntil) { this.revAmmo = TUNE.REVOLVER.rounds; Sfx.revClick(); }
     this.updateHarpoons(dt, now); this.updateLinkBeams(dt, now);
@@ -1212,6 +1214,7 @@ class GameScene extends Phaser.Scene {
     if (this.tb) this.tractorDrop(); this.tbOn = false; this.acidActiveUntil = 0; this.shockHeld = false; this.shockReady = false; this.limpetHeld = false;
     if (this.sky.st === 'paint') this.sky.st = 'idle';
     if (this.flail.st === 'spin') this.flail.st = 'idle';
+    this.xwDrop();                                                      // the heat ray's lock, the jet, a spear out on its cable
     this.nextFire = Math.max(this.wNext[i] || 0, this.time.now + 120);   // never locks the next one out
     Sfx.swap(); BUS.emit('weapon', i);
   }
@@ -1408,6 +1411,26 @@ class GameScene extends Phaser.Scene {
       this.fireRevolver(now, ox, oy, a, mx, my);
     } else if (W.id === 'ripper') {
       this.fireRipper(now, a, ca, sa);
+    } else if (W.id === 'cannon') {                                     // ---- expansion: weapons ----
+      this.fireCannon(now, ox, oy, a, mx, my);
+    } else if (W.id === 'quake') {
+      this.fireQuake(now, a, mx, my);
+    } else if (W.id === 'phase') {
+      this.firePhase(now, a, mx, my);
+    } else if (W.id === 'balllight') {
+      this.fireBallLight(now, ox, oy, a, mx, my);
+    } else if (W.id === 'cyclone') {
+      this.fireCyclone(now, ox, oy, a, mx, my);
+    } else if (W.id === 'caltrop') {
+      this.fireCaltrops(now, ox, oy, a, mx, my);
+    } else if (W.id === 'spear') {
+      this.fireSpear(now, ox, oy, a, mx, my);
+    } else if (W.id === 'heatray') {
+      this.fireHeatRay(now, ox, oy, a);
+    } else if (W.id === 'barrage') {
+      this.fireBarrage(now, ox, oy, a, mx, my);
+    } else if (W.id === 'hydro') {
+      this.fireHydro(now, ox, oy, a);
     } else if (W.id === 'saw') {
       this.stats.shots++;
       this.spawnSaw(ox, oy, a);
@@ -2299,6 +2322,7 @@ class GameScene extends Phaser.Scene {
       e.stunT = Math.max(e.stunT, 0.4 * f + 0.1);
       damaged = true;
       let dmg = W.enemyDamage !== undefined ? W.enemyDamage * (0.4 + 0.6 * f) : W.minDamage + (W.maxDamage - W.minDamage) * f;
+      if (W.style === 'arc' && e.soakUntil > now) dmg *= TUNE.HYDRO.zap;  // a soaked foe conducts
       if ((e.kind === 'bulwark' || e.kind === 'mirror') && e.shieldUp && Math.sign(x - b.center.x) === e.dir) { dmg *= 0.5; e.ai = 'stagger'; e.aiUntil = now + 900; this.mirrorDamage(e, dmg); }   // shield eats half, but it rocks them
       if (W.burn) this.ignite(e, W.burn);
       this.damageEnemy(e, dmg, Math.cos(ang), Math.sin(ang), 'rocket');
@@ -2450,6 +2474,7 @@ class GameScene extends Phaser.Scene {
     if (e.shieldBy && e.shieldBy.alive && this.time.now < e.shieldT && src !== 'burn') { dmg *= TUNE.WARDEN.soak; e.shieldHit = this.time.now; Sfx.shieldHit(); }   // warden bubble
     if (this.time.now < this.rampageUntil && src !== 'burn') dmg *= TUNE.RAMPAGE.damage;
     if (e.corrodeT > 0 && src !== 'acid' && src !== 'burn') dmg *= TUNE.ACID.bonus;   // corroded metal and flesh give way
+    if (e.juggleUntil || e.soakUntil) dmg *= this.xwBonus(e, src);        // quake-launched and still airborne; soaked and zapped
     if (src !== 'burn' && src !== 'gas') { if (this.perks.hollow) dmg *= 1.2; if (this.perks.adren && this.hp <= 35) dmg *= 1.5; if (this.time.now < this.dmgUntil) dmg *= 2; if (!this.lab) dmg *= 1 + 0.05 * masteryStars(WEAPONS[this.weapon].id); }   // perks + OVERDRIVE + mastery
     if (e.shrunkT > 0 && src !== 'burn') dmg *= TUNE.SHRINK.take;        // shrunk: a soft target
     if (this.mutator === 'glass') dmg *= 2;                                      // GLASS CANNON
@@ -2536,8 +2561,9 @@ class GameScene extends Phaser.Scene {
     this.flushDmg(e, e.lastHs ? 'Y' : 'R');
     if (!e.summoned && e.kind !== 'wyrmseg') this.multiKill(now0);
     const grounded = b.blocked.down || b.touching.down, playerAir = !(this.player.body.blocked.down || this.player.body.touching.down);
+    if (e.juggleUntil > now0 && !grounded) this.juggleKill(e);           // finished in the air after a quake threw it up
     let style = 60 + (e.lastHs ? 50 : 0) + (!grounded && !D.noAirStyle ? 40 : 0) + (playerAir ? 25 : 0);
-    const wid = WEAPONS[this.weapon].id;
+    const wid = this.creditW || WEAPONS[this.weapon].id;                // a ball, quake, tornado or barrage still out credits the gun that made it
     if (this.style.lastWeapon && this.style.lastWeapon !== wid) style += 30;      // reward mixing weapons
     this.style.lastWeapon = wid;
     if (!e.summoned) { this.stats.wk[wid] = (this.stats.wk[wid] || 0) + 1; if (this.mode.lifetime) LIFE.kills++; }
@@ -4686,7 +4712,7 @@ class GameScene extends Phaser.Scene {
     if (e.frozen > 0) { e.frozen = Math.max(e.frozen, TUNE.CRYO.thaw * 0.6); return; }
     e.burnT = 0; e.panicT = 0;
     if (e.def.noFreeze) return;                                          // the wyrm runs too hot to freeze
-    e.chill = Math.min(1, (e.chill || 0) + amt * (e.kind === 'boss' ? 0.25 : e.kind === 'jugg' ? 0.45 : 1));
+    e.chill = Math.min(1, (e.chill || 0) + amt * (e.kind === 'boss' ? 0.25 : e.kind === 'jugg' ? 0.45 : 1) * (e.soakUntil > this.time.now ? TUNE.HYDRO.chill : 1));   // soaked: it freezes faster
     if (e.chill >= 1 && e.kind !== 'boss' && e.kind !== 'gunship') this.freeze(e);
   }
   freeze(e) {
@@ -7921,6 +7947,796 @@ class GameScene extends Phaser.Scene {
       this.time.delayedCall(600, () => { e.houndPend--; if (this.state === 'dead' || !e.alive) return; const o = this.spawnEnemy('hound', pt[0], pt[1]); Object.assign(o, { summoned: true, aggro: true, aggroT: 9, owner: e }); });
     }
     BUS.emit('callout', 'HOUNDS'); Sfx.warp();
+  }
+
+  // ================================================================== expansion: weapons ====
+  // Ten wheel-only guns for the full arsenal (OVERTIME, DAILY, BOSS RUSH and the Lab); the campaign never issues them.
+  // Whatever one leaves behind (a ball still rolling, a quake, a tornado, caltrops, a barrage) credits its kills to the
+  // gun that made it, not the one in hand: xwHit and xwBoom set creditW for the hit, and killEnemy reads it.
+  initExpansionWeapons() {
+    this.cannonballs = []; this.quakes = []; this.phaseBolts = []; this.lballs = []; this.cyclones = []; this.caltrops = []; this.spear = null; this.barrages = [];
+    this.hrHeat = 0; this.hrVentUntil = 0; this.hrLock = 0; this.hrTarget = null; this.hrOnUntil = 0; this.hrBeam = null; this.hrScorchT = 0;
+    this.hydroUntil = 0; this.hydroJet = null; this.hydroPud = 0; this.xwFoes = new Set(); this.creditW = null;
+    this.xwFloorG = this.add.graphics().setDepth(4.98);                 // quake cracks and rocks, barrage markers: on the floor, behind the foes
+    this.xwG = this.add.graphics().setDepth(8.6);                       // cables, the cyclone's funnel, falling shells, the water jet
+    this.xwAG = this.add.graphics().setDepth(16).setBlendMode(ADD);     // phase tracers, arcs, the heat ray
+    this.hrGlow = this.add.image(0, 0, 'glow').setBlendMode(ADD).setTint(0xff6020).setDepth(18).setVisible(false);
+  }
+  xwHit(e, dmg, dx, dy, src, wid, hs) {                                 // a hit on behalf of one of these guns (see creditW)
+    const c = this.creditW; this.creditW = wid;
+    try { this.damageEnemy(e, dmg, dx, dy, src, hs); } finally { this.creditW = c; }
+  }
+  xwBoom(x, y, W, wid, countHit) {
+    const c = this.creditW; this.creditW = wid;
+    try { this.explode(x, y, W, countHit); } finally { this.creditW = c; }
+  }
+  xwBonus(e, src) {                                                     // damageEnemy asks: a quake-launched foe still in the air, a soaked one zapped
+    const now = this.time.now, b = e.body; let k = 1;
+    if (e.juggleUntil > now && src !== 'burn' && src !== 'quake' && !(b.blocked.down || b.touching.down)) {
+      k *= TUNE.QUAKE.bonus;
+      this.fx.emit(b.center.x, b.center.y, { n: 3, speed: [30, 90], life: [0.15, 0.3], size: [2, 1], cols: [0xffffff, 0xffe080, 0xffa030], add: true, cosmetic: true });
+    }
+    if (e.soakUntil > now && (src === 'arc' || src === 'shock')) {
+      k *= TUNE.HYDRO.zap;
+      this.fx.emit(b.center.x, b.center.y, { n: 6, speed: [40, 140], life: [0.1, 0.25], size: [2, 1], cols: [0xffffff, 0xc8f4ff, 0x46c8ff], add: true, cosmetic: true });
+    }
+    return k;
+  }
+  juggleKill(e) {                                                       // killEnemy: a foe the quake threw up, finished before it lands
+    BUS.emit('callout', 'JUGGLE!'); this.addStyle(60);
+    this.spawnLight(e.body.center.x, e.body.center.y, 'ring', 0xffd080, 0.2, 1.4, 0.9, 0.2);
+  }
+  xwPropAt(x, y) { for (const p of this.props || []) if (p.st === 'ok' && Math.abs(x - p.cx) <= p.hw && Math.abs(y - p.cy) <= p.hh) return p; return null; }   // thrown things stop at scenery
+  xwDrop() {                                                            // setWeapon: let go of what the held guns hold
+    this.hrTarget = null; this.hrLock = 0; this.hrOnUntil = 0; this.hydroUntil = 0;
+    if (this.spear) this.spearDrop();
+  }
+  updateExpansionWeapons(dt, now) {
+    this.xwFloorG.clear(); this.xwG.clear(); this.xwAG.clear();
+    this.updateCannonballs(dt, now); this.updateQuakes(dt, now); this.updatePhaseBolts(dt, now); this.updateLBalls(dt, now); this.updateCyclones(dt, now);
+    this.updateCaltrops(dt, now); this.updateSpear(dt, now); this.updateHeatRay(dt, now); this.updateBarrages(dt, now); this.updateHydro(dt, now);
+  }
+
+  // ---------------------------------------------------------------- hand cannon ----
+  // A heavy iron ball on a gravity arc (400 px/s): 60 to the first body, and it plows on through light foes, three in all,
+  // keeping 72% of its speed and punch after each and throwing them about (360; a wall makes a splat). Crates and girders
+  // it meets take 80 and usually give; a heavy foe, a boss or grey metal bounces it. It kicks: 300 px/s back on the
+  // ground, a full cannon-jump in the air (400 along the reverse of the shot).
+  fireCannon(now, ox, oy, a, mx, my) {
+    const T = TUNE.CANNON, ca = Math.cos(a), sa = Math.sin(a), pb = this.player.body;
+    this.stats.shots++;
+    this.cannonballs.push({ x: ox, y: oy, vx: ca * T.speed, vy: sa * T.speed - T.lift, t: T.life, k: 1, n: 0, hits: new Set(), hit: false, bounces: 0, tok: {}, rest: -1,
+      img: this.add.image(ox, oy, 'xw_ball').setDepth(9) });
+    if (pb.blocked.down || pb.touching.down) { pb.velocity.x -= ca * T.recoil; if (sa > 0.6) { pb.velocity.y = -sa * T.jump * 0.8; this.jumpCuttable = false; this.lastGround = -1e9; } }
+    else { pb.velocity.x -= ca * T.jump; pb.velocity.y = Math.max(-T.maxRise, Math.min(pb.velocity.y, 0) - sa * T.jump); this.jumpCuttable = false; this.lastGround = -1e9; }
+    this.recoil = 9; Sfx.cannon();
+    this.muzzle(mx, my, a, 1.9, 90); this.fxSmoke(mx, my, 10, 1.3); this.fxSmoke(this.shoulder.x, this.shoulder.y, 3, 0.6); this.fxFire(mx, my, 6);
+    this.fxSparks(mx, my, 10, a, 0.7, [100, 300]);
+    this.fx.emit(mx, my, { n: 10, angle: a, spread: 0.5, speed: [60, 200], life: [0.4, 0.8], size: [3, 8], cols: [0xa09a90, 0x77706a, 0x55504c], alpha: [0.6, 0], drag: 3, g: -20 });
+    this.shake(170, 0.01); this.addKick(-ca * 9, -sa * 9); this.zoomPunch = Math.max(this.zoomPunch, 0.04); this.hitStop(30);
+  }
+  updateCannonballs(dt, now) {
+    const T = TUNE.CANNON;
+    for (let i = this.cannonballs.length - 1; i >= 0; i--) {
+      const B = this.cannonballs[i];
+      if (B.rest >= 0) {                                                 // spent: it sits a moment, then fades
+        B.rest -= dt; B.img.setAlpha(clamp(B.rest / 0.4, 0, 1));
+        if (B.rest <= 0) { B.img.destroy(); this.cannonballs.splice(i, 1); }
+        continue;
+      }
+      B.t -= dt; B.vy += T.grav * dt;
+      const sp0 = Math.hypot(B.vx, B.vy), n = Math.max(1, Math.ceil(sp0 * dt / 3));
+      let stop = false;
+      for (let s = 0; s < n && !stop; s++) {
+        const nx = B.x + B.vx * dt / n, ny = B.y + B.vy * dt / n, sp = Math.hypot(B.vx, B.vy) || 1, ux = B.vx / sp, uy = B.vy / sp;
+        if (this.solidAt(nx, ny)) {
+          const tx = Math.floor(nx / TS), ty = Math.floor(ny / TS);
+          if (TILE_HP[this.tileAt(tx, ty)] && sp > 160 && this.damageTile(tx, ty, T.tile * B.k)) { B.vx *= 0.8; B.vy *= 0.8; B.k *= 0.85; this.shake(90, 0.005); Sfx.cannonHit(0.8); }   // smashed through
+          if (this.solidAt(nx, ny)) { stop = this.cannonBounce(B, nx, ny, sp); break; }
+        }
+        B.x = nx; B.y = ny;
+        for (const e of this.enemies.getChildren()) {                   // bodies: once each, plowed through or bounced off
+          if (!e.alive || e.under || B.hits.has(e) || B.k < 0.2) continue;
+          const b = e.body;
+          if (B.x < b.left - 3 || B.x > b.right + 3 || B.y < b.top - 3 || B.y > b.bottom + 3) continue;
+          B.hits.add(e);
+          if (this.shieldBlocks(e, B.vx, B.y)) { e.ai = 'stagger'; e.aiUntil = now + 900; this.fxSparks(B.x, B.y, 10, Math.atan2(-uy, -ux), 1.2, [80, 240]); Sfx.clang(); B.vx *= -0.35; B.vy = -140; B.k = 0.1; continue; }
+          if (!B.hit) { B.hit = true; this.stats.hits++; }
+          const heavy = e.kind === 'boss' || e.def.kb < 0.45 || e.def.hp > 150 || e.def.noClip;
+          if (e.def.mech) this.fxSparks(B.x, B.y, 12, Math.atan2(uy, ux), 1, [80, 280]); else { this.fxBlood(B.x, B.y, 14, Math.atan2(uy, ux), 0.8, [100, 320]); this.fxBlood(B.x, B.y, 6, Math.atan2(-uy, -ux), 1.2, [40, 140]); }
+          this.xwHit(e, T.dmg * B.k, ux, uy, 'cannon', 'cannon');
+          if (e.alive && !heavy) { const kb = Math.max(0.35, e.def.kb); b.velocity.x += ux * T.knock * kb * B.k; b.velocity.y = Math.min(b.velocity.y, (uy - 0.6) * T.knock * 0.6 * kb); e.stunT = Math.max(e.stunT, 0.6); e.kickedT = 0.5; }
+          Sfx.cannonHit(); this.hitStop(45); this.shake(110, 0.006); this.spawnLight(B.x, B.y, 'ring', 0xfff0d0, 0.2, 1.3, 0.8, 0.16);
+          B.n++;
+          if (heavy || B.n >= T.pierce) { B.vx *= -0.3; B.vy = -150; B.k = 0.1; Sfx.clang(0.6); }
+          else { B.vx *= T.keep; B.vy *= T.keep; B.k *= T.keep; }
+        }
+        for (const k of this.barrelList) if (k.active && !B.hits.has(k) && Math.abs(k.x - B.x) < 7 && Math.abs(k.y - B.y) < 9) { B.hits.add(k); this.damageBarrel(k, 40 * B.k); k.body.velocity.x += ux * 260; k.body.velocity.y -= 160; }
+        if (B.k >= 0.2) this.propHitAt(B.x, B.y, ux, uy, T.dmg * B.k * 0.7, B.tok);   // scenery: each piece once (tok)
+        const rh = this.ragdolls.length ? this.ragAt(B.x, B.y, 2) : null;
+        if (rh && !B.hits.has(rh.rd) && B.k >= 0.2) { B.hits.add(rh.rd); this.hitRagdoll(rh.rd, B.x, B.y, 50 * B.k, ux, uy, 'rail', rh.pi); }
+      }
+      if (stop) continue;
+      if (B.t <= 0 || B.y > LH) { B.rest = 0.01; continue; }
+      if (Math.random() < 0.6) this.fx.emit(B.x, B.y, { n: 1, speed: [4, 18], life: [0.3, 0.6], size: [2, 5], cols: [0x8a8580, 0x5a5652, 0x3a3836], alpha: [0.45, 0], g: -20, drag: 2 });
+      B.img.setPosition(B.x, B.y).setRotation(B.img.rotation + B.vx * dt * 0.08);
+    }
+  }
+  cannonBounce(B, nx, ny, sp) {                                        // grey metal or a crate that held: thud, bounce; slow enough and it's spent
+    const hx = this.solidAt(nx, B.y), hy = this.solidAt(B.x, ny) || (!hx);
+    if (hx) B.vx *= -0.35;
+    if (hy) { B.vy *= -0.35; B.vx *= 0.75; }
+    B.bounces++;
+    if (sp > 120) {
+      Sfx.cannonHit(Math.min(1, sp / 380)); this.fxDust(B.x, B.y, 6); this.fxSparks(B.x, B.y, 6, Math.atan2(-B.vy, -B.vx), 1.4, [60, 200]);
+      this.shake(80, 0.004); this.paintScorch(nx, ny, 3); this.makeNoise(B.x, B.y, 200, true);
+    }
+    B.k *= 0.6;
+    if (Math.hypot(B.vx, B.vy) < 90 || B.bounces > 3) { B.rest = 1.2; B.img.setPosition(B.x, B.y); return true; }
+    return false;
+  }
+
+  // ---------------------------------------------------------------- seismic launcher ----
+  // Thumps a quake into the floor at your feet that runs along it the way you aim (280 px/s, up to 400 px), climbing or
+  // dropping single steps and stopping at walls and drop-offs. Every grounded foe it passes is popped into the air (24,
+  // a 390 launch) and stays JUGGLE-able for 1.4 s: while it's airborne your hits do x1.5. Drums jump, scenery cracks.
+  fireQuake(now, a, mx, my) {
+    const T = TUNE.QUAKE, p = this.player, pb = p.body, dir = Math.cos(a) >= 0 ? 1 : -1;
+    this.stats.shots++;
+    let x = p.x + dir * 8, fy = this.floorBelow(x, pb.bottom - 4, 140);
+    if (fy === null || this.solidAt(x, fy - 6)) { x = p.x; fy = this.floorBelow(x, pb.bottom - 4, 140); }
+    if (fy !== null) {
+      this.quakes.push({ x, y: fy, dir, dist: 0, hit: new Set(), counted: false, fxT: 0, rocks: [], rockD: 0, crackD: 0, done: 0 });
+      this.fxDust(x, fy, 10);
+      this.fx.emit(x, fy - 2, { n: 18, angle: -Math.PI / 2, spread: 1.4, speed: [60, 220], life: [0.3, 0.6], size: [3, 1], cols: [0xc8b8a0, 0x8a7a68, 0x5a4e44], g: 600, mode: 1 });
+      this.paintScorch(x, fy + 2, 7); this.makeNoise(x, fy, 260, true);
+    } else this.fxDust(mx, my, 6);
+    this.recoil = 7; Sfx.quake(); this.muzzle(mx, my, a, 0.9, 50);
+    this.spawnLight(x, (fy ?? my) - 4, 'glow', 0xffb060, 1.4, 2.6, 0.7, 0.2);
+    this.shake(200, 0.008); this.addKick(0, 6); this.hitStop(35);
+  }
+  updateQuakes(dt, now) {
+    const T = TUNE.QUAKE, G = this.xwFloorG;
+    for (let i = this.quakes.length - 1; i >= 0; i--) {
+      const Q = this.quakes[i];
+      for (let k = Q.rocks.length - 1; k >= 0; k--) {                    // the rocks it throws up sink back behind it
+        const R0 = Q.rocks[k]; R0.t += dt; const f = R0.t < 0.08 ? R0.t / 0.08 : Math.max(0, 1 - (R0.t - 0.08) / 0.4), h = R0.h * f;
+        if (R0.t > 0.48) { Q.rocks.splice(k, 1); continue; }
+        G.fillStyle(0x3a322c, 1).fillTriangle(R0.x - R0.w, R0.y, R0.x + R0.w, R0.y, R0.x + R0.lean, R0.y - h);
+        G.fillStyle(0x8a7a68, 1).fillTriangle(R0.x - R0.w + 1, R0.y, R0.x, R0.y, R0.x + R0.lean, R0.y - h + 1);
+        G.fillStyle(0xd8c4a0, 0.9).fillRect(Math.round(R0.x + R0.lean) - 1, Math.round(R0.y - h), 1, 1);
+      }
+      if (Q.done) { if (!Q.rocks.length) this.quakes.splice(i, 1); continue; }
+      const step = T.speed * dt; let nx = Q.x + Q.dir * step, ny = Q.y;
+      Q.dist += step;
+      if (this.solidAt(nx, ny - 6)) ny = !this.solidAt(nx, ny - TS - 6) && !this.solidAt(Q.x, ny - TS - 6) ? ny - TS : null;   // one step up, or a wall
+      else if (!this.standAt(nx, ny + 2)) ny = this.standAt(nx, ny + TS + 2) ? ny + TS : null;                                // one step down, or a drop-off
+      if (ny === null || Q.dist > T.range) {                             // it runs out: one last heave of rock
+        Q.done = 1; this.fxDust(Q.x, Q.y, 8);
+        this.fx.emit(Q.x, Q.y - 2, { n: 12, angle: -Math.PI / 2 + Q.dir * 0.3, spread: 1.2, speed: [60, 200], life: [0.3, 0.6], size: [3, 1], cols: [0xc8b8a0, 0x8a7a68, 0x5a4e44], g: 600, mode: 1 });
+        continue;
+      }
+      if (ny !== Q.y) this.fxDust(nx, ny, 4);
+      Q.x = nx; Q.y = ny;
+      if ((Q.rockD += step) > 6) {                                       // a rock spike pops every 6 px; a crack runs under it
+        Q.rockD = 0; Q.rocks.push({ x: Q.x + rand(-2, 2), y: Q.y, w: rand(2.5, 5), h: rand(8, 17), lean: Q.dir * rand(0, 4), t: 0 });
+        this.fx.emit(Q.x, Q.y - 1, { n: 3, angle: -Math.PI / 2 + Q.dir * 0.4, spread: 0.9, speed: [50, 170], life: [0.25, 0.5], size: [2, 1], cols: [0xc8b8a0, 0x8a7a68, 0x5a4e44], g: 600, mode: 1 });
+        if (Math.random() < 0.4) this.fxDust(Q.x, Q.y, 1);
+        const L = this.lvlCtx; L.globalCompositeOperation = 'source-atop'; L.fillStyle = '#0a0806';
+        for (let k = 0; k < 6; k++) L.fillRect(Math.round(Q.x - Q.dir * k), Q.y + 1 + (Math.random() < 0.4 ? 1 : 0), 1, 1);
+        L.globalCompositeOperation = 'source-over'; this.lvlMark(Q.x, Q.y, 6);
+        const tx = Math.floor(Q.x / TS), ty = Math.floor((Q.y + 2) / TS), key = 't' + tx + ',' + ty;   // breakable floor it runs over: cracked once
+        if (TILE_HP[this.tileAt(tx, ty)] && !Q.hit.has(key)) { Q.hit.add(key); this.damageTile(tx, ty, T.tile); }
+      }
+      if ((Q.fxT -= dt) <= 0) { Q.fxT = 0.2; Sfx.rumble(0.6); }
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || Q.hit.has(e) || FLIERS.has(e.kind)) continue;
+        const b = e.body;
+        if (Math.abs(b.center.x - Q.x) > b.halfWidth + 7 || Math.abs(b.bottom - Q.y) > 10) continue;
+        Q.hit.add(e);
+        if (!Q.counted) { Q.counted = true; this.stats.hits++; }
+        this.xwHit(e, T.dmg, 0, -1, 'quake', 'quake');
+        this.fx.emit(b.center.x, b.bottom, { n: 12, angle: -Math.PI / 2, spread: 1, speed: [80, 240], life: [0.3, 0.6], size: [3, 1], cols: [0xffffff, 0xc8b8a0, 0x8a7a68], g: 600, mode: 1 });
+        Sfx.quakePop(); this.hitStop(25);
+        if (e.alive && e.kind !== 'boss' && !e.def.noClip) {
+          const kb = Math.max(0.35, e.def.kb); b.velocity.y = -T.launch * kb; b.velocity.x = Q.dir * 50 * kb; e.stunT = Math.max(e.stunT, 0.8); e.juggleUntil = now + T.juggle * 1000;
+          this.spawnLight(b.center.x, b.bottom - 4, 'glow', 0xffc080, 0.8, 1.6, 0.7, 0.15);
+        }
+      }
+      for (const kg of this.barrelList) if (kg.active && !Q.hit.has(kg) && Math.abs(kg.x - Q.x) < 8 && Math.abs(kg.y + 7 - Q.y) < 10) { Q.hit.add(kg); kg.body.velocity.y = -320; this.damageBarrel(kg, 10); }
+      for (const p of this.props || []) if (p.st === 'ok' && !Q.hit.has(p) && p.D.mount === 'floor' && Math.abs(p.cx - Q.x) < p.hw + 4 && Math.abs(p.cy + p.hh - Q.y) < 10) { Q.hit.add(p); this.hitProp(p, 16, 'kick', Q.x, Q.y - 2, Q.dir, -1); }
+      for (const g of this.gibList) if (g.active && Math.abs(g.x - Q.x) < 8 && Math.abs(g.y - Q.y) < 14 && !Q.hit.has(g)) { Q.hit.add(g); if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); } g.body.velocity.y = -rand(220, 360); g.body.angularVelocity = rand(-900, 900); }
+      for (const rd of this.ragdolls) if (!Q.hit.has(rd) && Math.abs(rd.pts[2].x - Q.x) < 10 && Math.abs(rd.pts[2].y - Q.y) < 20) { Q.hit.add(rd); for (const q of rd.pts) { q.vy = -rand(240, 360); q.vx += Q.dir * rand(20, 60); } rd.asleep = false; }
+    }
+  }
+
+  // ---------------------------------------------------------------- phase rifle ----
+  // A violet bolt (820 px/s, 560 px) that slips through walls, floors and scenery as if they weren't there and pierces
+  // up to three bodies (22 each, x1.5 to the head): it finds foes behind cover. It still clips drums and props it passes.
+  firePhase(now, a, mx, my) {
+    const T = TUNE.PHASE, ca = Math.cos(a), sa = Math.sin(a);
+    this.stats.shots++;
+    this.phaseBolts.push({ x: mx, y: my, vx: ca * T.speed, vy: sa * T.speed, d: 0, n: 0, hits: new Set(), hit: false, tok: {}, inWall: this.solidAt(mx, my), trail: [[mx, my]], fade: -1 });
+    this.recoil = 4; Sfx.phase();
+    this.spawnLight(mx, my, 'glow', 0xb070ff, 1.2, 2.2, 0.9, 0.12); this.spawnLight(mx, my, 'ring', 0xd8b0ff, 0.15, 0.9, 0.8, 0.14);
+    this.fx.emit(mx, my, { n: 8, angle: a, spread: 0.9, speed: [40, 160], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0xe0c8ff, 0xa060ff, 0x5020a0], add: true, drag: 2 });
+    this.shake(60, 0.003); this.addKick(-ca * 3, -sa * 3);
+  }
+  updatePhaseBolts(dt, now) {
+    const T = TUNE.PHASE, G = this.xwAG;
+    for (let i = this.phaseBolts.length - 1; i >= 0; i--) {
+      const P = this.phaseBolts[i];
+      if (P.fade >= 0) { P.fade -= dt; if (P.fade <= 0) { this.phaseBolts.splice(i, 1); continue; } }
+      else {
+        const sp = T.speed, n = Math.max(1, Math.ceil(sp * dt / 3)), ux = P.vx / sp, uy = P.vy / sp;
+        for (let s = 0; s < n && P.fade < 0; s++) {
+          P.x += P.vx * dt / n; P.y += P.vy * dt / n; P.d += sp * dt / n;
+          const inW = this.solidAt(P.x, P.y);
+          if (inW !== P.inWall) {                                        // phasing in or out: a violet ripple on the surface
+            P.inWall = inW;
+            this.fx.emit(P.x, P.y, { n: 6, speed: [20, 80], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xd0a0ff, 0x8040e0], add: true, drag: 3 });
+            if (Math.random() < 0.5) this.spawnLight(P.x, P.y, 'ring', 0xb070ff, 0.1, 0.6, 0.7, 0.12);
+          }
+          for (const e of this.enemies.getChildren()) {
+            if (!e.alive || e.under || P.hits.has(e)) continue;
+            const b = e.body;
+            if (P.x < b.left - 2 || P.x > b.right + 2 || P.y < b.top - 2 || P.y > b.bottom + 2) continue;
+            P.hits.add(e);
+            if (!P.hit) { P.hit = true; this.stats.hits++; }
+            const hs = (isHumanoid(e) || e.kind === 'jet') && P.y < b.top + 5;
+            if (e.def.mech) this.fxSparks(P.x, P.y, 5, Math.atan2(uy, ux), 1.4); else this.fxBlood(P.x, P.y, 6, Math.atan2(uy, ux), 0.8, [60, 220]);
+            this.fx.emit(P.x, P.y, { n: 8, speed: [40, 140], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0xe0c8ff, 0xa060ff], add: true, drag: 2 });
+            this.xwHit(e, T.dmg * (hs ? T.head : 1), ux, uy, 'phase', 'phase', hs); Sfx.phaseHit();
+            if (++P.n >= T.pierce) { P.fade = 0.12; break; }
+          }
+          for (const k of this.barrelList) if (k.active && !P.hits.has(k) && Math.abs(k.x - P.x) < 6 && Math.abs(k.y - P.y) < 8) { P.hits.add(k); this.damageBarrel(k, T.dmg); }
+          this.propHitAt(P.x, P.y, ux, uy, T.dmg, P.tok);
+          const rh = this.ragdolls.length ? this.ragAt(P.x, P.y, 1) : null;
+          if (rh && !P.hits.has(rh.rd)) { P.hits.add(rh.rd); this.hitRagdoll(rh.rd, P.x, P.y, T.dmg, ux, uy, 'nail', rh.pi); }
+          if (P.d >= T.range || P.x < -20 || P.x > LW + 20 || P.y < -20 || P.y > LH + 20) { P.fade = 0.12; this.fx.emit(P.x, P.y, { n: 6, speed: [10, 50], life: [0.2, 0.4], size: [2, 1], cols: [0xe0c8ff, 0x8040e0], add: true, drag: 2 }); }
+        }
+        P.trail.push([P.x, P.y]); if (P.trail.length > 7) P.trail.shift();
+        if (Math.random() < 0.7) this.fx.emit(P.x, P.y, { n: 1, speed: [2, 14], life: [0.25, 0.5], size: [2, 1], cols: [0xe0c8ff, 0xa060ff, 0x5020a0], add: true, drag: 1 });
+      }
+      const fa = P.fade >= 0 ? P.fade / 0.12 : 1, tr = P.trail;              // the tracer: a fading violet streak, dimmer and flickering inside walls
+      for (let k = 1; k < tr.length; k++) {
+        const t = k / (tr.length - 1), wall = this.solidAt(tr[k][0], tr[k][1]), al = (wall ? 0.35 + 0.25 * Math.random() : 1) * t * fa;
+        G.lineStyle(4, 0x6020c0, 0.35 * al).lineBetween(tr[k - 1][0], tr[k - 1][1], tr[k][0], tr[k][1]);
+        G.lineStyle(2, 0xb070ff, 0.7 * al).lineBetween(tr[k - 1][0], tr[k - 1][1], tr[k][0], tr[k][1]);
+        G.lineStyle(1, 0xf0e0ff, al).lineBetween(tr[k - 1][0], tr[k - 1][1], tr[k][0], tr[k][1]);
+      }
+      if (P.fade < 0) { G.fillStyle(0xffffff, 1).fillCircle(P.x, P.y, 1.5); G.fillStyle(0xb070ff, 0.5).fillCircle(P.x, P.y, 3); }
+    }
+  }
+
+  // ---------------------------------------------------------------- ball lightning ----
+  // A slow orb (70 px/s) that drifts along your aim, bouncing off walls, for 2.5 s. Every 0.22 s it arcs to up to three
+  // foes within 80 px (7 each) and lights any puddle under it; then it bursts (radius 44, 45->15, electric).
+  fireBallLight(now, ox, oy, a, mx, my) {
+    const T = TUNE.BALLLIGHT, ca = Math.cos(a), sa = Math.sin(a);
+    this.stats.shots++;
+    this.lballs.push({ x: ox, y: oy, vx: ca * T.speed, vy: sa * T.speed, t: T.life, zapT: 0.08, arcs: [], hit: false, ph: rand(0, 6),
+      img: this.add.image(ox, oy, 'xw_lball0').setBlendMode(ADD).setDepth(9), glow: this.add.image(ox, oy, 'glow').setBlendMode(ADD).setTint(0x4ab8ff).setScale(1.2).setAlpha(0.6).setDepth(18) });
+    this.recoil = 4; Sfx.ballLaunch();
+    this.spawnLight(mx, my, 'glow', 0x6ad0ff, 1.2, 2.4, 0.9, 0.15); this.spawnLight(mx, my, 'ring', 0xd8f4ff, 0.2, 1, 0.8, 0.15);
+    this.fx.emit(mx, my, { n: 10, angle: a, spread: 1.2, speed: [40, 160], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0xc8f4ff, 0x4ab8ff], add: true, drag: 2 });
+    this.shake(60, 0.003); this.addKick(-ca * 2.5, -sa * 2.5);
+  }
+  updateLBalls(dt, now) {
+    const T = TUNE.BALLLIGHT, G = this.xwAG;
+    for (let i = this.lballs.length - 1; i >= 0; i--) {
+      const L = this.lballs[i]; L.t -= dt; L.ph += dt;
+      const nx = L.x + L.vx * dt, ny = L.y + L.vy * dt + Math.sin(L.ph * 5) * 12 * dt;   // drifts with a lazy bob
+      if (this.solidAt(nx, L.y)) L.vx = -L.vx; else L.x = nx;
+      if (this.solidAt(L.x, ny)) L.vy = -L.vy; else L.y = ny;
+      if ((L.zapT -= dt) <= 0) {
+        L.zapT = T.rate;
+        const near = [];
+        for (const e of this.enemies.getChildren()) {
+          if (!e.alive || e.under) continue;
+          const d = Math.hypot(e.body.center.x - L.x, e.body.center.y - L.y);
+          if (d < T.reach && this.los(L.x, L.y, e.body.center.x, e.body.center.y)) near.push([d, e]);
+        }
+        near.sort((p, q) => p[0] - q[0]);
+        for (const [, e] of near.slice(0, T.n)) {
+          const ex = e.body.center.x, ey = e.body.center.y;
+          L.arcs.push({ x: ex, y: ey, t: 0.12 });
+          this.xwHit(e, T.dmg, Math.sign(ex - L.x) || 1, 0, 'arc', 'balllight');
+          this.fxSparks(ex, ey, 3, 0, Math.PI * 2, [40, 140]);
+          if (!L.hit) { L.hit = true; this.stats.hits++; }
+        }
+        let left = T.n - Math.min(T.n, near.length);                    // spare arcs go to drums and scenery in reach
+        for (const k of this.barrelList) if (left > 0 && k.active && Math.hypot(k.x - L.x, k.y - L.y) < T.reach && this.los(L.x, L.y, k.x, k.y)) { left--; L.arcs.push({ x: k.x, y: k.y - 4, t: 0.12 }); this.damageBarrel(k, T.dmg); }
+        for (const p of this.props || []) if (left > 0 && p.st === 'ok' && Math.hypot(p.cx - L.x, p.cy - L.y) < T.reach + Math.max(p.hw, p.hh) && this.los(L.x, L.y, p.cx, p.cy)) { left--; L.arcs.push({ x: p.cx, y: p.cy, t: 0.12 }); this.hitProp(p, T.dmg, 'shot', p.cx, p.cy, Math.sign(p.cx - L.x) || 1, 0); }
+        if (left < T.n) Sfx.ballZap();
+        else if (Math.random() < 0.5) { const an = rand(0, Math.PI * 2), r = rand(12, 26); L.arcs.push({ x: L.x + Math.cos(an) * r, y: L.y + Math.sin(an) * r, t: 0.08 }); }   // a stray crackle
+        if (this.waters.length) { const fy = this.floorBelow(L.x, L.y, 90); if (fy !== null && this.electrifyWater(L.x, fy, 20)) L.arcs.push({ x: L.x, y: fy - 1, t: 0.12 }); }   // a puddle under it goes live
+      }
+      for (let k = L.arcs.length - 1; k >= 0; k--) { const A = L.arcs[k]; A.t -= dt; if (A.t <= 0) { L.arcs.splice(k, 1); continue; } this.zapCol(G, L.x, L.y, A.x, A.y, 0x4ab8ff, 0xe8f8ff); }
+      if (L.t <= 0) {                                                    // burst
+        this.lballs.splice(i, 1); L.img.destroy(); L.glow.destroy();
+        const h0 = this.stats.hits;
+        this.xwBoom(L.x, L.y, T.boom, 'balllight', !L.hit);
+        if (this.waters.length) { const fy = this.floorBelow(L.x, L.y, 90); if (fy !== null) this.electrifyWater(L.x, fy, 50); }
+        for (let k = 0; k < 6; k++) { const an = k / 6 * Math.PI * 2 + rand(-0.3, 0.3); this.zapCol(G, L.x, L.y, L.x + Math.cos(an) * 40, L.y + Math.sin(an) * 40, 0x4ab8ff, 0xffffff); }
+        Sfx.coilBoom(); if (this.stats.hits > h0) L.hit = true;
+        continue;
+      }
+      const fl = L.t < 0.5 && Math.floor(L.t * 20) % 2;                 // it flickers as it's about to go
+      L.img.setPosition(L.x, L.y).setTexture(Math.floor(now / 50) % 2 ? 'xw_lball1' : 'xw_lball0').setRotation(Math.floor(now / 90) * 1.3).setScale(fl ? 1.25 : 1);
+      L.glow.setPosition(L.x, L.y).setScale(1.1 + Math.sin(now / 40) * 0.15 + (fl ? 0.4 : 0)).setAlpha(0.55 + Math.random() * 0.15);
+      if (Math.random() < 0.5) this.fx.emit(L.x, L.y, { n: 1, speed: [10, 40], life: [0.15, 0.3], size: [2, 1], cols: [0xffffff, 0x9ae8ff, 0x2a8ad0], add: true });
+    }
+  }
+
+  // ---------------------------------------------------------------- cyclone launcher ----
+  // Lobs a turbine canister that spins up into a tornado where it lands and wanders the floor for 3 s (70 px/s, turning
+  // at walls and edges). Light foes (140 HP or less) within 44 px are sucked in and whirled round it (15 DPS), gibs, corpses
+  // and drums with them; heavier ones take half that and get shoved. When it blows out it flings everything it holds.
+  fireCyclone(now, ox, oy, a, mx, my) {
+    const T = TUNE.CYCLONE, ca = Math.cos(a), sa = Math.sin(a);
+    this.stats.shots++;
+    this.cyclones.push({ st: 'fly', x: ox, y: oy, vx: ca * T.speed + this.player.body.velocity.x * 0.2, vy: sa * T.speed - T.lift, dir: ca >= 0 ? 1 : -1, t: 2.5, caught: [], tick: 0, hit: false, age: 0, sndT: 0,
+      img: this.add.image(ox, oy, 'xw_cyc').setDepth(9) });
+    this.recoil = 4; Sfx.cycloneLaunch(); this.muzzle(mx, my, a, 0.8, 45); this.fxSmoke(mx, my, 3);
+    this.fx.emit(mx, my, { n: 8, angle: a, spread: 1, speed: [40, 140], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xd8e8f0, 0x9aa4b0], drag: 3 });
+    this.shake(60, 0.003); this.addKick(-ca * 3, -sa * 3);
+  }
+  cycloneForm(C, x, y) {
+    const T = TUNE.CYCLONE, live = this.cyclones.filter(o => o.st === 'spin');
+    if (live.length >= T.max) this.cycloneEnd(live[0]);                 // two at most: the oldest blows itself out
+    C.st = 'spin'; C.x = x; C.y = y; C.t = T.life; C.age = 0; C.img.destroy(); C.img = null;
+    if (Math.abs(C.vx) > 20) C.dir = Math.sign(C.vx);
+    this.fxDust(x, y, 10); Sfx.cyclone(1); this.spawnLight(x, y - 16, 'ring', 0xd8e8f0, 0.2, 1.4, 0.6, 0.25);
+  }
+  cycloneEnd(C) {
+    const T = TUNE.CYCLONE, i = this.cyclones.indexOf(C); if (i >= 0) this.cyclones.splice(i, 1);
+    if (C.img) C.img.destroy();
+    if (C.st !== 'spin') return;
+    for (const c of C.caught) {                                          // fling the lot
+      const e = c.e; if (!e.alive) continue;
+      const b = e.body, kb = Math.max(0.35, e.def.kb), out = Math.cos(c.ph) >= 0 ? 1 : -1;
+      b.velocity.x = out * T.fling * kb * rand(0.7, 1); b.velocity.y = -T.fling * 0.6 * kb; e.stunT = Math.max(e.stunT, 0.6); e.kickedT = 0.7;
+    }
+    for (const g of this.gibList) if (g.active && Math.abs(g.x - C.x) < T.reach * 1.4 && g.y > C.y - 80 && g.y < C.y + 6) { g.body.velocity.x = Math.sign(g.x - C.x || 1) * rand(200, 420); g.body.velocity.y = -rand(200, 380); }
+    for (const rd of this.ragdolls) if (Math.abs(rd.pts[2].x - C.x) < T.reach * 1.4 && rd.pts[2].y > C.y - 80 && rd.pts[2].y < C.y + 10) { const out = Math.sign(rd.pts[2].x - C.x) || 1; for (const q of rd.pts) { q.vx = out * rand(240, 380); q.vy = -rand(220, 320); } rd.asleep = false; }
+    this.fxDust(C.x, C.y, 12); this.fx.emit(C.x, C.y - 20, { n: 20, speed: [80, 240], life: [0.3, 0.6], size: [3, 1], cols: [0xffffff, 0xd8e8f0, 0x9aa4b0, 0x6a7380], drag: 2 });
+    Sfx.whoosh(); this.shake(120, 0.005);
+  }
+  updateCyclones(dt, now) {
+    const T = TUNE.CYCLONE, G = this.xwG;
+    for (let i = this.cyclones.length - 1; i >= 0; i--) {
+      const C = this.cyclones[i];
+      if (C.st === 'fly') {
+        C.t -= dt; C.vy += 600 * dt;
+        const nx = C.x + C.vx * dt, ny = C.y + C.vy * dt, e = this.enemyAt(nx, ny, 2);
+        if (C.t <= 0 || ny > LH) { this.cycloneEnd(C); continue; }
+        if (this.solidAt(nx, ny) || (C.vy > 0 && this.standAt(nx, ny + 1)) || (e && !e.under) || this.xwPropAt(nx, ny)) {
+          const hit = this.sweep(C.x, C.y, nx, ny), px = hit ? hit.x : nx, fy = this.floorBelow(px, (hit ? hit.y : ny) - 6, 140);
+          if (fy === null) { this.cycloneEnd(C); continue; }
+          this.cycloneForm(C, clamp(px, 8, LW - 8), fy); continue;
+        }
+        C.x = nx; C.y = ny; C.img.setPosition(C.x, C.y).setRotation(C.img.rotation + 18 * dt);
+        continue;
+      }
+      C.t -= dt; C.age += dt;
+      if (C.t <= 0) { this.cycloneEnd(C); continue; }
+      let nx = C.x + C.dir * T.walk * dt, ny = C.y;                     // wander the floor: steps up and down, turn at walls and edges
+      if (this.solidAt(nx, ny - 6)) { if (!this.solidAt(nx, ny - TS - 6) && !this.solidAt(C.x, ny - TS - 6)) ny -= TS; else { C.dir *= -1; nx = C.x; } }
+      else if (!this.standAt(nx, ny + 2)) { if (this.standAt(nx, ny + TS + 2)) ny += TS; else { C.dir *= -1; nx = C.x; } }
+      C.x = nx; C.y = ny;
+      const grow = Math.min(1, C.age / 0.25) * Math.min(1, C.t / 0.3), reach = T.reach * grow, top = C.y - 70;
+      if ((C.sndT -= dt) <= 0) { C.sndT = 0.45; Sfx.cyclone(0.8); }
+      for (const e of this.enemies.getChildren()) {                      // suck in what's light; shove what isn't
+        if (!e.alive || e.under || e.kind === 'boss' || C.caught.some(c => c.e === e)) continue;
+        const b = e.body;
+        if (Math.abs(b.center.x - C.x) > reach + b.halfWidth || b.center.y < top || b.top > C.y + 4) continue;
+        if (e.def.hp <= T.maxHp && e.def.kb >= 0.45 && !e.def.noClip && !this.cyclones.some(o => o !== C && o.caught.some(c => c.e === e))) { C.caught.push({ e, ph: Math.atan2(0, b.center.x - C.x), r: rand(8, 14), h: 0 }); Sfx.whoosh(); }
+        else { b.velocity.x += Math.sign(C.x - b.center.x) * 300 * dt; if ((e.cycT = (e.cycT || 0) - dt) <= 0) { e.cycT = 0.2; this.xwHit(e, T.dps * 0.2 * 0.5, 0, 0, 'siphon', 'cyclone'); if (!C.hit) { C.hit = true; this.stats.hits++; } } }
+      }
+      C.tick -= dt; const tick = C.tick <= 0; if (tick) C.tick = 0.2;
+      for (let k = C.caught.length - 1; k >= 0; k--) {                   // the caught: round and round, rising
+        const c = C.caught[k], e = c.e;
+        if (!e.alive) { C.caught.splice(k, 1); continue; }
+        const b = e.body; c.ph += 10 * dt; c.h = Math.min(34, c.h + 40 * dt);
+        const tx = C.x + Math.cos(c.ph) * c.r, ty = C.y - 12 - c.h + Math.sin(c.ph * 2) * 2;
+        b.velocity.x = (tx - b.center.x) * 14; b.velocity.y = (ty - b.center.y) * 14; e.stunT = Math.max(e.stunT, 0.25); e.dir = Math.sin(c.ph) >= 0 ? 1 : -1;
+        if (tick) { this.xwHit(e, T.dps * 0.2, 0, 0, 'siphon', 'cyclone'); if (!C.hit) { C.hit = true; this.stats.hits++; } if (Math.random() < 0.5 && !e.def.mech) this.fxBlood(b.center.x, b.center.y, 2, 0, Math.PI * 2, [40, 120]); }
+      }
+      for (const g of this.gibList) {                                    // gibs, corpses and drums go round too
+        if (!g.active || Math.abs(g.x - C.x) > reach * 1.3 || g.y < top || g.y > C.y + 6) continue;
+        if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); }
+        const dx = g.x - C.x; g.body.velocity.x = -dx * 5 + (dx >= 0 ? -1 : 1) * 40 + Math.cos(now / 60 + g.x) * 60; g.body.velocity.y = Math.max(-160, g.body.velocity.y - 1500 * dt); g.body.angularVelocity = 900;
+      }
+      for (const rd of this.ragdolls) {
+        const c0 = rd.pts[2]; if (Math.abs(c0.x - C.x) > reach * 1.3 || c0.y < top || c0.y > C.y + 10) continue;
+        for (const q of rd.pts) { q.vx += ((C.x - q.x) * 6 + Math.sin(now / 80 + q.y * 0.2) * 90) * dt * 4; q.vy = Math.max(-140, q.vy - 1500 * dt); }
+        rd.asleep = false; rd.stillT = 0;
+      }
+      for (const kg of this.barrelList) if (kg.active && Math.abs(kg.x - C.x) < reach + 4 && kg.y > top && kg.y < C.y + 6) { kg.body.velocity.x = (C.x - kg.x) * 4 + C.dir * 60; kg.body.velocity.y = Math.max(-120, kg.body.velocity.y - 1100 * dt); if (tick) this.damageBarrel(kg, 3); }
+      this.propsIn((px, py, r) => Math.abs(px - C.x) < reach + r && py + r > top && py - r < C.y + 4, 4, 'kick', C.dir, -1, true);
+      // the funnel: bands that widen and whirl as they rise, specks of debris flying round it
+      const sw = Math.sin(C.age * 3) * 4, topX = C.x + sw, H = 62 * grow, Wt = 24 * grow;
+      G.fillStyle(0x8a94a0, 0.14 * grow).fillTriangle(C.x - 3, C.y, C.x + 3, C.y, topX - Wt, C.y - H).fillTriangle(C.x + 3, C.y, topX + Wt, C.y - H, topX - Wt, C.y - H);   // the dusty body of it
+      for (let k = 0; k < 12; k++) {                                     // bands that widen and whirl as they rise
+        const f = k / 11, y = C.y - 2 - f * H, w = 3 + f * Wt, x = C.x + (topX - C.x) * f + Math.sin(C.age * 7 + k * 0.8) * 1.5, ph = (C.age * 15 + k * 1.1) % (Math.PI * 2);
+        G.lineStyle(2, k % 2 ? 0xc8d0d8 : 0x8a94a0, (0.7 - f * 0.3) * grow);
+        G.beginPath(); G.arc(x, y, w, ph, ph + 2.4, false); G.strokePath();
+        G.lineStyle(1, 0xffffff, 0.5 * grow); G.beginPath(); G.arc(x, y, w * 0.75, ph + 3.1, ph + 4.3, false); G.strokePath();
+        const dp = C.age * 11 + k * 2.1; G.fillStyle(k % 3 ? 0x6a5a48 : 0xd8e8f0, 0.9 * grow).fillRect(Math.round(x + Math.cos(dp) * (w + 2)) - 1, Math.round(y + Math.sin(dp) * 2), 2, 2);   // debris round it
+      }
+      if (Math.random() < 0.6) this.fx.emit(C.x + rand(-8, 8), C.y - 1, { n: 1, angle: -Math.PI / 2 + C.dir * 0.6, spread: 1.2, speed: [30, 90], life: [0.3, 0.6], size: [2, 4], cols: [0x9aa4b0, 0x6a6f78], alpha: [0.6, 0], g: -30, drag: 2 });
+    }
+  }
+
+  // ---------------------------------------------------------------- caltrop scatter ----
+  // A fan of seven spiked caltrops that bounce and settle on whatever floor they reach, for 8 s. A grounded foe stood on
+  // one takes 9 (at most every 0.45 s) and limps at 55% for a second after; fliers float over them. One that hits a foe
+  // in the air stings for 4.
+  fireCaltrops(now, ox, oy, a, mx, my) {
+    const T = TUNE.CALTROP, ca = Math.cos(a), sa = Math.sin(a), shot = { hit: false }, pvx = this.player.body.velocity.x * 0.3;
+    this.stats.shots++;
+    for (let i = 0; i < T.n; i++) {
+      const an = a + ((i - (T.n - 1) / 2) / ((T.n - 1) / 2)) * T.fan * 0.5 + rand(-0.06, 0.06), sp = T.speed * rand(0.65, 1.15);
+      this.caltrops.push({ st: 'fly', x: ox, y: oy, vx: Math.cos(an) * sp + pvx, vy: Math.sin(an) * sp - rand(40, 100), t: T.life, spin: rand(8, 20), shot, bounce: 0,
+        img: this.add.image(ox, oy, 'xw_caltrop' + (i % 2)).setDepth(4.99) });
+    }
+    while (this.caltrops.length > T.max) this.caltrops.shift().img.destroy();
+    this.recoil = 4; Sfx.caltrops(); this.muzzle(mx, my, a, 0.8, 40); this.fxSparks(mx, my, 4, a, 0.8, [60, 160]); this.fxSmoke(mx, my, 3);
+    this.shake(60, 0.003); this.addKick(-ca * 3, -sa * 3);
+  }
+  caltropHit(C, e, dmg, now) {
+    const b = e.body;
+    this.xwHit(e, dmg, 0, 0, 'caltrop', 'caltrop');
+    if (!C.shot.hit) { C.shot.hit = true; this.stats.hits++; }
+    if (e.def.mech) this.fxSparks(C.x, C.y - 2, 4, -Math.PI / 2, 1.4, [40, 140]); else this.fxBlood(C.x, C.y - 2, 5, -Math.PI / 2, 1.2, [40, 160]);
+    Sfx.caltropStab();
+    if (e.alive && e.kind !== 'boss') { e.spikeUntil = now + TUNE.CALTROP.slowT * 1000; this.xwFoes.add(e); }   // (the limp is applied in updateCaltrops)
+  }
+  updateCaltrops(dt, now) {
+    const T = TUNE.CALTROP;
+    for (let i = this.caltrops.length - 1; i >= 0; i--) {
+      const C = this.caltrops[i];
+      if (C.st === 'fly') {
+        C.vy += 700 * dt;
+        const n = Math.max(1, Math.ceil(Math.hypot(C.vx, C.vy) * dt / 3));
+        for (let s = 0; s < n && C.st === 'fly'; s++) {
+          const nx = C.x + C.vx * dt / n, ny = C.y + C.vy * dt / n;
+          if (this.solidAt(nx, C.y)) { C.vx *= -0.4; continue; }
+          if (C.vy > 0 && this.standAt(nx, ny + 1)) {                      // a floor (gratings too): bounce once, then settle
+            C.x = nx; C.y = Math.floor((ny + 1) / TS) * TS - 1;
+            if (++C.bounce > 1 || C.vy < 120) { C.st = 'set'; C.img.setTexture('xw_caltrop0').setRotation(0); if (Math.random() < 0.4) Sfx.tink(0.4); }
+            else { C.vy *= -0.3; C.vx *= 0.5; }
+            continue;
+          }
+          if (C.vy < 0 && this.solidAt(nx, ny)) { C.vy = 0; continue; }
+          C.x = nx; C.y = ny;
+          const e = this.enemyAt(C.x, C.y, 1);
+          if (e && !e.under && !(e.spikeHitT > now)) { e.spikeHitT = now + T.cd * 1000; this.caltropHit(C, e, 4, now); C.vx *= 0.2; C.vy = 40; }
+        }
+        if (C.y > LH || (C.t -= dt) <= 0) { C.img.destroy(); this.caltrops.splice(i, 1); continue; }
+        if (C.st === 'fly') C.img.setPosition(C.x, C.y).setRotation(C.img.rotation + C.spin * dt);
+        else C.img.setPosition(C.x, C.y - 2);
+        continue;
+      }
+      C.t -= dt;
+      if (C.t <= 0 || !this.standAt(C.x, C.y + 2)) { C.img.destroy(); this.caltrops.splice(i, 1); continue; }   // spent, or the floor under it broke
+      C.img.setAlpha(C.t < 1 ? (Math.floor(C.t * 12) % 2 ? 0.4 : 1) : 1);
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind) || e.spikeHitT > now) continue;
+        const b = e.body;
+        if (Math.abs(b.center.x - C.x) > b.halfWidth + 1 || Math.abs(b.bottom - C.y) > 5) continue;
+        e.spikeHitT = now + T.cd * 1000; this.caltropHit(C, e, T.dmg, now);
+      }
+    }
+    for (const e of this.xwFoes) {                                        // spiked foes hobble (soaked ones drip: updateHydro)
+      if (!e.alive || !(e.spikeUntil > now)) continue;
+      const b = e.body, cap = (e.def.chase || e.def.speed || 120) * T.slow;                // a hobble: capped at 55% of its pace (a knock still throws it)
+      if (!(e.kickedT > 0) && !(e.stunT > 0.1) && Math.abs(b.velocity.x) > cap) b.velocity.x = Math.sign(b.velocity.x) * cap;
+      if (Math.random() < 0.06 && !e.def.mech) this.fxBlood(e.body.center.x, e.body.bottom - 2, 1, Math.PI / 2, 0.4, [10, 40]);
+    }
+  }
+
+  // ---------------------------------------------------------------- spear gun ----
+  // A barbed spear on a cable (640 px/s, 320 px). It skewers the first foe for 35: a light one (140 HP or less) is reeled
+  // in to you, a heavy one or a boss reels YOU to it, and either way it ends in a free boot (a kick's 25 and launch, or an
+  // execution if it's glowing). A kill it skewers rides the spear to the next wall and is PINNED there.
+  fireSpear(now, ox, oy, a, mx, my) {
+    const T = TUNE.SPEAR, ca = Math.cos(a), sa = Math.sin(a);
+    if (this.spear) this.spearDrop();
+    this.stats.shots++;
+    this.spear = { st: 'fly', x: ox, y: oy, vx: ca * T.speed, vy: sa * T.speed, a, d: 0, t: 0, e: null, carry: [], hit: false, tok: {}, hits: new Set(),
+      img: this.add.image(ox, oy, 'xw_spear').setOrigin(0.85, 0.5).setRotation(a).setDepth(9) };
+    this.recoil = 6; Sfx.spear(); this.muzzle(mx, my, a, 0.8, 50); this.fxSmoke(mx, my, 3);
+    this.shake(80, 0.004); this.addKick(-ca * 4, -sa * 4);
+  }
+  spearDrop() {
+    const S = this.spear; if (!S) return;
+    for (const c of S.carry) if (!c.rd.gone) { c.rd.asleep = false; c.rd.stillT = 0; }
+    S.img.destroy(); this.spear = null;
+  }
+  spearHit(S, e, now) {
+    const T = TUNE.SPEAR, ca = Math.cos(S.a), sa = Math.sin(S.a), b = e.body;
+    S.hits.add(e);
+    if (this.shieldBlocks(e, ca, S.y)) { this.fxSparks(S.x, S.y, 8, S.a + Math.PI, 1.2, [80, 240]); Sfx.clang(); e.ai = 'stagger'; e.aiUntil = now + 900; S.st = 'back'; return; }
+    if (!S.hit) { S.hit = true; this.stats.hits++; }
+    if (e.def.mech) this.fxSparks(S.x, S.y, 8, S.a + Math.PI, 1.2); else { this.fxBlood(S.x, S.y, 10, S.a, 0.7, [100, 300]); this.fxBlood(S.x, S.y, 4, S.a + Math.PI, 1, [40, 120]); }
+    Sfx.hookHit(); this.hitStop(40);
+    this.lastRag = null;
+    this.xwHit(e, T.dmg, ca, sa, 'spear', 'spear');
+    if (!e.alive) {                                                      // skewered: the body rides on to the wall
+      if (this.lastRag && this.lastRag.from === e && S.carry.length < T.carry) { S.carry.push({ rd: this.lastRag, pi: 1 }); Sfx.squish(); }
+      return;
+    }
+    const heavy = e.kind === 'boss' || e.def.kb < 0.45 || e.def.hp > T.light || e.def.noClip;
+    S.st = heavy ? 'zip' : 'reel'; S.e = e; S.t = 0; S.ox = S.x - b.center.x; S.oy = S.y - b.center.y;
+    e.stunT = Math.max(e.stunT, 0.6);
+    BUS.emit('callout', heavy ? 'HARPOONED!' : 'GET OVER HERE!'); this.addStyle(30); Sfx.spearReel();
+  }
+  spearKick(e, f) {                                                     // the end of the reel: a free boot
+    const K = TUNE.KICK, b = e.body;
+    this.kickUntil = this.time.now + 180; Sfx.kickHit(); this.hitStop(60); this.shake(100, 0.006); this.addStyle(25);
+    if (this.canExecute(e)) { this.execute(e, f); return; }
+    if (e.kind !== 'boss' && !e.def.noClip) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = f * K.push * kb; b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5); }
+    if (e.def.mech) this.fxSparks(b.center.x, b.center.y, 8, f > 0 ? 0 : Math.PI, 1, [80, 220]); else this.fxBlood(b.center.x, b.center.y, 8, f > 0 ? 0 : Math.PI, 1, [80, 220]);
+    this.xwHit(e, K.damage, f, -0.3, 'kick', 'spear');
+  }
+  updateSpear(dt, now) {
+    const S = this.spear; if (!S) return;
+    const T = TUNE.SPEAR, pb = this.player.body, sx = this.shoulder.x, sy = this.shoulder.y;
+    if (this.state === 'dead') { this.spearDrop(); return; }
+    S.t += dt;
+    if (S.st === 'fly') {
+      S.vy += 160 * dt; S.a = Math.atan2(S.vy, S.vx);
+      const ca = Math.cos(S.a), sa = Math.sin(S.a), sp = Math.hypot(S.vx, S.vy), n = Math.max(1, Math.ceil(sp * dt / 3));
+      for (let k = 0; k < n && S.st === 'fly'; k++) {
+        const nx = S.x + S.vx * dt / n, ny = S.y + S.vy * dt / n;
+        if (this.solidAt(nx, ny)) {                                       // a wall: thunk (and nail up whatever it carries)
+          const tx = Math.floor(nx / TS), ty = Math.floor(ny / TS);
+          if (S.carry.length) { this.stakeWall({ carry: S.carry, disableBody() {} }, S.x, S.y, tx, ty, S.a); S.carry = []; }
+          else { this.fxSparks(S.x, S.y, 8, S.a + Math.PI, 1.4, [60, 200]); this.fxDust(S.x, S.y, 3); this.paintHole(nx, ny); Sfx.clang(0.6); this.damageTile(tx, ty, 15); }
+          S.st = 'wall'; S.t = 0; break;
+        }
+        S.x = nx; S.y = ny; S.d += sp * dt / n;
+        const e = this.enemyAt(S.x, S.y, 1);
+        if (e && !e.under && !S.hits.has(e)) { this.spearHit(S, e, now); continue; }
+        const kg = this.barrelList.find(q => q.active && Math.abs(q.x - S.x) < 6 && Math.abs(q.y - S.y) < 8);
+        if (kg) { this.damageBarrel(kg, T.dmg); kg.body.velocity.x -= ca * 200; kg.body.velocity.y -= 120; S.st = 'back'; break; }   // a drum: holed, and tugged your way
+        if (this.propHitAt(S.x, S.y, ca, sa, T.dmg, S.tok)) { S.st = 'back'; break; }
+        if (S.carry.length < T.carry) { const rh = this.ragdolls.length ? this.ragAt(S.x, S.y, 1) : null; if (rh && !S.carry.some(c => c.rd === rh.rd)) { rh.rd.pin = null; S.carry.push({ rd: rh.rd, pi: rh.pi }); this.hitRagdoll(rh.rd, S.x, S.y, 6, ca, sa, 'stake', rh.pi); } }
+      }
+      if (S.st === 'fly' && S.d > T.range) S.st = 'back';
+      if (S.st === 'fly') S.carry.forEach((c, j) => { if (c.rd.gone) return; const q = c.rd.pts[c.pi]; q.x = S.x - Math.cos(S.a) * (5 + j * 7); q.y = S.y - Math.sin(S.a) * (5 + j * 7); q.vx = S.vx; q.vy = S.vy; c.rd.asleep = false; c.rd.stillT = 0; });
+    } else if (S.st === 'reel') {                                        // a light foe hauled in on the cable
+      const e = S.e; if (!e.alive) { S.st = 'back'; }
+      else {
+        const b = e.body, dx = sx - b.center.x, dy = sy - b.center.y, d = Math.hypot(dx, dy) || 1;
+        S.x = b.center.x + S.ox; S.y = b.center.y + S.oy; S.a = Math.atan2(-dy, -dx);
+        if (d < b.halfWidth + 14 || S.t > T.reelT) { this.spearKick(e, Math.sign(-dx) || this.facing); S.st = 'back'; }
+        else { b.velocity.x = dx / d * T.yank; b.velocity.y = dy / d * T.yank - 40; e.stunT = Math.max(e.stunT, 0.4); if ((S.clk = (S.clk || 0) - dt) <= 0) { S.clk = 0.2; Sfx.spearReel(); } }
+      }
+    } else if (S.st === 'zip') {                                         // a heavy one: the cable hauls you to it
+      const e = S.e; if (!e.alive) { S.st = 'back'; }
+      else {
+        const b = e.body, dx = b.center.x - pb.center.x, dy = b.center.y - pb.center.y, d = Math.hypot(dx, dy) || 1, f = Math.sign(dx) || this.facing;
+        S.x = b.center.x + S.ox; S.y = b.center.y + S.oy; S.a = Math.atan2(dy, dx);
+        if (d < b.halfWidth + 12 || S.t > T.reelT) { this.spearKick(e, f); pb.velocity.x = -f * 220; pb.velocity.y = -220; this.jumpCuttable = false; this.lastGround = -1e9; S.st = 'back'; }
+        else { pb.velocity.x = dx / d * T.pull; pb.velocity.y = dy / d * T.pull; this.jumpCuttable = false; this.lastGround = -1e9; e.stunT = Math.max(e.stunT, 0.3); if (Math.random() < 0.5) this.fx.emit(pb.center.x, pb.center.y, { n: 1, speed: [0, 10], life: [0.1, 0.2], size: [2, 1], cols: [0xffffff, 0xc8d0d8], add: true }); }
+      }
+    } else if (S.st === 'wall') { if (S.t > 0.15) S.st = 'back'; }
+    if (S.st === 'back') {                                               // the cable winds the spear home
+      const dx = sx - S.x, dy = sy - S.y, d = Math.hypot(dx, dy) || 1;
+      if (d < 12) { this.spearDrop(); return; }
+      S.a = Math.atan2(-dy, -dx); S.x += dx / d * 900 * dt; S.y += dy / d * 900 * dt;
+      for (const c of S.carry) if (!c.rd.gone) { c.rd.asleep = false; } S.carry = [];
+    }
+    const G = this.xwG, a = this.aim, mx = sx + Math.cos(a) * 26, my = sy + Math.sin(a) * 26, tx = S.x - Math.cos(S.a) * 13, ty = S.y - Math.sin(S.a) * 13;
+    const taut = S.st === 'reel' || S.st === 'zip', L = Math.hypot(tx - mx, ty - my), sag = taut ? 0 : Math.min(10, L * 0.06), N = Math.max(2, Math.round(L / 6));
+    let px = mx, py = my;                                                // the cable: taut while it hauls, a little slack otherwise
+    for (let k = 1; k <= N; k++) { const t = k / N, qx = mx + (tx - mx) * t, qy = my + (ty - my) * t + Math.sin(t * Math.PI) * sag; G.lineStyle(1, 0x2a2e35, 1).lineBetween(px, py, qx, qy); G.lineStyle(1, taut ? 0xd8dee6 : 0x8a94a0, 0.6).lineBetween(px, py - 1, qx, qy - 1); px = qx; py = qy; }
+    S.img.setPosition(S.x, S.y).setRotation(S.a);
+  }
+
+  // ---------------------------------------------------------------- heat ray ----
+  // Hold for a 210 px beam (20 ticks/s) that cooks whatever it rests on: 1.2 a tick on a fresh target, ramping to 6 (120
+  // a second) after 1.8 s on the same foe, which then catches fire. It heats the gun as it runs: 3.2 s of fire overheats
+  // it for a forced 1.6 s vent (steam, no shots); let go and it cools in 1.5 s. The gun glows with the heat.
+  fireHeatRay(now, ox, oy, a) {
+    const T = TUNE.HEATRAY, ca = Math.cos(a), sa = Math.sin(a), sx = this.shoulder.x, sy = this.shoulder.y;
+    if (now < this.hrVentUntil) { this.nextFire = this.hrVentUntil; return; }   // venting: nothing until it's cool
+    this.stats.shots++; this.hrOnUntil = now + 110; this.recoil = 1.5;
+    this.hrHeat = Math.min(1, this.hrHeat + T.cooldown / 1000 / T.heat);
+    let ex = ox, ey = oy, hitE = null, wall = false, keg = null, rd = null;
+    for (let d = 0; d < T.range; d += 3) {
+      const x = sx + ca * d, y = sy + sa * d;
+      if (this.solidAt(x, y)) { wall = true; break; }
+      ex = x; ey = y;
+      hitE = this.enemyAt(x, y, 2); if (hitE && !hitE.under) break; hitE = null;
+      keg = this.barrelList.find(k => k.active && Math.abs(k.x - x) < 6 && Math.abs(k.y - y) < 8); if (keg) break;
+      if (this.props && this.hitPropsAt(x, y, ca, sa)) break;
+      rd = this.ragdolls.length ? this.ragAt(x, y, 1) : null; if (rd) break;
+    }
+    if (hitE && hitE === this.hrTarget) this.hrLock += T.cooldown / 1000; else { this.hrTarget = hitE; this.hrLock = 0; }
+    const k = Math.min(1, this.hrLock / T.ramp), dmg = T.dmg0 + (T.dmg1 - T.dmg0) * k;
+    if (hitE) {
+      this.stats.hits++;
+      this.xwHit(hitE, dmg, ca, sa, 'microwave', 'heatray');
+      if (k >= 1 && hitE.alive) this.ignite(hitE, T.burn);
+      if (Math.random() < 0.5 + 0.5 * k) this.fx.emit(ex, ey, { n: 1, angle: -Math.PI / 2, spread: 0.8, speed: [10, 40], life: [0.3, 0.7], size: [2, 5], cols: [0x8a8580, 0x55504c], alpha: [0.5, 0], g: -40 });
+    }
+    if (keg) { this.damageBarrel(keg, dmg); if (k > 0.3 || this.hrHeat > 0.5) this.igniteBarrel(keg); }
+    if (rd) { rd.rd.burnT = Math.max(rd.rd.burnT, T.burn); this.hitRagdoll(rd.rd, ex, ey, dmg, ca, sa, 'flame', rd.pi); }
+    for (const P of this.tars.slice()) if (Math.abs(P.x - ex) < P.w / 2 + 3 && Math.abs(P.y - ey) < 8) this.igniteTar(P);   // the beam lights tar and gas
+    for (const C of this.clouds.slice()) if (Math.hypot(C.x - ex, C.y - ey) < C.r * 0.8) this.igniteCloud(C);
+    if (wall && now > this.hrScorchT) { this.hrScorchT = now + 160; this.paintScorch(ex + ca * 2, ey + sa * 2, 3 + Math.round(3 * k)); }
+    if (Math.random() < 0.6) this.fx.emit(ex, ey, { n: 1 + Math.round(2 * k), angle: a + Math.PI, spread: 2, speed: [40, 140], life: [0.1, 0.3], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20, 0xc03010], add: true, g: 300, mode: 1 });
+    this.hrBeam = { x0: ox, y0: oy, x1: ex, y1: ey, k };
+    if (this.hrHeat >= 1) {                                              // overheated: a forced vent
+      this.hrVentUntil = now + T.vent * 1000; this.nextFire = this.hrVentUntil; this.hrTarget = null; this.hrLock = 0;
+      Sfx.overheat(); Sfx.steam(); BUS.emit('callout', 'OVERHEATED');
+      this.fx.emit(this.shoulder.x + ca * 14, this.shoulder.y + sa * 14 - 2, { n: 16, angle: -Math.PI / 2, spread: 1.6, speed: [30, 110], life: [0.5, 1], size: [3, 8], cols: [0xffffff, 0xe8f0f4, 0xb0bcc4], alpha: [0.7, 0], g: -60, drag: 2 });
+    }
+    this.shake(25, 0.0008 * (1 + k));
+  }
+  updateHeatRay(dt, now) {
+    const T = TUNE.HEATRAY, on = now < this.hrOnUntil && this.state !== 'dead', venting = now < this.hrVentUntil, held = WEAPONS[this.weapon].id === 'heatray';
+    if (venting) {
+      this.hrHeat = Math.max(0, (this.hrVentUntil - now) / (T.vent * 1000));
+      if (held && Math.random() < 0.5) { const ca = Math.cos(this.aim), sa = Math.sin(this.aim); this.fx.emit(this.shoulder.x + ca * rand(8, 18), this.shoulder.y + sa * rand(8, 18) - 3, { n: 1, angle: -Math.PI / 2, spread: 0.9, speed: [20, 70], life: [0.4, 0.9], size: [2, 6], cols: [0xffffff, 0xe8f0f4, 0xb0bcc4], alpha: [0.6, 0], g: -50, drag: 1.5 }); }
+    } else if (!on) this.hrHeat = Math.max(0, this.hrHeat - dt / T.cool);
+    if (!on) { this.hrTarget = null; this.hrLock = 0; }
+    if (!held || this.hrHeat <= 0.01 || this.state === 'dead') this.hrGlow.setVisible(false);
+    Sfx.heatSet(on && held ? 0.3 + 0.7 * Math.min(1, this.hrLock / T.ramp) : 0);
+    const B = this.hrBeam; if (!on || !B || !held) return;
+    const G = this.xwAG, k = B.k, w = 1 + 2 * k, flick = 0.85 + Math.random() * 0.15;   // the beam: red when it lands, white-hot when it's locked
+    const outer = k < 0.5 ? 0xc02010 : 0xff6020, mid = k < 0.5 ? 0xff5020 : 0xffb040, core = k < 0.7 ? 0xffc080 : 0xffffff;
+    G.lineStyle(w + 4, outer, 0.25 * flick).lineBetween(B.x0, B.y0, B.x1, B.y1);
+    G.lineStyle(w + 1, mid, 0.7 * flick).lineBetween(B.x0, B.y0, B.x1, B.y1);
+    G.lineStyle(Math.max(1, w - 1), core, flick).lineBetween(B.x0, B.y0, B.x1, B.y1);
+    G.fillStyle(mid, 0.5).fillCircle(B.x1, B.y1, 2 + 3 * k * flick); G.fillStyle(0xffffff, 0.9).fillCircle(B.x1, B.y1, 1 + k);
+    if (Math.random() < 0.3) this.spawnLight(B.x1, B.y1, 'glow', 0xff7020, 0.8 + k, 1.4 + k, 0.5, 0.08);
+  }
+  heatGun(ca, sa, now) {                                                // syncVisuals: the heat shows on the gun, white at the top end; venting it flickers
+    const h = this.hrHeat, v = now < this.hrVentUntil && Math.floor(now / 70) % 2, G = GUNS.heatray;
+    this.gun.setTint(v ? 0xffffff : (255 << 16) | (Math.round(255 - 150 * h) << 8) | Math.round(255 - 220 * h));
+    this.gunTinted = true; this.hrGlow.setVisible(true).setPosition(this.gun.x + ca * (G.muzzle - 6), this.gun.y + sa * (G.muzzle - 6)).setScale(0.3 + 0.9 * h).setAlpha(0.25 + 0.55 * h);
+  }
+
+  // ---------------------------------------------------------------- barrage beacon ----
+  // Lobs a beacon that lands, blinks and calls it in: 0.7 s later six shells walk out from it along the floor the way you
+  // threw it, 32 px apart and 0.28 s between them, each marked on the floor 0.55 s before it lands (radius 34, 48->14).
+  // A wall stops the walk.
+  fireBarrage(now, ox, oy, a, mx, my) {
+    const T = TUNE.BARRAGE, ca = Math.cos(a), sa = Math.sin(a);
+    this.stats.shots++;
+    this.barrages.push({ st: 'fly', x: ox, y: oy, vx: ca * T.speed + this.player.body.velocity.x * 0.2, vy: sa * T.speed - T.lift, dir: ca >= 0 ? 1 : -1, t: 0, shells: null, counted: false,
+      img: this.add.image(ox, oy, 'xw_beacon0').setDepth(6) });
+    this.recoil = 4; Sfx.mineThrow(); this.muzzle(mx, my, a, 0.7, 40); this.spawnLight(mx, my, 'glow', 0xff4030, 0.6, 1.2, 0.8, 0.1);
+    this.addKick(-ca * 2, -sa * 2);
+  }
+  updateBarrages(dt, now) {
+    const T = TUNE.BARRAGE, G = this.xwFloorG, GA = this.xwG;
+    for (let i = this.barrages.length - 1; i >= 0; i--) {
+      const B = this.barrages[i]; B.t += dt;
+      if (B.st === 'fly') {
+        B.vy += 600 * dt;
+        const nx = B.x + B.vx * dt, ny = B.y + B.vy * dt;
+        if (B.t > 4 || ny > LH) { B.img.destroy(); this.barrages.splice(i, 1); continue; }
+        if (this.solidAt(nx, B.y)) B.vx *= -0.3;
+        else if (B.vy > 0 && this.standAt(nx, ny + 4)) {                  // down: it plants itself and calls it in
+          B.x = nx; B.y = Math.floor((ny + 4) / TS) * TS; B.st = 'set'; B.t = 0; Sfx.beaconSet(); this.fxDust(B.x, B.y, 3);
+        } else if (B.vy < 0 && this.solidAt(nx, ny)) B.vy = 0;
+        else {
+          B.x = nx; B.y = ny;
+          const e = this.enemyAt(B.x, B.y, 1); if ((e && !e.under) || this.xwPropAt(B.x, B.y)) { B.vx *= 0.2; B.vy = Math.max(B.vy, 40); }   // glances off a foe or a prop and drops
+        }
+        B.img.setPosition(B.x, B.y - 4).setRotation(B.img.rotation + B.vx * dt * 0.05);
+        continue;
+      }
+      const lit = Math.floor(B.t * (B.t < T.delay ? 6 : 14)) % 2;
+      if (B.img) { B.img.setPosition(B.x, B.y - 4).setRotation(0).setTexture(lit ? 'xw_beacon1' : 'xw_beacon0'); if (lit && !B.lastLit) { Sfx.beaconPing(B.shells ? 2 : 0); this.spawnLight(B.x, B.y - 7, 'glow', 0xff3020, 0.4, 0.8, 0.8, 0.12); } }
+      B.lastLit = lit;
+      if (B.st === 'set' && B.t < T.delay) { GA.lineStyle(1, 0xff3020, 0.25 + 0.3 * lit).lineBetween(B.x, B.y - 8, B.x, B.y - 8 - 60 * (B.t / T.delay)); }   // its designator climbs
+      if (!B.shells && B.t >= T.delay) {                                 // plot the walk: floor under each step, stopped by walls
+        B.shells = [];
+        for (let k = 0; k < T.shells; k++) {
+          const x = clamp(B.x + B.dir * T.step * k, 8, LW - 8), fy = this.floorBelow(x, B.y - 40, 160);
+          if (fy === null) continue;
+          if (fy <= B.y - 36) break;                                        // a wall in the way
+          B.shells.push({ x, y: fy, at: T.delay + k * T.gap + T.tell, warn: T.delay + k * T.gap, whist: false, done: false });
+        }
+      }
+      if (B.shells) {
+        let left = 0;
+        for (const S of B.shells) {
+          if (S.done) continue;
+          left++;
+          if (B.t < S.warn) continue;
+          if (!S.whist) { S.whist = true; Sfx.whistle(); }
+          const f = clamp((B.t - S.warn) / T.tell, 0, 1), blink = Math.floor(B.t * 16) % 2, r = 10 - 5 * f;
+          G.lineStyle(1, 0xff3020, 0.5 + 0.5 * blink).strokeEllipse(S.x, S.y - 1, r * 2 + 4, 4);       // the marker: a closing red ring on the floor
+          G.fillStyle(0xff3020, 0.35 + 0.4 * f).fillRect(S.x - 1, S.y - 2, 2, 1);
+          if (f > 0.55) { const k2 = (f - 0.55) / 0.45, y = S.y - 200 * (1 - k2); GA.lineStyle(1, 0xfff0c0, 0.25).lineBetween(S.x, y - 24, S.x, y - 4); GA.fillStyle(0x4a5240, 1).fillRect(S.x - 1, y - 7, 3, 6); GA.fillStyle(0xe8b422, 1).fillRect(S.x - 1, y - 5, 3, 1); GA.fillStyle(0x2a2e35, 1).fillRect(S.x - 1, y - 1, 3, 2); }   // the shell coming in
+          if (B.t >= S.at) {
+            S.done = true; left--;
+            const h0 = this.stats.hits;
+            this.xwBoom(S.x, S.y - 3, T.blast, 'barrage', !B.counted);
+            if (this.stats.hits > h0) B.counted = true;
+            this.fx.emit(S.x, S.y - 2, { n: 14, angle: -Math.PI / 2, spread: 0.9, speed: [100, 280], life: [0.4, 0.8], size: [3, 1], cols: [0xc8b8a0, 0x8a7a68, 0x5a4e44], g: 700, mode: 1 });
+          }
+        }
+        if (!left) { if (B.img) { this.fxSparks(B.x, B.y - 4, 6); B.img.destroy(); } this.barrages.splice(i, 1); }
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- hydro cannon ----
+  // Hold for a pressurised jet (18 ticks/s, 140 px, 8 degrees): 1 a tick, but it shoves foes back hard (340, wall splats)
+  // and soaks them for 5 s: soaked, they take x1.5 from electric hits (the arc caster, shock rifle, storm coil, ball
+  // lightning) and chill x1.8 faster under the cryo cannon. It puts out burning foes, floor fire, burning tar and drums,
+  // and leaves puddles where it lands, which electric hits can light. Molten slag takes x3 and steams.
+  fireHydro(now, ox, oy, a) {
+    const T = TUNE.HYDRO, ca = Math.cos(a), sa = Math.sin(a), sx = this.shoulder.x, sy = this.shoulder.y, pb = this.player.body;
+    this.hydroUntil = now + 120; this.stats.shots++; this.recoil = 1.5;
+    let ex = ox, ey = oy, wall = false;
+    for (let d = 6; d < T.range; d += 3) { const x = sx + ca * d, y = sy + sa * d; if (this.solidAt(x, y)) { wall = true; break; } ex = x; ey = y; }
+    const inCone = (x, y, extra) => {
+      const d = Math.hypot(x - sx, y - sy); if (d > T.range + extra) return false;
+      let da = Math.abs(Math.atan2(y - sy, x - sx) - a) % (Math.PI * 2); if (da > Math.PI) da = Math.PI * 2 - da;
+      return (da <= (T.cone + 8) * DEG || d < 12) && this.los(sx, sy, x, y);
+    };
+    let hitAny = false;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under || !inCone(e.body.center.x, e.body.center.y, e.body.halfWidth)) continue;
+      const b = e.body, kb = e.def.kb; hitAny = true;
+      e.soakUntil = now + T.soak * 1000; this.xwFoes.add(e);
+      if (e.burnT > 0) { e.burnT = 0; e.panicT = 0; Sfx.sizzle(); this.fx.emit(b.center.x, b.top, { n: 8, angle: -Math.PI / 2, spread: 1, speed: [10, 50], life: [0.5, 1], size: [3, 7], cols: [0xe8f0f4, 0xb0bcc4], alpha: [0.5, 0], g: -40, drag: 2 }); }
+      if (e.kind !== 'boss' && !e.def.noClip && kb > 0) {
+        b.velocity.x = approach(b.velocity.x, ca * T.push * kb, T.push * kb * 0.6);
+        if (FLIERS.has(e.kind)) b.velocity.y = approach(b.velocity.y, sa * T.push * kb, T.push * kb * 0.6); else if (sa < -0.3) b.velocity.y = Math.min(b.velocity.y, sa * T.push * kb * 0.7);
+        e.stunT = Math.max(e.stunT, 0.12);
+        if (!(e.hydroSplatT > now) && Math.abs(b.velocity.x) > 180) { e.kickedT = 0.25; e.hydroSplatT = now + 900; }   // hosed into a wall: a splat, once in a while
+      }
+      if (e.def.molten && Math.random() < 0.5) this.fx.emit(b.center.x, b.center.y, { n: 3, angle: -Math.PI / 2, spread: 1.2, speed: [20, 70], life: [0.4, 0.8], size: [3, 7], cols: [0xffffff, 0xe8f0f4, 0xb0bcc4], alpha: [0.6, 0], g: -50, drag: 2 });
+      this.xwHit(e, T.dmg * (e.def.molten ? 3 : 1), ca, sa, 'siphon', 'hydro');
+      if (Math.random() < 0.5) this.fx.emit(b.center.x - ca * b.halfWidth, b.center.y, { n: 3, angle: a + Math.PI, spread: 1.6, speed: [40, 140], life: [0.2, 0.45], size: [2, 1], cols: [0xffffff, 0xc8ecff, 0x6ab8f0], g: 500, mode: 1 });
+    }
+    if (hitAny) this.stats.hits++;
+    for (const k of this.barrelList) if (k.active && inCone(k.x, k.y, 6)) {                       // drums get shoved and put out
+      k.body.velocity.x = approach(k.body.velocity.x, ca * 160, 40);
+      if (k.burning && k.hp > 0) { k.burning = false; k.fuse = -1; k.clearTint(); Sfx.sizzle(); }
+    }
+    this.propsIn((px, py, r) => inCone(px, py, r), 3, 'shot', ca, sa, true);                      // scenery wears down under it
+    for (const rd of this.ragdolls) { const c = rd.pts[2]; if (inCone(c.x, c.y, 6)) { for (const q of rd.pts) { q.vx += ca * 30; q.vy += sa * 30 - 6; } rd.asleep = false; rd.stillT = 0; } }
+    for (const g of this.gibList) if (g.active && inCone(g.x, g.y, 2)) { if (g.stuckT > 0) { g.stuckT = 0; g.body.setAllowGravity(true); } g.body.velocity.x += ca * 40; g.body.velocity.y += sa * 40; }
+    this.douse(ex, ey, 18); this.douse((sx + ex) / 2, (sy + ey) / 2, 14);                        // fires out: floor fire, burning tar, foes, props
+    if ((this.hydroPud += T.cooldown / 1000) >= T.pud) { this.hydroPud = 0; this.spawnWater(ex - ca * 2, ey - sa * 2, 12); }   // it pools where it lands
+    this.hydroJet = { x0: ox, y0: oy, x1: ex, y1: ey, a, wall };
+    for (let k = 0; k < 3; k++) this.fx.emit(ox, oy, { n: 1, angle: a, spread: T.cone * 2 * DEG, speed: [250, 340], life: [0.25, 0.45], size: [2, 1], cols: [0xffffff, 0xd8f4ff, 0x7ac8f0, 0x3a8ad0], g: 260, drag: 0.6, vx: pb.velocity.x * 0.4 });
+    this.fx.emit(ex, ey, { n: 3, angle: a + Math.PI, spread: 2.4, speed: [40, 160], life: [0.2, 0.45], size: [2, 1], cols: [0xffffff, 0xc8ecff, 0x6ab8f0], g: 500, mode: 1 });
+    if (Math.random() < 0.5) this.fx.emit(ex, ey, { n: 1, speed: [5, 25], life: [0.4, 0.8], size: [3, 7], cols: [0xe8f4ff, 0xb8d4e8], alpha: [0.35, 0], g: -10, drag: 2 });
+    pb.velocity.x -= ca * 10; this.shake(25, 0.0007);
+  }
+  updateHydro(dt, now) {
+    const on = now < this.hydroUntil && this.state !== 'dead' && WEAPONS[this.weapon].id === 'hydro';
+    Sfx.hydroSet(on);
+    for (const e of this.xwFoes) {                                        // soaked foes drip (the set holds the spiked ones too)
+      if (!e.alive || (!(e.soakUntil > now) && !(e.spikeUntil > now))) { this.xwFoes.delete(e); continue; }
+      if (e.soakUntil > now && Math.random() < 0.25) this.fx.emit(e.body.center.x + rand(-e.body.halfWidth, e.body.halfWidth), e.body.center.y + rand(-4, 6), { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [5, 20], life: [0.3, 0.6], size: [1, 1], cols: [0xc8ecff, 0x6ab8f0], g: 400, mode: 1 });
+    }
+    const J = this.hydroJet; if (!on || !J) return;
+    const G = this.xwG, L = Math.hypot(J.x1 - J.x0, J.y1 - J.y0) || 1, nx = -(J.y1 - J.y0) / L, ny = (J.x1 - J.x0) / L, N = Math.max(3, Math.round(L / 6));
+    let px = J.x0, py = J.y0;                                            // the jet: a wobbling rope of water that swells and frays as it goes
+    for (let k = 1; k <= N; k++) {
+      const t = k / N, wob = Math.sin(now / 30 + t * 9) * 1.4 * t, qx = J.x0 + (J.x1 - J.x0) * t + nx * wob, qy = J.y0 + (J.y1 - J.y0) * t + ny * wob + t * t * 3, w = 2 + t * 3;
+      G.lineStyle(w + 3, 0x2a6aa8, 0.35).lineBetween(px, py, qx, qy);
+      G.lineStyle(w, 0x6ab8f0, 0.85).lineBetween(px, py, qx, qy);
+      G.lineStyle(Math.max(1, w * 0.4), 0xe8f8ff, 0.95).lineBetween(px, py - w * 0.2, qx, qy - w * 0.2);
+      if (k % 3 === 0) G.fillStyle(0xffffff, 0.8).fillRect(Math.round(qx + nx * w * 0.6), Math.round(qy + ny * w * 0.6), 1, 1);   // droplets peeling off
+      px = qx; py = qy;
+    }
+    const sp = 4 + Math.sin(now / 25) * 1.5;                             // the splash where it lands
+    G.fillStyle(0x9ad8ff, 0.45).fillCircle(px, py, sp + 2); G.fillStyle(0xe8f8ff, 0.85).fillCircle(px, py, sp * 0.6); G.fillStyle(0xffffff, 1).fillCircle(px, py, 1.5);
   }
 
   // ================================================================== armory round ====
@@ -11941,6 +12757,8 @@ class GameScene extends Phaser.Scene {
         const c = this.lanceCharge, G = GUNS.lance;
         this.gun.setTint((255 << 16) | (Math.round(255 - 90 * c) << 8) | Math.round(255 - 190 * c)); this.gunTinted = true;
         this.lanceGlow.setVisible(true).setPosition(this.gun.x + ca * G.muzzle, this.gun.y + sa * G.muzzle).setScale(0.35 + 1.1 * c + (c >= 1 ? Math.random() * 0.3 : 0)).setAlpha(0.45 + 0.45 * c);
+      } else if (wid === 'heatray' && this.hrHeat > 0.01) {             // heat ray: the heat shows on the gun
+        this.heatGun(ca, sa, now);
       } else if (masteryStars(wid) >= 3) {                              // mastered: gold-plated, with the odd glint
         this.gun.setTint(0xffe080); this.gunTinted = true;
         if (Math.random() < 0.05) this.fx.emit(this.gun.x + ca * rand(2, 14), this.gun.y + sa * rand(2, 14) + rand(-2, 2), { n: 1, speed: [0, 8], life: [0.15, 0.3], size: [1, 1], cols: [0xffffff, 0xffe080], add: true });
