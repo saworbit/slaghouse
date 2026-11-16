@@ -129,7 +129,8 @@ class TitleScene extends Phaser.Scene {
         desc: new PixelLabel(this, x + 26, y + 12, 'title_md' + i, { text: m.d, align: 'left', scale: 1, color: on ? '#e8ecf0' : '#8f9bab' }).setDepth(21) };
     });
     this.medalCount = new PixelLabel(this, 480, 96, 'title_mc', { text: 'COLLECTED ' + got.length + '/' + MEDALS.length, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
-    this.armImgs = WEAPONS.map((w, i) => this.add.image(480 + (i % 13 - 6) * 66, 124 + Math.floor(i / 13) * 56, 'icon_' + w.gun).setScale(Math.min(2, 52 / GUNS[w.gun].w)).setDepth(21));   // every gun, 13 to a row
+    const armRows = Math.ceil(WEAPONS.length / 13); this.armGap = armRows > 5 ? 48 : 56;   // every gun, 13 to a row; a sixth row packs them closer so the name still fits under them
+    this.armImgs = WEAPONS.map((w, i) => this.add.image(480 + (i % 13 - 6) * 66, (armRows > 5 ? 118 : 124) + Math.floor(i / 13) * this.armGap, 'icon_' + w.gun).setScale(Math.min(2, 52 / GUNS[w.gun].w)).setDepth(21));
     this.armName = new PixelLabel(this, 480, 404, 'title_arn', { maxChars: 20, scale: 3, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armDesc = new PixelLabel(this, 480, 436, 'title_ard', { maxChars: 40, scale: 2, color: '#d8dee6', shadow: sh, originY: 0.5 }).setDepth(21);
     this.armStat = new PixelLabel(this, 480, 464, 'title_ars', { maxChars: 52, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
@@ -357,7 +358,7 @@ class TitleScene extends Phaser.Scene {
       return;
     }
     if (this.sub === 'armory') {
-      const i = this.armImgs.findIndex(o => Math.abs(p.x - o.x) < 32 && Math.abs(p.y - o.y) < 28);
+      const i = this.armImgs.findIndex(o => Math.abs(p.x - o.x) < 32 && Math.abs(p.y - o.y) < this.armGap / 2);
       if (i >= 0 && i !== this.subSel) { this.subSel = i; this.refreshSub(); }
       return;
     }
@@ -405,7 +406,7 @@ class TitleScene extends Phaser.Scene {
     }
     if (this.sub === 'codex') { const o = this.codexImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 34, o.y - 25, 68, 50); }
     if (this.sub === 'armory') {                                          // a frame on the pick, three mastery pips under every gun
-      const o = this.armImgs[this.subSel]; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 31, o.y - 22, 62, 52);
+      const o = this.armImgs[this.subSel], fh = this.armGap < 56 ? 48 : 52; sg.lineStyle(2, 0xffb347, 0.6 + 0.4 * Math.sin(time / 120)); sg.strokeRect(o.x - 31, o.y - fh / 2 + 4, 62, fh);
       this.armImgs.forEach((im, i) => { const st = masteryStars(WEAPONS[i].id); for (let j = 0; j < 3; j++) { sg.fillStyle(j < st ? 0xffd040 : 0x2a2e35, 1); sg.fillRect(im.x - 9 + j * 7, im.y + 20, 5, 4); } });
     }
     if (this.sub === 'medals') for (const r of this.medalRows) { sg.fillStyle(r.on ? 0xffd040 : 0x2a2e35, 1); sg.fillTriangle(r.x, r.y + 4, r.x + 8, r.y - 10, r.x + 16, r.y + 4); sg.fillTriangle(r.x, r.y - 4, r.x + 16, r.y - 4, r.x + 8, r.y + 10); }
