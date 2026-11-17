@@ -62,9 +62,8 @@ window.campaignBot = () => {
     walk = null;
   }
 
-  function choosePosition(g, start, value) {
-    if (start < 0) return;
-    const b = player.body, current = NAV.nodes[start], now = g.time.now;
+  function ensureWalk(g, start) {                                     // shortest walks from this node, cached until it moves or a failed edge expires
+    const now = g.time.now;
     if (!walk || walk.start !== start || now >= walk.expires) {
       let expires = Infinity;
       for (const [key, until] of failedEdges) {
@@ -75,6 +74,21 @@ window.campaignBot = () => {
       const edgeCost = (from, edge) => (edge.playerCost ?? edge.cost) + (failedEdges.has(from * NAV.nodes.length + edge.to) ? 32 : 0);
       walk = { start, expires, ...navDijkstra(start, -1, Infinity, edgeCost) };
     }
+    return walk;
+  }
+  // Can the player walk to this foe? Blasts can take out the steps to a deck and strand a foe up there. Fliers and
+  // foes off the graph count as reachable: they come to you.
+  function reachable(g, start, e) {
+    if (start < 0 || FLIERS.has(e.kind)) return true;
+    const b = e.body, node = navAt(b.center.x, b.bottom - 1);
+    const n = node >= 0 ? node : navBelow(b.center.x, b.bottom - 2, MAP_H);
+    return n < 0 || Number.isFinite(ensureWalk(g, start).dist[n]);
+  }
+
+  function choosePosition(g, start, value) {
+    if (start < 0) return;
+    const b = player.body, current = NAV.nodes[start];
+    ensureWalk(g, start);
     let best = start, score = Infinity;
     for (let i = 0; i < NAV.nodes.length; i++) {
       const node = NAV.nodes[i], x = xOf(node), feet = feetOf(node), walkCost = walk.dist[i];
@@ -212,15 +226,16 @@ window.campaignBot = () => {
     const px = b.center.x, py = b.center.y, ground = grounded(b), start = nearestNode(b);
     const visible = (x, y) => g.los(px, py - 2, x, y);
     const foes = g.enemies.getChildren().filter(e => e.alive && !e.under && e.body.enable);
-    const nearest = foes.reduce((best, e) => Math.hypot(e.x - px, e.y - py) < Math.hypot((best?.x ?? 1e5) - px, (best?.y ?? 0) - py) ? e : best, null);
+    const near = e => Math.hypot(e.x - px, e.y - py) + (reachable(g, start, e) ? 0 : 1e4);   // a foe stranded on a cut-off deck comes last
+    const nearest = foes.reduce((best, e) => !best || near(e) < near(best) ? e : best, null);
     const rail = g.weaponSlots.includes(weaponSlot('rail'));
     const targets = foes.filter(e => visible(e.body.center.x, e.body.center.y) ||
       (rail && Math.hypot(e.x - px, e.y - py) < 420 && g.losHard(px, py - 2, e.body.center.x, e.body.center.y)));
     const target = targets.reduce((best, e) => {
-      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? 100 : 0) - (g.canExecute(o) ? 20 : 0);
+      const rank = o => Math.hypot(o.x - px, o.y - py) + (o.summoned ? 100 : 0) - (g.canExecute(o) ? 20 : 0) + (reachable(g, start, o) ? 0 : 600);
       return !best || rank(e) < rank(best) ? e : best;
     }, null);
-    const objective = g.campaignRoute[0];
+    const objective = g.routeGoal ? g.routeGoal() : g.campaignRoute[0];   // the open station, unless it's a lift waiting on a clear area
     const heal = !objective && g.hp <= 70 && g.pickups.filter(k => !k.taken)
       .sort((a, c) => Math.hypot(a.x - px, a.y - py) - Math.hypot(c.x - px, c.y - py))[0];
     const buried = g.enemies.getChildren().find(e => e.alive && e.under && !e.summoned && (e.kind === 'wyrm' || e.kind === 'burrower'));
@@ -244,12 +259,13 @@ window.campaignBot = () => {
     if (!direct && !action && ground && (now > timeout || !plan)) {
       const tide = g.mod === 'melt' ? TUNE.TIDE.top : LH;
       const goal = objective || heal;
-      const targetX = foe?.body.center.x, targetY = foe?.body.center.y;
+      const targetX = foe?.body.center.x, targetY = foe?.body.center.y, stranded = foe && foe !== buried && foe !== g.boss && !reachable(g, start, foe);
       plan = choosePosition(g, start, (x, y) => {
         const hazard = (y + 14 > tide ? 140 : 0) + (hazardAt(g, x, y + 14) ? 160 : 0);
         if (goal) return Math.abs(x - goal.x) * 1.8 + Math.abs(y - (objective ? goal.y - 14 : goal.y)) * 3 + hazard;
         if (!foe) return Math.abs(x - px) + Math.abs(y - py) + hazard;
         if (foe === buried) return Math.abs(x - (foe.ux ?? px)) * 0.16 + (LH - y) * 2 + hazard;
+        if (stranded) return (g.los(x, y, targetX, targetY) ? 0 : 400) + Math.max(0, Math.hypot(x - targetX, y - targetY) - 560) * 0.5 + hazard;   // out of reach: anywhere that sees it will do
         const dist = Math.hypot(x - targetX, y - targetY);
         const sight = g.los(x, y, targetX, targetY);
         const softCover = rail && g.losHard(x, y, targetX, targetY);
