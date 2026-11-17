@@ -372,6 +372,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   burst follows a grate tell. (#185)
 - A DOUBLE KILL ... MASSACRE label no longer stays up over the next run's card after R, a Lab deploy or reset, or a
   lift ride. Its tilt now draws from the cosmetic generator. (#180)
+- **The Furnace's Gunship no longer gets stuck above the catwalk.** The two pillars over the catwalk ran from the
+  ceiling down to it, so they boxed in the space above its middle. The campaign Gunship warps in there and flies at
+  a fixed height, so the pillars held it in that box for the whole fight. A player who climbed up through the grating
+  could only get out with S + Space. The pillars now stop as ceiling brackets above the Gunship's height. The
+  Gunship follows you across the arena, and you can walk out along the catwalk. Solid joints in the catwalk, where
+  the pillars met it, keep its girder spans supported.
 - Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
   scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
   That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,
