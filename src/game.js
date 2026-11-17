@@ -113,7 +113,7 @@ class GameScene extends Phaser.Scene {
     // mutator round: tripwires, ally drones, hard-light walls
     this.trips = []; this.allies = []; this.bwalls = [];
     // debrief round: bubbles, holy orbs, souls, mines, and who killed you
-    this.shieldUntil = 0; this.shieldBlockT = 0; this.shieldHeld = false; this.hustleT = 0; this.lastMod = null; this.globs = []; this.gluePuds = []; this.leapMarks = [];
+    this.shieldUntil = 0; this.shieldBlockT = 0; this.shieldHeld = false; this.hustleT = 0; this.barkPool = []; this.barkAt = 0; this.kegT = 0; this.tacT = 0; this.pvx = 0; this.threat = 'mid'; this.lastMod = null; this.globs = []; this.gluePuds = []; this.leapMarks = [];
     this.nukes = [];                                                     // powerhouse round: mini-nuke shells
     this.initExpansionWeapons();                                          // expansion: weapons (cannonballs, quakes, tornadoes, caltrops...)
     this.seeds = []; this.shrooms = []; this.pspores = []; this.tethered = []; this.sharing = false; this.linkCalled = false;   // gold round
@@ -304,7 +304,7 @@ class GameScene extends Phaser.Scene {
       const k = this.barrelList[i]; if (!k || k.active) return;
       k.enableBody(true, cx * TS + 8, (cy + 1) * TS - 7, true, true);
       k.body.setSize(10, 13, true); k.body.setAllowGravity(true); k.body.setBounce(0.2); k.body.setDrag(200, 0);
-      k.clearTint(); Object.assign(k, { hp: TUNE.BARREL.hp, fuse: -1, burning: false, kicked: false, prevV: 0 });
+      k.clearTint(); Object.assign(k, { hp: TUNE.BARREL.hp, fuse: -1, burning: false, kicked: false, prevV: 0, byFoe: false });
       if (fx) { this.fx.emit(k.x, k.y, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xffc060], add: true, g: -40 }); this.beamIn(k.x, (cy + 1) * TS, 13, [k]); }
     });
   }
@@ -1843,6 +1843,7 @@ class GameScene extends Phaser.Scene {
   explodeBarrel(k) {
     const x = k.x, y = k.y; k.disableBody(true, true);
     for (let i = 0; i < 4; i++) this.spawnGib('g_barrel', x, y, rand(-220, 220), rand(-340, -140), 'metal');
+    if (k.byFoe) { k.byFoe = false; this.explode(x, y, BARREL_FOE); return; }   // a foe set it off: a hostile blast, and no style for you
     this.explode(x, y, TUNE.BARREL);
     this.addStyle(20);
   }
@@ -1966,18 +1967,26 @@ class GameScene extends Phaser.Scene {
         const k = (now - e.aimStart) / T.aimMs;
         if (k < T.lockAt) e.aimA = this.leadAngle(e, T.bulletSpeed);
         if ((!c.canSee && k < 0.6) || c.dist < 100) { e.ai = 'engage'; e.fireCd = 0.6; e.repickT = 0; return 'hold'; }
-        if (now >= e.aiUntil) { this.sniperShoot(e); e.fireCd = T.fireCd; e.ai = 'engage'; e.repickT = 0.4; }
+        if (now >= e.aiUntil) {                                // fire, and often move before you can answer
+          this.sniperShoot(e); e.fireCd = T.fireCd; e.ai = 'engage'; e.repickT = 0.4;
+          if (Math.random() < TUNE.AI.scoot) { e.scoot = true; e.repickT = 0.15; }
+        }
         return 'hold';
       }
       default: {
         if (!c.alive || now - e.lkT > 9000) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
         if (c.onGround && !e.navAir && e.repickT <= 0) {
           if (c.dist < 130) { e.repickT = 1.2; this.pickPosition(e, 'retreat'); }
-          else { e.repickT = rand(4, 6); if (!this.pickPosition(e, 'snipe')) this.pickPosition(e, 'attack'); }
+          else {
+            e.repickT = rand(4, 6);
+            if (!this.pickPosition(e, 'snipe')) this.pickPosition(e, 'attack');
+            if (e.scoot && e.path?.length > 2) this.bark(e, 'MOVING!', '#9adcff');
+            e.scoot = false;
+          }
         }
         const settled = !e.path || e.pathI >= e.path.length;
         if (c.canSee && c.onGround && !e.navAir && settled && e.fireCd <= 0 && c.dist > 100) {
-          e.ai = 'aim'; e.aimStart = now; e.aiUntil = now + T.aimMs; Sfx.laser(); return 'hold';
+          this.aimStart(e, now, T.aimMs); Sfx.laser(); return 'hold';
         }
         return 'path';
       }
@@ -1993,7 +2002,7 @@ class GameScene extends Phaser.Scene {
     const b = this.ebullets.getFirstDead(false); if (!b) return;
     b.setTexture('sbullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(4, 4, true);
     b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.2, px: mx, py: my, ang: a, dmg: T.damage, snipe: true });
+    Object.assign(b, { life: 1.2, px: mx, py: my, ang: a, dmg: T.damage, snipe: true, keg: null });
   }
 
   // -------------------------------------------------------------------- boss ----
@@ -2253,6 +2262,10 @@ class GameScene extends Phaser.Scene {
       b.life -= dt;
       const hit = this.sweep(b.px, b.py, b.x, b.y);
       if (hit || b.life <= 0) { if (hit) this.fxSparks(hit.x, hit.y, 3, b.ang + Math.PI, 1.6, [40, 140]); b.disableBody(true, true); continue; }
+      if (b.keg) {                                                      // a burst aimed at a drum (thinkEnforcer) holes it
+        const k = this.barrelList.find(o => o.active && Math.abs(o.x - b.x) < 7 && Math.abs(o.y - 1 - b.y) < 9);
+        if (k) { k.byFoe = true; this.damageBarrel(k, b.dmg || 5); b.disableBody(true, true); continue; }
+      }
       if (b.snipe && this.state !== 'dead') {                           // 900 px/s can skip a 10 px body between frames: sweep it
         const pb = this.player.body, n = Math.ceil(Math.hypot(b.x - b.px, b.y - b.py) / 3) || 1;
         let struck = false;
@@ -2530,6 +2543,7 @@ class GameScene extends Phaser.Scene {
     }
     if (dmg0 < 999 && dmg > (this.stats.big || 0)) this.stats.big = dmg;   // (scripted 999 kills don't count)                 // the biggest single hit of the run
     e.hp -= dmg; e.flashT = 0.08; e.aggro = true; e.aggroT = 5; e.lastHs = !!hs;
+    { const now = this.time.now; e.hurtWin = (e.hurtWin || 0) * Math.exp(-(now - (e.hurtAt || 0)) / 1000) + dmg; e.hurtAt = now; }   // how hard it's being hit lately (underFire)
     e.dmgAcc += dmg; if (hs) e.dmgHead = true; if (!e.dmgFlushAt) e.dmgFlushAt = this.time.now + (src === 'burn' || src === 'flame' || src === 'acid' || src === 'crush' || src === 'needle' || src === 'drill' || src === 'gas' || src === 'siphon' || src === 'microwave' ? 420 : 90);   // batched damage numbers (streams batch longer)
     this.addStyle(dmg * 0.25);
     const quiet = src === 'burn' || src === 'gas' || src === 'net', rapid = src === 'arc' || src === 'flame' || src === 'ripper' || src === 'acid' || src === 'needle' || src === 'siphon' || src === 'microwave';
@@ -2724,6 +2738,7 @@ class GameScene extends Phaser.Scene {
     }
     this.flushDmg(e, e.lastHs ? 'Y' : 'R');
     if (!e.summoned && e.kind !== 'wyrmseg') this.multiKill(now0);
+    if (isHumanoid(e) && !this.lab?.stationary) this.allyDown(e, now0);
     const grounded = b.blocked.down || b.touching.down, playerAir = !(this.player.body.blocked.down || this.player.body.touching.down);
     if (e.juggleUntil > now0 && !grounded) this.juggleKill(e);           // finished in the air after a quake threw it up
     let style = 60 + (e.lastHs ? 50 : 0) + (!grounded && !D.noAirStyle ? 40 : 0) + (playerAir ? 25 : 0);
@@ -4340,30 +4355,31 @@ class GameScene extends Phaser.Scene {
         const k = (now - e.aimStart) / T.aimMs;
         if (k < T.lockAt) e.aimA = this.rocketAim(e);
         if (!c.canSee && k < 0.4) { e.ai = 'engage'; e.fireCd = 0.6; return 'hold'; }
+        if (k < T.lockAt && c.onGround && this.underFire(e, now)) {   // shot up while lining up: it gives up the shot and ducks
+          e.suppCd = now + TUNE.AI.suppressCd; e.ai = 'retreat'; e.aiUntil = now + 1600; e.fireCd = 0.6; this.pickPosition(e, 'cover'); this.coverMe(e); return 'path';
+        }
         if (now >= e.aiUntil) { this.rocketeerShoot(e); e.fireCd = T.fireCd * rand(0.85, 1.15); e.ai = 'engage'; e.repickT = Math.random() < 0.5 ? 0 : 1.2; }
         return 'hold';
       }
       case 'retreat': if (now > e.aiUntil) { e.ai = 'engage'; e.repickT = 0; } return 'path';
-      case 'search':
-        if (c.canSee || now - e.lkT < 300) { e.ai = 'engage'; e.repickT = 0; return 'path'; }
-        if (now > e.searchUntil || !c.alive) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
-        if (!e.path || e.pathI >= e.path.length) { this.lookAround(e, dt, 2.5); return 'hold'; }
-        return 'path';
+      case 'search': return this.searchStep(e, dt, now, c);
       default: {
         if (!c.alive) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
-        if (now - e.lkT > 1800) { e.ai = 'search'; e.searchUntil = now + 6000; this.pathTo(e, navBelow(e.lkx, e.lky - 4), 160); return 'path'; }
-        if (c.dist < 80 && c.onGround && !e.navAir && e.repickT < 1.5) { e.repickT = 2; e.ai = 'retreat'; e.aiUntil = now + 1400; this.pickPosition(e, 'retreat'); return 'path'; }
+        if (now - e.lkT > 1800) { this.startSearch(e, now); return 'path'; }
+        if (c.dist < 80 && c.onGround && !e.navAir && e.repickT < 1.5) { e.repickT = 2; e.ai = 'retreat'; e.aiUntil = now + 1400; this.pickPosition(e, 'retreat'); this.bark(e, 'BACK OFF!'); return 'path'; }
+        if (c.onGround && !e.navAir && this.underFire(e, now)) {   // pinned down: duck out of sight while a squadmate covers
+          e.suppCd = now + TUNE.AI.suppressCd; e.ai = 'retreat'; e.aiUntil = now + 1600; this.pickPosition(e, 'cover'); this.coverMe(e); return 'path';
+        }
         if (c.onGround && !e.navAir && e.repickT <= 0) { e.repickT = rand(3, 4.5); if (!this.pickPosition(e, 'attack')) this.pathTo(e, navBelow(e.lkx, e.lky - 4), 160); }
         if (c.canSee && c.onGround && !e.navAir && e.fireCd <= 0 && c.dist < 340 && c.dist > 60) {
-          e.ai = 'aim'; e.aimStart = now; e.aiUntil = now + T.aimMs; e.aimA = this.rocketAim(e); Sfx.charge(0.6); return 'hold';
+          this.aimStart(e, now, T.aimMs); e.aimA = this.rocketAim(e); Sfx.charge(0.6); return 'hold';
         }
         return 'path';
       }
     }
   }
-  rocketAim(e) {                                                       // aims at your feet so near misses still splash
-    const pb = this.player.body, sx = e.x, sy = e.y - 2, tof = Math.hypot(pb.center.x - sx, pb.bottom - sy) / TUNE.ROCKETEER.rocketSpeed;
-    return Math.atan2(pb.bottom - 3 - sy + (pb.blocked.down ? 0 : pb.velocity.y * tof * 0.2), pb.center.x + pb.velocity.x * tof * 0.5 - sx);
+  rocketAim(e) {                                                       // aims at your feet, where they'll land, so near misses still splash
+    return this.aimLead(e.x, e.y - 2, TUNE.ROCKETEER.rocketSpeed, { k: 0.7, maxT: 0.9, oy: this.player.body.halfHeight - 3 });
   }
   rocketeerShoot(e) {
     const T = TUNE.ROCKETEER, sx = e.x + (e.dir > 0 ? 0 : -1), sy = e.y - 2, a = e.aimA + rand(-2, 2) * DEG;
@@ -4717,7 +4733,7 @@ class GameScene extends Phaser.Scene {
     const bl = this.ebullets.getFirstDead(false); if (!bl) return;
     bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
     bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false });
+    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
   }
   spawnHaywire(e, dx) {
     const h = this.haywires.getFirstDead(false); if (!h) return false;
@@ -6383,7 +6399,7 @@ class GameScene extends Phaser.Scene {
     const bl = this.ebullets.getFirstDead(false); if (!bl) return;
     bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
     bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false });
+    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
   }
   juggCrack(e) {
     const b = e.body;
@@ -6670,7 +6686,7 @@ class GameScene extends Phaser.Scene {
     const bl = this.ebullets.getFirstDead(false); if (!bl) return;
     bl.setTexture('ebullet'); bl.enableBody(true, sx, sy, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
     bl.setRotation(a); bl.setVelocity(Math.cos(a) * 380, Math.sin(a) * 380);
-    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: this.campaign ? 3 : 4, snipe: false });
+    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: this.campaign ? 3 : 4, snipe: false, keg: null });
   }
   gunshipDrop(e) {
     const kind = this.campaign || Math.random() < 0.5 ? 'grunt' : 'tick';
@@ -7490,7 +7506,7 @@ class GameScene extends Phaser.Scene {
     const b = this.ebullets.getFirstDead(false); if (!b) return null;
     b.setTexture('ebullet'); b.enableBody(true, x, y, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
     b.setRotation(a); b.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
-    Object.assign(b, { life: 1.6, px: x, py: y, ang: a, dmg, snipe: false });
+    Object.assign(b, { life: 1.6, px: x, py: y, ang: a, dmg, snipe: false, keg: null });
     return b;
   }
 
@@ -9885,7 +9901,7 @@ class GameScene extends Phaser.Scene {
         const wx = e.x + e.dir * 26; if (!this.solidAt(wx, b.bottom - 8)) { e.wall = { x: wx, y0: b.bottom - T.wallH, y1: b.bottom, hp: T.wallHp, t: T.wallT, hitT: 0, owner: e }; this.bwalls.push(e.wall); Sfx.hardlight(); this.spawnLight(wx, b.bottom - 20, 'glow', 0x46e6ff, 0.6, 1.4, 0.8, 0.2); }
         return;
       }
-      if (e.sees && e.fireCd <= 0) { e.fireCd = T.fireCd * rand(0.9, 1.1); const a = Math.atan2(dy, dx); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
+      if (e.sees && e.fireCd <= 0) { e.fireCd = T.fireCd * rand(0.9, 1.1); const a = this.aimLead(e.x, e.y - 4, 240); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
     } else b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 5; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
   }
@@ -11693,7 +11709,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.SWAPPER, b = e.body, onG = b.blocked.down || b.touching.down, pb = this.player.body;
     if (alive && !e.aggro && (e.sees || dist < 240) && dist < e.def.sight) this.alertEnemy(e, now);
     if (e.ai === 'alert' || e.ai === 'patrol') e.ai = 'walk';
-    if (e.burst > 0 && (e.burstT -= dt) <= 0 && alive) { e.burst--; e.burstT = 0.14; const a = Math.atan2(dy, dx) + rand(-0.05, 0.05); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 260, 7); Sfx.eshot(); }
+    if (e.burst > 0 && (e.burstT -= dt) <= 0 && alive) { e.burst--; e.burstT = 0.14; const a = this.aimLead(e.x, e.y - 4, 260) + rand(-0.05, 0.05); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 260, 7); Sfx.eshot(); }
     if (e.ai === 'tell') {
       b.velocity.x = 0; e.fr = 'tell';
       if (Math.random() < 0.6) this.fx.emit(pb.center.x + rand(-6, 6), pb.center.y + rand(-10, 10), { n: 1, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0xf0d8ff, 0xb070ff], add: true });
@@ -11709,7 +11725,7 @@ class GameScene extends Phaser.Scene {
       b.velocity.x = want * T.speed;
       if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
       if (e.cd <= 0 && e.sees && dist < T.range && onG) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.tellDmg = 0; Sfx.swapTell(); return; }
-      if (e.sees && (e.fireCd -= dt) <= 0) { e.fireCd = rand(1.6, 2.2); const a = Math.atan2(dy, dx); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
+      if (e.sees && (e.fireCd -= dt) <= 0) { e.fireCd = rand(1.6, 2.2); const a = this.aimLead(e.x, e.y - 4, 240); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
     } else b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
   }
@@ -12291,7 +12307,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.PARA, b = e.body, pb = this.player.body;
     e.aggro = true; e.dir = dx >= 0 ? 1 : -1;
     e.burstT -= dt;
-    if (e.shots > 0 && (e.shotT -= dt) <= 0 && alive) { e.shots--; e.shotT = e.shots ? 0.12 : 0; const a = Math.atan2(pb.center.y - (e.y - 2), pb.center.x - e.x) + rand(-0.06, 0.06); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 2 + Math.sin(a) * 8, a, T.speed, T.dmg); Sfx.eshot(); }
+    if (e.shots > 0 && (e.shotT -= dt) <= 0 && alive) { e.shots--; e.shotT = e.shots ? 0.12 : 0; const a = this.aimLead(e.x, e.y - 2, T.speed) + rand(-0.06, 0.06); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 2 + Math.sin(a) * 8, a, T.speed, T.dmg); Sfx.eshot(); }
     if (e.burstT <= 0 && alive && e.shots === 0 && (e.sees || e.ai === 'drop')) { e.burstT = T.burstCd * rand(0.85, 1.2); e.shots = 3; e.shotT = 0; }
     if (e.ai === 'drop') {
       e.fr = 'drop';
@@ -13417,9 +13433,9 @@ class GameScene extends Phaser.Scene {
     if (want) { e.stepK += dt * 8; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else if (e.ai !== 'weld') e.fr = 'w0'; else e.fr = 'weld';
   }
   updateTurret(e, dt, now, dx, dy, dist, alive) {
-    const T = TUNE.TURRET, pb = this.player.body;
+    const T = TUNE.TURRET;
     e.body.velocity.x = 0;
-    const want = Math.atan2(pb.center.y - (e.y - 2), pb.center.x - e.x);
+    const want = this.aimLead(e.x, e.y - 2, T.speed);                    // tracks where you're going
     if (e.ai === 'aim') { if (now >= e.aiUntil) { this.spawnEBullet(e.x + Math.cos(e.aimA) * 8, e.y - 2 + Math.sin(e.aimA) * 8, e.aimA, T.speed, T.dmg); Sfx.eshot(); e.ai = 'watch'; e.fireCd = T.fireCd * rand(0.85, 1.15); } return; }
     if (alive && e.sees && dist < e.def.sight) {
       let d = want - e.aimA; d = Math.atan2(Math.sin(d), Math.cos(d)); e.aimA += clamp(d, -4 * dt, 4 * dt);
@@ -15061,6 +15077,7 @@ class GameScene extends Phaser.Scene {
       for (const e of this.enemies.getChildren().filter(o => !o.alive && now - (o.deadAt || 0) > 3000)) this.enemies.remove(e);
     }
     const pcx = p.body.center.x, pcy = p.body.center.y;
+    this.updateTactics(dt, now);
     this.gnatCache = this.enemies.getChildren().filter(o => o.alive && o.kind === 'gnat');   // boids look at each other
     let near = 0; for (const o of this.gnatCache) if (Math.abs(o.x - pcx) < 170 && Math.abs(o.y - pcy) < 120) near++;
     this.swarmLvl = this.gnatCache.length ? clamp(0.25 + near / 8, 0, 1) : 0;
@@ -15157,17 +15174,23 @@ class GameScene extends Phaser.Scene {
     const onGround = b.blocked.down || b.touching.down;
     if (alive && !e.aggro && e.sees && adx < D.sight && Math.abs(dy) < 70 && (Math.sign(dx) === e.dir || adx < 60)) this.alertEnemy(e, now);
     if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 3);
-    if (e.aggro && (e.aggroT <= 0 || !alive)) { e.aggro = false; e.ai = 'patrol'; }
+    if (e.aggro && (e.aggroT <= 0 || !alive)) { e.aggro = false; e.ai = 'patrol'; e.walkNav = false; e.path = null; }
     if (onGround && !e.wasGround) { if (e.ai === 'leap') this.heavyStomp(e); else if (e.airT > 0.25) this.fxDust(b.center.x, b.bottom, 3); }
     e.airT = onGround ? 0 : e.airT + dt; e.wasGround = onGround;
+    if (e.navAir && onGround && now > e.navAirT + 80) e.navAir = false;
+    if (!heavy && e.aggro && alive) this.rocketHop(e, now, onGround);
 
     let fr = 'w';
     if (e.stunT > 0) { if (onGround) b.velocity.x *= Math.pow(0.0005, dt); }
     else if (e.ai === 'alert') { if (onGround) b.velocity.x = 0; fr = 'c'; if (now >= e.aiUntil) e.ai = 'chase'; }
     else if (e.ai === 'windup') {
       b.velocity.x = 0; fr = 'wind'; e.dir = dx > 0 ? 1 : -1;
-      if (now >= e.aiUntil) { e.ai = 'leap'; e.aiUntil = now; b.velocity.y = -D.leapV; b.velocity.x = clamp(dx * 1.6, -210, 210); Sfx.growl(true); }
+      if (now >= e.aiUntil) {                                         // leaps at where you'll be when it comes down
+        const P = this.predictPlayer(0.8), lx = b.center.x + dx + (P.x - this.player.body.center.x) * TUNE.AI.lead[this.runDiff];
+        e.ai = 'leap'; e.aiUntil = now; b.velocity.y = -D.leapV; b.velocity.x = clamp((lx - b.center.x) * 1.6, -210, 210); Sfx.growl(true);
+      }
     } else if (e.ai === 'leap') { fr = 'wind'; if (onGround && now > e.aiUntil + 300) e.ai = 'chase'; }
+    else if (e.aggro && alive && this.walkerNav(e, dt, now, onGround)) { e.ai = 'chase'; fr = heavy ? 'w' : 'c'; }   // round by the nav graph
     else if (e.aggro && alive) {
       e.ai = 'chase'; fr = heavy ? 'w' : 'c'; e.dir = dx > 0 ? 1 : -1;
       let speed = D.chase;
@@ -15202,6 +15225,18 @@ class GameScene extends Phaser.Scene {
     if (heavy) e.fr = fr === 'wind' ? 'wind' : 'w' + legs;
     else e.fr = !onGround ? 'c1' : (fr === 'c' ? 'c' : 'w') + legs;
   }
+  walkerNav(e, dt, now, onGround) {                                     // true while it's taking a route to you rather than a straight run
+    const b = e.body;
+    if (e.navAir) { this.followPath(e, now, onGround, e.def.chase, dt); if (Math.abs(b.velocity.x) > 10) e.dir = b.velocity.x > 0 ? 1 : -1; return true; }
+    if (!onGround || e.stunT > 0) return false;
+    if ((e.repathT = (e.repathT || 0) - dt) <= 0) { e.repathT = e.walkNav ? 0.5 : 0.35; this.walkerPlan(e); }
+    if (!e.walkNav) return false;
+    if (!this.followPath(e, now, onGround, e.def.chase, dt)) { e.walkNav = false; return false; }
+    if (!e.navAir && Math.abs(b.velocity.x) < 8) { if ((e.stuckT = (e.stuckT || 0) + dt) > 0.9) { e.walkNav = false; e.path = null; e.stuckT = 0; e.repathT = 1.2; return false; } }
+    else e.stuckT = 0;
+    if (Math.abs(b.velocity.x) > 10) e.dir = b.velocity.x > 0 ? 1 : -1;
+    return true;
+  }
   heavyStomp(e) {
     const b = e.body; e.ai = 'chase';
     this.shake(220, 0.01); Sfx.stomp();
@@ -15216,9 +15251,10 @@ class GameScene extends Phaser.Scene {
     if (e.aggro && e.sees) e.aggroT = Math.max(e.aggroT, 3);
     if (e.aggro && (e.aggroT <= 0 || !alive)) e.aggro = false;
     let tx, ty;
-    if (e.aggro && alive) {                                             // hover above & to the side, keep range
+    if (e.aggro && alive) {                                             // hover where it can see you, apart from the other fliers and off your aim
+      if ((e.slotT = (e.slotT || 0) - dt) <= 0) { e.slotT = 0.6; this.droneSlot(e); }
       const side = b.center.x < p.x ? -1 : 1;
-      tx = p.x + side * 95; ty = p.y - 60 + Math.sin(e.t * 2.1) * 12;
+      tx = p.x + (e.slotX ?? side * 95); ty = p.y + (e.slotY ?? -60) + Math.sin(e.t * 2.1) * 12;
       if (this.solidAt(tx, ty)) tx = p.x + side * 40;
       if (this.solidAt(tx, ty)) ty = p.y - 30;
       e.dir = dx > 0 ? 1 : -1;
@@ -15231,6 +15267,12 @@ class GameScene extends Phaser.Scene {
       b.velocity.x += (clamp((tx - b.center.x) * 2, -100, 100) - b.velocity.x) * k;
       b.velocity.y += (clamp((ty - b.center.y) * 2, -85, 85) - b.velocity.y) * k;
     } else { const f = Math.pow(0.05, dt); b.velocity.x *= f; b.velocity.y *= f; }
+    e.dodgeCd = (e.dodgeCd || 0) - dt;
+    if (alive && e.aggro && e.stunT <= 0 && e.dodgeCd <= 0 && e.ai !== 'charge' && this.playerAimingAt(e)) {   // you're lining it up: it jinks and finds another spot
+      e.dodgeCd = TUNE.AI.droneJink; e.slotT = 0;
+      const perp = Math.atan2(dy, dx) + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2;
+      b.velocity.x += Math.cos(perp) * 190; b.velocity.y += Math.sin(perp) * 190;
+    }
     e.fireCd -= dt;
     if (e.ai === 'charge') { if (now >= e.aiUntil) { e.ai = 'hover'; if (alive) this.fireBolt(e); e.fireCd = rand(1.4, 2.1); } }
     else if (e.aggro && alive && e.fireCd <= 0 && e.sees && dist < 260 && e.stunT <= 0) { e.ai = 'charge'; e.aiUntil = now + 420; Sfx.charge(0.5); }
@@ -15238,12 +15280,213 @@ class GameScene extends Phaser.Scene {
   }
   fireBolt(e) {
     const b = this.bolts.getFirstDead(false); if (!b) return;
-    const sx = e.x + e.dir * 5, sy = e.y, pb = this.player.body;
-    const ang = Math.atan2(pb.center.y - sy, pb.center.x - sx), S = TUNE.DRONE_BOLT.speed;
+    const sx = e.x + e.dir * 5, sy = e.y, S = TUNE.DRONE_BOLT.speed;
+    const ang = this.aimLead(sx, sy, S, { k: 0.8, maxT: 0.7 });          // a slow bolt: it leads you, but not all the way
     b.enableBody(true, sx, sy, true, true); b.body.setAllowGravity(false); b.body.setSize(5, 5, true);
     b.setVelocity(Math.cos(ang) * S, Math.sin(ang) * S);
     Object.assign(b, { life: 4, px: sx, py: sy });
     Sfx.zap(); this.spawnLight(sx, sy, 'glow', 0xff40b0, 0.8, 1.6, 0.8, 0.15);
+  }
+
+  // ----------------------------------------------------------------- tactics ----
+  // What makes the foes smart beyond their own kind's moves, shared by all of them:
+  //  - they read where you're going (your run speed smoothed, so a jink isn't a heading, the arc of a jump down to the
+  //    floor it lands on, the wall that stops you) and lead their shots by a share of it that rises with the difficulty;
+  //  - they read your gun: a short reach keeps gunmen at a distance, splash spreads them out, and against a long-range
+  //    gun they close in and hold spots with cover a step away;
+  //  - walkers path to you over the nav graph and steer clear of the routes their packmates already took, so a pack
+  //    comes at your deck from both ends;
+  //  - squads cover each other, fan out to search, watch the corner you went round, shoot the drum by your feet, and
+  //    call it all out. Barks are only shown: they draw no random numbers and change nothing in play.
+  updateTactics(dt, now) {
+    const pb = this.player.body;
+    this.pvx = (this.pvx || 0) + (pb.velocity.x - (this.pvx || 0)) * Math.min(1, dt * 7);
+    this.updateBarks(now);
+    if ((this.tacT = (this.tacT || 0) - dt) > 0) return;
+    this.tacT = 0.25;
+    this.threat = this.weaponThreat(WEAPONS[this.weapon]);
+    const claim = this.navClaim || (this.navClaim = new Map());          // the nav cells walkers' routes already use, and how many
+    claim.clear();
+    for (const o of this.enemies.getChildren()) {
+      if (!o.alive || !o.walkNav || !o.path) continue;
+      for (let i = o.pathI; i < o.path.length; i++) { const id = o.path[i].to; claim.set(id, (claim.get(id) || 0) + 1); }
+    }
+  }
+  weaponThreat(W) {                                                     // 'close', 'blast', 'far' or 'mid': how far your gun reaches and how it hurts
+    if (!W) return 'mid';
+    if (W.radius >= 40) return 'blast';
+    const reach = W.range || W.reach || (W.speed && W.life ? W.speed * W.life : 0) || 400;
+    return reach < 180 ? 'close' : reach >= 600 && (W.cooldown || 0) >= 400 ? 'far' : 'mid';
+  }
+  predictPlayer(t) {                                                    // where you'll be in t seconds, as far as a foe can tell
+    const pb = this.player.body, hw = pb.halfWidth, hh = pb.halfHeight, x0 = pb.center.x, y0 = pb.center.y;
+    let x = clamp(x0 + this.pvx * t, 8, LW - 8);
+    const s = Math.sign(x - x0);
+    if (s) for (let xx = x0 + s * 6; (xx - x) * s < 0; xx += s * 6) if (this.solidAt(xx + s * hw, y0)) { x = xx; break; }   // you'd stop at the wall
+    let y = y0;
+    if (!(pb.blocked.down || pb.touching.down)) {                       // in the air: the arc, down to the floor under where you'll be
+      y = Math.min(y0 + pb.velocity.y * t + 0.5 * this.physics.world.gravity.y * t * t, LH - hh);
+      for (let yy = y0 + 2; yy < y; yy += 8) if (this.standAt(x, yy + hh)) { y = Math.min(y, Math.floor((yy + hh) / TS) * TS - hh); break; }
+    }
+    return { x, y };
+  }
+  aimLead(sx, sy, speed, opts = {}) {                                   // the angle a shot at that speed takes from (sx, sy) to meet you
+    const pb = this.player.body, k = (opts.k ?? 1) * TUNE.AI.lead[this.runDiff] * (this.lab?.stationary ? 0 : 1), maxT = opts.maxT ?? 1, oy = opts.oy || 0;
+    let t = Math.hypot(pb.center.x - sx, pb.center.y + oy - sy) / speed, P = null;
+    for (let i = 0; i < 3; i++) { P = this.predictPlayer(Math.min(t, maxT)); t = Math.hypot(P.x - sx, P.y + oy - sy) / speed; }
+    return Math.atan2(pb.center.y + (P.y - pb.center.y) * k + oy - sy, pb.center.x + (P.x - pb.center.x) * k - sx);
+  }
+  // Barks: a few words over a foe's head when it does something clever. One at a time across the arena, and each foe
+  // waits a while before it speaks again, so they stay readable.
+  bark(e, text, col = '#ffe46a') {
+    if (!e?.alive || this.lab?.stationary || this.state !== 'play') return;
+    const now = this.time.now, T = TUNE.AI;
+    if (now < (this.barkAt || 0) || now < (e.barkAt || 0) || !this.cameras.main.worldView.contains(e.x, e.y)) return;
+    this.barkAt = now + T.barkGap; e.barkAt = now + T.barkEach;
+    const key = 'bark_' + text.replace(/[^A-Z]/g, '') + col.slice(1);
+    if (!this.textures.exists(key)) {
+      const w = text.length * 6 + 3, tex = this.textures.createCanvas(key, w, 10), ctx = tex.getContext();
+      for (const [ox, oy] of [[0, 1], [2, 1], [1, 0], [1, 2], [2, 2]]) drawGlyphs(ctx, text, ox, oy, '#1a0c08');
+      drawGlyphs(ctx, text, 1, 1, col);
+      tex.refresh();
+    }
+    const pool = this.barkPool || (this.barkPool = []);
+    let img = pool.find(o => !o.on);
+    if (!img && pool.length < 6) { img = this.add.image(0, 0, key).setDepth(17).setOrigin(0.5, 1); pool.push(img); }
+    if (!img) img = pool.reduce((a, o) => (o.t0 < a.t0 ? o : a));
+    img.setTexture(key).setVisible(true).setAlpha(1);
+    Object.assign(img, { on: true, t0: now, who: e });
+    img.setPosition(Math.round(e.x), Math.round(e.body.top - 4));
+  }
+  updateBarks(now) {
+    for (const img of this.barkPool || []) {
+      if (!img.on) continue;
+      const k = (now - img.t0) / TUNE.AI.barkMs, e = img.who;
+      if (k >= 1 || img.t0 > now) { img.on = false; img.setVisible(false); img.who = null; continue; }
+      if (e?.active) img.setPosition(Math.round(e.x), Math.round(e.body.top - 4 - Math.min(1, k * 6) * 3));
+      img.setAlpha(k > 0.75 ? (1 - k) * 4 : 1);
+    }
+  }
+  // Walkers (grunts, heavies): straight at you on your own floor; otherwise over the nav graph, steering off the cells
+  // their packmates' routes already use, so a second one takes the stairs at the other end if there are any.
+  walkerPlan(e) {
+    const b = e.body, pb = this.player.body, me = navAt(b.center.x, b.bottom), you = navBelow(pb.center.x, pb.bottom - 2);
+    e.walkNav = false;
+    if (me < 0 || you < 0) return;
+    const A = NAV.nodes[me], B = NAV.nodes[you];
+    if (A.y === B.y && this.walkSpan(A.x, B.x, A.y)) { e.path = null; return; }   // the same floor with nothing between: charge
+    const claim = this.navClaim, mine = new Set(e.path ? e.path.map(st => st.to) : []), F = TUNE.AI.flankCost;
+    let flanked = false;
+    const res = navDijkstra(me, you, 160, (u, ed) => {
+      const c = claim ? (claim.get(ed.to) || 0) - (mine.has(ed.to) ? 1 : 0) : 0;
+      return ed.cost + (c > 0 ? c * F : 0);
+    });
+    let goal = you;
+    if (!isFinite(res.dist[you])) {                                      // out of reach: wait at the reachable cell nearest you
+      const far = n => Math.abs(n.x - B.x) + 2 * Math.abs(n.y - B.y);
+      let bd = far(A) - 3; goal = -1;
+      for (const u of res.reached) { const d = far(NAV.nodes[u]); if (d < bd) { bd = d; goal = u; } }
+      if (goal < 0) return;
+    }
+    const path = navPath(res, goal); if (!path.length) return;
+    for (let i = 0; i < Math.min(path.length, 6); i++) if ((claim?.get(path[i].to) || 0) > (mine.has(path[i].to) ? 1 : 0)) flanked = true;
+    const lead = NAV.nodes[path[Math.min(3, path.length - 1)].to];
+    if (claim?.size && !flanked && Math.abs(B.x - A.x) > 4 && Math.sign(lead.x - A.x) === -Math.sign(B.x - A.x)) this.bark(e, 'FLANKING!', '#ff9a6a');   // it set off away from you, round the other way
+    Object.assign(e, { path, pathI: 0, goalNode: goal, walkNav: true, navAir: false, stuckT: 0 });
+  }
+  walkSpan(x0, x1, y) { const s = Math.sign(x1 - x0); for (let x = x0; x !== x1; x += s) if (NAV.id(x, y) < 0) return false; return true; }
+  rocketHop(e, now, onGround) {                                         // a grunt that sees your rocket coming hops it
+    if (!onGround || now < (e.hopAt || 0) || e.stunT > 0) return;
+    const b = e.body, cx = b.center.x, cy = b.center.y;
+    for (const r of this.rocketList) {
+      if (!r.active) continue;
+      const vx = r.body.velocity.x, vy = r.body.velocity.y, vv = vx * vx + vy * vy; if (!vv) continue;
+      const rx = cx - r.x, ry = cy - r.y, t = (rx * vx + ry * vy) / vv;
+      if (t <= 0.12 || t > 0.4 || Math.hypot(rx - vx * t, ry - vy * t) > 22 || Math.abs(vy) > Math.abs(vx)) continue;
+      e.hopAt = now + 1500;
+      if (Math.random() < TUNE.AI.rocketHop) { b.velocity.y = -e.def.jumpV; this.fxDust(cx, b.bottom, 3); }
+      return;
+    }
+  }
+  // Drones: a hover spot that can see you, clear of the other fliers' spots and off the line you're aiming down.
+  droneSlot(e) {
+    const p = this.player, b = e.body, pcx = p.body.center.x, pcy = p.body.center.y, far = e.hp < e.def.hp * 0.4 ? 1.35 : 1;
+    const mates = this.enemies.getChildren().filter(o => o !== e && o.alive && FLIERS.has(o.kind) && Math.abs(o.x - e.x) < 260);
+    let best = null, bs = -1e9;
+    for (const [ox0, oy0] of DRONE_SLOTS) {
+      const ox = ox0 * far, oy = oy0 * far, x = p.x + ox, y = p.y + oy;
+      if (x < 16 || x > LW - 16 || y < 16 || this.solidAt(x, y)) continue;
+      let s = -Math.hypot(x - b.center.x, y - b.center.y) * 0.35;
+      if (!this.los(x, y, pcx, pcy - 4)) s -= 260;                        // somewhere it can actually shoot from
+      if (!this.los(b.center.x, b.center.y, x, y)) s -= 80;               // without flying through a wall to get there
+      for (const o of mates) { const mx = o.slotX !== undefined ? p.x + o.slotX : o.x, my = o.slotY !== undefined ? p.y + o.slotY : o.y; if (Math.hypot(mx - x, my - y) < 56) s -= 120; }
+      let da = Math.abs(Math.atan2(y - this.shoulder.y, x - this.shoulder.x) - this.aim) % (Math.PI * 2); if (da > Math.PI) da = Math.PI * 2 - da;
+      if (da < 0.5) s -= 70;                                              // out of your sights
+      if (s > bs) { bs = s; best = [ox, oy]; }
+    }
+    if (best) { e.slotX = best[0]; e.slotY = best[1]; }
+  }
+  // Humanoid squads.
+  underFire(e, now) { return now > (e.suppCd || 0) && (e.hurtWin || 0) * Math.exp(-(now - (e.hurtAt || 0)) / 1000) > e.def.hp * TUNE.AI.suppress; }
+  coverMe(e, idle) {                                                    // the nearest gunman who can see you opens up while this one ducks
+    let best = null, bd = 320;
+    for (const o of this.enemies.getChildren()) {
+      if (o === e || !o.alive || !isRifleman(o) || o.ai !== 'engage' || !o.sees) continue;
+      const d = Math.hypot(o.x - e.x, o.y - e.y); if (d < bd) { bd = d; best = o; }
+    }
+    if (best) { best.fireCd = Math.min(best.fireCd, 0.05); best.snapAim = true; this.bark(e, 'COVER ME!'); }
+    else this.bark(e, idle ? 'RELOADING' : 'TAKING FIRE!');
+  }
+  startSearch(e, now) {                                                 // lost you: the first goes where you were heading, the next watches the corner, the rest check behind
+    e.ai = 'search'; e.searchUntil = now + 6000; e.watching = false;
+    let mates = 0;
+    for (const o of this.enemies.getChildren()) if (o !== e && o.alive && isHumanoid(o) && o.ai === 'search' && Math.hypot(o.x - e.x, o.y - e.y) < 420) mates++;
+    const head = clamp((e.lvx || 0) * TUNE.AI.searchLead, -120, 120);
+    if (mates === 1 && isRifleman(e) && this.pickPosition(e, 'watch')) { e.watching = true; e.searchUntil = now + 7000; this.bark(e, 'WATCHING'); return; }
+    const gx = clamp(mates ? e.lkx - Math.sign(head) * 72 : e.lkx + head, 24, LW - 24);
+    if (!this.pathTo(e, navBelow(gx, e.lky - 4), 160)) this.pathTo(e, navBelow(e.lkx, e.lky - 4), 160);
+    this.bark(e, mates ? 'FAN OUT!' : 'LOST VISUAL');
+  }
+  searchStep(e, dt, now, c) {                                           // the search state the gunmen share; 'engage' once it has you again
+    if (c.canSee || now - e.lkT < 300) {
+      e.ai = 'engage'; e.repickT = e.watching ? 1.5 : 0;
+      if (c.canSee) { e.fireCd = Math.min(e.fireCd, e.watching ? 0 : 0.3); e.snapAim = true; this.bark(e, 'THERE!'); }
+      e.watching = false;
+      return 'path';
+    }
+    if (now > e.searchUntil || !c.alive) { e.ai = 'idle'; e.aggro = false; e.watching = false; return 'hold'; }
+    if (!e.path || e.pathI >= e.path.length) { if (e.watching) e.dir = Math.sign(e.lkx - e.x) || e.dir; else this.lookAround(e, dt, 2.5); return 'hold'; }
+    return 'path';
+  }
+  aimStart(e, now, ms) {                                                // a snap aim (covering fire, a target found) starts part way into the track
+    e.ai = 'aim'; e.aimStart = now - (e.snapAim ? ms * 0.4 : 0); e.aiUntil = e.aimStart + ms; e.snapAim = false;
+  }
+  sideStep(e, c) {                                                      // which way to hop out of your line: away if there's floor that way
+    const b = e.body, away = -Math.sign(c.dx) || 1;
+    return this.standAt(b.center.x + away * 30, b.bottom + 4) ? away : -away;
+  }
+  barrelNearYou(e) {                                                    // a drum by your feet, clear of its own side: worth a burst
+    const pb = this.player.body, sx = e.x, sy = e.y - 2;
+    let best = null, bd = TUNE.AI.kegReach;
+    for (const k of this.barrelList) {
+      if (!k.active || k.fuse > 0 || k.burning) continue;
+      const d = Math.hypot(k.x - pb.center.x, k.y - pb.center.y);
+      if (d >= bd || Math.hypot(k.x - sx, k.y - sy) < 110 || !this.los(sx, sy, k.x, k.y - 4)) continue;
+      if (this.segDist(pb.center.x, pb.center.y, sx, sy, k.x, k.y - 1)[0] < 12) continue;   // you're in the line: it'd only hit you, so it shoots you instead
+      if (this.enemies.getChildren().some(o => o.alive && o !== e && Math.abs(o.x - k.x) < 72 && Math.abs(o.y - k.y) < 48)) continue;
+      bd = d; best = k;
+    }
+    return best;
+  }
+  allyDown(e, now) {                                                    // a squadmate drops: those that see it go down know where you are
+    const pb = this.player.body; let told = null;
+    for (const o of this.enemies.getChildren()) {
+      if (!o.alive || !isHumanoid(o) || Math.hypot(o.x - e.x, o.y - e.y) > TUNE.AI.downR || !this.los(o.x, o.y - 6, e.x, e.y - 6)) continue;
+      o.lkx = pb.center.x; o.lky = pb.center.y; o.lkT = now;
+      if (o.ai === 'idle') this.alertHumanoid(o, now, false);
+      told = told || o;
+    }
+    if (told) this.bark(told, 'MAN DOWN!');
   }
 
   // ------------------------------------------------------------- humanoid AI ----
@@ -15255,7 +15498,7 @@ class GameScene extends Phaser.Scene {
     if (e.navAir && onGround && now > e.navAirT + 80) e.navAir = false;   // never leave a stale "airborne" flag behind
     const inCone = Math.sign(dx) === e.dir || Math.abs(dx) < 48 || (e.aggro && now - e.lastSeenT < 1500);
     const canSee = alive && e.sees && dist < D.sight && inCone;
-    if (canSee) { e.lkx = pb.center.x; e.lky = pb.center.y; e.lkT = now; e.lastSeenT = now; }
+    if (canSee) { e.lkx = pb.center.x; e.lky = pb.center.y; e.lkT = now; e.lastSeenT = now; e.lvx = this.pvx; }   // and which way you were heading
     else if (alive && e.flashT > 0) { e.lkx = pb.center.x; e.lky = pb.center.y; e.lkT = now; }   // getting shot gives you away
     if (alive && e.ai === 'idle' && (canSee || e.aggro)) this.alertHumanoid(e, now, true);
     if (onGround && e.airT > 0.25) this.fxDust(b.center.x, b.bottom, 3);
@@ -15304,26 +15547,41 @@ class GameScene extends Phaser.Scene {
       case 'dodge': if (c.onGround && now > e.aiUntil + 120) { e.ai = 'engage'; e.repickT = 0; } return 'free';
       case 'engage': {
         if (!c.alive) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
-        if (now - e.lkT > 1500) {                              // lost you: go check where you were last seen/heard
-          e.ai = 'search'; e.searchUntil = now + 6000; this.pathTo(e, navBelow(e.lkx, e.lky - 4), 160); return 'path';
-        }
+        if (now - e.lkT > 1500) { this.startSearch(e, now); return 'path'; }   // lost you: go and look, as a squad
         if (this.seekPack(e, now)) return 'path';               // hurt and a medkit is close: go take it (denies it to you)
         if (!e.retreated && e.hp < e.def.hp * 0.35) {          // badly hurt: fall back out of sight, once
-          e.retreated = true; e.ai = 'retreat'; e.aiUntil = now + 3000; this.pickPosition(e, 'retreat'); Sfx.radio(); return 'path';
+          e.retreated = true; e.ai = 'retreat'; e.aiUntil = now + 3000; this.pickPosition(e, 'retreat'); Sfx.radio(); this.bark(e, 'FALL BACK!'); return 'path';
+        }
+        if (c.onGround && !e.navAir && this.underFire(e, now)) {   // pinned down: break line of sight and let a squadmate cover
+          e.suppCd = now + TUNE.AI.suppressCd; e.ai = 'cover'; e.reloadT = 0.7; e.aiUntil = now + 1800; this.pickPosition(e, 'cover'); this.coverMe(e); return 'path';
+        }
+        if (c.onGround && !e.navAir && e.dodgeCd <= 0 && c.dist < 260 && this.playerAimingAt(e)) {   // you're lining it up: hop out of the line
+          e.dodgeCd = e.def.dodgeCd * 1.6;
+          if (Math.random() < e.def.dodge * TUNE.AI.sidestep) { this.humanoidDodge(e, now, this.sideStep(e, c) * 170, -250); return 'free'; }
         }
         if (c.onGround && !e.navAir && (e.repickT <= 0 || (c.dist < 64 && e.repickT < 1.5))) {   // reposition; kite if you get close
           e.repickT = rand(2.4, 3.6);
           if (!this.pickPosition(e, 'attack')) this.pathTo(e, navBelow(e.lkx, e.lky - 4), 160);
         }
+        if (c.canSee && c.onGround && !e.navAir && e.fireCd <= 0 && this.runDiff > 0 && now > this.kegT) {   // a drum by your feet: light it
+          const k = this.barrelNearYou(e);
+          if (k) { this.kegT = now + TUNE.AI.kegCd; e.keg = k; this.aimStart(e, now, T.aimMs); e.aimA = Math.atan2(k.y - 1 - (e.y - 2), k.x - e.x); this.bark(e, 'BARREL!'); Sfx.laser(); return 'hold'; }
+        }
         if (c.canSee && c.onGround && !e.navAir && e.fireCd <= 0 && c.dist < 300) {
-          e.ai = 'aim'; e.aimStart = now; e.aiUntil = now + T.aimMs; e.aimA = this.leadAngle(e); Sfx.laser(); return 'hold';
+          this.aimStart(e, now, T.aimMs); e.aimA = this.leadAngle(e); Sfx.laser(); return 'hold';
         }
         return 'path';
       }
       case 'aim': {
-        const k = (now - e.aimStart) / T.aimMs;
-        if (k < 0.7) e.aimA = this.leadAngle(e);              // tracks, then locks: the last 30% is your dodge window
-        if (!c.canSee && k < 0.5) { e.ai = 'engage'; e.fireCd = 0.35; return 'hold'; }
+        const k = (now - e.aimStart) / T.aimMs, keg = e.keg;
+        if (keg) {                                             // on the drum: it doesn't need to see you, only the drum
+          if (!keg.active || keg.burning || keg.fuse > 0 || !this.los(e.x, e.y - 2, keg.x, keg.y - 4)) { e.keg = null; e.ai = 'engage'; e.fireCd = 0.3; return 'hold'; }
+          e.aimA = Math.atan2(keg.y - 1 - (e.y - 2), keg.x - e.x);
+        } else if (k < 0.7) e.aimA = this.leadAngle(e);       // tracks, then locks: the last 30% is your dodge window
+        if (!keg && !c.canSee && k < 0.5) { e.ai = 'engage'; e.fireCd = 0.35; return 'hold'; }
+        if (k < 0.7 && c.onGround && this.underFire(e, now)) {   // shot up while lining up: it gives up the shot and ducks
+          e.keg = null; e.suppCd = now + TUNE.AI.suppressCd; e.ai = 'cover'; e.reloadT = 0.7; e.aiUntil = now + 1800; e.fireCd = 0.3; this.pickPosition(e, 'cover'); this.coverMe(e); return 'path';
+        }
         if (now >= e.aiUntil) { e.ai = 'burst'; e.shotsLeft = T.burst; e.shotT = 0; }
         return 'hold';
       }
@@ -15331,8 +15589,9 @@ class GameScene extends Phaser.Scene {
         e.shotT -= dt;
         if (e.shotT <= 0 && e.shotsLeft > 0) { this.enforcerShoot(e); e.shotsLeft--; e.shotT = T.burstGap / 1000; }
         if (e.shotsLeft <= 0 && e.shotT <= 0) {
-          e.bursts++; e.fireCd = rand(0.7, 1.1);
-          if (e.bursts >= 2) { e.bursts = 0; e.ai = 'cover'; e.reloadT = 1.4; e.aiUntil = now + 2600; this.pickPosition(e, 'cover'); }
+          if (e.keg && e.keg.active && !e.keg.burning && !(e.keg.fuse > 0)) this.kegT = now + 1200;   // the drum's still cold: it, or another, can try again soon
+          e.bursts++; e.fireCd = rand(0.7, 1.1); e.keg = null;
+          if (e.bursts >= 2) { e.bursts = 0; e.ai = 'cover'; e.reloadT = 1.4; e.aiUntil = now + 2600; this.pickPosition(e, 'cover'); this.coverMe(e, true); }
           else e.ai = 'engage';
         }
         return 'hold';
@@ -15343,11 +15602,7 @@ class GameScene extends Phaser.Scene {
         return 'path';
       case 'retreat': if (now > e.aiUntil) { e.ai = 'engage'; e.repickT = 0; } return 'path';
       case 'getpack': if (!this.packStep(e)) { e.ai = 'engage'; e.repickT = 0; } return 'path';
-      case 'search':
-        if (c.canSee || now - e.lkT < 300) { e.ai = 'engage'; e.repickT = 0; return 'path'; }
-        if (now > e.searchUntil || !c.alive) { e.ai = 'idle'; e.aggro = false; return 'hold'; }
-        if (!e.path || e.pathI >= e.path.length) { this.lookAround(e, dt, 2.5); return 'hold'; }
-        return 'path';
+      case 'search': return this.searchStep(e, dt, now, c);
     }
     return 'hold';
   }
@@ -15439,7 +15694,7 @@ class GameScene extends Phaser.Scene {
     }
     if (best === null) return false;
     e.ai = 'getpack'; e.goalNode = best; e.path = navPath(r, best); e.pathI = 0; e.navAir = false;
-    Sfx.radio();
+    Sfx.radio(); this.bark(e, 'MEDKIT!', '#7dff8a');
     return true;
   }
   packStep(e) {                                                       // false once the medkit trip is over
@@ -15514,21 +15769,30 @@ class GameScene extends Phaser.Scene {
   }
 
   // Score every reachable node for the job at hand (line of sight, range, height, travel, squad spacing, grenades).
+  // The range it wants depends on your gun (weaponThreat): out of a short reach, spread out against splash, and in
+  // close with cover a step away against a long-range one. 'watch' covers the spot it last saw you from a distance.
   pickPosition(e, mode) {
     const start = navAt(e.body.center.x, e.body.bottom); if (start < 0) return false;
-    const snipe = mode === 'snipe', res = navDijkstra(start, -1, snipe ? 60 : 36), tx = e.lkx, ty = e.lky;
+    const snipe = mode === 'snipe', watch = mode === 'watch', res = navDijkstra(start, -1, snipe ? 60 : 36), tx = e.lkx, ty = e.lky;
+    const th = this.threat || 'mid', ideal = th === 'close' ? TUNE.AI.closeIdeal : th === 'far' ? TUNE.AI.farIdeal : 165, near = th === 'close' ? 150 : 80;
+    const gap = th === 'blast' ? 6 : 4, crowd = th === 'blast' ? 110 : 70, here = NAV.nodes[start];
     let best = -1, bestS = -1e9;
     for (const id of res.reached) {
       const n = NAV.nodes[id], nx = n.x * TS + 8, ny = (n.y + 1) * TS - 14, d = Math.hypot(nx - tx, ny - ty);
       if (d > (snipe ? 480 : 360)) continue;
       const los = this.los(nx, ny, tx, ty);
       let s = -res.dist[id] * (mode === 'cover' ? 3 : snipe ? 0.6 : 1.2);
-      if (mode === 'attack') { if (!los) continue; s -= Math.abs(d - 165) * 0.5 + (d < 80 ? 150 : 0); s += clamp(ty - ny, -40, 60) * 0.6; }
+      if (mode === 'attack') {
+        if (!los) continue;
+        s -= Math.abs(d - ideal) * 0.5 + (d < near ? 150 : 0); s += clamp(ty - ny, -40, 60) * 0.6;
+        if (th === 'far' && (!this.los(nx - 32, ny, tx, ty) || !this.los(nx + 32, ny, tx, ty))) s += 45;   // cover a step away: duck between your shots
+      }
       else if (mode === 'cover') s -= (los ? 400 : 0) + (d < 90 ? 120 : 0) + Math.abs(d - 170) * 0.15;
-      else if (snipe) { if (!los) continue; s -= Math.abs(d - 320) * 0.35 + (d < 180 ? 200 : 0); s += clamp(ty - ny, -40, 140); }   // high and far
+      else if (snipe) { if (!los) continue; s -= Math.abs(d - 320) * 0.35 + (d < 180 ? 200 : 0); s += clamp(ty - ny, -40, 140); if (e.scoot && Math.abs(n.x - here.x) < 6) s -= 220; }   // high and far, and somewhere new after a shot
+      else if (watch) { if (!los) continue; s -= Math.abs(d - 190) * 0.4 + (d < 100 ? 200 : 0); }
       else s += (los ? -250 : 0) + Math.min(d, 320) * 0.6;
       for (const o of this.enemies.getChildren()) {
-        if (o !== e && o.alive && o.goalNode >= 0) { const g = NAV.nodes[o.goalNode]; if (Math.abs(g.x - n.x) + Math.abs(g.y - n.y) < 4) s -= 70; }
+        if (o !== e && o.alive && o.goalNode >= 0) { const g = NAV.nodes[o.goalNode]; if (Math.abs(g.x - n.x) + Math.abs(g.y - n.y) < gap) s -= crowd; }
       }
       for (const g of this.grenadeList) if (g.active && Math.hypot(g.x - nx, g.y - ny) < 70) s -= 300;
       if (mode === 'attack') for (const o of this.enemies.getChildren()) {   // pincer: prefer the opposite side of you from squadmates
@@ -15584,7 +15848,7 @@ class GameScene extends Phaser.Scene {
     const f = NAV.nodes[step.from];
     if (cur >= 0 && NAV.nodes[cur].y !== f.y) { e.path = null; e.repickT = 0; e.repathT = 0; return false; }   // knocked off course
     if (step.type === 'jump' || step.type === 'fall') {
-      const fx = f.x * TS + 8;
+      const fx = f.x * TS + 8 + (step.type === 'jump' && n.y < f.y && n.x !== f.x ? Math.sign(f.x - n.x) * Math.max(0, b.halfWidth - 4) : 0);   // a wide body takes off a hair back from the ledge it's jumping up to, or it bonks its underside
       if (Math.abs(fx - b.center.x) > 3) {                            // line up on the take-off cell
         b.velocity.x = approach(b.velocity.x, Math.sign(fx - b.center.x) * Math.min(speed, Math.abs(fx - b.center.x) * 9 + 20), 2400 * dt);
         return true;
@@ -15618,6 +15882,7 @@ class GameScene extends Phaser.Scene {
       if (!g.active) continue;
       const gx = g.x - cx, gy = g.y - cy, d = Math.hypot(gx, gy);
       if (d > 78 || g.fuse > 1.15) continue;
+      if (e.fleeT <= 0) this.bark(e, 'GRENADE!');
       e.fleeT = 0.5; e.fleeDir = gx > 0 ? -1 : 1;
       if (onGround && e.dodgeCd <= 0 && d < 44) { e.dodgeCd = D.dodgeCd; if (Math.random() < D.dodge) this.humanoidDodge(e, now, e.fleeDir * 240, -270); }
       return;
@@ -15635,13 +15900,9 @@ class GameScene extends Phaser.Scene {
     let d = Math.abs(a - this.aim) % (Math.PI * 2); if (d > Math.PI) d = Math.PI * 2 - d;
     return d < 0.3;
   }
-  leadAngle(e, speed = TUNE.ENFORCER.bulletSpeed) {
-    const pb = this.player.body, sx = e.x, sy = e.y - 2;
-    const tof = Math.hypot(pb.center.x - sx, pb.center.y - sy) / speed;
-    return Math.atan2(pb.center.y + pb.velocity.y * tof * 0.25 - sy, pb.center.x + pb.velocity.x * tof * 0.75 - sx);
-  }
+  leadAngle(e, speed = TUNE.ENFORCER.bulletSpeed) { return this.aimLead(e.x, e.y - 2, speed); }   // where you'll be, the arc of a jump included
   enforcerShoot(e) {
-    const T = TUNE.ENFORCER, sx = e.x + (e.dir > 0 ? 0 : -1), sy = e.y - 2, a = e.aimA + rand(-2.5, 2.5) * DEG;
+    const T = TUNE.ENFORCER, sx = e.x + (e.dir > 0 ? 0 : -1), sy = e.y - 2, a = e.aimA + rand(-2.5, 2.5) * (e.keg ? 0.4 : 1) * DEG;   // a drum holds still: a tight group
     const mx = sx + Math.cos(e.aimA) * 21, my = sy + Math.sin(e.aimA) * 21;
     e.recoil = 2;
     this.spawnLight(mx, my, 'glow', 0xffa040, 0.7, 1.1, 0.9, 0.08);
@@ -15651,7 +15912,7 @@ class GameScene extends Phaser.Scene {
     const b = this.ebullets.getFirstDead(false); if (!b) return;
     b.setTexture('ebullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
     b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false });
+    Object.assign(b, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: e.keg || null });
   }
   onEBulletHit(p, b) {
     if (!b.active || this.state === 'dead') return;

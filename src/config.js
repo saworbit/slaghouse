@@ -26,6 +26,11 @@ const TUNE = {
   DRONE_BOLT: { speed: 150, damage: 10 },
   ENFORCER: { burst: 3, burstGap: 90, bulletSpeed: 380, damage: 5, aimMs: 480 },
   STALKER: { lunge: 320, windupMs: 280 },
+  // Squad tactics every foe shares (GameScene's tactics section). lead: the share of your predicted movement a shot
+  // leads by, per difficulty. Barks are ms: the gap between any two, each foe's own gap, and how long one shows.
+  AI: { lead: [0.5, 0.85, 1], barkGap: 650, barkEach: 3500, barkMs: 1150, flankCost: 1.2, closeIdeal: 235, farIdeal: 145,
+        suppress: 0.3, suppressCd: 6000, sidestep: 0.55, searchLead: 0.7, kegReach: 50, kegCd: 7000, downR: 260, scoot: 0.55,
+        droneJink: 1.3, rocketHop: 0.4 },
   HEAVY_STOMP: 15,
   ARC:  { cooldown: 50, damage: 4, range: 170, chain: 2, chainRange: 70, chainFactor: 0.6 },
   RAIL: { cooldown: 1500, damage: 100, range: 900, knock: 160 },
@@ -966,6 +971,8 @@ const PROP_BLAST = {                                               // the props 
   transformer: { radius: 52, maxDamage: 30, minDamage: 10, selfDamage: 10, push: 280, maxRise: 360, tileDamage: 22, scenery: true, style: 'arc' },
 };
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
+const BARREL_FOE = Object.assign({}, TUNE.BARREL, { enemy: true });   // a drum a foe shot: its blast hurts you like theirs
+const DRONE_SLOTS = [[-95, -60], [95, -60], [-60, -95], [60, -95], [-125, -30], [125, -30], [0, -105], [-40, -72], [40, -72]];   // hover spots round you a drone picks from (droneSlot)
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
 const POSTFX = { on: (() => { try { return localStorage.getItem('slaghouse.postfx') !== '0'; } catch (err) { return true; } })() };   // V toggles bloom / warp / grading
 const STYLE_RANKS = [

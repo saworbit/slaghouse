@@ -6,6 +6,8 @@
 //     and dies without an error
 //   - every breakable prop in every arena (props.js): it sits where it can, breaks and goes off, restocks and breaks
 //     again to a blast without an error
+//   - squad tactics (tactics.js): shots lead you, a grunt climbs to your deck, drones spread out with a line of sight,
+//     an enforcer lights the drum by your feet, ducks under fire while a squadmate covers, and searchers split up
 //   - every arena's nav graph, with the player's long drops and wall climbs: each standing cell reaches the start
 //     and gets back (#125)
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
@@ -102,7 +104,7 @@ const browser = await chromium.launch({
   ...(process.env.PLAYTEST_CHROME ? { executablePath: process.env.PLAYTEST_CHROME } : { channel: 'chrome' }),
   args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'],
 });
-const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep', 'modes'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
+const scripts = Object.fromEntries(await Promise.all(['harness', 'campaign-bot', 'vibe', 'twotab', 'daily', 'kinds', 'props', 'checkpoint', 'lab', 'lab-sweep', 'modes', 'tactics'].map(async f => [f, await readFile(join(here, f + '.js'), 'utf8')])));
 const failures = [];
 const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(0) + 's';
 const lost = [];                                                     // campaigns that lost or stalled, allowed by --min-wins
@@ -645,6 +647,10 @@ try {
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;
+  });
+  await check('foes lead their shots, climb to you, spread out, light drums, cover each other and split up to search', async ctx => {
+    const page = await open(ctx, ['tactics']);
+    return (await page.evaluate(() => AT.check())).fails;
   });
   await check('every breakable prop goes off cleanly in every arena', async ctx => {
     const page = await open(ctx, ['props']);

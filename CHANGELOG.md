@@ -150,6 +150,41 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **Smarter foes.** A squad-tactics layer that every foe shares sits on top of each kind's own moves.
+  - **They read where you're going.** Shots lead your run speed (smoothed, so a jink isn't a heading), follow the arc
+    of a jump down to the floor it lands on and stop at the wall that stops you. The lead is half your movement on
+    Easy, most of it on Normal and all of it on Brutal. Enforcers, Snipers, Rocketeers (at your landing feet), drones,
+    Linkers, Jets, Bastions, Swappers, Paratroopers and Turrets all use it. Stop or turn and the shot goes wide.
+  - **Grunts and Heavies take the stairs.** On your floor they charge you as before. When you're on a deck above them,
+    they path to you over the nav graph instead of pacing under it, and steer off the routes their packmates already
+    took, so a pack comes at your deck from both ends when it can. A Heavy leaps at where you'll be when it lands, and
+    a Grunt that sees your rocket coming sometimes hops it.
+  - **Drones pick their spot.** Each one hovers where it can see you, clear of the other fliers and off the line you're
+    aiming down. When you line one up and fire, it jinks sideways and finds another spot. A badly hurt drone keeps
+    further off.
+  - **Gunmen read your gun.** Against a short-reach weapon (shotgun, hose, cryo, katana, hammer) they keep out of
+    reach, against splash they spread out, and against a long-range gun (railgun, marksman rifle) they close in and
+    hold spots with cover a step away.
+  - **Squads work together.** An Enforcer or Rocketeer that takes a lot of damage fast ducks into cover, even in the
+    middle of lining up a shot, and the nearest squadmate that can see you opens up at once. An Enforcer hops out of
+    your line when you fire at it. When a squad loses you, the first goes to where you were heading, the second
+    watches the spot from cover and fires the moment you show, and the rest check behind you. A Sniper often moves
+    after a shot. A squadmate that sees one of its own go down knows where you are.
+  - **They use the arena.** On Normal and Brutal an Enforcer with a clear line shoots the drum by your feet. Its rounds
+    set the drum burning, so you have a second and a half to move. A drum a foe set off hurts you like their own
+    blast, and you get no style for it. They don't shoot a drum with one of their own next to it, or when you stand
+    in the line.
+  - **They call it out.** Short barks over their heads say what they're doing: FLANKING!, COVER ME!, TAKING FIRE!,
+    RELOADING, LOST VISUAL, FAN OUT!, WATCHING, THERE!, BARREL!, GRENADE!, FALL BACK!, MEDKIT!, MAN DOWN!, MOVING!,
+    BACK OFF!. One shows at a time, and each foe waits a while before it speaks again. They are only shown and draw no
+    random numbers.
+  - Wide-bodied foes (Bulwarks, and the Grunts and Heavies now on the nav graph) take off a hair back from a ledge they
+    jump up to, so they no longer bonk its underside and fall back.
+  - `AT.check()` (`dev/playtest/tactics.js`, in the headless suite) checks these in small fights on a fixed seed. Over
+    Brutal seeds 1 to 80 the campaign bot won 73 against `main`'s 74, and its losses are the same recurring kinds:
+    foes the bot can't find in the Meltdown and Wrecking Yard, and early deaths. Normal seeds 1 to 20 all win, as on
+    `main`. The seeds move, so of CI's eight Brutal seeds seed 4 now stalls in the Meltdown with a Gatling out of
+    reach; the other seven and all four Normal seeds win.
 - **Open source under the MIT License.** The MIT License replaces the proprietary license, and contributions are
   open to all. The sampled SFX banks come from AudioGen and keep their non-commercial note. The README now describes
   the architecture and the build, art, audio, test and release pipelines, with diagrams, in Simplified Technical
