@@ -31,15 +31,20 @@ have to build the game to play it.
 
 ## Play
 
+### Play online
+
+Open <https://saworbit.github.io/slaghouse/> in a desktop browser. GitHub Pages publishes each release of the game
+there.
+
 ### Requirements
 
 - A desktop browser with WebGL and Web Audio.
 - An internet connection. The page loads Phaser 4.2.1 from the jsDelivr CDN.
-- A local HTTP server. The procedure below uses Python 3.
 - A keyboard and mouse, or a gamepad. On a phone or tablet with touch input only, the title screen tells you this. It
   holds the run until a key press or pad input arrives.
+- To play locally: a local HTTP server. The procedure below uses Python 3.
 
-### Procedure
+### Play locally
 
 1. Open a terminal in the repository folder.
 2. Start the server:
@@ -377,7 +382,7 @@ slaghouse/
 │   ├── screenshots/      Screenshots from playtests.
 │   └── ISSUES.md         The original issue drafts. The open ones are GitHub issues.
 ├── docs/                 Images for this README.
-├── .github/              CI and release workflows, Dependabot, templates, CODEOWNERS.
+├── .github/              CI, release and Pages workflows, Dependabot, templates, CODEOWNERS.
 └── .claude/launch.json   Local preview-server configuration for Claude Code.
 ```
 
@@ -519,10 +524,16 @@ flowchart TB
   end
   subgraph rel["Release: release.yml"]
     direction LR
-    tag["Tag vX.Y.Z<br/>on main"] --> r1["check.mjs"] --> r2["Zip: game, 4 banks,<br/>LICENSE, README, CHANGELOG"] --> r3["GitHub release,<br/>notes from CHANGELOG"]
+    r1["check.mjs"] --> r2["Zip: game, 4 banks,<br/>LICENSE, README, CHANGELOG"] --> r3["GitHub release,<br/>notes from CHANGELOG"]
+  end
+  subgraph pages["Pages: pages.yml"]
+    direction LR
+    g1["check.mjs"] --> g2["Site: the same files,<br/>index.html redirect"] --> g3["saworbit.github.io<br/>/slaghouse/"]
   end
   local --> ci
-  ci -- "3 jobs pass, squash merge to main" --> rel
+  ci -- "3 jobs pass, squash merge to main" --> tag["Tag vX.Y.Z on main"]
+  tag --> rel
+  tag --> pages
 ```
 
 `node dev/check.mjs` does these checks:
@@ -533,8 +544,9 @@ flowchart TB
 - Each entry in `dev/sfxgen/calib.json` agrees with the code of its procedural sound.
 - It shows each sampled sound that the game asks for and that `sfx_bank.js` does not have.
 
-`main` requires the three CI jobs before a merge. A `vX.Y.Z` tag starts the release workflow. You can also start the
-workflow by hand as a dry run. See [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
+`main` requires the three CI jobs before a merge. A `vX.Y.Z` tag starts the release workflow and the Pages workflow.
+You can also start each workflow by hand: the release workflow as a dry run, and the Pages workflow to publish a
+different ref. See [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 ### Art pipeline
 

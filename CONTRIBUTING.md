@@ -173,9 +173,9 @@ in that file as well.
 Releases are tagged `vX.Y.Z` and published on GitHub with a playable zip.
 
 Before any commercial release, clear the sampled SFX first: `sfx_bank.js` and `sfx_bank_aac.js` come from AudioGen,
-whose weights are CC BY-NC 4.0 (see Licensing in README.md). Either regenerate them from a commercially licensed
-source or leave both files out of the zip; every sampled sound has a synth fallback. AudioGen is credited in
-README.md and LICENSE, and has to be credited anywhere else credits are shown, in-game credits included.
+whose weights are CC BY-NC 4.0 (see License in README.md). Either regenerate them from a commercially licensed
+source or leave both files out of the zip and the Pages site; every sampled sound has a synth fallback. AudioGen is
+credited in README.md, and has to be credited anywhere else credits are shown, in-game credits included.
 
 1. In `CHANGELOG.md`, move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading and update the
    version links at the bottom of the file.
@@ -201,6 +201,16 @@ builds the same zip and notes from the branch you pick, takes the notes from the
 
 ```bash
 gh workflow run release.yml --ref main -f version=Unreleased
+```
+
+The tag also starts the `Pages` workflow (`.github/workflows/pages.yml`), which publishes the game to
+<https://saworbit.github.io/slaghouse/>. It runs `node dev/check.mjs`, then deploys the same files as the zip plus an
+`index.html` that sends the bare URL on to `slaghouse.html` with its query string (so `?lab=furnace` still works). A
+pull request that changes the workflow builds the site without deploying it. To publish another ref, for example
+`main` between releases or an older tag again, run it by hand and name the ref. The ref doesn't need the workflow file:
+
+```bash
+gh workflow run pages.yml --ref main -f ref=main
 ```
 
 ## Audio
