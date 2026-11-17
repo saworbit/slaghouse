@@ -2,7 +2,8 @@
 // - slaghouse.html is exactly what src/ builds (node src/join.mjs)
 // - every inline <script> in slaghouse.html compiles
 // - the optional audio banks compile, and each AAC copy (loaded where Ogg Opus won't decode) holds the same sounds
-//   and tracks as its Opus bank
+//   and tracks as its Opus bank, and every AAC clip has the MP4 edit list that trims AAC's encoder priming, with the
+//   priming shorter than a looping track's 100 ms pad (#169)
 // - every local <script src> exists, and CDN scripts are pinned to an exact version with an integrity hash
 // - notes any sampled sound name the game asks for that sfx_bank.js doesn't have (the synth plays instead)
 // - the Sfx block loads on its own and every dev/sfxgen/calib.json entry matches its procedural sound (calibcheck)
@@ -14,6 +15,27 @@ import { pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
+// The seconds of priming an MP4's edit list skips (its first entry's media time over the track's timescale), or null
+// if it has no edit list.
+function mp4Priming(buf) {
+  const inside = new Set(['moov', 'trak', 'mdia', 'edts']), found = {};
+  const walk = (s, e) => {
+    while (s + 8 <= e) {
+      let size = buf.readUInt32BE(s), hdr = 8;
+      const type = buf.toString('latin1', s + 4, s + 8);
+      if (size === 1) { size = Number(buf.readBigUInt64BE(s + 8)); hdr = 16; } else if (size === 0) size = e - s;
+      if (size < hdr || s + size > e) return;
+      if (!found[type]) found[type] = s + hdr;
+      if (inside.has(type)) walk(s + hdr, s + size);
+      s += size;
+    }
+  };
+  walk(0, buf.length);
+  if (found.elst === undefined || found.mdhd === undefined) return null;
+  const m = found.mdhd, ts = buf[m] === 1 ? buf.readUInt32BE(m + 20) : buf.readUInt32BE(m + 12);
+  const q = found.elst, media = buf[q] === 1 ? Number(buf.readBigInt64BE(q + 16)) : buf.readInt32BE(q + 12);
+  return media / ts;
+}
 const ok = (msg) => console.log(`ok    ${msg}`);
 const fail = (msg) => { console.log(`FAIL  ${msg}`); failures.push(msg); };
 
@@ -78,6 +100,18 @@ for (const [bank, aacBank, key] of [['sfx_bank.js', 'sfx_bank_aac.js', 'SLAG_SFX
   const opus = Object.keys(a.window[key] || {}).sort().join(' '), aac = Object.keys(b.window[key + '_AAC'] || {}).sort().join(' ');
   if (opus !== aac) fail(`${aacBank} is out of step with ${bank}: rebuild it (names differ)`);
   else ok(`${aacBank} compiles and matches ${bank}`);
+  // AAC starts every clip with encoder priming (1024 samples from ffmpeg). The MP4 edit list (elst) tells the decoder
+  // to skip it, so a one-shot starts on time. A loop plays [ls, ls + len] of a clip padded with 100 ms of its own wrap
+  // either side, so if a decoder ignores the edit list, priming shorter than that pad still keeps the seam clean.
+  const late = [], bare = [];
+  for (const [name, rec] of Object.entries(b.window[key + '_AAC'] || {})) for (const [i, d] of [].concat(rec.d).entries()) {
+    const p = mp4Priming(Buffer.from(d, 'base64')), id = `${name}${Array.isArray(rec.d) ? '#' + i : ''}`;
+    if (p === null) bare.push(id);
+    else if (p <= 0 || (rec.loop && p >= rec.ls)) late.push(`${id} (${(p * 1000).toFixed(1)} ms${rec.loop ? ', pad ' + rec.ls * 1000 + ' ms' : ''})`);
+  }
+  if (bare.length) fail(`${aacBank}: ${bare.length} clip(s) with no MP4 edit list, so a decoder plays AAC's priming as a late start or a click: ${bare.slice(0, 6).join(' ')}`);
+  else if (late.length) fail(`${aacBank}: priming that a loop's pad can't cover, or none trimmed: ${late.slice(0, 6).join(' ')}`);
+  else ok(`${aacBank}: every clip's edit list trims the encoder priming, inside each loop's pad`);
 }
 
 // sfxgen calibration (#124): calibcheck.mjs evaluates the `const Sfx = { ... };` block with no page globals, the
