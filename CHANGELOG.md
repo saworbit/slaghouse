@@ -146,6 +146,37 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **The lift is a lift.** Every arena has two lift doors in its back wall: the car you arrived in, beside the start,
+  and the way on at the far end, locked with a red lamp. When the route reaches it, the car comes down (its light
+  passes the slots in the doors), chimes and opens. It waits until no foe is left. Walk in and the doors shut
+  on you, the lamp shows a falling arrow and the car goes down. The next arena opens on the car arriving with you in
+  it. You have no control and take no harm for about 1.4 s. Before, a marker box appeared and vanished the moment you
+  touched it, and outside the campaign the screen just faded. OVERTIME, DAILY and BOSS RUSH now call the same lift
+  after an arena's last wave, and you walk in. The HUD names it and points to it, and ARENA 05's sits at column 92,
+  clear of its water tank.
+- **Act 03's coolant valves are a real objective.** The meltdown heat-locks the lift: from Meltdown on, it glows and
+  sheds embers. After the Wyrm, turn both valves while a valve crew warps in for each. Each crew is three foes, and
+  they count in the campaign's total. A valve is a riser off a coolant main that runs along the wall to the lift, with
+  a handwheel that turns as you hold under it (2.2 s, up from 0.8). Being knocked off sets it back at half speed
+  instead of resetting it. Each turned valve sends coolant down the main. After the second, the lift steams as it
+  cools, and the car comes once both crews are down. A crew going down no longer counts as a second wave clear. The
+  act's goal reads SURVIVE THE MELTDOWN AND COOL THE LIFT, and the old INTAKE OPEN / COOLANT SEALED pair is gone.
+- **Act 05 cuts the power it promised to.** After Live Circuit, pull the main breaker on the generator. The lamps
+  drop to dim red emergency light, the tube lights and screens dim, and the generator's windings go dark. Then the
+  Smelter warps in. When it starts the rails in its second phase, the callout reads RAILS HOTWIRED.
+- **Machinery stays in the world when it's off.** The Sorting Line's presses park at the top instead of vanishing
+  until Meltdown, and one switched off mid-stroke pulls back without landing. The wrecking ball hangs latched at the
+  top of its arc on a holdback cable instead of appearing mid-swing. When the operation ends, the gantry winches it
+  back to the latch instead of it vanishing, so the Foreman cuts it loose from where it hangs. Each route's wave
+  card names the act's goal, for example LOCKDOWN LIFTED or LINE BREACHED, and the health top-up after a clear shows
+  as SUIT PATCHED with a green flash.
+- The campaign bot and `T.bot` fight a valve crew instead of waiting at a lift that won't come (`routeGoal()`). The
+  bot also stops flipping between a foe it can reach and one stranded on a deck whose steps were blown away (a
+  Meltdown stall that cost Brutal seeds on main too). A stranded foe now comes last, and the bot shoots it from any
+  reachable spot that can see it. The valve crews, the breaker and the lift ride change the seeded campaigns, so every
+  pinned seed plays out differently. The eight Brutal pins win 7 (seed 14 dies in Meltdown's slag) and the four
+  Normal pins all win. A 40-seed Brutal sweep wins 31 here against 36 on main. Every loss comes before the new
+  objectives, and they are the same kinds main has.
 - With ARENAS 06-10 in the rotation, DAILY picks its arena from ten, so a given day's arena differs from before.
   BOSS RUSH now rides the lift after its second, fourth, sixth and eighth bosses, two fights to each of the first
   five arenas.
