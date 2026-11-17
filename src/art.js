@@ -3391,6 +3391,13 @@ const SPAWNS = {                                  // [col, row] of the empty cel
 };
 
 // The operation order controls the arsenal, the first appearance of threats, and when machinery starts.
+// A route runs once an operation's last squad is down: its stations in order, each { cell, label } plus
+//   hold        seconds to stand there (a valve wheel, a breaker); a station without one is the lift, which comes
+//               down once no foe is left (and Act 03's once its shaft has cooled)
+//   valve, breaker  the fixture that stands there all act (Act 03's coolant valves, Act 05's main breaker)
+//   done        the callout once it's done; card: [title, subtitle] for the wave card as the route opens
+//   guard       foes that warp in as it becomes the open station ([kind, point], as in a squad); crew: their callout
+// After a route of only held stations the next operation starts in the same arena.
 const CAMPAIGN = [
   { name: 'LOCKDOWN', brief: 'CLEAR THE PATROL WITH THE NAILGUN',
     breakMs: 3200, spawnGap: 1100, damageScale: 0.8, recovery: 75, squads: [
@@ -3404,7 +3411,7 @@ const CAMPAIGN = [
     { foes: [['grunt', 'G'], ['enforcer', 'G'], ['bulwark', 'G']] },
     { name: 'DARK AMBUSH', mod: 'dark', foes: [['creeper', 'A'], ['mimic', 'G'], ['stalker', 'G']] },
     { name: 'FLOOR SWEEP', foes: [['grunt', 'G'], ['tarspit', 'G'], ['mender', 'A']] },
-  ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT' }] },
+  ], route: [{ cell: [95, 24], label: 'REACH THE FURNACE LIFT', card: ['LOCKDOWN LIFTED', 'THE FURNACE LIFT IS ON ITS WAY'] }] },
   { name: 'SLAG RAIN', brief: 'FIND OVERHEAD COVER BEFORE THE RAIN', machinery: 'vents', unlock: ['grenade', 'saw', 'acid'],
     breakMs: 2800, spawnGap: 950, damageScale: 0.9, hazardContactMs: 425, recovery: 65, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['shellback', 'G']] },
@@ -3421,7 +3428,7 @@ const CAMPAIGN = [
     { name: 'HEAVY SUPPORT', foes: [['welder', 'G'], ['howitzer', 'G']] },
     { name: 'CONTAINMENT CREW', foes: [['slug', 'G'], ['chiller', 'G']] },
     { incoming: 'JUGGERNAUT', breakMs: 3500, machinery: null, foes: [['jugg', 'G']] },
-  ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT' }] },
+  ], route: [{ cell: [95, 24], label: 'REACH THE SORTING LINE LIFT', card: ['LINE BREACHED', 'THE SORTING LINE LIFT IS ON ITS WAY'] }] },
   { name: 'SORTING SHIFT', brief: 'RIDE THE BELTS AND WATCH FOR MINES', machinery: 'belts', unlock: ['arc', 'stake'],
     breakMs: 1600, spawnGap: 550, elites: 1, squads: [
     { foes: [['grunt', 'G'], ['roller', 'G'], ['scavenger', 'G'], ['spotter', 'A']] },
@@ -3436,9 +3443,11 @@ const CAMPAIGN = [
     { name: 'CONTROL GUARD', prepare: 'SLAG DRAINING', mod: null, unlock: ['siphon'],
       foes: [['strider', 'G'], ['warhorn', 'G'], ['swapper', 'G'], ['grappler', 'G'], ['gatling', 'G']] },
     { incoming: 'WYRM', prepare: 'WATCH THE GROUND FOR ITS TELL', breakMs: 3200, foes: [['wyrm', 'G']] },
-  ], route: [
-    { cell: [36, 24], label: 'STAND AT COOLANT VALVE 1', hold: 0.8, done: 'INTAKE OPEN' },
-    { cell: [63, 24], label: 'STAND AT COOLANT VALVE 2', hold: 0.8, done: 'COOLANT SEALED' },
+  ], route: [                                                     // the meltdown cooked the lift shaft: send it coolant
+    { cell: [33, 24], valve: true, label: 'TURN COOLANT VALVE 1', hold: 2.2, done: 'COOLANT FLOWING', card: ['LIFT OVERHEATED', 'TURN BOTH VALVES TO COOL THE SHAFT'],
+      crew: 'VALVE CREW!', guard: [['grunt', 'G'], ['scavenger', 'G'], ['drone', 'A']] },
+    { cell: [66, 24], valve: true, label: 'TURN COOLANT VALVE 2', hold: 2.2, done: 'SHAFT COOLED',
+      crew: 'MORE OF THEM!', guard: [['enforcer', 'G'], ['roller', 'G'], ['drone', 'A']] },
     { cell: [95, 24], label: 'REACH THE WRECKING YARD LIFT' },
   ] },
   { name: 'DEMOLITION', brief: 'CLEAR THE CREW BEFORE THE BALL DROPS', unlock: ['drill'], elites: 2, squads: [
@@ -3448,26 +3457,26 @@ const CAMPAIGN = [
     { name: 'WRECKING CREW', unlock: ['flak'], foes: [['rocketeer', 'G'], ['wraith', 'A'], ['bastion', 'G'], ['buzzsaw', 'A'], ['pylon', 'G']] },
   ] },
   { name: 'THE FOREMAN', music: 'boss', brief: 'JUMP OVER THE SLAM WAVES', leadMs: 1800, unlock: ['shield', 'mini', 'marksman'],
-    squads: [{ foes: [['foreman', 'B']] }], route: [{ cell: [95, 24], label: 'REACH THE POWERHOUSE LIFT' }] },
+    squads: [{ foes: [['foreman', 'B']] }], route: [{ cell: [95, 24], label: 'REACH THE POWERHOUSE LIFT', card: ['FOREMAN DOWN', 'THE POWERHOUSE LIFT IS ON ITS WAY'] }] },
   { name: 'LIVE CIRCUIT', brief: 'CLEAR THE CREW WHILE RAILS ARE OFF', unlock: ['coil'], elites: 3, squads: [
     { foes: [['sparker', 'G'], ['sparker', 'G'], ['linker', 'A'], ['linker', 'A']] },
     { name: 'RAIL CREW', prepare: 'JUMP TO THE WALKWAYS', breakMs: 2600, machinery: 'rails', unlock: ['prism'],
       foes: [['magnet', 'A'], ['jammer', 'A'], ['pylon', 'G'], ['welder', 'G']] },
     { name: 'SURGE CREW', unlock: ['tether'], foes: [['vortex', 'A'], ['thundercloud', 'A'], ['bastion', 'G'], ['duelist', 'G']] },
     { name: 'CORE GUARD', foes: [['gatling', 'G'], ['sponge', 'G'], ['shellback', 'G'], ['copycat', 'A']] },
-  ] },
+  ], route: [{ cell: [53, 16], breaker: true, label: 'PULL THE MAIN BREAKER', hold: 1.2, done: 'POWER CUT', card: ['CUT THE POWER', 'PULL THE BREAKER ON THE GENERATOR'] }] },
   { name: 'THE SMELTER', music: 'boss', brief: 'KEEP CLEAR OF ITS BREATH', leadMs: 1800, unlock: ['lance', 'sing', 'nuke'],
     squads: [{ foes: [['boss', 'B']] }] },
 ];
 const CAMPAIGN_ACTS = [
   { name: 'MELT FLOOR', first: 0, last: 1, job: 'BREAK LOCKDOWN AND RESTORE LIFT ACCESS', color: 0xffb347 },
   { name: 'FURNACE', first: 2, last: 3, job: 'BREACH THE FURNACE SECURITY LINE', color: 0xff764a, recovery: 60 },
-  { name: 'SORTING LINE', first: 4, last: 5, job: 'SEAL THE COOLANT VALVES', color: 0x76e8ff, recovery: 75, breakMs: 1500, spawnGap: 525 },
+  { name: 'SORTING LINE', first: 4, last: 5, job: 'SURVIVE THE MELTDOWN AND COOL THE LIFT', color: 0x76e8ff, recovery: 75, breakMs: 1500, spawnGap: 525 },
   { name: 'WRECKING YARD', first: 6, last: 7, job: 'BRING DOWN THE FOREMAN', color: 0x9fe5a6, recovery: 75, breakMs: 1350, spawnGap: 490 },
   { name: 'POWERHOUSE', first: 8, last: 9, job: 'CUT POWER AND DESTROY THE SMELTER', color: 0xc9aaff, recovery: 80, breakMs: 1250, spawnGap: 460 },
 ];
-const campaignFoesFrom = wave => CAMPAIGN.slice(wave).reduce((total, op) =>
-  total + op.squads.reduce((n, squad) => n + squad.foes.length, 0), 0);
+const campaignFoesFrom = wave => CAMPAIGN.slice(wave).reduce((total, op) =>   // squads, and the crews that come for you on a route
+  total + op.squads.reduce((n, squad) => n + squad.foes.length, 0) + (op.route || []).reduce((n, st) => n + (st.guard?.length ?? 0), 0), 0);
 const CAMPAIGN_TOTAL = campaignFoesFrom(0);
 const CAMPAIGN_KEY = 'slaghouse.campaign.v1';
 const CAMPAIGN_REVISION = 2;
@@ -4242,7 +4251,7 @@ const ARENAS = [
               A: [[20, 8], [80, 8], [30, 14], [70, 14], [10, 12], [90, 12], [50, 8], [50, 14]], B: [[50, 17]] },
     decor: DECOR4, barrels: [[22, 24], [36, 24], [63, 24], [78, 24], [27, 18], [72, 18]], canisters: [[32, 24], [68, 24], [47, 17], [14, 20]],
     pipes: [[32, 388, 1], [1568, 388, -1]] },
-  { id: 5, name: 'ARENA 05', sub: 'THE POWERHOUSE', grid: buildLevel5(), bgTint: 0xd0c8ff, paint: paintPower, last: 99, rails: RAILS5,
+  { id: 5, name: 'ARENA 05', sub: 'THE POWERHOUSE', grid: buildLevel5(), bgTint: 0xd0c8ff, paint: paintPower, last: 99, rails: RAILS5, liftX: 92,
     spawns: { player: [4, 24], health: [[4, 9], [95, 9], [17, 14], [82, 14]] },
     points: { G: [[12, 24], [33, 24], [66, 24], [86, 24], [50, 16], [16, 19], [84, 19], [32, 19], [67, 19], [18, 14], [82, 14], [5, 9], [94, 9]],
               A: [[20, 8], [80, 8], [34, 10], [66, 10], [50, 6], [10, 13], [90, 13], [50, 13]], B: [[50, 16]] },
