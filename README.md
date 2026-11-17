@@ -53,7 +53,8 @@ hazard modifier, stationary enemies and invulnerability. Changing **Room** after
 the rest from the new room's preset. A tally beside **Add group** counts enemies and bosses, and **Deploy room** waits
 while the roster is over. Choose **Deploy room** to start. **F2** or the
 **Lab controls** button reopens the setup during play. **R** resets terrain, props, health, weapon and enemies
-to the deployed setup. Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
+to the deployed setup. The Lab's rooms leave every crate, girder and grating breakable, with no reinforced steps.
+Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
 The setup dialog takes a keyboard, a pointer or a gamepad: the D-pad moves between fields and changes them, **A**
 picks and **B** goes back. The regular gamepad controls work during play.
 See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted room control and observations.
@@ -152,8 +153,9 @@ OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
 
 Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
 starts. Each new weapon card shows what the weapon does and how to equip it. In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and sustained prop jets
-share a damage interval, so overlapping hazards cannot hit all at once. Ground fire clears when an
-operation ends. A Gunship wreck that lands after the clear cannot start a new fire.
+share a damage interval, so overlapping hazards cannot hit all at once. When an operation ends,
+the fire suppression sprays out the ground fire. A Gunship wreck that lands after the clear cannot start a new fire.
+New weapons arrive on the green supply beam.
 
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump

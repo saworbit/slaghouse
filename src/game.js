@@ -14,7 +14,7 @@ class GameScene extends Phaser.Scene {
     this.labRoster = this.lab ? data.spawns ?? labSpawns(this.lab) : null;
     this.labPending = 0;
     this.A = this.lab ? LAB_ROOMS[this.lab.room].arena : ARENAS[data?.arena ?? 0];
-    this.carry = data?.carry ?? null; this.descending = false;
+    this.carry = data?.carry ?? null; this.descending = false; this.arrivedRetry = !!data?.retry;
     this.mode = this.lab ? RUN_MODES.lab : (RUNMODE !== 'lab' && RUN_MODES[RUNMODE]) || RUN_MODES.campaign;   // any other RUNMODE plays the campaign, as before
     this.campaign = this.mode.id === 'campaign';                        // for the campaign's own systems: squads, routes, checkpoints
     if (this.campaign) this.A = CAMPAIGN_ARENAS[this.A.id - 1];
@@ -1257,6 +1257,7 @@ class GameScene extends Phaser.Scene {
     this.unlockSlots = issued;
     this.unlockUntil = this.time.now + 6200;
     Sfx.pickup();
+    const pb = this.player.body; this.beamIn(pb.center.x, pb.bottom, 26, []);   // the supply teleporter delivers it to you
   }
 
   // ---------------------------------------------------------------- weapons ----
@@ -1872,8 +1873,8 @@ class GameScene extends Phaser.Scene {
       if (hit || (s.body.velocity.y > 0 && this.standAt(s.x, s.y + 3))) { this.slagImpact(hit ? hit.x : s.x, hit ? hit.y : s.y, s.rain); s.disableBody(true, true); s.glow.setVisible(false); continue; }
       s.px = s.x; s.py = s.y;
     }
-    // A wreck or firebomb can land after the clear and leave a new patch.
-    if (this.campaign && !this.enemiesLeft) this.puddles.length = 0;
+    // A wreck or firebomb can land after the clear and leave a new patch: the fire suppression gets that one too.
+    if (this.campaign && !this.enemiesLeft && this.puddles.length) this.dousePuddles();
     for (let i = this.puddles.length - 1; i >= 0; i--) {              // molten puddles: burn whoever stands in them
       const P = this.puddles[i]; P.t -= dt;
       if (P.t <= 0) { this.puddles.splice(i, 1); continue; }
@@ -1895,6 +1896,21 @@ class GameScene extends Phaser.Scene {
       for (const rd of this.ragdolls) for (const q of rd.pts) if (q.gr && Math.abs(q.x - w.x) < 7 && Math.abs(q.y + q.r - w.y) < 6) { q.vy = -rand(200, 280); q.vx += w.dir * 90; rd.asleep = false; rd.stillT = 0; }
       if (!w.hit && alive && Math.abs(pb.center.x - w.x) < 10 && pb.bottom > w.y - 18 && pb.bottom <= w.y + 4) { w.hit = true; this.hurtPlayer(20, w.x - w.dir * 10); }
     }
+  }
+  // The campaign's fire suppression: when an operation ends, a spray from overhead puts out every burning patch
+  // and it steams out. Only the look: the patches are gone at once, as before. only: just the patches it picks.
+  dousePuddles(only) {
+    let n = 0;
+    for (const P of this.puddles) {
+      if (only && !only(P)) continue;
+      n++;
+      for (let x = P.x - P.w / 2 + 3; x < P.x + P.w / 2; x += 7) {
+        this.cfx.emit(x, P.y - 70, { n: 2, angle: Math.PI / 2, spread: 0.12, speed: [130, 190], life: [0.35, 0.5], size: [1, 1], cols: [0xd8f4ff, 0x7ac4dc], g: 500, mode: 1, cosmetic: true });
+        this.cfx.emit(x, P.y - 2, { n: 1, angle: -Math.PI / 2, spread: 0.9, speed: [15, 45], life: [0.7, 1.3], size: [3, 9], cols: [0xeef6f8, 0xb8ccd4], alpha: [0.5, 0], g: -40, cosmetic: true });
+      }
+    }
+    if (n) { Sfx.hiss(); this.time.delayedCall(200, () => Sfx.steam()); }
+    if (only) this.puddles = this.puddles.filter(P => !only(P)); else this.puddles.length = 0;
   }
   slagImpact(x, y, rain) {                                              // rain burns and shoves but leaves floors and drums alone, so a shower can't dig you into a pit
     this.explode(x, y, rain ? this.rainBlast || (this.rainBlast = { ...TUNE.BOSS.slag, tileDamage: 0, drums: false }) : TUNE.BOSS.slag);
@@ -2565,7 +2581,8 @@ class GameScene extends Phaser.Scene {
   // the camera, which the play-test bot's idle aim reads the pointer through; and it only reads the scene. So the
   // seeded campaigns play out the same with or without it.
   polInit() {
-    this.cfx = new FX(this, 600, 12); this.cfx.solid = (x, y) => this.solidAt(x, y);   // flecks and sparks bounce off tiles (mode 1); nothing here paints (mode 2)
+    this.cfx = new FX(this, 900, 12); this.cfx.solid = (x, y) => this.solidAt(x, y);   // flecks and sparks bounce off tiles (mode 1); nothing here paints (mode 2)
+    this.fx.twin = this.cfx;                                             // every cosmetic emit in the scene lands here too, out of the seeded list
     this.polG = this.add.graphics().setDepth(16.5).setBlendMode(ADD);   // impact stars, shock rings, dash streaks, twinkles
     this.polPops = []; this.polPopI = 0; this.polMarks = []; this.polFree = []; this.polDrawn = false;
     for (let i = 0; i < 20; i++) { const p = this.add.image(-99, -99, 'glow').setVisible(false).setDepth(5.05); p.on = false; p.t = 0; this.polPops.push(p); }   // white copies just over the foes
@@ -2905,7 +2922,14 @@ class GameScene extends Phaser.Scene {
   deathEcho(e, cx, cy, dx, src, charred) {
     this.fx.emit(cx, cy, { n: 30, speed: [30, 160], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0x9af0ff, 0x46b8f0], add: true }); this.spawnLight(cx, cy, 'player', 0x60e0ff, 1, 1.4, 0.6, 0.3, e.fr, e.dir < 0);
   }
-  deathPilferer(e, cx, cy, dx, src, charred) { if (e.gunImg) e.gunImg.destroy(); if (e.stolen >= 0) { this.locked.delete(e.stolen); BUS.emit('locked', [...this.locked]); BUS.emit('callout', 'GUN RECOVERED'); this.addStyle(40); } }
+  deathPilferer(e, cx, cy, dx, src, charred) {
+    if (e.gunImg) {                                                     // the gun it was carrying spins back to you
+      const img = e.gunImg, sx = img.x, sy = img.y;
+      this.tweens.addCounter({ from: 0, to: 1, duration: 380, ease: 'Quad.easeIn',
+        onUpdate: tw => { const k = tw.getValue(); img.setPosition(sx + (this.player.x - sx) * k, sy + (this.player.y - 4 - sy) * k - Math.sin(k * Math.PI) * 24).setRotation(k * 9); },
+        onComplete: () => { img.destroy(); if (this.state !== 'dead') this.spawnLight(this.player.x, this.player.y - 4, 'ring', 0xffffff, 0.2, 1, 0.8, 0.2); } });
+    }
+    if (e.stolen >= 0) { this.locked.delete(e.stolen); BUS.emit('locked', [...this.locked]); BUS.emit('callout', 'GUN RECOVERED'); this.addStyle(40); } }
   deathGolem(e, cx, cy, dx, src, charred) {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.time.delayedCall(60, () => { this.explode(cx, cy, TUNE.GOLEM.scrap); for (let i = 0; i < 10; i++) { const b = this.spawnBullet('shard', cx, cy - 6, i / 10 * Math.PI * 2 + rand(-0.2, 0.2), rand(220, 340), 9, 0.5); if (b) { b.bounces = 1; b.free = true; } } BUS.emit('callout', 'SCRAPPED'); });
   }
@@ -6379,11 +6403,12 @@ class GameScene extends Phaser.Scene {
   modOn(m) { return this.mod === m || this.mutator === m; }             // a scripted hazard, or MOON BOOTS / LIGHTS OUT for the whole run
   applyMod(m) {                                                         // wave modifiers: chaos with rules
     if (this.campaign && this.mod === 'slag' && m !== 'slag') {
-      for (const s of this.slagList) if (s.active && s.rain) {
+      for (const s of this.slagList) if (s.active && s.rain) {           // drops still falling cool to cinders and crumble
+        this.cfx.emit(s.x, s.y, { n: 5, speed: [10, 50], life: [0.4, 0.8], size: [2, 1], cols: [0x6a5a50, 0x3a2a20, 0xff8a20], g: 300, cosmetic: true });
         s.disableBody(true, true);
         s.glow.setVisible(false);
       }
-      this.puddles = this.puddles.filter(p => !p.rain);
+      this.dousePuddles(p => p.rain);
     }
     const rainLead = this.campaign ? 3 : 1.5;
     this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
@@ -8022,7 +8047,10 @@ class GameScene extends Phaser.Scene {
     } else {
       b.setVelocityX(0);
       if (R.st === 'shut' && L.st === 'shut') this.descend();
-      else if (R.st === 'arrive' && L.st === 'open') { L.cover = false; L.t = 1.4; this.ride = null; }   // out you go
+      else if (R.st === 'arrive' && L.st === 'open') {                   // out you go, patched up if the act started you higher
+        L.cover = false; L.t = 1.4; this.ride = null;
+        if (this.campaign && this.carry?.patched > 0 && !this.arrivedRetry) { const pb = this.player.body; this.spawnLight(pb.center.x, pb.center.y, 'ring', 0x7dff8a, 0.4, 2, 0.9, 0.5); BUS.emit('callout', 'SUIT PATCHED +' + this.carry.patched); }
+      }
     }
     const hide = !!this.ride && L.cover;
     this.gun.setVisible(!hide); this.visor.setVisible(!hide);
@@ -8173,6 +8201,7 @@ class GameScene extends Phaser.Scene {
         carry.elapsed = Math.max(0, this.runTime() * 1000);
         carry.diff = this.runDiff; carry.mut = this.runMut; carry.retried = this.campaignRetried;
         if (this.mutator !== 'vamp') carry.hp = Math.max(carry.hp, CAMPAIGN_ACTS[arena].recovery);
+        if (carry.hp > this.hp) carry.patched = Math.round(carry.hp - this.hp);   // the next act says so as you step out
         delete carry.stats.t0;
         const save = loadCampaign();
         if (ownsCampaign(save, this.campaignRunId)) writeCampaign({ ...save, checkpoint: carry, cleared: !!save?.cleared, owner: this.campaignRunId });   // a stale tab keeps playing but leaves a newer campaign's checkpoint alone
@@ -12118,8 +12147,9 @@ class GameScene extends Phaser.Scene {
       if (fy === null || Math.abs(fy - pb.bottom) > 160) continue;
       let y0 = fy - 8; while (y0 > fy - 200 && y0 > 36 && !this.solidAt(x, y0 - 4)) y0 -= 4;                       // as high as the open air above it goes
       if (fy - y0 < 40) continue;
-      this.supplies.push({ x, y: y0, fy, st: 'fall', crate: true, kind: pick(['dmg', 'haste', 'aegis', 'med']), t: 0, img: this.add.image(x, y0, 'supply').setDepth(6.7) });
+      this.supplies.push({ x, y: y0, fy, st: 'fall', crate: true, kind: pick(['dmg', 'haste', 'aegis', 'med']), t: 0, img: this.add.image(x, y0, 'supply').setDepth(6.7).setAlpha(0) });
       BUS.emit('callout', 'SUPPLY DROP'); Sfx.whoosh();
+      this.spawnLight(x, y0, 'ring', 0x7dffb0, 0.3, 1.5, 0.9, 0.35); this.spawnLight(x, y0, 'glow', 0x7dffb0, 1.2, 0.4, 0.8, 0.35);   // the supply teleporter puts it in the air
       return;
     }
   }
@@ -12137,8 +12167,9 @@ class GameScene extends Phaser.Scene {
         S.y += T.fall * dt; const sw = Math.sin(S.t * 2.5) * 3;
         if (S.y >= S.fy - 6) { S.y = S.fy - 6; S.st = 'land'; this.fxDust(S.x, S.fy, 6); Sfx.clunk(0.7); }
         else {
-          g.lineStyle(1, 0xc8c0a8, 0.8).lineBetween(S.x - 6, S.y - 6, S.x - 12 + sw, S.y - 26).lineBetween(S.x + 6, S.y - 6, S.x + 12 + sw, S.y - 26);
-          g.fillStyle(0xd8d0b8, 1).fillRect(Math.round(S.x - 14 + sw), Math.round(S.y - 30), 28, 4); g.fillStyle(0xc83020, 1).fillRect(Math.round(S.x - 4 + sw), Math.round(S.y - 30), 8, 4);
+          const fa = Math.min(1, S.t / 0.3); S.img.setAlpha(fa);          // it fades in, then its chute opens
+          g.lineStyle(1, 0xc8c0a8, 0.8 * fa).lineBetween(S.x - 6, S.y - 6, S.x - 12 + sw, S.y - 26).lineBetween(S.x + 6, S.y - 6, S.x + 12 + sw, S.y - 26);
+          g.fillStyle(0xd8d0b8, fa).fillRect(Math.round(S.x - 14 + sw), Math.round(S.y - 30), 28, 4); g.fillStyle(0xc83020, fa).fillRect(Math.round(S.x - 4 + sw), Math.round(S.y - 30), 8, 4);
         }
       } else if (S.st === 'cap') {                                       // a capsule pops up, falls and bobs; it drifts to you when close
         const d = Math.hypot(pb.center.x - S.x, pb.center.y - S.y);
@@ -14560,7 +14591,7 @@ class GameScene extends Phaser.Scene {
     if (this.campaign) {
       this.campaignMachinery = null;
       this.applyMod(null);
-      this.puddles.length = 0;
+      this.dousePuddles();
       for (const w of this.wrecks) w.cosmetic = true;                  // a wreck still in the air cannot reignite the arena
       const recovery = CAMPAIGN[this.wave].recovery;
       if (this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery) {
@@ -15673,7 +15704,8 @@ class GameScene extends Phaser.Scene {
       a *= (1 - (this.darkA || 0)) * (L.outUntil > now ? 0.03 : 1) * (this.powerCut ? 0.3 : 1); L.gl.setAlpha(0.5 * a); L.cone.setAlpha(0.16 * a);   // lamps die in a blackout (and a blown transformer's); emergency light once the power's cut
     }
     for (const B of this.beacons) B.img.setAlpha(0.35 + 0.35 * Math.sin(now / 220 + B.ph));
-    const jb = this.jetCycle && this.jetCycle.st === 'tell' ? 1 - this.jetCycle.t / TUNE.JETS.tell : this.jetCycle && this.jetCycle.st === 'fire' ? 1 : 0;   // the grate flares before the vents fire
+    const ventsOn = !this.campaign || this.campaignMachinery === 'vents';   // switched off mid-cycle, the grate goes back to its idle glow
+    const jb = !ventsOn ? 0 : this.jetCycle && this.jetCycle.st === 'tell' ? 1 - this.jetCycle.t / TUNE.JETS.tell : this.jetCycle && this.jetCycle.st === 'fire' ? 1 : 0;   // the grate flares before the vents fire
     for (const F of this.furnaceGlows) F.img.setScale(F.sc * (1 + Math.sin(now / 300 + F.ph) * 0.06 + jb * 0.35)).setAlpha((0.4 + 0.1 * Math.sin(now / 170 + F.ph) + jb * 0.4) * (this.powerCut ? 0.15 : 1));
     if (this.A.id === 2 && Math.random() < dt * 14) this.fx.emit(rand(46, 54) * TS, 19 * TS - 2, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [30, 90], life: [0.8, 1.8], size: [2, 1], cols: [0xffe080, 0xff8a20, 0xa02008], add: true, g: -20, drag: 0.4 });   // the furnace breathes embers
     for (const v of this.vents) {

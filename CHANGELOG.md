@@ -146,6 +146,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **More things happen for a reason.** When an operation ends, the fire suppression sprays every burning patch and it
+  steams out, instead of the fire winking out. A wreck that lands after the clear gets the same. Slag-rain drops
+  still falling when the rain clears cool to cinders instead of vanishing mid-air, and their patches steam out.
+  Supply crates appear in a green supply-beam flash and fade in before their chute opens, instead of popping into the
+  air. Issued campaign weapons arrive on the same beam. A downed Pilferer's stolen gun spins back to you instead of
+  vanishing. Arriving at a new act calls out SUIT PATCHED when the act raised your health. The furnace grate stops
+  flaring when its vents are switched off mid-burst. All of it is the look only, and with the cosmetic-particle fix
+  below it leaves the pinned campaigns line for line as they were.
 - **Blasts can't strand a deck any more.** The few crates, girders and gratings that are the only way up to a solid
   deck or ledge are reinforced: steel straps or bolts and a hazard edge, blast-proof, and they never sag loose. When
   hit they only ring. One search over the player's own moves from the start picks them: 2 to 21 tiles an arena
@@ -336,6 +344,14 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   under 50 MB. (#22)
 
 ### Fixed
+
+- Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
+  scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
+  That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,
+  or just extra cosmetic draws, reshuffled every pinned seed from the next busy fight on. Every `cosmetic: true` emit
+  now runs in the polish pool's own list (`FX.twin`, raised from 600 to 900 particles). The pinned seeds play out
+  differently once more, and from here on a cosmetic change leaves them exactly as they were. With the fix, this
+  round's effects leave all twelve pinned seeds identical line for line, and all twelve win.
 
 - Electric arcs from breakable props last as long as they should, and the shrink ray's beam shows. Both used one list
   with clocks running opposite ways: arcs shorter than 0.15 s never expired (a capacitor's idle sparks piled up to
