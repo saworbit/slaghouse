@@ -39,7 +39,7 @@ for runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the p
 with real key and pad input, rebinding keys from OPTIONS > KEYS (and keys going by position on another layout), the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
 placement, breakage, restocking and overlapping hazard damage on Normal. Each run mode keeps its own wave total,
 lifetime stats and record. Every arena's navigation graph, counting
-the player's long drops and wall climbs, must let every standing cell reach the start and get back. Campaign checks
+the player's long drops and wall climbs, must let every standing cell reach the start and get back. No arena may have a wall across the rows a Gunship flies in at its cruise height. Campaign checks
 cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for

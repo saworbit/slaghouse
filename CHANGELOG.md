@@ -7,6 +7,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- A play-test check that a Gunship can cross every campaign and OVERTIME arena at its cruise height. It fails, naming
+  the arena and the columns, if solid tiles, crates or girders cross the rows its body fills there, as the Furnace's
+  and the Sorting Line's ceiling pillars did before #194 and #195 (#200).
 - **Start the campaign at any act** for a real-speed playtest: `slaghouse.html?act=N`, for N from 2 to 5, saves a
   test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation, full health
   and your difficulty and mutator, and opens the campaign page on Continue. It asks before replacing a saved
@@ -203,6 +206,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
     Brutal seeds 1 to 80 the campaign bot won 73 against `main`'s 74, and its losses are the same recurring kinds:
     foes the bot can't find in the Meltdown and Wrecking Yard, and early deaths. Normal seeds 1 to 20 all win, as on
     `main`. All eight of CI's Brutal seeds and all eight of its Normal seeds win.
+- Boss rules read two record flags instead of lists of kinds (#177). `boss: true` now marks the Smelter and THE
+  FOREMAN as well as the five expansion bosses, and `miniBoss: true` marks the Juggernaut, the Gunship and the Slag
+  Wyrm. `SWARM_SKIP` and `NO_ELITE` are built from them, and the expansion intro now keys off `title`. The Smelter's
+  own exemptions became record fields (`headCrit`, `anchored`, `slagproof`, `burn`, `chill`, `chillOnly`). Where the
+  old lists disagreed, they now agree: THE FOREMAN and the Gunship take 60 at most from a press, THE FOREMAN gets the
+  short net hold, stasis freezes no Juggernaut or Gunship, Welders, Menders and Banners heal no boss or mini-boss,
+  Linkers tether no boss (nor the blimp or the wraith, which pass through walls), and the Grinder no longer panics
+  when it burns. A boss whose fall can end a run rolls for no supply capsule, so the five expansion bosses join the
+  Smelter there. The seeded campaigns replay line for line, and `compare.mjs` shows only those five bosses' capsule
+  rolls.
 - `node dev/playtest/run.mjs`, and CI's Headless play-test job, now play eight Normal campaigns and pass when seven
   win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
   the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed

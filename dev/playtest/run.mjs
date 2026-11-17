@@ -658,6 +658,26 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('a Gunship can cross every arena at its cruise height (#200)', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      // The Gunship holds TUNE.GUNSHIP.alt (give or take a 5 px bob) and collides with solid tiles and girders, but not
+      // gratings. A wall across the rows its body fills at that height splits the arena: one that warps in on one side
+      // stays there for the whole fight (#194, #195). The bob's top only grazes the row above, so that row doesn't count.
+      const fails = [], T = TUNE.GUNSHIP, bh = ENEMY.gunship.bh;
+      const r0 = Math.floor((T.alt - bh / 2) / TS), r1 = Math.floor((T.alt + bh / 2 - 1) / TS), wall = c => c === '#' || c === 'x' || c === 'g';
+      for (const [mode, list] of [['campaign', CAMPAIGN_ARENAS], ['OVERTIME', ARENAS]]) for (const A of list) {
+        const blocked = c => { for (let r = r0; r <= r1; r++) if (wall(A.grid[r][c])) return true; return false; };
+        const parts = []; let from = null;
+        for (let c = 1; c < MAP_W - 1; c++) {
+          if (!blocked(c) && from === null) from = c;
+          if ((blocked(c) || c === MAP_W - 2) && from !== null) { parts.push([from, blocked(c) ? c - 1 : c]); from = null; }
+        }
+        if (parts.length !== 1) fails.push(`${mode} ${A.name} (${A.sub}): walls across rows ${r0}-${r1} split the Gunship's flight into ${parts.length} parts, columns ${parts.map(p => p.join('-')).join(', ')}`);
+      }
+      return fails;
+    });
+  });
   await check('no blast can strand a solid deck: the reinforced steps hold and keep every deck in reach (#188)', async ctx => {
     const page = await open(ctx, []);
     return page.evaluate(() => {

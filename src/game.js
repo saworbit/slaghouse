@@ -1579,7 +1579,7 @@ class GameScene extends Phaser.Scene {
     if (hits.length) this.stats.hits++;
     for (const h of hits) {
       const hs = isHumanoid(h.e) && h.y < h.e.body.top + 5;
-      if (h.e.kind === 'boss' && h.y < h.e.body.top + 12) h.e.dmgHead = true;
+      if (h.e.def.headCrit && h.y < h.e.body.top + 12) h.e.dmgHead = true;
       this.fxBlood(h.x, h.y, 10, a, 0.6, [120, 320]);
       if (h.e.kind === 'bulwark' || h.e.kind === 'mirror') { h.e.ai = 'stagger'; h.e.aiUntil = now + 900; this.mirrorDamage(h.e, 50); }
       this.damageEnemy(h.e, W.damage * (hs ? TUNE.HEADSHOT : 1), ca, sa, 'rail', hs);
@@ -1663,7 +1663,7 @@ class GameScene extends Phaser.Scene {
         continue;
       }
       if (this.canExecute(e)) { this.execute(e, f); continue; }        // glowing and nearly dead: the boot finishes it
-      if (e.kind !== 'boss') {
+      if (!e.def.anchored) {
         const kb = Math.max(0.3, e.def.kb);
         b.velocity.x = f * K.push * kb * (drop ? 1.3 : 1); b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5);
         if (e.kind === 'bulwark' || e.kind === 'mirror') { e.ai = 'stagger'; e.aiUntil = now + 1100; e.shieldUp = false; }   // the boot breaks the guard
@@ -1763,10 +1763,10 @@ class GameScene extends Phaser.Scene {
   }
   ignite(e, t) {
     if (e.kind === 'pyro' || e.kind === 'scorcher' || e.kind === 'torcher' || e.kind === 'cinder' || e.def.molten || e.under) return;            // fireproof
-    if (e.kind === 'boss') t *= 0.5;
+    t *= e.def.burn ?? 1;
     if (e.burnT <= 0) {
       Sfx.ignite();
-      if (!['boss', 'foreman', 'bulwark', 'rammer', 'brood', 'jugg', 'burrower', 'turret', 'mimic'].includes(e.kind) && !FLIERS.has(e.kind) && e.def.speed !== 0 && e.def.kb > 0) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
+      if (!e.def.boss && !e.def.miniBoss && !['bulwark', 'rammer', 'brood', 'burrower', 'turret', 'mimic'].includes(e.kind) && !FLIERS.has(e.kind) && e.def.speed !== 0 && e.def.kb > 0) { e.panicT = 1.2; e.panicDir = Math.random() < 0.5 ? -1 : 1; }
     }
     e.burnT = Math.max(e.burnT, t);
   }
@@ -1888,7 +1888,7 @@ class GameScene extends Phaser.Scene {
         P.tick = 0.35;
         for (const rd of this.ragdolls) if (Math.abs(rd.pts[2].x - P.x) < P.w / 2 && Math.abs(rd.pts[2].y - P.y) < 12) rd.burnT = Math.max(rd.burnT, 2);   // corpses catch too
         if (alive && Math.abs(pb.center.x - P.x) < P.w / 2 + 5 && Math.abs(pb.bottom - P.y) < 6) this.hurtFromHazardContact(7, P.x, { burn: true, srcY: P.y + 8 });
-        for (const e of this.enemies.getChildren()) if (e.alive && e.kind !== 'boss' && Math.abs(e.body.center.x - P.x) < P.w / 2 + 4 && Math.abs(e.body.bottom - P.y) < 6) this.ignite(e, 1.5);
+        for (const e of this.enemies.getChildren()) if (e.alive && !e.def.slagproof && Math.abs(e.body.center.x - P.x) < P.w / 2 + 4 && Math.abs(e.body.bottom - P.y) < 6) this.ignite(e, 1.5);
       }
     }
     for (let i = this.shockwaves.length - 1; i >= 0; i--) {           // slam waves run along the floor: jump them
@@ -2345,7 +2345,7 @@ class GameScene extends Phaser.Scene {
     }
     if (!b.free) this.stats.hits++;
     const hs = (isHumanoid(e) || e.kind === 'jet') && by < e.body.top + 5;                    // top quarter of a humanoid = head
-    if (e.kind === 'boss' && by < e.body.top + 12) { e.dmgHead = true; b.dmg *= 1.5; }   // boss head / furnace crit
+    if (e.def.headCrit && by < e.body.top + 12) { e.dmgHead = true; b.dmg *= 1.5; }   // boss head / furnace crit
     if (e.def.molten) this.fx.emit(bx, by, { n: 5, angle: ang + Math.PI, spread: 1.6, speed: [40, 160], life: [0.2, 0.45], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 400, mode: 1 });   // slag spits sparks, not blood
     else if (e.def.mech) this.fxSparks(bx, by, 5, ang + Math.PI, 1.8);
     else {
@@ -2557,7 +2557,7 @@ class GameScene extends Phaser.Scene {
       e.stunT = Math.max(e.stunT, ({ pellet: 0.2, arc: 0.05, rail: 0.3, flame: 0.02, kick: 0, parry: 0.3, stake: 0.4, ripper: 0.16, lance: 0.4, glaive: 0.15, acid: 0.02, shock: 0.3, needle: 0.03, drill: 0.2, gas: 0, revolver: 0.2, siphon: 0.02, microwave: 0.02 }[src] ?? 0.07));
     }
     if (isRifleman(e) && e.ai === 'aim' && !rapid && src !== 'nail' && !quiet) { e.ai = 'engage'; e.fireCd = 0.5; }   // heavy hits spoil the aim
-    if (e.kind !== 'boss' && !quiet) e.rotation = clamp(e.rotation + (dx >= 0 ? 1 : -1) * (src === 'nail' || rapid ? 0.12 : 0.3), -0.5, 0.5);   // visual wobble
+    if (!e.def.anchored && !quiet) e.rotation = clamp(e.rotation + (dx >= 0 ? 1 : -1) * (src === 'nail' || rapid ? 0.12 : 0.3), -0.5, 0.5);   // visual wobble
     if (hs && src === 'ripper' && Math.random() > 0.15) hs = false;          // the blade doesn't ding every bite
     if (hs) { this.headshots++; Sfx.ding(); this.fxBlood(e.body.center.x, e.body.top, 8, -Math.PI / 2, 1.0, [60, 200]); }
     if (!quiet) BUS.emit('hitmark', e.hp <= 0, !!hs);
@@ -2842,7 +2842,7 @@ class GameScene extends Phaser.Scene {
     if (this.mutator === 'vamp' && !D.tiny && this.state !== 'dead' && this.hp < TUNE.PLAYER_HP) { this.hp = Math.min(TUNE.PLAYER_HP, this.hp + 4); BUS.emit('hp', this.hp, 0); }   // VAMPIRE
     if (this.perks.vampire && this.state !== 'dead' && this.hp < TUNE.PLAYER_HP) { this.hp = Math.min(TUNE.PLAYER_HP, this.hp + 3); BUS.emit('hp', this.hp, 0); }
     if (this.perks.scav && Math.random() < 0.15) this.dropOrbs(e.body.center.x, e.body.center.y, 1);
-    if (e.def.hp >= TUNE.SUPPLY.eliteHp && !e.summoned && e.kind !== 'boss' && Math.random() < TUNE.SUPPLY.eliteChance) this.dropCapsule(e.body.center.x, e.body.center.y);   // elites sometimes drop a power-up
+    if (e.def.hp >= TUNE.SUPPLY.eliteHp && !e.summoned && !e.def.winDelay && Math.random() < TUNE.SUPPLY.eliteChance) this.dropCapsule(e.body.center.x, e.body.center.y);   // elites sometimes drop a power-up
     if (this.perks.volatile && src !== 'volatile' && Math.random() < 0.25) { const vx = e.body.center.x, vy = e.body.center.y; this.time.delayedCall(90, () => { if (this.state !== 'dead') this.explode(vx, vy, TUNE.VOLATILE); }); }
     if (e.summoned) return;                                            // boss spawn: doesn't count toward the wave
     if (this.lab) { this.labKill(); return; }
@@ -4274,7 +4274,7 @@ class GameScene extends Phaser.Scene {
       const vy = fb.body.velocity.y, hh = fb.kind === '=' ? 3 : 7;
       if (vy > 140) {                                                   // anything under it gets flattened
         for (const e of this.enemies.getChildren()) {
-          if (!e.alive || fb.hits.has(e) || e.kind === 'boss') continue;
+          if (!e.alive || fb.hits.has(e) || e.def.anchored) continue;
           const eb = e.body;
           if (fb.x + 7 > eb.left && fb.x - 7 < eb.right && fb.y + hh > eb.top && fb.y - hh < eb.bottom) {
             fb.hits.add(e); this.fxBlood(eb.center.x, eb.top, 10, -Math.PI / 2, 1.6, [60, 220]);
@@ -4496,7 +4496,7 @@ class GameScene extends Phaser.Scene {
         if (ch === 'x' || ch === 'g') { this.destroyTile(tx, ty, true); this.addKick(e.dir * 2, 0); }
       }
       for (const o of this.enemies.getChildren()) {                       // ...and its own side
-        if (o === e || !o.alive || e.hitSet.has(o) || o.kind === 'boss') continue;
+        if (o === e || !o.alive || e.hitSet.has(o) || o.def.anchored) continue;
         const ob = o.body; if (ob.right < b.left - 2 || ob.left > b.right + 2 || ob.bottom < b.top || ob.top > b.bottom) continue;
         e.hitSet.add(o); const k = Math.max(0.3, o.def.kb);
         o.body.velocity.x = e.dir * 380 * k; o.body.velocity.y = -260 * k; o.kickedT = 0.6;
@@ -4643,7 +4643,7 @@ class GameScene extends Phaser.Scene {
       }
       if (!m.stuck && !m.host) {
         const e = this.enemyAt(m.x, m.y, 3);
-        if (e && e.kind !== 'boss') {
+        if (e && !e.def.anchored) {
           m.host = e; m.hox = m.x - e.x; m.hoy = m.y - e.y; m.trig = 0.9; m.stuck = true; m.armed = true;
           b.setVelocity(0, 0); b.setAllowGravity(false); b.moves = false; Sfx.mineArm(); BUS.emit('callout', 'STUCK!'); this.addStyle(40);
           continue;
@@ -4792,7 +4792,7 @@ class GameScene extends Phaser.Scene {
       if (Math.random() < 0.3) this.fxBlood(h.x, h.y, 1);
       h.glow.setPosition(ex, ey).setScale(0.6 + Math.random() * 0.4);
       for (const o of this.enemies.getChildren()) {                       // smashes into its old squad
-        if (!o.alive || h.hitSet.has(o) || o.kind === 'boss') continue;
+        if (!o.alive || h.hitSet.has(o) || o.def.anchored) continue;
         const ob = o.body;
         if (h.x > ob.left - 4 && h.x < ob.right + 4 && h.y > ob.top - 4 && h.y < ob.bottom + 4) { h.hitSet.add(o); this.damageEnemy(o, 20, Math.sign(bv.x) || 1, -0.5, 'kick'); Sfx.kickHit(); }
       }
@@ -4876,7 +4876,7 @@ class GameScene extends Phaser.Scene {
     L.gl.setPosition(L.x, L.y + 3).setAlpha(0.5 * fl); L.cone.setPosition(L.x, L.y + 3).setRotation(L.img.rotation).setAlpha(0.16 * fl);
     if (L.vy > 120) {
       for (const e of this.enemies.getChildren()) {
-        if (!e.alive || L.hits.has(e) || e.kind === 'boss') continue;
+        if (!e.alive || L.hits.has(e) || e.def.anchored) continue;
         const eb = e.body;
         if (L.x + 6 > eb.left && L.x - 6 < eb.right && L.y + 5 > eb.top && L.y - 5 < eb.bottom) {
           L.hits.add(e); this.damageEnemy(e, 80, 0, 1, 'crush');
@@ -6235,8 +6235,8 @@ class GameScene extends Phaser.Scene {
     if (e.frozen > 0) { e.frozen = Math.max(e.frozen, TUNE.CRYO.thaw * 0.6); return; }
     e.burnT = 0; e.panicT = 0;
     if (e.def.noFreeze) return;                                          // the wyrm runs too hot to freeze
-    e.chill = Math.min(1, (e.chill || 0) + amt * (e.kind === 'boss' ? 0.25 : e.kind === 'jugg' ? 0.45 : 1) * (e.soakUntil > this.time.now ? TUNE.HYDRO.chill : 1));   // soaked: it freezes faster
-    if (e.chill >= 1 && e.kind !== 'boss' && e.kind !== 'gunship') this.freeze(e);
+    e.chill = Math.min(1, (e.chill || 0) + amt * (e.def.chill ?? 1) * (e.soakUntil > this.time.now ? TUNE.HYDRO.chill : 1));   // soaked: it freezes faster
+    if (e.chill >= 1 && !e.def.chillOnly) this.freeze(e);
   }
   freeze(e) {
     e.frozen = TUNE.CRYO.thaw; e.chill = 1; e.fallV = 0; e.body.setAllowGravity(true); e.body.velocity.x *= 0.3;
@@ -6363,7 +6363,7 @@ class GameScene extends Phaser.Scene {
     e.linkT -= dt;
     if (e.linkT <= 0) {
       e.linkT = 0.4;
-      e.links = this.enemies.getChildren().filter(o => o.alive && o !== e && !['warden', 'boss', 'tick', 'screamer', 'gnat', 'wyrm', 'wyrmseg'].includes(o.kind) && Math.hypot(o.x - e.x, o.y - e.y) < T.range * 1.6)
+      e.links = this.enemies.getChildren().filter(o => o.alive && o !== e && !o.def.boss && !o.def.noClip && !['warden', 'tick', 'screamer', 'gnat'].includes(o.kind) && Math.hypot(o.x - e.x, o.y - e.y) < T.range * 1.6)
         .sort((p, q) => Math.hypot(p.x - e.x, p.y - e.y) - Math.hypot(q.x - e.x, q.y - e.y)).slice(0, T.links);
     }
     const L = e.links.filter(o => o.alive);
@@ -6563,7 +6563,7 @@ class GameScene extends Phaser.Scene {
         const e = this.enemyAt(k.x, k.y, 2);
         if (e) {
           Sfx.hookHit(); this.fxBlood(k.x, k.y, 6);
-          if (e.def.kb < 0.45 || ['boss', 'jugg', 'gunship', 'brood'].includes(e.kind)) { k.state = 'zip'; k.t = 0; k.follow = e; }   // too big: you go to it
+          if (e.def.kb < 0.45 || e.def.boss || e.def.miniBoss || e.kind === 'brood') { k.state = 'zip'; k.t = 0; k.follow = e; }   // too big: you go to it
           else {
             k.state = 'yank'; k.t = 0; k.target = e;
             this.damageEnemy(e, 8, Math.sign(sx - e.x) || 1, -0.5, 'kick');
@@ -6758,7 +6758,7 @@ class GameScene extends Phaser.Scene {
       this.fxFire(w.x + rand(-12, 12), w.y + rand(-4, 4), 2); this.fxSmoke(w.x, w.y - 4, 2, 1.4);
       if (Math.random() < 0.15) this.boomFx(w.x + rand(-18, 18), w.y + rand(-6, 6), 0.35);
       for (const e of this.enemies.getChildren()) {                      // flattens whatever it comes down on
-        if (w.cosmetic || !e.alive || w.hits.has(e) || e.kind === 'boss') continue;
+        if (w.cosmetic || !e.alive || w.hits.has(e) || e.def.anchored) continue;
         const eb = e.body; if (Math.abs(eb.center.x - w.x) < 26 && Math.abs(eb.center.y - w.y) < 14) { w.hits.add(e); this.damageEnemy(e, 90, 0, 1, 'crush'); }
       }
       if ((w.t > 0.25 && (b.blocked.down || b.blocked.left || b.blocked.right)) || w.t > 5) {
@@ -7066,7 +7066,7 @@ class GameScene extends Phaser.Scene {
     if (hits.size) this.stats.hits++;
     for (const [e, h] of hits) {
       const hs = isHumanoid(e) && h.y < e.body.top + 5;
-      if (e.kind === 'boss' && h.y < e.body.top + 12) e.dmgHead = true;
+      if (e.def.headCrit && h.y < e.body.top + 12) e.dmgHead = true;
       if (e.kind === 'bulwark' || e.kind === 'mirror') { e.ai = 'stagger'; e.aiUntil = now + 900; this.mirrorDamage(e, dmg * 0.6); }
       this.ignite(e, T.burn * Math.max(0.4, c));
       this.fx.emit(h.x, h.y, { n: 8, angle: a, spread: 0.8, speed: [80, 260], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xffe080, 0xff8a20], add: true, g: 300, mode: 1 });
@@ -7500,7 +7500,7 @@ class GameScene extends Phaser.Scene {
       const pb = this.player.body;
       if (this.state !== 'dead' && (!this.campaign || this.mod === 'melt') && pb.bottom > lvl + 2) { this.hurtPlayer(T.dmg, pb.center.x, { knock: false, iframes: false, burn: true, srcY: pb.bottom + 12 }); this.fxFire(pb.center.x, pb.bottom - 4, 6); Sfx.sizzle(); }
       for (const e of this.enemies.getChildren()) {
-        if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.molten || e.kind === 'pyro' || e.kind === 'boss' || e.kind === 'burrower' || e.body.bottom <= lvl + 2) continue;
+        if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.molten || e.def.slagproof || e.kind === 'pyro' || e.kind === 'burrower' || e.body.bottom <= lvl + 2) continue;
         if (e.kind === 'tick') this.tickBoom(e); else this.ignite(e, 1.5);
       }
       for (const k of this.barrelList) if (k.active && k.y + 6 > lvl) this.damageBarrel(k, 30, 0.4);
@@ -7645,7 +7645,7 @@ class GameScene extends Phaser.Scene {
       const b = e.body; if (b.right < xl || b.left > xr || b.bottom < yt || b.top > yb) continue;
       hit = true; this.stats.hits++;
       if (this.canExecute(e)) { this.execute(e, f); continue; }
-      if (e.kind !== 'boss' && !e.def.noClip) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = f * T.swingKnock * kb; b.velocity.y = -220 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5); }
+      if (!e.def.anchored && !e.def.noClip) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = f * T.swingKnock * kb; b.velocity.y = -220 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5); }
       if (e.kind === 'bulwark' || e.kind === 'mirror') { e.ai = 'stagger'; e.aiUntil = now + 1000; e.shieldUp = false; this.mirrorDamage(e, 30); }
       if (!e.def.molten && !e.def.mech) this.fxBlood(b.center.x, b.center.y, 8, f > 0 ? 0 : Math.PI, 1, [100, 260]);
       this.damageEnemy(e, T.swingDmg, f, -0.4, 'kick');
@@ -7669,7 +7669,7 @@ class GameScene extends Phaser.Scene {
       this.stats.hits++;
       if (this.canExecute(e)) { this.execute(e, Math.sign(b.center.x - p.x) || this.facing); continue; }
       this.damageEnemy(e, dmg * 1.4, Math.sign(b.center.x - p.x) || this.facing, -1, 'kick');
-      if (e.alive && !e.def.noClip && e.kind !== 'boss') { b.velocity.y = -T.launch * Math.max(0.3, e.def.kb); e.stunT = Math.max(e.stunT, 0.8); }
+      if (e.alive && !e.def.noClip && !e.def.anchored) { b.velocity.y = -T.launch * Math.max(0.3, e.def.kb); e.stunT = Math.max(e.stunT, 0.8); }
     }
     for (const dir of [-1, 1]) this.pwaves.push({ x, y: fy, dir, dist: 0, max: range, dmg, speed: T.waveSpeed, hit: new Set(), fxT: 0 });
     const ty = Math.floor((fy + 2) / TS);
@@ -7705,7 +7705,7 @@ class GameScene extends Phaser.Scene {
         const b = e.body;
         if (Math.abs(b.center.x - w.x) > b.halfWidth + 6 || Math.abs(b.bottom - w.y) > 10) continue;
         w.hit.add(e); this.stats.hits++;
-        if (e.kind !== 'boss') { const kb = Math.max(0.35, e.def.kb); b.velocity.y = -T.launch * kb * (0.5 + 0.5 * f); b.velocity.x = w.dir * 160 * kb; e.stunT = Math.max(e.stunT, 0.7); e.kickedT = 0.4; }
+        if (!e.def.anchored) { const kb = Math.max(0.35, e.def.kb); b.velocity.y = -T.launch * kb * (0.5 + 0.5 * f); b.velocity.x = w.dir * 160 * kb; e.stunT = Math.max(e.stunT, 0.7); e.kickedT = 0.4; }
         this.damageEnemy(e, w.dmg * (0.55 + 0.45 * f), w.dir, -1, 'kick');
       }
       for (const kg of this.barrelList) if (kg.active && !w.hit.has(kg) && Math.abs(kg.x - w.x) < 8 && Math.abs(kg.y + 7 - w.y) < 10) { w.hit.add(kg); kg.body.velocity.y = -320; }
@@ -8289,7 +8289,7 @@ class GameScene extends Phaser.Scene {
   // Hold to catch the nearest loose thing in the aim cone (drums, satchels, gas cans, gibs, corpses, light enemies)
   // and carry it at the muzzle; release to hurl it. Drums and satchels go off on impact, gas cans become rockets,
   // corpses and enemies bowl over whatever they hit. Held enemies get crushed slowly.
-  tractorable(e) { return e.def.kb >= 0.5 && e.hp <= 130 && !e.def.noClip && !['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'hive', 'buzzsaw'].includes(e.kind); }
+  tractorable(e) { return e.def.kb >= 0.5 && e.hp <= 130 && !e.def.noClip && !e.def.boss && !e.def.miniBoss && !['burrower', 'hive', 'buzzsaw'].includes(e.kind); }
   tractorFind() {
     const T = TUNE.TRACTOR, sx = this.shoulder.x, sy = this.shoulder.y, a = this.aim;
     let best = null, bs = 1e9;
@@ -8815,7 +8815,7 @@ class GameScene extends Phaser.Scene {
       if ((e.healT -= dt) <= 0) {
         e.healT = 0.5;
         for (const o of this.enemies.getChildren()) {
-          if (!o.alive || o.under || o.def.tiny || o.kind === 'boss' || o.kind === 'foreman' || o.def.boss || o.hp >= o.def.hp) continue;
+          if (!o.alive || o.under || o.def.tiny || o.def.boss || o.def.miniBoss || o.hp >= o.def.hp) continue;
           const self = o === e; if (!self && Math.hypot(o.body.center.x - e.x, o.body.center.y - e.y) > T.radius) continue;
           o.hp = Math.min(o.def.hp, o.hp + T.heal * 0.5 * (self ? 0.5 : 1));
           if (Math.random() < 0.5) this.fx.emit(o.body.center.x + rand(-4, 4), o.body.top, { n: 1, angle: -Math.PI / 2, spread: 0.3, speed: [10, 30], life: [0.3, 0.6], size: [2, 1], cols: [0x5cff7a, 0xd0ffd8], add: true });
@@ -9544,7 +9544,7 @@ class GameScene extends Phaser.Scene {
         n++; this.stats.hits++;
         if (this.canExecute(e)) { this.execute(e, ca >= 0 ? 1 : -1); continue; }
         this.damageEnemy(e, T.bash, ca, sa, 'kick');
-        if (e.alive && e.kind !== 'boss' && e.def.kb > 0) { const kb = Math.max(0.3, e.def.kb); e.body.velocity.x = ca * T.push * kb; e.body.velocity.y = -180 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.6); }
+        if (e.alive && !e.def.anchored && e.def.kb > 0) { const kb = Math.max(0.3, e.def.kb); e.body.velocity.x = ca * T.push * kb; e.body.velocity.y = -180 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.6); }
       }
       Sfx.whoosh(); if (n) { Sfx.kickHit(); this.hitStop(60); this.shake(110, 0.006); if (n >= 2) { BUS.emit('callout', 'SHIELD BASH'); this.addStyle(30); } }
       this.recoil = -4; this.addKick(ca * 3, sa * 3);
@@ -9684,7 +9684,7 @@ class GameScene extends Phaser.Scene {
       const e = this.enemyAt(B.x, B.y, 3);
       if (!e || e.under || e.bubbleUntil > now) continue;
       this.bubbles.splice(i, 1); this.stats.hits++;
-      if (FLIERS.has(e.kind) || e.def.noClip || e.def.hp > T.big || ['boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'turret'].includes(e.kind) || e.frozen > 0 || e.stasisT > 0 || e.gravT > 0) {
+      if (FLIERS.has(e.kind) || e.def.noClip || e.def.hp > T.big || e.def.boss || e.def.miniBoss || e.kind === 'burrower' || e.kind === 'turret' || e.frozen > 0 || e.stasisT > 0 || e.gravT > 0) {
         this.popBubbleFx(B.x, B.y, 6); this.damageEnemy(e, T.dmg, Math.sign(B.vx) || 1, 0, 'pellet'); continue;
       }
       const b = e.body; e.gravT = T.float; e.gravSlam = false; b.setAllowGravity(false); b.setVelocity(b.velocity.x * 0.2, -T.rise); e.bubbleUntil = now + T.float * 1000;
@@ -9995,7 +9995,7 @@ class GameScene extends Phaser.Scene {
       this.punchHit = true; this.dashUntil = now; this.stats.hits++;
       if (this.canExecute(e)) { this.execute(e, ux >= 0 ? 1 : -1); return; }
       this.damageEnemy(e, T.dmg, ux, uy, 'kick');
-      if (e.alive && e.kind !== 'boss' && e.def.kb > 0) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = ux * T.push * kb; b.velocity.y = uy * 200 - 180 * kb; e.kickedT = 0.7; e.stunT = Math.max(e.stunT, 0.6); }
+      if (e.alive && !e.def.anchored && e.def.kb > 0) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = ux * T.push * kb; b.velocity.y = uy * 200 - 180 * kb; e.kickedT = 0.7; e.stunT = Math.max(e.stunT, 0.6); }
       for (const o of this.enemies.getChildren()) if (o.alive && o !== e && !o.under && Math.hypot(o.body.center.x - fx, o.body.center.y - fy) < 34) this.damageEnemy(o, T.splash, Math.sign(o.body.center.x - fx) || 1, -0.4, 'pellet');
       pb.velocity.x = -ux * 120; pb.velocity.y = -80;
       this.hitStop(90); this.shake(160, 0.008); Sfx.punchHit(); BUS.emit('callout', 'HAYMAKER'); this.addStyle(50); this.zoomPunch = Math.max(this.zoomPunch, 0.06);
@@ -10282,7 +10282,7 @@ class GameScene extends Phaser.Scene {
           B.hits.add(e);
           if (this.shieldBlocks(e, B.vx, B.y)) { e.ai = 'stagger'; e.aiUntil = now + 900; this.fxSparks(B.x, B.y, 10, Math.atan2(-uy, -ux), 1.2, [80, 240]); Sfx.clang(); B.vx *= -0.35; B.vy = -140; B.k = 0.1; continue; }
           if (!B.hit) { B.hit = true; this.stats.hits++; }
-          const heavy = e.kind === 'boss' || e.def.kb < 0.45 || e.def.hp > 150 || e.def.noClip;
+          const heavy = e.def.anchored || e.def.kb < 0.45 || e.def.hp > 150 || e.def.noClip;
           if (e.def.mech) this.fxSparks(B.x, B.y, 12, Math.atan2(uy, ux), 1, [80, 280]); else { this.fxBlood(B.x, B.y, 14, Math.atan2(uy, ux), 0.8, [100, 320]); this.fxBlood(B.x, B.y, 6, Math.atan2(-uy, -ux), 1.2, [40, 140]); }
           this.xwHit(e, T.dmg * B.k, ux, uy, 'cannon', 'cannon');
           if (e.alive && !heavy) { const kb = Math.max(0.35, e.def.kb); b.velocity.x += ux * T.knock * kb * B.k; b.velocity.y = Math.min(b.velocity.y, (uy - 0.6) * T.knock * 0.6 * kb); e.stunT = Math.max(e.stunT, 0.6); e.kickedT = 0.5; }
@@ -10378,7 +10378,7 @@ class GameScene extends Phaser.Scene {
         this.xwHit(e, T.dmg, 0, -1, 'quake', 'quake');
         this.fx.emit(b.center.x, b.bottom, { n: 12, angle: -Math.PI / 2, spread: 1, speed: [80, 240], life: [0.3, 0.6], size: [3, 1], cols: [0xffffff, 0xc8b8a0, 0x8a7a68], g: 600, mode: 1 });
         Sfx.quakePop(); this.hitStop(25);
-        if (e.alive && e.kind !== 'boss' && !e.def.noClip) {
+        if (e.alive && !e.def.anchored && !e.def.noClip) {
           const kb = Math.max(0.35, e.def.kb); b.velocity.y = -T.launch * kb; b.velocity.x = Q.dir * 50 * kb; e.stunT = Math.max(e.stunT, 0.8); e.juggleUntil = now + T.juggle * 1000;
           this.spawnLight(b.center.x, b.bottom - 4, 'glow', 0xffc080, 0.8, 1.6, 0.7, 0.15);
         }
@@ -10568,7 +10568,7 @@ class GameScene extends Phaser.Scene {
       const grow = Math.min(1, C.age / 0.25) * Math.min(1, C.t / 0.3), reach = T.reach * grow, top = C.y - 70;
       if ((C.sndT -= dt) <= 0) { C.sndT = 0.45; Sfx.cyclone(0.8); }
       for (const e of this.enemies.getChildren()) {                      // suck in what's light; shove what isn't
-        if (!e.alive || e.under || e.kind === 'boss' || C.caught.some(c => c.e === e)) continue;
+        if (!e.alive || e.under || e.def.anchored || C.caught.some(c => c.e === e)) continue;
         const b = e.body;
         if (Math.abs(b.center.x - C.x) > reach + b.halfWidth || b.center.y < top || b.top > C.y + 4) continue;
         if (e.def.hp <= T.maxHp && e.def.kb >= 0.45 && !e.def.noClip && !this.cyclones.some(o => o !== C && o.caught.some(c => c.e === e))) { C.caught.push({ e, ph: Math.atan2(0, b.center.x - C.x), r: rand(8, 14), h: 0 }); Sfx.whoosh(); }
@@ -10631,7 +10631,7 @@ class GameScene extends Phaser.Scene {
     if (!C.shot.hit) { C.shot.hit = true; this.stats.hits++; }
     if (e.def.mech) this.fxSparks(C.x, C.y - 2, 4, -Math.PI / 2, 1.4, [40, 140]); else this.fxBlood(C.x, C.y - 2, 5, -Math.PI / 2, 1.2, [40, 160]);
     Sfx.caltropStab();
-    if (e.alive && e.kind !== 'boss') { e.spikeUntil = now + TUNE.CALTROP.slowT * 1000; this.xwFoes.add(e); }   // (the limp is applied in updateCaltrops)
+    if (e.alive && !e.def.anchored) { e.spikeUntil = now + TUNE.CALTROP.slowT * 1000; this.xwFoes.add(e); }   // (the limp is applied in updateCaltrops)
   }
   updateCaltrops(dt, now) {
     const T = TUNE.CALTROP;
@@ -10708,7 +10708,7 @@ class GameScene extends Phaser.Scene {
       if (this.lastRag && this.lastRag.from === e && S.carry.length < T.carry) { S.carry.push({ rd: this.lastRag, pi: 1 }); Sfx.squish(); }
       return;
     }
-    const heavy = e.kind === 'boss' || e.def.kb < 0.45 || e.def.hp > T.light || e.def.noClip;
+    const heavy = e.def.anchored || e.def.kb < 0.45 || e.def.hp > T.light || e.def.noClip;
     S.st = heavy ? 'zip' : 'reel'; S.e = e; S.t = 0; S.ox = S.x - b.center.x; S.oy = S.y - b.center.y;
     e.stunT = Math.max(e.stunT, 0.6);
     BUS.emit('callout', heavy ? 'HARPOONED!' : 'GET OVER HERE!'); this.addStyle(30); Sfx.spearReel();
@@ -10717,7 +10717,7 @@ class GameScene extends Phaser.Scene {
     const K = TUNE.KICK, b = e.body;
     this.kickUntil = this.time.now + 180; Sfx.kickHit(); this.hitStop(60); this.shake(100, 0.006); this.addStyle(25);
     if (this.canExecute(e)) { this.execute(e, f); return; }
-    if (e.kind !== 'boss' && !e.def.noClip) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = f * K.push * kb; b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5); }
+    if (!e.def.anchored && !e.def.noClip) { const kb = Math.max(0.3, e.def.kb); b.velocity.x = f * K.push * kb; b.velocity.y = -200 * kb; e.kickedT = 0.6; e.stunT = Math.max(e.stunT, 0.5); }
     if (e.def.mech) this.fxSparks(b.center.x, b.center.y, 8, f > 0 ? 0 : Math.PI, 1, [80, 220]); else this.fxBlood(b.center.x, b.center.y, 8, f > 0 ? 0 : Math.PI, 1, [80, 220]);
     this.xwHit(e, K.damage, f, -0.3, 'kick', 'spear');
   }
@@ -10931,7 +10931,7 @@ class GameScene extends Phaser.Scene {
       const b = e.body, kb = e.def.kb; hitAny = true;
       e.soakUntil = now + T.soak * 1000; this.xwFoes.add(e);
       if (e.burnT > 0) { e.burnT = 0; e.panicT = 0; Sfx.sizzle(); this.fx.emit(b.center.x, b.top, { n: 8, angle: -Math.PI / 2, spread: 1, speed: [10, 50], life: [0.5, 1], size: [3, 7], cols: [0xe8f0f4, 0xb0bcc4], alpha: [0.5, 0], g: -40, drag: 2 }); }
-      if (e.kind !== 'boss' && !e.def.noClip && kb > 0) {
+      if (!e.def.anchored && !e.def.noClip && kb > 0) {
         b.velocity.x = approach(b.velocity.x, ca * T.push * kb, T.push * kb * 0.6);
         if (FLIERS.has(e.kind)) b.velocity.y = approach(b.velocity.y, sa * T.push * kb, T.push * kb * 0.6); else if (sa < -0.3) b.velocity.y = Math.min(b.velocity.y, sa * T.push * kb * 0.7);
         e.stunT = Math.max(e.stunT, 0.12);
@@ -10996,7 +10996,7 @@ class GameScene extends Phaser.Scene {
       const F = this.stasisFields[i]; F.t -= dt; const end = F.t <= 0;
       let n = 0;
       for (const e of this.enemies.getChildren()) {
-        if (end || !e.alive || e.under || ['boss', 'foreman', 'wyrm', 'wyrmseg'].includes(e.kind) || e.def.boss) continue;
+        if (end || !e.alive || e.under || e.def.boss || e.def.miniBoss) continue;
         if (Math.hypot(e.body.center.x - F.x, e.body.center.y - F.y) > T.radius) continue;
         if (!(e.stasisT > 0)) { e.stasisDmg = 0; e.stasisGrav = this.tb && this.tb.o === e ? this.tb.grav : e.body.allowGravity; e.body.setAllowGravity(false); }
         e.stasisT = 0.12; e.body.setVelocity(0, 0); n++;
@@ -11038,7 +11038,7 @@ class GameScene extends Phaser.Scene {
     if ((this.mwSndT = (this.mwSndT || 0) - W.cooldown / 1000) <= 0) { this.mwSndT = 0.3; Sfx.microwave(); }
     if (!tgt) { this.mwFx = { x0: ox, y0: oy, x1: ox + Math.cos(a) * 40, y1: oy + Math.sin(a) * 40, t: now }; return; }
     const ex = tgt.body.center.x, ey = tgt.body.center.y; this.mwFx = { x0: ox, y0: oy, x1: ex, y1: ey, t: now };
-    tgt.cook = Math.min(1, (tgt.cook || 0) + W.cook * (['boss', 'foreman', 'jugg', 'gunship', 'wyrm'].includes(tgt.kind) || tgt.def.boss ? 0.35 : 1)); tgt.cookT = now;
+    tgt.cook = Math.min(1, (tgt.cook || 0) + W.cook * (tgt.def.boss || tgt.def.miniBoss ? 0.35 : 1)); tgt.cookT = now;
     this.damageEnemy(tgt, W.dmg, Math.cos(a), Math.sin(a), 'microwave'); this.stats.hits++;
     if (tgt.alive && tgt.cook >= 1) this.mwPop(tgt);
   }
@@ -11178,7 +11178,7 @@ class GameScene extends Phaser.Scene {
       if (Math.hypot(qx - bx, qy - by) > R0 || (W.hit.get(e) || 0) > now) continue;
       W.hit.set(e, now + 700);
       this.damageEnemy(e, TUNE.WRECK.dmg * clamp(sp / 300, 0.4, 1.2), ux, uy, 'crush');
-      if (e.alive && e.def.kb > 0 && e.kind !== 'boss') { b.velocity.x = ux * 420 * e.def.kb; b.velocity.y = uy * 300 * e.def.kb - 200 * e.def.kb; e.stunT = Math.max(e.stunT, 0.8); e.kickedT = 0.6; }
+      if (e.alive && e.def.kb > 0 && !e.def.anchored) { b.velocity.x = ux * 420 * e.def.kb; b.velocity.y = uy * 300 * e.def.kb - 200 * e.def.kb; e.stunT = Math.max(e.stunT, 0.8); e.kickedT = 0.6; }
       this.fxSparks(qx, qy, 8, Math.atan2(uy, ux), 1.2, [80, 260]); Sfx.wreckHit(); this.shake(120, 0.006); this.hitStop(40);
       if (!e.alive) { BUS.emit('callout', 'WRECKED'); this.addStyle(60); if ((this.ms.wrecks = (this.ms.wrecks || 0) + 1) >= 3) this.award('wrecker'); }
     }
@@ -11467,7 +11467,7 @@ class GameScene extends Phaser.Scene {
       for (const k of this.barrelList) if (k.active) { const d = cone(k.x, k.y); if (d) k.body.velocity.x += (nx - k.x) / d * 200 * dt; }
       // props are bolted down and the suction does no damage, so the vacuum leaves them alone
       for (const e of this.enemies.getChildren()) {
-        if (!e.alive || e.under || e.def.kb < 0.5 || e.hp > 90 || e.def.noClip || ['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg'].includes(e.kind)) continue;
+        if (!e.alive || e.under || e.def.kb < 0.5 || e.hp > 90 || e.def.noClip || e.def.boss || e.def.miniBoss) continue;
         const d = cone(e.body.center.x, e.body.center.y); if (!d) continue;
         e.body.velocity.x += (nx - e.body.center.x) / d * W.pull * 0.8 * e.def.kb * dt;
         if (FLIERS.has(e.kind)) e.body.velocity.y += (ny - e.body.center.y) / d * W.pull * 0.8 * e.def.kb * dt;
@@ -11691,7 +11691,7 @@ class GameScene extends Phaser.Scene {
       if (this.canExecute(e)) { this.execute(e, this.facing); continue; }
       if (e.def.mech) this.fxSparks(b.center.x, b.center.y, 6, a, 1, [80, 240]); else this.fxBlood(b.center.x, b.center.y, 8, a, 1, [80, 260]);
       this.damageEnemy(e, T.dmg * mul, Math.cos(a), Math.sin(a), 'slash');
-      if (e.alive && e.def.kb > 0 && e.kind !== 'boss') { b.velocity.x += Math.cos(a) * T.push * e.def.kb; b.velocity.y -= 90 * e.def.kb; }
+      if (e.alive && e.def.kb > 0 && !e.def.anchored) { b.velocity.x += Math.cos(a) * T.push * e.def.kb; b.velocity.y -= 90 * e.def.kb; }
     }
     for (const list of [this.ebulletList, this.boltList]) for (const q of list) {   // bat the shots back
       if (!q.active || !inArc(q.x, q.y, 6)) continue;
@@ -11844,7 +11844,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.GRAV; let n = 0;
     for (const e of this.enemies.getChildren()) {
       if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.noClip || e.frozen > 0 || e.netT > 0 || (e.kind === 'para' && e.ai === 'drop')) continue;
-      if (['boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'turret'].includes(e.kind) || e.def.boss) continue;
+      if (e.def.boss || e.def.miniBoss || e.kind === 'burrower' || e.kind === 'turret') continue;
       const b = e.body; if (Math.hypot(b.center.x - x, b.center.y - y) > T.radius + b.halfWidth) continue;
       e.gravT = T.float; e.gravSlam = false; b.setAllowGravity(false); b.setVelocity(b.velocity.x * 0.2 + (b.center.x - x) * 0.4, -T.rise);
       this.damageEnemy(e, T.dmg, 0, -1, 'kick'); n++;
@@ -11899,7 +11899,7 @@ class GameScene extends Phaser.Scene {
     const v = ball.body.velocity, sp = Math.hypot(v.x, v.y) || 1, ux = v.x / sp, uy = v.y / sp;
     this.damageEnemy(e, (T.dmg + T.perBounce * ball.bounces) * clamp(sp / 420, 0.5, 1.3), ux, uy, 'pellet');
     if (!ball.counted) { ball.counted = true; this.stats.hits++; }      // a ball is one shot however often it bounces into foes
-    if (e.alive && e.def.kb > 0 && e.kind !== 'boss') { e.body.velocity.x += ux * 260 * e.def.kb; e.body.velocity.y -= 120 * e.def.kb; }
+    if (e.alive && e.def.kb > 0 && !e.def.anchored) { e.body.velocity.x += ux * 260 * e.def.kb; e.body.velocity.y -= 120 * e.def.kb; }
     const b = e.body, nx0 = ball.x - b.center.x, ny0 = ball.y - b.center.y, nl = Math.hypot(nx0, ny0) || 1, nx = nx0 / nl, ny = ny0 / nl;   // carom off it
     const dot = v.x * nx + v.y * ny; if (dot < 0) { v.x -= 2 * dot * nx; v.y -= 2 * dot * ny; }
     v.x *= 0.9; v.y *= 0.9; ball.pvx = v.x; ball.pvy = v.y;
@@ -12059,7 +12059,7 @@ class GameScene extends Phaser.Scene {
     this.shrinkFx.push({ x0: ox, y0: oy, x1: ex, y1: ey, t: 0 });
     Sfx.shrink(); this.recoil = 3; this.spawnLight(mx, my, 'glow', 0x60ffe0, 0.6, 1.2, 0.8, 0.1);
     if (!hit) return;
-    const big = ['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'blimp'].includes(hit.kind);
+    const big = hit.def.boss || hit.def.miniBoss || hit.kind === 'blimp';
     if (hit.kind === 'gasbag' || hit.kind === 'claw') { this.damageEnemy(hit, 10, ca, sa, 'shock'); return; }
     hit.shrunkT = big ? 3 : W.time; hit.noStomp = big; this.stats.hits++;
     this.spawnLight(hit.x, hit.y, 'ring', 0xff60d0, 1.2, 0.3, 0.9, 0.2);
@@ -12778,7 +12778,7 @@ class GameScene extends Phaser.Scene {
       if (!e.alive || e.under || e.def.noClip) continue;
       const b = e.body; if (b.right < x0 || b.left > x1 || b.bottom < y0 || b.top > y1) continue;
       this.paintSplatAround(b.center.x, y1 - 2, 12);
-      this.damageEnemy(e, e.kind === 'boss' || e.kind === 'jugg' || e.kind === 'wyrm' || e.def.boss ? 60 : T.edmg, 0, 1, 'crush'); if (!e.alive) crushed++;
+      this.damageEnemy(e, e.def.boss || e.def.miniBoss ? 60 : T.edmg, 0, 1, 'crush'); if (!e.alive) crushed++;
     }
     if (crushed) { BUS.emit('callout', crushed > 1 ? 'COMPACTED!' : 'CRUSHED!'); this.addStyle(60 * crushed); this.impactFrame(1); }
     for (const k of this.barrelList) if (k.active && k.x > x0 && k.x < x1 && k.y > y0 && k.y < y1) this.explodeBarrel(k);
@@ -12810,7 +12810,7 @@ class GameScene extends Phaser.Scene {
         for (const o of this.enemies.getChildren()) {
           if (!o.alive || o.under || o.kind === 'wyrmseg' || o.kind === 'wraith') continue;
           if (Math.hypot(o.body.center.x - x, o.body.center.y - y) > W.radius + Math.max(o.body.halfWidth, o.body.halfHeight)) continue;
-          const boss = o.kind === 'boss' || o.kind === 'jugg' || o.kind === 'gunship' || o.kind === 'wyrm' || o.def.boss;
+          const boss = o.def.boss || o.def.miniBoss;
           o.netT = boss ? W.hold * 0.4 : W.hold; o.netTick = 0; caught++;
           if (FLIERS.has(o.kind) && !boss) o.body.setAllowGravity(true);
         }
@@ -13442,7 +13442,7 @@ class GameScene extends Phaser.Scene {
     if ((e.scanT -= dt) <= 0) {
       e.scanT = 0.5; e.patient = null; let worst = 0.98;
       for (const o of this.enemies.getChildren()) {
-        if (!o.alive || o === e || !o.def.mech || o.under || o.kind === 'wyrmseg') continue;
+        if (!o.alive || o === e || !o.def.mech || o.under || o.def.boss || o.def.miniBoss) continue;   // Welders, Menders and Banners heal no boss (#177)
         const f = o.hp / o.def.hp, d = Math.hypot(o.body.center.x - e.x, o.body.center.y - e.y);
         if (f < worst && d < 250) { worst = f; e.patient = o; }
       }
@@ -14361,7 +14361,7 @@ class GameScene extends Phaser.Scene {
     Object.assign(e, { ai: 'drift', links: [], scanT: 0 });
     e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xffd040).setScale(0.45).setAlpha(0.75).setDepth(18);
   }
-  overclockable(o) { return o.alive && !o.under && !o.def.tiny && o.kind !== 'overclock' && !['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship'].includes(o.kind) && !o.def.boss; }
+  overclockable(o) { return o.alive && !o.under && !o.def.tiny && o.kind !== 'overclock' && !o.def.boss && !o.def.miniBoss; }
   updateOverclock(e, dt, now, dx, dy, dist, alive) {
     const T = TUNE.OVERCLOCK, b = e.body, pb = this.player.body, far = o => Math.hypot(o.body.center.x - b.center.x, o.body.center.y - b.center.y);
     if (alive && !e.aggro && dist < e.def.sight) { e.aggro = true; e.aggroT = 6; this.popAlert(e); }
@@ -14877,7 +14877,7 @@ class GameScene extends Phaser.Scene {
       if (kind === 'foreman') { this.boss = e; BUS.emit('boss', 'THE FOREMAN', 'YARD BOSS'); BUS.emit('flash', 0.35); this.shake(500, 0.012); Sfx.roar(); this.camFocus = { x: e.x, y: e.y - 30, until: this.time.now + 2400 }; }
       if (kind === 'wyrm') { this.boss = e; BUS.emit('minibar', 'SLAG WYRM'); BUS.emit('callout', 'SLAG WYRM'); this.shake(400, 0.01); Sfx.roar(); }
       if (kind === 'gunship') { this.boss = e; BUS.emit('minibar', 'GUNSHIP'); BUS.emit('callout', 'GUNSHIP INBOUND'); this.shake(400, 0.008); Sfx.roar(); }
-      if (e.def.boss) this.xbIntro(e);                                   // the expansion bosses: title card, boss bar, camera
+      if (e.def.title) this.xbIntro(e);                                   // the expansion bosses: title card, boss bar, camera
       this.spawnLight(x, e.y, 'glow', 0xff60e0, 1.5, 3.5, 1, 0.3);
       this.spawnLight(e.x, e.y, e.def.key + '_w', 0xffffff, 1.6, 1, 1, 0.25, e.fr, e.flipX);
       this.fx.emit(x, e.y, { n: 24, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xffa0f0, 0xff40c0], add: true, drag: 2 });
@@ -15776,7 +15776,7 @@ class GameScene extends Phaser.Scene {
       e.retargetT = 0.4;
       let best = null, bestS = 1e9;
       for (const o of this.enemies.getChildren()) {
-        if (!o.alive || o === e || o.kind === 'mender') continue;
+        if (!o.alive || o === e || o.kind === 'mender' || o.def.boss || o.def.miniBoss) continue;
         const d = Math.hypot(o.x - e.x, o.y - e.y); if (d > 380) continue;
         const s = (o.hp / o.def.hp) * 300 + d * 0.5 - (isHumanoid(o) ? 40 : 0);
         if (s < bestS) { bestS = s; best = o; }

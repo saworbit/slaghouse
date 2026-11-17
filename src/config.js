@@ -311,7 +311,6 @@ const MUTATORS = [
   { id: 'dark', name: 'LIGHTS OUT', d: 'EVERY WAVE IN THE DARK.' },
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
-const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship', 'crucible', 'grinder', 'queen', 'overseer', 'conductor']);   // SWARM never doubles (or thins) a boss
 const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
@@ -709,8 +708,6 @@ slotLabels();
 // elite foes: one trait each, a coloured aura and a diamond over the head
 const ELITE_KINDS = ['armored', 'shielded', 'volatile', 'regen'];
 const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, regen: 0x5cff7a };
-const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger',
-  'crucible', 'grinder', 'queen', 'overseer', 'conductor', 'eggsac', 'eyenode']);
 // One record per foe kind: stats, hitbox and gibs, plus what the scene looks up by kind: frame0 is the frame it
 // spawns on, flier means no gravity and air spawn points, humanoid means head shots, cover and alerts, and update
 // names the GameScene method that runs it each frame (updateWalker for the plain ones). visuals names the method
@@ -729,7 +726,11 @@ const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship
 // with and gibSpread how far apart they start (5 px otherwise), noGibs none at all, burstSparks and burstFire add
 // sparks or fire to its blood burst, killShake is [ms, intensity] and killStop the hit stop in ms (120 / 45
 // otherwise), dropGun the icon its gun drops as (icon_rifle otherwise), winDelay holds the win that long when it's
-// the last foe, and skipOneLeft skips the ONE LEFT callout it would set off (#145).
+// the last foe, and skipOneLeft skips the ONE LEFT callout it would set off (#145). boss and miniBoss mark the bosses
+// and mini-bosses the shared rules leave out (#177; a boss with a title gets the expansion intro). The Smelter's own
+// exemptions are fields too: headCrit (a hit at the top of its body crits), anchored (nothing shoves, flattens, sweeps
+// up or sticks to it), slagproof (slag puddles and the tide don't light it), burn (how long fire lasts on it), chill
+// (how fast cryo chills it) and chillOnly (it chills but never freezes solid; the Gunship too).
 const ENEMY = {
   grunt: { key: 'grunt', frame0: 'w0', update: 'updateWalker', fw: 20, fh: 18, bw: 12, bh: 14, hp: 45, patrol: 42, chase: 150, jumpV: 360, sight: 190, range: 70, touch: 12, kb: 1,
            gibs: ['g_flesh1', 'g_flesh2', 'g_flesh3', 'g_jaw', 'g_chunk', 'g_bone', 'g_rib', 'g_plate', 'g_chunk'], gibN: [11, 15], ragdoll: true },
@@ -764,13 +765,13 @@ const ENEMY = {
              gibs: ['g_blade', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [11, 14], ragdoll: true },
   pyro: { key: 'pyro', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visPyro', death: 'deathPyro', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_pmask',
           gibs: ['g_tank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15], ragdoll: true },
-  gunship: { key: 'gunship', frame0: 'g0', flier: true, setup: 'setupGunship', update: 'updateGunship', visuals: 'visGunship', death: 'deathGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
+  gunship: { key: 'gunship', frame0: 'g0', miniBoss: true, chillOnly: true, flier: true, setup: 'setupGunship', update: 'updateGunship', visuals: 'visGunship', death: 'deathGunship', fw: 56, fh: 24, bw: 48, bh: 18, hp: 500, sight: 700, touch: 15, kb: 0.02,
              gibs: ['g_plateL', 'g_plateL', 'g_plateL', 'g_jplate', 'g_jplate', 'g_wire', 'g_wire', 'g_shard', 'g_shard2', 'g_plate', 'g_core'], gibN: [20, 26], noGibs: true },
   screamer: { key: 'screamer', frame0: 's0', flier: true, setup: 'setupScreamer', update: 'updateScreamer', visuals: 'visScreamer', death: 'deathScreamer', fw: 14, fh: 12, bw: 10, bh: 9, hp: 18, sight: 300, touch: 0, kb: 1.4, gibs: ['g_skull', 'g_chunk', 'g_bone'], gibN: [4, 6] },
   warden: { key: 'warden', frame0: 'v0', flier: true, setup: 'setupWarden', update: 'updateWarden', visuals: 'visWarden', death: 'deathWarden', fw: 18, fh: 16, bw: 12, bh: 12, hp: 50, sight: 280, touch: 6, kb: 1.1, gibs: ['g_dish', 'g_plate', 'g_wire', 'g_plate', 'g_shard', 'g_shard2'], gibN: [8, 11] },
-  jugg: { key: 'jugg', frame0: 's0w0', setup: 'setupJugg', update: 'updateJugg', visuals: 'visJugg', death: 'deathJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
+  jugg: { key: 'jugg', frame0: 's0w0', miniBoss: true, chill: 0.45, setup: 'setupJugg', update: 'updateJugg', visuals: 'visJugg', death: 'deathJugg', fw: 32, fh: 30, bw: 20, bh: 26, hp: 420, sight: 320, touch: 20, kb: 0.1, head: 'g_jughelm',
           gibs: ['g_jplate', 'g_jplate', 'g_jplate', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_bone', 'g_rib', 'g_chunk', 'g_chunk', 'g_core'], gibN: [24, 30] },
-  boss: { key: 'boss', frame0: 'w0', setup: 'setupBoss', update: 'updateBoss', visuals: 'visBoss', death: 'deathBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
+  boss: { key: 'boss', frame0: 'w0', boss: true, headCrit: true, anchored: true, slagproof: true, burn: 0.5, chill: 0.25, chillOnly: true, setup: 'setupBoss', update: 'updateBoss', visuals: 'visBoss', death: 'deathBoss', fw: 48, fh: 44, bw: 32, bh: 38, hp: 900, sight: 900, touch: 22, kb: 0.05,
           gibs: ['g_core', 'g_core', 'g_core', 'g_plateL', 'g_plateL', 'g_plateL', 'g_plateL', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_flesh1', 'g_flesh2',
                  'g_bone', 'g_bone', 'g_rib', 'g_rib', 'g_jaw', 'g_shard', 'g_shard2', 'g_shard', 'g_plate', 'g_plate', 'g_chunk', 'g_chunk'], gibN: [34, 40], gibPower: 1.7, gibSpread: 18, winDelay: 1900 },
   // ---- overdrive round ----
@@ -793,9 +794,9 @@ const ENEMY = {
   gnat: { key: 'gnat', frame0: 'n0', flier: true, setup: 'setupGnat', update: 'updateGnat', marks: 'none', fw: 7, fh: 6, bw: 5, bh: 4, hp: 4, sight: 420, touch: 0, kb: 2, tiny: true, gibs: ['g_chunk'], gibN: [0, 1] },
   stitcher: { key: 'stitcher', frame0: 's0', flier: true, setup: 'setupStitcher', update: 'updateStitcher', visuals: 'visStitcher', death: 'deathStitcher', fw: 18, fh: 16, bw: 12, bh: 12, hp: 55, sight: 300, touch: 6, kb: 1.1, mech: true,
               gibs: ['g_needle', 'g_needle', 'g_plate', 'g_wire', 'g_skull', 'g_shard'], gibN: [9, 12] },
-  wyrm: { key: 'wyrm', frame0: 'c', flier: true, setup: 'setupWyrm', update: 'updateWyrm', visuals: 'visWyrm', death: 'deathWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
+  wyrm: { key: 'wyrm', frame0: 'c', miniBoss: true, flier: true, setup: 'setupWyrm', update: 'updateWyrm', visuals: 'visWyrm', death: 'deathWyrm', fw: 28, fh: 26, bw: 18, bh: 18, hp: 700, sight: 900, touch: 0, kb: 0.02, noClip: true, noFreeze: true,
           gibs: ['g_wyrmplate', 'g_wyrmplate', 'g_wormseg', 'g_wormseg', 'g_tooth', 'g_tooth', 'g_tooth', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_core', 'g_core', 'g_chunk'], gibN: [20, 26] },
-  wyrmseg: { key: 'wyrmseg', frame0: 'a', flier: true, setup: 'setupWyrmseg', update: 'updateWyrmseg', visuals: 'visWyrm', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
+  wyrmseg: { key: 'wyrmseg', frame0: 'a', miniBoss: true, flier: true, setup: 'setupWyrmseg', update: 'updateWyrmseg', visuals: 'visWyrm', fw: 20, fh: 20, bw: 14, bh: 14, hp: 99999, sight: 900, touch: 0, kb: 0, noClip: true, noFreeze: true,
              gibs: ['g_wyrmplate', 'g_wormseg', 'g_flesh1', 'g_chunk', 'g_wormseg'], gibN: [5, 7] },
   // ---- furnace round ----
   buzzsaw: { key: 'buzzsaw', frame0: 'z0', flier: true, setup: 'setupBuzzsaw', update: 'updateBuzzsaw', visuals: 'visBuzzsaw', marks: 'none', death: 'deathBuzzsaw', fw: 16, fh: 16, bw: 12, bh: 12, hp: 50, sight: 420, touch: 0, kb: 0, mech: true, gibs: ['g_shard', 'g_shard2', 'g_shard', 'g_eye', 'g_wire'], gibN: [8, 10] },
@@ -846,7 +847,7 @@ const ENEMY = {
   shellback: { key: 'shellback', frame0: 'w0', setup: 'setupShellback', update: 'updateShellback', fw: 22, fh: 16, bw: 18, bh: 12, hp: 110, speed: 40, sight: 360, touch: 12, kb: 0.3, gibs: ['g_flesh1', 'g_chunk', 'g_plate', 'g_shard'], gibN: [9, 12] },
   shinobi: { key: 'shinobi', frame0: 'w0', setup: 'setupShinobi', update: 'updateShinobi', fw: 16, fh: 22, bw: 10, bh: 18, hp: 55, speed: 120, sight: 460, touch: 8, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
   thundercloud: { key: 'thundercloud', frame0: 'c0', flier: true, setup: 'setupThundercloud', update: 'updateThunder', visuals: 'visThundercloud', fw: 26, fh: 14, bw: 22, bh: 10, hp: 70, speed: 60, sight: 520, touch: 0, kb: 0.3, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard'], gibN: [6, 9] },
-  foreman: { key: 'foreman', frame0: 'w0', setup: 'setupForeman', update: 'updateForeman', visuals: 'visForeman', death: 'deathForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
+  foreman: { key: 'foreman', frame0: 'w0', boss: true, setup: 'setupForeman', update: 'updateForeman', visuals: 'visForeman', death: 'deathForeman', fw: 44, fh: 36, bw: 34, bh: 30, hp: 1400, speed: 40, sight: 1200, touch: 18, kb: 0.04, mech: true, noFreeze: true, gibs: ['g_plate', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [18, 24] },
   vortex: { key: 'vortex', frame0: 'v0', flier: true, setup: 'setupVortex', update: 'updateVortex', visuals: 'visVortex', fw: 18, fh: 18, bw: 14, bh: 14, hp: 80, speed: 45, sight: 460, touch: 8, kb: 0.4, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [7, 10] },
   pylon: { key: 'pylon', frame0: 'p0', setup: 'setupPylon', update: 'updatePylon', visuals: 'visPylon', fw: 16, fh: 28, bw: 12, bh: 26, hp: 100, speed: 0, sight: 420, touch: 6, kb: 0, mech: true, gibs: ['g_plate', 'g_wire', 'g_wire', 'g_shard'], gibN: [8, 11] },
   scavenger: { key: 'scavenger', frame0: 'w0', setup: 'setupScavenger', update: 'updateScavenger', fw: 20, fh: 18, bw: 14, bh: 14, hp: 60, speed: 110, sight: 400, touch: 10, kb: 0.8, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
@@ -974,6 +975,13 @@ const PROP_BLAST = {                                               // the props 
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const BARREL_FOE = Object.assign({}, TUNE.BARREL, { enemy: true });   // a drum a foe shot: its blast hurts you like theirs
 const DRONE_SLOTS = [[-95, -60], [95, -60], [-60, -95], [60, -95], [-125, -30], [125, -30], [0, -105], [-40, -72], [40, -72]];   // hover spots round you a drone picks from (droneSlot)
+// Bosses (boss: the Smelter, THE FOREMAN and the five expansion bosses) and mini-bosses (miniBoss: the Juggernaut, the
+// Gunship and the Slag Wyrm, whose segments count as the Wyrm) are left out of the rules below by their records,
+// never by kind (#177), so a new boss needs only its record plus RUSH / OT_BOSSES.
+const BOSSY = Object.keys(ENEMY).filter(k => ENEMY[k].boss || ENEMY[k].miniBoss);
+const SWARM_SKIP = new Set(BOSSY);                 // SWARM never doubles (or thins) a boss
+const NO_ELITE = new Set([...BOSSY, 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger',
+  'eggsac', 'eyenode']);
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
 const POSTFX = { on: (() => { try { return localStorage.getItem('slaghouse.postfx') !== '0'; } catch (err) { return true; } })() };   // V toggles bloom / warp / grading
 const STYLE_RANKS = [
