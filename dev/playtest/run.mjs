@@ -13,7 +13,7 @@
 //   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors
 // Any page error or console error fails the run too. Exits 1 and names each failure.
 //   npm ci --prefix dev/playtest        (once: installs playwright-core, no browser download)
-//   node dev/playtest/run.mjs           (all checks)
+//   node dev/playtest/run.mjs           (all checks, then eight Normal campaigns; seven must win)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7   (CI's Brutal job)
@@ -30,10 +30,11 @@ import { chromium } from 'playwright-core';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
 const USAGE = `Usage: node dev/playtest/run.mjs [options]
-  (no options)       every check, then the Normal campaigns
+  (no options)       every check, then eight Normal campaigns, at least seven to win
   --quick            every check except the full campaigns
   --campaign         full campaigns only
-  --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers)
+  --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers); without it, the
+                     eight Normal pins with --min-wins=7
   --brutal           play the full campaigns on Brutal
   --min-wins=7       pass if at least this many campaigns win; a lost or stalled one is reported as LOST, not FAIL
                      (an error in the page or the harness still fails the run)
@@ -52,12 +53,13 @@ const sweepOnly = args.includes('--lab-sweep');
 const campaignOnly = args.includes('--campaign');
 const brutal = args.includes('--brutal');
 const seedArg = args.findLast(arg => arg.startsWith('--seeds='));
-const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
+// The Normal pins: four from before #165, then the four thinnest wins in a 20-seed Normal sweep (#165).
+const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5,15,1,13,17').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
 if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
   usageError(`--seeds expects comma-separated unsigned 32-bit integers, got ${seedArg}`);
 }
 const minWinsArg = args.findLast(arg => arg.startsWith('--min-wins='));
-const minWins = minWinsArg ? Number(minWinsArg.slice('--min-wins='.length)) : null;
+const minWins = minWinsArg ? Number(minWinsArg.slice('--min-wins='.length)) : seedArg ? null : 7;   // the pins: seven of eight, as for Brutal (#159, #165)
 if (minWinsArg && (!/^[0-9]+$/.test(minWinsArg.slice('--min-wins='.length)) || minWins < 1 || minWins > campaignSeeds.length)) {
   usageError(`--min-wins expects a whole number from 1 to the number of seeds (${campaignSeeds.length}), got ${minWinsArg}`);
 }

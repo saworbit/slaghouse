@@ -169,6 +169,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- `node dev/playtest/run.mjs`, and CI's Headless play-test job, now play eight Normal campaigns and pass when seven
+  win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
+  the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed
+  Normal sweep. Seeds 91, 404, 137 and 5 stay (#165).
 - When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
   of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
   (#191)

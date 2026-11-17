@@ -42,7 +42,7 @@ the player's long drops and wall climbs, must let every standing cell reach the 
 cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
 Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
 includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for
-Normal seeds 91, 404, 137 and 5. Each run must complete all ten operations, win with the
+Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and at least seven must win. Each winning run must complete all ten operations, win with the
 full kill count, and leave zero survivors at the lifts and at victory. The Smelter's death sequence pops everything
 it summoned, so none may be left a second after it falls.
 
@@ -50,15 +50,15 @@ it summoned, so none may be left a second after it falls.
 | --- | --- |
 | `--quick` | All checks except the full campaigns |
 | `--campaign` | Full campaigns only |
-| `--seeds=91,404` | Selects the seeds for any full campaigns in the run. Use comma-separated unsigned 32-bit integers |
+| `--seeds=91,404` | Selects the seeds for any full campaigns in the run. Use comma-separated unsigned 32-bit integers. Without it, the run plays the eight Normal pins and needs seven wins |
 | `--brutal` | Sets the difficulty of the full campaigns to Brutal |
 | `--min-wins=7` | Passes if at least that many of the full campaigns win. A lost or stalled one prints as `LOST`; page and harness errors still fail |
 | `--lab` | Lab sweeps, menu and gamepad controls, room changes and the roster tally, presets, snapshots, reset and save isolation |
 | `--lab-sweep` | Weapon, enemy and hazard sweeps only |
 | `--help` | Prints the options. An unknown option or a bad `--seeds` value exits with status 2 |
 
-CI runs the eight-seed Brutal check as its own job and passes when at least seven win, since any change that moves the
-random stream can tip one thin run over. A lost or stalled seed prints as `LOST` with its details; an error in the
+The default run's eight Normal seeds pass when at least seven win, and CI runs the eight-seed Brutal check as its own
+job with the same rule, since any change that moves the random stream can tip one thin run over. A lost or stalled seed prints as `LOST` with its details; an error in the
 page or the harness still fails. Run this command to repeat it.
 
 ```bash
