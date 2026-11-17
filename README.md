@@ -1,94 +1,120 @@
 # SLAGHOUSE
 
 [![CI](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml/badge.svg)](https://github.com/saworbit/slaghouse/actions/workflows/ci.yml)
-![License: proprietary](https://img.shields.io/badge/license-proprietary-red)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![Phaser 4.2.1](https://img.shields.io/badge/Phaser-4.2.1-8a2be2)
 ![No build step](https://img.shields.io/badge/build-none-lightgrey)
 
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
-A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
-ragdolls, destructible terrain, thirty kinds of breakable scenery, 71 weapons with mastery stars, 109 enemy types and
-28 medals. The five-act
-campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
-Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
-as one self-contained page, with no build step to play it.
+SLAGHOUSE is a pixel-art arena shooter that scrolls from side to side. It runs on [Phaser 4](https://phaser.io/) in a
+browser, as one self-contained page. The game makes all of its art with code. It has ragdolls, destructible terrain
+and thirty kinds of breakable scenery. It has 71 weapons with mastery stars, 109 enemy types and 28 medals.
+
+The five-act campaign ends in a boss fight. The other modes are OVERTIME (endless waves), DAILY (a seeded run) and
+BOSS RUSH. You can play on Easy, Normal or Brutal. Use a keyboard and mouse, or a gamepad with aim assist. You do not
+have to build the game to play it.
+
+## Contents
+
+- [Play](#play)
+- [Controls](#controls)
+- [Weapons](#weapons)
+- [Campaign](#campaign)
+- [Other modes and systems](#other-modes-and-systems)
+- [Lab](#lab)
+- [Architecture](#architecture)
+- [Pipelines](#pipelines)
+- [Development](#development)
+- [Contributing and security](#contributing-and-security)
+- [License](#license)
 
 ## Play
 
-The game loads Phaser 4.2.1 from the jsDelivr CDN, so it needs an internet connection. Serve the folder locally
-(Python 3 shown) and open the page:
+### Requirements
 
-```bash
-python -m http.server 8765 --bind 127.0.0.1
-```
+- A desktop browser with WebGL and Web Audio.
+- An internet connection. The page loads Phaser 4.2.1 from the jsDelivr CDN.
+- A local HTTP server. The procedure below uses Python 3.
+- A keyboard and mouse, or a gamepad. On a phone or tablet with touch input only, the title screen tells you this. It
+  holds the run until a key press or pad input arrives.
 
-Open <http://127.0.0.1:8765/slaghouse.html> and click the game. On the title screen, use **W / S** to choose,
-**Enter** to select, **A / D** to change difficulty and **E** to start OVERTIME. In **CAMPAIGN**, use **A / D**
-to choose **New Campaign** or **Continue** when a checkpoint is available.
+### Procedure
 
-The title also has **OVERTIME** (endless waves), **DAILY** (today's seeded OVERTIME run), **BOSS RUSH** (ten bosses
-back to back), **CODEX**, **ARMORY**, **MEDALS** and **OPTIONS**. Options include the Glass Cannon, Swarm, Moon Boots,
-Lights Out and Vampire mutators, and the full controls list. With a mouse, the wheel pages the CODEX and steps through
-the other lists; leave a page with **< BACK**, a right click or **Esc**.
+1. Open a terminal in the repository folder.
+2. Start the server:
 
-The game needs a keyboard and mouse or a gamepad. On a touch-only phone or tablet the title says so and holds runs
-until a key press or pad input arrives.
+   ```bash
+   python -m http.server 8765 --bind 127.0.0.1
+   ```
 
-`sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) sit next to the page and load
-automatically. Both are optional; without them the game uses its built-in procedural audio. A browser that can't
-decode Ogg Opus (older Safari) loads `sfx_bank_aac.js` and `music_bank_aac.js` instead, the same audio as AAC.
+3. Open <http://127.0.0.1:8765/slaghouse.html> in the browser.
+4. Click the game. This gives it the keyboard focus.
+5. Use the keys in the table below to start a run.
 
-## Lab
+| Key on the title screen | Function |
+| --- | --- |
+| **W / S** | Select a menu item. |
+| **Enter** | Open the selected item. |
+| **A / D** | Change the difficulty. In **CAMPAIGN**, select **New Campaign** or **Continue**. **Continue** shows only when a checkpoint exists. |
+| **E** | Start OVERTIME. |
 
-Choose **LAB** on the title screen to practice with the full arsenal. Pick the **Firing Range** for stationary targets,
-the **Combat Pit** for a mixed fight, the **Boss Chamber** for a single boss, or the **Breakables Bay** and
-**Traversal Course** for scenery and movement. **Machinery Floor**, **Furnace Vents**, **Wrecking Yard**, **Live Rails**,
-**Cooling Tower** (`tower`), **Chill Vault** (`vault`), **Storm Roof** (`storm`), **The Crusher** (`crusher`) and
-**Turbine Hall** (`turbine`) let you practice the arena hazards. A URL such as `slaghouse.html?lab=furnace` opens the room picker
-with Furnace Vents selected; an unknown room name opens the Firing Range and says so.
+The title menu also has **OVERTIME**, **DAILY**, **BOSS RUSH**, **CODEX**, **ARMORY**, **MEDALS** and **OPTIONS**.
+OPTIONS has five mutators: Glass Cannon, Swarm, Moon Boots, Lights Out and Vampire. It also shows the full list of
+controls. The mouse wheel turns the CODEX pages and moves through the other lists. To go back, select **< BACK**,
+click the right mouse button or push **Esc**.
 
-Choose a starting weapon, build a roster of up to 16 enemies including at most one boss, and set the difficulty,
-hazard modifier, stationary enemies and invulnerability. Changing **Room** afterwards keeps what you set and fills
-the rest from the new room's preset. A tally beside **Add group** counts enemies and bosses, and **Deploy room** waits
-while the roster is over. Choose **Deploy room** to start. **F2** or the
-**Lab controls** button reopens the setup during play. **R** resets terrain, props, health, weapon and enemies
-to the deployed setup. The Lab's rooms leave every crate, girder and grating breakable, with no reinforced steps.
-Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
-The setup dialog takes a keyboard, a pointer or a gamepad: the D-pad moves between fields and changes them, **A**
-picks and **B** goes back. The regular gamepad controls work during play.
-See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted room control and observations.
+> [!NOTE]
+> The audio banks are optional. `sfx_bank.js` (sampled sound effects) and `music_bank.js` (soundtrack) are next to
+> the page, and the page loads them automatically. Without them, the game uses its procedural audio. A browser that
+> cannot decode Ogg Opus (older Safari) loads `sfx_bank_aac.js` and `music_bank_aac.js`. These two files have the same
+> audio in AAC.
 
 ## Controls
 
 | Action | Keys |
 | --- | --- |
 | Move | **A / D** or arrow keys |
-| Jump / drop through a platform / wall jump | **Space** or **W** / **S + Space** / jump near a wall, even while rising. Hold toward the wall and jump again to climb |
-| Dash (8-way, i-frames) | **Shift** (kick straight out of a dash for a dropkick) |
-| Aim and fire | mouse + left click (**J** fires when playing on the keyboard) |
-| Kick / parry / execute (enemies pulsing orange) | **F** or right click |
+| Jump / drop through a platform / wall jump | **Space** or **W** / **S + Space** / jump near a wall, also while you rise. Hold toward the wall and jump again to climb |
+| Dash (8 directions, with i-frames) | **Shift**. Kick straight out of a dash for a dropkick |
+| Aim and fire | Mouse and left click. On the keyboard, **J** fires |
+| Kick / parry / execute (enemies that pulse orange) | **F** or right click |
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
-| Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher, tether gun, hand cannon, seismic launcher, phase rifle, ball lightning, cyclone launcher, caltrop scatter, spear gun, heat ray, barrage beacon and hydro cannon have no key: use the wheel or Q/E) |
-| Weapon wheel (time slows while it's open) | hold **Tab** |
+| Grapple hook | **C**. Push again to let go |
+| Select a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H**. The other 41 weapons have no key. Use the wheel or **Q / E** (see [Weapons](#weapons)) |
+| Weapon wheel (time slows while it is open) | Hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, retry act or restart, volume, screen shake, post FX, flashes, controls, quit to title) | **Esc** or **P** |
-| Retry the current campaign act or restart the run (press twice mid-run; once when the results are up) | **R** |
+| Retry the current campaign act, or restart the run | **R**. Push two times during a run. Push one time when the results show |
 | Post-processing on / off | **V** |
-| Mute (remembered; works in the pause menu too) / sampled vs synth SFX / sampled vs synth music | **M** / **N** / **B** |
+| Mute (the game keeps this setting; it also operates in the pause menu) / sampled or synth SFX / sampled or synth music | **M** / **N** / **B** |
 
-The keys above are the US positions. The game reads keys by where they sit, not what they print, so on a UK, German,
-French or Nordic keyboard WASD and the weapon keys stay in the same places; the hints and the CONTROLS page show
-your keyboard's own labels where the browser offers them. **OPTIONS > KEYS** rebinds any of them: pick a row, press
-Enter, then the new key. A key does one job, so the row that had it takes your old key. **RESET ALL TO DEFAULTS**
-puts everything back, and your bindings are remembered.
+The table shows the key positions on a US keyboard. The game reads a key by its position, not by its label. On a UK,
+German, French or Nordic keyboard, WASD and the weapon keys stay in the same positions. The hints and the CONTROLS page
+show the labels of your keyboard when the browser supplies them.
 
-On a gamepad: left stick moves (down + **A** drops through a platform), right stick aims, **RT** fires, **LT** throws a
-mine, **A** jumps, **B** dashes, **X** kicks, **Y** fires the hook, **RB** drops the sentry, hold **LB** for the weapon
-wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses. Menus take the D-pad or left stick,
-**A** and **B**.
+To change a key binding, open **OPTIONS > KEYS**:
+
+1. Select a row.
+2. Push **Enter**.
+3. Push the new key.
+
+One key does one function. If a different row had the new key, that row receives your old key. **RESET ALL TO
+DEFAULTS** sets all keys back to their defaults. The game keeps your bindings.
+
+| Gamepad control | Function |
+| --- | --- |
+| Left stick | Move. Down + **A** drops through a platform |
+| Right stick | Aim |
+| **RT** / **LT** | Fire / throw a mine |
+| **A** / **B** / **X** / **Y** | Jump / dash / kick / fire the hook |
+| **RB** | Drop the sentry |
+| Hold **LB** | Weapon wheel. Select with the right stick |
+| D-pad | Cycle weapons |
+| **Start** | Pause |
+
+In menus, use the D-pad or the left stick, then **A** and **B**.
 
 ## Weapons
 
@@ -131,134 +157,644 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Heat ray (a beam that burns hotter the longer it holds; overheats) | wheel | Barrage beacon (a line of shells walks out from where it lands) |
 | wheel | Hydro cannon (shoves, puts out fires, soaks foes for electric hits) | | |
 
-The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
+The header comment in `src/page-head.html` records every weapon, enemy, wave and tuning value. The build copies it to
+the top of `slaghouse.html`.
 
 ## Campaign
 
-The campaign starts with the Nailgun. Clear the first patrol to earn the Shotgun. Other weapons unlock at fixed
-points as operations or reinforcement breaks begin. Hotkeys, the wheel and weapon cycling share the issued
-arsenal. The opening patrol has two grunts, and Sorting Shift brings squads of up to six. In the Furnace,
-later threats arrive in pairs, with longer preparation breaks before bosses. Incoming damage rises from 80%
-to full across the first five operations for the selected difficulty. The HUD counts down each break.
-The first heavy arrives alone after you get the Shotgun.
-OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
+The campaign starts with the Nailgun. Clear the first patrol to receive the Shotgun. The other weapons unlock at fixed
+points, when an operation or a reinforcement break starts. The hotkeys, the wheel and weapon cycling use the same
+issued arsenal. OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
+
+The opening patrol has two grunts. Sorting Shift sends squads of up to six. In the Furnace, the later threats arrive
+in pairs, and the preparation breaks before bosses are longer. The first heavy arrives alone, after you receive the
+Shotgun. Incoming damage increases from 80% to 100% of the selected difficulty across the first five operations. The
+HUD counts down each break.
 
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |
-| I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
-| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team in clear weather. Use the 6.2-second countdown to find cover before the Gunship. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. The Linkers fight below the catwalk. |
-| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains. The meltdown overheats the lift: turn both coolant valves while a valve crew comes for you, and the lift comes once the shaft cools and the area is clear. |
-| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | The ball hangs latched over the yard. Get to the dais before the second squad releases it. Afterwards the gantry winches it back up, and breaching the Foreman's armor cuts it loose again. |
-| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. Then pull the main breaker on the generator to cut the power and draw out the Smelter. It hotwires the rails in its second phase and overheats below 15% health. |
+| I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Grunts come first, then a heavy and drones. Blackout starts in the light, so you can equip the Flare Gun before the ambush cuts the power. |
+| II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during the slag showers. The Demolition Team attacks when the weather is clear. Before the Gunship, a 6.2-second countdown gives you time to find cover. The Gunship shows its rocket volleys and strafes before it fires, and it pauses between attacks. In low gravity, the second Hound, the Linkers and the later enemy pairs arrive in separate squads. The Linkers fight below the catwalk. |
+| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains. The meltdown overheats the lift. Turn both coolant valves while a valve crew attacks you. The lift comes when the shaft is cool and the area is clear. |
+| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | The ball hangs latched above the yard. Go to the dais before the second squad releases it. After this, the gantry winches the ball back up. When you breach the Foreman's armor, the ball comes loose again. |
+| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to go above the rails. Then pull the main breaker on the generator. This cuts the power and brings out the Smelter. In its second phase, the Smelter hotwires the rails. Below 15% health, it overheats. |
 
-Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
-starts. Each new weapon card shows what the weapon does and how to equip it. In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and sustained prop jets
-share a damage interval, so overlapping hazards cannot hit all at once. When an operation ends,
-the fire suppression sprays out the ground fire. A Gunship wreck that lands after the clear cannot start a new fire.
-New weapons arrive on the green supply beam.
+### Operations
 
-Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
-it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
-after Lockdown. Later perk drafts draw from the remaining pool.
-Each arena has two lifts in its back wall: the one you arrive in, at the start, and the way on, at the far end,
-locked with a red lamp. Once an act's route reaches it and no foe is left, the car comes down and opens. Walk in to
-ride down to the next act and save a checkpoint. OVERTIME, DAILY and BOSS RUSH call the same lift after an arena's
-last wave. Arrival raises health to at least
-60 HP in the Furnace, 75 HP in the Sorting Line and Wrecking Yard, and 80 HP in the Powerhouse. The Vampire
-mutator skips this recovery. Checkpoints restore issued weapons, the equipped weapon, perks, difficulty,
-mutator and accumulated run stats. A checkpoint from the three-act campaign also keeps its equipped weapon
-if that weapon falls outside the new progression.
+- Clear each squad to start the next countdown.
+- Before new machinery starts, the preparation prompts point to safe terrain.
+- Each new weapon card tells you what the weapon does and how to equip it. New weapons arrive on the green supply beam.
+- In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and prop jets share one damage interval. Thus
+  overlapping hazards cannot all hit you at the same time.
+- When an operation ends, the fire suppression sprays out the ground fire. A Gunship wreck that lands after the clear
+  cannot start a new fire.
 
-Choose **Campaign → Continue** to return to the saved act after quitting or reloading. Keep the same browser
-profile, host and port to find your save. **New Campaign** replaces the active checkpoint, and completing the
-campaign clears it. A campaign left running in another tab keeps playing but stops saving once you start a new one.
+### Health and perks
 
-Press **R** after defeat to retry the saved act. During play, press **R** twice within two seconds; the first
-press only shows a prompt. In Act I or after victory, **R** starts a fresh run. The pause menu shows **Retry Act**
-when a checkpoint is available. **Retry Act**, **Restart** and **Quit to Title** each need a second pick to
-confirm. Speedrunner requires a clear under 10 minutes without using **Continue** or retrying from a checkpoint.
+- When you clear Lockdown, your health increases to a minimum of 75 HP. This occurs before the first perk choice.
+- When you clear Slag Rain, your health increases to a minimum of 65 HP.
+- After Lockdown, pick Hollow Points, Vampire or Double Jump. The later perk drafts come from the remaining pool.
+- The Vampire mutator stops the clear recovery and the arrival recovery.
 
-**OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
-a boss every sixth (seven take turns: the Smelter, THE FOREMAN, a four-legged crane walker, then THE CRUCIBLE, THE GRINDER,
-THE HIVE QUEEN, THE OVERSEER and THE CONDUCTOR), a perk after each wave and a new arena every three, round all ten: among them
-THE WRECKING YARD, with a wrecking ball swinging across the middle, THE POWERHOUSE, whose floor rails go live in turns, THE COOLING
-TOWER, whose basin floods (and sometimes goes live), THE CHILL VAULT's ice and falling icicles, THE STORM ROOF's lightning and
-gusts, THE CRUSHER's closing walls and THE TURBINE HALL's updrafts and rotors. Your best wave is kept. Every enemy
-type can turn up, from echoes (holograms that replay your path and shots) to wraiths and warhorns.
-**DAILY** is an OVERTIME run seeded by the date: the same arena, starting perks, waves and modifiers for everyone
-that day (mutators are switched off for it). A run keeps the day you started it on, past 00:00 UTC and through
-restarts, and its record counts for that day.
+### Lifts and checkpoints
 
-Every kill counts toward that gun's **mastery** (three stars gold-plate it): 25, 100 and 250 kills earn its three stars, each +5% damage with
-it. The weapon wheel shows each gun's stars.
+Each arena has two lifts in its back wall. You arrive in the lift at the start. The lift at the far end is the way on.
+A red lamp shows that it is locked. When the route of the act reaches this lift and no foe is left, the car comes down
+and opens. Walk in to ride down to the next act. The ride saves a checkpoint. OVERTIME, DAILY and BOSS RUSH call the
+same lift after the last wave of an arena.
 
-Medkits, drums, gas cans and broken scenery beam back in on a green supply beam between waves, and after each wave
-you pick one of three perks for the rest of the run (more
-damage, faster fire, life steal, a double jump, exploding kills and so on). Steam pipes on the walls burst into
-scalding jets when shot, and get welded back on for the next wave. Blasts tear up crates, girders and gratings, but
-the few that are the only way up to a solid deck are reinforced (bolted, with a hazard edge) and won't break. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. When five or fewer foes are left, arrows at the screen edge point to them and the stragglers come looking for you. From wave 2, a few foes warp in as **elites**
-(armored, shielded, volatile or regenerating, marked by a coloured diamond) that drop health when they die. Medals pop up as you earn them, and the title screen counts your collection. Supply
-crates float down mid-wave with a power-up: OVERDRIVE (double damage), HASTE, an AEGIS shield or a MEDPACK. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
-orbs. The results screen lists your top guns, your biggest hit and what killed you, grades the run (S-D) and
-keeps your best score.
+When you arrive in an act, your health increases to a minimum value:
 
-## Project layout
+- The Furnace: 60 HP.
+- The Sorting Line and the Wrecking Yard: 75 HP.
+- The Powerhouse: 80 HP.
 
-| Path | What it is |
+A checkpoint restores the issued weapons, the equipped weapon, perks, difficulty, mutator and run stats. A checkpoint
+from the old three-act campaign also keeps its equipped weapon if that weapon is not in the new progression.
+
+- To go back to the saved act after you quit or reload, select **Campaign → Continue**. Use the same browser
+  profile, host and port, or the game cannot find your save.
+- **New Campaign** replaces the active checkpoint. When you complete the campaign, the game clears the checkpoint.
+- A campaign in a different tab continues to play. It stops saving when you start a new campaign.
+
+### Retry and restart
+
+- After a defeat, push **R** to retry the saved act.
+- During play, push **R** two times in two seconds. The first push only shows a prompt.
+- In Act I, or after a victory, **R** starts a new run.
+- The pause menu shows **Retry Act** when a checkpoint exists. **Retry Act**, **Restart** and **Quit to Title** each
+  ask for a second pick to confirm.
+- The Speedrunner medal requires a clear in less than 10 minutes. Do not use **Continue** or retry from a checkpoint.
+
+## Other modes and systems
+
+**OVERTIME** (push **E** on the title screen) is endless. The random waves become larger and tougher. A mini-boss
+comes every few waves, and a boss comes every sixth wave. Seven bosses take turns: the Smelter, THE FOREMAN (a
+four-legged crane walker), THE CRUCIBLE, THE GRINDER, THE HIVE QUEEN, THE OVERSEER and THE CONDUCTOR. After each
+wave, you pick a perk. Every three waves, the run moves to the next of the ten arenas. Some arenas have their own
+hazards:
+
+| Arena | Hazard |
 | --- | --- |
-| `slaghouse.html` | The whole game, built from `src/`. Tuning values live in the `TUNE` object, and the header comment records them. |
-| `src/` | The game's source in 13 parts (page and header comment, config, audio, art, scenes, `GameScene`, HUD, Lab, boot). `node src/join.mjs` joins them into `slaghouse.html`, plain concatenation, and `dev/check.mjs` fails if the two are out of step. |
-| `sfx_bank.js` | Optional sampled SFX bank (Opus, base64), generated by `dev/sfxgen`. |
-| `music_bank.js` | Optional synthwave soundtrack (Opus, base64), rendered by `dev/synthwave`. |
-| `sfx_bank_aac.js`, `music_bank_aac.js` | The same banks as AAC in MP4, loaded only where Ogg Opus won't decode. Built alongside the Opus banks. |
-| `dev/sfxgen/` | AudioGen pipeline for the SFX bank, with the takes the bank uses in `takes/` (FLAC) so a fresh clone can rebuild it; see its README. |
-| `dev/synthwave/` | Offline synth engine and score for the soundtrack; see its README. |
-| `dev/audiolib/` | `loud.py`, the K-weighted loudness both audio pipelines level against. |
-| `dev/build/` | History: one-off scripts and code snippets that applied each update round to `slaghouse.html` before `src/`. Already applied; they won't re-run against the current file. `recv.py` receives playtest screenshots. |
-| `dev/playtest/` | Lab fixtures, arena stress tests, virtual-time stepping and seeded campaign clears. |
-| `dev/screenshots/` | Screenshots from playtesting. |
-| `dev/ISSUES.md` | The original issue drafts; the open ones are filed as [GitHub issues](https://github.com/saworbit/slaghouse/issues). |
-| `dev/check.mjs` | Static checks run by CI (and locally with `node dev/check.mjs`). |
-| `docs/` | Images for this README. |
-| `.github/` | CI and release workflows, Dependabot, issue and pull request templates, CODEOWNERS. |
-| `.claude/launch.json` | Local preview-server configs for Claude Code. |
+| THE WRECKING YARD | A wrecking ball swings across the middle. |
+| THE POWERHOUSE | The floor rails become live in turns. |
+| THE COOLING TOWER | The basin floods, and sometimes the water becomes live. |
+| THE CHILL VAULT | Ice, and icicles that fall. |
+| THE STORM ROOF | Lightning and gusts. |
+| THE CRUSHER | Walls that close in. |
+| THE TURBINE HALL | Updrafts and rotors. |
 
-## Development notes
+The game keeps your best wave. All enemy types can appear, from echoes (holograms that replay your path and shots) to
+wraiths and warhorns.
 
-- **Source:** edit the files in `src/`, then run `node src/join.mjs` to rebuild `slaghouse.html`; CONTRIBUTING has the
-  details.
-- **Tuning:** change the values in `TUNE` (`src/config.js`) and update the header comment (`src/page-head.html`) to match.
-- **Breakable props:** how each kind plays (HP, mounting, what it does when it breaks) is in `PROPS` and
-  `PROP_BLAST`, its art in `PROP_ART`, and where each arena puts them in `PROP_SPOTS`. The header comment's
-  Breakables entry lists their numbers; `dev/playtest/props.js` checks every spot in both the campaign and
-  OVERTIME layouts.
-- **Checks:** `node dev/check.mjs` checks that `slaghouse.html` is what `src/` builds, compiles the game script and the
-  audio banks (and that each AAC copy matches its Opus bank), checks the script tags, and notes any sampled sound the
-  game asks for that `sfx_bank.js` lacks; CI runs it on every push to `main` and every pull
-  request.
-- **Testing.** CI runs static checks, headless Lab sweeps and seeded Normal and Brutal campaigns. Use the
-  [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) and [Lab smoke check](CONTRIBUTING.md#lab-smoke-check)
-  to test at real speed. The [playtest guide](dev/playtest/README.md) covers the browser API and the Brutal run command.
-- **Audio:** to regenerate the sound banks, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`. The SFX
-  pipeline needs a Python 3.11 venv and the soundtrack a Python 3.13 one, both with `ffmpeg` and libopus. The SFX pipeline needs a CUDA GPU only to generate new takes;
-  rebuilding the bank from the takes committed in `dev/sfxgen/takes/` doesn't. The soundtrack's venv comes from
-  `dev/synthwave/requirements.txt`.
-- **History:** see [CHANGELOG.md](CHANGELOG.md). Pushing a `vX.Y.Z` tag builds the release and its playable zip
-  (`.github/workflows/release.yml`); the steps are in [CONTRIBUTING.md](CONTRIBUTING.md).
+**DAILY** is an OVERTIME run with the date as its seed. On one day, all players receive the same arena, starting
+perks, waves and modifiers. Mutators are off for DAILY. A run keeps the day it started on, after 00:00 UTC and through
+restarts. Its record counts for that day.
+
+**BOSS RUSH** sends ten bosses, one after the other.
+
+**Mastery.** Each kill counts toward the mastery of that gun. At 25, 100 and 250 kills, the gun receives a star. Each
+star gives +5% damage with that gun. Three stars make the gun gold. The weapon wheel shows the stars of each gun.
+
+**In the arena:**
+
+- Between waves, medkits, drums, gas cans and broken scenery come back on a green supply beam.
+- After each wave, pick one of three perks for the remainder of the run. Examples are more damage, faster fire, life
+  steal, a double jump and exploding kills.
+- When you shoot a steam pipe on a wall, it bursts into a scalding jet. Before the next wave, the plant welds it
+  back on.
+- Blasts break crates, girders and gratings. Some tiles are the only way up to a solid deck. These tiles are
+  reinforced (bolted, with a hazard edge), and they do not break.
+- Fast kills chain into DOUBLE KILL, TRIPLE and up to MASSACRE.
+- When five or fewer foes are left, arrows at the screen edge point to them. The last foes come to find you.
+- From wave 2, some foes warp in as **elites**: armored, shielded, volatile or regenerating. A coloured diamond marks
+  an elite. Elites drop health when they die.
+- During a wave, supply crates float down with a power-up: OVERDRIVE (double damage), HASTE, an AEGIS shield or a
+  MEDPACK.
+- An enemy that pulses orange has less than 20% health. Kick it to execute it and receive health orbs.
+- A medal shows when you earn it. The title screen counts your collection.
+- The results screen shows your top guns, your biggest hit and what killed you. It grades the run from S to D and
+  keeps your best score.
+
+## Lab
+
+Select **LAB** on the title screen to practice with all of the weapons.
+
+| Room | URL name | Use it for |
+| --- | --- | --- |
+| Firing Range | `range` | Stationary targets |
+| Combat Pit | `encounter` | A mixed fight |
+| Boss Chamber | `bosses` | One boss |
+| Breakables Bay | `breakables` | Breakable scenery |
+| Traversal Course | `traversal` | Movement |
+| Machinery Floor, Furnace Vents, Wrecking Yard, Live Rails | `machinery`, `furnace`, `yard`, `rails` | Arena hazards |
+| Cooling Tower, Chill Vault, Storm Roof, Crusher, Turbine Hall | `tower`, `vault`, `storm`, `crusher`, `turbine` | Arena hazards |
+
+A URL such as `slaghouse.html?lab=furnace` opens the room picker with that room selected. If the URL has an unknown
+room name, the Lab opens the Firing Range and tells you this.
+
+To set up a room:
+
+1. Select a starting weapon.
+2. Make a roster of up to 16 enemies. The roster can have a maximum of one boss.
+3. Set the difficulty, the hazard modifier, stationary enemies and invulnerability.
+4. Select **Deploy room**.
+
+If you change **Room** after step 3, the Lab keeps your settings and fills the remainder from the preset of the new
+room. A tally next to **Add group** counts the enemies and bosses. **Deploy room** does not start while the roster is
+too large.
+
+| During play | Function |
+| --- | --- |
+| **F2** or the **Lab controls** button | Open the setup again. |
+| **R** | Reset the terrain, props, health, weapon and enemies to the deployed setup. |
+| **Exit to title** | Leave the Lab. |
+
+In the Lab rooms, all crates, girders and gratings can break. There are no reinforced steps. Lab sessions do not
+change saves, records, mastery or medals.
+
+The setup dialog accepts a keyboard, a pointer or a gamepad. The D-pad moves between fields and changes them. **A**
+selects and **B** goes back. The usual gamepad controls operate during play. For scripted room control and
+observations, see the [playtest guide](dev/playtest/README.md#lab-browser-api).
+
+## Architecture
+
+SLAGHOUSE is one HTML page. It has no server code, no accounts and no bundler. Phaser 4.2.1 supplies the renderer, the
+scene manager, input and Arcade Physics. The game draws all of its art at boot, and it plays its sound through its own
+Web Audio graph.
+
+### System overview
+
+```mermaid
+flowchart LR
+  subgraph inputs["Files and input"]
+    direction TB
+    cdn["jsDelivr CDN<br/>phaser.min.js 4.2.1"]
+    html["slaghouse.html"]
+    banks["Audio banks, optional<br/>sfx_bank*.js, music_bank*.js"]
+    pads["Keyboard, mouse,<br/>gamepad"]
+  end
+  subgraph browser["Browser"]
+    direction TB
+    phaser["Phaser<br/>WebGL renderer, scenes,<br/>input, Arcade Physics"]
+    game["Game code<br/>scenes, Sfx, Music, Lab panel"]
+    audio["Web Audio graph"]
+    store[("localStorage<br/>slaghouse.* keys")]
+  end
+  subgraph outputs["Output"]
+    direction TB
+    screen["Canvas<br/>960×540"]
+    speakers["Speakers"]
+  end
+  cdn -- "exact version,<br/>SRI hash" --> phaser
+  html --> game
+  banks -.-> audio
+  pads --> phaser
+  game <--> phaser
+  game --> audio
+  game <--> store
+  phaser --> screen
+  audio --> speakers
+```
+
+### Repository structure
+
+```text
+slaghouse/
+├── slaghouse.html        The game. node src/join.mjs builds it from src/.
+├── sfx_bank.js           Sampled SFX: Ogg Opus in base64 (optional).
+├── sfx_bank_aac.js       The same SFX in AAC, for browsers without Ogg Opus.
+├── music_bank.js         Soundtrack: Ogg Opus in base64 (optional).
+├── music_bank_aac.js     The same soundtrack in AAC.
+├── src/                  The 13 source parts and join.mjs.
+├── dev/
+│   ├── check.mjs         Static checks (local and CI).
+│   ├── playtest/         Headless test harness, checks and the campaign bot.
+│   ├── sfxgen/           AudioGen pipeline for the SFX bank. takes/ holds the FLAC takes.
+│   ├── synthwave/        Offline synth engine and score for the soundtrack.
+│   ├── audiolib/         loud.py: K-weighted loudness for both audio pipelines.
+│   ├── build/            History: one-off scripts from before src/. They do not run on the current file.
+│   ├── screenshots/      Screenshots from playtests.
+│   └── ISSUES.md         The original issue drafts. The open ones are GitHub issues.
+├── docs/                 Images for this README.
+├── .github/              CI and release workflows, Dependabot, templates, CODEOWNERS.
+└── .claude/launch.json   Local preview-server configuration for Claude Code.
+```
+
+### Source parts
+
+`node src/join.mjs` joins the 13 parts of `src/` into `slaghouse.html` in a fixed order. It joins the bytes only. It
+does not transform or minify them.
+
+```mermaid
+flowchart LR
+  parts["src/<br/>13 parts"] -- "node src/join.mjs" --> html["slaghouse.html"]
+  html -- "node dev/check.mjs" --> same{"Same bytes as<br/>src/ builds?"}
+  same -- "yes" --> passed["Check passes"]
+  same -- "no" --> failed["Check fails"]
+```
+
+| Order | Part | Contents |
+| --- | --- | --- |
+| 1 | `page-head.html` | Header comment (all tuning values), CSS, the page DOM and the Lab panel, the script tags |
+| 2 | `config.js` | `TUNE`, `WEAPONS`, `ENEMY`, `PROPS`, `PERKS`, `MEDALS`, options and saved data |
+| 3 | `util.js` | Random helpers (`rand`, `fxRandom`), `BUS` (the event bus from the game to the HUD) |
+| 4 | `audio.js` | `Sfx` and `Music`: the Web Audio graph, the synth voices and the bank loaders |
+| 5 | `font.js` | The 5×7 pixel font |
+| 6 | `art.js` | Sprite drawings, arenas, `NAV`, `CAMPAIGN`, `RUN_MODES`, `genTextures()` |
+| 7 | `particles.js` | `FX`: the pooled pixel particles that can bounce or paint |
+| 8 | `scenes.js` | `BootScene` and `TitleScene` |
+| 9 | `game.js` | `GameScene`: player, enemies, weapons, props, hazards, campaign route, lifts |
+| 10 | `hud.js` | `HudScene` |
+| 11 | `lab.js` | `LAB_PANEL`: the logic of the Lab setup dialog |
+| 12 | `boot.js` | `new Phaser.Game(...)`, and the pause on a hidden tab |
+| 13 | `page-tail.html` | The closing tags |
+
+### Boot and scenes
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant B as Browser
+  participant P as Phaser.Game
+  participant Boot as BootScene
+  participant T as TitleScene
+  participant G as GameScene
+  participant H as HudScene
+  B->>B: Load Phaser, check the SRI hash
+  B->>B: Load the audio banks
+  B->>P: boot.js: new Phaser.Game
+  P->>Boot: Start
+  Boot->>Boot: genTextures(): draw all art
+  Boot->>T: Start Title
+  T->>T: Sfx.init(), Music.start()
+  T->>G: Start Game (mode, arena, carry)
+  T->>H: Launch Hud
+  G->>G: create(): grid, NAV, world, terrain
+  G-->>H: BUS events (hp, wave, callout)
+  G->>G: descend(): next arena, same carry
+```
+
+The carry holds the run state from one arena to the next: health, the equipped weapon, perks, medals, stats and the
+wave number. In the campaign, it also holds the difficulty, the mutator and the run clock.
+
+### One frame
+
+```mermaid
+flowchart TB
+  input["Keyboard, mouse, gamepad<br/>PAD.poll() on prestep"] --> upd
+  subgraph upd["GameScene.update(dt)"]
+    direction TB
+    pl["Player, or the lift ride"] --> en["Enemies and bosses"]
+    en --> wp["Weapons and projectiles"]
+    wp --> wd["Props, hazards, machinery"]
+    wd --> rt["Campaign route and lifts"]
+    rt --> fx["Gibs, ragdolls, particles"]
+  end
+  upd <--> phys["Arcade Physics<br/>solids and one-way zones"]
+  upd -- "paint: blood, scorch, holes" --> lvl["Level CanvasTexture<br/>8×2 tiles, dirty tiles upload"]
+  upd -- "BUS.emit()" --> hud["HudScene"]
+  upd -- "Sfx and Music calls" --> audio["Web Audio graph"]
+  lvl --> cam["Main camera, zoom 2"]
+  upd -- "sprites" --> cam
+  cam --> pfx["Camera filters:<br/>bloom, barrel, colour matrix<br/>V turns them on or off"]
+  pfx --> screen["Canvas"]
+  hud --> screen
+```
+
+The game clock of `GameScene` runs only while the scene runs. Thus the pause menu stops all timers. A hidden tab
+pauses the run and suspends the audio.
+
+### Random streams
+
+The seeded campaign tests require the same run from the same seed. For this reason, the game uses two random streams.
+
+```mermaid
+flowchart LR
+  seed["Seed from the<br/>test harness"] --> mr["Math.random"]
+  mr --> gp["Gameplay: AI, spawns, damage,<br/>this.fx particles, paint"]
+  fxr["fxRandom<br/>own fixed stream"] --> cos["Cosmetic: crand(), cpick(),<br/>this.cfx particles"]
+  gp --> same["Same seed,<br/>same run"]
+  cos -. "no effect" .-> same
+```
+
+- Gameplay code uses `Math.random`, `rand`, `randi` and `pick`. The play-test harness replaces `Math.random` with a
+  seeded generator.
+- DAILY makes its arena, starting perks, waves and foes with `seeded()`, from the date. Thus all players receive the
+  same run on one day.
+- Cosmetic code uses `fxRandom`, `crand` and `cpick`. A particle emit with `cosmetic: true` goes to the cosmetic pool
+  `this.cfx`.
+- A cosmetic change thus does not change the seeded campaigns. Do not use a cosmetic emit for a particle that paints
+  the level (`mode: 2`), because each paint uses `Math.random`.
+
+### Saved data
+
+The game keeps its data in `localStorage` only. All keys start with `slaghouse.`.
+
+| Key | Data |
+| --- | --- |
+| `slaghouse.campaign.v1` | The campaign checkpoint |
+| `slaghouse.best`, `slaghouse.bestEndless`, `slaghouse.bestRush`, `slaghouse.daily` | Records for each run mode |
+| `slaghouse.life` | Lifetime kills, runs, deaths and time |
+| `slaghouse.mastery` | Kills with each weapon |
+| `slaghouse.medals`, `slaghouse.seen` | Medals, and the enemy kinds that the CODEX shows |
+| `slaghouse.binds` | Key bindings |
+| `slaghouse.postfx` and the option keys | Post FX, volume, screen shake, difficulty, mute and the other options |
+
+## Pipelines
+
+### Build, CI and release
+
+```mermaid
+flowchart TB
+  subgraph local["On your computer"]
+    direction LR
+    edit["Edit src/"] --> join["node src/join.mjs"] --> check["node dev/check.mjs"] --> quick["run.mjs --quick"] --> pr["Open a pull request"]
+  end
+  subgraph ci["CI: ci.yml"]
+    direction TB
+    c1["Static checks<br/>check.mjs"]
+    c2["Headless play-test<br/>all checks, 4 Normal seeds"]
+    c3["Brutal campaign seeds<br/>8 seeds, 7 must win"]
+  end
+  subgraph rel["Release: release.yml"]
+    direction LR
+    tag["Tag vX.Y.Z<br/>on main"] --> r1["check.mjs"] --> r2["Zip: game, 4 banks,<br/>LICENSE, README, CHANGELOG"] --> r3["GitHub release,<br/>notes from CHANGELOG"]
+  end
+  local --> ci
+  ci -- "3 jobs pass, squash merge to main" --> rel
+```
+
+`node dev/check.mjs` does these checks:
+
+- `slaghouse.html` is the same, byte for byte, as the output of `src/`.
+- Each inline script and each audio bank compiles. Each AAC bank has the same sounds and tracks as its Opus bank.
+- Each local `<script src>` exists. Each CDN script has an exact version and an integrity hash.
+- Each entry in `dev/sfxgen/calib.json` agrees with the code of its procedural sound.
+- It shows each sampled sound that the game asks for and that `sfx_bank.js` does not have.
+
+`main` requires the three CI jobs before a merge. A `vX.Y.Z` tag starts the release workflow. You can also start the
+workflow by hand as a dry run. See [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
+
+### Art pipeline
+
+The repository has no image files for the game. Each sprite is a function that draws pixels on a canvas. `BootScene`
+calls `genTextures()` one time, and Phaser keeps the result as textures.
+
+```mermaid
+flowchart TB
+  subgraph sprites["Sprites, at boot"]
+    direction LR
+    pal["Palettes<br/>PAL, EN, IRN, MLT"] --> draw["draw*() functions<br/>fillRect on a canvas"] --> mk["makeSprite()<br/>dark outline"] --> sheet["addSheet()<br/>frames and a<br/>white flash copy"] --> tex[("Phaser texture<br/>manager")]
+  end
+  subgraph level["Arena art"]
+    direction LR
+    grid["Arena grid<br/>100×27 tiles"] --> lvlart["drawLevelArt()<br/>at boot"] --> canvas["Level CanvasTexture<br/>for each run"] --> tiles["16 tile textures<br/>dirty tiles upload"]
+  end
+  subgraph run["Each run: create()"]
+    direction TB
+    zones["Static physics zones<br/>mergeRects()"]
+    nav["NAV graph<br/>AI and campaign bot"]
+    reinf["reinforcedTiles()<br/>steps that must not break"]
+  end
+  sprites ~~~ level
+  level -- "grid copy" --> run
+```
+
+- The grid of an arena is 100 × 27 tiles of 16 pixels. Each tile is one character, for example `#` solid, `x`
+  crate, `g` girder, `=` grating and `.` air.
+- Each run uses a copy of the grid. When a tile breaks, the scene changes the copy and rebuilds `NAV`.
+- Blood, scorch marks and bullet holes paint onto the level canvas. Only the tiles that changed upload to the GPU.
+- Ragdoll parts (`RAG`) come from the same drawings as the living sprites. Thus a corpse looks like its enemy.
+- `PROP_ART` draws the breakable props. `PROP_SPOTS` puts them in each arena.
+
+### Audio pipelines
+
+SLAGHOUSE has three audio layers. The procedural synth is always available. Two offline pipelines make the optional
+banks. If a bank is missing, or a sound or track does not decode, the synth plays in its place.
+
+#### Runtime audio graph
+
+```mermaid
+flowchart LR
+  subgraph sfx["Sfx"]
+    direction TB
+    call["Sfx.nail(), Sfx.explosion()"] --> q{"Sample decoded<br/>and N set to sampled?"}
+    q -- "yes" --> smp["AudioBufferSource<br/>gain and pitch jitter,<br/>never the same take twice"]
+    q -- "no" --> syn["Synth voice<br/>tone(), noise(), crunch shaper"]
+  end
+  subgraph mus["Music"]
+    direction TB
+    mq{"Track decoded<br/>and B set to sampled?"}
+    mq -- "yes" --> trk["Bank track<br/>loop from ls to ls + len"]
+    trk --> lp["Low-pass shade<br/>follows combat intensity"]
+    lp --> mbus["Music bus<br/>LEVEL × music volume"]
+    mq -- "no" --> drum["Procedural drum and bass<br/>25 ms scheduler"]
+    drum --> mout["Music.out<br/>music volume"]
+  end
+  smp --> sout["Sfx.out<br/>SFX volume"]
+  syn --> sout
+  sout --> master["Master gain<br/>M mutes"]
+  mbus --> master
+  mout --> master
+  master --> comp["DynamicsCompressor<br/>-16 dB threshold, 6:1"]
+  comp --> dest(("Speakers"))
+```
+
+- Phaser audio is off. All sound goes through the `Sfx` and `Music` objects in `src/audio.js`.
+- Each sampled sound keeps its synth version. **N** changes between the two. **B** does the same for the music.
+- The stage loops stay muffled until an enemy sees you. They open up as the fight becomes more intense. The title, boss
+  and jingle tracks always play at full level.
+
+#### Bank loading
+
+```mermaid
+flowchart LR
+  init["Sfx.init()"] --> probe{"Does a 20 ms<br/>Opus probe decode?"}
+  probe -- "yes" --> opus["Decode sfx_bank.js<br/>Music decodes tracks when needed"]
+  probe -- "no" --> aac["Load sfx_bank_aac.js<br/>and music_bank_aac.js"]
+  aac --> opus2["Decode the AAC copies"]
+  opus --> ok{"Decoded?"}
+  opus2 --> ok
+  ok -- "yes" --> sample["Sample plays"]
+  ok -- "no, for that sound<br/>or track" --> synth["Synth plays"]
+```
+
+Each bank is a script that sets one global object:
+
+| File | Global | Format of each entry |
+| --- | --- | --- |
+| `sfx_bank.js` | `window.SLAG_SFX` | `name: { g: gain, j: pitch jitter, d: [base64 Ogg Opus takes] }`. 200 sounds, 388 takes. |
+| `music_bank.js` | `window.SLAG_MUSIC` | `name: { d: base64 Ogg Opus, loop, ls: loop start, len: loop length }`. 6 tracks. |
+| `*_aac.js` | `window.SLAG_SFX_AAC`, `window.SLAG_MUSIC_AAC` | The same entries, as AAC in MP4. |
+
+#### SFX bank pipeline (`dev/sfxgen`)
+
+```mermaid
+flowchart LR
+  sounds["sounds.py<br/>prompts, lengths, cut modes"] --> gen["gen.py<br/>AudioGen on a CUDA GPU<br/>6-12 takes for each sound"]
+  gen --> raw[("out/raw/")]
+  raw --> proc["process.py<br/>trim, slice, loop,<br/>16 to 48 kHz, CLAP rank"]
+  proc --> cand[("out/proc/<br/>candidates.json")]
+  cand --> review["review.html<br/>listen and pick"]
+  review --> picks["picks.json"]
+  game["slaghouse.html<br/>procedural Sfx"] --> calib["calib.js in the browser<br/>loudness, peak, fingerprint"]
+  calib --> cj["calib.json"]
+  picks --> build["build.py"]
+  cand --> build
+  cj --> build
+  takes[("takes/<br/>FLAC")] <--> build
+  loud["audiolib/loud.py"] --> build
+  build --> b1["sfx_bank.js<br/>Opus"]
+  build --> b2["sfx_bank_aac.js<br/>AAC 48 kbps"]
+```
+
+1. `sounds.py` gives each sound its prompts, length, cut mode and number of variants.
+2. `gen.py` makes 6 to 12 AudioGen takes for each sound. The seed of a sound comes from its name.
+3. `process.py` trims, slices and loops the takes, adds high-frequency "air" at 48 kHz and ranks the takes with CLAP.
+4. `review.html` plays each take. You tick the picks and export `picks.json`. Sounds without an override use the
+   top-ranked takes.
+5. `calib.js` renders each procedural sound in the browser and measures its loudness and peak. The result goes in
+   `calib.json`, with a fingerprint of the synth code.
+6. `build.py` runs `calibcheck.mjs` first. It levels each take to the synth sound that it replaces, then encodes the
+   Opus and AAC banks. It encodes again only the sounds that changed.
+
+`takes/` holds every take that the bank uses, as FLAC (about 11 MB). On a new clone, `build.py` makes the same
+`sfx_bank.js`, byte for byte, without a GPU or a model download. If a procedural sound changes, its `calib.json` entry
+becomes stale, and `node dev/check.mjs` fails until you measure it again.
+
+#### Soundtrack pipeline (`dev/synthwave`)
+
+```mermaid
+flowchart LR
+  score["score.py<br/>chords, bass, arps, leads, drums"] --> render
+  inst["instruments.py<br/>patches, drum machine"] --> render
+  dsp["dsp.py<br/>oscillators, filters, reverb,<br/>delay, compressor"] --> render
+  loud["audiolib/loud.py"] --> render
+  render["render.py<br/>48 kHz stereo WAV,<br/>stem balance, loop seam check"] --> wav[("out/*.wav")]
+  wav --> build["build.py<br/>level match, encode,<br/>decode-back check"]
+  loud --> build
+  build --> m1["music_bank.js<br/>Opus 64 kbps"]
+  build --> m2["music_bank_aac.js<br/>AAC 64 kbps"]
+```
+
+| Track | Use in the game |
+| --- | --- |
+| `title` | Title screen, and below the results screen after a jingle |
+| `stage1` | Campaign waves 1-2. OVERTIME and DAILY waves 1-2 of every six |
+| `stage2` | Campaign from the Furnace on, but not the Foreman and Smelter fights. OVERTIME and DAILY waves 3-5 of every six |
+| `boss` | The Foreman and Smelter fights, all BOSS RUSH fights, OVERTIME and DAILY waves 6, 12, 18 and on |
+| `win`, `lose` | The ARENA CLEARED fanfare and the YOU GOT GIBBED tape-stop |
+
+- Each loop renders with 4 s of tail. The tail folds back onto the start, so the loop has no seam.
+- `render.py` sets the loudness of each stem relative to the kick. If a loop has a seam, `render.py` does not write
+  it and exits with status 1.
+- `build.py` decodes each bank again after it writes it. It fails if a track is missing, a level is more than 0.5 dB
+  from the target, or a loop seam does not align.
+- The encodes are bit-exact. The same WAV files always give the same bank.
+
+#### Audio tools
+
+| Pipeline | Python | Other requirements |
+| --- | --- | --- |
+| SFX (`dev/sfxgen`) | 3.11 venv with PyTorch 2.5.1 and AudioCraft 1.3.0 | `ffmpeg` with libopus. A CUDA GPU only to make new takes. The first run downloads about 7 GB of models. |
+| Soundtrack (`dev/synthwave`) | 3.13 venv from `requirements.txt` | `ffmpeg` with libopus. No GPU. |
+
+The full procedures are in [dev/sfxgen/README.md](dev/sfxgen/README.md) and
+[dev/synthwave/README.md](dev/synthwave/README.md).
+
+### Test pipeline
+
+```mermaid
+flowchart LR
+  run["node dev/playtest/run.mjs"] --> chrome["Headless Chrome<br/>playwright-core, new profile<br/>for each check"]
+  cdnp["Phaser from jsDelivr<br/>one fetch, SRI check"] --> chrome
+  chrome --> page["slaghouse.html<br/>with harness.js<br/>and the check scripts"]
+  page --> checks["Checks: two tabs, DAILY, run modes,<br/>enemy kinds, props, NAV, checkpoints"]
+  page --> camp["VB.campaign(1500)<br/>campaign-bot.js plays"]
+  checks --> res{"Page error, console error<br/>or failed check?"}
+  camp --> res
+  res -- "yes" --> fail["Exit 1,<br/>names each failure"]
+  res -- "no" --> pass["Exit 0"]
+```
+
+- The harness steps the game on a virtual clock. A full campaign thus runs faster than real time.
+- The campaign bot uses the normal game mechanics. It plans its moves on the same `NAV` graph that the checks use.
+- Each full campaign must win with the full kill count and leave no survivors.
+
+| Command | What it runs |
+| --- | --- |
+| `node dev/playtest/run.mjs` | All checks, then the Normal campaigns (seeds 91, 404, 137 and 5) |
+| `node dev/playtest/run.mjs --quick` | All checks, without the full campaigns |
+| `node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7` | The CI Brutal job |
+| `node dev/playtest/compare.mjs` | A comparison of each enemy kind between the working tree and a git ref |
+
+The [playtest guide](dev/playtest/README.md) has all options and the browser API.
+
+## Development
+
+### Change the game
+
+1. Edit the files in `src/`. Do not edit `slaghouse.html`.
+2. Build the page:
+
+   ```bash
+   node src/join.mjs
+   ```
+
+3. Run the static checks:
+
+   ```bash
+   node dev/check.mjs
+   ```
+
+4. Install the play-test tools. Do this one time:
+
+   ```bash
+   npm ci --prefix dev/playtest
+   ```
+
+5. Run the quick play-test:
+
+   ```bash
+   node dev/playtest/run.mjs --quick
+   ```
+
+6. Play the changed mode in a browser. Use the
+   [campaign smoke check](CONTRIBUTING.md#campaign-smoke-check) or the [Lab smoke check](CONTRIBUTING.md#lab-smoke-check).
+7. Add an entry to [CHANGELOG.md](CHANGELOG.md) below `[Unreleased]`.
+
+> [!CAUTION]
+> A change to props, hazards, enemies or timing can change the seeded campaigns. Run the Normal and Brutal seeds before
+> you open a pull request. For a visual-only effect, use the cosmetic stream (see [Random streams](#random-streams)).
+
+### Reference
+
+- **Tuning.** Change a value in `TUNE` (`src/config.js`). Then change the header comment (`src/page-head.html`) to
+  agree.
+- **Breakable props.** `PROPS` and `PROP_BLAST` set how each kind plays: its HP, its mounting and its effect when it
+  breaks. `PROP_ART` draws it, and `PROP_SPOTS` puts it in each arena. `dev/playtest/props.js` checks each spot in the
+  campaign and OVERTIME layouts.
+- **Enemies, bosses and run modes.** [CONTRIBUTING.md](CONTRIBUTING.md) tells you how to add them.
+- **Audio.** To make the banks again, follow `dev/sfxgen/README.md` and `dev/synthwave/README.md`.
+- **History.** See [CHANGELOG.md](CHANGELOG.md). To publish a release, follow the steps in
+  [CONTRIBUTING.md](CONTRIBUTING.md#releasing).
 
 ## Contributing and security
 
-Contributions are by invitation; see [CONTRIBUTING.md](CONTRIBUTING.md). Report security problems privately as
-described in [SECURITY.md](SECURITY.md).
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request.
 
-## Licensing
+Do not report a security problem in a public issue. Report it privately, as [SECURITY.md](SECURITY.md) tells you.
 
-Copyright (c) 2026 Shane Wall. All rights reserved. SLAGHOUSE is proprietary software: no part of it may be copied,
-modified or distributed without written permission. See [LICENSE](LICENSE).
+## License
 
-Third-party components keep their own licenses:
+SLAGHOUSE is free software under the [MIT License](LICENSE). Copyright (c) 2026 Shane Wall.
 
-- **Phaser** is MIT-licensed and loaded from the jsDelivr CDN; it isn't included in this repository.
-- The sampled SFX in `sfx_bank.js` and `sfx_bank_aac.js` were generated with Meta's **AudioGen**
-  (`facebook/audiogen-medium`), whose model weights are licensed CC BY-NC 4.0, so treat those banks as non-commercial. Every sampled sound has a synth fallback,
-  so the game can ship without it.
+The MIT License covers the code, the art, the soundtrack and the documentation of this repository. Third-party
+components keep their own licenses:
+
+- **Phaser** has the MIT License. The page loads it from the jsDelivr CDN. This repository does not include it.
+- The sampled SFX in `sfx_bank.js`, `sfx_bank_aac.js` and `dev/sfxgen/takes/` come from Meta's **AudioGen**
+  (`facebook/audiogen-medium`). The AudioGen model weights have the CC BY-NC 4.0 license. The MIT License of this
+  repository does not remove limits that apply to the AudioGen output. Thus treat these samples as non-commercial.
+  Each sampled sound has a synth version. If you remove the two SFX banks, the game still has sound.

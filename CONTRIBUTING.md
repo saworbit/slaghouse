@@ -1,8 +1,8 @@
 # Contributing to SLAGHOUSE
 
-SLAGHOUSE is proprietary software (see [LICENSE](LICENSE)). Contributions are accepted only from collaborators the
-owner has invited. Unless you've agreed otherwise in writing, by submitting a contribution you grant the copyright
-holder the right to use, modify and distribute it under any terms, including proprietary ones.
+SLAGHOUSE is open source under the [MIT License](LICENSE). Contributions are welcome. When you submit a contribution,
+you agree that it is licensed under the same MIT License. The sampled SFX banks come from AudioGen and keep their
+non-commercial note; see [License](README.md#license) in the README.
 
 ## Running the game
 

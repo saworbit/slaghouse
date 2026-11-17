@@ -146,6 +146,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **Open source under the MIT License.** The MIT License replaces the proprietary license, and contributions are
+  open to all. The sampled SFX banks come from AudioGen and keep their non-commercial note. The README now describes
+  the architecture and the build, art, audio, test and release pipelines, with diagrams, in Simplified Technical
+  English.
 - **More things happen for a reason.** When an operation ends, the fire suppression sprays every burning patch and it
   steams out, instead of the fire winking out. A wreck that lands after the clear gets the same. Slag-rain drops
   still falling when the rain clears cool to cinders instead of vanishing mid-air, and their patches steam out.
