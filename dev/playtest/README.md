@@ -5,7 +5,7 @@ Load them from DevTools or use the headless runner. The game's built-in `SlagLab
 
 | file | what it gives you |
 | --- | --- |
-| `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.setup(arena, keepWaves)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
+| `harness.js` | `window.T`: `T.boot()`, `T.run(ms)`, `T.seed(n)` (seeds `Math.random` and mutes sound; every seeded check starts with it), `T.setup(arena, keepWaves)`, `T.tp(tx, ty)`, `T.aimAt(x, y)`, `T.trig(on)`, `T.bot({ seconds })`, `T.snap(name)`, `T.errs` |
 | `chaos.js` | `window.CH`: `CH.arenaStorm(arena, secs)` spawns every enemy kind in batches while the bot fights, and `CH.check(g, tag)` lists broken invariants (NaN positions, foes outside the world, overheal, gravity stuck off, runaway lists) |
 | `twotab.js` | `window.TT`: `TT.check()` plays a second tab by writing to `localStorage`, then checks that lifetime stats, mastery and codex sightings add up and that a stale run can't replace a newer campaign checkpoint. It puts every `slaghouse.*` key back; reload before other tests |
 | `daily.js` | `window.DY`: `DY.check()` moves the clock past the next 00:00 UTC in a DAILY run and checks the waves, a restart's arena and the record's date keep the run's day |

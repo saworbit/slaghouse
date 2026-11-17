@@ -79,7 +79,7 @@ window.PR = (() => {
   // into the grunts, and its blast counted.
   PR.accuracy = () => {
     const fails = [];
-    Math.random = seeded(158); Sfx.muted = true; game.loop.now = game.loop.time = 10000;
+    T.seed(158); game.loop.now = game.loop.time = 10000;
     RUNMODE = 'endless'; T.boot();
     const g = T.setup(0), crate = g.props.find(p => p.kind === 'ammo');
     g.props = [crate];
