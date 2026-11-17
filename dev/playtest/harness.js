@@ -75,8 +75,8 @@ T.bot = async (opts = {}) => {
     if (g.wave !== lastWave) { lastWave = g.wave; log.push('wave ' + (g.wave + 1) + ' @' + t.toFixed(0) + 's'); }
     if (g.state !== 'play') { log.push('state ' + g.state + ' @' + t.toFixed(0)); break; }
     if (g.perkOffer) { const id = g.perkOffer[Math.floor(Math.random() * g.perkOffer.length)]; log.push('perk ' + id); g.onPerkPick(id); }
-    const st = g.campaign && g.campaignRoute && g.campaignRoute[0];
-    if (st) {                                                        // campaign lift or coolant valve: stand on it until it fires
+    const st = g.routeGoal ? g.routeGoal() : g.campaign && g.campaignRoute && g.campaignRoute[0];
+    if (st) {                                                        // the route's lift, valve or breaker: stand on it until it fires
       if (Math.abs(g.player.x - st.x) > 8 || Math.abs(g.player.body.bottom - st.y) > 6) { T.tp(Math.floor(st.x / 16), st.y / 16 - 1); log.push('route ' + st.label + ' @' + t.toFixed(0)); }
       const k = K(); k.A.isDown = k.D.isDown = false; T.trig(false);
       T.run(50); t += 0.05; continue;

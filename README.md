@@ -146,9 +146,9 @@ OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
 | --- | --- | --- | --- |
 | I · The Melt Floor | **Lockdown**, **Blackout** | Nailgun, Shotgun, Flare Gun, Net Gun | Start with grunts, then a heavy and drones. Blackout starts in the light so you can equip the Flare Gun before the ambush cuts power. |
 | II · The Furnace | **Slag Rain**, **Gravity Loss** | Grenade Launcher, Saw Launcher, Corroder, Railgun, Cryo Cannon, Hornet Pod | Take cover during slag showers, then face the Demolition Team in clear weather. Use the 6.2-second countdown to find cover before the Gunship. The Gunship telegraphs its rocket volleys and strafes, with a pause between attacks. In low gravity, the second Hound, Linkers, and later enemy pairs arrive in separate squads. The Linkers fight below the catwalk. |
-| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains and seal both coolant valves to open the lift. |
-| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | Get to the dais before the second squad releases the ball. The ball starts swinging again after you breach the Foreman's armor. |
-| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. The Smelter starts the rail charge in its second phase and overheats below 15% health. |
+| III · The Sorting Line | **Sorting Shift**, **Meltdown** | Arc Caster, Stake Driver, Plasma Katana, Rocket Launcher, Siphon | Learn the belts and presses, then climb before the slag rises. Fight the Wyrm after the floor drains. The meltdown overheats the lift: turn both coolant valves while a valve crew comes for you, and the lift comes once the shaft cools and the area is clear. |
+| IV · The Wrecking Yard | **Demolition**, **The Foreman** | Drill Launcher, Tractor, Flak Cannon, Riot Shield, Rivet Minigun, Marksman Rifle | The ball hangs latched over the yard. Get to the dais before the second squad releases it. Afterwards the gantry winches it back up, and breaching the Foreman's armor cuts it loose again. |
+| V · The Powerhouse | **Live Circuit**, **The Smelter** | Storm Coil, Prism Laser, Tether Gun, Magma Lance, Singularity, Mini-Nuke | Use the walkway break to get above the rails. Then pull the main breaker on the generator to cut the power and draw out the Smelter. It hotwires the rails in its second phase and overheats below 15% health. |
 
 Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
 starts. Each new weapon card shows what the weapon does and how to equip it. In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and sustained prop jets
@@ -158,7 +158,10 @@ operation ends. A Gunship wreck that lands after the clear cannot start a new fi
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
 after Lockdown. Later perk drafts draw from the remaining pool.
-Step onto each marked lift to enter the next act and save a checkpoint. Arrival raises health to at least
+Each arena has two lifts in its back wall: the one you arrive in, at the start, and the way on, at the far end,
+locked with a red lamp. Once an act's route reaches it and no foe is left, the car comes down and opens. Walk in to
+ride down to the next act and save a checkpoint. OVERTIME, DAILY and BOSS RUSH call the same lift after an arena's
+last wave. Arrival raises health to at least
 60 HP in the Furnace, 75 HP in the Sorting Line and Wrecking Yard, and 80 HP in the Powerhouse. The Vampire
 mutator skips this recovery. Checkpoints restore issued weapons, the equipped weapon, perks, difficulty,
 mutator and accumulated run stats. A checkpoint from the three-act campaign also keeps its equipped weapon

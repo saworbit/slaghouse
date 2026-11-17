@@ -294,7 +294,8 @@ class HudScene extends Phaser.Scene {
       name.setVisible(false); use.setVisible(false); key.setVisible(false);
     }
     if (!gs || !gs.sys.isActive() || this.overOn) return;
-    const showCampaign = gs.campaign && gs.state === 'play' && !this.pauseOn && !this.perkOn && !gs.wheelOn && !gs.descending;
+    const showRoute = gs.state === 'play' && !this.pauseOn && !this.perkOn && !gs.wheelOn && !gs.descending && !gs.ride;   // the route, and OVERTIME's lift
+    const showCampaign = gs.campaign && showRoute;
     if (showCampaign && gs.time.now < gs.unlockUntil) {
       const slots = gs.unlockSlots;
       for (const [i, slot] of slots.entries()) {
@@ -310,19 +311,21 @@ class HudScene extends Phaser.Scene {
       }
     }
     const cam = gs.cameras.main, wv = cam.worldView, z = cam.zoom, toS = (x, y) => [(x - wv.x) * z, (y - wv.y) * z];
-    if (showCampaign && !gs.boss) {
-      const station = gs.campaignRoute[0], op = CAMPAIGN[gs.wave], n = op.squads.length;
+    if (showRoute && !gs.boss && (gs.campaign || gs.campaignRoute.length)) {
+      const station = gs.campaignRoute[0], op = gs.campaign ? CAMPAIGN[gs.wave] : null, n = op ? op.squads.length : 0;
       const next = gs.campaignSquads[0], released = n - gs.campaignSquads.length;
-      const incoming = Math.ceil((gs.campaignReinforceAt - gs.time.now) / 1000);
+      const incoming = op ? Math.ceil((gs.campaignReinforceAt - gs.time.now) / 1000) : 0;
       if (station || incoming > 0 || gs.activeHostiles() > 0) {
-        const label = station?.label || (incoming > 0 ? (next?.incoming || next?.name || 'NEXT SQUAD') + ' IN ' + incoming + 'S' :
+        const [stationLabel, stationDetail] = station ? gs.routeText(station) : [];
+        const label = stationLabel || (incoming > 0 ? (next?.incoming || next?.name || 'NEXT SQUAD') + ' IN ' + incoming + 'S' :
           (op.squads[released - 1]?.name || op.name) + '  /  SQUAD ' + released + '/' + n);
         this.routeLabel.setText(label).setVisible(true);
         g.fillStyle(0x070d12, 0.9).fillRect(328, 12, 424, 43);
         g.fillStyle(station ? 0x76e8ff : 0xffb347, 1).fillRect(328, 12, 424, 2);
         if (station) {
+          if (stationDetail) this.routeDetail.setText(stationDetail).setVisible(true);
           const [sx, sy] = toS(station.x, station.y - 28);
-          if (sx < 24 || sx > VIEW_W - 24 || sy < 90 || sy > VIEW_H - 36) {
+          if (gs.routeGoal() && (sx < 24 || sx > VIEW_W - 24 || sy < 90 || sy > VIEW_H - 36)) {
             const x = clamp(sx, 24, VIEW_W - 24), y = clamp(sy, 90, VIEW_H - 36);
             const a = Math.atan2(sy - y, sx - x), ca = Math.cos(a), sa = Math.sin(a);
             g.fillStyle(0x0b1015, 0.95).fillCircle(x, y, 14);

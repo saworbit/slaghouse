@@ -99,15 +99,19 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    arrives with **Gravity Surge** and the Linkers arrive in the next squad. Climb onto the catwalk and confirm the
    last Linker stays in reach or descends below it. Hold toward a wall and repeat the jump input to climb without
    drifting away. Enter the Sorting Line lift and confirm **Continue** now starts in the Sorting Line.
-4. In Meltdown, check that the countdown gives you time to reach a walkway. The presses stop before the slag
-   rises, and the floor drains before the Wyrm arrives. After Meltdown, leave the first coolant valve early to
-   reset its meter, then pause on the valve to check that the meter holds. Resume, seal both valves in order
-   and enter the Wrecking Yard lift.
-5. Check that the wrecking ball and live rails have preparation countdowns before their squads. Fight the
-   Foreman and Smelter and verify that each starts its arena machinery in phase two. Defeat them in order
-   and confirm the results appear and Continue is unavailable on the campaign screen.
+4. In Meltdown, check that the countdown gives you time to reach a walkway. The presses park at the top before
+   the slag rises, and the floor drains before the Wyrm arrives. Watch the far lift glow as the meltdown heats it.
+   After Meltdown, a valve crew warps in: step off the first coolant valve partway and check that its meter creeps
+   back rather than resetting, then pause on the valve to check that the meter holds. Resume and turn both valves
+   in order. Check that coolant runs along the pipe to the lift, that the lift steams as it cools, and that it only
+   comes once both crews are down. Ride it to the Wrecking Yard and check that you arrive in the car at the start.
+5. Check that the wrecking ball hangs latched before its squad, that the wrecking ball and live rails have
+   preparation countdowns, and that the gantry winches the ball back up after Demolition. Fight the Foreman and
+   verify that he cuts the ball loose in phase two. After Live Circuit, pull the main breaker and check that the
+   lights and generator go dark before the Smelter warps in, and that it hotwires the rails in phase two. Defeat
+   it and confirm the results appear and Continue is unavailable on the campaign screen.
 6. Start OVERTIME, DAILY and BOSS RUSH. Check that the full arsenal is available and each mode has its own
-   wave, boss or daily perk setup.
+   wave, boss or daily perk setup. Clear an OVERTIME cycle and check that the lift comes and you have to walk in.
 
 ### Lab smoke check
 
