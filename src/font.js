@@ -68,8 +68,7 @@ const CALL_ROWS = ['#fff8c8', '#ffe46a', '#ffd040', '#ffb030', '#ff8a1f', '#ff6a
 const WIN_ROWS = ['#ffffff', '#e6f7ff', '#bfe9ff', '#7dd8ff', '#46b8f0', '#2a86c8', '#1a5a90'];
 const LOSE_ROWS = ['#ffd0c0', '#ff9a80', '#ff6a50', '#ff3a2a', '#d81e14', '#a0100c', '#600808'];
 let HINT1 = '', HINT2 = '';                        // the keyboard hint strips, from the bindings (bindTexts)
-const HINT_PAD1 = 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY';
-const HINT_PAD2 = 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE';
+let HINT_PAD1 = '', HINT_PAD2 = '';                // the gamepad's, from PAD_BINDS (bindTexts)
 const RESTART_CONFIRM_MS = 2000;                     // mid-run R arms a restart; a second R inside this window confirms it
 const CONTROL_LINES = [];                          // the CONTROLS page: the hint strips plus everything they leave out
 function bindTexts() {                             // rebuild every key label from BINDS; with the defaults they read as they always did
@@ -77,6 +76,9 @@ function bindTexts() {                             // rebuild every key label fr
   slotLabels();
   HINT1 = `${k('A')}/${k('D')} MOVE  ${k('SPACE')} JUMP  ${k('SHIFT')} DASH  CLICK FIRE  ${k('F')} KICK  ${k('G')} MINE  ${k('C')} HOOK  ${k('T')} SENTRY`;
   HINT2 = `${k('TAB')} WHEEL  ${k('Q')}/${k('E')} CYCLE  KICK GLOWING FOES TO EXECUTE  ${k('ESC')} PAUSE  ${k('V')} FX`;
+  const p = padLabel, dpad = PAD_BINDS.prev === 12 && PAD_BINDS.next === 13;
+  HINT_PAD1 = `LS MOVE  RS AIM  ${p('fire')} FIRE  ${p('jump')} JUMP  ${p('dash')} DASH  ${p('kick')} KICK  ${p('hook')} HOOK  ${p('mine')} MINE  ${p('sentry')} SENTRY`;
+  HINT_PAD2 = `HOLD ${p('wheel')} WHEEL  ${dpad ? 'DPAD UP/DOWN' : p('prev') + '/' + p('next')} CYCLE  KICK GLOWING FOES  ${p('pause')} PAUSE`;
   CONTROL_LINES.length = 0;
   CONTROL_LINES.push(['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
     ['WEAPONS  ' + SLOT_KEYS.filter(s => s.trim()).map(s => (s === '<' ? 'BKSP' : s)).join(' ')],
@@ -84,7 +86,7 @@ function bindTexts() {                             // rebuild every key label fr
     [`${k('J')} FIRE ON KEYS  MOUSE WHEEL CYCLE  ${k('P')} PAUSE  ${k('R')} TWICE RESTART  ${k('M')} MUTE`],
     [`${k('N')} SAMPLED/SYNTH SFX  ${k('B')} SAMPLED/SYNTH MUSIC   OPTIONS > KEYS REBINDS`],
     ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
-    ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK']);
+    [`DOWN+${p('jump')} DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK`]);
 }
 bindTexts();
 try {                                              // the keyboard's own key labels, once the browser has them

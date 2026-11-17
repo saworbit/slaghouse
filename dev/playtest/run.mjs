@@ -321,6 +321,48 @@ try {
     if (r.space !== 'Space' || r.k !== 'KeyK' || r.saved !== 'Space' || !r.hint.startsWith('A/D MOVE  SPACE JUMP')) fail.push(`RESET ALL left JUMP ${r.space}, slot K ${r.k}, saved ${r.saved}`);
     return fail;
   });
+  await check('pad buttons rebind from OPTIONS > KEYS, swap on a clash, work in a run after a reload, and reset (#167)', async ctx => {
+    const stub = () => page.evaluate(() => {
+      window.__pad = { connected: true, mapping: 'standard', axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ value: 0 })) };
+      navigator.getGamepads = () => [window.__pad];
+    });
+    let page = await open(ctx, []);
+    await stub();
+    const fail = [], frames = n => page.evaluate(n => new Promise(r => { let k = 0; const f = () => (++k >= n ? r() : game.events.once('poststep', f)); game.events.once('poststep', f); }), n);
+    const pad = async b => { await page.evaluate(b => { window.__pad.buttons[b].value = 1; }, b); await frames(3); await page.evaluate(b => { window.__pad.buttons[b].value = 0; }, b); await frames(3); };
+    const title = () => page.evaluate(() => { const ts = game.scene.getScene('Title'); return { sub: ts.sub, capture: ts.capture, note: ts.keyNote._text }; });
+    await page.evaluate(() => { const ts = game.scene.getScene('Title'); ts.showSub('keys'); ts.subSel = ts.keyRows.findIndex(r => r[0] === 'pad.jump'); ts.refreshSub(); });
+    await pad(0);                                                     // A on PAD JUMP: it waits for a button, and the A that picked it doesn't count
+    let t = await title();
+    if (t.capture !== 'pad.jump') fail.push(`A on PAD JUMP did not wait for a button (capture ${t.capture})`);
+    await pad(2);                                                     // X: jump moves to X, and kick takes A
+    let r = await page.evaluate(() => ({ binds: { ...PAD_BINDS }, saved: JSON.parse(localStorage.getItem('slaghouse.binds') || '{}').pad, hint: HINT_PAD1, sub: game.scene.getScene('Title').sub }));
+    t = await title();
+    if (r.binds.jump !== 2 || r.binds.kick !== 0 || r.saved?.jump !== 2 || r.saved?.kick !== 0) fail.push(`X for JUMP left jump ${r.binds.jump}, kick ${r.binds.kick}, saved ${JSON.stringify(r.saved)}`);
+    if (!/X JUMP/.test(r.hint) || !/A KICK/.test(r.hint) || !/MOVED TO A/.test(t.note)) fail.push(`after the swap the hint reads '${r.hint}' and the note '${t.note}'`);
+    if (t.capture || r.sub !== 'keys') fail.push(`the KEYS page was still waiting (${t.capture}) or left (${r.sub}) after the button`);
+    // a fresh page keeps the buttons, and a run reads them: X jumps, A kicks
+    page = await open(ctx, []);
+    await stub();
+    r = await page.evaluate(() => {
+      RUNMODE = 'endless'; T.boot(); T.setup(0); T.run(600);
+      const g = T.g(), b = g.player.body, press = (i, ms = 50) => { window.__pad.buttons[i].value = 1; T.run(ms); window.__pad.buttons[i].value = 0; };
+      const binds = { ...PAD_BINDS };
+      const k0 = g.kickReady, a0 = b.bottom; press(0, 120); const kicked = g.kickReady !== k0, aRose = a0 - b.bottom; T.run(900);
+      const y0 = b.bottom; press(2, 120); const rose = y0 - b.bottom; T.run(900);
+      return { binds, kicked, aRose, rose };
+    });
+    if (r.binds.jump !== 2 || r.binds.kick !== 0) fail.push(`after a reload the pad binds are ${JSON.stringify(r.binds)}`);
+    if (r.rose < 8) fail.push(`after a reload X (now JUMP) lifted the player ${Math.round(r.rose)} px`);
+    if (!r.kicked || r.aRose > 2) fail.push(`after a reload A (now KICK) ${r.kicked ? 'kicked' : 'did not kick'} and lifted the player ${Math.round(r.aRose)} px`);
+    // RESET ALL puts the pad back too
+    page = await open(ctx, []);
+    await page.evaluate(() => { const ts = game.scene.getScene('Title'); ts.showSub('keys'); ts.subSel = ts.keyRows.findIndex(x => x[0] === 'reset'); ts.subKey('ok'); });
+    r = await page.evaluate(() => ({ binds: { ...PAD_BINDS }, saved: JSON.parse(localStorage.getItem('slaghouse.binds') || '{}').pad, hint: HINT_PAD1, two: HINT_PAD2 }));
+    if (r.binds.jump !== 0 || r.binds.kick !== 2 || r.saved?.jump !== 0) fail.push(`RESET ALL left the pad binds ${JSON.stringify(r.binds)}`);
+    if (r.hint !== 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY' || r.two !== 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE') fail.push(`the default pad hints read '${r.hint}' / '${r.two}'`);
+    return fail;
+  });
   await check('Lab setup keeps your changes across rooms, tallies the roster, and works with a gamepad', async ctx => {
     const fail = [];
     let page = await open(ctx, []);

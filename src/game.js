@@ -916,7 +916,7 @@ class GameScene extends Phaser.Scene {
     if (this.jd.R && this.mode.confirmRestart && this.state === 'play' && this.time.now >= this.restartArmUntil) {   // R sits among the combat keys: mid-run, the first press only asks
       this.restartArmUntil = this.time.now + RESTART_CONFIRM_MS; Sfx.ui();
     } else if ((this.jd.R && (!this.mode.confirmRestart || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
-    if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
+    if ((this.jd.ESC || this.jd.P || PAD.hit('pause')) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
     else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
 
@@ -992,8 +992,8 @@ class GameScene extends Phaser.Scene {
   updatePlayer(dt, now) {
     const T = TUNE, p = this.player, b = p.body, K = this.keys;
     const left = K.A.isDown || K.LEFT.isDown || PAD.ax[0] < -0.35 || PAD.down(14), right = K.D.isDown || K.RIGHT.isDown || PAD.ax[0] > 0.35 || PAD.down(15), down = K.S.isDown || K.DOWN.isDown || PAD.ax[1] > 0.6;
-    const jumpHeld = K.SPACE.isDown || K.W.isDown || K.UP.isDown || PAD.down(0);
-    const jumpPressed = this.jd.SPACE || this.jd.W || this.jd.UP || PAD.jd(0);
+    const jumpHeld = K.SPACE.isDown || K.W.isDown || K.UP.isDown || PAD.held('jump');
+    const jumpPressed = this.jd.SPACE || this.jd.W || this.jd.UP || PAD.hit('jump');
     const onGround = b.blocked.down || b.touching.down;
     if (onGround) { this.lastGround = now; this.wallT = -1e9; this.wallLockUntil = 0; }
     if (jumpPressed) this.jumpBuffer = now;
@@ -1057,7 +1057,7 @@ class GameScene extends Phaser.Scene {
     // dash (Shift): a short burst in the held direction with i-frames; one in the air until you land
     if (onGround) this.dashAir = true;
     const up = K.W.isDown || K.UP.isDown || PAD.ax[1] < -0.6;
-    if ((this.jd.SHIFT || PAD.jd(1)) && now >= this.dashReady && (onGround || this.dashAir)) this.startDash(now, dir, (down ? 1 : 0) - (up ? 1 : 0), onGround);
+    if ((this.jd.SHIFT || PAD.hit('dash')) && now >= this.dashReady && (onGround || this.dashAir)) this.startDash(now, dir, (down ? 1 : 0) - (up ? 1 : 0), onGround);
     if (now < this.dashUntil) {
       b.setVelocity(this.dashVx, this.dashVy);
       if ((this.dashGhostT -= dt) <= 0) { this.dashGhostT = 0.022; this.spawnLight(this.pv.x, this.pv.y - 12, 'player', 0x46e6ff, 1, 1, 0.55, 0.2, this.pFrame, this.facing < 0); }
@@ -1141,17 +1141,17 @@ class GameScene extends Phaser.Scene {
     if (this.jd.O) this.setWeapon(27);
     if (this.jd.Y) this.setWeapon(28);
     if (this.jd.H) this.setWeapon(29);
-    if (PAD.jd(12)) this.cycleWeapon(-1);
-    if (PAD.jd(13)) this.cycleWeapon(1);
-    if (this.jd.C || PAD.jd(3)) { if (this.hook && this.hook.state === 'zip') this.endHook(); else this.fireHook(now); }
-    if (PAD.jd(2)) this.kickQueued = true;
-    if (PAD.jd(6)) this.mineQueued = true;
+    if (PAD.hit('prev')) this.cycleWeapon(-1);
+    if (PAD.hit('next')) this.cycleWeapon(1);
+    if (this.jd.C || PAD.hit('hook')) { if (this.hook && this.hook.state === 'zip') this.endHook(); else this.fireHook(now); }
+    if (PAD.hit('kick')) this.kickQueued = true;
+    if (PAD.hit('mine')) this.mineQueued = true;
     if ((this.jd.F || this.kickQueued) && now >= this.kickReady) this.bootKick(now);
     this.kickQueued = false;
     if ((this.jd.G || this.mineQueued) && now >= this.mineReady) this.throwMine(now);
     this.mineQueued = false;
-    if (this.jd.T || PAD.jd(5)) this.deploySentry(now);
-    const tab = (K.TAB.isDown || PAD.down(4)) && this.state === 'play';   // hold Tab (or LB): weapon wheel, time crawls
+    if (this.jd.T || PAD.hit('sentry')) this.deploySentry(now);
+    const tab = (K.TAB.isDown || PAD.held('wheel')) && this.state === 'play';   // hold Tab (or LB): weapon wheel, time crawls
     if (tab && !this.wheelOn) { this.wheelOn = true; this.wheelSel = this.weapon; Sfx.ui(); }
     if (this.wheelOn) {
       const wp = this.input.activePointer, wx = wp.x - VIEW_W / 2, wy = wp.y - (VIEW_H / 2 + 10);
@@ -1174,7 +1174,7 @@ class GameScene extends Phaser.Scene {
       if (this.jd.E) this.cycleWeapon(1);
     }
     const jammed = now < this.jamUntil;
-    const ptr = this.input.activePointer, trig = !this.wheelOn && !jammed && ((ptr.isDown && ptr.leftButtonDown()) || K.J.isDown || (PAD.b[7] || 0) > 0.3), mini = WEAPONS[this.weapon].id === 'mini';
+    const ptr = this.input.activePointer, trig = !this.wheelOn && !jammed && ((ptr.isDown && ptr.leftButtonDown()) || K.J.isDown || PAD.pull('fire') > 0.3), mini = WEAPONS[this.weapon].id === 'mini';
     if (jammed && Math.random() < 0.3) this.fxSparks(this.shoulder.x + Math.cos(this.aim) * 14, this.shoulder.y + Math.sin(this.aim) * 14, 1, 0, Math.PI * 2, [30, 90]);
     this.spin = clamp(this.spin + (mini && trig ? dt / TUNE.MINI.spinUp : -dt / 0.7), 0, 1);   // minigun barrels spin up before they bite
     const wid = WEAPONS[this.weapon].id;

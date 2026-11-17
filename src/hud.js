@@ -301,7 +301,7 @@ class HudScene extends Phaser.Scene {
       for (const [i, slot] of slots.entries()) {
         const card = this.unlockCards[i], weapon = WEAPONS[slot], x = 480 + (i - (slots.length - 1) / 2) * 292;
         const key = SLOT_KEYS[slot]?.trim(), equipped = slot === gs.weapon;
-        const action = equipped ? 'EQUIPPED' : PAD.on && PAD.active ? 'HOLD LB FOR WHEEL' :
+        const action = equipped ? 'EQUIPPED' : PAD.on && PAD.active ? 'HOLD ' + padLabel('wheel') + ' FOR WHEEL' :
           key ? (key === '<' ? 'BKSP' : key) + ' TO EQUIP' : 'HOLD TAB FOR WHEEL';
         g.fillStyle(0x071118, 0.94).fillRect(x - 140, 437, 280, 54);
         g.fillStyle(0x76e8ff, 1).fillRect(x - 140, 437, 280, 2);

@@ -108,9 +108,15 @@ To change a key binding, open **OPTIONS > KEYS**:
 One key does one function. If a different row had the new key, that row receives your old key. **RESET ALL TO
 DEFAULTS** sets all keys back to their defaults. The game keeps your bindings.
 
+The **PAD** rows after the keys rebind the gamepad the same way. Select a row, push **A** (or **Enter**), then push the
+new button. One button does one action, so the action that had it takes your old button, and **Esc** keeps the old
+one. **RESET ALL TO DEFAULTS** resets the pad too. Menus always use the D-pad or the left stick, **A** to pick and
+**B** to go back. The left and right of the D-pad always move. The hints, the CONTROLS page and the weapon cards
+name your buttons. The table below shows the defaults.
+
 | Gamepad control | Function |
 | --- | --- |
-| Left stick | Move. Down + **A** drops through a platform |
+| Left stick | Move. Down + jump (**A**) drops through a platform |
 | Right stick | Aim |
 | **RT** / **LT** | Fire / throw a mine |
 | **A** / **B** / **X** / **Y** | Jump / dash / kick / fire the hook |

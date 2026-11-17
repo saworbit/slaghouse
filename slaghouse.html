@@ -1245,8 +1245,9 @@ const MUTATORS = [
 const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship', 'crucible', 'grinder', 'queen', 'overseer', 'conductor']);   // SWARM never doubles (or thins) a boss
 const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
-//  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
-//  D-pad up/down cycle weapons, Start pause. Menus: D-pad / LS, A pick, B back.
+//  LS move (down + jump drops), RS aim, and by default RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry,
+//  hold LB wheel, D-pad up/down cycle weapons, Start pause; OPTIONS > KEYS rebinds those (PAD_BINDS, #167).
+//  Menus always take D-pad / LS, A pick, B back, and the D-pad's left and right always move.
 const PAD = {
   b: [], prev: [], ax: [0, 0, 0, 0], on: false, active: false, gp: null, stickY: 0, prevStickY: 0, stickX: 0, prevStickX: 0, rumbleAt: 0,
   poll() {
@@ -1262,6 +1263,9 @@ const PAD = {
   },
   down(i) { return (this.b[i] || 0) > 0.4; },
   jd(i) { return this.down(i) && !((this.prev[i] || 0) > 0.4); },
+  held(id) { return this.down(PAD_BINDS[id]); },                        // an in-run action, on whatever button it's bound to
+  hit(id) { return this.jd(PAD_BINDS[id]); },
+  pull(id) { return this.b[PAD_BINDS[id]] || 0; },                      // how far its button or trigger is in
   menuY() { return this.jd(12) || (this.stickY < 0 && this.prevStickY >= 0) ? -1 : this.jd(13) || (this.stickY > 0 && this.prevStickY <= 0) ? 1 : 0; },
   menuX() { return this.jd(14) || (this.stickX < 0 && this.prevStickX >= 0) ? -1 : this.jd(15) || (this.stickX > 0 && this.prevStickX <= 0) ? 1 : 0; },
   rumble(ms, k) {                                                       // a buzz in the hands for hits and blasts (follows the screen-shake setting)
@@ -1628,7 +1632,25 @@ function loadBinds() {                             // a saved binding wins only 
 }
 loadBinds.defaults = () => Object.fromEntries(Object.entries(BIND_DEFAULTS).map(([n, c]) => [n, c.slice()]));
 let BINDS = loadBinds();
-function saveBinds() { try { localStorage.setItem('slaghouse.binds', JSON.stringify(BINDS)); } catch (err) { /* private mode */ } }
+// The pad's in-run actions, top to bottom on the KEYS page after the keys, each with its standard-mapping button (#167).
+// Any of buttons 0-13 can take one (BACK, the stick clicks and the D-pad's up and down too); a button does one job.
+const PAD_ROWS = [
+  ['jump', 'JUMP', 0], ['dash', 'DASH', 1], ['kick', 'KICK', 2], ['hook', 'HOOK', 3], ['fire', 'FIRE', 7], ['mine', 'MINE', 6],
+  ['sentry', 'SENTRY', 5], ['wheel', 'WEAPON WHEEL', 4], ['prev', 'PREVIOUS WEAPON', 12], ['next', 'NEXT WEAPON', 13], ['pause', 'PAUSE', 9],
+];
+const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'BACK', 'START', 'LS', 'RS', 'DPAD UP', 'DPAD DOWN'];   // the buttons a binding can use
+const padDefaults = () => Object.fromEntries(PAD_ROWS.map(([id, , b]) => [id, b]));
+function loadPadBinds() {                          // saved with the keys; kept only if every action has its own button
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('slaghouse.binds') || 'null')?.pad; } catch (err) { /* private mode or junk */ }
+  const ids = PAD_ROWS.map(([id]) => id), ok = isObj(saved) && ids.every(id => Number.isInteger(saved[id]) && saved[id] >= 0 && saved[id] < PAD_NAMES.length) &&
+    new Set(ids.map(id => saved[id])).size === ids.length;
+  return ok ? Object.fromEntries(ids.map(id => [id, saved[id]])) : padDefaults();
+}
+let PAD_BINDS = loadPadBinds();
+function saveBinds() { try { localStorage.setItem('slaghouse.binds', JSON.stringify({ ...BINDS, pad: PAD_BINDS })); } catch (err) { /* private mode */ } }
+const padLabel = id => PAD_NAMES[PAD_BINDS[id]];
+const padRow = id => PAD_ROWS.find(r => r[0] === id)[1];
 const bindLabel = name => keyLabel(BINDS[name][0]);
 const bindRow = name => (BIND_ROWS.find(r => r[0] === name) || [name, name])[1];
 const SLOT_KEYS = [];                              // the HUD's short label per weapon slot (< = backspace); wheel-only guns get a space
@@ -2834,8 +2856,7 @@ const CALL_ROWS = ['#fff8c8', '#ffe46a', '#ffd040', '#ffb030', '#ff8a1f', '#ff6a
 const WIN_ROWS = ['#ffffff', '#e6f7ff', '#bfe9ff', '#7dd8ff', '#46b8f0', '#2a86c8', '#1a5a90'];
 const LOSE_ROWS = ['#ffd0c0', '#ff9a80', '#ff6a50', '#ff3a2a', '#d81e14', '#a0100c', '#600808'];
 let HINT1 = '', HINT2 = '';                        // the keyboard hint strips, from the bindings (bindTexts)
-const HINT_PAD1 = 'LS MOVE  RS AIM  RT FIRE  A JUMP  B DASH  X KICK  Y HOOK  LT MINE  RB SENTRY';
-const HINT_PAD2 = 'HOLD LB WHEEL  DPAD UP/DOWN CYCLE  KICK GLOWING FOES  START PAUSE';
+let HINT_PAD1 = '', HINT_PAD2 = '';                // the gamepad's, from PAD_BINDS (bindTexts)
 const RESTART_CONFIRM_MS = 2000;                     // mid-run R arms a restart; a second R inside this window confirms it
 const CONTROL_LINES = [];                          // the CONTROLS page: the hint strips plus everything they leave out
 function bindTexts() {                             // rebuild every key label from BINDS; with the defaults they read as they always did
@@ -2843,6 +2864,9 @@ function bindTexts() {                             // rebuild every key label fr
   slotLabels();
   HINT1 = `${k('A')}/${k('D')} MOVE  ${k('SPACE')} JUMP  ${k('SHIFT')} DASH  CLICK FIRE  ${k('F')} KICK  ${k('G')} MINE  ${k('C')} HOOK  ${k('T')} SENTRY`;
   HINT2 = `${k('TAB')} WHEEL  ${k('Q')}/${k('E')} CYCLE  KICK GLOWING FOES TO EXECUTE  ${k('ESC')} PAUSE  ${k('V')} FX`;
+  const p = padLabel, dpad = PAD_BINDS.prev === 12 && PAD_BINDS.next === 13;
+  HINT_PAD1 = `LS MOVE  RS AIM  ${p('fire')} FIRE  ${p('jump')} JUMP  ${p('dash')} DASH  ${p('kick')} KICK  ${p('hook')} HOOK  ${p('mine')} MINE  ${p('sentry')} SENTRY`;
+  HINT_PAD2 = `HOLD ${p('wheel')} WHEEL  ${dpad ? 'DPAD UP/DOWN' : p('prev') + '/' + p('next')} CYCLE  KICK GLOWING FOES  ${p('pause')} PAUSE`;
   CONTROL_LINES.length = 0;
   CONTROL_LINES.push(['KEYBOARD', '#ffb347'], [HINT1], [HINT2],
     ['WEAPONS  ' + SLOT_KEYS.filter(s => s.trim()).map(s => (s === '<' ? 'BKSP' : s)).join(' ')],
@@ -2850,7 +2874,7 @@ function bindTexts() {                             // rebuild every key label fr
     [`${k('J')} FIRE ON KEYS  MOUSE WHEEL CYCLE  ${k('P')} PAUSE  ${k('R')} TWICE RESTART  ${k('M')} MUTE`],
     [`${k('N')} SAMPLED/SYNTH SFX  ${k('B')} SAMPLED/SYNTH MUSIC   OPTIONS > KEYS REBINDS`],
     ['GAMEPAD', '#ffb347'], [HINT_PAD1], [HINT_PAD2],
-    ['DOWN+A DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK']);
+    [`DOWN+${p('jump')} DROP  RS PICKS IN THE WHEEL  MENUS: DPAD OR LS, A PICK, B BACK`]);
 }
 bindTexts();
 try {                                              // the keyboard's own key labels, once the browser has them
@@ -8255,7 +8279,7 @@ class TitleScene extends Phaser.Scene {
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
     this.optLbls = OPTION_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, 124 + i * 34, 'title_op_' + id, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
-    this.keyRows = [...BIND_ROWS, ['reset', 'RESET ALL TO DEFAULTS'], ['back', 'BACK']];
+    this.keyRows = [...BIND_ROWS, ...PAD_ROWS.map(([id, label]) => ['pad.' + id, 'PAD ' + label]), ['reset', 'RESET ALL TO DEFAULTS'], ['back', 'BACK']];
     this.keyLbls = Array.from({ length: 12 }, (_, j) => new PixelLabel(this, 480, 106 + j * 29, 'title_key' + j, { maxChars: 44, scale: 2.5, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21));
     this.keyNote = new PixelLabel(this, 480, 470, 'title_keyn', { maxChars: 64, scale: 1.75, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.campaignCards = CAMPAIGN_ACTS.map((act, i) => {
@@ -8333,7 +8357,7 @@ class TitleScene extends Phaser.Scene {
       const N = this.keyRows.length, top = clamp(this.subSel - 5, 0, N - this.keyLbls.length);
       this.keyLbls.forEach((o, j) => {
         const i = top + j, [name, label] = this.keyRows[i], sel = i === this.subSel;
-        const keys = BINDS[name] ? BINDS[name].map(keyLabel).join(' / ') : '';
+        const keys = BINDS[name] ? BINDS[name].map(keyLabel).join(' / ') : name.startsWith('pad.') ? padLabel(name.slice(4)) : '';
         const text = this.capture === name ? label.padEnd(24) + '...' : keys ? label.padEnd(24) + keys : label;
         o.setText(sel ? '> ' + text : text).setStyle({ color: this.capture === name ? '#76e8ff' : sel ? '#ffe46a' : '#8f9bab' });
       });
@@ -8356,7 +8380,9 @@ class TitleScene extends Phaser.Scene {
         const d = { up: -1, down: 1, pgup: -10, pgdn: 10 }[a];
         this.subSel = Math.abs(d) > 1 ? clamp(this.subSel + d, 0, N - 1) : (this.subSel + d + N) % N; Sfx.swap();
       } else if (a === 'ok' && row === 'reset') {
-        BINDS = loadBinds.defaults(); this.bindsChanged('ALL KEYS ARE BACK ON THEIR DEFAULTS');
+        BINDS = loadBinds.defaults(); PAD_BINDS = padDefaults(); this.bindsChanged('ALL KEYS AND PAD BUTTONS ARE BACK ON THEIR DEFAULTS');
+      } else if (a === 'ok' && row.startsWith('pad.')) {
+        this.capture = row; this.keyNote.setText('PRESS A PAD BUTTON FOR ' + padRow(row.slice(4)) + '   ESC KEEPS ' + padLabel(row.slice(4))); Sfx.ui();
       } else if (a === 'ok') { this.capture = row; this.keyNote.setText('PRESS A KEY FOR ' + bindRow(row) + '   ESC KEEPS ' + BINDS[row].map(keyLabel).join(' / ')); Sfx.ui(); }
       this.refreshSub();
       return;
@@ -8407,6 +8433,10 @@ class TitleScene extends Phaser.Scene {
   }
   keysKey(ev) {                                    // true when the KEYS page used the key, so onTitleKey skips it
     if (!this.capture) return false;
+    if (this.capture.startsWith('pad.')) {           // waiting for a pad button: Esc keeps the old one, other keys do nothing
+      if (ev.code === 'Escape') { const id = this.capture.slice(4); this.capture = null; Sfx.ui(); this.keyNote.setText(padRow(id) + ' STAYS ON ' + padLabel(id)); this.refreshSub(); }
+      return true;
+    }
     const name = this.capture, code = ev.code;
     this.capture = null;
     if (!code || code === 'Escape') { Sfx.ui(); this.keyNote.setText(bindRow(name) + ' STAYS ON ' + bindLabel(name)); this.refreshSub(); return true; }
@@ -8419,6 +8449,13 @@ class TitleScene extends Phaser.Scene {
     }
     this.bindsChanged(note);
     return true;
+  }
+  padBind(b) {                                     // the pad button pressed for the row waiting on one; it swaps with the action that had it
+    const id = this.capture.slice(4), old = PAD_BINDS[id], other = Object.keys(PAD_BINDS).find(k => k !== id && PAD_BINDS[k] === b);
+    this.capture = null;
+    if (b === old) { Sfx.ui(); this.keyNote.setText(padRow(id) + ' STAYS ON ' + PAD_NAMES[b]); this.refreshSub(); return; }
+    PAD_BINDS = { ...PAD_BINDS, [id]: b, ...(other ? { [other]: old } : {}) };
+    this.bindsChanged(padRow(id) + ' ON ' + PAD_NAMES[b] + (other ? '   ' + padRow(other) + ' MOVED TO ' + PAD_NAMES[old] : ''));
   }
   bindsChanged(note) { saveBinds(); bindTexts(); BUS.emit('binds'); Sfx.ui(); this.keyNote.setText(note); this.refreshSub(); }
   menuPick(i) {
@@ -8534,7 +8571,9 @@ class TitleScene extends Phaser.Scene {
     if (this.rotateNote) this.rotateNote.setVisible(this.coarse && window.innerHeight > window.innerWidth);
     if (this.menuItems && !this.started && !LAB_PANEL.isOpen()) {        // the pad drives the menu and its pages
       const my = PAD.menuY(), mx = PAD.menuX();
-      if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
+      const padWait = this.sub === 'keys' && !!this.capture?.startsWith('pad.'), pressed = padWait ? PAD_NAMES.findIndex((_, b) => PAD.jd(b)) : -1;
+      if (padWait) { if (pressed >= 0) this.padBind(pressed); }         // the KEYS page is waiting on a pad button
+      else if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
       else { if (my) { const n = this.menuItems.length; this.menuSel = (this.menuSel + my + n) % n; Sfx.swap(); } if (mx) this.stepDiff(mx); if (PAD.jd(3)) this.menuPick(1); else if (PAD.jd(0) || PAD.jd(9)) this.menuPick(this.menuSel); }
     }
     if (this.menuItems) this.drawMenu(time);
@@ -9462,7 +9501,7 @@ class GameScene extends Phaser.Scene {
     if (this.jd.R && this.mode.confirmRestart && this.state === 'play' && this.time.now >= this.restartArmUntil) {   // R sits among the combat keys: mid-run, the first press only asks
       this.restartArmUntil = this.time.now + RESTART_CONFIRM_MS; Sfx.ui();
     } else if ((this.jd.R && (!this.mode.confirmRestart || this.state === 'play' || this.overShown)) || (this.overShown && (this.jd.ENTER || PAD.jd(0) || PAD.jd(9)))) { this.restartRun(); return; }   // not during the death/win beat: the records land with the results
-    if ((this.jd.ESC || this.jd.P || PAD.jd(9)) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
+    if ((this.jd.ESC || this.jd.P || PAD.hit('pause')) && this.state === 'play') { this.pauseGame(); return; }        // Esc / P / Start: pause menu (resume, restart, quit)
     else if (this.overShown && (this.jd.ESC || PAD.jd(1))) { this.quitToTitle(); return; }
     if (this.jd.J) this.aimMode = 'keys';
 
@@ -9538,8 +9577,8 @@ class GameScene extends Phaser.Scene {
   updatePlayer(dt, now) {
     const T = TUNE, p = this.player, b = p.body, K = this.keys;
     const left = K.A.isDown || K.LEFT.isDown || PAD.ax[0] < -0.35 || PAD.down(14), right = K.D.isDown || K.RIGHT.isDown || PAD.ax[0] > 0.35 || PAD.down(15), down = K.S.isDown || K.DOWN.isDown || PAD.ax[1] > 0.6;
-    const jumpHeld = K.SPACE.isDown || K.W.isDown || K.UP.isDown || PAD.down(0);
-    const jumpPressed = this.jd.SPACE || this.jd.W || this.jd.UP || PAD.jd(0);
+    const jumpHeld = K.SPACE.isDown || K.W.isDown || K.UP.isDown || PAD.held('jump');
+    const jumpPressed = this.jd.SPACE || this.jd.W || this.jd.UP || PAD.hit('jump');
     const onGround = b.blocked.down || b.touching.down;
     if (onGround) { this.lastGround = now; this.wallT = -1e9; this.wallLockUntil = 0; }
     if (jumpPressed) this.jumpBuffer = now;
@@ -9603,7 +9642,7 @@ class GameScene extends Phaser.Scene {
     // dash (Shift): a short burst in the held direction with i-frames; one in the air until you land
     if (onGround) this.dashAir = true;
     const up = K.W.isDown || K.UP.isDown || PAD.ax[1] < -0.6;
-    if ((this.jd.SHIFT || PAD.jd(1)) && now >= this.dashReady && (onGround || this.dashAir)) this.startDash(now, dir, (down ? 1 : 0) - (up ? 1 : 0), onGround);
+    if ((this.jd.SHIFT || PAD.hit('dash')) && now >= this.dashReady && (onGround || this.dashAir)) this.startDash(now, dir, (down ? 1 : 0) - (up ? 1 : 0), onGround);
     if (now < this.dashUntil) {
       b.setVelocity(this.dashVx, this.dashVy);
       if ((this.dashGhostT -= dt) <= 0) { this.dashGhostT = 0.022; this.spawnLight(this.pv.x, this.pv.y - 12, 'player', 0x46e6ff, 1, 1, 0.55, 0.2, this.pFrame, this.facing < 0); }
@@ -9687,17 +9726,17 @@ class GameScene extends Phaser.Scene {
     if (this.jd.O) this.setWeapon(27);
     if (this.jd.Y) this.setWeapon(28);
     if (this.jd.H) this.setWeapon(29);
-    if (PAD.jd(12)) this.cycleWeapon(-1);
-    if (PAD.jd(13)) this.cycleWeapon(1);
-    if (this.jd.C || PAD.jd(3)) { if (this.hook && this.hook.state === 'zip') this.endHook(); else this.fireHook(now); }
-    if (PAD.jd(2)) this.kickQueued = true;
-    if (PAD.jd(6)) this.mineQueued = true;
+    if (PAD.hit('prev')) this.cycleWeapon(-1);
+    if (PAD.hit('next')) this.cycleWeapon(1);
+    if (this.jd.C || PAD.hit('hook')) { if (this.hook && this.hook.state === 'zip') this.endHook(); else this.fireHook(now); }
+    if (PAD.hit('kick')) this.kickQueued = true;
+    if (PAD.hit('mine')) this.mineQueued = true;
     if ((this.jd.F || this.kickQueued) && now >= this.kickReady) this.bootKick(now);
     this.kickQueued = false;
     if ((this.jd.G || this.mineQueued) && now >= this.mineReady) this.throwMine(now);
     this.mineQueued = false;
-    if (this.jd.T || PAD.jd(5)) this.deploySentry(now);
-    const tab = (K.TAB.isDown || PAD.down(4)) && this.state === 'play';   // hold Tab (or LB): weapon wheel, time crawls
+    if (this.jd.T || PAD.hit('sentry')) this.deploySentry(now);
+    const tab = (K.TAB.isDown || PAD.held('wheel')) && this.state === 'play';   // hold Tab (or LB): weapon wheel, time crawls
     if (tab && !this.wheelOn) { this.wheelOn = true; this.wheelSel = this.weapon; Sfx.ui(); }
     if (this.wheelOn) {
       const wp = this.input.activePointer, wx = wp.x - VIEW_W / 2, wy = wp.y - (VIEW_H / 2 + 10);
@@ -9720,7 +9759,7 @@ class GameScene extends Phaser.Scene {
       if (this.jd.E) this.cycleWeapon(1);
     }
     const jammed = now < this.jamUntil;
-    const ptr = this.input.activePointer, trig = !this.wheelOn && !jammed && ((ptr.isDown && ptr.leftButtonDown()) || K.J.isDown || (PAD.b[7] || 0) > 0.3), mini = WEAPONS[this.weapon].id === 'mini';
+    const ptr = this.input.activePointer, trig = !this.wheelOn && !jammed && ((ptr.isDown && ptr.leftButtonDown()) || K.J.isDown || PAD.pull('fire') > 0.3), mini = WEAPONS[this.weapon].id === 'mini';
     if (jammed && Math.random() < 0.3) this.fxSparks(this.shoulder.x + Math.cos(this.aim) * 14, this.shoulder.y + Math.sin(this.aim) * 14, 1, 0, Math.PI * 2, [30, 90]);
     this.spin = clamp(this.spin + (mini && trig ? dt / TUNE.MINI.spinUp : -dt / 0.7), 0, 1);   // minigun barrels spin up before they bite
     const wid = WEAPONS[this.weapon].id;
@@ -25327,7 +25366,7 @@ class HudScene extends Phaser.Scene {
       for (const [i, slot] of slots.entries()) {
         const card = this.unlockCards[i], weapon = WEAPONS[slot], x = 480 + (i - (slots.length - 1) / 2) * 292;
         const key = SLOT_KEYS[slot]?.trim(), equipped = slot === gs.weapon;
-        const action = equipped ? 'EQUIPPED' : PAD.on && PAD.active ? 'HOLD LB FOR WHEEL' :
+        const action = equipped ? 'EQUIPPED' : PAD.on && PAD.active ? 'HOLD ' + padLabel('wheel') + ' FOR WHEEL' :
           key ? (key === '<' ? 'BKSP' : key) + ' TO EQUIP' : 'HOLD TAB FOR WHEEL';
         g.fillStyle(0x071118, 0.94).fillRect(x - 140, 437, 280, 54);
         g.fillStyle(0x76e8ff, 1).fillRect(x - 140, 437, 280, 2);
