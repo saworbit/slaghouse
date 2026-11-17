@@ -202,7 +202,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   - `AT.check()` (`dev/playtest/tactics.js`, in the headless suite) checks these in small fights on a fixed seed. Over
     Brutal seeds 1 to 80 the campaign bot won 73 against `main`'s 74, and its losses are the same recurring kinds:
     foes the bot can't find in the Meltdown and Wrecking Yard, and early deaths. Normal seeds 1 to 20 all win, as on
-    `main`. All eight of CI's Brutal seeds and all four Normal seeds win.
+    `main`. All eight of CI's Brutal seeds and all eight of its Normal seeds win.
 - `node dev/playtest/run.mjs`, and CI's Headless play-test job, now play eight Normal campaigns and pass when seven
   win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
   the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed
