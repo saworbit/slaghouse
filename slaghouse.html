@@ -236,9 +236,10 @@
                           it rockets about for 1.2-1.8 s, ricocheting and ramming (25 dmg), then explodes
                           (radius 58, 70->20 dmg).
     Hanging lamps ....... shoot the lamp or its chain: it drops, crushes whatever is under it (80) and goes out.
-    Breakables .......... twenty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
-                          each. Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw blades,
-                          the hose, the wrecking ball and every melee, cone and burst weapon that hits drums wear
+    Breakables .......... thirty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
+                          each of the first twenty, and the Lab's Breakables Bay one of all thirty (the last ten on
+                          its upper deck). Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw
+                          blades, the hose, the wrecking ball and every melee, cone and burst weapon that hits drums wear
                           them down; fire vents, the slag tide, Torchers and Thundercloud strikes cook off what
                           burns, and the Bulldozer's plow and the Foreman's slam break them. The tractor, the scrap
                           vacuum, the Lugger and the Foreman's magnet only move loose things and leave props be.
@@ -265,11 +266,33 @@
       Window 12 ......... cracks, then shatters: glass rains 18 on whoever is below.
       PA horn 12 ........ a feedback shriek: stuns and shoves foes in 104 px and breaks any glass in earshot.
       Water tank 40 ..... leaks where shot; bursts in a wave (shoves, puts fires out) and floods the floor for 12 s.
-                          Water conducts: a fuse box, capacitor or terminal going off near it, a live rail under
-                          it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker link, Arc Pylon,
-                          Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle (10 + stun a
-                          tick to foes in it, 5 to you).
-      Fire cooks off the propane, oil, ammo and flares: a flame jet, fire puddle, burning foe or flare near them.
+                          Water conducts: a fuse box, capacitor, terminal, server rack or transformer going off near
+                          it, a live rail under it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker
+                          link, Arc Pylon, Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle
+                          (10 + stun a tick to foes in it, 5 to you).
+      Chain hoist 40 .... an engine block on a chain. Broken, the chain lets go a link at a time for 0.6 s (creaks,
+                          its shadow darkening on the floor), then it drops; shoot the chain and it drops at once:
+                          120 to whatever it lands on (30 to you), 30 around.
+      Server rack 34 .... sparks when hit; broken, it topples the way it was hit (35 where its top lands) and lies
+                          arcing at the nearest foe in 76 px every 0.12-0.24 s (7 + stun) for 1.4 s.
+      Jukebox 30 ........ a hit skips a note; broken, one last chord, then 5 records fly out spinning (18 each, each
+                          foe once), ricochet twice and shatter.
+      Hydrant 30 ........ shears off: a geyser up to 112 px for 3 s throws foes up (3 each time) and you (ride it like
+                          a jump pad), puts out fire in 72 px and floods the floor.
+      Gas main 18 ....... the valve shears: a 78 px burning jet dips to the floor and back for 4 s (ignites, 5 a tick,
+                          sets the floor it licks alight), then the line goes up: radius 46, 42->12, burning.
+      Sand hopper 26 .... pours for 3 s: the sand heaps up to 72 px wide for 18 s, halves the pace of foes wading
+                          through it and smothers fire in it (and under the stream).
+      Chem vat 24 ....... a wave of acid runs 136 px both ways along the floor till a ledge or wall: 14, a shove and
+                          5 s corroded to each foe it rolls over, 8 to you; it leaves acid pools behind.
+      Transformer 36 .... hits arc off it; broken, it hums 0.5 s, then zaps every foe in 120 px (34 + stun, machines
+                          longer), electrifies water in 170 px and blacks out the lights in 200 px for 4 s.
+      Paint cans 14 ..... burst pink, cyan and yellow over the floor, walls and foes in 64 px (painted 7 s, 10%
+                          slower); the slicks slow foes 20% for 12 s. Cooked off, they leave the floor burning.
+      Sprinkler 6 ....... shot, or fire within 40 px anywhere under it: it rains on everything below for 3.5 s,
+                          putting fires and burning foes out, and leaves water on the floor.
+      Fire cooks off the propane, oil, ammo, flares, paint cans and gas main: a flame jet, fire puddle, burning foe or
+                          flare near them.
       In the campaign's BLACKOUT, SLAG RAIN and GRAVITY LOSS, your hits from fire puddles, live puddles, the propane
                           jet, boiler steam and the ladle's pour share one interval (hazardContactMs: 500 / 425 / 350 ms).
     Rampage ............. hitting S style rank: 6 s of 40% faster fire (sentry too), +25% damage, afterimages,
@@ -1597,10 +1620,19 @@ const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind =
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
-// Twenty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
+// Thirty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
 // backdrop, 'hang' dangles from whatever is overhead and swings when hit); what it's made of (the chips and the sound a
 // hit makes); the methods that run on a hit, on breaking and while it goes off; how long fire takes to cook it off
 // (cook); its light ([tint, scale x, scale y, x, y, alpha] from its centre) and the callout when it kills something.
+// Where the last ten want to go (PROP_SPOTS cells; the Lab's Breakables Bay has one of each):
+//   hoist:       hang it 2-5 tiles over floor foes walk on, from a solid tile or girder; the block drops straight down.
+//   server, jukebox, vat, paint: floor props; the vat's wave runs along the floor it stands on, so give it a few
+//                open tiles either side. The jukebox flings its records up and out: keep it out of tight corners.
+//   hydrant:     floor, with open air above it (the geyser climbs up to 7 tiles and throws whoever is in it).
+//   gasline:     wall, low over a floor, with 4-5 open tiles on the side it faces (the facing sets the jet's side).
+//   hopper:      wall, with floor within 10 tiles below its chute (that's where the sand heaps up).
+//   transformer: wall; its discharge reaches 120 px and its blackout 200, so put it where lights and foes gather.
+//   sprinkler:   wall, high, over floor within 10 tiles; fire under it (within 2-3 tiles either side) sets it off.
 const PROPS = {
   neon:      { hp: 20, mount: 'wall',  mat: 'glass', hit: 'hitNeon', brk: 'breakNeon', live: 'liveNeon', light: [0xff3aa0, 2.6, 1.0, 0, 0, 0.55], call: 'SIGN OFF!' },
   tube:      { hp: 6,  mount: 'hang',  mat: 'glass', brk: 'breakTube', live: 'liveTube', light: [0xc8ecff, 1.8, 0.7, 0, 2, 0.5], cone: [0xd8f2ff, 1.3, 1.5, 0.15], call: 'LIGHTS OUT!' },
@@ -1622,12 +1654,26 @@ const PROPS = {
   window:    { hp: 12, mount: 'wall',  mat: 'glass', hit: 'hitWindow', brk: 'breakWindow', call: 'GLASSED!' },
   horn:      { hp: 12, mount: 'wall',  mat: 'metal', brk: 'breakHorn', light: [0xff2a14, 0.45, 0.45, -6, -4, 0.8], call: 'FEEDBACK!' },
   water:     { hp: 40, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakWater', call: 'WASHED OUT!' },
+  // ---- expansion: props ----
+  hoist:       { hp: 40, mount: 'hang',  mat: 'metal', brk: 'breakHoist', live: 'liveHoist', call: 'DEAD WEIGHT!' },
+  server:      { hp: 34, mount: 'floor', mat: 'metal', hit: 'hitServer', brk: 'breakServer', live: 'liveServer', light: [0x46f088, 0.7, 1.3, 0, 0, 0.2], call: 'CRASHED!' },
+  jukebox:     { hp: 30, mount: 'floor', mat: 'glass', hit: 'hitJukebox', brk: 'breakJukebox', live: 'liveJukebox', light: [0xff8a3a, 1.3, 1.4, 0, -5, 0.38], call: 'NOW PLAYING!' },
+  hydrant:     { hp: 30, mount: 'floor', mat: 'metal', brk: 'breakHydrant', live: 'liveHydrant', call: 'HOSED!' },
+  gasline:     { hp: 18, mount: 'wall',  mat: 'metal', brk: 'breakGasline', live: 'liveGasline', cook: 1.6, call: 'GAS LEAK!' },
+  hopper:      { hp: 26, mount: 'wall',  mat: 'metal', brk: 'breakHopper', live: 'liveHopper', call: 'SANDBAGGED!' },
+  vat:         { hp: 24, mount: 'floor', mat: 'glass', brk: 'breakVat', live: 'liveVat', light: [0x7dff4a, 0.9, 1.3, 0, 1, 0.3], call: 'DISSOLVED!' },
+  transformer: { hp: 36, mount: 'wall',  mat: 'metal', hit: 'hitTransformer', brk: 'breakTransformer', live: 'liveTransformer', light: [0x80c8ff, 0.5, 0.5, -2, -9, 0.4], call: 'GRID DOWN!' },
+  paint:       { hp: 14, mount: 'floor', mat: 'metal', brk: 'breakPaint', cook: 2.4, call: 'FRESH COAT!' },
+  sprinkler:   { hp: 6,  mount: 'wall',  mat: 'metal', brk: 'breakSprinkler', live: 'liveSprinkler', call: 'DRENCHED!' },
 };
 const PROP_BLAST = {                                               // the props that go bang
   propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70, scenery: true },
   boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60, scenery: true },
   small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18, scenery: true },
   slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30, scenery: true },
+  // ---- expansion: props ----
+  gasline:     { radius: 46, maxDamage: 42, minDamage: 12, selfDamage: 14, push: 320, maxRise: 400, burn: 2.5, tileDamage: 34, scenery: true },
+  transformer: { radius: 52, maxDamage: 30, minDamage: 10, selfDamage: 10, push: 280, maxRise: 360, tileDamage: 22, scenery: true, style: 'arc' },
 };
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };
@@ -4782,7 +4828,7 @@ function drawDrone(ctx, sway, charge) {          // 18x16 hovering eye-sentry
 }
 
 // ---- destructible props: art ------------------------------------------------------
-// Twenty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
+// Thirty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
 // outline. Each has its intact frame, any frames it needs while it's hurt or going off, and a wreck ('x') that stays
 // put until the next wave restocks it. PROP_ART[kind] = { w, h, fr: frame names (the first is the intact one), draw }.
 const PRR = {
@@ -5152,6 +5198,216 @@ function drawWaterTank(c, st) {                                   // 22x26 water
   if (st === 'hit') { R(c, '#02060c', 6, 13); R(c, '#8ce0ff', 6, 14, 1, 2); R(c, '#02060c', 14, 6); R(c, '#8ce0ff', 14, 7); R(c, B[2], 12, 3, 2, 1); }
   if (x) { prTear(c, 0, 22, 10, 4, 10, '#0c1e36'); R(c, '#4ac8f8', 6, 12, 8, 1); prScorch(c, 0, 8, 22, 10, 10, 2); }
 }
+// ---- expansion: props ----
+const PRT = {                                                     // the last ten's own ramps
+  trf: ['#141a22', '#1e2630', '#2c3846', '#3e4c5c', '#546474', '#6e8092', '#90a2b4', '#b8c8d8'],   // transformer grey
+  snd: ['#3a2a14', '#5e4422', '#8a6834', '#b08a50', '#d0aa6a', '#e8c88a', '#f8e4b0'],              // sand
+  pnt: [['#4a0a2a', '#8a1450', '#d0307e', '#ff6ab4', '#ffb4dc'], ['#05303a', '#0a6a78', '#18b0c4', '#5ae8f4', '#b8fcff'],
+        ['#4a3804', '#9a7408', '#e8b818', '#ffe050', '#fff4a8']],                                  // paint: pink, cyan, yellow
+};
+const PAINT_COLS = [0xff3a9a, 0x2ad8ec, 0xffd21a];               // what the paint cans splash (PRT.pnt's middles, brighter)
+function drawHoist(c, st) {                                       // 22x18 engine block slung from a crane hook; 'x' is what's left of it on the floor
+  const Rr = PRR.red;
+  if (st === 'x') {
+    R(c, PRR.blk[2], 0, 17, 22, 1); R(c, PRR.blk[4], 3, 17, 5, 1); R(c, PRR.blk[3], 15, 17, 4, 1);                     // oil spreading out from under it
+    R(c, IRN[3], 1, 11, 10, 6); R(c, IRN[5], 1, 11, 9, 1); R(c, IRN[4], 1, 12, 1, 5); R(c, IRN[1], 10, 12, 1, 5);         // the front half, still upright
+    R(c, Rr[3], 2, 9, 8, 2); R(c, Rr[5], 2, 9, 7, 1); R(c, IRN[1], 1, 11, 10, 1); R(c, IRN[2], 2, 15, 8, 1);
+    for (const x of [4, 7]) { R(c, IRN[2], x, 13, 1, 2); R(c, IRN[4], x - 1, 13, 1, 2); }
+    for (const [x, y] of [[11, 10], [11, 12], [10, 14], [11, 16]]) R(c, IRN[0], x, y, 1, 2);                              // the torn face
+    R(c, IRN[3], 12, 13, 9, 4); R(c, IRN[5], 12, 13, 8, 1); R(c, IRN[1], 20, 14, 1, 3); R(c, Rr[2], 13, 12, 5, 1); R(c, Rr[4], 13, 12, 2, 1);   // the back half, on its side
+    R(c, IRN[2], 16, 14, 1, 3); R(c, PRR.brs[5], 5, 14); R(c, PRR.brs[4], 14, 15); R(c, IRN[6], 17, 11); R(c, IRN[6], 7, 8);   // core plugs and bolts
+    blob(c, 1.5, 15, 1.6, 1.6, IRN.slice(2), 2, 0.1);                                                                   // the pulley, knocked loose
+    prScorch(c, 0, 8, 22, 10, 22, 5);
+    return;
+  }
+  R(c, IRN[6], 10, 0, 2, 1); R(c, IRN[7], 10, 0); R(c, IRN[5], 9, 1, 1, 2); R(c, IRN[3], 12, 1, 1, 2); R(c, IRN[2], 10, 3, 2, 1);   // the ring it hangs by
+  R(c, PRR.yel[4], 10, 4, 2, 2); R(c, PRR.yel[6], 10, 4); R(c, '#15161a', 11, 5);                                      // the hook block
+  for (let i = 0; i < 5; i++) { R(c, i % 2 ? IRN[4] : IRN[7], 9 - i, 6 + (i >> 1)); R(c, i % 2 ? IRN[3] : IRN[6], 12 + i, 6 + (i >> 1)); }   // sling chains
+  R(c, IRN[6], 4, 8); R(c, IRN[5], 17, 8);                                                                             // lifting eyes
+  R(c, Rr[4], 5, 8, 12, 2); R(c, Rr[6], 5, 8, 11, 1); R(c, Rr[7], 5, 8, 4, 1); R(c, Rr[2], 5, 9, 12, 1); R(c, Rr[3], 16, 8);   // red rocker cover
+  for (const x of [6, 11, 15]) R(c, IRN[6], x, 9);
+  R(c, IRN[1], 4, 10, 14, 1);                                                                                          // gasket
+  R(c, IRN[4], 4, 11, 14, 2); R(c, IRN[6], 4, 11, 13, 1); for (const x of [6, 9, 12, 15]) R(c, IRN[1], x, 12, 2, 1);     // head and its ports
+  R(c, IRN[3], 3, 13, 16, 3); R(c, IRN[5], 4, 13, 14, 1); R(c, IRN[5], 3, 13, 1, 3); R(c, IRN[1], 18, 13, 1, 3);         // block
+  for (const x of [7, 11, 15]) { R(c, IRN[2], x, 14, 1, 2); R(c, IRN[4], x - 1, 14, 1, 2); }
+  R(c, PRR.brs[5], 5, 15); R(c, PRR.brs[5], 9, 15); R(c, PRR.brs[3], 13, 15);                                         // core plugs
+  R(c, IRN[2], 6, 16, 10, 1); R(c, IRN[4], 6, 16, 4, 1); R(c, IRN[1], 7, 17, 8, 1);                                    // sump
+  R(c, IRN[3], 19, 11, 2, 6); R(c, IRN[5], 19, 11, 1, 6); R(c, IRN[1], 21, 12, 1, 4);                                  // bell housing
+  blob(c, 2, 14, 2.2, 2.2, IRN.slice(2), 2, 0.1); R(c, IRN[0], 2, 14); R(c, IRN[7], 1, 13);                            // crank pulley
+  if (st === 'hit') { prLine(c, IRN[0], 12, 13, 15, 16); R(c, IRN[6], 13, 13); R(c, Rr[1], 8, 8, 2, 1); R(c, Rr[1], 13, 9); R(c, PRR.blk[1], 14, 16, 1, 2); R(c, PRR.blk[4], 14, 17); }
+}
+function drawServer(c, st) {                                      // 14x28 server rack: five units of blinking LEDs; 'ok0'-'ok2' blink
+  const f = st === 'ok1' ? 1 : st === 'ok2' ? 2 : 0, x = st === 'x', hit = st === 'hit', LED = ['#5cff7a', '#ffb040', '#46a0ff'];
+  R(c, IRN[1], 0, 0, 14, 28); R(c, IRN[5], 0, 0, 14, 1); R(c, IRN[4], 0, 1, 1, 24); R(c, IRN[0], 13, 1, 1, 24); R(c, IRN[3], 1, 1, 12, 1);   // the cabinet
+  for (let i = 2; i < 12; i += 2) R(c, IRN[0], i, 2, 1, 2);                                                            // vent slots
+  for (let k = 0; k < 5; k++) {
+    const y = 5 + k * 4, dead = (hit && k === 2) || (x && k !== 1);
+    R(c, IRN[3], 1, y, 12, 3); R(c, IRN[5], 1, y, 12, 1); R(c, IRN[2], 1, y + 2, 12, 1);
+    for (let d = 0; d < 3; d++) { R(c, IRN[1], 2 + d * 2, y + 1); R(c, IRN[4], 3 + d * 2, y + 1); }                      // drive bays
+    for (let i = 0; i < 3; i++) { const on = !dead && (k * 3 + i * 5 + f * 7) % 4 !== 0; R(c, on ? LED[(k + i + f) % 3] : '#16201a', 9 + i, y + 1); }
+    if (dead && x) { R(c, '#05060a', 2 + (k % 2) * 4, y + 1, 4, 2); R(c, IRN[6], 2 + (k % 2) * 4, y + 2, 2, 1); }
+  }
+  R(c, IRN[6], 12, 12, 1, 4);                                                                                          // door handle
+  R(c, IRN[2], 0, 25, 14, 2); R(c, IRN[4], 0, 25, 14, 1); R(c, IRN[0], 1, 27, 3, 1); R(c, IRN[0], 10, 27, 3, 1);         // plinth and feet
+  if (hit) { R(c, IRN[0], 7, 10, 3, 1); R(c, IRN[6], 7, 11, 3, 1); prLine(c, '#e8b422', 4, 18, 3, 22); prLine(c, '#c83020', 6, 18, 6, 21); R(c, '#ffe080', 3, 23); }
+  if (x) {
+    R(c, '#ff3020', 9, 10);
+    prLine(c, '#e8b422', 3, 15, 2, 21); prLine(c, '#c83020', 7, 15, 8, 20); prLine(c, '#3a80e0', 10, 19, 11, 24); prLine(c, IRN[4], 5, 23, 4, 26);   // cables hanging out
+    R(c, IRN[0], 0, 8, 1, 6); R(c, IRN[5], 13, 17, 1, 3);
+    prScorch(c, 0, 0, 14, 28, 36, 13);
+  }
+}
+function drawJukebox(c, st) {                                     // 20x26 jukebox: a neon arch over the record deck, wood pillars, chrome foot; 'disc' is one of its records
+  if (st === 'disc') {                                            // a record, centred in the frame
+    for (let y = 8; y < 18; y++) for (let xx = 5; xx < 15; xx++) {
+      const r = Math.hypot(xx + 0.5 - 10, y + 0.5 - 13); if (r > 4.6) continue;
+      R(c, r < 0.8 ? '#06070a' : r < 1.8 ? '#e0402a' : Math.abs(r - 3.3) < 0.45 || Math.abs(r - 2.4) < 0.35 ? '#34343e' : '#121216', xx, y);
+    }
+    R(c, '#9a9aaa', 7, 10); R(c, '#5a5a68', 8, 9); R(c, '#5a5a68', 6, 11); R(c, '#ff8a6a', 9, 12);
+    return;
+  }
+  const x = st === 'x', W = PRR.wht, C = PRR.cop, ARCH = x ? ['#3a1e2a', '#3a2418', '#38301a'] : ['#ff5ac0', '#ff8a3a', '#ffd23a'];
+  for (let y = 0; y < 11; y++) for (let xx = 0; xx < 20; xx++) {
+    const dx = xx + 0.5 - 10, dy = y + 0.5 - 10.5, r = Math.hypot(dx, dy);
+    if (r > 9.9 || dy > 0) continue;
+    if (r > 8.7) R(c, dx < -2 && dy < -3 ? W[6] : dx > 4 ? W[2] : W[4], xx, y);                                         // chrome rim
+    else if (r > 6.5) { const a = Math.atan2(-dy, dx) / Math.PI; R(c, r > 7.9 && !x ? '#fff0f8' : ARCH[Math.min(2, Math.floor(Math.abs(a - 0.5) * 5))], xx, y); }   // neon tube: pink at the crown to yellow at the sides
+    else R(c, (Math.floor(xx / 2) + Math.floor(y / 2)) % 2 ? '#2e1022' : '#1a0812', xx, y);                              // the grille behind
+  }
+  R(c, C[3], 1, 10, 18, 14);
+  for (const px of [1, 16]) { R(c, C[px > 8 ? 2 : 5], px, 10, 3, 14); R(c, C[px > 8 ? 1 : 6], px, 10, 1, 14); }         // wood pillars
+  for (let y = 11; y < 23; y++) { R(c, ARCH[(y >> 1) % 3], 2, y); R(c, ARCH[((y >> 1) + 1) % 3], 17, y); }              // tubes in the pillars
+  R(c, W[2], 4, 11, 12, 7); R(c, W[5], 4, 11, 12, 1); R(c, '#08090c', 5, 12, 10, 5);                                    // the record window
+  if (!x) {
+    prEll(c, 9.5, 14.6, 4, 1.6, '#16161c'); prEll(c, 9.5, 14.6, 2.6, 1, '#2a2a34'); R(c, '#d83a2a', 9, 14, 2, 1);
+    R(c, W[6], 13, 12, 1, 2); R(c, W[5], 12, 13); R(c, 'rgba(210,240,255,0.35)', 5, 12, 3, 1); R(c, 'rgba(210,240,255,0.2)', 5, 13, 1, 2);
+  } else { R(c, '#8a9aa6', 5, 12, 1, 2); R(c, '#c8d8e0', 14, 15); R(c, '#6a7a86', 11, 12); R(c, '#2a2a34', 6, 15, 4, 1); }
+  for (let i = 0; i < 6; i++) R(c, x ? '#3a3a3a' : i % 2 ? '#ffffff' : '#ffe0a0', 5 + i * 2, 18); R(c, C[1], 4, 19, 12, 1);   // selector keys
+  R(c, '#1a1008', 4, 20, 12, 3); for (let y = 20; y < 23; y++) for (let i = 0; i < 12; i += 2) R(c, C[2], 4 + i + (y % 2), y);   // speaker grille
+  R(c, W[3], 0, 23, 20, 2); R(c, W[6], 0, 23, 20, 1); R(c, W[1], 1, 25, 4, 1); R(c, W[1], 15, 25, 4, 1);                 // chrome foot
+  if (st === 'hit') { prCracks(c, 8, 6, 5, 4, 7, '#fff0f8', '#7a2a4a'); R(c, '#3a1e2a', 17, 15, 1, 3); }
+  if (x) { prCracks(c, 11, 5, 6, 5, 9, '#6a4a5a', '#1a0812'); prScorch(c, 0, 0, 20, 26, 60, 9); R(c, '#05060a', 6, 21, 4, 2); }
+}
+function drawHydrant(c, st) {                                     // 10x14 fire hydrant: bonnet, side caps and a brass pumper nozzle
+  const Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[2], 0, 13, 10, 1); R(c, IRN[4], 0, 13, 4, 1); R(c, IRN[6], 1, 13); R(c, IRN[6], 8, 13);                     // base bolted to the floor
+  R(c, Rr[3], 1, 12, 8, 1); R(c, Rr[5], 1, 12, 3, 1);                                                                  // flange
+  if (st === 'x') {
+    prCyl(c, 5, 9, 12, 3, Rr, 0.04);
+    R(c, '#05080c', 3, 9, 4, 1); R(c, '#1c4a6a', 4, 10, 2, 1); for (const [xx, h] of [[2, 1], [3, 2], [5, 1], [7, 2]]) R(c, Rr[xx < 5 ? 5 : 3], xx, 9 - h, 1, h);   // sheared off, a jagged lip
+    R(c, '#4ac8f8', 2, 11); R(c, '#8ce0ff', 7, 10);
+    return;
+  }
+  prCyl(c, 5, 4, 12, 3, Rr, 0.04);                                                                                     // barrel
+  blob(c, 5, 4.2, 3.4, 3.2, Rr, 2, 0.08, (xx, y) => y < 4);                                                            // bonnet
+  R(c, Rr[2], 1, 4, 8, 1); R(c, Rr[6], 1, 4, 2, 1);
+  R(c, B[5], 4, 0, 2, 1); R(c, B[6], 4, 0); R(c, B[2], 4, 1, 2, 1);                                                    // operating nut
+  R(c, Rr[4], 0, 6, 2, 2); R(c, Rr[6], 0, 6, 2, 1); R(c, B[5], 0, 6, 1, 2); R(c, Rr[3], 8, 6, 2, 2); R(c, B[3], 9, 6, 1, 2);   // side caps
+  blob(c, 5, 8.5, 1.9, 1.9, B, 2, 0.1); R(c, B[1], 5, 9); R(c, B[7], 4, 7);                                             // pumper nozzle
+  prLine(c, IRN[5], 1, 8, 2, 10);                                                                                      // cap chain
+}
+function drawGasline(c, st) {                                     // 20x14 gas main: a yellow line through a shut-off valve and its handwheel to a flanged nozzle (facing right)
+  const Y = PRR.yel, Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[3], 0, 3, 3, 9); R(c, IRN[5], 0, 3, 1, 9); R(c, IRN[1], 2, 4, 1, 8); R(c, IRN[6], 1, 4); R(c, IRN[6], 1, 10);   // wall plate
+  limb(c, 2, 7.5, 16, 7.5, 2.1, 2.1, Y, 0.02, true);                                                                   // the line
+  R(c, IRN[4], 4, 5, 1, 6); R(c, IRN[6], 4, 5); R(c, Rr[4], 14, 6, 1, 4); R(c, Rr[6], 14, 6);                         // a clamp and a red band
+  R(c, B[3], 8, 4, 5, 7); R(c, B[5], 8, 4, 5, 1); R(c, B[5], 8, 4, 1, 7); R(c, B[1], 12, 5, 1, 6); R(c, B[2], 8, 10, 5, 1); R(c, B[6], 9, 5);   // valve body
+  R(c, IRN[5], 10, 2, 1, 2);                                                                                           // stem
+  R(c, Rr[5], 7, 1, 7, 1); R(c, Rr[3], 7, 2, 7, 1); R(c, Rr[7], 7, 1, 2, 1); R(c, IRN[6], 10, 1);                      // handwheel, edge on
+  R(c, IRN[3], 16, 4, 3, 7); R(c, IRN[5], 16, 4, 3, 1); R(c, IRN[6], 16, 5, 1, 5); R(c, IRN[1], 18, 5, 1, 6);           // nozzle flange
+  R(c, '#05060a', 19, 6, 1, 3); R(c, IRN[7], 17, 5); R(c, IRN[7], 17, 9);
+  if (st === 'x') { prTear(c, 7, 14, 6, 2, 13, '#2a1a0c'); prScorch(c, 6, 3, 14, 10, 34, 11); R(c, '#05060a', 9, 6, 3, 1); R(c, '#ff8a20', 10, 6); R(c, '#14100c', 19, 5, 1, 5); }
+}
+function drawHopper(c, st) {                                      // 20x22 sand hopper: a riveted bin, its funnel and a gated chute
+  const O = PRR.olv, S = PRT.snd, Rr = PRR.red, x = st === 'x';
+  if (!x) { prEll(c, 10, 2.4, 7, 2, S[3]); prEll(c, 10, 2, 5, 1.3, S[5]); R(c, S[6], 7, 1, 3, 1); R(c, S[2], 13, 2); }  // sand heaped over the rim
+  R(c, IRN[5], 0, 2, 20, 1); R(c, IRN[6], 0, 2, 8, 1);                                                                // rim
+  R(c, O[3], 1, 3, 18, 10); R(c, O[5], 1, 3, 18, 1); R(c, O[4], 1, 4, 1, 9); R(c, O[1], 18, 4, 1, 9); R(c, O[2], 1, 12, 18, 1);   // the bin
+  for (const sx of [6, 13]) { R(c, O[4], sx, 4, 1, 5); R(c, O[1], sx + 1, 4, 1, 5); }                                // stiffeners
+  for (let i = 2; i < 18; i++) for (const y of [9, 10]) R(c, ((i + y) >> 1) % 2 ? '#15161a' : HAZ[3], i, y);         // hazard band
+  for (const rx of [2, 9, 16]) R(c, O[6], rx, 4);
+  for (let y = 13; y < (x ? 15 : 18); y++) {                                                                          // the funnel
+    const hw = 8.5 - (y - 13) * 1.5, x0 = Math.round(10 - hw), x1 = Math.round(10 + hw);
+    for (let xx = x0; xx < x1; xx++) R(c, O[clamp(Math.round(4 - (xx + 0.5 - 10) / hw * 2.2 - (y - 13) * 0.3), 0, 6)], xx, y);
+  }
+  if (x) {                                                                                                            // the bottom blown out, the chute hanging
+    R(c, '#05060a', 4, 14, 12, 1); for (const xx of [4, 7, 9, 12, 14]) R(c, O[2], xx, 15); R(c, O[3], 6, 15, 1, 2); R(c, O[3], 11, 15, 1, 2);
+    R(c, IRN[3], 13, 16, 2, 4); R(c, IRN[5], 13, 16, 1, 4); R(c, S[3], 8, 13, 3, 1);
+    prScorch(c, 0, 3, 20, 14, 26, 4);
+    return;
+  }
+  R(c, IRN[3], 8, 18, 4, 2); R(c, IRN[5], 8, 18, 1, 2); R(c, IRN[1], 11, 18, 1, 2);                                    // chute
+  R(c, Rr[4], 7, 20, 6, 1); R(c, Rr[6], 7, 20, 2, 1); R(c, IRN[2], 8, 21, 4, 1);                                       // the gate
+  R(c, IRN[6], 13, 17, 1, 3); R(c, Rr[5], 13, 16);                                                                     // its lever
+  if (st === 'hit') { R(c, O[0], 14, 6, 2, 1); R(c, O[6], 14, 7, 2, 1); R(c, '#05060a', 4, 7); R(c, S[4], 4, 8, 1, 1); R(c, O[0], 3, 11, 2, 1); R(c, O[6], 10, 15); }
+}
+function drawVat(c, st) {                                         // 18x26 chem vat: a glass tank of green acid on an iron stand
+  const G = PRR.grn, x = st === 'x';
+  R(c, IRN[2], 1, 21, 16, 3); R(c, IRN[5], 1, 21, 16, 1); R(c, IRN[4], 1, 22, 1, 2); R(c, IRN[0], 16, 22, 1, 2);       // stand
+  R(c, IRN[3], 1, 24, 2, 2); R(c, IRN[3], 15, 24, 2, 2); R(c, IRN[1], 3, 24, 12, 1);                                   // legs
+  R(c, HAZ[3], 7, 22, 4, 2); R(c, HAZ[4], 7, 22, 4, 1); R(c, '#15161a', 8, 22, 2, 1); R(c, '#15161a', 9, 23);           // hazard plate
+  R(c, IRN[4], 2, 20, 14, 1); R(c, IRN[6], 2, 20, 6, 1);                                                               // bottom ring
+  if (x) {                                                                                                            // shattered: jagged glass round a green residue
+    const h = [4, 6, 2, 5, 7, 3, 2, 6, 4, 3, 7, 2, 5, 3];
+    for (let i = 0; i < 14; i++) R(c, i % 3 ? 'rgba(170,230,215,0.6)' : '#d0ece4', 2 + i, 20 - h[i], 1, h[i]);
+    R(c, G[2], 3, 19, 12, 1); R(c, G[4], 4, 19, 5, 1); R(c, G[3], 6, 21, 3, 1); R(c, G[3], 12, 22);
+    return;
+  }
+  R(c, 'rgba(150,220,205,0.22)', 2, 5, 14, 2);                                                                         // empty glass above the acid
+  prCyl(c, 9, 7, 20, 6.5, G, 0.02);                                                                                    // the acid
+  R(c, G[6], 3, 7, 12, 1); R(c, G[5], 3, 8, 3, 1);                                                                     // its surface
+  for (const [bx, by] of [[5, 15], [7, 11], [11, 17], [12, 12], [9, 9], [6, 18], [10, 14]]) R(c, G[6], bx, by);
+  R(c, '#e0fff4', 2, 5, 1, 15); R(c, '#5a8a80', 15, 5, 1, 15); R(c, 'rgba(240,255,250,0.55)', 4, 6, 1, 13); R(c, 'rgba(240,255,250,0.3)', 5, 8, 1, 7);   // glass edges and glare
+  R(c, IRN[4], 2, 4, 14, 1); R(c, IRN[6], 2, 4, 6, 1);                                                                 // top ring
+  blob(c, 9, 4, 6, 2.8, IRN.slice(2), 2, 0.05, (xx, y) => y < 4); R(c, IRN[7], 7, 2, 2, 1);                             // lid
+  R(c, IRN[4], 12, 0, 2, 3); R(c, IRN[6], 12, 0, 1, 3);                                                                // vent pipe
+  if (st === 'hit') { prCracks(c, 6, 12, 5, 4, 17, '#e8ffe0', '#2a6a20'); R(c, G[5], 15, 18, 1, 2); R(c, G[4], 16, 20); }
+}
+function drawTransformer(c, st) {                                 // 16x22 pole transformer: a finned can, two porcelain bushings, a wall bracket
+  const T = PRT.trf, x = st === 'x';
+  R(c, IRN[2], 0, 6, 1, 12); for (const y of [7, 15]) { R(c, IRN[3], 0, y, 4, 2); R(c, IRN[5], 0, y, 4, 1); }          // bracket off the wall
+  for (let y = 8; y < 19; y += 2) { R(c, T[3], 13, y, 2, 1); R(c, T[5], 13, y + 1, 2, 1); }                             // cooling fins
+  prCyl(c, 8, 6, 19.5, 5, T, 0.03);                                                                                    // the can
+  prEll(c, 8, 6, 5, 1.6, T[6]); prEll(c, 8, 6.2, 3.6, 0.9, T[4]);                                                       // lid
+  R(c, T[1], 4, 19, 8, 1); R(c, IRN[5], 8, 20); R(c, IRN[3], 8, 21);                                                    // drain cock
+  R(c, HAZ[3], 7, 11, 2, 1); R(c, HAZ[3], 6, 12, 4, 2); R(c, HAZ[3], 7, 14, 2, 1); R(c, '#15161a', 8, 11); R(c, '#15161a', 7, 12); R(c, '#15161a', 8, 13); R(c, '#15161a', 7, 14);   // the bolt sign
+  if (!x) for (const bx of [5, 10]) { for (let y = 1; y < 6; y++) R(c, y % 2 ? '#a0603a' : '#d8985c', bx, y, 2, 1); R(c, '#f0c090', bx, 2); R(c, PRR.cop[6], bx, 0, 2, 1); }   // bushings
+  if (st === 'hit') { prScorch(c, 9, 12, 5, 6, 12, 5); R(c, '#05060a', 10, 15, 2, 2); R(c, '#80c8ff', 10, 15); R(c, T[0], 13, 12, 2, 1); R(c, T[6], 13, 13, 2, 1); }
+  if (x) {
+    prTear(c, 3, 14, 10, 3, 19, '#1a1410');
+    R(c, PRR.cop[4], 5, 12, 6, 1); R(c, PRR.cop[6], 6, 12, 2, 1); R(c, PRR.cop[3], 5, 13, 6, 1);                        // the windings, cooked
+    R(c, '#a0603a', 5, 8, 2, 2); R(c, '#d8985c', 11, 9, 1, 1);
+    prScorch(c, 0, 6, 16, 16, 56, 21);
+  }
+}
+function drawPaint(c, st) {                                       // 16x12 three tins of paint, stacked two and one, drips down their sides
+  const W = PRR.wht, P = PRT.pnt;
+  if (st === 'x') {                                                                                                   // burst flat, paint everywhere
+    const rnd = prRng(41);
+    R(c, W[2], 1, 9, 6, 3); R(c, W[4], 1, 9, 5, 1); R(c, P[0][2], 1, 10, 6, 1);
+    R(c, W[2], 9, 8, 6, 4); R(c, W[4], 9, 8, 6, 1); R(c, P[1][2], 9, 10, 6, 1); R(c, '#05060a', 11, 8, 2, 1);
+    limb(c, 6, 6.5, 10, 6.5, 2, 2, W.slice(1), 0.02, true); R(c, P[2][2], 7, 6, 2, 2);
+    for (let i = 0; i < 52; i++) { const k = i % 3; R(c, P[k][2 + (rnd() < 0.35 ? 1 : 0)], Math.floor(rnd() * 16), 3 + Math.floor(rnd() * 9)); }
+    R(c, W[6], 13, 3, 3, 1); R(c, W[6], 0, 5, 2, 1);
+    return;
+  }
+  const can = (cx, y0, p) => {
+    prCyl(c, cx, y0 + 1, y0 + 6, 3.5, W.slice(1), 0.02);
+    prCyl(c, cx, y0 + 2.5, y0 + 5, 3.56, p.slice(0, 4));                                                               // its label
+    prEll(c, cx, y0 + 1, 3.5, 1, W[6]); prEll(c, cx, y0 + 1.1, 2.4, 0.6, p[2]);                                        // lid, paint round the rim
+    R(c, p[3], Math.round(cx - 2), y0 + 1, 1, 2); R(c, p[2], Math.round(cx + 1), y0 + 1, 1, 3);                        // drips
+  };
+  can(3.5, 5, P[0]); can(12.5, 5, P[1]); can(8, -1, P[2]);
+  R(c, IRN[5], 6, 0); R(c, IRN[5], 10, 0);                                                                             // the top tin's handle lugs
+}
+function drawSprinkler(c, st) {                                   // 10x8 sprinkler head under a red feed pipe: brass yoke, red glass bulb, deflector
+  const Rr = PRR.red, B = PRR.brs, x = st === 'x';
+  R(c, Rr[5], 0, 0, 10, 1); R(c, Rr[3], 0, 1, 10, 1); R(c, Rr[7], 1, 0, 3, 1);                                         // the feed pipe
+  R(c, B[4], 4, 2, 2, 2); R(c, B[6], 4, 2, 1, 2);                                                                      // fitting
+  R(c, B[5], 3, 4, 1, 2); R(c, B[3], 6, 4, 1, 2);                                                                      // yoke
+  if (!x) { R(c, '#ff3a2a', 4, 4, 2, 2); R(c, '#ffb0a0', 4, 4); R(c, B[6], 1, 6, 8, 1); for (let i = 1; i < 9; i += 2) R(c, B[3], i, 7); }   // bulb, deflector and its teeth
+  else { R(c, '#a02018', 5, 5); R(c, B[6], 1, 6, 4, 1); R(c, B[5], 5, 7, 4, 1); R(c, B[3], 1, 7); R(c, '#8ce0ff', 4, 6); }
+}
 const PROP_ART = {
   neon:     { w: 34, h: 15, fr: ['n4', 'n3', 'n2', 'n1', 'n0', 'dead', 'x'], draw: (c, f) => f === 'x' ? (R(c, '#2a2e35', 7, 0, 2, 2), R(c, '#2a2e35', 9, 1, 2, 1), R(c, '#2a2e35', 25, 0, 2, 3), R(c, '#5d6775', 25, 0, 1, 2), prLine(c, '#1a1c20', 26, 3, 27, 6), prLine(c, '#1a1c20', 27, 6, 25, 9), R(c, '#e8b422', 25, 10), R(c, '#ff8040', 24, 10)) : drawNeon(c, f === 'dead' ? 0 : +f[1], f === 'dead') },
   tube:     { w: 26, h: 6,  fr: ['ok', 'off', 'x'], draw: drawTube },
@@ -5173,6 +5429,17 @@ const PROP_ART = {
   window:   { w: 34, h: 22, fr: ['ok', 'c1', 'c2', 'x'], draw: drawWindow },
   horn:     { w: 16, h: 14, fr: ['ok', 'x'], draw: drawHorn },
   water:    { w: 22, h: 26, fr: ['ok', 'hit', 'x'], draw: drawWaterTank },
+  // ---- expansion: props ----
+  hoist:       { w: 22, h: 18, fr: ['ok', 'hit', 'x'], draw: drawHoist },
+  server:      { w: 14, h: 28, fr: ['ok0', 'ok1', 'ok2', 'hit', 'x'], draw: drawServer },
+  jukebox:     { w: 20, h: 26, fr: ['ok', 'hit', 'x', 'disc'], draw: drawJukebox },
+  hydrant:     { w: 10, h: 14, fr: ['ok', 'x'], draw: drawHydrant },
+  gasline:     { w: 20, h: 14, fr: ['ok', 'x'], draw: drawGasline },
+  hopper:      { w: 20, h: 22, fr: ['ok', 'hit', 'x'], draw: drawHopper },
+  vat:         { w: 18, h: 26, fr: ['ok', 'hit', 'x'], draw: drawVat },
+  transformer: { w: 16, h: 22, fr: ['ok', 'hit', 'x'], draw: drawTransformer },
+  paint:       { w: 16, h: 12, fr: ['ok', 'x'], draw: drawPaint },
+  sprinkler:   { w: 10, h: 8,  fr: ['ok', 'x'], draw: drawSprinkler },
 };
 function genPropTextures(scene) {
   for (const k in PROP_ART) {
@@ -5792,6 +6059,7 @@ function buildLabArena(variant) {
   const workshop = variant === 'breakables', traversal = variant === 'traversal';
   if (workshop) {
     fill(22, 23, 3, 2, 'x'); fill(42, 20, 2, 5, '#'); fill(44, 20, 8, 1, 'g'); fill(52, 20, 2, 5, '#');
+    fill(58, 17, 36, 1, '#'); fill(54, 21, 4, 1, '='); fill(62, 7, 3, 1, '#');   // the upper deck, a step up to it, and a beam over it for the hoist
   }
   if (traversal) {
     fill(14, 21, 6, 1, '='); fill(21, 17, 6, 1, '='); fill(28, 13, 6, 1, '=');
@@ -5805,7 +6073,9 @@ function buildLabArena(variant) {
     points: { G: columns.filter(x => grid[24][x] === '.' && grid[23][x] === '.').map(x => [x, 24]) },
     decor: { lamps: [[156, 165], [394, 128], [702, 150], [972, 130], [1350, 148]], beacons: [[52, 356], [1544, 356]], vents: [] },
     props: workshop ? [['propane', 16, 24], ['oil', 27, 24], ['water', 34, 24], ['capacitor', 38, 24],
-      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24]] : [],
+      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24],
+      ['hydrant', 59, 16], ['hoist', 63, 11], ['server', 67, 16], ['transformer', 68, 12], ['jukebox', 72, 16], ['vat', 78, 16],
+      ['hopper', 82, 11], ['paint', 86, 16], ['sprinkler', 89, 10], ['gasline', 92, 15, -1]] : [],
     barrels: workshop ? [[12, 24], [31, 24], [82, 24]] : [], canisters: workshop ? [[18, 24], [86, 24]] : [],
     pipes: workshop ? [[32, 388, 1], [1568, 388, -1]] : [],
     paint(ctx) {
@@ -5822,7 +6092,7 @@ const LAB_ROOMS = {
     arena: LAB_RANGE, weapon: 'nail', stationary: true, invulnerable: true, groups: [{ kind: 'grunt', count: 3 }, { kind: 'drone', count: 1 }] },
   encounter: { name: 'Combat Pit', detail: 'Mix enemy types and elites in an open arena. Add groups to build a fight.',
     arena: LAB_RANGE, weapon: 'shotgun', groups: [{ kind: 'grunt', count: 3 }, { kind: 'enforcer', count: 1 }, { kind: 'heavy', count: 1 }, { kind: 'drone', count: 2 }] },
-  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle. Shoot out a girder or stack of crates.',
+  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle, then climb to the deck for the heavy kit. Shoot out a girder or stack of crates.',
     arena: buildLabArena('breakables'), weapon: 'rocket', invulnerable: true, groups: [] },
   traversal: { name: 'Traversal Course', detail: 'Climb staggered grates, wall-jump up the shaft and grapple across the gaps.',
     arena: buildLabArena('traversal'), weapon: 'nail', invulnerable: true, groups: [] },
@@ -7915,6 +8185,7 @@ class GameScene extends Phaser.Scene {
     this.updateSentry(dt, now); this.updateWrecks(dt); if (this.mod === 'slag' && this.state === 'play') this.updateSlagRain(dt);
     this.updateOrbs(dt, now);
     this.updateBarrels(dt); this.updateProps(dt, now);
+    this.updatePropSpills(dt, now);
     this.updateHazards(dt, now);
     if (this.campaign) this.updateCampaignRoute(dt, now);
     this.updateEProjs(dt);
@@ -10858,7 +11129,7 @@ class GameScene extends Phaser.Scene {
     }
   }
   // ------------------------------------------------------------- destructible props ----
-  // Twenty kinds of breakable scenery (PROPS for how they play, PROP_ART for how they look), placed per arena as
+  // Thirty kinds of breakable scenery (PROPS for how they play, PROP_ART for how they look), placed per arena as
   // [kind, tile x, tile y, facing]. Shots, blasts, kicks, saws and fire wear them down, each goes off its own way,
   // and every wave restocks the broken ones. Water they spill conducts: anything electrical that goes off near a
   // puddle lights the whole puddle up.
@@ -10868,6 +11139,7 @@ class GameScene extends Phaser.Scene {
     this.waterG = this.add.graphics().setDepth(4.96);                   // puddles
     this.zapG = this.add.graphics().setDepth(16).setBlendMode(ADD);    // arcs and molten pours
     for (const [kind, tx, ty, dir] of this.A.props || []) if (PROPS[kind]) this.props.push(this.makeProp(kind, tx, ty, kind === 'neon' ? 1 : dir || 1));
+    this.initPropSpills();
   }
   makeProp(kind, tx, ty, dir) {
     const D = PROPS[kind], A = PROP_ART[kind], p = { kind, D, A, dir, tx, ty, hw: A.w / 2 - 1, hh: Math.max(4, A.h / 2 - 1) };
@@ -11673,6 +11945,457 @@ class GameScene extends Phaser.Scene {
     for (let k = 0; k < 5; k++) this.spawnGib(k % 2 ? 'g_blu' : 'g_plate', x, y, rand(-220, 220), rand(-320, -120), 'metal');
     Sfx.splat(1); Sfx.gurgle(); this.shake(90, 0.004);
     this.wreckProp(p, 0);
+  }
+
+  // ---- expansion: props ----
+  // The last ten breakables, and what they leave behind once they're wrecks: sand heaps, paint slicks and painted foes,
+  // records in flight, a transformer's blackout. updatePropSpills runs all that every frame, after updateProps, along
+  // with the last ten's idle life (propAmbient's job for the first twenty) and the sprinklers' heat sensors. Their arcs
+  // keep a list of their own (arcX): this.zaps is shared with the shrink ray, whose clock runs the other way.
+  initPropSpills() {
+    this.sands = []; this.slicks = []; this.vinyls = []; this.darks = []; this.arcsX = []; this.paintedT = 0; this.sprinkT = 0;
+    this.spillG = this.add.graphics().setDepth(4.94);                   // sand heaps and paint slicks
+  }
+  arcX(x0, y0, x1, y1, t, c0 = 0x4ab8ff, c1 = 0xe8f8ff) { this.arcsX.push({ x0, y0, x1, y1, t, c0, c1 }); }
+  updatePropSpills(dt, now) {
+    if (!this.spillG) return;
+    const G = this.spillG; G.clear();
+    for (const p of this.props) if (p.st !== 'gone') this.propIdleX(p, dt, now);
+    for (let i = this.arcsX.length - 1; i >= 0; i--) { const z = this.arcsX[i]; z.t -= dt; if (z.t <= 0) { this.arcsX.splice(i, 1); continue; } this.zapCol(this.zapG, z.x0, z.y0, z.x1, z.y1, z.c0, z.c1); }
+    for (let i = this.sands.length - 1; i >= 0; i--) {                  // sand: a heap that bogs foes down and smothers fire
+      const S = this.sands[i]; S.t -= dt;
+      if (S.t <= 0) { this.sands.splice(i, 1); continue; }
+      const h = S.h * Math.min(1, S.t / 2), half = S.w / 2;
+      this.drawSand(G, S, h, half);
+      if ((S.tick -= dt) <= 0) { S.tick = 0.3; this.douse(S.x, S.y - 2, half + 4); }
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind)) continue; const b = e.body;
+        if (Math.abs(b.center.x - S.x) > half || b.center.x < S.l || b.center.x > S.r || b.bottom < S.y - h - 4 || b.bottom > S.y + 3) continue;
+        b.velocity.x *= 0.5; if (b.velocity.y < 0) b.velocity.y *= 0.85;
+      }
+    }
+    for (let i = this.slicks.length - 1; i >= 0; i--) {                 // paint on the floor: slippery, and it marks what wades through
+      const P = this.slicks[i]; P.t -= dt;
+      if (P.t <= 0) { this.slicks.splice(i, 1); continue; }
+      const a = Math.min(1, P.t / 1.5), x0 = Math.round(P.x - P.w / 2);
+      G.fillStyle(P.dark, 0.9 * a).fillRect(x0, P.y - 2, P.w, 2); G.fillStyle(P.col, a).fillRect(x0 + 1, P.y - 2, P.w - 2, 1);
+      G.fillStyle(0xffffff, 0.7 * a).fillRect(x0 + 1 + Math.floor((now / 45 + P.seed) % Math.max(1, P.w - 3)), P.y - 2, 1, 1);
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind)) continue; const b = e.body;
+        if (Math.abs(b.center.x - P.x) > P.w / 2 + 2 || Math.abs(b.bottom - P.y) > 4) continue;
+        b.velocity.x *= 0.8; e.paintCol = P.col; e.paintT = Math.max(e.paintT || 0, 2); this.paintedT = Math.max(this.paintedT, 2);
+      }
+    }
+    if (this.paintedT > 0) {                                            // painted foes show it, and drag their feet a little
+      this.paintedT -= dt;
+      for (const e of this.enemies.getChildren()) {
+        if (!(e.paintT > 0)) continue;
+        e.paintT -= dt; if (!e.alive) { e.paintT = 0; continue; }
+        if (e.frozen > 0 || e.chill > 0.05) continue;
+        e.body.velocity.x *= 0.9;
+        if (e.tintKey !== e.paintCol) { e.tintKey = e.paintCol; e.setTint(e.paintCol); }
+        if (Math.random() < 0.06) this.fx.emit(e.body.center.x + rand(-4, 4), e.body.bottom - 3, { n: 1, angle: Math.PI / 2, spread: 0.3, speed: [5, 20], life: [0.3, 0.5], size: [2, 1], cols: [e.paintCol], g: 300 });
+      }
+    }
+    for (let i = this.vinyls.length - 1; i >= 0; i--) {                // the jukebox's records: spinning edges that ricochet, then shatter
+      const V = this.vinyls[i]; V.t -= dt; V.vy += 380 * dt;
+      const nx = V.x + V.vx * dt, ny = V.y + V.vy * dt;
+      if (this.solidAt(nx, V.y)) { V.vx *= -0.75; V.bounce--; Sfx.tink(0.5); } else V.x = nx;
+      if (this.solidAt(V.x, ny)) { V.vy *= -0.5; V.vx *= 0.8; V.bounce--; Sfx.tink(0.5); } else V.y = ny;
+      V.img.setPosition(V.x, V.y).setRotation(V.img.rotation + V.spin * dt);
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || V.hits.has(e)) continue; const b = e.body;
+        if (V.x > b.left - 4 && V.x < b.right + 4 && V.y > b.top - 4 && V.y < b.bottom + 4) { V.hits.add(e); this.propHurt(V.p, e, 18, Math.sign(V.vx) || 1, -0.3, 'saw'); Sfx.squish(); }
+      }
+      if (V.t > 0 && V.bounce >= 0) continue;
+      this.fx.emit(V.x, V.y, { n: 12, speed: [40, 150], life: [0.2, 0.5], size: [2, 1], cols: [0x121216, 0x34343e, 0xe0402a], g: 500, mode: 1 });
+      for (let k = 0; k < 2; k++) this.spawnGib('g_blk', V.x, V.y, rand(-120, 120), rand(-200, -60), 'metal');
+      Sfx.shatter(); V.img.destroy(); this.vinyls.splice(i, 1);
+    }
+    for (let i = this.darks.length - 1; i >= 0; i--) {                  // a blown transformer's blackout: lights out round it, stuttering back on
+      const D = this.darks[i]; D.t -= dt;
+      if (D.t <= 0) { D.img.destroy(); this.darks.splice(i, 1); for (const L of this.lamps) if (Math.hypot(L.x - D.x, L.y - D.y) < D.R) L.outUntil = 0; continue; }
+      const k = Math.min(1, (D.T - D.t) / 0.12) * (D.t < 0.7 && Math.random() > D.t / 0.7 ? 0.2 : 1);
+      D.img.setAlpha(0.95 * k);
+      for (const L of this.lamps) if (Math.hypot(L.x - D.x, L.y - D.y) < D.R) L.outUntil = k > 0.5 ? now + 100 : 0;
+      for (const q of this.props) if (q.glow && q.glow.visible && Math.hypot(q.cx - D.x, q.cy - D.y) < D.R) q.glow.setAlpha(q.glow.alpha * (1 - 0.92 * k));
+    }
+    if ((this.sprinkT -= dt) <= 0) {                                    // fire under a sprinkler bursts its bulb
+      this.sprinkT = 0.3;
+      for (const p of this.props) if (p.kind === 'sprinkler' && p.st === 'ok' && this.sprinklerHot(p)) this.breakProp(p, 'fire');
+    }
+  }
+  propIdleX(p, dt, now) {
+    const D = p.D, ok = p.st === 'ok', hurt = p.hp < D.hp;
+    switch (p.kind) {
+      case 'server':
+        if (ok) {
+          p.fr = p.hp <= D.hp * 0.5 ? 'hit' : 'ok' + (Math.floor(now / 230 + p.wob) % 3); p.la = p.flickT > 0 ? 0.2 : 0.85 + 0.15 * Math.sin(now / 70 + p.wob);
+          if (hurt && Math.random() < dt * 2) this.fxSparks(p.x + rand(-5, 5), p.y - rand(6, 24), 2, -Math.PI / 2, 2, [30, 120]);
+        } else if (p.ang) { const w2 = p.A.w / 2; p.img.setPosition(p.x + w2 * p.topple * (1 - Math.cos(p.ang)), p.y - w2 * Math.sin(p.ang)); }   // it tips over its bottom corner
+        break;
+      case 'jukebox':
+        if (!ok) break;
+        p.la = p.flickT > 0 ? 0.15 : 0.7 + 0.4 * Math.max(0, 1 - ((now / 480 + p.wob) % 1) * 3);                        // the lights pulse to the beat
+        if (Math.random() < dt * 1.2) this.fx.emit(p.x + rand(-7, 7), p.y - 24, { n: 1, angle: -Math.PI / 2, spread: 0.6, speed: [12, 28], life: [0.8, 1.3], size: [2, 2], cols: [0xff5ac0, 0xffd23a, 0x4ce4fa], randCol: true, alpha: [0.9, 0], add: true });
+        break;
+      case 'vat':
+        if (p.st === 'x' || p.st === 'live') break;
+        p.la = 0.8 + 0.2 * Math.sin(now / 400 + p.wob);
+        for (let k = 0; k < 4; k++) this.propG.fillStyle(0xc8ff96, 0.85).fillRect(Math.round(p.x - 5 + (k * 37 + p.wob * 13) % 10), Math.round(p.y - 7 - (now / 28 + k * 29 + p.wob * 50) % 12), 1, 1);
+        break;
+      case 'transformer':
+        if (!ok) break;
+        p.la = p.flickT > 0 ? 1.8 : 0.75 + 0.25 * Math.sin(now / 45);
+        if (Math.random() < dt * (hurt ? 3 : 0.4)) this.arcX(p.x - 2, p.y - 10, p.x + 3, p.y - 10, 0.05);              // a spark between the bushings
+        break;
+      case 'gasline': if (ok && hurt && Math.random() < dt * 5) this.fx.emit(p.x + p.dir, p.y - 3, { n: 1, angle: -Math.PI / 2, spread: 0.8, speed: [10, 30], life: [0.5, 0.9], size: [2, 5], cols: [0xc8d0c0, 0xa0a898], alpha: [0.35, 0], g: -20, drag: 1 }); break;
+      case 'hopper': if (ok && hurt && Math.random() < dt * 6) this.fx.emit(p.x - 6 * p.dir, p.y - 2, { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [5, 15], life: [0.4, 0.6], size: [1, 1], cols: [0xd0aa6a, 0xb08a50], g: 500, mode: 1 }); break;
+      case 'hydrant': if (ok && hurt && Math.random() < dt * 2) this.fx.emit(p.x + rand(-3, 3), p.y - 8, { n: 1, angle: Math.PI / 2, spread: 0.3, speed: [5, 20], life: [0.3, 0.5], size: [1, 1], cols: [0x8ce0ff], g: 600, mode: 1 }); break;
+      case 'sprinkler': if (ok && Math.random() < dt * 0.25) this.fx.emit(p.x, p.y + 3, { n: 1, angle: Math.PI / 2, spread: 0.1, speed: [5, 10], life: [0.5, 0.7], size: [1, 1], cols: [0x8ce0ff], g: 600, mode: 1 }); break;
+      case 'hoist': if (ok && Math.abs(p.swv) > 0.8 && (p.creakT = (p.creakT || 0) - dt) <= 0) { p.creakT = 0.7; Sfx.creak(); } break;
+      default: return;
+    }
+    if (p.flickT > 0) p.flickT -= dt;
+    if (p.glow && p.glow.visible) p.glow.setAlpha(clamp(D.light[5] * p.la, 0, 1));
+  }
+  // CHAIN HOIST: an engine block on a chain. Break it and the chain lets go a link at a time (creaks, sparks at the
+  // anchor, its shadow darkening on the floor), then it drops; shoot the chain and it drops at once. It crushes
+  // whatever it lands on (120; a hard hit to you) and stays as scrap.
+  breakHoist(p) { p.phase = 'creak'; p.t = 0.6; p.slip = 0; Sfx.creak(); Sfx.clang(0.4); }
+  liveHoist(p, dt) {
+    const A = p.A;
+    if (!p.falling) {
+      p.t -= dt; p.jig = 1.4;
+      if ((p.slip -= dt) <= 0) { p.slip = 0.15; p.swv += rand(-0.4, 0.4); this.fxSparks(p.bx, p.ay + 3, 4, Math.PI / 2, 1.4, [30, 110]); Sfx.tink(0.5); }
+      this.hoistShadow(p, 1 - Math.max(0, p.t) / 0.6);
+      if (p.t > 0) return;
+      p.falling = true; p.fvy = 0; Sfx.snap();
+    }
+    if (p.phase !== 'drop') { p.phase = 'drop'; p.hits = new Set(); p.hitP = false; p.rot = -p.sw; }
+    p.fvy = Math.min(p.fvy + 900 * dt, 640); p.y += p.fvy * dt; p.rot *= Math.exp(-dt * 6);
+    const l = p.x - A.w / 2 + 2, r = p.x + A.w / 2 - 2, top = p.y + 5, btm = p.y + A.h;
+    if (p.fvy > 80) {
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under || p.hits.has(e)) continue; const b = e.body; if (b.right > l && b.left < r && b.bottom > top && b.top < btm) { p.hits.add(e); this.propHurt(p, e, 120, 0, 1, 'crush'); } }
+      const pb = this.player.body;
+      if (!p.hitP && this.state !== 'dead' && pb.right > l && pb.left < r && pb.bottom > top && pb.top < btm) { p.hitP = true; this.hurtPlayer(30, p.x, { srcY: p.y, by: 'AN ENGINE BLOCK' }); }
+    }
+    this.hoistShadow(p, 1);
+    if (!(this.standAt(p.x, btm) || this.standAt(l + 1, btm) || this.standAt(r - 1, btm) || p.y > LH)) return;
+    const fy = Math.floor(btm / TS) * TS;
+    p.y = fy - A.h; p.rot = 0;
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && !p.hits.has(e) && Math.abs(e.body.center.x - p.x) < 26 && Math.abs(e.body.bottom - fy) < 12) this.propHurt(p, e, 30, Math.sign(e.body.center.x - p.x) || 1, -0.7, 'crush');
+    for (const q of this.props) if (q !== p && q.st === 'ok' && Math.abs(q.cx - p.x) < q.hw + 12 && Math.abs(q.cy - (fy - 8)) < q.hh + 10) this.hitProp(q, 30, 'crush', q.cx, q.cy, Math.sign(q.cx - p.x) || 1, -0.5);
+    this.fxDust(p.x, fy, 14); this.fxSparks(p.x, fy - 3, 14, -Math.PI / 2, 2.6, [80, 260]);
+    this.fx.emit(p.x, fy - 2, { n: 12, angle: -Math.PI / 2, spread: 2.4, speed: [30, 120], life: [0.3, 0.6], size: [2, 1], cols: [0x30343c, 0x0e0f12], g: 500, mode: 1 });   // oil
+    for (let k = 0; k < 6; k++) this.spawnGib(k % 3 ? 'g_plate' : 'g_bar', p.x + rand(-7, 7), fy - 8, rand(-200, 200), rand(-280, -100), 'metal');
+    Sfx.smash('x'); Sfx.clang(1); Sfx.stomp(); this.shake(220, 0.011);
+    this.wreckProp(p, 3);
+  }
+  hoistShadow(p, k) {                                                  // where it'll land, darker as it comes
+    const fy = this.floorBelow(p.x, p.y + p.A.h); if (fy === null) return;
+    const w = Math.round(10 + 8 * k), x0 = Math.round(p.x - w / 2), G = this.propG;
+    G.fillStyle(0x000000, 0.2 + 0.35 * k).fillRect(x0, fy - 2, w, 2); G.fillStyle(0x000000, 0.12 + 0.2 * k).fillRect(x0 + 2, fy - 3, w - 4, 1);
+  }
+  // SERVER RACK: sparks where it's hit; broken, it topples the way it was hit in a cascade of sparks, brains whoever
+  // its top comes down on (35) and lies there arcing at foes close by for 1.4 s, lighting up any water it fell in
+  hitServer(p, dmg, x, y) { p.flickT = 0.08; this.fxSparks(x, y, 3 + Math.min(6, dmg / 5 | 0), -Math.PI / 2, 2.2, [50, 190]); if (Math.random() < 0.35) Sfx.zap(); }
+  breakServer(p) { p.fr = 'hit'; p.topple = p.fdir; p.ang = 0; p.angV = 0.5; p.phase = 'fall'; this.fxSparks(p.x, p.y - 20, 16, -Math.PI / 2, 2.4, [60, 220]); Sfx.crack(); Sfx.zap(); if (p.glow) p.glow.setVisible(false); }
+  liveServer(p, dt) {
+    const H = p.A.h, w2 = p.A.w / 2, t = p.topple;
+    if (p.phase === 'fall') {
+      p.angV += 8 * dt; p.ang = Math.min(Math.PI / 2, p.ang + p.angV * dt); p.rot = p.ang * t;
+      const s = Math.sin(p.ang), c = Math.cos(p.ang), ox = p.x + w2 * t * (1 - c), oy = p.y - w2 * s;
+      for (let k = 0; k < 2; k++) { const d = rand(6, H); this.fxSparks(ox + s * d * t, oy - c * d, 1, -Math.PI / 2, 2.6, [30, 160]); }
+      if (p.ang < Math.PI / 2) return;
+      const hx = p.x + t * (w2 + H - 5), cx = p.x + t * (w2 + H / 2);
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const b = e.body; if (b.right > hx - 7 && b.left < hx + 7 && b.bottom > p.y - 16 && b.top < p.y) this.propHurt(p, e, 35, t, -0.6, 'crush'); }
+      for (let k = 0; k < 4; k++) this.spawnGib(k % 2 ? 'g_wire' : 'g_plate', cx + rand(-10, 10), p.y - 8, rand(-160, 160), rand(-240, -80), 'metal');
+      this.fxDust(cx, p.y, 10); this.fxSparks(cx, p.y - 7, 24, -Math.PI / 2, 2.8, [60, 260]); this.spawnLight(cx, p.y - 7, 'glow', 0x9adcff, 1.2, 3, 0.9, 0.2);
+      Sfx.clang(0.9); Sfx.smash('x'); Sfx.zap(); this.shake(140, 0.006);
+      this.electrifyWater(cx, p.y - 2, 64);
+      p.fr = 'x'; p.phase = 'arc'; p.t = 1.4; p.arcT = 0.05;
+      return;
+    }
+    p.t -= dt;
+    const x0 = p.x + t * w2, cy = p.y - 7, along = d => x0 + t * d;
+    if (Math.random() < 0.6) this.fxSparks(along(rand(2, H - 2)), cy + rand(-5, 4), 1, -Math.PI / 2, 2, [30, 140]);
+    if ((p.arcT -= dt) <= 0) {
+      p.arcT = rand(0.12, 0.24);
+      const sx = along(rand(3, H - 3));
+      let tgt = null, bd = 76;
+      for (const e of this.enemies.getChildren()) { if (!e.alive || e.under) continue; const d = Math.hypot(e.body.center.x - sx, e.body.center.y - cy); if (d < bd && this.los(sx, cy, e.body.center.x, e.body.center.y)) { bd = d; tgt = e; } }
+      if (tgt) { this.arcX(sx, cy, tgt.body.center.x, tgt.body.center.y, 0.09); this.propHurt(p, tgt, 7, Math.sign(tgt.body.center.x - sx) || 1, -0.3, 'arc'); if (tgt.alive) tgt.stunT = Math.max(tgt.stunT, 0.3); }
+      else { const a = rand(-Math.PI, 0), r = rand(12, 32); this.arcX(sx, cy, sx + Math.cos(a) * r, cy + Math.sin(a) * r, 0.06); }
+      if (Math.random() < 0.5) Sfx.zap();
+      this.electrifyWater(along(H / 2), p.y - 2, 60);
+      const pb = this.player.body;
+      if (this.state !== 'dead' && Math.hypot(pb.center.x - sx, pb.center.y - cy) < 22 && Math.random() < 0.3) { this.arcX(sx, cy, pb.center.x, pb.center.y, 0.08); this.hurtPlayer(4, sx, { knock: false, srcY: cy, by: 'A SERVER RACK' }); }
+    }
+    if (p.t <= 0) this.wreckProp(p, 4);
+  }
+  // JUKEBOX: a hit skips it onto a jaunty note; broken, it plays one last chord, its glass goes and it flings five
+  // records that spin through foes (18 each) and ricochet before they shatter
+  hitJukebox(p) {
+    p.flickT = 0.1;
+    if (Sfx.ok('jukeskip', 0.06)) { const f = [523, 587, 659, 784, 880, 1046][(Math.random() * 6) | 0]; Sfx.tone({ type: 'square', f0: f, dur: 0.08, vol: 0.045 }); Sfx.tone({ type: 'square', f0: f * 1.5, dur: 0.1, vol: 0.03, delay: 0.07 }); }
+    this.fx.emit(p.x, p.y - 22, { n: 2, angle: -Math.PI / 2, spread: 1.4, speed: [20, 50], life: [0.5, 0.9], size: [2, 2], cols: [0xff5ac0, 0xffd23a, 0x4ce4fa], randCol: true, alpha: [0.9, 0], add: true, g: -30 });
+  }
+  breakJukebox(p) {
+    p.fr = 'x'; p.t = 0.5;
+    for (let k = 0; k < 10; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', p.x + rand(-7, 7), p.y - 20 + rand(-4, 4), rand(-180, 180), rand(-240, -60), 'metal');
+    this.fx.emit(p.x, p.y - 20, { n: 26, speed: [40, 180], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xffd2ee, 0xff5ac0, 0xffd23a], add: true, g: 500, mode: 1 });
+    this.spawnLight(p.x, p.y - 18, 'glow', 0xff8a3a, 1.5, 3.5, 0.9, 0.25);
+    if (Sfx.ok('jukechord')) [262, 330, 392, 523].forEach((f, i) => Sfx.tone({ type: i ? 'square' : 'sawtooth', f0: f, f1: f * 0.45, dur: 1.1, vol: 0.035, attack: 0.01 }));   // one last chord, winding down
+    Sfx.shatter();
+  }
+  liveJukebox(p, dt) {
+    p.t -= dt; p.la = Math.random() < 0.35 ? 1.4 : 0.15;
+    if (Math.random() < 0.5) this.fxSparks(p.x + rand(-7, 7), p.y - rand(6, 20), 1, -Math.PI / 2, 2, [30, 120]);
+    if (p.t > 0) return;
+    for (let k = 0; k < 5; k++) {                                       // two skim out low either side, one goes up
+      const a = [-0.2, -0.62, -Math.PI / 2, 0.62 - Math.PI, 0.2 - Math.PI][k] + rand(-0.1, 0.1), sp = rand(230, 300), x = p.x, y = p.y - 13;
+      this.vinyls.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: rand(1.3, 1.8), spin: (k % 2 ? 1 : -1) * rand(18, 26), bounce: 2, hits: new Set(), p, img: this.add.image(x, y, 'pr_jukebox', 'disc').setDepth(9) });
+    }
+    this.fx.emit(p.x, p.y - 13, { n: 16, speed: [40, 160], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xffe46a], add: true, drag: 2 });
+    Sfx.sawLaunch(); Sfx.clang(0.6); this.shake(80, 0.004);
+    this.wreckProp(p, 3);
+  }
+  // HYDRANT: shears off and a geyser roars up for 3 s: it throws foes skywards (and you: ride it like a jump pad),
+  // puts out fires round it and floods the floor
+  breakHydrant(p) {
+    p.fr = 'x'; p.t = 3; p.tick2 = 0; p.pudT = 0;
+    this.spawnGib('g_barrel', p.x, p.y - 12, rand(-60, 60), -460, 'metal');
+    for (let k = 0; k < 3; k++) this.spawnGib(k % 2 ? 'g_plate' : 'g_barrel', p.x, p.y - 8, rand(-160, 160), rand(-260, -120), 'metal');
+    this.fx.emit(p.x, p.y - 8, { n: 40, angle: -Math.PI / 2, spread: 1.6, speed: [80, 300], life: [0.4, 0.9], size: [2, 1], cols: [0xffffff, 0xd8f8ff, 0x8ce0ff, 0x4ac8f8], g: 600, mode: 1 });
+    this.douse(p.x, p.y - 8, 72); this.spawnWater(p.x, p.y - 2, 110);
+    Sfx.clang(0.7); Sfx.splat(1); Sfx.steam(); this.shake(90, 0.004);
+  }
+  liveHydrant(p, dt, now) {
+    p.t -= dt;
+    const k = Math.min(1, p.t / 0.5, (3 - p.t) / 0.15 + 0.3), x = p.x, base = p.y - 6, reach = 112 * k, hw = 2 + 2.5 * k, wb = Math.sin(now / 40) * 0.8;
+    let top = base - reach;
+    for (let y = base - 4; y > base - reach; y -= 4) if (this.solidAt(x, y)) { top = y + 4; break; }
+    const G = this.propG;
+    G.fillStyle(0x4ac8f8, 0.55).fillRect(x - hw - 1 + wb, top, hw * 2 + 2, base - top);
+    G.fillStyle(0xa8e8ff, 0.8).fillRect(x - hw + wb, top, hw * 2, base - top);
+    G.fillStyle(0xffffff, 0.85).fillRect(x - 1 + wb, top + 2, 2, Math.max(0, base - top - 2));
+    for (let j = 0; j < 5; j++) { const yy = base - ((now / 2.5 + j * 29) % Math.max(1, base - top)); G.fillStyle(0xffffff, 0.75).fillRect(x - hw - 1 + wb, yy, hw * 2 + 2, 1); }   // foam rushing up it
+    this.fx.emit(x, top, { n: 3, angle: -Math.PI / 2, spread: 2.6, speed: [40, 140], life: [0.3, 0.7], size: [2, 1], cols: [0xffffff, 0xd8f8ff, 0x8ce0ff], g: 600, mode: 1 });
+    this.fx.emit(x + rand(-hw, hw), rand(top, base), { n: 1, speed: [10, 40], life: [0.3, 0.6], size: [3, 6], cols: [0xf0fbff, 0xc8ecf8], alpha: [0.4, 0], g: 40, drag: 2 });
+    if ((p.tick2 -= dt) <= 0) {
+      p.tick2 = 0.1;
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under) continue; const b = e.body;
+        if (b.right < x - hw - 3 || b.left > x + hw + 3 || b.bottom < top || b.top > base + 6) continue;
+        const kb = Math.max(0.35, e.def.kb);
+        if (b.velocity.y > -300 * kb) { b.velocity.y = -470 * kb; b.velocity.x *= 0.4; e.stunT = Math.max(e.stunT, 0.5); this.propHurt(p, e, 3, 0, -1, 'blast'); }
+        if (e.burnT > 0) { e.burnT = 0; e.panicT = 0; }
+      }
+      const pb = this.player.body;
+      if (this.state !== 'dead' && pb.right > x - hw - 2 && pb.left < x + hw + 2 && pb.bottom > top && pb.top < base + 6 && pb.velocity.y > -380) { pb.velocity.y = -560; this.jumpCuttable = false; this.lastGround = -1e9; Sfx.boing(); }
+      if ((p.pudT -= 0.1) <= 0) { p.pudT = 0.5; this.douse(x, base, 72); this.spawnWater(x, p.y - 2, 110); }
+    }
+    if (p.t <= 0) this.wreckProp(p, 0);
+  }
+  // GAS MAIN: the valve shears and the line vents a burning jet that dips to the floor and back for 4 s, lighting foes
+  // (5 a tick, and burning), the scenery and the floor it licks; then what's left in the line goes up
+  breakGasline(p) {
+    p.fr = 'x'; p.t = 4; p.tick2 = 0; p.fireT = 0.2;
+    this.spawnGib('g_barrel', p.x, p.y - 6, p.fdir * rand(80, 160), rand(-300, -200), 'metal');
+    this.fxSparks(p.x, p.y - 2, 14, -Math.PI / 2, 2.2, [60, 220]); this.spawnLight(p.x + p.dir * 10, p.y, 'glow', 0xffa040, 1.2, 2.6, 0.9, 0.2);
+    Sfx.clang(0.7); Sfx.gasHiss(); Sfx.ignite();
+  }
+  liveGasline(p, dt) {
+    p.t -= dt;
+    const age = 4 - p.t, dip = 0.08 + 0.62 * (0.5 - 0.5 * Math.cos(age * 2.6)), a = p.dir > 0 ? dip : Math.PI - dip, ca = Math.cos(a), sa = Math.sin(a);
+    const nx = p.x + p.dir * 10, ny = p.y + 1, reach = 78 * Math.min(1, age / 0.25, p.t / 0.3 + 0.25);
+    let len = 4, wall = false;
+    for (; len < reach; len += 3) if (this.solidAt(nx + ca * len, ny + sa * len)) { wall = true; break; }
+    const ex = nx + ca * len, ey = ny + sa * len;
+    for (let k = 0; k < 4; k++) this.fx.emit(nx, ny, { n: 1, angle: a, spread: 0.18, speed: [len * 3.2, len * 4], life: [0.2, 0.27], size: [5, 1], cols: [0xffffff, 0xbfe8ff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, drag: 1, g: -70 });
+    if (wall) this.fx.emit(ex, ey, { n: 2, angle: a + Math.PI, spread: 2.4, speed: [30, 110], life: [0.15, 0.35], size: [4, 1], cols: [0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -90 });
+    if (Math.random() < 0.5) this.spawnLight(nx + ca * len * 0.5, ny + sa * len * 0.5, 'glow', 0xff9a40, 1.2, 2, 0.5, 0.08);
+    if ((p.tick2 -= dt) > 0) { if (p.t <= 0) this.ventOut(p, nx, ny); return; }
+    p.tick2 = 0.12; Sfx.gasHiss();
+    const on = (x, y, pad) => { const u = clamp(((x - nx) * ca + (y - ny) * sa) / len, 0, 1); return Math.hypot(nx + ca * len * u - x, ny + sa * len * u - y) < pad; };
+    for (const e of this.enemies.getChildren()) if (e.alive && !e.under && on(e.body.center.x, e.body.center.y, Math.max(e.body.halfWidth, e.body.halfHeight) + 3)) { this.ignite(e, 2.5); this.propHurt(p, e, 5, ca, sa, 'flame'); }
+    for (const T of this.tars.slice()) if (Math.abs(T.y - ey) < 10 && ex > T.x - T.w / 2 - 4 && ex < T.x + T.w / 2 + 4) this.igniteTar(T);
+    for (const k of this.barrelList) if (k.active && on(k.x, k.y, 9)) this.igniteBarrel(k);
+    for (const C of this.clouds.slice()) if (on(C.x, C.y, C.r)) this.igniteCloud(C);
+    for (const q of this.props) if (q !== p && q.st === 'ok' && on(q.cx, q.cy, Math.max(q.hw, q.hh) + 3)) { this.igniteProp(q); this.hitProp(q, 4, 'flame'); }
+    const pb = this.player.body;
+    if (this.state !== 'dead' && on(pb.center.x, pb.center.y, 9)) this.hurtFromHazardContact(6, nx, { burn: true, srcY: ny, by: 'A GAS MAIN' });
+    if (wall && (p.fireT -= 0.12) <= 0) { p.fireT = 0.45; if (!this.puddles.some(Q => Q.fire && Math.abs(Q.x - ex) < Q.w / 2 && Math.abs(Q.y - ey) < 18)) this.spawnFirePatch(ex, ey - 6); this.paintScorch(ex, ey, 5); }
+    if (p.t <= 0) this.ventOut(p, nx, ny);
+  }
+  ventOut(p, x, y) { this.explode(x, y, PROP_BLAST.gasline); this.wreckProp(p, 6); }
+  // SAND HOPPER: the gate bursts and it pours for 3 s: the sand heaps up where it lands (for 18 s), bogs down foes
+  // wading through it and smothers fire in it
+  breakHopper(p) {
+    p.fr = 'x'; p.t = 3; p.tick2 = 0; p.heap = null;
+    this.spawnGib('g_plate', p.x, p.y + 10, p.fdir * rand(60, 140), rand(-160, -60), 'metal');
+    this.fx.emit(p.x, p.y + 8, { n: 24, angle: Math.PI / 2, spread: 2.4, speed: [30, 140], life: [0.3, 0.7], size: [2, 1], cols: [0xf0d8a0, 0xd0aa6a, 0xb08a50], g: 600, mode: 1 });
+    Sfx.clang(0.6); Sfx.clunk(); Sfx.splat(0);
+  }
+  liveHopper(p, dt, now) {
+    p.t -= dt;
+    const k = Math.min(1, p.t / 0.6), sx = p.x, sy = p.y + p.A.h / 2 - 1, fy = this.floorBelow(sx, sy + 2);
+    if (fy !== null) {
+      const S = p.heap && this.sands.includes(p.heap) ? p.heap : (p.heap = this.addSand(sx, fy)), u = (sx - S.x) / (S.w / 2 || 1);
+      const top = Math.max(sy, fy - S.h * Math.max(0, 1 - u * u)), G = this.propG, wb = Math.sin(now / 50) * 0.5;
+      G.fillStyle(0x8a6834, 0.9).fillRect(sx - 1.5 * k - 0.5 + wb, sy, 3 * k + 1, top - sy);
+      G.fillStyle(0xe0c080, 1).fillRect(sx - 0.5 + wb, sy, 1, top - sy);
+      S.h = Math.min(10, S.h + dt * 4.5 * k); S.w = Math.min(72, S.w + dt * 26 * k); S.t = Math.max(S.t, 18);
+      if (Math.random() < 0.6) this.fx.emit(sx, top, { n: 1, angle: -Math.PI / 2, spread: 2.4, speed: [10, 50], life: [0.3, 0.6], size: [2, 4], cols: [0xd8c090, 0xb8a070], alpha: [0.5, 0], g: 60, drag: 2 });
+      if ((p.tick2 -= dt) <= 0) {                                        // the stream puts out and pins down what it pours on
+        p.tick2 = 0.2; this.douse(sx, (sy + fy) / 2, Math.max(20, (fy - sy) / 2));
+        for (const e of this.enemies.getChildren()) if (e.alive && !e.under && Math.abs(e.body.center.x - sx) < e.body.halfWidth + 3 && e.body.bottom > sy && e.body.top < fy) e.stunT = Math.max(e.stunT, 0.25);
+      }
+    }
+    if (p.t <= 0) this.wreckProp(p, 0);
+  }
+  addSand(x, fy) {
+    const old = this.sands.find(S => Math.abs(S.y - fy) < 3 && Math.abs(S.x - x) < S.w / 2 + 8);
+    if (old) return old;
+    const [cx, w] = this.spanOn(x, fy, 240), S = { x, y: fy, w: 8, h: 1, t: 18, tick: 0, l: cx - w / 2, r: cx + w / 2, seed: Math.random() * 100 };
+    this.sands.push(S); if (this.sands.length > 8) this.sands.shift();
+    return S;
+  }
+  drawSand(G, S, h, half) {                                            // a heap: a parabola of sand lit along its crest, cut off where the floor ends
+    if (h < 0.5) return;
+    for (let dx = -Math.floor(half); dx < half; dx += 2) {
+      const x = Math.round(S.x + dx); if (x < S.l || x + 2 > S.r) continue;
+      const u = (dx + 1) / half, hh = Math.round(h * (1 - u * u)); if (hh <= 0) continue;
+      G.fillStyle(dx < 0 ? 0xb08a50 : 0x8a6834, 1).fillRect(x, S.y - hh, 2, hh);
+      G.fillStyle(dx < -half * 0.3 ? 0xf0d8a0 : 0xd0aa6a, 1).fillRect(x, S.y - hh, 2, 1);
+      if (hh > 2 && (dx * 7 + S.seed) % 5 < 1) G.fillStyle(0x5e4422, 1).fillRect(x, S.y - hh + 2, 1, 1);
+    }
+  }
+  // CHEM VAT: the glass gives and a wave of acid washes both ways along the floor till it runs off a ledge or into a
+  // wall: whatever it rolls over is corroded (5 s of extra damage taken), takes 14 and gets shoved; it leaves pools
+  breakVat(p) {
+    p.fr = 'x';
+    p.waves = [-1, 1].map(d => ({ x: p.x + d * 7, d, v: 180, left: 136, drop: 0, hits: new Set(), hitP: false, on: true }));
+    for (let k = 0; k < 12; k++) this.spawnGib(k % 2 ? 'g_glass' : 'g_glass2', p.x + rand(-8, 8), p.y - 14 + rand(-8, 8), rand(-200, 200), rand(-260, -80), 'metal');
+    this.fx.emit(p.x, p.y - 12, { n: 40, speed: [60, 220], life: [0.3, 0.7], size: [3, 1], cols: [0xe0ff90, 0x9aff4a, 0x4aa020, 0x1a4010], g: 600, mode: 1 });
+    this.fx.emit(p.x, p.y - 12, { n: 12, speed: [10, 50], life: [0.6, 1.2], size: [4, 9], cols: [0xc8ff90, 0x6aa040], alpha: [0.4, 0], g: -30, drag: 1.5 });
+    { const [ax, aw] = this.spanOn(p.x, p.y, 30); this.acids.push({ x: ax, y: p.y, w: aw, t: 8, eat: true }); } this.paintAcid(p.x, p.y + 1, 12);
+    this.spawnLight(p.x, p.y - 12, 'glow', 0x7dff4a, 1.5, 3.5, 0.9, 0.3);
+    Sfx.shatter(); Sfx.splat(1); Sfx.gurgle(); Sfx.sizzle(); this.shake(90, 0.004);
+  }
+  liveVat(p, dt) {
+    const fy = p.y, pb = this.player.body, G = this.propG; let going = false;
+    for (const W of p.waves || []) {
+      if (!W.on) continue;
+      const nx = W.x + W.d * W.v * dt;
+      if (!(this.standAt(nx, fy + 1) && !this.solidAt(nx, fy - 3)) || (W.left -= W.v * dt) <= 0) {   // over the edge or into a wall: it splashes and is gone
+        W.on = false; Sfx.splat(0);
+        this.fx.emit(W.x, fy - 2, { n: 14, angle: -Math.PI / 2 + W.d * 0.4, spread: 1.4, speed: [40, 160], life: [0.3, 0.6], size: [2, 1], cols: [0xe0ff90, 0x9aff4a, 0x4aa020], g: 600, mode: 1 });
+        continue;
+      }
+      going = true; W.x = nx; W.v = Math.max(110, W.v - 50 * dt);
+      const hgt = 3 + 4 * Math.min(1, W.left / 60);
+      for (let i = 0; i < 10; i++) { const h = Math.round(hgt * (1 - i / 10)); if (h > 0) G.fillStyle(i < 2 ? 0xe0ff90 : 0x7dd040, 0.9).fillRect(Math.round(W.x - W.d * i * 2), fy - h, 2, h); }   // the crest, trailing off behind
+      this.fx.emit(W.x, fy - hgt, { n: 2, angle: -Math.PI / 2 + W.d * 0.6, spread: 0.9, speed: [40, 120], life: [0.2, 0.45], size: [2, 1], cols: [0xe0ff90, 0x9aff4a, 0x4aa020], g: 500, mode: 1 });
+      if ((W.drop -= W.v * dt) <= 0) { W.drop = 14; const [ax, aw] = this.spanOn(W.x - W.d * 8, fy, 14); this.acids.push({ x: ax, y: fy, w: aw, t: 6, eat: true }); if (this.acids.length > 60) this.acids.shift(); this.paintAcid(W.x, fy + 1, 5); }
+      for (const e of this.enemies.getChildren()) {
+        if (!e.alive || e.under || FLIERS.has(e.kind) || W.hits.has(e)) continue; const b = e.body;
+        if (b.left > W.x + 6 || b.right < W.x - 6 || Math.abs(b.bottom - fy) > 10) continue;
+        W.hits.add(e); this.propHurt(p, e, 14, W.d, -0.5, 'acid');
+        if (e.alive) { e.corrodeT = Math.max(e.corrodeT, 5); b.velocity.x += W.d * 160 * e.def.kb; b.velocity.y -= 90 * e.def.kb; }
+      }
+      if (!W.hitP && this.state !== 'dead' && pb.left < W.x + 6 && pb.right > W.x - 6 && Math.abs(pb.bottom - fy) < 8) { W.hitP = true; this.hurtFromHazardContact(8, W.x, { burn: true, srcY: fy, by: 'AN ACID WAVE' }); this.pCorrodeT = Math.max(this.pCorrodeT, TUNE.SLUG.corrode); }
+    }
+    if (!going) this.wreckProp(p, 0);
+  }
+  // TRANSFORMER: hits crackle and arc off it; broken, it hums up for half a second, then dumps its charge into every
+  // foe in 120 px (34 and a stun, machines longer), lights up water near it and blacks out the lights round it for 4 s
+  hitTransformer(p) {
+    p.flickT = 0.1;
+    const a = rand(0, Math.PI * 2), r = rand(10, 24); this.arcX(p.x, p.y - 4, p.x + Math.cos(a) * r, p.y - 4 + Math.sin(a) * r, 0.07);
+    if (Math.random() < 0.5) Sfx.zap();
+  }
+  breakTransformer(p) { p.fr = 'hit'; p.t = 0.5; Sfx.pylonCharge(); Sfx.buzz(); this.fxSparks(p.x, p.y - 8, 18, -Math.PI / 2, 2.4, [60, 220]); }
+  liveTransformer(p, dt) {
+    p.t -= dt; p.jig = 1; p.la = 1.2 + Math.random();
+    if (Math.random() < 0.6) { const a = rand(0, Math.PI * 2), r = rand(8, 30); this.arcX(p.x, p.y - 6, p.x + Math.cos(a) * r, p.y - 6 + Math.sin(a) * r, 0.05); }
+    if (p.t > 0) return;
+    const x = p.x, y = p.y; let n = 0;
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue; const ex = e.body.center.x, ey = e.body.center.y;
+      if (Math.hypot(ex - x, ey - y) > 120 || !this.los(x, y, ex, ey)) continue;
+      this.arcX(x, y, ex, ey, 0.3, 0x80c8ff, 0xffffff); this.arcX(x, y, ex, ey, 0.2); this.fxSparks(ex, ey, 8); n++;
+      this.propHurt(p, e, 34, Math.sign(ex - x) || 1, -0.4, 'arc'); if (e.alive) e.stunT = Math.max(e.stunT, e.def.mech ? 1.4 : 0.8);
+    }
+    for (let k = n; k < 5; k++) { const a = rand(-Math.PI, Math.PI), r = rand(40, 100); this.arcX(x, y, x + Math.cos(a) * r, y + Math.sin(a) * r, 0.25); }
+    this.electrifyWater(x, y, 170);
+    this.darks.push({ x, y, R: 200, t: 4, T: 4, img: this.add.image(x, y, 'glow').setTint(0x000000).setDepth(15.85).setScale(13).setAlpha(0) });
+    this.spawnLight(x, y, 'ring', 0x80e0ff, 0.3, 3.4, 0.9, 0.3); this.spawnLight(x, y, 'glow', 0xc8f0ff, 2, 5, 1, 0.25);
+    this.explode(x, y, PROP_BLAST.transformer);
+    Sfx.pylonZap(); Sfx.thunder(); Sfx.emp(); BUS.emit('flash', 0.14);
+    this.wreckProp(p, 6);
+  }
+  // PAINT CANS: they burst in three bright colours: paint over the floor and walls round them, over foes close by (it
+  // shows for 7 s and slows them a touch), and slicks on the floor that slow whatever wades through. Cooked off, they
+  // go up burning.
+  breakPaint(p, src) {
+    const x = p.x, y = p.y - 6, fy = p.y;
+    PAINT_COLS.forEach((col, k) => {
+      const dx = (k - 1) * 9;
+      this.fx.emit(x + dx * 0.4, y, { n: 22, angle: -Math.PI / 2 + (k - 1) * 0.5, spread: 2.2, speed: [80, 280], life: [0.5, 1.1], size: [2, 2], cols: [col], randCol: true, g: 700, mode: 2 });
+      this.paintBlot(x + dx, fy + 1, 9, col);
+      const [sx, sw] = this.spanOn(x + dx * 2.2, fy, 26); this.slicks.push({ x: sx, y: fy, w: sw, t: 12, col, dark: (col >> 1) & 0x7f7f7f, seed: Math.random() * 100 });
+    });
+    if (this.slicks.length > 18) this.slicks.splice(0, this.slicks.length - 18);
+    for (const d of [-1, 1]) for (let xx = 0; xx < 48; xx += 3) if (this.solidAt(x + d * xx, y - 4)) { this.paintBlot(x + d * xx, y - 6, 8, PAINT_COLS[d > 0 ? 2 : 0]); break; }   // and up a wall, if one is close
+    for (const e of this.enemies.getChildren()) {
+      if (!e.alive || e.under) continue; const ex = e.body.center.x, ey = e.body.center.y;
+      if (Math.hypot(ex - x, ey - y) > 64 || !this.los(x, y, ex, ey)) continue;
+      e.paintT = 7; e.paintCol = PAINT_COLS[clamp(Math.round((ex - x) / 24) + 1, 0, 2)]; this.paintedT = Math.max(this.paintedT, 7);
+      e.body.velocity.x += (Math.sign(ex - x) || 1) * 120 * e.def.kb; e.body.velocity.y -= 60 * e.def.kb;
+    }
+    if (src === 'fire' || p.burning) for (const dx of [-14, 14]) this.spawnFirePatch(x + dx, fy - 4);
+    for (let k = 0; k < 3; k++) this.spawnGib('g_wht', x + (k - 1) * 4, y, rand(-180, 180), rand(-320, -160), 'metal');
+    Sfx.splat(1); Sfx.clunk(); Sfx.bubblePop(); this.shake(60, 0.003);
+    this.wreckProp(p, 0);
+  }
+  paintBlot(x, y, r, col) {                                            // paint, not blood: one colour in a few shades, on tile pixels only
+    const c = this.lvlCtx, cr = (col >> 16) & 255, cg = (col >> 8) & 255, cb = col & 255;
+    c.globalCompositeOperation = 'source-atop';
+    for (let i = 0, n = Math.round(r * r * 1.4); i < n; i++) {
+      const a = rand(0, Math.PI * 2), d = Math.sqrt(Math.random()) * r, s = rand(0.72, 1.12);
+      c.fillStyle = `rgb(${Math.min(255, cr * s) | 0},${Math.min(255, cg * s) | 0},${Math.min(255, cb * s) | 0})`;
+      c.fillRect((x + Math.cos(a) * d) | 0, (y + Math.sin(a) * d * 0.7) | 0, Math.random() < 0.3 ? 2 : 1, Math.random() < 0.15 ? randi(2, 4) : 1);
+    }
+    c.globalCompositeOperation = 'source-over'; this.lvlMark(x, y, r + 4);
+  }
+  // SPRINKLER HEAD: shoot it, or let fire burn under it, and it rains on everything below for 3.5 s: fires out,
+  // burning foes put out, water on the floor
+  breakSprinkler(p) {
+    p.fr = 'x'; p.t = 3.5; p.tick2 = 0; p.pudT = 0; p.fy = this.floorBelow(p.x, p.y + 6) ?? p.y + 160;
+    this.fx.emit(p.x, p.y + 1, { n: 8, speed: [30, 120], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xffb0a0, 0xff3a2a], add: true, g: 400, mode: 1 });
+    Sfx.snap(); Sfx.gasHiss();
+  }
+  liveSprinkler(p, dt) {
+    p.t -= dt;
+    const k = Math.min(1, p.t / 0.6, (3.5 - p.t) / 0.2 + 0.2), hy = p.y + 3, fy = p.fy;
+    for (let n = 0; n < 6 * k; n++) this.fx.emit(p.x, hy, { n: 1, angle: Math.PI / 2, spread: 2, speed: [50, 150], life: [0.5, 1], size: [1, 2], cols: [0xe8fbff, 0x8ce0ff, 0x4ac8f8], alpha: [0.9, 0.5], g: 500, mode: 1 });
+    if (Math.random() < 0.5 * k) this.fx.emit(p.x + rand(-40, 40), fy - 2, { n: 2, angle: -Math.PI / 2, spread: 1.6, speed: [20, 60], life: [0.15, 0.3], size: [1, 1], cols: [0xd8f8ff, 0x8ce0ff], g: 400 });
+    if ((p.tick2 -= dt) <= 0) {
+      p.tick2 = 0.25;
+      this.douse(p.x, fy - 4, 52); this.douse(p.x, (hy + fy) / 2, (fy - hy) / 2 + 8);
+      if ((p.pudT -= 0.25) <= 0) { p.pudT = 0.75; this.spawnWater(p.x, fy - 2, 84); }
+    }
+    if (p.t <= 0) this.wreckProp(p, 0);
+  }
+  sprinklerHot(p) {                                                    // fire within a couple of tiles either side, anywhere under the head
+    const x = p.x, y0 = p.y, y1 = (this.floorBelow(x, p.y + 6) ?? p.y + 160) + 4, inZone = (qx, qy, pad) => Math.abs(qx - x) < 40 + pad && qy > y0 && qy < y1;
+    for (const Q of this.puddles) if (Q.fire && inZone(Q.x, Q.y - 1, Q.w / 2)) return true;
+    for (const e of this.enemies.getChildren()) if (e.alive && e.burnT > 0 && inZone(e.body.center.x, e.body.center.y, 0)) return true;
+    for (const q of this.props) if (q.burning && inZone(q.cx, q.cy, q.hw)) return true;
+    for (const F of this.flares) if (inZone(F.x, F.y, 0)) return true;
+    return false;
   }
 
   // ---------------------------------------------------------------- cryo cannon ----
@@ -19650,7 +20373,7 @@ class GameScene extends Phaser.Scene {
       let a = 0.88 + 0.12 * Math.sin(L.t * 9 + L.ph);
       if (Math.random() < 0.003) L.drop = 0.12;
       if (L.drop > 0) { L.drop -= dt; a *= 0.25; }
-      a *= 1 - (this.darkA || 0); L.gl.setAlpha(0.5 * a); L.cone.setAlpha(0.16 * a);   // lamps die in a blackout
+      a *= (1 - (this.darkA || 0)) * (L.outUntil > now ? 0.03 : 1); L.gl.setAlpha(0.5 * a); L.cone.setAlpha(0.16 * a);   // lamps die in a blackout (and a blown transformer's)
     }
     for (const B of this.beacons) B.img.setAlpha(0.35 + 0.35 * Math.sin(now / 220 + B.ph));
     const jb = this.jetCycle && this.jetCycle.st === 'tell' ? 1 - this.jetCycle.t / TUNE.JETS.tell : this.jetCycle && this.jetCycle.st === 'fire' ? 1 : 0;   // the grate flares before the vents fire
