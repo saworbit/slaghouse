@@ -407,6 +407,7 @@ class HudScene extends Phaser.Scene {
     this.setPerkUi(false);
     this.t0 = d.carry ? -1e9 : this.time.now; this.hurtA = 0; this.healA = 0; this.flashA = 0; this.hmT = 0; this.splats = [];
     this.tweens.killTweensOf(this.lblCombo); this.lblCombo.setAlpha(0);
+    this.tweens.killTweensOf(this.mkLbl); this.mkLbl.setAlpha(0);
     this.dirs = []; this.wcT = 0; this.setPause(false);
   }
   onHp(hp, dmg) {
@@ -424,7 +425,7 @@ class HudScene extends Phaser.Scene {
   showMulti(name, n) {                                                  // DOUBLE KILL ... MASSACRE: punches in under the callout
     if (this.overOn) return;
     this.tweens.killTweensOf(this.mkLbl);
-    this.mkLbl.setStyle({ color: ['#ffe14a', '#ffe14a', '#ffe14a', '#ffb347', '#ff7a2a', '#ff4a2a'][n] || '#ff3040' }).setText(name).setAlpha(1).setScale(4.6).setAngle(rand(-5, 5));
+    this.mkLbl.setStyle({ color: ['#ffe14a', '#ffe14a', '#ffe14a', '#ffb347', '#ff7a2a', '#ff4a2a'][n] || '#ff3040' }).setText(name).setAlpha(1).setScale(4.6).setAngle(crand(-5, 5));
     this.tweens.add({ targets: this.mkLbl, scale: 3, angle: 0, duration: 180, ease: 'Back.easeOut' });
     this.tweens.add({ targets: this.mkLbl, alpha: 0, delay: 900, duration: 350 });
   }
