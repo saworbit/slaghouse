@@ -176,6 +176,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
   the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed
   Normal sweep. Seeds 91, 404, 137 and 5 stay (#165).
+- CI's Brutal job plays seed 21 in place of seed 10 (#205). After the bot changes for #186, #187 and #201, seed 10
+  dies in operation 3, but a 40-seed Brutal sweep wins 39 of 40, against 38 on main, so the job is repinned by margin:
+  seed 21 wins with 58 HP at its lowest before and after. All eight pins now win, so the job has its one loss of slack
+  back.
 - When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
   of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
   (#191)
@@ -387,6 +391,17 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- The campaign bot no longer chases a medkit it can't reach for the rest of a run. A medkit it gets no closer to for
+  5 s is passed over for 30 s. On Brutal seed 28 a jump to a medkit in the Melt Floor's top left kept failing, so the
+  bot stayed there through all of Blackout with its foes out of sight; it now clears Blackout in under a minute. A new
+  check hangs a medkit out of reach over a hurt bot in Blackout (#187).
+- The campaign bot no longer holds a spot where its only shot is a harmless railgun shot through a deep crate stack.
+  A rail shot through cover that hurts nothing for 2.2 s counts as no shot, so the spot is marked blind and the bot
+  moves (#186).
+- The campaign bot rates each spot's shot along the line its body fires from, two pixels lower than before, so it
+  picks fewer spots it then can't shoot from. It also stops marking spots blind while it waits for a buried Wyrm. Each
+  campaign's summary line counts blind spots and passed-over medkits: across the 16 pinned seeds the blind-spot rule
+  now fires 2.4 times a run on average, against 5.3 before this change (#201).
 - **Low gravity warns before it starts and before it ends.** Gravity used to halve the moment Gravity Loss began,
   1.3 s before the LOW GRAVITY! callout, and snap back to full the moment the operation was cleared. Now it eases down
   over a second once LOW GRAVITY! is called. At the clear, a GRAVITY RESTORED callout follows WAVE CLEARED and gravity

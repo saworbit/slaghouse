@@ -738,7 +738,7 @@ flowchart LR
 | --- | --- |
 | `node dev/playtest/run.mjs` | All checks, then the Normal campaigns (seeds 91, 404, 137, 5, 15, 1, 13 and 17; seven must win) |
 | `node dev/playtest/run.mjs --quick` | All checks, without the full campaigns |
-| `node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7` | The CI Brutal job |
+| `node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,21,4,6,14 --min-wins=7` | The CI Brutal job |
 | `node dev/playtest/compare.mjs` | A comparison of each enemy kind between the working tree and a git ref |
 
 The [playtest guide](dev/playtest/README.md) has all options and the browser API.

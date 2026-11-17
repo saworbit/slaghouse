@@ -4,7 +4,8 @@ window.campaignBot = () => {
   const grounded = b => b.blocked.down || b.touching.down;
   const xOf = node => (node.x + 0.5) * TS;
   const feetOf = node => (node.y + 1) * TS;
-  let player, graph, walk, plan, action, timeout, failedEdges, focus, progress, lastHp, aim, motion, detour, anchor, blind;
+  let player, graph, walk, plan, action, timeout, failedEdges, focus, progress, lastHp, aim, motion, detour, anchor, blind, healTry, passed;
+  let blindSpots = 0, passedHeals = 0;                               // over the whole run, for the summary line (#201)
   const input = (g, key, held, press = false) => {
     g.keys[key].isDown = held;
     g.keys[key]._justDown = press;
@@ -216,7 +217,7 @@ window.campaignBot = () => {
   return g => {
     const b = g.player.body, now = g.time.now;
     if (player !== g.player || graph !== NAV) {
-      player = g.player; graph = NAV; walk = plan = action = focus = motion = detour = anchor = null; timeout = 0; failedEdges = new Map(); progress = now; blind = [];
+      player = g.player; graph = NAV; walk = plan = action = focus = motion = detour = anchor = healTry = null; timeout = 0; failedEdges = new Map(); progress = now; blind = []; passed = new Map();
     }
     if (g.perkOffer) {
       const choice = priority.find(id => g.perkOffer.includes(id)) || g.perkOffer[0];
@@ -236,8 +237,16 @@ window.campaignBot = () => {
       return !best || rank(e) < rank(best) ? e : best;
     }, null);
     const objective = g.routeGoal ? g.routeGoal() : g.campaignRoute[0];   // the open station, unless it's a lift waiting on a clear area
-    const heal = !objective && g.hp <= 70 && g.pickups.filter(k => !k.taken)
+    const heal = !objective && g.hp <= 70 && g.pickups.filter(k => !k.taken && !(passed.get(k) > now))
       .sort((a, c) => Math.hypot(a.x - px, a.y - py) - Math.hypot(c.x - px, c.y - py))[0];
+    // A pickup it gets no closer to for 5 s (a jump it keeps missing) is passed over for 30 s. Otherwise a hurt bot can
+    // chase one for the rest of the run while the foes wait out of sight, as Brutal seed 28 did in Blackout (#187).
+    if (heal) {
+      const d = Math.hypot(heal.x - px, heal.y - py);
+      if (healTry?.k !== heal) healTry = { k: heal, best: d, at: now };
+      else if (d < healTry.best - 16) { healTry.best = d; healTry.at = now; }
+      else if (now - healTry.at > 5000) { passed.set(heal, now + 30000); healTry = null; plan = null; timeout = 0; passedHeals++; }
+    } else healTry = null;
     const buried = g.enemies.getChildren().find(e => e.alive && e.under && !e.summoned && (e.kind === 'wyrm' || e.kind === 'burrower'));
     let foe = target || nearest || buried;
     // Stay on the foe it's chasing while it can still reach and hurt it (9 s without a hit lets go), unless one in sight
@@ -246,12 +255,16 @@ window.campaignBot = () => {
     if (chasing && !(target && Math.hypot(target.x - px, target.y - py) < 0.6 * Math.hypot(focus.x - px, focus.y - py))) foe = focus;
     if (focus !== foe || foe?.hp < lastHp) { focus = foe; lastHp = foe?.hp; progress = now; anchor = null; }
     const stall = now - progress > 2200;
-    // Parked at its chosen spot with no clear shot and nothing hurt for a while: the spot's sight line only grazes a
-    // corner (positions are scored from the node, shots from the body), so mark it blind to this foe and pick another.
+    // Parked at its chosen spot with no clear shot and nothing hurt for a while: mark the spot blind to this foe and pick
+    // another. Spots are scored from the line the body fires along (#201), so this is a backstop for a foe that has
+    // moved behind cover. A railgun shot through cover that does no harm counts as no shot: a stack of crates deeper
+    // than the rail punches through looks like soft cover from the spot, and the bot would fire into it for the rest of
+    // the run (#186). A buried foe is never in sight, so waiting for it to surface marks nothing.
     blind = blind.filter(s => s.until > now && s.foe.alive);
-    if (stall && foe && !target && !objective && ground && plan && Math.hypot(plan.x - px, plan.feet - b.bottom) < 20 &&
+    const clearShot = target && visible(target.body.center.x, target.body.center.y);
+    if (stall && foe && foe !== buried && !clearShot && !objective && ground && plan && Math.hypot(plan.x - px, plan.feet - b.bottom) < 20 &&
         !blind.some(s => s.foe === foe && Math.hypot(s.x - px, s.feet - b.bottom) < 40)) {
-      blind.push({ foe, x: px, feet: b.bottom, until: now + 20000 });
+      blind.push({ foe, x: px, feet: b.bottom, until: now + 20000 }); blindSpots++;
       plan = null; timeout = 0; progress = now;
     }
     const blindAt = (x, feet) => blind.some(s => s.foe === foe && Math.hypot(s.x - x, s.feet - feet) < 40);
@@ -278,10 +291,11 @@ window.campaignBot = () => {
         if (goal) return Math.abs(x - goal.x) * 1.8 + Math.abs(y - (objective ? goal.y - 14 : goal.y)) * 3 + hazard;
         if (!foe) return Math.abs(x - px) + Math.abs(y - py) + hazard;
         if (foe === buried) return Math.abs(x - (foe.ux ?? px)) * 0.16 + (LH - y) * 2 + hazard;
-        if (stranded) return (g.los(x, y, targetX, targetY) ? 0 : 400) + Math.max(0, Math.hypot(x - targetX, y - targetY) - 560) * 0.5 + hazard;   // out of reach: anywhere that sees it will do
+        const eye = y + 14 - b.halfHeight - 2;                          // where visible() looks from with the body standing there (#201)
+        if (stranded) return (g.los(x, eye, targetX, targetY) ? 0 : 400) + Math.max(0, Math.hypot(x - targetX, y - targetY) - 560) * 0.5 + hazard;   // out of reach: anywhere that sees it will do
         const dist = Math.hypot(x - targetX, y - targetY);
-        const sight = g.los(x, y, targetX, targetY);
-        const softCover = rail && g.losHard(x, y, targetX, targetY);
+        const sight = g.los(x, eye, targetX, targetY);
+        const softCover = rail && g.losHard(x, eye, targetX, targetY);
         return (sight ? 0 : softCover ? 55 : 300) + Math.abs(dist - (foe === g.boss ? 200 : 135)) + hazard;
       });
       timeout = now + 420;
@@ -343,6 +357,6 @@ window.campaignBot = () => {
     if (aim) T.aimAt(aim.x, aim.y);
     return { x: Math.round(px), y: Math.round(py), hp: Math.round(g.hp), goal: [Math.round(gx), Math.round(gy)],
       route: objective?.label, target: foe?.kind, path: plan?.path?.length, fallback: plan?.fallback, node: start,
-      edge: action?.edge ?? plan?.path?.find(edge => edge.from === start), grounded: ground, move: dir, hook: g.hook?.state };
+      edge: action?.edge ?? plan?.path?.find(edge => edge.from === start), grounded: ground, move: dir, hook: g.hook?.state, blindSpots, passedHeals };
   };
 };
