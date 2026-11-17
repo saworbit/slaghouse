@@ -261,6 +261,23 @@ const TUNE = {
   HYDRO:     { cooldown: 55, range: 140, cone: 8, dmg: 1, push: 340, soak: 5, zap: 1.5, chill: 1.8, pud: 0.3 },
   CINDER:    { speed: 150, hop: 260, trail: 1.6, owned: 1.5, ownSpeed: 260, ownDmg: 40 },
   GATLING:   { speed: 35, keep: [140, 260], spin: 0.9, burst: 2.2, rate: 0.07, dmg: 5, turn: 1.2, cool: 1.5, front: 0.6, hot: 1.5 },
+  // ---- expansion: enemies ----
+  FLAILER:   { speed: 50, close: 26, keep: 60, r: 32, spin: 5.5, windSpin: 12, windMs: 550, cd: [2.8, 3.8], reach: 165, throwSpeed: 420, reel: 460, hit: 12, ehit: 10, throwDmg: 22, ethrowDmg: 20 },
+  HOSER:     { speed: 85, keep: [80, 160], range: 190, braceMs: 450, spray: 1.1, turn: 1.8, blast: 340, push: 2600, dmg: 3, tick: 0.3, soak: 1.6, cd: [2.4, 3.2], tank: 72 },
+  DEMO:      { speed: 175, lightMs: 700, fuse: 3, hop: 300, drop: 0.7,
+               boom: { radius: 52, maxDamage: 36, minDamage: 10, enemyDamage: 40, selfDamage: 30, push: 400, maxRise: 500, enemy: true, tileDamage: 90 },
+               shot: { radius: 56, maxDamage: 40, minDamage: 12, enemyDamage: 70, selfDamage: 24, push: 420, maxRise: 520, enemy: true, tileDamage: 90 } },
+  PANZER:    { speed: 38, keep: [150, 260], turnMs: 900, gunTurn: 1.8, aimMs: 650, flight: 1.1, cd: [3.4, 4.4], coaxAt: 120, burst: 4, gap: 0.08, coaxDmg: 5, coaxCd: 2.2,
+               front: 0.35, rear: 1.5, top: 1.5, boom: { radius: 50, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 360, maxRise: 460, tileDamage: 60, scenery: true } },
+  REAPER:    { speed: 70, rush: 110, at: 120, tellMs: 700, whirl: 1.2, drive: 185, r: 20, tick: 0.2, dmg: 9, edmg: 10, dizzy: 1.6, take: 1.75, cd: [2, 3] },
+  GULL:      { speed: 95, alt: 105, orbit: 80, screamMs: 520, dive: [0.45, 0.85], rake: 14, cd: [2.4, 3.4], bonk: 0.8 },
+  OVERCLOCK: { speed: 60, keep: [160, 260], range: 150, links: 3, charge: 0.5, haste: 1.35 },
+  REFRACTOR: { cd: [2.8, 3.6], tellMs: 900, fireMs: 250, bounces: 2, range: 760, dmg: 20, edmg: 15, near: 6, bank: 0.5 },
+  MIRAGE:    { speed: 80, keep: [140, 240], fireCd: [2, 2.6], volley: 3, gap: 0.16, boltSpeed: 220, dmg: 6, castMs: 600, castCd: [6, 8], spread: 56, life: 12 },
+  CLINGER:   { speed: 150, hold: 2, throwSpeed: 420, flight: 1.2,
+               boom: { radius: 40, maxDamage: 30, minDamage: 10, enemyDamage: 30, selfDamage: 28, push: 320, maxRise: 420, enemy: true, tileDamage: 50 },
+               thrown: { radius: 44, maxDamage: 60, minDamage: 20, selfDamage: 12, push: 340, maxRise: 440, tileDamage: 60 },
+               pop: { radius: 26, maxDamage: 14, minDamage: 4, enemyDamage: 14, selfDamage: 12, push: 220, maxRise: 300, enemy: true, tileDamage: 20 } },
   BANNER:    { speed: 40, keep: [200, 300], radius: 150, heal: 5, plant: 6 },
   FOREMAN:   { speed: 40, rage: 62, cd: 2.2, slamTell: 700, slamDmg: 22, spray: 3, magnet: 1.6, pull: 110, maxHounds: 4, core: 1.3 },
 };
@@ -464,6 +481,16 @@ const CODEX = [
   ['cinder', 'CINDER WHEEL', 'w0', 'A BURNING WHEEL THAT ROLLS AND HOPS. KICK IT BACK AT THEM.'],
   ['gatling', 'GATLING', 'w0', 'SPINS UP, THEN HOSES YOU. OUTRUN THE STREAM; HIT IT WHEN HOT.'],
   ['banner', 'BANNER', 'w0', 'PLANTS A BANNER THAT HEALS EVERY FOE NEAR IT. TAKE IT DOWN.'],
+  ['flailer', 'FLAILER', 'w0', 'WHIRLS A SPIKED BALL ROUND ITSELF, THEN HURLS IT. GET INSIDE.'],
+  ['hoser', 'HOSER', 'w0', 'ITS JET BLASTS YOU BACK AND SOAKS YOU. ITS TANK LEAVES A PUDDLE.'],
+  ['demo', 'DEMO RUNNER', 'r0', 'SPRINTS AT YOU WITH LIT DYNAMITE. SHOOT THE BUNDLE FIRST.'],
+  ['panzer', 'PANZER', 'w0', 'MINI-TANK THAT LOBS SHELLS. ARMOURED UP FRONT: GET BEHIND IT.'],
+  ['reaper', 'REAPER', 'w0', 'WHIRLS ITS SCYTHES AT YOU, THEN REELS. HIT IT WHILE IT IS DIZZY.'],
+  ['gull', 'GULL', 'f0', 'CIRCLES HIGH, SCREECHES, THEN SWOOPS TO RAKE YOU.'],
+  ['overclock', 'OVERCLOCKER', 'o0', 'BEAMS HASTE INTO THREE FOES. KILL IT AND THE LINKS SNAP.'],
+  ['refractor', 'REFRACTOR', 'p0', 'BANKS A LASER OFF TWO WALLS. THE THIN LINE SHOWS ITS PATH.'],
+  ['mirage', 'MIRAGE', 'w0', 'PROJECTS TWO DECOYS OF ITSELF. ONLY THE REAL ONE BLEEDS.'],
+  ['clinger', 'CLINGER', 'c0', 'CLAMPS ON AND BLOWS. KICK OR DASH IT OFF AT THEM.'],
   ['foreman', 'THE FOREMAN', 'w0', 'OVERTIME BOSS. SLAMS, SPRAYS RIVETS, MAGNETS YOU IN, CALLS HOUNDS.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
 ];
@@ -661,7 +688,7 @@ slotLabels();
 // elite foes: one trait each, a coloured aura and a diamond over the head
 const ELITE_KINDS = ['armored', 'shielded', 'volatile', 'regen'];
 const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, regen: 0x5cff7a };
-const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit']);
+const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger']);
 // One record per foe kind: stats, hitbox and gibs, plus what the scene looks up by kind: frame0 is the frame it
 // spawns on, flier means no gravity and air spawn points, humanoid means head shots, cover and alerts, and update
 // names the GameScene method that runs it each frame (updateWalker for the plain ones). visuals names the method
@@ -669,8 +696,11 @@ const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship
 // marks draw over it first: all of them (a net, a microwave's swell, a bubble, stasis) unless it says 'net' for only
 // the net or 'none'. death names the method for its own death: blasts, spills, loose parts, a boss's fall (none for
 // the ones that just burst). setup names the method that gives it its own fields, images and start position when it
-// spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). FLIERS
-// and isHumanoid below are built from these, and dev/playtest/kinds.js checks every kind (#52).
+// spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). armour
+// names a method that adjusts each hit on it in damageEnemy before difficulty and perks (a plate, a weak spot, a fuse
+// a shot sets off), and contact one that runs when it touches you instead of the plain bite and says whether it dealt
+// with the touch (a blast, a clamp, a rake). FLIERS and isHumanoid below are built from these, and
+// dev/playtest/kinds.js checks every kind (#52).
 // The rest are values killEnemy reads, all left out on most kinds: ragdoll drops it as a ragdoll you can keep shooting
 // on a light kill (it needs RAG art), haywire sends its jetpack off on one, noAirStyle skips the airborne kill bonus,
 // deathFlash is the colours of a flash as it dies, killZoom a camera punch, gibPower the least force its gibs fly
@@ -810,6 +840,27 @@ const ENEMY = {
   wraith: { key: 'wraith', frame0: 'f0', flier: true, setup: 'setupWraith', update: 'updateWraith', visuals: 'visWraith', death: 'deathWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
   chiller: { key: 'chiller', frame0: 'w0', setup: 'setupChiller', update: 'updateChiller', visuals: 'visChiller', death: 'deathChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
   warhorn: { key: 'warhorn', frame0: 'w0', setup: 'setupWarhorn', update: 'updateWarhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
+  // ---- expansion: enemies ----
+  flailer: { key: 'flailer', frame0: 'w0', setup: 'setupFlailer', update: 'updateFlailer', visuals: 'visFlailer', death: 'deathFlailer', contact: 'contactNone', fw: 24, fh: 24, bw: 14, bh: 20, hp: 130, speed: 50, sight: 400, touch: 0, kb: 0.35,
+             gibs: ['g_chain', 'g_chain', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [12, 16] },
+  hoser: { key: 'hoser', frame0: 'w0', setup: 'setupHoser', update: 'updateHoser', visuals: 'visHoser', death: 'deathHoser', fw: 18, fh: 24, bw: 11, bh: 20, hp: 75, speed: 85, sight: 380, touch: 8, kb: 0.7,
+           gibs: ['g_hosetank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 14] },
+  demo: { key: 'demo', frame0: 'r0', setup: 'setupDemo', update: 'updateDemo', visuals: 'visDemo', death: 'deathDemo', armour: 'armourDemo', contact: 'contactDemo', fw: 16, fh: 22, bw: 10, bh: 18, hp: 35, speed: 175, sight: 420, touch: 0, kb: 0.9,
+          gibs: ['g_tnt', 'g_tnt', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  panzer: { key: 'panzer', frame0: 'w0', setup: 'setupPanzer', update: 'updatePanzer', visuals: 'visPanzer', death: 'deathPanzer', armour: 'armourPanzer', fw: 30, fh: 20, bw: 26, bh: 15, hp: 200, speed: 38, sight: 460, touch: 12, kb: 0.1, mech: true,
+            gibs: ['g_tread', 'g_tread', 'g_plateL', 'g_plateL', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [12, 16], killShake: [220, 0.01], killStop: 80 },
+  reaper: { key: 'reaper', frame0: 'w0', setup: 'setupReaper', update: 'updateReaper', visuals: 'visReaper', armour: 'armourReaper', contact: 'contactReaper', fw: 22, fh: 32, bw: 12, bh: 28, hp: 140, speed: 70, sight: 420, touch: 10, kb: 0.4, mech: true,
+            gibs: ['g_scythe', 'g_scythe', 'g_plate', 'g_wire', 'g_shard', 'g_eye'], gibN: [10, 13] },
+  gull: { key: 'gull', frame0: 'f0', flier: true, setup: 'setupGull', update: 'updateGull', visuals: 'visGull', contact: 'contactGull', fw: 22, fh: 14, bw: 14, bh: 9, hp: 40, speed: 95, sight: 460, touch: 0, kb: 0.9, mech: true,
+          gibs: ['g_feather', 'g_feather', 'g_feather', 'g_wire', 'g_plate', 'g_eye'], gibN: [8, 11], noAirStyle: true },
+  overclock: { key: 'overclock', frame0: 'o0', flier: true, setup: 'setupOverclock', update: 'updateOverclock', visuals: 'visOverclock', death: 'deathOverclock', contact: 'contactNone', fw: 16, fh: 16, bw: 12, bh: 12, hp: 45, speed: 60, sight: 460, touch: 0, kb: 0.8, mech: true,
+               gibs: ['g_coil', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [7, 9], noAirStyle: true },
+  refractor: { key: 'refractor', frame0: 'p0', setup: 'setupRefractor', update: 'updateRefractor', visuals: 'visRefractor', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 0, sight: 520, touch: 6, kb: 0, mech: true,
+               gibs: ['g_prism', 'g_prism', 'g_glass', 'g_plate', 'g_wire', 'g_shard'], gibN: [8, 11] },
+  mirage: { key: 'mirage', frame0: 'w0', setup: 'setupMirage', update: 'updateMirage', visuals: 'visMirage', death: 'deathMirage', fw: 16, fh: 24, bw: 10, bh: 20, hp: 70, speed: 80, sight: 420, touch: 8, kb: 0.7,
+            gibs: ['g_xmask', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_rib'], gibN: [10, 13] },
+  clinger: { key: 'clinger', frame0: 'c0', flier: true, setup: 'setupClinger', update: 'updateClinger', visuals: 'visClinger', death: 'deathClinger', armour: 'armourClinger', contact: 'contactClinger', fw: 12, fh: 12, bw: 9, bh: 9, hp: 20, speed: 150, sight: 420, touch: 0, kb: 1.2, mech: true,
+             gibs: ['g_magnet', 'g_shard', 'g_wire'], gibN: [4, 6], noAirStyle: true },
   tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visTarspit', death: 'deathTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
 };
