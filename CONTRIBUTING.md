@@ -155,6 +155,12 @@ name an `armour` method on its record, which `damageEnemy` calls just before the
 `contact` method that replaces the plain bite when it touches you. Armour whose place in the damage order matters
 differently still goes in `damageEnemy` itself.
 
+A kind that shoots aims with `this.aimLead(x, y, speed)` (or `this.leadAngle(e, speed)`), so it leads the player on
+the shared `TUNE.AI.lead` scale for each difficulty. Every bullet it takes from `this.ebullets` sets `keg: null`: the
+pool reuses bullets, and a bullet that keeps an old `keg` sets that drum burning. A humanoid can reuse the squad
+helpers: `startSearch` and `searchStep` when it loses you, `underFire` and `coverMe` when it is hit hard, and
+`bark(e, text)` to show what it does. `dev/playtest/tactics.js` checks the shared behaviour.
+
 A full boss also sets `boss: true` (its title card and bar, and the Smelter's treatment from stasis, nets, gravity
 pulses, presses and the microwave), `title: [name, subtitle]` for the card and `barNotches` for its phase marks on
 the boss bar. Its own hooks are `bossArmour` and `bossContact`: they run before every other kind's, and

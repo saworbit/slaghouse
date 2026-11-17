@@ -271,6 +271,9 @@ star gives +5% damage with that gun. Three stars make the gun gold. The weapon w
 - Blasts break crates, girders and gratings. Some tiles are the only way up to a solid deck. These tiles are
   reinforced (bolted, with a hazard edge), and they do not break.
 - Fast kills chain into DOUBLE KILL, TRIPLE and up to MASSACRE.
+- Foes fight as squads. They aim where you are going, so change direction to make them miss. Grunts climb to your
+  deck, and gunmen cover each other. Short calls over their heads, for example FLANKING! or COVER ME!, show what
+  they do. On Normal and Brutal they shoot drums near you. When a drum starts to burn, move away.
 - When five or fewer foes are left, arrows at the screen edge point to them. The last foes come to find you.
 - From wave 2, some foes warp in as **elites**: armored, shielded, volatile or regenerating. A coloured diamond marks
   an elite. Elites drop health when they die.
@@ -722,7 +725,7 @@ flowchart LR
   run["node dev/playtest/run.mjs"] --> chrome["Headless Chrome<br/>playwright-core, new profile<br/>for each check"]
   cdnp["Phaser from jsDelivr<br/>one fetch, SRI check"] --> chrome
   chrome --> page["slaghouse.html<br/>with harness.js<br/>and the check scripts"]
-  page --> checks["Checks: two tabs, DAILY, run modes,<br/>enemy kinds, props, NAV, checkpoints"]
+  page --> checks["Checks: two tabs, DAILY, run modes,<br/>enemy kinds, foe tactics, props, NAV, checkpoints"]
   page --> camp["VB.campaign(1500)<br/>campaign-bot.js plays"]
   checks --> res{"Page error, console error<br/>or failed check?"}
   camp --> res
