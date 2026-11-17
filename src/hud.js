@@ -117,6 +117,7 @@ class HudScene extends Phaser.Scene {
     on('medal', m => this.medQ.push(m)); on('jam', t => { this.jamT = t; });
     on('locked', ids => { this.lockedIds = ids.slice(); });
     on('perks', this.onPerks); on('perkdone', () => this.setPerkUi(false)); on('perklist', ids => this.lblPerks.setText(ids.length ? 'PERKS ' + ids.map(id => (PERKS.find(q => q.id === id) || {}).tag).join(' ') : ''));
+    this.polInit();                                                      // expansion: polish (cosmetic only)
   }
   // ---- slagforge round: perk cards ----
   onPerks(ids) {
@@ -147,14 +148,20 @@ class HudScene extends Phaser.Scene {
     if (i !== this.perkSel) { this.perkSel = i; Sfx.swap(); }
     if (click && this.hudFrame !== this.perkArm) this.pickPerk(i);
   }
-  drawPerks(time) {
+  drawPerks(time) {                                                    // the cards deal in one after another; the pick lifts and glows (expansion: polish)
     const g = this.perkG; g.clear();
-    g.fillStyle(0x000000, 0.5); g.fillRect(0, 134, VIEW_W, 222);
+    if (this.polPerkFor !== this.perkArm) { this.polPerkFor = this.perkArm; this.polPerkT0 = time; this.polLift = [0, 0, 0]; }   // a new draft
+    const age = (time - this.polPerkT0) / 1000, rdt = Math.min(this.game.loop.delta, 50) / 1000;
+    g.fillStyle(0x000000, 0.5 * clamp(age / 0.15, 0, 1)); g.fillRect(0, 134, VIEW_W, 222);
     this.perkIds.forEach((id, i) => {
-      const x = 160 + i * 220, sel = i === this.perkSel, lift = sel ? 4 : 0;
-      g.fillStyle(sel ? 0x2a1806 : 0x0a0b0e, 0.94); g.fillRect(x, 200 - lift, 200, 140);
-      g.lineStyle(2, sel ? 0xffb347 : 0x3a424d, 1); g.strokeRect(x, 200 - lift, 200, 140);
-      if (sel) { const bob = Math.round(Math.sin(time / 120) * 2); g.fillStyle(0xffe46a, 1); g.fillTriangle(x + 100 - 6, 348 + bob, x + 100 + 6, 348 + bob, x + 100, 342 + bob); }
+      const k = clamp((age - i * 0.07) / 0.3, 0, 1), e = 1 - Math.pow(1 - k, 3), sel = i === this.perkSel, C = this.perkCards[i];
+      this.polLift[i] += ((sel ? 6 : 0) - this.polLift[i]) * Math.min(1, rdt * 16);
+      const x = 160 + i * 220, lift = Math.round(this.polLift[i] - (1 - e) * 40), top = 200 - lift, glow = sel ? 0.5 + 0.5 * Math.sin(time / 140) : 0;
+      if (sel) { g.lineStyle(4, 0xff8a1f, (0.15 + 0.25 * glow) * e); g.strokeRect(x - 3, top - 3, 206, 146); }
+      g.fillStyle(sel ? 0x2a1806 : 0x0a0b0e, 0.94 * e); g.fillRect(x, top, 200, 140);
+      g.lineStyle(2, sel ? (glow > 0.6 ? 0xffd070 : 0xffb347) : 0x3a424d, e); g.strokeRect(x, top, 200, 140);
+      if (sel) { const bob = Math.round(Math.sin(time / 120) * 2), by = top + 140; g.fillStyle(0xffe46a, e); g.fillTriangle(x + 100 - 6, by + 12 + bob, x + 100 + 6, by + 12 + bob, x + 100, by + 6 + bob); }
+      C.name.setY(228 - lift).setAlpha(e); C.d.forEach((l, j) => l.setY(258 + j * 18 - lift).setAlpha(e)); C.key.setY(326 - lift).setAlpha(e);
     });
   }
   // ---- overdrive round: hit direction, wave cards, pause menu ----
@@ -241,10 +248,10 @@ class HudScene extends Phaser.Scene {
     g.fillStyle(0x06070a, 0.85); g.fillRect(270, 100, 420, 366);
     g.fillStyle(0xff8a1f, 1); g.fillRect(270, 100, 420, 3); g.fillRect(270, 463, 420, 3);
     if (this.pShownSel !== this.pSel) { this.pShownSel = this.pSel; this.pItems.forEach((o, i) => o.setStyle({ color: i === this.pConfirm ? '#ff6a4a' : i === this.pSel ? '#ffe46a' : '#8f9bab' })); }
-    const o = this.pItems[this.pSel], ask = this.pConfirm === this.pSel;   // a pending restart / quit turns its bar red
-    g.fillStyle(ask ? 0x2a0806 : 0x2a1806, 0.95); g.fillRect(300, o.y - 15, 360, 30); g.fillStyle(ask ? 0xff4a3a : 0xff8a1f, 1); g.fillRect(300, o.y - 15, 4, 30); g.fillRect(656, o.y - 15, 4, 30);
-    const s = this.pItems[this.pSel], bob = Math.round(Math.sin(time / 120) * 2);
-    g.fillStyle(0xffe46a, 1); g.fillTriangle(314 + bob, s.y - 6, 314 + bob, s.y + 6, 322 + bob, s.y);
+    const o = this.pItems[this.pSel], ask = this.pConfirm === this.pSel, oy = this.polSlideY(o.y);   // a pending restart / quit turns its bar red; the bar slides to the pick
+    g.fillStyle(ask ? 0x2a0806 : 0x2a1806, 0.95); g.fillRect(300, oy - 15, 360, 30); g.fillStyle(ask ? 0xff4a3a : 0xff8a1f, 1); g.fillRect(300, oy - 15, 4, 30); g.fillRect(656, oy - 15, 4, 30);
+    const bob = Math.round(Math.sin(time / 120) * 2);
+    g.fillStyle(0xffe46a, 1); g.fillTriangle(314 + bob, oy - 6, 314 + bob, oy + 6, 322 + bob, oy);
   }
   drawWheel(gs) {                                                      // radial weapon picker (hold Tab): time crawls while it's open
     const on = !!(gs && gs.sys.isActive() && gs.wheelOn), g = this.wheelG; g.clear();
@@ -580,6 +587,7 @@ class HudScene extends Phaser.Scene {
     if (this.overOn) { this.ovPrompt.setAlpha(Math.floor(time / 400) % 2 ? 1 : 0.35); this.tallyOver(dt); }
     this.drawWheel(gsr);
     if (this.countPulse > 0) { this.countPulse -= dt; this.lblCount.setScale(4 + Math.max(0, this.countPulse) * 6); }
+    this.polUpdate(time, dt, gsr);                                       // expansion: polish (cosmetic only)
   }
   drawBoss(dt) {
     const lg = this.lbG; lg.clear();
@@ -591,18 +599,10 @@ class HudScene extends Phaser.Scene {
       this.lbTitle.setVisible(ta > 0).setAlpha(ta).setScale(8 + (1 - ta) * 3); this.lbSub.setVisible(ta > 0).setAlpha(ta);
     } else { this.lbTitle.setVisible(false); this.lbSub.setVisible(false); }
     const gs = this.scene.get('Game'), b = gs && gs.boss;
-    if (b && b.alive && this.lbT < 2.2) {                                // boss health bar, white trail on damage, phase notches
-      const frac = clamp(b.hp / b.def.hp, 0, 1);
-      this.bossDisp = this.bossDisp > frac ? Math.max(frac, this.bossDisp - dt * 0.35) : frac;
-      const g = this.g, x = 336, y = 18, w = 408;
-      g.fillStyle(0x06070a, 0.85); g.fillRect(x - 4, y - 4, w + 8, 22);
-      g.fillStyle(0x3a2010, 1); g.fillRect(x, y, w, 14);
-      g.fillStyle(0xffffff, 0.9); g.fillRect(x, y, Math.round(w * this.bossDisp), 14);
-      g.fillStyle(frac > 0.66 ? 0xff8a20 : frac > 0.33 ? 0xff5a20 : 0xff2a2a, 1); g.fillRect(x, y, Math.round(w * frac), 14);
-      g.fillStyle(0xffffff, 0.3); g.fillRect(x, y, Math.round(w * frac), 3);
-      g.fillStyle(0x000000, 1); g.fillRect(x + Math.round(w * 0.66), y, 2, 14); g.fillRect(x + Math.round(w * 0.33), y, 2, 14);
+    if (b && b.alive && this.lbT < 2.2) {                                // boss health bar: polBossBar fills it in, holds a chip trail, flashes and marks the phases
+      this.polBossBar(b, clamp(b.hp / b.def.hp, 0, 1), dt);
       this.bossName.setVisible(true);
-    } else this.bossName.setVisible(false);
+    } else { this.bossName.setVisible(false); this.polBossRef = null; }
   }
   drawSplats(dt) {
     const g = this.splatG; g.clear();
@@ -671,7 +671,7 @@ class HudScene extends Phaser.Scene {
     g.fillStyle(0x000000, 0.55 * this.hint1.alpha); g.fillRect(0, 494, VIEW_W, 38);   // backing strip for the control hints
     const fg = this.flashG; fg.clear();
     let red = this.hurtA * 0.6;
-    if (this.hp > 0 && this.hp <= 30) red = Math.max(red, 0.2 + 0.14 * Math.sin(time / 160));
+    if (this.hp > 0 && this.hp <= 30) red = Math.max(red, 0.16 + 0.34 * this.polBeat);   // throbs with the heartbeat (expansion: polish)
     const edge = (color, a) => {
       for (let i = 0; i < 6; i++) {
         const t = 12, ins = i * t, al = a * (1 - i / 6) * 0.5;
@@ -684,6 +684,107 @@ class HudScene extends Phaser.Scene {
     if (this.healA > 0.01) edge(0x30ff60, this.healA * 0.5);
     if (this.rampA > 0) edge(0xff6a10, 0.22 + 0.1 * Math.sin(time / 90));
     if (this.flashA > 0.01) { fg.fillStyle(0xfff2d8, this.flashA); fg.fillRect(0, 0, VIEW_W, VIEW_H); }
+  }
+  // ---- expansion: polish ----
+  // HUD juice: the crosshair blooms with recoil and twists on a kill, the low-health edge throbs with the heartbeat,
+  // the health readout punches when it changes, a weapon swap slides its name in and glints its slot, the boss bar
+  // fills in, holds a chip trail and jolts on big hits, wave cards catch a sweep of light, a picked perk card flashes,
+  // and the results grade lands with a ring. Cosmetic only: it reads the game scene and draws from fxRandom, never
+  // Math.random, since this scene runs inside the seeded campaigns too.
+  polInit() {
+    this.polG = this.add.graphics().setDepth(4.7).setBlendMode(ADD);   // light sweeps: the wave card, the weapon slot
+    this.polTop = this.add.graphics().setDepth(9.5).setBlendMode(ADD); // over the results and the perk cards: the grade ring, the pick flash
+    this.polHp = this.hp; this.polHpK = 0; this.polHpHeal = false; this.polBeat = 0; this.polHeartT = 0; this.polDub = -1;
+    this.polW = this.weapon; this.polWT = 1; this.polBloom = 0; this.polXTint = -1; this.polGrade = false; this.polGradeT = 1;
+    this.polPerkOn = false; this.polPickT = 1; this.polPickX = 0; this.polPickY = 0; this.polBossRef = null; this.polPOn = false;
+    this.polNotchTab = { boss: [0.66, 0.33, 0.15], foreman: [0.6, 0.25], gunship: [0.5, 0.25] };   // where each boss changes phase; a new boss can set barNotches on its record
+  }
+  polSlideY(y) {                                                       // drawPause: the highlight bar glides to the pick
+    const rdt = Math.min(this.game.loop.delta, 50) / 1000;
+    this.polPY = this.polPOn ? this.polPY + (y - this.polPY) * Math.min(1, rdt * 22) : y; this.polPOn = true;
+    return Math.round(this.polPY);
+  }
+  polBossBar(b, frac, dt) {                                            // drawBoss, every frame a boss is up
+    const g = this.g, x = 336, y = 18, w = 408, notches = b.def.barNotches || this.polNotchTab[b.kind] || [];
+    if (this.polBossRef !== b) { this.polBossRef = b; this.polBossIn = 0; this.polBossF = frac; this.bossDisp = frac; this.polChip = 0; this.polBossHit = 0; this.polJolt = 0; this.polNotch = notches.map(n => frac <= n ? 0 : -1); }
+    this.polBossIn = Math.min(1, this.polBossIn + dt / 0.8);
+    if (frac < this.polBossF - 1e-4) { this.polChip = 0.5; this.polBossHit = 0.1; this.polJolt = Math.min(0.35, this.polJolt + (this.polBossF - frac) * 8); }   // a hit: hold the trail, flash, jolt by the chunk lost
+    this.polBossF = frac;
+    if (this.polChip > 0) this.polChip -= dt; else this.bossDisp = Math.max(frac, this.bossDisp - dt * 0.7);   // the chip trail waits, then drains
+    if (this.bossDisp < frac) this.bossDisp = frac;
+    this.polBossHit = Math.max(0, this.polBossHit - dt); this.polJolt = Math.max(0, this.polJolt - dt);
+    const fill = 1 - Math.pow(1 - this.polBossIn, 3), jx = this.polJolt > 0 ? Math.round(crand(-3, 3) * this.polJolt * 3) : 0, jy = this.polJolt > 0 ? Math.round(crand(-1, 1) * this.polJolt * 3) : 0;
+    const X = x + jx, Y = y + jy, shown = Math.round(w * Math.min(frac, fill)), trail = Math.round(w * Math.min(this.bossDisp, fill)), low = frac < 0.25;
+    g.fillStyle(0x06070a, 0.85); g.fillRect(X - 4, Y - 4, w + 8, 22);
+    if (low) { g.lineStyle(2, 0xff2a2a, 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(this.time.now / 90))); g.strokeRect(X - 5, Y - 5, w + 10, 24); }   // nearly down: the frame pulses red
+    g.fillStyle(0x3a2010, 1); g.fillRect(X, Y, Math.round(w * fill), 14);
+    g.fillStyle(this.polChip > 0 ? 0xffffff : 0xffd0a0, 0.9); g.fillRect(X, Y, trail, 14);
+    g.fillStyle(frac > 0.66 ? 0xff8a20 : frac > 0.33 ? 0xff5a20 : 0xff2a2a, 1); g.fillRect(X, Y, shown, 14);
+    g.fillStyle(0xffffff, 0.3); g.fillRect(X, Y, shown, 3);
+    if (this.polBossHit > 0) { g.fillStyle(0xffffff, this.polBossHit * (OPTS.flash ? 5 : 2)); g.fillRect(X, Y, shown, 14); }
+    if (this.polBossIn < 1) { g.fillStyle(0xffffff, 0.9); g.fillRect(X + Math.round(w * fill) - 2, Y - 2, 3, 18); }   // filling in: a bright leading edge
+    notches.forEach((n, i) => {
+      const nx = X + Math.round(w * n), gone = frac <= n;
+      if (this.polNotch[i] < 0 && gone) this.polNotch[i] = 0.6;         // a phase line just broke
+      const f = this.polNotch[i] > 0 ? (this.polNotch[i] = Math.max(0, this.polNotch[i] - dt)) / 0.6 : 0;
+      g.fillStyle(gone ? 0x2a1206 : 0x000000, 1); g.fillRect(nx, Y, 2, 14);
+      if (f > 0) { g.fillStyle(0xffe46a, f); g.fillRect(nx - 1, Y - 2 - Math.round(6 * f), 4, 18 + Math.round(12 * f)); g.fillStyle(0xffffff, f * 0.5); g.fillRect(nx - 10 * f, Y + 6, 2 + 20 * f, 2); }
+    });
+  }
+  polUpdate(time, dt, gs) {                                            // update(), last thing every frame
+    const live = !!(gs && gs.sys.isActive()), pg = this.polG, tg = this.polTop; pg.clear(); tg.clear();
+    if (!this.pauseOn) this.polPOn = false;
+    // health readout: punches on a hit, swells on a heal, and beats with the heart below 30
+    if (this.hp !== this.polHp) { this.polHpHeal = this.hp > this.polHp; this.polHpK = this.polHpHeal ? 0.6 : 1; this.polHp = this.hp; }
+    this.polHpK = Math.max(0, this.polHpK - dt * 5);
+    if (live && this.hp > 0 && this.hp <= 30) { if (gs.heartT > this.polHeartT + 0.05) { this.polBeat = 1; this.polDub = 0.17; } this.polHeartT = gs.heartT; }   // the game resets heartT on each beat
+    if (this.polDub >= 0 && (this.polDub -= dt) < 0) this.polBeat = Math.max(this.polBeat, 0.7);   // lub... dub
+    this.polBeat = Math.max(0, this.polBeat - dt * 4.5);
+    const hk = this.polHpK * this.polHpK;
+    this.lblHp.setScale(3 * (1 + 0.28 * hk + 0.1 * this.polBeat)).setY(16 + (this.polHpHeal || !hk ? 0 : Math.round(crand(-2, 2) * hk)));
+    // crosshair: blooms with the gun's recoil, twists and goes red on a kill
+    if (live && this.xhair.visible) {
+      const r = clamp((gs.recoil || 0) / 6, 0, 1), kk = this.hmT > 0 && this.hmKill ? this.hmT / 0.32 : 0;
+      this.polBloom += (r - this.polBloom) * Math.min(1, dt * (r > this.polBloom ? 40 : 10));
+      this.xhair.setScale(2 * (1 + 0.35 * this.polBloom + 0.3 * kk)).setRotation(kk * Math.PI / 4);
+      const tint = kk > 0 ? 0xff7a60 : 0xffffff; if (tint !== this.polXTint) { this.polXTint = tint; if (tint === 0xffffff) this.xhair.clearTint(); else this.xhair.setTint(tint); }
+    }
+    // weapon swap: the name slides in and a glint crosses the slot in hand
+    if (this.weapon !== this.polW) { this.polW = this.weapon; this.polWT = 0; }
+    if (this.polWT < 1) {
+      this.polWT = Math.min(1, this.polWT + dt / 0.28);
+      this.lblWeapon.setX(26 - Math.round(Math.pow(1 - this.polWT, 3) * 16));
+      const slots = (live && gs.weaponSlots) || ALL_WEAPON_SLOTS, N = slots.length, k = slots.indexOf(this.weapon);
+      if (k >= 0 && !this.overOn) {
+        const sx = 14 + (4 + (N <= 9 ? k - 4 : 0)) * 34, gx = sx - 8 + this.polWT * 48, a = 0.5 * (1 - this.polWT), c = v => clamp(v, sx + 2, sx + 30);
+        pg.fillStyle(0xffffff, a); pg.fillTriangle(c(gx), 84, c(gx + 6), 84, c(gx - 8), 126); pg.fillTriangle(c(gx + 6), 84, c(gx - 2), 126, c(gx - 8), 126);
+      }
+    }
+    // wave card: a sweep of light crosses the band, and sparks ride the ends of its rules as they draw out
+    if (this.wcT > 0 && this.wcTitle.visible) {
+      const age = this.wcDur - this.wcT, kin = clamp(age / 0.25, 0, 1), kout = clamp(this.wcT / 0.3, 0, 1), e = 1 - Math.pow(1 - Math.min(kin, kout), 3), h = Math.round(92 * e), y0 = 262 - h / 2;
+      if (kin < 1) for (let s = -1; s <= 1; s += 2) { const sx = 480 + s * 480 * e, a = 1 - kin; pg.fillStyle(0xffe8b0, 0.9 * a); pg.fillRect(sx - 6, y0 - 1, 12, 4); pg.fillRect(sx - 6, y0 + h - 3, 12, 4); pg.fillStyle(0xff8a1f, 0.5 * a); pg.fillRect(sx - 1, y0 - 6, 3, 14); pg.fillRect(sx - 1, y0 + h - 8, 3, 14); }
+      const p = (age - 0.2) / 0.7;
+      if (p > 0 && p < 1 && h > 8) { const bx = -120 + p * 1200; pg.fillStyle(0xfff0d0, 0.2 * Math.sin(Math.PI * p)); pg.fillTriangle(bx, y0, bx + 70, y0, bx + 40, y0 + h); pg.fillTriangle(bx, y0, bx + 40, y0 + h, bx - 30, y0 + h); }
+    }
+    // perk draft: the picked card flashes as the draft closes
+    if (this.perkOn) { this.polPerkOn = true; this.polPickX = 160 + this.perkSel * 220; this.polPickY = 200 - Math.round(this.polLift ? this.polLift[this.perkSel] || 0 : 0); }
+    else if (this.polPerkOn) { this.polPerkOn = false; if (!this.pauseOn && live && gs.state === 'play') this.polPickT = 0; }
+    if (this.polPickT < 1) {
+      this.polPickT = Math.min(1, this.polPickT + dt / 0.35);
+      const a = 1 - this.polPickT, gr = Math.round(this.polPickT * 14);
+      tg.fillStyle(0xffd890, 0.5 * a * a * a * (OPTS.flash ? 1 : 0.4)); tg.fillRect(this.polPickX, this.polPickY, 200, 140);
+      tg.lineStyle(2, 0xffb347, a); tg.strokeRect(this.polPickX - gr, this.polPickY - gr, 200 + gr * 2, 140 + gr * 2);
+    }
+    // results: the grade stamps in with a ring and a spray of sparks
+    if (!this.overOn) this.polGrade = false;
+    else if (this.ovGradeShown && !this.polGrade) { this.polGrade = true; this.polGradeT = 0; }
+    if (this.polGradeT < 1) {
+      this.polGradeT = Math.min(1, this.polGradeT + dt / 0.55);
+      const e = 1 - Math.pow(1 - this.polGradeT, 3), a = 1 - this.polGradeT, col = { S: 0xffd040, A: 0x5cff7a, B: 0x5cc8ff, C: 0xc6ced8, D: 0xff6a4a }[this.ovData && this.ovData.grade] || 0xffd040;
+      tg.lineStyle(3, col, a); tg.strokeCircle(822, 270, 24 + 84 * e); tg.lineStyle(1, 0xffffff, a * 0.8); tg.strokeCircle(822, 270, 12 + 60 * e);
+      tg.fillStyle(col, a); for (let i = 0; i < 12; i++) { const an = i / 12 * Math.PI * 2 + 0.26, r = 30 + 78 * e; tg.fillRect(Math.round(822 + Math.cos(an) * r) - 2, Math.round(270 + Math.sin(an) * r) - 2, 4, 4); }
+    }
   }
 }
 
