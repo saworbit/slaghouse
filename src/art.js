@@ -4026,15 +4026,20 @@ const PROP_SPOTS = [
    ['window', 25, 6], ['horn', 31, 8], ['tube', 47, 11], ['tube', 52, 11], ['cryo', 15, 14], ['ext', 60, 18], ['vending', 80, 14], ['fan', 3, 13]],
   // ---- expansion: arenas ---- ARENAS 06-10
   [['terminal', 50, 16], ['horn', 3, 10], ['water', 40, 24], ['cryo', 58, 24], ['capacitor', 19, 20], ['tube', 12, 18], ['tube', 87, 18], ['ext', 43, 22],
-   ['flood', 6, 12], ['flood', 93, 12, -1], ['window', 50, 11], ['vending', 30, 12], ['ammo', 70, 12], ['oil', 17, 24], ['propane', 83, 24]],
+   ['flood', 6, 12], ['flood', 93, 12, -1], ['window', 50, 11], ['vending', 30, 12], ['ammo', 70, 12], ['oil', 17, 24], ['propane', 83, 24],
+   ['transformer', 36, 15], ['server', 69, 20], ['sprinkler', 64, 15], ['vat', 88, 16, -1]],
   [['cryo', 30, 24], ['cryo', 70, 24], ['cryo', 47, 20], ['vending', 53, 20, -1], ['terminal', 4, 12], ['flares', 95, 12], ['tube', 18, 14], ['tube', 80, 14],
-   ['fan', 3, 19], ['fan', 96, 19, -1], ['ext', 44, 23], ['horn', 50, 6], ['water', 60, 24], ['ammo', 24, 16], ['neon', 50, 3]],
+   ['fan', 3, 19], ['fan', 96, 19, -1], ['ext', 44, 23], ['horn', 50, 6], ['water', 60, 24], ['ammo', 24, 16], ['neon', 50, 3],
+   ['gasline', 40, 19], ['hopper', 60, 19], ['jukebox', 7, 20], ['paint', 91, 20]],
   [['neon', 65, 6], ['flood', 13, 20], ['flood', 86, 20, -1], ['capacitor', 49, 16], ['fuse', 16, 23], ['water', 55, 24], ['propane', 30, 24], ['oil', 46, 24],
-   ['horn', 53, 11], ['terminal', 82, 20], ['ammo', 95, 20], ['tube', 64, 18], ['flares', 4, 16]],
+   ['horn', 53, 11], ['terminal', 82, 20], ['ammo', 95, 20], ['tube', 64, 18], ['flares', 4, 16],
+   ['hydrant', 20, 24], ['transformer', 28, 14], ['server', 66, 12, -1], ['sprinkler', 76, 14]],
   [['terminal', 49, 20], ['capacitor', 51, 20], ['ammo', 39, 16], ['flares', 60, 16], ['oil', 34, 24], ['propane', 65, 24], ['water', 38, 24], ['toxic', 61, 24],
-   ['fuse', 43, 22], ['fuse', 56, 22, -1], ['horn', 50, 10], ['window', 50, 16], ['tube', 46, 14], ['tube', 54, 14], ['neon', 50, 3]],
+   ['fuse', 43, 22], ['fuse', 56, 22, -1], ['horn', 50, 10], ['window', 50, 16], ['tube', 46, 14], ['tube', 54, 14], ['neon', 50, 3],
+   ['vat', 43, 24], ['jukebox', 56, 24, -1], ['gasline', 36, 14], ['hopper', 63, 14]],
   [['fan', 96, 6, -1], ['capacitor', 43, 20], ['capacitor', 56, 20], ['terminal', 4, 12], ['flares', 95, 12], ['boiler', 92, 24], ['oil', 8, 24], ['fuse', 38, 22],
-   ['fuse', 61, 22, -1], ['tube', 26, 18], ['tube', 73, 18], ['horn', 20, 6], ['window', 50, 11], ['ammo', 28, 8], ['propane', 72, 8], ['vending', 33, 24]],
+   ['fuse', 61, 22, -1], ['tube', 26, 18], ['tube', 73, 18], ['horn', 20, 6], ['window', 50, 11], ['ammo', 28, 8], ['propane', 72, 8], ['vending', 33, 24],
+   ['hoist', 40, 15], ['hydrant', 68, 24], ['paint', 6, 20], ['transformer', 88, 16]],
 ];
 ARENAS.forEach((A, i) => { A.props = PROP_SPOTS[i] || []; });
 const CAMPAIGN_ARENAS = [
