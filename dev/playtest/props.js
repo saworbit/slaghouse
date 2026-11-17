@@ -1,5 +1,5 @@
 // Breakable scenery checks. Not part of the game; see dev/playtest/README.md. Needs harness.js.
-// PR.check() goes through every arena's PROP_SPOTS. Each prop must:
+// PR.check() goes through every arena's PROP_SPOTS and the Lab's Breakables Bay. Each prop must:
 //   - be a kind in PROPS with art in PROP_ART, a texture holding every frame the art names, and the scene methods
 //     its row names (hit, brk, live)
 //   - sit where it can: a floor prop in an empty cell over something to stand on, a wall prop clear of solid tiles,
@@ -7,15 +7,24 @@
 //   - break with a few grunts about and run its whole effect to a wreck without an error, come back when the
 //     wave restocks, and break again to a blast
 // Each arena is checked the way the current RUNMODE stages it, and again in the other mode where the campaign builds it
-// differently (ARENA 04 and 05 get extra steps in the campaign).
-// PR.check([0]) checks only those arenas (0 = ARENA 01). Returns { fails: [...], props: n }; an empty list is a pass.
+// differently (ARENA 04 and 05 get extra steps in the campaign). The Lab's Breakables Bay, which has one of every kind,
+// is checked last, with a grunt beside each of its floor props as well.
+// PR.check([0]) checks only those arenas (0 = ARENA 01), PR.check(['lab']) only the Breakables Bay. Returns
+// { fails: [...], props: n }; an empty list is a pass.
 window.PR = (() => {
   const PR = {};
   const EFFECT_MS = 6000;
+  const labRoom = room => {                                            // deploy a Lab room over whatever runs now, as SlagLab.load does from a live Lab
+    T.g().scene.restart({ lab: labConfig(room), spawns: [] }); T.run(50);
+    const g = T.g(); g.pauseGame = () => {};
+    for (let t = 0; t < 3000 && (g.labTransition || g.needReset || g.labPending); t += 100) T.run(100);
+    g.enemiesLeft = 99; T.run(300);
+    return g;
+  };
 
   PR.check = (only) => {
-    const fails = [], arenas = only || ARENAS.map((_, i) => i), mode = RUNMODE, other = mode === 'campaign' ? 'endless' : 'campaign';
-    const stages = arenas.flatMap(a => CAMPAIGN_ARENAS[a].grid === ARENAS[a].grid ? [[a, mode]] : [[a, mode], [a, other]]);
+    const fails = [], arenas = only || [...ARENAS.map((_, i) => i), 'lab'], mode = RUNMODE, other = mode === 'campaign' ? 'endless' : 'campaign';
+    const stages = arenas.flatMap(a => a === 'lab' ? [[a]] : CAMPAIGN_ARENAS[a].grid === ARENAS[a].grid ? [[a, mode]] : [[a, mode], [a, other]]);
     let count = 0;
     for (const kind of Object.keys(PROPS)) {
       const D = PROPS[kind], A = PROP_ART[kind], say = msg => fails.push(`${kind}: ${msg}`);
@@ -26,12 +35,15 @@ window.PR = (() => {
       if (!A.fr.includes('x')) say('no wreck frame');
     }
     for (const [a, m] of stages) {
-      RUNMODE = m;
-      let g; try { g = T.setup(a); } finally { RUNMODE = mode; }
-      const name = ARENAS[a].name + (m === 'campaign' ? ' (campaign)' : '');
+      const lab = a === 'lab';
+      let g;
+      if (lab) g = labRoom('breakables');
+      else { RUNMODE = m; try { g = T.setup(a); } finally { RUNMODE = mode; } }
+      const name = lab ? 'Lab ' + LAB_ROOMS.breakables.name : ARENAS[a].name + (m === 'campaign' ? ' (campaign)' : '');
+      const spots = lab ? LAB_ROOMS.breakables.arena.props : PROP_SPOTS[a] || [];
       const step = (ms, what) => { try { T.run(ms); return true; } catch (err) { fails.push(`${name}: threw ${what}: ${String(err && err.message || err).split('\n')[0]}`); return false; } };
       T.errs.length = 0;
-      if (g.props.length !== (PROP_SPOTS[a] || []).length) fails.push(`${name}: ${g.props.length} props built for ${(PROP_SPOTS[a] || []).length} spots`);
+      if (g.props.length !== spots.length) fails.push(`${name}: ${g.props.length} props built for ${spots.length} spots`);
       for (const p of g.props) {
         const D = p.D, say = msg => fails.push(`${name} ${p.kind} at ${p.tx},${p.ty}: ${msg}`);
         count++;
@@ -44,7 +56,8 @@ window.PR = (() => {
         } else if (!g.standAt(p.bx, p.ay - 2)) say('nothing overhead to hang from');
         if (p.st !== 'ok') say(`starts '${p.st}'`);
       }
-      const foes = (g.A.points.G || []).slice(0, 6).map(([x, y]) => g.spawnEnemy('grunt', x, y));
+      const beside = lab ? g.props.filter(p => p.D.mount === 'floor' && g.tileAt(p.tx + 1, p.ty) === '.' && g.tileAt(p.tx + 1, p.ty + 1) !== '.').map(p => [p.tx + 1, p.ty]) : [];
+      const foes = [...(g.A.points.G || []).slice(0, 6), ...beside].map(([x, y]) => g.spawnEnemy('grunt', x, y));
       for (const e of foes) e.aggro = false;
       if (!step(300, 'settling')) continue;
       for (const p of g.props) { try { g.hitProp(p, 999, 'harness', p.cx, p.cy, 1, 0); } catch (err) { fails.push(`${name} ${p.kind}: hitProp threw: ${err.message}`); } }
