@@ -677,6 +677,38 @@ try {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;
   });
+  await check('flying bosses close in over the Wrecking Yard ball without being hit, and the ball alone breaks no Overseer node', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'bossrush'; Sfx.muted = true; T.boot();
+      for (const kind of ['overseer', 'crucible', 'conductor']) {
+        Math.random = seeded(178);
+        const g = T.setup(3), W = g.wreck, [bx, by] = g.A.points.B[0];
+        T.tp(50, 17); T.run(100);                                      // on the dais, under the swing
+        g.warpIn(kind, [bx, by], true); T.run(2500);                   // the warp, then the intro hover
+        const e = g.enemies.getChildren().find(o => o.alive && o.kind === kind);
+        if (!e) { fails.push(`${kind}: did not warp in`); continue; }
+        const nodes = (e.nodes || []).slice(), pb = g.player.body;
+        let near = Infinity, nearAt = null;
+        for (let t = 0; t < 12000; t += 100) {
+          T.run(100);
+          if (!e.alive) break;
+          const d = Math.hypot(e.body.center.x - pb.center.x, e.body.center.y - pb.center.y);
+          if (d < near) { near = d; if (d < 180 && nearAt === null) nearAt = t; }
+          if (!Number.isFinite(e.x + e.y) || e.x < 0 || e.x > LW || e.y < 0 || e.y > LH) { fails.push(`${kind}: left the world at (${e.x}, ${e.y})`); break; }
+        }
+        if (W.hit.has(e)) fails.push(`${kind}: the wrecking ball hit it`);
+        if (nearAt === null || nearAt > 6000) fails.push(`${kind}: never came within 180 px of a player on the dais in 6 s (closest ${Math.round(near)} px)`);
+        if (kind === 'overseer') {
+          if (nodes.length !== 4) fails.push(`overseer: ${nodes.length} nodes, want 4`);
+          const hurt = nodes.filter(n => !n.alive || n.hp < n.def.hp);
+          if (hurt.length) fails.push(`overseer: ${hurt.length} nodes lost HP with nobody shooting (the ball swung through them)`);
+        }
+      }
+      return [...fails, ...T.errs];
+    });
+  });
   await check('every breakable prop goes off cleanly in every arena', async ctx => {
     const page = await open(ctx, ['props']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return PR.check(); })).fails;
