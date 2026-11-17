@@ -2001,10 +2001,7 @@ class GameScene extends Phaser.Scene {
     this.spawnLight(mx, my, 'glow', 0x9adcff, 1, 2, 1, 0.12); this.fxSparks(mx, my, 6, e.aimA, 0.5, [80, 220]); this.fxSmoke(mx, my, 3);
     Sfx.snipe();
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const b = this.ebullets.getFirstDead(false); if (!b) return;
-    b.setTexture('sbullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(4, 4, true);
-    b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.2, px: mx, py: my, ang: a, dmg: T.damage, snipe: true, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { tex: 'sbullet', size: 4, life: 1.2, snipe: true });
   }
 
   // -------------------------------------------------------------------- boss ----
@@ -4761,10 +4758,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.JET, a = e.aimA + rand(-4, 4) * DEG, mx = e.x + Math.cos(a) * 14, my = e.y + 1 + Math.sin(a) * 14;
     e.recoil = 2; Sfx.eshot(); this.spawnLight(mx, my, 'glow', 0xffe080, 0.6, 1, 0.9, 0.06);
     if (this.solidAt(mx, my) || !this.los(e.x, e.y, mx, my)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4 });
   }
   spawnHaywire(e, dx) {
     const h = this.haywires.getFirstDead(false); if (!h) return false;
@@ -6427,10 +6421,7 @@ class GameScene extends Phaser.Scene {
     if (Math.random() < 0.5) this.spawnGib('g_casing', sx, sy, -e.dir * rand(40, 100), rand(-200, -120), 'shell');
     this.shake(30, 0.0015);
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4 });
   }
   juggCrack(e) {
     const b = e.body;
@@ -6730,10 +6721,7 @@ class GameScene extends Phaser.Scene {
     const pb = this.player.body, sx = e.x + e.dir * 22, sy = e.body.bottom - 2, a = Math.atan2(pb.center.y - sy, pb.center.x - sx) + rand(-8, 8) * DEG;
     Sfx.eshot(); this.spawnLight(sx, sy, 'glow', 0xffd080, 0.6, 1, 0.9, 0.05);
     if (this.solidAt(sx, sy)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, sx, sy, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * 380, Math.sin(a) * 380);
-    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: this.campaign ? 3 : 4, snipe: false, keg: null });
+    this.spawnEBullet(sx, sy, a, 380, this.campaign ? 3 : 4, { life: 1.4 });
   }
   gunshipDrop(e) {
     const kind = this.campaign || Math.random() < 0.5 ? 'grunt' : 'tick';
@@ -7549,11 +7537,14 @@ class GameScene extends Phaser.Scene {
       px = qx; py = qy;
     }
   }
-  spawnEBullet(x, y, a, speed, dmg) {
+  // Every enemy bullet comes from here (#203): a pooled bullet gets every per-shot field reset to its default, then
+  // the shot's own. tex and size are its look and body, life its seconds aloft, snipe a sniper round (swept between
+  // frames, a heavier hit) and keg the drum a burst is aimed at (thinkEnforcer), which it sets burning on the way.
+  spawnEBullet(x, y, a, speed, dmg, { tex = 'ebullet', size = 3, life = 1.6, snipe = false, keg = null } = {}) {
     const b = this.ebullets.getFirstDead(false); if (!b) return null;
-    b.setTexture('ebullet'); b.enableBody(true, x, y, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
+    b.setTexture(tex); b.enableBody(true, x, y, true, true); b.body.setAllowGravity(false); b.body.setSize(size, size, true);
     b.setRotation(a); b.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
-    Object.assign(b, { life: 1.6, px: x, py: y, ang: a, dmg, snipe: false, keg: null });
+    Object.assign(b, { life, px: x, py: y, ang: a, dmg, snipe, keg });
     return b;
   }
 
@@ -15965,10 +15956,7 @@ class GameScene extends Phaser.Scene {
     this.fxSparks(mx, my, 2, e.aimA, 0.6, [60, 140]);
     Sfx.eshot();
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const b = this.ebullets.getFirstDead(false); if (!b) return;
-    b.setTexture('ebullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
-    b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: e.keg || null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4, keg: e.keg || null });
   }
   onEBulletHit(p, b) {
     if (!b.active || this.state === 'dead') return;

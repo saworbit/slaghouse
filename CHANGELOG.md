@@ -182,6 +182,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Every enemy bullet now comes from `spawnEBullet`, which resets each per-shot field (texture, body size, life,
+  `snipe` and the `keg` an Enforcer's burst aims at) before applying the shot's own. The Sniper, Jet trooper,
+  Juggernaut, Gunship and Enforcer each set those fields on a raw pooled bullet, so a new spawner that copied one and
+  left a field out would inherit the last shot's value, such as a drum to set burning. No shot or random number moves:
+  `compare.mjs` reports no kind as different, and a new check fires each spawner from a pool of stale bullets (#203).
 - **Smarter foes.** A squad-tactics layer that every foe shares sits on top of each kind's own moves.
   - **They read where you're going.** Shots lead your run speed (smoothed, so a jink isn't a heading), follow the arc
     of a jump down to the floor it lands on and stop at the wall that stops you. The lead is half your movement on
