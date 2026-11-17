@@ -190,9 +190,11 @@ restarts, and its record counts for that day.
 Every kill counts toward that gun's **mastery** (three stars gold-plate it): 25, 100 and 250 kills earn its three stars, each +5% damage with
 it. The weapon wheel shows each gun's stars.
 
-Medkits restock between waves, and after each wave you pick one of three perks for the rest of the run (more
+Medkits, drums, gas cans and broken scenery beam back in on a green supply beam between waves, and after each wave
+you pick one of three perks for the rest of the run (more
 damage, faster fire, life steal, a double jump, exploding kills and so on). Steam pipes on the walls burst into
-scalding jets when shot. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. When five or fewer foes are left, arrows at the screen edge point to them and the stragglers come looking for you. From wave 2, a few foes warp in as **elites**
+scalding jets when shot, and get welded back on for the next wave. Blasts tear up crates, girders and gratings, but
+the few that are the only way up to a solid deck are reinforced (bolted, with a hazard edge) and won't break. Quick kills chain into DOUBLE KILL, TRIPLE and on up to MASSACRE. When five or fewer foes are left, arrows at the screen edge point to them and the stragglers come looking for you. From wave 2, a few foes warp in as **elites**
 (armored, shielded, volatile or regenerating, marked by a coloured diamond) that drop health when they die. Medals pop up as you earn them, and the title screen counts your collection. Supply
 crates float down mid-wave with a power-up: OVERDRIVE (double damage), HASTE, an AEGIS shield or a MEDPACK. Kicking an enemy that's pulsing orange (under 20% health) executes it for health
 orbs. The results screen lists your top guns, your biggest hit and what killed you, grades the run (S-D) and

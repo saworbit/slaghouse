@@ -146,6 +146,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- **Blasts can't strand a deck any more.** The few crates, girders and gratings that are the only way up to a solid
+  deck or ledge are reinforced: steel straps or bolts and a hazard edge, blast-proof, and they never sag loose. When
+  hit they only ring. One search over the player's own moves from the start picks them: 2 to 21 tiles an arena
+  (ARENA 04's grating towers need 36 to 41), and the Furnace's girder catwalk still comes down. Before, a busy fight
+  could blow away every step up to the Sorting Line's right deck and strand the foes on it for the rest of the act.
+  The Lab's rooms leave every tile loose.
+- **Restocks arrive.** Drums, gas cans, medkits and broken props used to reappear out of nowhere at each wave. Now
+  they beam back in on a short green supply beam (the foes' warp beam is magenta) and fade in inside it. Only the look
+  changed: they're there from the same frame as before. A burst steam valve is welded back on for the next wave with
+  sparks and a weld flash, and keeps a clamp to show for it, instead of being fixed in an instant.
 - **The lift is a lift.** Every arena has two lift doors in its back wall: the car you arrived in, beside the start,
   and the way on at the far end, locked with a red lamp. When the route reaches it, the car comes down (its light
   passes the slots in the doors), chimes and opens. It waits until no foe is left. Walk in and the doors shut
@@ -173,10 +183,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 - The campaign bot and `T.bot` fight a valve crew instead of waiting at a lift that won't come (`routeGoal()`). The
   bot also stops flipping between a foe it can reach and one stranded on a deck whose steps were blown away (a
   Meltdown stall that cost Brutal seeds on main too). A stranded foe now comes last, and the bot shoots it from any
-  reachable spot that can see it. The valve crews, the breaker and the lift ride change the seeded campaigns, so every
-  pinned seed plays out differently. The eight Brutal pins win 7 (seed 14 dies in Meltdown's slag) and the four
-  Normal pins all win. A 40-seed Brutal sweep wins 31 here against 36 on main. Every loss comes before the new
-  objectives, and they are the same kinds main has.
+  reachable spot that can see it. It also keeps chasing the foe it's after while it can reach and hurt it (9 s
+  without a hit lets go), unless one in sight is much closer, instead of flipping between a foe in sight across the
+  room and a nearer one out of sight. Reinforced tiles stop its railgun, so they no longer count as soft cover.
+  The world-logic changes reshuffle every seeded campaign. The four Normal pins and all eight Brutal pins win, and a
+  40-seed Brutal sweep wins 37, the same as main with this bot (main won 36 with the old one).
 - With ARENAS 06-10 in the rotation, DAILY picks its arena from ten, so a given day's arena differs from before.
   BOSS RUSH now rides the lift after its second, fourth, sixth and eighth bosses, two fights to each of the first
   five arenas.
