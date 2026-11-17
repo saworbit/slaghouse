@@ -146,6 +146,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- With ARENAS 06-10 in the rotation, DAILY picks its arena from ten, so a given day's arena differs from before.
+  BOSS RUSH now rides the lift after its second, fourth, sixth and eighth bosses, two fights to each of the first
+  five arenas.
+- `dev/playtest/README.md` and CONTRIBUTING cover the new ENEMY hooks (`armour`, `contact`, `bossArmour`,
+  `bossContact`), adding a boss, the Lab Breakables Bay in `PR.check()`, and keeping the seeded campaigns steady
+  with the cosmetic random source.
 - `dev/synthwave` runs on Python 3.13 with numpy 2.5.4 and scipy 1.18.1 (both need 3.12 or newer, so the 3.11 venv
   couldn't take Dependabot's bumps). Every track re-renders within float rounding of the 3.11 output, the AAC bank
   rebuilds byte for byte, and `build.py` checks both banks clean. The SFX pipeline stays on 3.11. (#170, #171)
