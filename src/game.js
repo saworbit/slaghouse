@@ -56,7 +56,7 @@ class GameScene extends Phaser.Scene {
     this.restartArmUntil = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
     this.hook = null; this.hookReady = 0; this.wrecks = []; this.darkA = 0;
-    this.physics.world.gravity.y = TUNE.GRAVITY;
+    this.physics.world.gravity.y = this.gravTo = TUNE.GRAVITY; this.gravAt = 0;   // gravTo: where low gravity is easing to, from gravAt
     this.mineReady = 0; this.mineQueued = false; this.killTimes = []; this.killCamUntil = 0; this.chaosT = []; this.chaosCd = 0; this.lastRag = null;
     this.jd = {}; this._v = new Phaser.Math.Vector2();
     // overdrive round: dash, the four new guns, harpoons, slag tide, pause
@@ -919,7 +919,7 @@ class GameScene extends Phaser.Scene {
     if (this.jd.J) this.aimMode = 'keys';
 
     if (this.state !== 'dead') { if (this.ride) this.updateRide(dt, now); else { this.updatePlayer(dt, now); this.updateHook(dt); } } else if (this.hook) this.hook = null;   // in a lift car you're along for the ride
-    this.updateEnemies(dt, now);
+    this.updateEnemies(dt, now); this.updateGravity(dt);
     this.updateTractor(dt, now); this.updateTars(dt, now); this.updateMagnetField(dt);
     this.updateShockOrbs(dt); this.updateNeedles(dt); this.updateJets(dt, now); this.updateDrills(dt, now); this.updateClouds(dt, now);
     this.updateFlares(dt, now); this.updateLimpets(dt, now); this.updatePipes(dt, now); this.updateEmpRings(dt, now);
@@ -3000,13 +3000,42 @@ class GameScene extends Phaser.Scene {
   }
   xbPhase(e) { const f = e.hp / e.def.hp; return f > 0.66 ? 1 : f > 0.33 ? 2 : 3; }
   xbFloor() { const pb = this.player.body, fy = this.floorBelow(pb.center.x, pb.bottom - 4, 240); return fy === null ? pb.bottom : fy; }   // the floor you're over
-  xbSafeX(x, from = x) {                                                // ARENA 04: a flier keeps to its own side of the wrecking ball's swing
+  xbSafeX(x, from = x) {                                                // ARENA 04: beside the wrecking ball's swing, on the side `from` is on
     const W = this.A.wrecker, r = W ? W.len * Math.sin(W.amp) + 36 : 0;
     return !W ? x : from < W.px ? Math.min(x, W.px - r) : Math.max(x, W.px + r);
   }
-  xbLift(e, x, y, alt) { const fy = this.floorBelow(x, y - 8); e.body.reset(this.xbSafeX(x, x - 1), clamp(fy === null ? y : Math.min(y, fy - alt), 56, LH - 96)); }   // warped in on the floor, a flier rises to hover
+  // ARENA 04: a flier of radius s keeps out of the ball's reach anywhere along its arc. It can hover over the arc, above
+  // the dais, and it crosses over the top of the swing rather than through it.
+  xbReach(e) { const b = e.body; return Math.hypot(b.halfWidth, b.halfHeight) + (e.nodes && e.phase === 1 ? TUNE.OVERSEER.orbit + 8 : 0); }   // the Overseer's nodes too
+  xbBallGap(x, y, s) {                                                  // > 0: (x, y) is that far inside the ball's reach
+    const W = this.A.wrecker; if (!W) return -1;
+    const a = clamp(Math.atan2(x - W.px, y - W.py), -W.amp, W.amp);
+    return TUNE.WRECK.r + s + 4 - Math.hypot(x - W.px - Math.sin(a) * W.len, y - W.py - Math.cos(a) * W.len);
+  }
+  xbClear(x, y, s, inside) {                                            // the nearest point out of the ball's reach, over the arc (inside) or under and beside it
+    const W = this.A.wrecker; if (!W || this.xbBallGap(x, y, s) <= 0) return [x, y];
+    if (inside === undefined) inside = Math.hypot(x - W.px, y - W.py) < W.len;
+    const a = clamp(Math.atan2(x - W.px, y - W.py), -W.amp, W.amp), r = (TUNE.WRECK.r + s + 14) * (inside ? -1 : 1);   // 10 px spare for its drift
+    const nx = W.px + Math.sin(a) * (W.len + r), ny = W.py + Math.cos(a) * (W.len + r);
+    return ny >= 56 && this.xbBallGap(nx, ny, s) <= 0 ? [nx, ny] : [this.xbSafeX(x), y];
+  }
+  xbRoute(x, y, tx, ty, s) {                                            // a line through the arc goes over the swing instead: up, across, then down
+    const W = this.A.wrecker; if (!W) return [tx, ty];
+    const inside = Math.hypot(x - W.px, y - W.py) < W.len;              // a target near the arc is pushed to the side the flier is on, so it can't flip
+    if (this.xbBallGap(x, y, s) > 0) return this.xbClear(x, y, s, inside);   // in its reach: out the shortest way first
+    [tx, ty] = this.xbClear(tx, ty, s, inside);
+    const crosses = (x1, y1) => { for (let i = 1; i <= 12; i++) if (this.xbBallGap(x + (x1 - x) * i / 12, y + (y1 - y) * i / 12, s) > 0) return true; return false; };
+    if (!crosses(tx, ty)) return [tx, ty];
+    const top = W.py + Math.cos(W.amp) * W.len - TUNE.WRECK.r - s - 8;   // the lane over the ends of the swing
+    if (top < 56) return [this.xbSafeX(tx, x), ty];                   // too big to pass over: stay on this side
+    if (y > top + 4) return !crosses(x, top) ? [x, top] : [x < W.px ? W.px - W.len * Math.sin(W.amp) - TUNE.WRECK.r - s - 8 : W.px + W.len * Math.sin(W.amp) + TUNE.WRECK.r + s + 8, y];   // out from under the arc, then up
+    return [tx, top];
+  }
+  xbLift(e, x, y, alt) { const fy = this.floorBelow(x, y - 8), [nx, ny] = this.xbClear(x, clamp(fy === null ? y : Math.min(y, fy - alt), 56, LH - 96), this.xbReach(e)); e.body.reset(nx, ny); }   // warped in on the floor, a flier rises to hover
   xbHover(e, dt, tx, ty, sp, k = 1.6) {                                 // a flier eases toward a point, kept inside the room and out of the ball's way
-    const b = e.body; tx = this.xbSafeX(clamp(tx, 72, LW - 72), b.center.x); ty = clamp(ty, 56, LH - 96);
+    const b = e.body, s = this.xbReach(e);
+    if (this.xbBallGap(b.center.x, b.center.y, s) > 0) sp = Math.max(sp, 90);   // caught in the ball's reach: hurry out
+    [tx, ty] = this.xbRoute(b.center.x, b.center.y, clamp(tx, 72, LW - 72), clamp(ty, 56, LH - 96), s);
     b.velocity.x += (clamp((tx - b.center.x) * 1.4, -sp, sp) - b.velocity.x) * Math.min(1, dt * k);
     b.velocity.y += (clamp((ty - b.center.y) * 1.6, -sp, sp) - b.velocity.y) * Math.min(1, dt * k);
   }
@@ -3726,7 +3755,7 @@ class GameScene extends Phaser.Scene {
   conductorSpot(e) {                                                     // somewhere to blink to: in the air off to one side of you, clear of walls
     const pb = this.player.body, fy = this.xbFloor(), side = Math.sign(e.body.center.x - pb.center.x) || 1;
     for (let k = 0; k < 8; k++) {
-      const x = this.xbSafeX(clamp(pb.center.x + (k < 4 ? -side : side) * rand(110, 220), 72, LW - 72)), y = clamp(fy - TUNE.CONDUCTOR.alt + rand(-16, 16), 56, LH - 96);
+      const [x, y] = this.xbClear(clamp(pb.center.x + (k < 4 ? -side : side) * rand(110, 220), 72, LW - 72), clamp(fy - TUNE.CONDUCTOR.alt + rand(-16, 16), 56, LH - 96), this.xbReach(e));
       if (Math.abs(x - e.body.center.x) > 60 && !this.solidAt(x, y) && !this.solidAt(x, y - 18) && !this.solidAt(x, y + 18)) return { x, y };
     }
     return null;
@@ -6417,7 +6446,7 @@ class GameScene extends Phaser.Scene {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
   modOn(m) { return this.mod === m || this.mutator === m; }             // a scripted hazard, or MOON BOOTS / LIGHTS OUT for the whole run
-  applyMod(m) {                                                         // wave modifiers: chaos with rules
+  applyMod(m, restoreLead = 0) {                                        // wave modifiers: chaos with rules (restoreLead: ms before GRAVITY RESTORED)
     if (this.campaign && this.mod === 'slag' && m !== 'slag') {
       for (const s of this.slagList) if (s.active && s.rain) {           // drops still falling cool to cinders and crumble
         this.cfx.emit(s.x, s.y, { n: 5, speed: [10, 50], life: [0.4, 0.8], size: [2, 1], cols: [0x6a5a50, 0x3a2a20, 0xff8a20], g: 300, cosmetic: true });
@@ -6429,8 +6458,24 @@ class GameScene extends Phaser.Scene {
     const rainLead = this.campaign ? 3 : 1.5;
     this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
     this.rainPhaseT = rainLead + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
-    this.physics.world.gravity.y = this.modOn('lowg') ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;   // a hazard starting or clearing keeps the mutator's
-    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
+    const gTo = this.modOn('lowg') ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;   // a hazard starting or clearing keeps the mutator's
+    if (this.mutator === 'lowg' || this.lab) this.physics.world.gravity.y = this.gravTo = gTo;   // MOON BOOTS or a Lab room's modifier was picked from a menu
+    else if (gTo !== this.gravTo) {
+      this.gravTo = gTo;
+      if (gTo < TUNE.GRAVITY) this.gravAt = Infinity;                  // low gravity waits for its callout below
+      else if (this.physics.world.gravity.y === gTo) this.gravAt = 0;   // it never took hold
+      else {                                                           // full gravity comes back once it's called
+        this.gravAt = Infinity;
+        const restore = () => { if (this.gravTo !== gTo || this.gravAt !== Infinity) return; this.gravAt = 0; if (this.state === 'play') BUS.emit('callout', 'GRAVITY RESTORED'); };
+        if (restoreLead) this.time.delayedCall(restoreLead, restore); else restore();
+      }
+    }
+    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); if (m === 'lowg') this.gravAt = 0; } });
+  }
+  updateGravity(dt) {                                                   // low gravity eases in over a second once called, and back in half that
+    const G = this.physics.world.gravity, half = TUNE.GRAVITY * 0.5;
+    if (G.y === this.gravTo || this.time.now < this.gravAt) return;
+    G.y = G.y > this.gravTo ? Math.max(this.gravTo, G.y - half * dt) : Math.min(this.gravTo, G.y + half * 2 * dt);
   }
   updateSlagRain(dt) {                                                  // molten drips from the ceiling in showers, marked where they'll land
     const R = TUNE.RAIN;
@@ -8797,6 +8842,10 @@ class GameScene extends Phaser.Scene {
     if (kind === this.campaignMachinery) return;
     this.campaignMachinery = kind;
     if (kind === 'rails') this.railCyc = { st: 'idle', t: 3.5, g: 0 };
+    if (kind === 'vents' && this.jetCycle) {                             // back on from idle, so every burst follows a grate tell
+      this.jetCycle = { st: 'idle', t: 6, f: 0 };
+      for (const jet of this.jets) jet.lit = false;
+    }
     if (kind === 'wreck' && this.wreck) {                                // release from the top of the swing, where its holdback cable kept it
       const W = this.wreck; W.t = W.period / 4; W.snapT = 0.5; Sfx.clank();
       const hx = W.px + Math.sin(W.amp) * W.len, hy = W.py + Math.cos(W.amp) * W.len;
@@ -11121,7 +11170,7 @@ class GameScene extends Phaser.Scene {
     if (sp < 60) return;
     const ux = vx / sp, uy = vy / sp;
     for (const e of this.enemies.getChildren()) {
-      if (!e.alive || e.under || e.kind === 'wyrmseg') continue;
+      if (!e.alive || e.under || e.kind === 'wyrmseg' || e.kind === 'eyenode') continue;   // the Overseer's nodes are yours to break
       const b = e.body, qx = clamp(bx, b.left, b.right), qy = clamp(by, b.top, b.bottom);
       if (Math.hypot(qx - bx, qy - by) > R0 || (W.hit.get(e) || 0) > now) continue;
       W.hit.set(e, now + 700);
@@ -14606,11 +14655,11 @@ class GameScene extends Phaser.Scene {
   waveCleared(x, y) {
     if (this.campaign) {
       this.campaignMachinery = null;
-      this.applyMod(null);
+      const recovery = CAMPAIGN[this.wave].recovery, patch = this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery;
+      this.applyMod(null, patch ? 2300 : 1100);                        // GRAVITY RESTORED waits for WAVE CLEARED (and SUIT PATCHED)
       this.dousePuddles();
       for (const w of this.wrecks) w.cosmetic = true;                  // a wreck still in the air cannot reignite the arena
-      const recovery = CAMPAIGN[this.wave].recovery;
-      if (this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery) {
+      if (patch) {
         const gain = Math.round(recovery - this.hp), pb = this.player.body;
         this.hp = recovery;
         BUS.emit('hp', this.hp, 0);
@@ -14999,7 +15048,11 @@ class GameScene extends Phaser.Scene {
   spawnGib(tex, x, y, vx, vy, kind) {                     // kind: undefined = meat, 'shell', 'metal', 'slag' (glowing, cools)
     const shell = kind === 'shell', metal = kind === 'metal' || kind === 'slag';
     let g = this.gibs.getFirstDead(false);
-    if (!g) { g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length; }   // recycle oldest
+    if (!g) {                                              // recycle the oldest: where it lay, it crumbles instead of blinking out
+      g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length;
+      if (this.cameras.main.worldView.contains(g.x, g.y)) this.cfx.emit(g.x, g.y, { n: 6, speed: [15, 50], life: [0.3, 0.6], size: [2, 1], g: 180, cosmetic: true,
+        cols: g.shell ? [0xd8b050, 0x8a6a2a] : g.metal ? (g.hot > 0 ? [0xff8a20, 0x6a5a50] : [0x9aa0a8, 0x5a5e66, 0x3a3c40]) : [0x9a1a1a, 0x5a0a0a, 0x4a3a30] });
+    }
     g.setTexture(tex); g.clearTint();
     g.enableBody(true, x, y, true, true);
     g.body.setSize(Math.max(2, g.frame.width - 3), Math.max(2, g.frame.height - 3), true);

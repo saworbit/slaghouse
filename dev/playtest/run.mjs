@@ -608,6 +608,14 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.mutatorHazards())).fails;
   });
+  await check('low gravity is called before it starts and before it ends, and the vents restart with a tell', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.modifierCues())).fails;
+  });
+  await check('a run reset clears the multi-kill label', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.hudReset())).fails;
+  });
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;
@@ -632,6 +640,48 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('no blast can strand a solid deck: the reinforced steps hold and keep every deck in reach (#188)', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      // Every campaign and OVERTIME arena (not the Lab rooms) with each breakable tile that isn't reinforced blown away.
+      const reachable = (nav, sx, sy) => {                             // the player's moves: any edge with a finite player cost
+        const s = nav.id(sx, sy), seen = new Uint8Array(nav.nodes.length);
+        if (s < 0) return seen;
+        seen[s] = 1; const q = [s];
+        while (q.length) for (const ed of nav.nodes[q.shift()].edges) if (Number.isFinite(ed.playerCost ?? ed.cost) && !seen[ed.to]) { seen[ed.to] = 1; q.push(ed.to); }
+        return seen;
+      };
+      const arenas = [...ARENAS.map(A => [A.name, A]), ...CAMPAIGN_ARENAS.filter((A, i) => A.grid !== ARENAS[i].grid).map(A => [A.name + ' (campaign)', A])];
+      for (const [name, A] of arenas) {
+        const grid = A.grid, [sx, sy] = A.spawns.player, W = grid[0].length;
+        NAV = buildNav(grid);
+        const hard = reinforcedTiles(grid, sx, sy), before = reachable(NAV, sx, sy), decks = NAV.nodes.filter((n, i) => before[i] && grid[n.y + 1] && grid[n.y + 1][n.x] === '#');
+        const bare = grid.map((row, y) => [...row].map((c, x) => (TILE_HP[c] && !hard.has(y * W + x) ? '.' : c)));
+        const nav = buildNav(bare), after = reachable(nav, sx, sy);
+        const cut = decks.filter(n => { const k = nav.id(n.x, n.y); return k < 0 || !after[k]; });
+        if (cut.length) fails.push(`${name}: ${cut.length} solid deck cells can be stranded by blasts, e.g. ${cut.slice(0, 4).map(n => `(${n.x},${n.y})`).join(' ')}`);
+      }
+      // In play: a reinforced crate, girder and grating ring and stand through a 999 tile-damage blast; a loose neighbour breaks.
+      RUNMODE = 'campaign'; T.boot();
+      const kinds = { x: 'crate', g: 'girder', '=': 'grating' }, found = {};
+      for (let arena = 0; arena < CAMPAIGN_ARENAS.length && Object.keys(found).length < 3; arena++) {
+        const g = T.setup(arena);
+        for (const k of g.hardTiles) {
+          const tx = k % MAP_W, ty = Math.floor(k / MAP_W), c = g.tileAt(tx, ty);
+          if (!kinds[c] || found[c]) continue;
+          const nx = [tx - 1, tx + 1].find(x => g.tileAt(x, ty) === c && !g.hardTiles.has(ty * MAP_W + x));
+          if (nx === undefined) continue;
+          found[c] = true;
+          g.explode(tx * TS + 8, ty * TS + 8, { ...TUNE.ROCKET, tileDamage: 999 }); T.run(1500);
+          if (g.tileAt(tx, ty) !== c) fails.push(`${g.A.name}: the reinforced ${kinds[c]} at (${tx},${ty}) broke in a blast`);
+          if (g.tileAt(nx, ty) === c) fails.push(`${g.A.name}: the loose ${kinds[c]} at (${nx},${ty}) beside a reinforced one survived a 999 tile-damage blast`);
+        }
+      }
+      for (const c of Object.keys(kinds)) if (!found[c]) fails.push(`no campaign arena has a reinforced ${kinds[c]} with a loose one beside it to test`);
+      return [...fails, ...T.errs];
+    });
+  });
   await check('upper catwalks and responsive wall jumps', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.traversal())).fails;
@@ -639,6 +689,29 @@ try {
   await check('late campaign stages hazard warnings, weapon issues and boss machinery', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.latePacing())).fails;
+  });
+  await check('a recycled gib crumbles where it lay and draws no seeded random numbers for it', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'campaign'; T.boot();
+      const g = T.setup(0), view = g.cameras.main.worldView, cx = view.centerX, cy = view.centerY;
+      for (let i = 0; i < g.gibList.length; i++) g.spawnGib('g_chunk', cx - 30 + (i % 20) * 3, cy, 0, 0);
+      const spawnCounting = () => {                                    // one more gib, counting its Math.random draws
+        const real = Math.random; let n = 0;
+        Math.random = () => { n++; return real(); };
+        try { g.spawnGib('g_chunk', cx, cy - 40, 0, 0); } finally { Math.random = real; }
+        return n;
+      };
+      const old = g.gibList[g.gibCursor], at = { x: old.x, y: old.y }, n0 = g.cfx.live.length;
+      const recycled = spawnCounting();
+      const crumble = g.cfx.live.slice(n0).filter(p => Math.hypot(p.x - at.x, p.y - at.y) < 6).length;
+      if (!crumble) fails.push(`the recycled gib at (${Math.round(at.x)},${Math.round(at.y)}) vanished with no crumble`);
+      g.gibList[5].disableBody(true, true);
+      const fresh = spawnCounting();
+      if (recycled !== fresh) fails.push(`recycling a gib drew ${recycled} seeded random numbers, a free one ${fresh}`);
+      return [...fails, ...T.errs];
+    });
   });
   await check('every run mode keeps its own wave total, lifetime stats and record', async ctx => {
     const page = await open(ctx, ['modes']);
@@ -651,6 +724,73 @@ try {
   await check('foes lead their shots, climb to you, spread out, light drums, cover each other and split up to search', async ctx => {
     const page = await open(ctx, ['tactics']);
     return (await page.evaluate(() => AT.check())).fails;
+  });
+  await check('flying bosses close in over the Wrecking Yard ball without being hit, and the ball alone breaks no Overseer node', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'bossrush'; Sfx.muted = true; T.boot();
+      for (const kind of ['overseer', 'crucible', 'conductor']) {
+        Math.random = seeded(178);
+        const g = T.setup(3), W = g.wreck, [bx, by] = g.A.points.B[0];
+        T.tp(50, 17); T.run(100);                                      // on the dais, under the swing
+        g.warpIn(kind, [bx, by], true); T.run(2500);                   // the warp, then the intro hover
+        const e = g.enemies.getChildren().find(o => o.alive && o.kind === kind);
+        if (!e) { fails.push(`${kind}: did not warp in`); continue; }
+        const nodes = (e.nodes || []).slice(), pb = g.player.body;
+        let near = Infinity, nearAt = null;
+        for (let t = 0; t < 12000; t += 100) {
+          T.run(100);
+          if (!e.alive) break;
+          const d = Math.hypot(e.body.center.x - pb.center.x, e.body.center.y - pb.center.y);
+          if (d < near) { near = d; if (d < 180 && nearAt === null) nearAt = t; }
+          if (!Number.isFinite(e.x + e.y) || e.x < 0 || e.x > LW || e.y < 0 || e.y > LH) { fails.push(`${kind}: left the world at (${e.x}, ${e.y})`); break; }
+        }
+        if (W.hit.has(e)) fails.push(`${kind}: the wrecking ball hit it`);
+        if (nearAt === null || nearAt > 6000) fails.push(`${kind}: never came within 180 px of a player on the dais in 6 s (closest ${Math.round(near)} px)`);
+        if (kind === 'overseer') {
+          if (nodes.length !== 4) fails.push(`overseer: ${nodes.length} nodes, want 4`);
+          const hurt = nodes.filter(n => !n.alive || n.hp < n.def.hp);
+          if (hurt.length) fails.push(`overseer: ${hurt.length} nodes lost HP with nobody shooting (the ball swung through them)`);
+        }
+      }
+      return [...fails, ...T.errs];
+    });
+  });
+  await check('every OVERTIME boss fights and falls in ARENAS 06-10 with the machinery running (#179)', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'endless'; T.boot();
+      const arenas = ARENAS.map((A, i) => i).filter(i => !CAMPAIGN_ARENAS[i]);
+      for (const ai of arenas) for (const [kind] of OT_BOSSES) {
+        T.seed(179 + ai);
+        const g = T.setup(ai), [bx, by] = g.A.points.B[0], tag = `${kind} in ${g.A.name}`;
+        g.warpIn(kind, [bx, by], FLIERS.has(kind)); T.run(1500);
+        const e = g.enemies.getChildren().find(o => o.alive && o.kind === kind);
+        if (!e) { fails.push(`${tag}: did not warp in`); continue; }
+        let bad = null, stuck = 0;
+        for (let t = 0; t < 10000 && !bad; t += 250) {                  // the player can't die here: T.setup heals every hit
+          T.run(250);
+          const b = e.body;
+          if (!Number.isFinite(e.x + e.y + b.velocity.x + b.velocity.y)) bad = `non-finite position or speed (${e.x}, ${e.y})`;
+          else if (e.x < 0 || e.x > LW || e.y < 0 || e.y > LH) bad = `left the world at (${Math.round(e.x)}, ${Math.round(e.y)})`;
+          else if (!e.def.noClip && !e.under && g.solidAt(b.center.x, b.center.y) && (stuck += 250) >= 2000) bad = `stuck inside solid tiles at (${Math.round(b.center.x)}, ${Math.round(b.center.y)})`;
+          else if (!g.solidAt(b.center.x, b.center.y)) stuck = 0;
+        }
+        if (bad) { fails.push(`${tag}: ${bad}`); continue; }
+        for (let n = 0; n < 80 && e.alive; n++) {                      // strike it down through its phases
+          for (const nd of e.nodes || []) if (nd.alive) g.killEnemy(nd, 1, 0, 'nail');
+          if (!e.under) g.damageEnemy(e, e.def.hp * 0.12, 0, -1, 'nail');
+          T.run(300);
+        }
+        if (e.alive) { fails.push(`${tag}: still alive at ${Math.round(e.hp)} HP after 80 strikes (phase ${e.phase}, ai ${e.ai})`); continue; }
+        T.run(3000);
+        const live = g.xb ? ['waves', 'pools', 'blades', 'orbs'].flatMap(L => g.xb[L].filter(h => h.src === e && !h.dead).map(() => L)) : [];
+        if (live.length) fails.push(`${tag}: ${live.length} of its hazards still live 3 s after it fell (${[...new Set(live)].join(', ')})`);
+      }
+      return [...fails, ...T.errs];
+    });
   });
   await check('every breakable prop goes off cleanly in every arena', async ctx => {
     const page = await open(ctx, ['props']);
@@ -668,10 +808,32 @@ try {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.campaignContactDamage());
   });
+  await check('a seeded stretch of play draws the same random numbers however fast the audio clock runs (#176)', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      Sfx.init();                                                      // sound live, as after the title's start
+      const real = Sfx.ctx;
+      if (!real) return ['fixture: no audio context'];
+      RUNMODE = 'campaign'; OPTS.diff = 1; T.boot();
+      const draws = step => {                                          // the audio clock moves `step` s per read
+        T.seed(426);
+        let clock = 0, n = 0;
+        Sfx.ctx = new Proxy(real, { get: (o, k) => (k === 'currentTime' ? (clock += step) : typeof o[k] === 'function' ? o[k].bind(o) : o[k]) });
+        const g = T.setup(1, true); g.startWave(2);
+        const seededRandom = Math.random; Math.random = () => { n++; return seededRandom(); };
+        try { T.run(6000); } finally { Math.random = seededRandom; Sfx.ctx = real; }
+        return n;
+      };
+      const crawl = draws(1e-6), race = draws(10);
+      if (crawl !== race) fails.push(`six seconds of the Furnace drew ${crawl} random numbers with a slow audio clock and ${race} with a fast one`);
+      return [...fails, ...T.errs];
+    });
+  });
   await check('campaign bot clears the Blackout ceiling creeper and disguised mimic', async ctx => {
     const page = await open(ctx, ['campaign-bot']);
     return page.evaluate(() => {
-      Math.random = seeded(91);
+      T.seed(91);
       RUNMODE = 'campaign'; T.boot(); T.run(300);
       const g = T.g();
       g.time.removeAllEvents(); g.wave = 1; g.enemiesLeft = 2; g.applyMod('dark');
@@ -785,8 +947,7 @@ try {
       const page = await open(ctx, ['campaign-bot', 'vibe']);
       const r = await page.evaluate(async ({ seed, brutal }) => {
         // Hold the simulation clock and game RNG steady across fresh browser profiles.
-        Math.random = seeded(seed);
-        Sfx.muted = true;
+        T.seed(seed);
         game.loop.now = game.loop.time = 10000;
         OPTS.diff = DIFFS.findIndex(d => d.name === (brutal ? 'BRUTAL' : 'NORMAL'));
         RUNMODE = 'campaign'; T.boot(); T.run(300);

@@ -109,7 +109,7 @@ window.AT = (() => {
 
   AT.check = () => {
     const fails = [], notes = [];
-    Math.random = seeded(7);                                               // the same fights every run
+    T.seed(7);                                                             // the same fights every run, sound muted
     RUNMODE = 'overtime'; T.boot(); T.run(300);
     for (const name of ['prediction', 'climb', 'drones', 'drum', 'squad']) {
       try { AT[name](fails, notes); } catch (err) { fails.push(`${name} threw: ${String(err && err.stack || err).split('\n').slice(0, 2).join(' | ')}`); }

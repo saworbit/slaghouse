@@ -7,6 +7,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- Three play-test checks. Every OVERTIME boss now fights and falls in each of ARENAS 06-10 with the machinery running,
+  and its hazards go harmless when it does (#179). Every solid deck in every campaign and OVERTIME arena stays in reach
+  with each unreinforced breakable blown away, and a reinforced crate, girder and grating stand through a blast that
+  breaks the loose one beside them (#188). A stretch of seeded play draws the same random numbers however fast the
+  audio clock runs. Seeded checks start with the new `T.seed(n)`, which also mutes sound, because sound throttles on
+  wall time and draws `Math.random`, so a busy machine could change a seeded check's result (#176).
+
 - **Play in the browser** at <https://saworbit.github.io/slaghouse/>. A new `Pages` workflow publishes each `vX.Y.Z`
   tag to GitHub Pages, with the audio banks, and the bare URL opens the game. It can also publish any other ref by
   hand.
@@ -183,8 +190,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   - `AT.check()` (`dev/playtest/tactics.js`, in the headless suite) checks these in small fights on a fixed seed. Over
     Brutal seeds 1 to 80 the campaign bot won 73 against `main`'s 74, and its losses are the same recurring kinds:
     foes the bot can't find in the Meltdown and Wrecking Yard, and early deaths. Normal seeds 1 to 20 all win, as on
-    `main`. The seeds move, so of CI's eight Brutal seeds seed 4 now stalls in the Meltdown with a Gatling out of
-    reach; the other seven and all four Normal seeds win.
+    `main`. All eight of CI's Brutal seeds and all four Normal seeds win.
+- When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
+  of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
+  (#191)
 - **Open source under the MIT License.** The MIT License replaces the proprietary license, and contributions are
   open to all. The sampled SFX banks come from AudioGen and keep their non-commercial note. The README now describes
   the architecture and the build, art, audio, test and release pipelines, with diagrams, in Simplified Technical
@@ -388,6 +397,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- **Low gravity warns before it starts and before it ends.** Gravity used to halve the moment Gravity Loss began,
+  1.3 s before the LOW GRAVITY! callout, and snap back to full the moment the operation was cleared. Now it eases down
+  over a second once LOW GRAVITY! is called. At the clear, a GRAVITY RESTORED callout follows WAVE CLEARED and gravity
+  eases back. MOON BOOTS and a Lab room's modifier still apply at once, since you pick them. (#190)
+- **The Furnace vents restart from idle.** When the Demolition Team shut the vents off mid-burst, Gravity Loss turned
+  them back on partway through it, with no grate flare. Now they start from idle 6 s after they switch on, so every
+  burst follows a grate tell. (#185)
+- A DOUBLE KILL ... MASSACRE label no longer stays up over the next run's card after R, a Lab deploy or reset, or a
+  lift ride. Its tilt now draws from the cosmetic generator. (#180)
 - Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
   scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
   That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,
@@ -396,6 +414,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   differently once more, and from here on a cosmetic change leaves them exactly as they were. With the fix, this
   round's effects leave all twelve pinned seeds identical line for line, and all twelve win.
 
+- **THE OVERSEER closes in over the Wrecking Yard's ball.** The flying bosses used to keep to one side of the ball's
+  whole swing, so in BOSS RUSH THE OVERSEER hung about 210 px from a player on the dais, out of reach of many guns.
+  Now they keep clear of the ball's arc itself: they hover over it, above the dais, and cross over the top of the
+  swing. The ball no longer breaks the Overseer's shield nodes; only you can. (#178)
 - Electric arcs from breakable props last as long as they should, and the shrink ray's beam shows. Both used one list
   with clocks running opposite ways: arcs shorter than 0.15 s never expired (a capacitor's idle sparks piled up to
   dozens until a hit-stop cleared them), longer ones (a capacitor going off, a puddle going live) vanished at once,

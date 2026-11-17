@@ -4,7 +4,7 @@ window.labSweep = section => {
   const originalRandom = Math.random;
   T.start();
   function test(id, run) {
-    Math.random = seeded(1279);
+    T.seed(1279);
     try { run(message => fails.push(`${id}: ${message}`)); }
     catch (err) { fails.push(`${id}: ${err.stack.split('\n').slice(0, 3).join(' | ')}`); }
   }
@@ -133,7 +133,8 @@ window.labSweep = section => {
         const missing = want.filter(s => !seen.has(s));
         if (missing.length) fail('never used ' + missing.join(', '));
       } else if (id === 'wyrm') {
-        if (!stepUntil(() => e.segs.some(part => !part.under), 7000, 17)) { fail('no body segment surfaced'); return; }
+        // A buried head can't be touched (damageEnemy), so a tail still out as it dives passes nothing on: wait for both up.
+        if (!stepUntil(() => !e.under && e.segs.some(part => !part.under), 7000, 17)) { fail('no body segment surfaced with the head up'); return; }
         const part = e.segs.find(part => !part.under), hp = e.hp;
         g.damageEnemy(part, 10, 0, -1, 'crush');
         if (e.hp >= hp) fail('segment did not transfer damage to the head');
