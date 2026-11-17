@@ -150,6 +150,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
+  of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
+  (#191)
 - **Open source under the MIT License.** The MIT License replaces the proprietary license, and contributions are
   open to all. The sampled SFX banks come from AudioGen and keep their non-commercial note. The README now describes
   the architecture and the build, art, audio, test and release pipelines, with diagrams, in Simplified Technical
