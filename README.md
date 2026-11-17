@@ -53,7 +53,8 @@ hazard modifier, stationary enemies and invulnerability. Changing **Room** after
 the rest from the new room's preset. A tally beside **Add group** counts enemies and bosses, and **Deploy room** waits
 while the roster is over. Choose **Deploy room** to start. **F2** or the
 **Lab controls** button reopens the setup during play. **R** resets terrain, props, health, weapon and enemies
-to the deployed setup. Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
+to the deployed setup. The Lab's rooms leave every crate, girder and grating breakable, with no reinforced steps.
+Use **Exit to title** to leave the Lab. Lab sessions leave saves, records, mastery and medals intact.
 The setup dialog takes a keyboard, a pointer or a gamepad: the D-pad moves between fields and changes them, **A**
 picks and **B** goes back. The regular gamepad controls work during play.
 See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted room control and observations.

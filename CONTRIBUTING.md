@@ -87,18 +87,22 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 ### Campaign smoke check
 
 1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
-   grunt patrol falls. Equip the newly issued Shotgun using the **2** shown on its card. Pick a perk with
+   grunt patrol falls. Check that the Shotgun arrives on a green supply beam, then equip it using the **2** shown
+   on its card. Pick a perk with
    **1**, **2** or **3** after Lockdown and confirm the equipped weapon stays put. Check that the Flare Gun
    arrives before the lights go out. Press **R** once mid-fight: only the **PRESS R AGAIN** prompt should
    appear, and it should clear after two seconds. In the pause menu, check that **Restart** and **Quit to
    Title** each ask for a second pick and that **Esc** cancels without resuming.
 2. Clear Blackout and enter the marked lift. Record your weapon, perks, difficulty and mutator. Reload at the
-   same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings.
+   same URL and choose **Campaign → Continue**. Check that you start Slag Rain with the recorded build and settings,
+   and that stepping out of the car calls out **SUIT PATCHED** if the act raised your health.
 3. Die in the Furnace and press **R** after the results appear. Verify that the retry restores the Furnace
-   checkpoint. On Normal, check that the rain, its puddles and the vents clear before the **Demolition Team**.
+   checkpoint. On Normal, check that the rain clears before the **Demolition Team** (drops still falling crumble to
+   cinders and its puddles steam out) and that the vents stop. At each wave start, check that restocked drums, gas
+   cans and medkits beam in and that a valve you burst is welded back on.
    After that squad, check that the Gunship countdown prompts you to find cover and gives you about six seconds
-   to move. Verify that its rocket and strafe warnings give you time to react and that ground fire stops
-   damaging you after **WAVE CLEARED**, including during the crash. In Gravity Loss, check that the second Hound
+   to move. Verify that its rocket and strafe warnings give you time to react, and that after **WAVE CLEARED** the
+   fire suppression sprays out the ground fire and it stops damaging you, including any the crash leaves. In Gravity Loss, check that the second Hound
    arrives with **Gravity Surge** and the Linkers arrive in the next squad. Climb onto the catwalk and confirm the
    last Linker stays in reach or descends below it. Hold toward a wall and repeat the jump input to climb without
    drifting away. Enter the Sorting Line lift and confirm **Continue** now starts in the Sorting Line.
@@ -107,10 +111,11 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    After Meltdown, a valve crew warps in: step off the first coolant valve partway and check that its meter creeps
    back rather than resetting, then pause on the valve to check that the meter holds. Resume and turn both valves
    in order. Check that coolant runs along the pipe to the lift, that the lift steams as it cools, and that it only
-   comes once both crews are down. Ride it to the Wrecking Yard and check that you arrive in the car at the start.
+   comes once both crews are down. Blast the steps up to the right-hand deck and confirm the bolted, striped ones
+   stay. Ride the lift to the Wrecking Yard and check that you arrive in the car at the start.
 5. Check that the wrecking ball hangs latched before its squad, that the wrecking ball and live rails have
    preparation countdowns, and that the gantry winches the ball back up after Demolition. Fight the Foreman and
-   verify that he cuts the ball loose in phase two. After Live Circuit, pull the main breaker and check that the
+   verify that it cuts the ball loose in phase two. After Live Circuit, pull the main breaker and check that the
    lights and generator go dark before the Smelter warps in, and that it hotwires the rails in phase two. Defeat
    it and confirm the results appear and Continue is unavailable on the campaign screen.
 6. Start OVERTIME, DAILY and BOSS RUSH. Check that the full arsenal is available and each mode has its own
