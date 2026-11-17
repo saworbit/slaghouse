@@ -29,6 +29,19 @@ and the header comment), `config.js` (`TUNE`, weapons, the `ENEMY` records), `ut
 `boot.js` and `page-tail.html`. Commit both `src/` and the rebuilt `slaghouse.html`. `node dev/check.mjs`, and so CI,
 fails if they're out of step.
 
+### Keeping the seeded campaigns steady
+
+The campaign checks seed `Math.random`, so one extra call anywhere the campaign runs changes everything after it,
+and a pinned seed can tip from a win to a loss. An effect that changes nothing in play (a spark, a glint, a HUD
+wobble, lightning jitter) draws from the cosmetic generator in `src/util.js` instead: `crand(a, b)`, `cpick(arr)`,
+`fxRandom()`, and particles with `this.fx.emit(x, y, { ..., cosmetic: true })`. These also draw `Math.random` or
+change timing, so keep them out of shared paths unless the change is meant to play differently: `rand`, `randi`,
+`pick`, `this.shake()` (Phaser's camera shake draws every frame), `hitStop` and `slowmoUntil`. Content that the
+campaign never issues or spawns can use them freely in its own code.
+
+To check that a change leaves the campaign alone, run the Normal and Brutal campaign commands below on `main` and on
+your branch and compare each seed's line. With the sim fps and wall times stripped, they should match exactly.
+
 ## Checks
 
 ```bash
@@ -125,8 +138,18 @@ An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene
 `setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death reads (a
 ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.
 `dev/playtest/kinds.js` warps in every kind and fails one with a missing codex row, start frame or method, so run
-`node dev/playtest/run.mjs --quick` after adding one. Special armour (a plate, a weak spot, a hit counter) still goes
-in `damageEnemy`, where its place in the damage order matters.
+`node dev/playtest/run.mjs --quick` after adding one. A kind with its own armour (a plate, a weak spot, a fuse) can
+name an `armour` method on its record, which `damageEnemy` calls just before the bulldozer's plow check, and a
+`contact` method that replaces the plain bite when it touches you. Armour whose place in the damage order matters
+differently still goes in `damageEnemy` itself.
+
+A full boss also sets `boss: true` (its title card and bar, and the Smelter's treatment from stasis, nets, gravity
+pulses, presses and the microwave), `title: [name, subtitle]` for the card and `barNotches` for its phase marks on
+the boss bar. Its own hooks are `bossArmour` and `bossContact`: they run before every other kind's, and
+`bossContact` replaces all contact rules. Add it to `RUSH` and `RUSH_SUBS` for BOSS RUSH, `OT_BOSSES` for OVERTIME's
+sixth wave, `SWARM_SKIP` and `NO_ELITE`, and give it phase checks in the mob sweep in `dev/playtest/lab-sweep.js`.
+Scattered kind lists still name the older bosses (for example a Banner's heal), so search for `'foreman'` and add
+`|| e.def.boss` where a new boss should be left out too.
 
 A run mode is one record in `RUN_MODES`. The comment above it lists every rule a record carries: its waves and
 music, its start and restart, its difficulty and mutator, and its results screen. `dev/playtest/modes.js` plays every
