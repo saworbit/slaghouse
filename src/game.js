@@ -2553,7 +2553,7 @@ class GameScene extends Phaser.Scene {
     this.polCol = { star: [0xffb878, 0xfff090, 0xff9a40], ring: [0xff6a4a, 0xffd860, 0xff8a28],   // by material: meat, metal, slag
       fleck: [[0xffffff, 0xffd0b0, 0xff7050], [0xffffff, 0xffe46a, 0xffa030], [0xffffff, 0xffe080, 0xff8a20, 0xa02008]] };
     this.polCool = new Set(['arc', 'cryo', 'acid', 'microwave', 'siphon', 'tractor', 'ripper', 'prism', 'sonic', 'whip', 'katana', 'gauntlet', 'shield', 'vacuum', 'hammer',
-      'bubble', 'glue', 'stasis', 'decoy', 'tripwire', 'shrink', 'coil', 'limpet', 'glaive', 'orbital', 'dronepod', 'flail', 'net', 'seed', 'shock']);   // beams, blades and throwers: no barrel to smoke
+      'bubble', 'glue', 'stasis', 'decoy', 'tripwire', 'shrink', 'coil', 'limpet', 'glaive', 'orbital', 'dronepod', 'flail', 'net', 'seed', 'shock', 'heatray', 'hydro', 'caltrop']);   // beams, blades and throwers: no barrel to smoke
   }
   polMat(D) { return D.molten ? 2 : D.mech ? 1 : 0; }
   polMark(k, x, y, a, col, s, dur, delay = 0) {                         // k: 0 impact star, 1 shock ring, 2 dash streak, 3 floor ring, 4 twinkle
