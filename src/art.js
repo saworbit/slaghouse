@@ -1587,6 +1587,273 @@ const RAG = {
   cloaker:  { up: true, hp: 35, fw: 18, fh: 24, body: x => drawCloaker(x, 0, [0, 0], [0, 0], 'idle'), head: [4, 0, 10, 8], torso: [2, 8, 12, 7], P: CKLEG, legW: 2 },
   pyro:     { up: true, hp: 45, fw: 18, fh: 24, body: x => drawPyro(x, 0, [0, 0], [0, 0], 'idle'), head: [4, 0, 11, 8], torso: [1, 8, 13, 7], P: PYLEG, legW: 3 },
 };
+// ---- expansion: bosses ----------------------------------------------------------------
+// The five expansion bosses (BOSS RUSH, OVERTIME, the Lab): every one is drawn for its three phases, so the wear
+// shows as the fight goes on, plus the egg sacs, shield nodes and saw blades that come with them.
+const XCH = ['#0a0710', '#160e20', '#24162e', '#36203f', '#4c2c54', '#6a406e', '#8e5c8e'];   // brood chitin
+const XCU = ['#24100a', '#42200e', '#6a3416', '#984c20', '#c46a2c', '#e8904a', '#ffc27a'];   // copper windings
+const XGL = ['#0c1824', '#16283a', '#244056', '#3a6482', '#5e94b8', '#9ccce8', '#e0f6ff'];   // glass
+const XCT = ['#05060c', '#0b0f1c', '#141a2e', '#1e2842', '#2c3a5a', '#425478'];               // tailcoat
+const XSC = ['#4a3a3a', '#7a6a66', '#a89a94', '#d2c8c0', '#f2ece4'];                          // sclera
+const XSR = ['#300606', '#5a1010', '#8a1c1c', '#b83434', '#e06060'];                          // a bloodshot sclera
+const xbHash = (x, y, s = 0) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };   // fixed noise: art never reads Math.random
+function xbCrack(c, pts, glow) {                     // a jagged crack along a polyline, lit from inside when glow is set
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; pxLine(c, '#07080b', x0, y0, x1, y1); if (glow) pxLine(c, glow, x0 + 1, y0, x1 + 1, y1); }
+}
+function drawCrucible(ctx, ph, pose) {               // 56x48 the crucible: a slag cauldron on thrusters, spout right; pose i | t (pouring) | v (venting)
+  const W = 56, H = 48, tl = pose === 't', vt = pose === 'v', hot = ph === 3;
+  const BOWL = hot ? ['#0c0e12', '#1a1210', '#2e1a14', '#4a2418', '#6a3420', '#8c4a2a', '#a86a48'] : IRN;
+  part(ctx, W, H, c => {                                                     // thruster pods and their stubby flames
+    for (const x of [17, 39]) { limb(c, x, 37, x, 43, 3.6, 2.6, IRN, -0.05, true); R(c, IRN[6], x - 2, 37, 4, 1); R(c, IRN[0], x - 2, 43, 5, 1); R(c, vt ? MLT[4] : '#9ad8ff', x - 1, 44, 3, 1); R(c, '#ffffff', x, 44, 1, 1); }
+    for (const x of [4, 52]) { blob(c, x, 24, 4.2, 4.6, IRN, 2.4, 0.06); R(c, IRN[0], x - 2, 28, 4, 2); R(c, IRN[6], x - 2, 21, 2, 1); }
+    limb(c, 8, 24, 12, 24, 1.4, 1.4, IRN, 0.1, true); limb(c, 44, 24, 48, 24, 1.4, 1.4, IRN, 0.1, true);   // trunnion arms
+  });
+  part(ctx, W, H, c => {                                                     // the bowl
+    const cx = 28, cy = 25, rx = 20, ry = 15, P = 2.3, ins = (x, y) => inBlob(x, y, cx, cy, rx, ry, P);
+    blob(c, cx, cy, rx, ry, BOWL, P, 0.05, (x, y) => y >= 12);
+    blob(c, cx, cy, rx, ry, RST, P, 0.04, (x, y) => y >= 31);                 // scorched underside
+    for (let x = 8; x < 49; x++) for (const y of [30, 31]) if (ins(x, y)) R(c, HAZ[((x + y) >> 1) & 1 ? 3 : 0], x, y);   // hazard band
+    for (let x = 10; x < 47; x += 4) if (ins(x, 17) && !(ph === 3 && x > 30 && x < 40)) { R(c, IRN[7], x, 17); R(c, IRN[2], x, 18); }   // rivets
+    R(c, IRN[1], 12, 20, 6, 6); R(c, IRN[5], 13, 21, 4, 4); R(c, '#e8e2d0', 14, 22, 2, 2); R(c, '#d02a1a', 15, 22, 1, 2);   // pressure gauge, needle in the red
+    for (let i = 0; i < 3; i++) R(c, IRN[1], 39, 20 + i * 2, 6, 1);           // side vents
+    if (ph >= 2) {
+      xbCrack(c, [[19, 13], [17, 17], [20, 21], [18, 27]], MLT[4]); xbCrack(c, [[41, 24], [45, 28], [43, 33]], MLT[3]); R(c, IRN[1], 34, 33, 4, 2); R(c, IRN[2], 9, 19, 2, 2);
+      for (const [x, y0, n] of [[24, 14, 4], [36, 14, 6], [11, 16, 3]]) for (let i = 0; i < n; i++) R(c, MLT[i < 2 ? 5 : 3], x + (i > 2 ? 1 : 0), y0 + i);   // slag running down from the lip
+    }
+    if (ph === 3) {                                                           // plates blown off: the glowing liner shows
+      for (const [x0, y0, w, h] of [[31, 15, 9, 4], [8, 25, 5, 5], [40, 33, 6, 3]]) for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (ins(x, y)) R(c, MLT[2 + ((x + y) % 3)], x, y);
+      R(c, MLT[6], 34, 16, 2, 1); R(c, MLT[5], 10, 27, 2, 1);
+    }
+  });
+  part(ctx, W, H, c => {                                                     // the hatch over its core
+    const hx = 28, hy = 24;
+    if (vt) {
+      blob(c, hx, hy, 7, 6.5, IRN, 2, -0.2); blob(c, hx, hy, 5.6, 5.2, MLT, 2, 0.35);
+      R(c, '#ffffff', hx - 2, hy - 2, 3, 2); R(c, MLT[7], hx - 3, hy - 1, 5, 3); R(c, '#ffffff', hx - 1, hy - 1, 2, 1);
+      blob(c, hx - 11, hy, 2.4, 6, IRN, 2.6, 0.1); blob(c, hx + 11, hy, 2.4, 6, IRN, 2.6, 0.1);   // the doors swung open
+    } else {
+      blob(c, hx, hy, 7, 6.5, IRN, 2.2, 0.08);
+      for (let y = hy - 3; y <= hy + 3; y += 2) R(c, IRN[0], hx - 5, y, 11, 1);
+      for (let y = hy - 3; y <= hy + 3; y += 2) R(c, MLT[tl || hot ? 4 : 2], hx - 4 + ((y >> 1) & 1), y, 9, 1);   // the glow through the grille
+      R(c, IRN[7], hx - 1, hy - 6, 3, 1); R(c, IRN[0], hx - 1, hy + 6, 3, 1);
+    }
+  });
+  part(ctx, W, H, c => {                                                     // the rim, the slag in it and the spout
+    const cx = 28, cy = 11;
+    for (let y = 5; y <= 17; y++) for (let x = 6; x <= 50; x++) {
+      const o = Math.pow((x + 0.5 - cx) / 22, 2) + Math.pow((y + 0.5 - cy) / 5.6, 2), n = Math.pow((x + 0.5 - cx) / 18, 2) + Math.pow((y + 0.5 - cy + 0.6) / 3.4, 2);
+      if (o > 1) continue;
+      if (n <= 1) { const d = Math.sqrt(n), sl = tl ? (x - cx) / 40 : 0; R(c, MLT[clamp(Math.round(7 - d * 4 - (hot ? 0 : 1) + sl * 2 + (xbHash(x, y, ph) < 0.12 ? -2 : 0)), 2, 7)], x, y); }
+      else R(c, hot ? (y < cy ? RST[5] : y > cy + 2 ? RST[2] : MLT[2]) : (y < cy - 1 ? IRN[6] : y > cy + 2 ? IRN[2] : IRN[4]), x, y);
+    }
+    for (let x = 9; x < 48; x += 5) R(c, hot ? MLT[3] : IRN[7], x, cy - 5 + (Math.abs(x - cx) > 15 ? 1 : 0));
+    limb(c, 47, 11, 54, 13, 2.6, 2.0, hot ? RST : IRN, 0.1, true);            // spout trough
+    R(c, MLT[tl ? 6 : 4], 48, 10, 5, 1); R(c, MLT[tl ? 7 : 5], 50, 10, 2, 1);
+    if (tl) { R(c, MLT[6], 54, 14, 2, 2); R(c, MLT[5], 55, 16, 1, 2); R(c, MLT[4], 54, 18, 1, 1); }   // slag leaving the lip
+    if (ph >= 2) { R(c, '#07080b', 14, 7, 3, 1); R(c, '#07080b', 40, 14, 4, 1); }   // dents in the lip
+    if (hot) for (const [x, y] of [[12, 9], [44, 9], [30, 6]]) R(c, '#ffffff', x, y);   // boiling over
+  });
+}
+function drawGrinder(ctx, ph, k) {                   // 48x48 the grinder: a saw ring spinning round a fixed armoured hub; k 0-3 steps the spin
+  const cx = 24, cy = 24, a0 = k * Math.PI / 24, seg = Math.PI / 6;
+  const SAW = ['#1a1e24', '#2a3038', '#3e4652', '#5a6474', '#7e8a9a', '#a8b4c2', '#d8e2ec'];
+  part(ctx, 48, 48, c => {                                                   // the saw ring and its teeth
+    for (let y = 0; y < 48; y++) for (let x = 0; x < 48; x++) {
+      const dx = x + 0.5 - cx, dy = y + 0.5 - cy, r = Math.hypot(dx, dy), ang = Math.atan2(dy, dx), u = (((ang - a0) / seg) % 1 + 1) % 1;
+      const lit = clamp(Math.round(3.5 - (dx * 0.5 + dy * 0.75) / r * 2.5), 0, 6);
+      if (r >= 15 && r < 19.5) {
+        const band = r >= 17.5 ? (Math.floor((ang - a0) / seg + 12) % 2 ? HAZ[3] : '#15161a') : null;   // painted outer band: the stripes show it turning
+        R(c, band && ph < 3 ? band : r < 16 ? SAW[1] : SAW[clamp(lit, 1, 5)], x, y);
+        if (ph >= 2 && band && xbHash(Math.floor((ang - a0) * 8), 3, ph) < 0.25) R(c, SAW[2], x, y);   // paint chipped off
+      } else if (r >= 19.5 && r < 24 && r - 19.5 < 4.4 * Math.pow(1 - u, 0.8)) R(c, u < 0.2 ? SAW[6] : SAW[clamp(lit + 1, 3, 6)], x, y);   // the teeth, keen on the leading edge
+    }
+    for (let i = 0; i < 6; i++) { const a = a0 + i * seg * 2 + seg / 2; R(c, SAW[0], Math.round(cx + Math.cos(a) * 16.5), Math.round(cy + Math.sin(a) * 16.5), 1, 1); }   // bolt heads
+  });
+  part(ctx, 48, 48, c => {                                                   // the hub housing, upright whatever the ring does
+    blob(c, cx, cy, 13, 12, IRN, 3.4, 0.06);
+    if (ph === 1) {
+      for (const [x0, y0] of [[13, 15], [26, 15], [13, 25], [26, 25]]) { R(c, IRN[5], x0, y0, 9, 8); R(c, IRN[6], x0, y0, 9, 1); R(c, IRN[3], x0, y0 + 7, 9, 1); R(c, IRN[7], x0 + 1, y0 + 1); R(c, IRN[7], x0 + 7, y0 + 6); }
+      for (let i = 0; i < 6; i++) R(c, i % 2 ? '#15161a' : HAZ[3], 13 + i * 4, 23, 4, 2);
+    } else if (ph === 2) {
+      for (const [x0, y0] of [[13, 15], [13, 25], [26, 25]]) { R(c, IRN[4], x0, y0, 9, 8); R(c, IRN[5], x0, y0, 9, 1); R(c, IRN[2], x0, y0 + 7, 9, 1); }
+      R(c, IRN[0], 26, 15, 9, 8); for (let i = 0; i < 4; i++) R(c, i % 2 ? '#c84a20' : '#40c0ff', 27 + i * 2, 16 + i, 1, 5);   // a plate gone: wiring
+      xbCrack(c, [[14, 26], [18, 29], [17, 32]], null); xbCrack(c, [[30, 27], [33, 30]], null);
+      for (let i = 0; i < 6; i++) R(c, i % 2 ? '#15161a' : HAZ[1], 13 + i * 4, 23, 4, 2);
+    } else {
+      blob(c, cx, cy, 11, 10, ['#140806', '#2a0e08', '#4a1a0c', '#7a2a10'], 2.6, 0);   // stripped: the gearbox and its hot core
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; R(c, IRN[4], Math.round(cx + Math.cos(a) * 8.5), Math.round(cy + Math.sin(a) * 8), 2, 2); }
+      blob(c, cx, cy, 5.2, 5, MLT, 2, 0.3); R(c, '#ffffff', cx - 2, cy - 2, 2, 2);
+      R(c, IRN[3], 12, 14, 4, 3); R(c, IRN[3], 33, 31, 4, 3);
+    }
+    R(c, IRN[0], 32, 18, 6, 4); R(c, ph === 3 ? MLT[6] : '#ff3020', 33, 19, 5, 2); R(c, '#ffe0a0', 36, 19, 2, 1);   // the visor slit, looking ahead
+    if (ph >= 2) R(c, '#07080b', 34, 18, 1, 4);
+    limb(c, 17, 11, 17, 6, 1.8, 1.6, IRN, -0.1, true); limb(c, 22, 11, 22, 7, 1.5, 1.4, IRN, -0.1, true);   // exhaust stacks
+    R(c, ph === 3 ? MLT[5] : IRN[1], 16, 5, 3, 1); R(c, ph === 3 ? MLT[4] : IRN[1], 21, 6, 3, 1);
+    blob(c, cx, cy + 12, 4, 2.2, IRN, 2.4, 0.1); R(c, IRN[7], cx - 1, cy + 11, 2, 1);   // axle cap
+  });
+}
+function drawQueen(ctx, ph, pose) {                  // 56x40 the hive queen, faces right; pose a | b wingbeat, s rearing to screech
+  const sc = pose === 's', up = pose === 'a' || sc, by = sc ? -2 : 0;
+  const wingFill = (c, cx, cy, rx, ry, rot, tatter) => {
+    const cs = Math.cos(rot), sn = Math.sin(rot);
+    for (let y = Math.floor(cy - rx - 1); y <= cy + rx + 1; y++) for (let x = Math.floor(cx - rx - 1); x <= cx + rx + 1; x++) {
+      const px = x + 0.5 - cx, py = y + 0.5 - cy, u = (px * cs + py * sn) / rx, v = (-px * sn + py * cs) / ry;
+      if (u * u + v * v > 1 || x < 0 || y < 0 || x >= 56 || y >= 40) continue;
+      if (tatter && xbHash(x >> 1, y >> 1, tatter) < 0.22 * tatter && u > -0.3) continue;   // torn membrane
+      const vein = Math.abs(v - u * 0.4) < 0.09 || Math.abs(v + u * 0.5 - 0.3) < 0.08 || Math.abs(u - 0.35) < 0.05;
+      c.fillStyle = vein ? 'rgba(90,120,150,0.95)' : u > 0.55 ? 'rgba(220,240,255,0.7)' : 'rgba(170,210,240,0.5)'; c.fillRect(x, y, 1, 1);
+    }
+  };
+  const wings = (back) => part(ctx, 56, 40, c => {
+    const t = back ? 0 : ph - 1, dx = back ? -3 : 0;
+    if (sc) wingFill(c, 23 + dx, 8, 13, 4, -0.5, t);
+    else if (up) wingFill(c, 21 + dx, 9, 13, 4, -0.38, t);
+    else wingFill(c, 18 + dx, 15, 15, 3.6, -0.06, t);
+  }, back ? '#20182a' : '#07080b');
+  wings(true);
+  part(ctx, 56, 40, c => {                                                   // legs, folded under
+    for (const [hx, f] of [[27, 0], [31, 1], [35, 2]]) {
+      const kx = hx - 3 + f * 2, ky = 30 + by + (f === 1 ? 1 : 0), fx = hx - 6 + f * 4, fy = 35 + by;
+      pxLine(c, XCH[3], hx, 24 + by, kx, ky, 1); pxLine(c, XCH[4], hx + 1, 24 + by, kx + 1, ky, 1); pxLine(c, XCH[2], kx, ky, fx, fy, 1); R(c, XCH[5], fx, fy, 1, 1);
+    }
+  });
+  part(ctx, 56, 40, c => {                                                   // the egg-heavy abdomen
+    const cx = 15, cy = 23 + by * 0.5, rx = 13.5, ry = 10.5;
+    blob(c, cx, cy, rx, ry, BRF, 2.1, 0.04);
+    blob(c, cx + 1, cy - 3.5, rx - 1, ry - 4.5, XCH, 2.4, 0.08, (x, y) => y < cy - 1);   // dorsal plates
+    for (let x = 6; x < 26; x += 5) for (let y = Math.round(cy - 8); y < cy + 9; y++) if (inBlob(x, y, cx, cy, rx, ry, 2.1)) R(c, '#1a0808', x, y);   // segment bands
+    for (const [x, y] of [[8, 25], [13, 27], [19, 26], [10, 21], [16, 23], [22, 22], [5, 23]]) { R(c, BRE[ph === 3 ? 3 : 2], x, y + by * 0.5, 2, 2); R(c, BRE[4], x, y + by * 0.5, 1, 1); }   // eggs glowing through
+    R(c, XCH[2], 1, 23, 3, 3); R(c, BRE[1], 0, 24, 2, 1);                     // ovipositor
+    if (ph === 3) {                                                           // ruptured: brood seeping out
+      blob(c, 17, 28, 4.2, 3, ['#140404', '#2a0808', '#4a1010'], 2, -0.2);
+      for (const [x, y] of [[15, 27], [18, 28], [16, 29], [19, 27]]) { R(c, BRE[3], x, y); R(c, BRE[4], x, y - 1 + (x & 1)); }
+      R(c, BRE[2], 16, 31, 1, 3); R(c, BRE[3], 16, 34, 1, 1); R(c, BRE[2], 19, 31, 1, 2);
+    }
+    if (ph >= 2) xbCrack(c, [[12, 15], [14, 18], [12, 21]], null);
+  });
+  part(ctx, 56, 40, c => {                                                   // thorax and head
+    blob(c, 31, 19 + by, 7.5, 6.5, XCH, 2.2, 0.1);
+    R(c, XCH[6], 29, 13 + by, 4, 1); if (ph >= 2) xbCrack(c, [[30, 15 + by], [32, 19 + by]], null);
+    const hx = 41 + (sc ? 1 : 0), hy = 18 + by - (sc ? 2 : 0);
+    for (const [x, h] of [[hx - 4, 3], [hx - 2, 4], [hx, 3]]) { R(c, XCH[3], x, hy - 4 - h, 1, h); R(c, XCH[6], x, hy - 4 - h, 1, 1); }   // her crown of spines
+    blob(c, hx, hy, 6, 5.2, XCH, 2.3, 0.12);
+    pxLine(c, XCH[5], hx + 1, hy - 4, hx + 7, hy - 11 - (sc ? 1 : 0)); pxLine(c, XCH[4], hx - 1, hy - 4, hx + 3, hy - 12);   // antennae
+    R(c, XCH[6], hx + 7, hy - 12, 1, 1); R(c, XCH[6], hx + 3, hy - 13, 1, 1);
+    const eye = ph === 3 ? ['#ff2010', '#ffb080', '#ffffff'] : ['#c02818', '#ff7040', '#ffd0a0'];
+    R(c, '#140606', hx - 1, hy - 3, 5, 4); R(c, eye[0], hx - 1, hy - 3, 4, 3); R(c, eye[1], hx, hy - 3, 2, 2); R(c, eye[2], hx + 1, hy - 3, 1, 1);   // compound eye
+    const open = sc ? 4 : 1;                                                // mandibles
+    pxLine(c, XCH[5], hx + 5, hy + 1, hx + 10, hy - open, 2); R(c, '#e8e2d0', hx + 10, hy - open, 1, 2);
+    pxLine(c, XCH[4], hx + 5, hy + 2, hx + 10, hy + 2 + open, 2); R(c, '#e8e2d0', hx + 10, hy + 1 + open, 1, 2);
+    if (sc) { R(c, '#3a0808', hx + 6, hy, 3, 2); R(c, '#ff6040', hx + 7, hy + 1, 1, 1); }
+  });
+  wings(false);
+}
+function drawOverseer(ctx, ph, pose) {               // 48x48 the overseer: an armoured eye on a thruster stalk; pose i | c (charging, lids narrowed). The iris is drawn live
+  const ch = pose === 'c', cx = 24, cy = 22;
+  part(ctx, 48, 48, c => {                                                   // stalk, fins, antenna
+    limb(c, cx, 35, cx, 44, 4.2, 2.6, IRN, -0.05, true); R(c, IRN[6], cx - 3, 36, 2, 1); R(c, '#40e0ff', cx - 1, 45, 3, 1); R(c, '#ffffff', cx, 45, 1, 1);
+    limb(c, 10, 24, 2, 33, 2.4, 1.4, IRN, 0, true); limb(c, 38, 24, 46, 33 + (ph >= 2 ? 2 : 0), 2.4, 1.4, IRN, 0.05, true);
+    R(c, ph === 3 ? '#401010' : '#ff3020', 2, 33, 1, 1); R(c, '#40e0ff', 45, 33 + (ph >= 2 ? 2 : 0), 1, 1);
+    limb(c, cx, 7, cx, 2, 1, 0.8, IRN, 0, true); R(c, '#ff3020', cx, 1, 1, 1);
+    limb(c, 15, 9, 12, 4, 1.4, 1, IRN, 0, true); limb(c, 33, 9, 36, 4, 1.4, 1, IRN, 0, true);
+  });
+  part(ctx, 48, 48, c => {                                                   // the armoured housing
+    const P = 2.4, ins = (x, y) => inBlob(x, y, cx, cy, 17, 16, P);
+    blob(c, cx, cy, 17, 16, IRN, P, 0.06);
+    for (let a = 0; a < 8; a++) { const t = a / 8 * Math.PI * 2 + 0.2; for (let r = 12; r < 16; r++) { const x = Math.round(cx + Math.cos(t) * r), y = Math.round(cy + Math.sin(t) * r * 0.94); if (ins(x, y)) R(c, IRN[1], x, y); } }   // panel seams
+    for (const [px, py] of [[cx - 13, cy - 9], [cx + 12, cy - 9], [cx - 13, cy + 9], [cx + 12, cy + 9]]) { R(c, IRN[0], px, py, 3, 3); R(c, ph === 1 ? '#46e6ff' : ph === 2 ? '#1a4a58' : '#401010', px + 1, py + 1, 1, 1); }   // shield ports
+    if (ph >= 2) { xbCrack(c, [[12, 12], [15, 15], [14, 19]], null); xbCrack(c, [[34, 31], [36, 34], [33, 36]], null); }
+    if (ph === 3) for (const [x0, y0, w, h] of [[30, 8, 7, 5], [8, 26, 6, 6]]) for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (ins(x, y)) R(c, (y - y0) % 2 === 1 && (x - x0) % 5 < 4 ? ((x + y) % 4 ? '#c83a18' : '#ffb040') : '#1a0606', x, y);   // blown panels: hot wiring
+  });
+  part(ctx, 48, 48, c => {                                                   // the socket, the eye and its lids
+    blob(c, cx, cy, 11.5, 11, IRN, 2, -0.25);
+    blob(c, cx, cy, 9.4, 9.2, ph === 3 ? XSR : XSC, 2, 0.1);
+    if (ph >= 2) for (const [x0, y0, x1, y1] of [[cx - 8, cy - 2, cx - 4, cy - 1], [cx + 8, cy + 3, cx + 4, cy + 2], [cx - 6, cy + 5, cx - 3, cy + 3]]) pxLine(c, ph === 3 ? '#ff7060' : '#c03030', x0, y0, x1, y1);   // bloodshot
+    const lid = ch ? 5 : 2;
+    for (let y = cy - 12; y < cy - 9 + lid; y++) for (let x = cx - 12; x <= cx + 12; x++) if (inBlob(x, y, cx, cy, 11.5, 11, 2)) R(c, y === cy - 10 + lid ? IRN[1] : IRN[y < cy - 9 ? 5 : 4], x, y);
+    for (let y = cy + 10 - lid; y <= cy + 12; y++) for (let x = cx - 12; x <= cx + 12; x++) if (inBlob(x, y, cx, cy, 11.5, 11, 2)) R(c, y === cy + 10 - lid ? IRN[1] : IRN[3], x, y);
+  });
+}
+function drawConductor(ctx, ph, pose) {              // 40x48 the conductor: a live wire in a tailcoat, a glass-domed head and a lightning baton; pose i | c (baton raised)
+  const cast = pose === 'c', hot = ph === 3, CU = hot ? XCU.slice(2).concat(['#fff0c0']) : XCU;
+  part(ctx, 40, 48, c => {                                                   // coat tails, trailing as it floats
+    for (const [x0, len, sw, w0] of [[12, 14, -5, 6], [20, 16, -8, 7]]) for (let i = 0; i < len; i++) {
+      const y = 31 + i, w = Math.max(1, Math.round(w0 - i * 0.38)), x = Math.round(x0 + sw * (i / len) * (i / len));
+      if (ph >= 2 && x0 === 20 && i > len - 6 && i % 2) continue;             // a tail torn ragged
+      R(c, XCT[i < 3 ? 3 : 2], x, y, w, 1); R(c, hot ? '#80e0ff' : XCT[4], x, y, 1, 1); R(c, XCT[1], x + w - 1, y, 1, 1);
+    }
+  });
+  const arm = (sx, sy, hx, hy, back) => part(ctx, 40, 48, c => {
+    const ex = (sx + hx) / 2 + (back ? -1 : 1), ey = (sy + hy) / 2 + 1;
+    limb(c, sx, sy, ex, ey, 2.4, 2.1, XCT, back ? -0.2 : 0.05); limb(c, ex, ey, hx, hy, 2.1, 1.6, XCT, back ? -0.2 : 0.05);
+    R(c, CU[4], Math.round(ex) - 1, Math.round(ey), 3, 1); blob(c, hx, hy, 1.9, 1.9, CU, 2, 0.1);
+  });
+  if (cast) arm(10, 17, 5, 6, true); else arm(10, 17, 7, 30, true);
+  part(ctx, 40, 48, c => {                                                   // the coat, its copper waistcoat and lapels
+    blob(c, 20, 25, 10.5, 11, XCT, 2.7, 0.05);
+    for (let y = 18; y < 32; y += 2) { R(c, CU[3], 16, y, 8, 1); R(c, CU[5], 17, y, 3, 1); R(c, CU[1], 16, y + 1, 8, 1); }   // windings
+    pxLine(c, XCT[5], 15, 16, 17, 30); pxLine(c, XCT[5], 25, 16, 23, 30); R(c, '#e8b422', 20, 32, 1, 1); R(c, '#e8b422', 20, 34, 1, 1);
+    blob(c, 9.5, 17, 4, 2.8, CU, 2.2, 0.1); blob(c, 30.5, 17, 4, 2.8, CU, 2.2, 0.12);   // coil epaulettes
+    for (const x of [7, 9, 11, 29, 31, 33]) R(c, CU[1], x, 16, 1, 3);
+    if (ph >= 2) { R(c, XCT[0], 25, 27, 3, 3); R(c, '#80e0ff', 26, 28, 1, 1); R(c, XCT[0], 12, 31, 2, 2); }
+    if (hot) { pxLine(c, '#80e0ff', 12, 21, 13, 33); pxLine(c, '#80e0ff', 28, 21, 27, 33); R(c, '#ffffff', 20, 24, 1, 1); }
+    limb(c, 14, 14, 26, 14, 2.4, 2.4, CU, 0.05, true);                        // the coil collar
+  });
+  part(ctx, 40, 48, c => {                                                   // the glass dome and its filament
+    blob(c, 20, 8, 7.4, 7, XGL, 2.1, 0.1);
+    const F = hot ? '#ffffff' : '#c8faff';
+    pxLine(c, F, 16, 12, 17, 6); pxLine(c, F, 17, 6, 20, 11); pxLine(c, F, 20, 11, 23, 6); pxLine(c, F, 23, 6, 24, 12);
+    R(c, XGL[6], 15, 3, 2, 1); R(c, XGL[6], 14, 4, 1, 3);
+    R(c, '#ffe060', 18, 8, 1, 1); R(c, '#ffe060', 22, 8, 1, 1);
+    if (ph >= 2) { xbCrack(c, [[22, 1], [24, 4], [26, 5]], null); R(c, XGL[1], 24, 2, 2, 2); }
+    R(c, CU[2], 14, 13, 13, 1); R(c, CU[4], 15, 13, 5, 1);                     // the dome's base ring
+  });
+  if (cast) arm(30, 17, 33, 6, false); else arm(30, 17, 33, 26, false);
+  part(ctx, 40, 48, c => {                                                   // the baton, a lightning rod with a live tip
+    const [x0, y0, x1, y1] = cast ? [33, 6, 36, 0] : [33, 26, 39, 20];
+    pxLine(c, '#c8a040', x0, y0, x1, y1); pxLine(c, '#fff0a0', x0, y0 - 1, x1 - 1, y1);
+    R(c, '#ffffff', x1, y1, 1, 1); R(c, '#80e0ff', x1 - 1, y1, 1, 1);
+  });
+}
+function drawEyenode(ctx, f) {                       // 14x14 shield node: a steel octahedron round a cyan emitter
+  for (let y = 0; y < 14; y++) for (let x = 0; x < 14; x++) {
+    const dx = x - 6.5, dy = y - 6.5; if (Math.abs(dx) + Math.abs(dy) > 6.5) continue;
+    R(ctx, IRN[dx < 0 && dy < 0 ? 6 : dx < 0 || dy < 0 ? 4 : 2], x, y);
+  }
+  R(ctx, IRN[0], 4, 4, 6, 6); R(ctx, '#1a6a80', 5, 5, 4, 4); R(ctx, f ? '#c8faff' : '#46e6ff', 6 - f, 6 - f, 2 + 2 * f, 2 + 2 * f); R(ctx, '#ffffff', 6, 6, 1, 1);
+}
+function drawEggsac(ctx, f) {                        // 14x16 egg sac: an amber sac on a goo foot; f 0 | 1 pulse | 2 hatching
+  const sw = f ? 0.5 : 0;
+  R(ctx, XCH[2], 2, 14, 10, 2); R(ctx, XCH[4], 3, 14, 7, 1);
+  blob(ctx, 7, 8.5, 5.4 + sw, 6.4 + sw, ['#2a1008', '#4e200e', '#7a3814', '#a8561c', '#cc7a26', '#e8a238'], 2.1, f === 2 ? 0.2 : 0.06);
+  blob(ctx, 7.5, 9.5, 2.6 + sw, 3.2 + sw, ['#e89a2a', '#ffd060', '#fff0a8'], 2, 0.1);   // the yolk glowing through
+  for (const [x0, y0, x1, y1] of [[4, 4, 5, 12], [9, 3, 8, 13], [6, 2, 7, 7]]) pxLine(ctx, XCH[3], x0, y0, x1, y1);
+  R(ctx, '#ffffff', 5, 5, 1, 1);
+  if (f === 2) { pxLine(ctx, '#140606', 6, 3, 8, 8); pxLine(ctx, '#140606', 8, 8, 6, 12); R(ctx, '#ff3020', 7, 7, 1, 1); R(ctx, XCH[4], 11, 9, 2, 1); }
+}
+function drawXBlade(ctx, r) {                        // a launched saw blade (12x12, or 8x8 split off)
+  const c0 = r + 2;
+  for (let y = 0; y < c0 * 2; y++) for (let x = 0; x < c0 * 2; x++) {
+    const dx = x + 0.5 - c0, dy = y + 0.5 - c0, d = Math.hypot(dx, dy), u = (((Math.atan2(dy, dx) / (Math.PI / 4)) % 1) + 1) % 1;
+    if (d <= r - 0.5) R(ctx, d < 1.5 ? '#2a3038' : dx + dy < 0 ? '#c8d2dc' : '#7e8a9a', x, y);
+    else if (d < r + 1.8 * (1 - u)) R(ctx, '#e8f0f8', x, y);
+  }
+}
+function genExpansionBossArt(scene) {                 // their sheets: a frame per phase and pose, with white hit-flash copies
+  const sheet = (key, w, h, names, draw) => addSheet(scene, key, names.map(n => ({ name: n, c: makeSprite(w, h, x => draw(x, +n[0], n.slice(1))) })), w, h, true);
+  const per = poses => [1, 2, 3].flatMap(p => poses.map(q => p + q));
+  sheet('crucible', 56, 48, per(['i', 't', 'v']), drawCrucible);
+  sheet('grinder', 48, 48, per(['a', 'b', 'c', 'd']), (x, p, q) => drawGrinder(x, p, 'abcd'.indexOf(q)));
+  sheet('queen', 56, 40, per(['a', 'b', 's']), drawQueen);
+  sheet('overseer', 48, 48, per(['i', 'c']), drawOverseer);
+  sheet('conductor', 40, 48, per(['i', 'c']), drawConductor);
+  addSheet(scene, 'eyenode', ['n0', 'n1'].map((n, f) => ({ name: n, c: makeSprite(14, 14, x => drawEyenode(x, f)) })), 14, 14, true);
+  addSheet(scene, 'eggsac', ['e0', 'e1', 'e2'].map((n, f) => ({ name: n, c: makeSprite(14, 16, x => drawEggsac(x, f)) })), 14, 16, true);
+  addTex(scene, 'xblade', makeSprite(12, 12, x => drawXBlade(x, 4))); addTex(scene, 'xbladeS', makeSprite(8, 8, x => drawXBlade(x, 2)));
+  addTex(scene, 'g_xtooth', makeSprite(6, 5, c => { R(c, '#d8e2ec', 1, 1, 3, 1); R(c, '#7e8a9a', 1, 2, 2, 1); R(c, '#d8e2ec', 1, 3, 1, 1); }));
+  addTex(scene, 'g_xlens', makeSprite(6, 6, c => { R(c, '#f2ece4', 1, 1, 3, 3); R(c, '#46e6ff', 2, 2, 2, 2); R(c, '#07080b', 3, 3, 1, 1); }));
+  addTex(scene, 'g_xcoil', makeSprite(7, 5, c => { for (let i = 0; i < 3; i++) R(c, XCU[i % 2 ? 3 : 5], 1 + i * 2, 1, 1, 3); R(c, XCU[1], 1, 3, 5, 1); }));
+}
 function buildRagParts(scene) {
   const put = (key, c) => { addTex(scene, key, c); addTex(scene, key + '_w', whiteCopy(c)); };   // + white hit-flash copy
   for (const kind in RAG) {
@@ -2709,7 +2976,7 @@ function campaignCheckpoint(save = loadCampaign()) {
   // A checkpoint only saves after an act is clear. Keep its kills and use the current rosters for the acts ahead.
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
-// BOSS RUSH: five bosses back to back across the three arenas, a perk between each
+// BOSS RUSH: ten bosses back to back across the first five arenas, two to each, a perk between each
 // Run modes (#128): one record per mode holding every rule that differs between modes, from its waves and music to its
 // start, restart and results. GameScene.create sets this.mode from RUNMODE (or the Lab) and asks it. this.campaign and
 // this.lab stay as flags for the campaign's own systems (squads, routes, checkpoints) and the Lab's (its roster and
@@ -2790,7 +3057,7 @@ const overtimeMode = (id, record, dated) => ({                       // OVERTIME
     if (mod && mod === g.lastMod) mod = MOD_ROLL.filter(m => m !== mod)[Math.floor(rng() * 3)];
     return mod;
   },
-  card: (g, i, mod) => ['OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND'],
+  card: (g, i, mod) => ['OVERTIME ' + (i + 1), i % 6 === 5 ? OT_BOSSES[Math.floor(i / 6) % OT_BOSSES.length][1] : MOD_CARDS[mod] || 'HOSTILES INBOUND'],
   elites: (g, i) => Math.min(6, Math.floor(i / 2)),
   music: (g, i) => WAVE_MUSIC[i % WAVE_MUSIC.length],                // round the six-wave cycle
 });
@@ -2835,7 +3102,7 @@ const RUN_MODES = {
     begin: (g, c) => {                                                // straight into the first boss (or the next one, down the lift)
       BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
       if (c) { liftArrival(g, c); return; }
-      BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(g.waveTrack(0), true);
+      BUS.emit('wavecard', 'BOSS RUSH', 'TEN BOSSES BACK TO BACK'); Music.track(g.waveTrack(0), true);
       g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(0); });
     },
     liftAfter: g => g.wave >= g.A.last,
@@ -2858,8 +3125,11 @@ const RUN_MODES = {
     },
     music: campaignMusic },
 };
-const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
-const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
+const RUSH = [[['jugg', 'G']], [['grinder', 'B']], [['gunship', 'A']], [['crucible', 'B']], [['wyrm', 'G']], [['queen', 'B']], [['foreman', 'B']], [['overseer', 'B']], [['conductor', 'B']], [['boss', 'B']]];
+const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GRINDER', 'THE GUNSHIP', 'THE CRUCIBLE', 'THE SLAG WYRM', 'THE HIVE QUEEN', 'THE FOREMAN', 'THE OVERSEER', 'THE CONDUCTOR', 'THE SMELTER'];
+// OVERTIME's boss every sixth wave, in turn (DAILY too): [kind, the wave card's line]
+const OT_BOSSES = [['boss', 'THE SMELTER RETURNS'], ['foreman', 'THE FOREMAN CLOCKS IN'], ['crucible', 'THE CRUCIBLE BOILS OVER'], ['grinder', 'THE GRINDER ROLLS IN'],
+  ['queen', 'THE HIVE QUEEN DESCENDS'], ['overseer', 'THE OVERSEER IS WATCHING'], ['conductor', 'THE CONDUCTOR TAKES THE STAGE']];
 // what a copycat copies: lobs, spreads and beams; anything else is a rapid burst
 const CAT_LOB = new Set(['grenade', 'cluster', 'napalm', 'grav', 'gaslaunch', 'stasis', 'decoy', 'limpet', 'coil', 'nuke', 'sing', 'spider', 'tripwire', 'glue', 'bubble']);
 const CAT_SPREAD = new Set(['shotgun', 'flak', 'dragon', 'vacuum', 'splitter', 'bees', 'firework', 'cutter', 'saw']);
@@ -3023,13 +3293,13 @@ const ARENAS = [
               A: [[20, 8], [50, 6], [80, 8], [32, 12], [68, 12], [10, 15], [90, 15], [50, 14]], B: [[50, 18]] },
     decor: DECOR2, barrels: [[12, 24], [36, 24], [63, 24], [86, 24], [47, 18], [20, 16]], canisters: [[30, 24], [70, 24], [53, 18], [87, 16]],
     pipes: [[32, 388, 1], [1568, 388, -1], [368, 388, -1], [416, 388, 1], [1184, 388, -1], [1232, 388, 1]] },
-  { id: 3, name: 'ARENA 03', sub: 'THE SORTING LINE', grid: buildLevel3(), bgTint: 0xb8d0ff, paint: paintSorting, last: 99, belts: BELTS3, presses: PRESSES3,
+  { id: 3, name: 'ARENA 03', sub: 'THE SORTING LINE', grid: buildLevel3(), bgTint: 0xb8d0ff, paint: paintSorting, last: 5, belts: BELTS3, presses: PRESSES3,
     spawns: { player: [4, 24], health: [[4, 10], [94, 10], [40, 12], [60, 12]] },
     points: { G: [[10, 24], [25, 24], [37, 24], [62, 24], [75, 24], [90, 24], [50, 20], [15, 16], [85, 16], [45, 12], [55, 12], [5, 10], [95, 10]],
               A: [[20, 8], [50, 6], [80, 8], [30, 12], [70, 12], [10, 14], [90, 14], [50, 16]], B: [[50, 20]] },
     decor: DECOR3, barrels: [[12, 24], [36, 24], [63, 24], [88, 24], [47, 20], [20, 16]], canisters: [[30, 24], [70, 24], [53, 20], [80, 16]],
     pipes: [[32, 388, 1], [1568, 388, -1], [704, 388, -1], [896, 388, 1]] },
-  { id: 4, name: 'ARENA 04', sub: 'THE WRECKING YARD', grid: buildLevel4(), bgTint: 0xc8f0d0, paint: paintYard, last: 99,
+  { id: 4, name: 'ARENA 04', sub: 'THE WRECKING YARD', grid: buildLevel4(), bgTint: 0xc8f0d0, paint: paintYard, last: 7,
     wrecker: { px: 50 * TS, py: 3 * TS, len: 12 * TS, amp: 0.95, period: 5.2 },
     spawns: { player: [4, 24], health: [[4, 8], [95, 8], [27, 18], [72, 18]] },
     points: { G: [[13, 20], [21, 24], [36, 24], [63, 24], [78, 24], [86, 20], [95, 24], [50, 17], [28, 18], [71, 18], [5, 8], [94, 8]],
@@ -3121,7 +3391,7 @@ const LAB_ROOMS = {
 const LAB_MODIFIERS = { none: 'None', dark: 'Blackout', slag: 'Slag Rain', lowg: 'Low Gravity', melt: 'Meltdown' };
 const LAB_BOSSES = new Set(RUSH.map(([entry]) => entry[0]));
 const LAB_ENEMIES = [...CODEX.map(([id, name]) => ({ id, name })),
-  { id: 'slagmid', name: 'SLAGLING HALF' }, { id: 'slagbit', name: 'SLAGLING BIT' }]
+  { id: 'slagmid', name: 'SLAGLING HALF' }, { id: 'slagbit', name: 'SLAGLING BIT' }, { id: 'eggsac', name: 'EGG SAC' }, { id: 'eyenode', name: 'SHIELD NODE' }]
   .sort((a, b) => a.name.localeCompare(b.name));
 const LAB_MAX_ENEMIES = 16;
 
@@ -3717,6 +3987,7 @@ function genTextures(scene) {
   addSheet(scene, 'shinobi', ['w0', 'w1', 'air', 'cling'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawShinobi(x, f)) })), 16, 22, true);
   addSheet(scene, 'thundercloud', ['c0', 'c1'].map(f => ({ name: f, c: makeSprite(26, 14, x => drawThunder(x, f)) })), 26, 14, true);
   addSheet(scene, 'foreman', ['w0', 'w1', 'slam', 'magnet'].map(f => ({ name: f, c: makeSprite(44, 36, x => drawForeman(x, f)) })), 44, 36, true);
+  genExpansionBossArt(scene);
   addSheet(scene, 'vortex', ['v0', 'v1', 'spin'].map(f => ({ name: f, c: makeSprite(18, 18, x => drawVortex(x, f)) })), 18, 18, true);
   addSheet(scene, 'pylon', ['p0', 'p1'].map(f => ({ name: f, c: makeSprite(16, 28, x => drawPylon(x, f)) })), 16, 28, true);
   addSheet(scene, 'scavenger', ['w0', 'w1', 'eat'].map(f => ({ name: f, c: makeSprite(20, 18, x => drawScavenger(x, f)) })), 20, 18, true);

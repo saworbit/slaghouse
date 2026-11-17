@@ -50,6 +50,7 @@ class GameScene extends Phaser.Scene {
     this.kickReady = 0; this.kickUntil = 0; this.kickQueued = false; this.flameActiveUntil = 0; this.scorchT = 0;
     this.hazardContactUntil = 0;
     this.boss = null; this.camFocus = null; this.puddles = []; this.shockwaves = []; this.ragdolls = [];
+    this.xb = null;                                                     // the expansion bosses' hazards: made by the first of them to spawn (xbFx)
     Sfx.stopLoops(); this.spin = 0; this.heat = 0;
     this.restartArmUntil = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
@@ -923,6 +924,7 @@ class GameScene extends Phaser.Scene {
     this.updateOrbs(dt, now);
     this.updateBarrels(dt); this.updateProps(dt, now);
     this.updateHazards(dt, now);
+    if (this.xb) this.updateXb(dt, now);
     if (this.campaign) this.updateCampaignRoute(dt, now);
     this.updateEProjs(dt);
     this.updateFallingBlocks(dt);
@@ -2382,6 +2384,7 @@ class GameScene extends Phaser.Scene {
       if (e.head && e.head.alive) this.damageEnemy(e.head, dmg * TUNE.WYRM.segTake, dx, dy, src, false);
       return;
     }
+    if (e.def.armour) { dmg = this[e.def.armour](e, dmg, dx, dy, src); if (dmg <= 0) return; }   // an expansion boss's shield, plating or open core
     if (e.kind === 'orbiter' && (dx || dy) && !['burn', 'gas', 'rocket', 'crush'].includes(src)) {   // a plate between it and the shot eats it
       const ia = Math.atan2(-dy, -dx), np = e.plates.length;
       for (let k = 0; k < np; k++) { if (e.plates[k] <= 0) continue; const da = Math.atan2(Math.sin(e.spin + k * Math.PI * 2 / np - ia), Math.cos(e.spin + k * Math.PI * 2 / np - ia)); if (Math.abs(da) < 0.55) { this.orbiterPlateHit(e, k, dmg); return; } }
@@ -2771,6 +2774,832 @@ class GameScene extends Phaser.Scene {
     for (let i = 0; i < 6; i++) this.time.delayedCall(1100 + i * 110, () => this.boomFx(cx + rand(-30, 30), cy + rand(-26, 20), rand(0.8, 1.3)));
     for (let i = 0; i < 12; i++) this.spawnGib(pick(['g_plate', 'g_shard', 'g_shard2', 'g_wire']), cx + rand(-16, 16), cy + rand(-16, 10), rand(-320, 320), rand(-460, -200), 'metal');
     if (this.mode.smelterCard) this.time.delayedCall(700, () => BUS.emit('wavecard', 'VICTORY', 'THE SMELTER FALLS'));
+  }
+  // ================================================================== expansion: bosses ====
+  // Five bosses for BOSS RUSH, OVERTIME's boss slot and the Lab's Boss Chamber, never the campaign: THE CRUCIBLE,
+  // THE GRINDER, THE HIVE QUEEN, THE OVERSEER and THE CONDUCTOR. Each breaks into phase two at 66% and phase three at
+  // 33% (the boss bar's notches) with a stagger, a callout and flying debris, telegraphs every attack (an outline, a
+  // mark on the floor, a line to where it strikes), gets the letterbox intro from warpIn (xbIntro) and goes down in
+  // rolling blasts that take whatever it summoned with it (xbDeath). Their floor hazards (slag waves and pools, ruts,
+  // live floor, saw blades, ball lightning) live in this.xb, made by the first of them to spawn and run by updateXb;
+  // each hazard keeps its boss and goes harmless when that boss falls.
+  xbFx() {
+    return this.xb || (this.xb = { waves: [], pools: [], blades: [], orbs: [],
+      g: this.add.graphics().setDepth(4.98), ga: this.add.graphics().setDepth(16.4).setBlendMode(ADD), gt: this.add.graphics().setDepth(5.3) });
+  }
+  xbPhase(e) { const f = e.hp / e.def.hp; return f > 0.66 ? 1 : f > 0.33 ? 2 : 3; }
+  xbFloor() { const pb = this.player.body, fy = this.floorBelow(pb.center.x, pb.bottom - 4, 240); return fy === null ? pb.bottom : fy; }   // the floor you're over
+  xbSafeX(x, from = x) {                                                // ARENA 04: a flier keeps to its own side of the wrecking ball's swing
+    const W = this.A.wrecker, r = W ? W.len * Math.sin(W.amp) + 36 : 0;
+    return !W ? x : from < W.px ? Math.min(x, W.px - r) : Math.max(x, W.px + r);
+  }
+  xbLift(e, x, y, alt) { const fy = this.floorBelow(x, y - 8); e.body.reset(this.xbSafeX(x, x - 1), clamp(fy === null ? y : Math.min(y, fy - alt), 56, LH - 96)); }   // warped in on the floor, a flier rises to hover
+  xbHover(e, dt, tx, ty, sp, k = 1.6) {                                 // a flier eases toward a point, kept inside the room and out of the ball's way
+    const b = e.body; tx = this.xbSafeX(clamp(tx, 72, LW - 72), b.center.x); ty = clamp(ty, 56, LH - 96);
+    b.velocity.x += (clamp((tx - b.center.x) * 1.4, -sp, sp) - b.velocity.x) * Math.min(1, dt * k);
+    b.velocity.y += (clamp((ty - b.center.y) * 1.6, -sp, sp) - b.velocity.y) * Math.min(1, dt * k);
+  }
+  xbOwn(e, kind) { let n = 0; for (const o of this.enemies.getChildren()) if (o.alive && o.owner === e && o.kind === kind) n++; return n; }
+  xbAdd(kind, x, y, owner) {                                            // a summoned add at an exact spot; it dies with its boss
+    const o = this.spawnEnemy(kind, clamp(Math.floor(x / TS), 2, MAP_W - 3), clamp(Math.floor(y / TS), 2, MAP_H - 3));
+    o.body.reset(x, y); Object.assign(o, { summoned: true, aggro: true, aggroT: 99, owner });
+    return o;
+  }
+  xbIntro(e) {                                                          // warpIn: the title card and the camera held on it
+    this.boss = e; BUS.emit('boss', ...e.def.title); BUS.emit('flash', 0.35); this.shake(500, 0.012); Sfx.roar();
+    this.camFocus = { x: e.x, y: e.y - 20, until: this.time.now + 2400 };
+  }
+  xbBreak(e, now, call, gibs, col, meat) {                              // a phase break: it staggers, sheds parts and roars
+    const b = e.body, cx = b.center.x, cy = b.center.y;
+    e.ai = 'stagger'; e.aiUntil = now + 1100; e.atkN = 0; this.xbCancel(e);
+    for (let i = 0; i < 9; i++) this.spawnGib(pick(gibs), cx + rand(-14, 14), cy + rand(-12, 8), rand(-260, 260), rand(-420, -160), meat ? undefined : 'metal');
+    BUS.emit('callout', call); BUS.emit('flash', 0.25); this.shake(450, 0.012); this.impactFrame(2); this.slowmoUntil = Math.max(this.slowmoUntil, now + 350);
+    Sfx.roar(); Sfx.wreckHit(); this.boomFx(cx + rand(-10, 10), cy + rand(-8, 8), 0.6); this.spawnLight(cx, cy, 'ring', col, 0.4, 3, 0.9, 0.35);
+  }
+  xbCancel(e) { const X = this.xb; if (X) X.pools = X.pools.filter(P => P.src !== e || !(P.tell > 0)); }   // a warning that hadn't gone live is called off
+  xbSpent(e) {                                                          // a fallen boss's hazards fizzle out harmlessly
+    const X = this.xb; if (!X) return;
+    this.xbCancel(e);
+    for (const H of [...X.waves, ...X.pools, ...X.blades, ...X.orbs]) if (H.src === e) { H.dead = true; H.t = Math.min(H.t, 0.45); }
+  }
+  xbDeath(e, cx, cy, call, bit, style) {                                // the fall: slow-mo, rolling blasts, and whatever it summoned goes with it
+    const now = this.time.now;
+    if (this.boss === e) this.boss = null;
+    this.slowmoUntil = now + 1500; this.zoomPunch = 0.15; BUS.emit('flash', 0.5); BUS.emit('callout', call); this.impactFrame(4); this.shake(1500, 0.012);
+    this.camFocus = { x: cx, y: cy, until: now + 2200 };
+    for (let i = 0; i < 9; i++) this.time.delayedCall(i * 120, () => this.boomFx(cx + rand(-24, 24), cy + rand(-20, 16), rand(0.6, 1.1), style));
+    for (let i = 0; i < 5; i++) this.time.delayedCall(1000 + i * 120, () => this.boomFx(cx + rand(-30, 30), cy + rand(-24, 20), rand(0.8, 1.3), style));
+    for (const o of this.enemies.getChildren()) if (o.alive && o.owner === e) this.time.delayedCall(rand(100, 700), () => {
+      if (!o.alive) return;
+      if (o.kind === 'gnat') o.panicDie = rand(0.1, 1.2);
+      else if (o.kind === 'tick') { o.hp = 0; this.killEnemy(o, 0, -1, 'tickboom'); }   // its ticks fizzle rather than blow up in your face
+      else this.damageEnemy(o, 999, 0, -1, 'crush');
+    });
+    this.xbSpent(e); this.dropOrbs(cx, cy, 4);
+    if ((this.ms.xboss = (this.ms.xboss | 0) | bit) === 31) this.award('management');   // all five in one run
+    if (this.mode.smelterCard && this.mode.waves && this.wave >= this.mode.waves - 1 && this.enemiesLeft <= 1) this.time.delayedCall(700, () => BUS.emit('wavecard', 'VICTORY', e.def.title[0] + ' FALLS'));
+  }
+  xbArmour(e, dmg, dx, dy, src) {                                       // damageEnemy, before the shared modifiers: shields, a vent's open core, bare plating
+    if (e.kind === 'overseer' && e.phase === 1) {                       // the nodes are up: the shield turns everything
+      const now = this.time.now, b = e.body;
+      if (now - (e.deflT || 0) > 90) { e.deflT = now; this.fxSparks(b.center.x - (dx || 0) * 18, b.center.y - 2 - (dy || 0) * 18, 4, Math.atan2(-(dy || 0), -(dx || 1)), 1.4, [60, 180]); Sfx.shieldHit(); }
+      e.shieldHitT = now; return 0;
+    }
+    if (e.kind === 'crucible') { if (src === 'burn') return 0; if (e.ai === 'vent') { e.coreHitT = this.time.now; return dmg * TUNE.CRUCIBLE.core; } }
+    if (e.kind === 'grinder' && e.phase === 3) return dmg * TUNE.GRINDER.bare;
+    return dmg;
+  }
+  xbTouch(p, e) {                                                       // onTouchEnemy: what touching each of them costs you
+    const now = this.time.now, b = e.body;
+    if (e.kind === 'eggsac' || e.kind === 'eyenode' || now < (e.touchT || 0)) return;
+    const roll = e.kind === 'grinder' && e.ai === 'roll', dive = e.kind === 'queen' && e.ai === 'dive';
+    if (!this.hurtPlayer(roll ? TUNE.GRINDER.touch : dive ? TUNE.QUEEN.diveDmg : e.def.touch, b.center.x, { srcY: b.center.y })) return;
+    e.touchT = now + 600;
+    if (roll || dive) { const d = Math.sign(p.x - b.center.x) || e.dir; p.body.velocity.x = d * 320; p.body.velocity.y = -280; this.jumpCuttable = false; this.shake(220, 0.01); Sfx.kickHit(); this.fxSparks(p.x, p.y, 8); }
+    if (this.perks.thorns && e.alive) this.damageEnemy(e, 20, Math.sign(e.x - p.x) || 1, -0.3, 'kick');
+  }
+  updateXb(dt, now) {                                                   // the bosses' floor hazards: move them, draw them, hurt what's on them
+    const X = this.xb, pb = this.player.body, alive = this.state === 'play', g = X.g, ga = X.ga;
+    g.clear(); ga.clear(); X.gt.clear();
+    for (let i = X.waves.length - 1; i >= 0; i--) {                     // slag waves run along the floor: jump them
+      const w = X.waves[i]; w.t -= dt; w.x += w.dir * w.spd * dt;
+      if (w.t <= 0 || !this.standAt(w.x + w.dir * 6, w.y + 2) || this.solidAt(w.x + w.dir * 6, w.y - 6)) {
+        this.fx.emit(w.x, w.y - 3, { n: 10, angle: -Math.PI / 2, spread: 1.2, speed: [40, 140], life: [0.3, 0.6], size: [3, 1], cols: [0xffe080, 0xffa030, 0xff5a1a], add: true, g: 500, mode: 1 });
+        X.waves.splice(i, 1); continue;
+      }
+      const h = w.dead ? w.h * w.t / 0.45 : w.h, x = Math.round(w.x);
+      for (let k = -10; k <= 10; k++) {
+        const f = 1 - (k / 10) * (k / 10), hh = Math.round(h * f * (k * w.dir >= 0 ? 1 : 0.7) * (0.85 + 0.15 * Math.sin(now / 50 + k))); if (hh <= 0) continue;
+        g.fillStyle(0x7a1806, 1).fillRect(x + k, w.y - hh, 1, hh); g.fillStyle(0xf05a12, 1).fillRect(x + k, w.y - hh, 1, Math.max(1, hh - 2)); g.fillStyle(hh > h * 0.6 ? 0xffe68a : 0xffa030, 1).fillRect(x + k, w.y - hh, 1, 1);
+      }
+      ga.fillStyle(0xff6a20, 0.22).fillRect(x - 13, w.y - h - 5, 26, h + 5);
+      if (Math.random() < 0.7) this.fx.emit(w.x + rand(-6, 6), w.y - h * 0.7, { n: 1, angle: -Math.PI / 2 - w.dir * 0.5, spread: 0.6, speed: [40, 120], life: [0.25, 0.5], size: [2, 1], cols: [0xffe080, 0xff8a20, 0xc03010], add: true, g: 500, mode: 1 });
+      if (!w.hit && !w.dead && alive && Math.abs(pb.center.x - w.x) < 9 && pb.bottom > w.y - w.h - 2 && pb.bottom <= w.y + 4) { w.hit = true; this.hurtPlayer(w.dmg, w.x - w.dir * 10, { srcY: w.y, by: w.src.def.title[0] }); }
+      if (!w.dead) for (const o of this.enemies.getChildren()) if (o.alive && !o.def.boss && !FLIERS.has(o.kind) && Math.abs(o.body.center.x - w.x) < 8 && Math.abs(o.body.bottom - w.y) < 8) this.ignite(o, 1.5);
+    }
+    for (let i = X.pools.length - 1; i >= 0; i--) {                     // floor strips: a warning first, then live
+      const P = X.pools[i], x0 = Math.round(P.x - P.w / 2), x1 = Math.round(P.x + P.w / 2), y = P.y, k = P.kind;
+      if (P.tell > 0) {
+        P.tell -= dt;
+        const on = Math.floor(now / 110) % 2;
+        if (k === 'slag') {
+          ga.fillStyle(0xff4010, on ? 0.35 : 0.15).fillRect(x0, y - 3, P.w, 3); ga.fillStyle(0xff6020, 0.9).fillRect(x0, y - 14, 1, 14).fillRect(x1 - 1, y - 14, 1, 14);
+          for (let x = x0 + 4; x < x1 - 8; x += 12) ga.lineStyle(1, 0xff8a30, on ? 0.9 : 0.5).lineBetween(x, y - 10, x + 4, y - 6).lineBetween(x + 4, y - 6, x + 8, y - 10);
+        } else if (k === 'live') {
+          ga.fillStyle(0xffe040, Math.random() < 0.7 ? 0.5 : 0.2).fillRect(x0 + 1, y - 2, P.w - 2, 2);
+          for (let x = x0 + 3; x < x1 - 3; x += 8) ga.fillStyle(0xffe040, on ? 0.8 : 0.4).fillRect(x, y - 6, 3, 1);
+        } else if (k === 'safe') {
+          ga.fillStyle(0x5cff7a, 0.3 + 0.15 * Math.sin(now / 80)).fillRect(x0 + 2, y - 2, P.w - 4, 2);
+          ga.fillStyle(0x5cff7a, 0.95).fillRect(x0 + 1, y - 10, 1, 8).fillRect(x0 + 1, y - 10, 4, 1).fillRect(x1 - 2, y - 10, 1, 8).fillRect(x1 - 5, y - 10, 4, 1);
+        }
+        if (P.tell <= 0 && k === 'slag' && !P.dead) { Sfx.sizzle(); this.paintScorch(P.x, y + 2, 10); }
+        continue;
+      }
+      P.t -= dt; if (P.t <= 0) { X.pools.splice(i, 1); continue; }
+      P.fill = Math.min(1, P.fill + dt / 0.35);
+      const a = Math.min(1, P.t / 0.45), wf = P.w * P.fill;
+      const cl = P.ox <= x0 ? x0 : P.ox >= x1 ? x1 - wf : P.x - wf / 2, cr = cl + wf;   // a flood spreads out from where it pours in
+      if (k === 'slag') {
+        g.fillStyle(0x3a0a04, a).fillRect(cl, y - 5, wf, 5); g.fillStyle(0xc0340a, a).fillRect(cl, y - 4, wf, 3); g.fillStyle(0xf06a14, a).fillRect(cl + 1, y - 4, Math.max(0, wf - 2), 1);
+        for (let x = Math.ceil(cl); x < cr; x += 3) if ((x * 7 + Math.floor(now / 90)) % 11 < 2) g.fillStyle(0xffe68a, a).fillRect(x, y - 5, 2, 1);
+        ga.fillStyle(0xff6020, 0.28 * a).fillRect(cl, y - 11, wf, 11);
+        if (Math.random() < 0.9) this.fx.emit(rand(cl, cr), y - 3, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [20, 60], life: [0.2, 0.5], size: [4, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f, 0xc03010], add: true, g: -40 });
+      } else if (k === 'rut') {
+        g.fillStyle(0x140a06, 0.9 * a).fillRect(x0, y - 1, P.w, 2); ga.fillStyle(0xff8a30, 0.55 * a).fillRect(x0 + 2, y - 1, P.w - 4, 1);
+        if (Math.random() < 0.25 * a) this.fxSparks(rand(x0, x1), y - 1, 1, -Math.PI / 2, 1.2, [30, 110]);
+      } else if (k === 'live') {
+        ga.fillStyle(0x60c8ff, 0.18 * a).fillRect(x0, y - 12, P.w, 12); ga.fillStyle(0x60c8ff, 0.5 * a).fillRect(x0, y - 4, P.w, 4); ga.fillStyle(0xe8f8ff, 0.85 * a).fillRect(x0, y - 1, P.w, 1);
+        for (let n = 0; n < Math.ceil(P.w / 22); n++) { const xa = rand(x0, x1 - 6); this.zap(ga, xa, y - 1, Math.min(x1, xa + rand(8, 20)), y - rand(3, 14)); }
+      } else if (k === 'safe') ga.fillStyle(0x5cff7a, 0.18 * a).fillRect(x0 + 2, y - 2, P.w - 4, 2);
+      if (P.dead || !P.dmg || (P.tick -= dt) > 0) continue;
+      P.tick = P.gap;
+      if (alive && pb.center.x > cl - 4 && pb.center.x < cr + 4 && Math.abs(pb.bottom - y) < 6) this.hurtPlayer(P.dmg, P.x, { burn: true, knock: false, iframes: false, srcY: y + 6, by: P.src.def.title[0] });
+      for (const o of this.enemies.getChildren()) if (o.alive && !o.def.boss && o.owner !== P.src && Math.abs(o.body.bottom - y) < 6 && o.body.center.x > cl && o.body.center.x < cr) { if (k === 'slag') this.ignite(o, 1.5); else if (k === 'live') this.damageEnemy(o, 10, 0, -1, 'arc'); }
+    }
+    for (let i = X.blades.length - 1; i >= 0; i--) {                    // saw blades bounce about until they wear out
+      const B = X.blades[i]; B.t -= dt;
+      if (B.t <= 0) { B.img.destroy(); this.fxSparks(B.x, B.y, 6); X.blades.splice(i, 1); continue; }
+      B.vy = Math.min(B.vy + this.physics.world.gravity.y * 0.7 * dt, 520);
+      let nx = B.x + B.vx * dt, ny = B.y + B.vy * dt;
+      if (this.solidAt(nx + Math.sign(B.vx) * B.r, ny)) { B.vx = -B.vx * 0.85; nx = B.x; this.fxSparks(B.x + Math.sign(-B.vx) * B.r, B.y, 4); Sfx.tink(0.4); }
+      if (B.vy > 0 && this.standAt(nx, ny + B.r)) {
+        ny = Math.floor((ny + B.r) / TS) * TS - B.r;
+        if (B.vy > 90) {
+          if (B.split && !B.dead) { B.split = false; for (const s of [-1, 1]) this.xbBlade(B.src, nx, ny - 2, B.vx * 0.5 + s * 110, -240, true, false); B.t = 0; this.fxSparks(nx, ny + B.r, 8, -Math.PI / 2, 1.4); Sfx.clang(0.5); }
+          else { this.fxSparks(nx, ny + B.r, 3, -Math.PI / 2, 1.2, [40, 140]); Sfx.tink(0.3); }
+        }
+        B.vy = B.vy > 90 ? -B.vy * 0.6 : 0; B.vx *= 0.995;
+      } else if (B.vy < 0 && this.solidAt(nx, ny - B.r)) { B.vy = -B.vy * 0.4; ny = B.y; }
+      B.x = nx; B.y = ny; B.img.setPosition(nx, ny).setRotation(B.img.rotation + B.vx * dt * 0.15).setAlpha(Math.min(1, B.t / 0.3));
+      if (!B.dead && alive && now > B.hitT && Math.abs(pb.center.x - B.x) < pb.halfWidth + B.r && Math.abs(pb.center.y - B.y) < pb.halfHeight + B.r) {
+        B.hitT = now + 800; if (this.hurtPlayer(B.dmg, B.x, { srcY: B.y, by: 'A SAW BLADE' })) { this.fxBlood(pb.center.x, pb.center.y, 8, Math.atan2(B.vy, B.vx), 1.2); Sfx.squish(); }
+      }
+    }
+    for (let i = X.orbs.length - 1; i >= 0; i--) {                      // ball lightning drifts after you; a bullet pops it
+      const O = X.orbs[i]; O.t -= dt;
+      let pop = O.t <= 0, hit = false;
+      if (!pop) for (const bl of this.bulletList) if (bl.active && Math.abs(bl.x - O.x) < 7 && Math.abs(bl.y - O.y) < 7) { bl.disableBody(true, true); pop = true; this.addStyle(15); break; }
+      if (!pop) {
+        const ax = pb.center.x - O.x, ay = pb.center.y - O.y, d = Math.hypot(ax, ay) || 1;
+        let sx = 0, sy = 0; for (const Q of X.orbs) if (Q !== O) { const qx = O.x - Q.x, qy = O.y - Q.y, q = Math.hypot(qx, qy); if (q < 24 && q > 0) { sx += qx / q; sy += qy / q; } }
+        O.vx += ((ax / d + sx * 0.8) * O.spd - O.vx) * Math.min(1, dt * 1.3); O.vy += ((ay / d + sy * 0.8) * O.spd - O.vy) * Math.min(1, dt * 1.3);
+        O.x += O.vx * dt + Math.sin(now / 200 + O.ph) * 0.5; O.y += O.vy * dt + Math.cos(now / 170 + O.ph) * 0.5;
+        if (!O.dead && alive && d < 9) { pop = true; hit = true; }
+      }
+      if (pop) {
+        X.orbs.splice(i, 1); this.spawnLight(O.x, O.y, 'ring', 0x80d8ff, 0.2, 1.4, 0.9, 0.2); this.fx.emit(O.x, O.y, { n: 12, speed: [40, 160], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x60c8ff], add: true }); Sfx.jellyZap();
+        if (hit) this.hurtPlayer(O.dmg, O.x, { srcY: O.y, by: 'BALL LIGHTNING' });
+        continue;
+      }
+      const fl = 0.8 + 0.2 * Math.sin(now / 40 + O.ph), a = Math.min(1, O.t / 0.4);
+      ga.fillStyle(0x4ab8ff, 0.18 * a).fillCircle(O.x, O.y, 9 * fl); ga.fillStyle(0x9adcff, 0.5 * a).fillCircle(O.x, O.y, 5); ga.fillStyle(0xffffff, 0.95 * a).fillCircle(O.x, O.y, 2.5);
+      if (Math.random() < 0.5) { const t = rand(0, Math.PI * 2); this.zap(ga, O.x, O.y, O.x + Math.cos(t) * 9, O.y + Math.sin(t) * 9); }
+    }
+  }
+
+  // ---------------------------------------------------------------- the crucible ----
+  // A slag cauldron on thrusters (1300 HP) that hangs ~92 px over your floor and drifts from side to side of you. POUR:
+  // it tips its spout your way (0.85 s, slag drips and the floor under it is marked) and pours a slag wave along the
+  // floor (18, jump it; both ways from phase two). BOMBS: 3-5 molten shells lobbed round you with landing marks. From
+  // phase two it FLOODS: it marks the floor on your side of it (1.4 s), tips and fills it with slag for 3.5 s (7 per
+  // 0.35 s). Phase three it overheats: it VENTS (0.7 s tell, then 2.6 s low with its core open, taking double) and
+  // rains slag round you between attacks. Fire doesn't hurt it.
+  setupCrucible(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false); this.xbFx(); this.xbLift(e, x, y, TUNE.CRUCIBLE.alt);
+    Object.assign(e, { ai: 'intro', aiUntil: this.time.now + 1800, phase: 1, atkN: 0, cd: 0.6, side: e.x > this.player.x ? 1 : -1, sideT: 5, tilt: 0, rainT: 1, pourDir: 1, floodDir: 1, holdX: e.x, tellMs: 1 });
+    e.glow = this.add.image(e.x, e.y, 'glow').setBlendMode(ADD).setTint(0xff7a20).setScale(1.7).setAlpha(0.45).setDepth(4.6);
+  }
+  updateCrucible(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.CRUCIBLE, b = e.body, pb = this.player.body, ph = this.xbPhase(e), quick = ph === 3 ? 0.75 : 1;
+    e.aggro = true; e.stunT = 0;
+    if (ph !== e.phase) {
+      e.phase = ph; this.xbBreak(e, now, ph === 2 ? 'BOILING OVER' : 'OVERHEATING', ['g_plate', 'g_plateL', 'g_shard', 'g_crust'], 0xff7a20);
+      for (let i = 0; i < 6; i++) this.spawnGib('g_slag', b.center.x + rand(-12, 12), b.top + 4, rand(-200, 200), rand(-380, -200), 'slag');
+    }
+    const hold = e.ai === 'pourTell' || e.ai === 'pour' || e.ai === 'floodTell' || e.ai === 'flood' || e.ai === 'ventTell';
+    if ((e.sideT -= dt) <= 0) { e.sideT = rand(4, 6); e.side = -e.side; }
+    const ty = this.xbFloor() - T.alt + (e.ai === 'vent' ? 26 : e.ai === 'floodTell' || e.ai === 'flood' ? -14 : 0) + Math.sin(e.t * 2.2) * 4;
+    this.xbHover(e, dt, hold ? e.holdX : pb.center.x + e.side * 120, ty, e.ai === 'vent' ? 35 : e.ai === 'stagger' ? 10 : T.speed * (ph === 3 ? 1.3 : 1));
+    e.dir = e.ai === 'pourTell' || e.ai === 'pour' ? e.pourDir : e.ai === 'floodTell' || e.ai === 'flood' ? e.floodDir : dx >= 0 ? 1 : -1;
+    const want = e.ai === 'pourTell' || e.ai === 'pour' ? 0.24 : e.ai === 'floodTell' ? 0.6 * clamp(1 - (e.aiUntil - now) / e.tellMs, 0, 1) : e.ai === 'flood' && now < e.aiUntil - 350 ? 0.62 : 0;
+    e.tilt += (want - e.tilt) * Math.min(1, dt * 7);
+    const sx = b.center.x + e.dir * 27, sy = b.center.y - 10 + e.tilt * 14;  // the spout's lip
+    switch (e.ai) {
+      case 'intro': if (now >= e.aiUntil) e.ai = 'hover'; break;
+      case 'stagger': if (Math.random() < 0.4) this.fxSparks(b.center.x + rand(-18, 18), b.center.y + rand(-12, 10), 2); if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = 0.8; } break;
+      case 'pourTell':
+        if (Math.random() < 0.5) this.fx.emit(sx, sy + 4, { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [20, 60], life: [0.3, 0.5], size: [2, 1], cols: [0xffe080, 0xff8a20], add: true, g: 400 });
+        if (now >= e.aiUntil) { e.ai = 'pour'; e.aiUntil = now + T.pour * 1000; this.cruciblePour(e, ph, sx, sy); }
+        break;
+      case 'pour': if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = T.cd * quick; } break;
+      case 'bombTell':
+        if (Math.random() < 0.6) this.fx.emit(b.center.x + rand(-16, 16), b.top + 2, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [30, 90], life: [0.2, 0.4], size: [2, 1], cols: [0xffe080, 0xff8a20], add: true, g: 300 });
+        if (now >= e.aiUntil) { this.crucibleBombs(e, T.bombs[ph - 1], false); e.ai = 'hover'; e.cd = T.cd * quick; }
+        break;
+      case 'floodTell':
+        if (Math.random() < 0.6) this.fx.emit(b.center.x + e.dir * rand(8, 22), b.top + 2, { n: 1, angle: -Math.PI / 2 + e.dir * 0.6, spread: 0.4, speed: [30, 90], life: [0.3, 0.5], size: [2, 1], cols: [0xffe080, 0xff8a20], add: true, g: 500, mode: 1 });
+        if (now >= e.aiUntil) { e.ai = 'flood'; e.aiUntil = now + 900; Sfx.erupt(); Sfx.splat(2); this.shake(400, 0.01); }
+        break;
+      case 'flood': if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = T.cd * quick; } break;
+      case 'ventTell':
+        if (Math.random() < 0.5) this.fx.emit(b.center.x + rand(-18, 18), b.top, { n: 1, angle: -Math.PI / 2, spread: 0.3, speed: [40, 100], life: [0.4, 0.8], size: [3, 8], cols: [0xe0e0e0, 0xa0a0a0], alpha: [0.5, 0], g: -40, drag: 1 });
+        if (now >= e.aiUntil) { e.ai = 'vent'; e.aiUntil = now + T.vent * 1000; Sfx.steam(); BUS.emit('callout', 'CORE EXPOSED'); this.shake(260, 0.008); }
+        break;
+      case 'vent':
+        if (Math.random() < 0.7) this.fx.emit(b.center.x + rand(-20, 20), b.top - 2, { n: 1, angle: -Math.PI / 2, spread: 0.25, speed: [60, 140], life: [0.5, 1], size: [3, 10], cols: [0xf0f0f0, 0xb0b0b0, 0x808080], alpha: [0.6, 0], g: -60, drag: 1.2 });
+        if (Math.random() < 0.12) Sfx.sizzle();
+        if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = T.cd * 0.6; }
+        break;
+      default:
+        if (ph === 3 && alive && (e.rainT -= dt) <= 0) { e.rainT = T.rain; this.crucibleBombs(e, 1, true); }
+        if (alive && (e.cd -= dt) <= 0) {
+          const cyc = ph === 1 ? ['pour', 'bombs'] : ph === 2 ? ['pour', 'flood', 'bombs', 'pour', 'bombs'] : ['vent', 'pour', 'flood', 'bombs', 'vent', 'bombs'];
+          const a = cyc[e.atkN++ % cyc.length];
+          e.holdX = b.center.x;
+          if (a === 'pour') { e.ai = 'pourTell'; e.pourDir = dx >= 0 ? 1 : -1; e.tellMs = T.pourTell * 1000 * quick; Sfx.gurgle(); Sfx.charge(0.6); }
+          else if (a === 'bombs') { e.ai = 'bombTell'; e.tellMs = T.bombTell * 1000; Sfx.charge(0.7); }
+          else if (a === 'flood') { e.ai = 'floodTell'; e.tellMs = T.floodTell * 1000 * quick; this.crucibleFlood(e, dx >= 0 ? 1 : -1, e.tellMs / 1000); }
+          else { e.ai = 'ventTell'; e.tellMs = T.ventTell * 1000; Sfx.hiss(); }
+          e.aiUntil = now + e.tellMs;
+        }
+    }
+    e.fr = ph + (e.ai === 'vent' ? 'v' : e.tilt > 0.12 || e.ai === 'pourTell' || e.ai === 'pour' ? 't' : 'i');
+  }
+  cruciblePour(e, ph, sx, sy) {                                          // the wave: it lands under the spout and runs off along the floor
+    const T = TUNE.CRUCIBLE, fy = this.floorBelow(sx, e.body.bottom + 2, 320);
+    e.pourY = fy; if (fy === null) return;
+    for (const dir of ph >= 2 ? [-1, 1] : [e.pourDir]) this.xb.waves.push({ src: e, x: sx + dir * 8, y: fy, dir, spd: T.wave.speed * (ph === 3 ? 1.15 : 1), h: T.wave.h, dmg: T.wave.dmg, t: 4, hit: false });
+    Sfx.erupt(); Sfx.sizzle(); this.shake(220, 0.008); this.paintScorch(sx, fy + 2, 10);
+    this.fx.emit(sx, fy - 2, { n: 20, angle: -Math.PI / 2, spread: 1.3, speed: [60, 200], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a], add: true, g: 500, mode: 1 });
+    this.spawnLight(sx, fy - 4, 'glow', 0xff7020, 2, 3, 0.9, 0.4);
+  }
+  crucibleBombs(e, n, rain) {                                            // molten shells lobbed round you, each with a mark where it lands
+    const pb = this.player.body, G = this.physics.world.gravity.y, T = rain ? 1.1 : 0.95, x0 = e.body.center.x, y0 = e.body.top + 4;
+    for (let i = 0; i < n; i++) {
+      const s = this.slags.getFirstDead(false); if (!s) break;
+      const tx = clamp(pb.center.x + (rain ? rand(-120, 120) : (i - (n - 1) / 2) * 46 + rand(-10, 10)), 40, LW - 40);
+      let ty = pb.bottom; for (let yy = pb.bottom - 4; yy < pb.bottom + 160; yy += 4) if (this.standAt(tx, yy)) { ty = Math.floor(yy / TS) * TS; break; }
+      s.enableBody(true, x0, y0, true, true); s.body.setAllowGravity(true); s.body.setSize(5, 5, true);
+      s.setVelocity((tx - x0) / T, (ty - 4 - y0 - 0.5 * G * T * T) / T); Object.assign(s, { px: x0, py: y0, rain }); s.glow.setVisible(true);
+      this.spawnLight(tx, ty - 2, 'ring', 0xff4020, 1.2, 0.5, 0.9, T); this.spawnLight(tx, ty - 2, 'glow', 0xff3010, 1.4, 1, 0.6, T);
+    }
+    if (rain) { if (Math.random() < 0.4) Sfx.whistle(); } else { Sfx.mortar(); this.shake(120, 0.004); }
+    this.fxSmoke(x0, y0, rain ? 2 : 5);
+  }
+  crucibleFlood(e, side, tell) {                                         // marks the floor on your side of it; the slag comes when the warning runs out
+    const T = TUNE.CRUCIBLE, b = e.body, fy = this.floorBelow(b.center.x + side * 30, b.bottom, 320);
+    e.floodDir = side; Sfx.magTell();
+    const ok = x => this.standAt(x, fy + 1) && !this.solidAt(x, fy - 2), x0 = b.center.x + side * 30;
+    if (fy === null || !ok(x0)) return;
+    let near = x0, far = x0;                                            // the floor under it, out to 230 px on your side
+    while (ok(near - side * 2) && Math.abs(near - x0) < 40) near -= side * 2;
+    while (ok(far + side * 2) && Math.abs(far - x0) < T.floodW - 40) far += side * 2;
+    const l = Math.min(near, far), r = Math.max(near, far);
+    this.xb.pools.push({ src: e, kind: 'slag', x: (l + r) / 2, w: r - l, y: fy, ox: near, tell, t: T.flood * (e.phase === 3 ? 1.15 : 1), gap: 0.35, tick: 0, dmg: T.floodDmg, fill: 0 });
+  }
+  visCrucible(e, g, now) {
+    const b = e.body, L = this.laserG, hot = e.ai === 'vent' || e.phase === 3;
+    e.setRotation(e.dir * e.tilt + (e.ai === 'ventTell' ? Math.sin(now / 25) * 0.05 : 0));
+    e.glow.setPosition(b.center.x, b.center.y + 4).setScale(e.ai === 'vent' ? 2.4 + Math.sin(now / 40) * 0.2 : 1.7 + Math.sin(now / 300) * 0.1).setAlpha(e.ai === 'vent' ? 0.75 : hot ? 0.6 : 0.42).setTint(e.ai === 'vent' ? 0xffd080 : hot ? 0xff5a20 : 0xff7a20);
+    for (const ox of [-11, 11]) if (Math.random() < 0.7) this.fx.emit(b.center.x + ox, b.bottom + 7, { n: 1, angle: Math.PI / 2, spread: 0.25, speed: [60, 130], life: [0.1, 0.22], size: [3, 1], cols: e.ai === 'vent' ? [0xffffff, 0xffe080, 0xff8a20] : [0xffffff, 0x9adcff, 0x4a8aff], add: true });
+    if (Math.random() < (hot ? 0.5 : 0.15)) this.fx.emit(b.center.x + rand(-14, 14), b.top, { n: 1, angle: -Math.PI / 2, spread: 0.4, speed: [10, 40], life: [0.6, 1.2], size: [3, 8], cols: [0x6a5a50, 0x403530], alpha: [0.45, 0], g: -20, drag: 1 });
+    const sx = b.center.x + e.dir * 27, sy = b.center.y - 10 + e.tilt * 14;
+    if (e.ai === 'pourTell' || e.ai === 'pour') {
+      const fy = this.floorBelow(sx, b.bottom + 2, 320);
+      if (fy !== null && e.ai === 'pourTell') {                          // where it lands, and which way the wave will run
+        const on = Math.floor(now / 90) % 2; L.fillStyle(0xff6020, on ? 0.9 : 0.4).fillRect(sx - 7, fy - 2, 14, 2);
+        for (const d of e.phase >= 2 ? [-1, 1] : [e.dir]) for (let j = 0; j < 3; j++) { const ax = sx + d * (12 + j * 12 + (now / 40) % 12); L.lineStyle(1, 0xff8a30, 0.8 - j * 0.2).lineBetween(ax, fy - 8, ax + d * 4, fy - 4).lineBetween(ax + d * 4, fy - 4, ax, fy); }
+      } else if (fy !== null) { L.fillStyle(0xff8a20, 0.9).fillRect(sx - 2, sy, 4, fy - sy); L.fillStyle(0xffffff, 0.8).fillRect(sx - 0.5, sy, 1, fy - sy); }
+    }
+    if (e.ai === 'flood' && now < e.aiUntil - 250) {                     // the slag going over the rim
+      const rx = b.center.x + e.dir * 22, ry = b.top + 2, fy = this.floorBelow(rx + e.dir * 6, b.bottom, 320);
+      if (fy !== null) { L.fillStyle(0xff7020, 0.9).fillRect(rx + e.dir * 3 - 3, ry, 7, fy - ry); L.fillStyle(0xffe080, 0.9).fillRect(rx + e.dir * 3 - 1, ry, 2, fy - ry); }
+    }
+    if (e.ai === 'vent' && Math.floor(now / 120) % 2) L.lineStyle(1, 0xffe080, 0.8).strokeCircle(b.center.x, b.center.y + 1, 10);   // the open core: hit it
+  }
+  deathCrucible(e, cx, cy, dx, src, charred) {                           // it cracks and spills, and goes over in blasts
+    this.xbDeath(e, cx, cy, 'CRUCIBLE CRACKED', 1);
+    for (let i = 0; i < 14; i++) this.spawnGib('g_slag', cx + rand(-16, 16), cy - 8, rand(-260, 260), rand(-460, -200), 'slag');
+    this.fx.emit(cx, cy - 6, { n: 40, angle: -Math.PI / 2, spread: 1.6, speed: [80, 300], life: [0.4, 1], size: [3, 1], cols: [0xffffff, 0xffe080, 0xffa030, 0xff5a1a], add: true, g: 500, mode: 1 });
+    const fy = this.floorBelow(cx, cy, 320); if (fy !== null) this.paintScorch(cx, fy + 2, 18);
+  }
+
+  // ---------------------------------------------------------------- the grinder ----
+  // A saw-toothed drum round an armoured hub (1250 HP). It revs (0.75 s: sparks fly, a red ring, a trail of chevrons)
+  // and ROLLS at you (150 px/s; 26 and a fling on contact), smashing crates, props and drums and caroming off walls;
+  // low steps it climbs over. It LAUNCHES a fan of 2-4 saw blades that bounce about (14 each). CLIMB: it rolls into
+  // a wall, climbs it, hangs (0.55 s, a mark where it'll land) and drops on you: a slam with shockwaves each way.
+  // Phase two: faster rolls and blades that split in two when they land. Phase three: its plating is gone (it takes
+  // x1.35) and it gouges sparking ruts behind it as it rolls (5 per 0.35 s on them).
+  setupGrinder(e, x, y, cx, cy) {
+    this.xbFx();
+    Object.assign(e, { ai: 'intro', aiUntil: this.time.now + 1600, phase: 1, atkN: 0, cd: 0.6, spin: 0, spinV: 4, rollDir: 1, bounces: 0, rollT: 0, rutX: x, stuckT: 0, climbY: 0, climbAtk: false, crushT: 0, wasG: true });
+    e.glow = this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff3020).setScale(0.7).setAlpha(0).setDepth(18);
+  }
+  updateGrinder(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.GRINDER, b = e.body, onG = b.blocked.down || b.touching.down, ph = this.xbPhase(e), i3 = ph - 1;
+    e.aggro = true; e.stunT = 0;
+    if (ph !== e.phase) { e.phase = ph; e.climbAtk = false; b.setAllowGravity(true); b.velocity.x = 0; this.xbBreak(e, now, ph === 2 ? 'TEETH OUT' : 'PLATING SHED', ['g_plate', 'g_plateL', 'g_xtooth', 'g_xtooth', 'g_shard', 'g_wire'], 0xffc040); }
+    if (onG && !e.wasG && e.airT > 0.3 && e.ai !== 'drop') { this.shake(160, 0.006); this.fxDust(b.center.x, b.bottom, 8); Sfx.stomp(); }
+    e.airT = onG ? 0 : e.airT + dt; e.wasG = onG;
+    const wx = (e.rollDir > 0 ? b.right : b.left) + e.rollDir * 3;
+    switch (e.ai) {
+      case 'intro': b.velocity.x = 0; e.spinV = 4 + 26 * clamp(1 - (e.aiUntil - now) / 1600, 0, 1); if (now >= e.aiUntil) { e.ai = 'idle'; e.cd = 0.3; } break;
+      case 'stagger': b.velocity.x *= Math.pow(0.02, dt); e.spinV = 2; if (Math.random() < 0.4) this.fxSparks(b.center.x + rand(-16, 16), b.center.y + rand(-14, 14), 2); if (now >= e.aiUntil) { e.ai = 'idle'; e.cd = 0.5; } break;
+      case 'rev':
+        b.velocity.x = 0; e.spinV = 34; e.dir = e.rollDir;
+        if (onG) { this.fxSparks(b.center.x - e.rollDir * 12, b.bottom - 2, 2, e.rollDir > 0 ? Math.PI + 0.5 : -0.5, 0.5, [80, 240]); if (Math.random() < 0.4) this.fxDust(b.center.x - e.rollDir * 12, b.bottom, 1); }
+        if (Math.random() < 0.25) Sfx.whirr(0.9);
+        if (now >= e.aiUntil) { e.ai = 'roll'; e.rollT = 0; e.bounces = 0; e.stuckT = 0; Sfx.whoosh(); this.shake(150, 0.006); }
+        break;
+      case 'roll': {
+        e.rollT += dt; e.dir = e.rollDir;
+        if (onG) b.velocity.x = approach(b.velocity.x, e.rollDir * T.roll[i3] * (e.climbAtk ? 1.1 : 1), 1400 * dt);
+        e.spinV = Math.abs(b.velocity.x) / 6;
+        if ((e.crushT -= dt) <= 0) { e.crushT = 0.12; this.grinderGrind(e); }
+        if (ph === 3 && onG && Math.abs(b.center.x - e.rutX) > 22) { e.rutX = b.center.x; this.xb.pools.push({ src: e, kind: 'rut', x: b.center.x - e.rollDir * 12, w: 26, y: b.bottom, tell: 0, t: T.rut, gap: 0.35, tick: 0, dmg: T.rutDmg, fill: 1, ox: b.center.x }); }
+        if (onG && Math.random() < 0.5) this.fxSparks(b.center.x - e.rollDir * 8, b.bottom - 1, 1, e.rollDir > 0 ? Math.PI + 0.4 : -0.4, 0.4, [60, 200]);
+        if (e.rollDir > 0 ? b.blocked.right : b.blocked.left) {
+          if (!this.solidAt(wx, b.bottom - 44) || e.climbAtk) { e.ai = 'climb'; e.climbY = b.bottom; b.setAllowGravity(false); b.velocity.y = -T.climb; Sfx.clang(0.7); }
+          else { this.grinderBounce(e, wx); if (++e.bounces > T.bounces[i3]) e.ai = 'brake'; }
+          break;
+        }
+        if (onG && Math.abs(b.velocity.x) < 25 && e.rollT > 0.4) { if ((e.stuckT += dt) > 0.5) { e.rollDir = -e.rollDir; e.stuckT = 0; } } else e.stuckT = 0;
+        if (e.rollT > (e.climbAtk ? 6 : 4) || (!e.climbAtk && e.rollDir * dx < -200)) e.ai = 'brake';
+        break;
+      }
+      case 'brake':
+        e.climbAtk = false; b.velocity.x = approach(b.velocity.x, 0, 600 * dt); e.spinV = Math.abs(b.velocity.x) / 6;
+        if (onG && Math.random() < 0.6) this.fxSparks(b.center.x + e.rollDir * 10, b.bottom - 1, 2, e.rollDir > 0 ? -0.3 : Math.PI + 0.3, 0.5, [80, 220]);
+        if (Math.abs(b.velocity.x) < 10) { e.ai = 'idle'; e.cd = 0.7 * (ph === 3 ? 0.7 : 1); }
+        break;
+      case 'climb': {
+        b.setAllowGravity(false); b.velocity.x = e.rollDir * 40; b.velocity.y = -T.climb; e.spinV = 26;
+        if (Math.random() < 0.6) this.fxSparks(wx, b.center.y + rand(-8, 8), 2, e.rollDir > 0 ? Math.PI : 0, 1, [60, 200]);
+        if (Math.random() < 0.15) Sfx.whirr(0.7);
+        if (!this.solidAt(wx, b.bottom - 3)) { b.setAllowGravity(true); b.velocity.y = -140; b.velocity.x = e.rollDir * 140; e.ai = 'roll'; e.climbAtk = false; break; }   // over the top: carry on rolling
+        const up = e.climbY - b.bottom;
+        if (e.climbAtk && (up > T.climbH || b.blocked.up)) { e.ai = 'hang'; e.aiUntil = now + T.hang * 1000 * (ph === 3 ? 0.8 : 1); b.setVelocity(0, 0); Sfx.charge(0.8); break; }
+        if (!e.climbAtk && (up > 52 || b.blocked.up)) { b.setAllowGravity(true); b.velocity.y = 0; this.grinderBounce(e, wx); e.ai = ++e.bounces > T.bounces[i3] ? 'brake' : 'roll'; }   // a real wall after all
+        break;
+      }
+      case 'hang':
+        b.setVelocity(0, 0); b.setAllowGravity(false); e.spinV = 30;
+        if (Math.random() < 0.7) this.fxSparks(wx, b.center.y, 2, Math.PI / 2 + (e.rollDir > 0 ? 0.3 : -0.3), 0.6, [40, 160]);
+        if (now >= e.aiUntil) { e.ai = 'drop'; e.aiUntil = now; b.setAllowGravity(true); b.setVelocity(clamp((this.player.body.center.x - b.center.x) * 1.2, -280, 280), -90); e.dir = Math.sign(b.velocity.x) || -e.rollDir; Sfx.whoosh(); }
+        break;
+      case 'drop': e.spinV = 20; if (onG && now > e.aiUntil + 150) { this.grinderSlam(e); e.ai = 'idle'; e.cd = 0.9 * (ph === 3 ? 0.7 : 1); e.climbAtk = false; } break;
+      case 'bladeTell':
+        b.velocity.x = approach(b.velocity.x, 0, 900 * dt); e.spinV = 16;
+        if (Math.random() < 0.5) this.fxSparks(b.center.x + rand(-18, 18), b.top + 4, 1, -Math.PI / 2, 1, [40, 140]);
+        if (now >= e.aiUntil) { this.grinderBlades(e, ph); e.ai = 'idle'; e.cd = 1.1 * (ph === 3 ? 0.7 : 1); }
+        break;
+      default:
+        b.velocity.x = approach(b.velocity.x, 0, 800 * dt); e.spinV = Math.max(3, Math.abs(b.velocity.x) / 6); e.dir = dx >= 0 ? 1 : -1;
+        if (alive && onG && (e.cd -= dt) <= 0) {
+          const cyc = ph === 1 ? ['roll', 'blades', 'roll', 'climb'] : ph === 2 ? ['roll', 'blades', 'climb', 'roll', 'blades'] : ['roll', 'climb', 'blades', 'roll'];
+          const a = cyc[e.atkN++ % cyc.length];
+          if (a === 'blades') { e.ai = 'bladeTell'; e.aiUntil = now + T.bladeTell * 1000; Sfx.charge(0.6); }
+          else { e.ai = 'rev'; e.rollDir = dx >= 0 ? 1 : -1; e.climbAtk = a === 'climb'; e.aiUntil = now + T.rev[i3] * 1000; Sfx.charge(0.4); }
+        }
+    }
+    e.spin += e.spinV * dt; e.fr = ph + 'abcd'[Math.floor(e.spin) % 4];
+  }
+  grinderGrind(e) {                                                      // what's in front of the teeth: crates, props, drums and foes
+    const b = e.body, fx = b.center.x + e.rollDir * (b.halfWidth + 4), fy = b.center.y + 6;
+    this.blastTiles(fx, fy, 14, 40);
+    if (this.props) this.hitPropsAt(fx, fy, e.rollDir, 0, 30, 'grind' + Math.floor(this.time.now / 400));
+    for (const k of this.barrelList) if (k.active && Math.abs(k.x - fx) < 12 && Math.abs(k.y - fy) < 20) { k.body.velocity.x = e.rollDir * 420; k.body.velocity.y = -160; k.kicked = true; }   // drums get bowled ahead of it
+    for (const o of this.enemies.getChildren()) if (o.alive && o !== e && !o.def.boss && Math.abs(o.body.center.x - fx) < o.body.halfWidth + 8 && Math.abs(o.body.center.y - b.center.y) < o.body.halfHeight + 14) this.damageEnemy(o, 30, e.rollDir, -0.5, 'saw');
+  }
+  grinderBounce(e, wx) {                                                 // off a wall: a clang, a shower of sparks, and back the other way
+    const b = e.body; e.rollDir = -e.rollDir; b.velocity.x = e.rollDir * 90; if (b.blocked.down) b.velocity.y = -120;
+    this.fxSparks(wx, b.center.y, 14, e.rollDir > 0 ? 0 : Math.PI, 1.4, [80, 260]); this.shake(220, 0.01); Sfx.clang(1); Sfx.wreckHit(); this.zoomPunch = Math.max(this.zoomPunch, 0.03);
+  }
+  grinderSlam(e) {                                                       // the drop lands: a slam and shockwaves each way along the floor
+    const b = e.body, y = b.bottom, pb = this.player.body;
+    this.shake(420, 0.014); Sfx.stomp(); Sfx.explosion(0.7); this.zoomPunch = Math.max(this.zoomPunch, 0.06); this.fxDust(b.center.x, y, 18);
+    this.fxSparks(b.center.x, y - 2, 16, -Math.PI / 2, 1.6, [80, 260]); this.blastTiles(b.center.x, y + 4, 40, 60);
+    for (const dir of [-1, 1]) this.shockwaves.push({ x: b.center.x + dir * (b.halfWidth + 2), y, dir, t: 1.6, hit: false });
+    if (this.state === 'play' && Math.abs(pb.center.x - b.center.x) < b.halfWidth + 12 && Math.abs(pb.bottom - y) < 30) this.hurtPlayer(TUNE.GRINDER.slam, b.center.x);
+  }
+  grinderBlades(e, ph) {                                                 // a fan of blades off the ring; from phase two they split when they land
+    const T = TUNE.GRINDER, b = e.body, n = T.blades[ph - 1], d = e.dir;
+    for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + d * (0.45 + i * 0.7 / Math.max(1, n - 1)), sp = T.bladeSpeed * rand(0.9, 1.1); this.xbBlade(e, b.center.x + d * 10, b.top + 6, Math.cos(a) * sp, Math.sin(a) * sp, false, ph >= 2); }
+    Sfx.sawLaunch(); this.shake(140, 0.006); this.fxSparks(b.center.x, b.top + 4, 10, -Math.PI / 2, 1.4, [80, 240]);
+  }
+  xbBlade(src, x, y, vx, vy, small, split) {
+    this.xb.blades.push({ src, x, y, vx, vy, r: small ? 3 : 5, t: small ? 2.2 : 3, split, hitT: 0, dmg: small ? 9 : TUNE.GRINDER.bladeDmg, img: this.add.image(x, y, small ? 'xbladeS' : 'xblade').setDepth(6) });
+  }
+  visGrinder(e, g, now) {
+    const b = e.body, L = this.laserG, tell = e.ai === 'rev' || e.ai === 'hang' || e.ai === 'bladeTell';
+    e.glow.setPosition(b.center.x + e.dir * 10, b.center.y - 6).setAlpha(tell ? 0.6 + Math.sin(now / 30) * 0.2 : e.phase === 3 ? 0.35 : 0).setScale(tell ? 0.9 : 0.6).setTint(e.phase === 3 && !tell ? 0xffa040 : 0xff3020);
+    if (tell && Math.floor(now / 80) % 2) L.lineStyle(1, 0xff3020, 0.8).strokeCircle(b.center.x, b.center.y + 2, 24);
+    if (e.ai === 'rev') for (let j = 0; j < 4; j++) { const ax = b.center.x + e.rollDir * (30 + j * 14 + (now / 30) % 14), y = b.bottom; L.lineStyle(1, 0xff5030, 0.8 - j * 0.18).lineBetween(ax, y - 8, ax + e.rollDir * 5, y - 4).lineBetween(ax + e.rollDir * 5, y - 4, ax, y); }
+    if (e.ai === 'hang') {                                               // where it'll come down
+      const tx = clamp(this.player.body.center.x, b.center.x - 160, b.center.x + 160), fy = this.xbFloor(), on = Math.floor(now / 90) % 2;
+      L.lineStyle(1, 0xff3020, on ? 0.9 : 0.4).strokeRect(tx - 18, fy - 3, 36, 3); L.fillStyle(0xff3020, 0.25).fillRect(tx - 18, fy - 3, 36, 3);
+    }
+    if (e.phase === 3 && Math.random() < 0.25) this.fxSparks(b.center.x + rand(-10, 10), b.center.y + rand(-10, 10), 1, 0, Math.PI * 2, [30, 120]);
+  }
+  deathGrinder(e, cx, cy, dx, src, charred) {                            // the ring flies apart in teeth and plate
+    this.xbDeath(e, cx, cy, 'GRINDER SCRAPPED', 2);
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; this.spawnGib(i % 2 ? 'g_xtooth' : 'g_plate', cx + Math.cos(a) * 18, cy + Math.sin(a) * 18, Math.cos(a) * rand(220, 360), Math.sin(a) * rand(220, 360) - 140, 'metal'); }
+    this.fxSparks(cx, cy, 30, 0, Math.PI * 2, [100, 320]);
+  }
+
+  // ---------------------------------------------------------------- the hive queen ----
+  // A flying brood mother (1150 HP) circling ~120 px over you. EGGS: she drops 2-3 egg sacs (30 HP) that hatch in
+  // 4.5 s into three gnats (and a tick from phase two) unless you shoot them. DIVE: she rears and screeches (0.7 s, a
+  // red line to where she'll strike that locks white for the last 0.25 s) and dives along it (22 and a fling), then
+  // hangs low for a moment. From phase two she SPRAYS acid: five globs lobbed at you that leave pools. Phase three
+  // is a frenzy: everything a third faster and a six-gnat escort she tops up every 5 s.
+  setupQueen(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false); this.xbFx(); this.xbLift(e, x, y, TUNE.QUEEN.alt);
+    Object.assign(e, { ai: 'intro', aiUntil: this.time.now + 1700, phase: 1, atkN: 0, cd: 0.6, side: e.x > this.player.x ? 1 : -1, sideT: 4, escortT: 0, tx: x, ty: y, diveA: 0 });
+  }
+  updateQueen(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.QUEEN, b = e.body, pb = this.player.body, ph = this.xbPhase(e), fz = ph === 3 ? T.frenzy : 1;
+    e.aggro = true; e.stunT = 0;
+    if (ph !== e.phase) { e.phase = ph; this.xbBreak(e, now, ph === 2 ? 'THE BROOD STIRS' : 'FRENZY', ['g_wing', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_chunk'], 0xffd040, true); Sfx.scream(); e.escortT = 0; }
+    if ((e.sideT -= dt) <= 0) { e.sideT = rand(3.5, 5); e.side = -e.side; }
+    const fy = this.xbFloor(), still = e.ai === 'screech' || e.ai === 'layTell' || e.ai === 'spitTell' || e.ai === 'stagger', low = e.ai === 'recover';
+    if (e.ai !== 'dive') this.xbHover(e, dt, still ? b.center.x : pb.center.x + e.side * 90 + Math.sin(e.t * 0.9) * 30, (low ? fy - 46 : fy - T.alt) + Math.sin(e.t * 1.7) * 8, still ? 20 : T.speed * fz * (low ? 0.5 : 1));
+    if (e.ai !== 'dive' && e.ai !== 'recover') e.dir = dx >= 0 ? 1 : -1;
+    if (ph === 3 && alive && (e.escortT -= dt) <= 0) { e.escortT = 5; this.queenEscort(e); }
+    switch (e.ai) {
+      case 'intro': if (now >= e.aiUntil) e.ai = 'hover'; break;
+      case 'stagger': if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = 0.6; } break;
+      case 'layTell': if (now >= e.aiUntil) { this.queenEggs(e, T.eggs[ph - 1]); e.ai = 'hover'; e.cd = T.cd / fz; } break;
+      case 'spitTell': if (now >= e.aiUntil) { this.queenSpit(e); e.ai = 'hover'; e.cd = T.cd / fz; } break;
+      case 'screech':
+        if (now < e.aiUntil - T.lock * 1000) { e.tx = pb.center.x; e.ty = Math.min(pb.center.y, fy - 22); }   // she tracks you, then locks on
+        if (now >= e.aiUntil) { e.ai = 'dive'; e.aiUntil = now + 1400; e.diveA = Math.atan2(e.ty - b.center.y, e.tx - b.center.x); e.dir = Math.cos(e.diveA) >= 0 ? 1 : -1; Sfx.whoosh(); }
+        break;
+      case 'dive': {
+        const v = T.dive * fz, ux = Math.cos(e.diveA), uy = Math.sin(e.diveA);
+        b.setVelocity(ux * v, uy * v);
+        if (Math.random() < 0.6) this.fx.emit(b.center.x - ux * 16, b.center.y - uy * 10, { n: 1, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0xffd040, 0xc87a26], add: true });
+        if ((e.tx - b.center.x) * ux + (e.ty - b.center.y) * uy < 4 || now >= e.aiUntil) { e.ai = 'recover'; e.aiUntil = now + 650 / fz; this.shake(160, 0.006); b.velocity.y = 0; }   // past the mark
+        break;
+      }
+      case 'recover': b.velocity.x *= Math.pow(0.05, dt); if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = T.cd / fz * 0.8; } break;
+      default:
+        if (alive && (e.cd -= dt) <= 0) {
+          const cyc = ph === 1 ? ['dive', 'eggs'] : ph === 2 ? ['eggs', 'dive', 'acid', 'dive'] : ['dive', 'acid', 'eggs', 'dive', 'acid'];
+          let a = cyc[e.atkN++ % cyc.length]; if (a === 'eggs' && this.xbOwn(e, 'eggsac') >= T.eggMax) a = 'dive';
+          if (a === 'eggs') { e.ai = 'layTell'; e.aiUntil = now + T.layTell * 1000 / fz; Sfx.squelch(); }
+          else if (a === 'acid') { e.ai = 'spitTell'; e.aiUntil = now + T.spitTell * 1000 / fz; Sfx.gurgle(); }
+          else { e.ai = 'screech'; e.aiUntil = now + T.screech * 1000 / fz; e.tx = pb.center.x; e.ty = pb.center.y; Sfx.scream(); Sfx.wail(0.7); this.shake(200, 0.004); }
+        }
+    }
+    e.fr = ph + (e.ai === 'screech' || e.ai === 'dive' ? 's' : Math.floor(now / (ph === 3 ? 40 : 60)) % 2 ? 'a' : 'b');
+  }
+  queenEggs(e, n) {                                                      // egg sacs out of her abdomen: they hatch unless you shoot them
+    const b = e.body;
+    for (let i = 0; i < n; i++) {
+      const o = this.xbAdd('eggsac', b.center.x - e.dir * 12 + (i - (n - 1) / 2) * 14, b.center.y + 10, e);
+      o.body.setVelocity(rand(-50, 50) + b.velocity.x * 0.3, rand(-40, 20)); o.hatchT = TUNE.QUEEN.hatch * (e.phase === 3 ? 0.8 : 1);
+    }
+    Sfx.squelch(); this.fx.emit(b.center.x - e.dir * 12, b.center.y + 8, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffd040, 0xc87a26, 0x7a3814], g: 300, mode: 1 });
+  }
+  queenSpit(e) {                                                         // a fan of acid globs lobbed at you; each leaves a pool
+    const pb = this.player.body, G = this.physics.world.gravity.y, Tf = 0.8, x0 = e.body.center.x + e.dir * 18, y0 = e.body.center.y + 2, n = TUNE.QUEEN.globs;
+    for (let i = 0; i < n; i++) { const tx = pb.center.x + (i - (n - 1) / 2) * 26, ty = pb.bottom - 4; this.spawnEProj('acid', x0, y0, (tx - x0) / Tf, (ty - y0 - 0.5 * G * Tf * Tf) / Tf); }
+    Sfx.spit(); this.fx.emit(x0, y0, { n: 10, speed: [30, 120], life: [0.2, 0.4], size: [2, 1], cols: [0xe0ff90, 0x9aff4a], add: true });
+  }
+  queenEscort(e) {                                                       // the frenzy's escort: gnats round her, topped back up to six
+    const T = TUNE.QUEEN, have = this.xbOwn(e, 'gnat'), b = e.body;
+    for (let i = have; i < T.escort; i++) { const a = i / T.escort * Math.PI * 2, o = this.xbAdd('gnat', b.center.x + Math.cos(a) * 18, b.center.y + Math.sin(a) * 12, e); o.body.setVelocity(Math.cos(a) * 80, Math.sin(a) * 80); }
+    if (have < T.escort) { Sfx.buzz(); this.fx.emit(b.center.x, b.center.y, { n: 12, speed: [30, 100], life: [0.3, 0.6], size: [2, 1], cols: [0xffd040, 0x843830], g: 100 }); }
+  }
+  visQueen(e, g, now) {
+    const b = e.body, L = this.laserG;
+    e.setRotation(e.ai === 'dive' ? clamp(Math.sin(e.diveA) * e.dir * 0.5, -0.5, 0.5) : 0);
+    if (e.ai === 'screech') {                                            // the line she'll dive along, locking white at the end
+      const lock = now >= e.aiUntil - TUNE.QUEEN.lock * 1000, hx = b.center.x + e.dir * 14, hy = b.center.y - 4, n = 14;
+      for (let i = 0; i < n; i += 2) L.lineStyle(1, lock ? 0xffffff : 0xff3020, lock ? 0.9 : 0.35 + 0.3 * Math.random()).lineBetween(hx + (e.tx - hx) * i / n, hy + (e.ty - hy) * i / n, hx + (e.tx - hx) * (i + 1) / n, hy + (e.ty - hy) * (i + 1) / n);
+      L.lineStyle(1, lock ? 0xffffff : 0xff3020, 0.8).strokeCircle(e.tx, e.ty, lock ? 6 : 6 + (now / 20) % 8);
+      for (let k = 0; k < 2; k++) L.lineStyle(1, 0xffd0d0, 0.5 - k * 0.2).strokeCircle(hx, hy, 6 + ((now / 4 + k * 9) % 18));   // the screech
+    }
+    if (e.ai === 'layTell') L.fillStyle(0xffd040, 0.25 + 0.25 * Math.sin(now / 40)).fillCircle(b.center.x - e.dir * 12, b.center.y + 4, 10);
+    if (e.ai === 'spitTell') L.fillStyle(0x9aff4a, 0.3 + 0.3 * Math.sin(now / 30)).fillCircle(b.center.x + e.dir * 16, b.center.y - 2, 5);
+    if (e.ai === 'dive' && Math.floor(now / 50) % 2) this.spawnLight(e.x, e.y, 'queen_w', 0xff9080, 1, 1, 0.45, 0.18, e.fr, e.flipX);   // afterimages
+    if (e.phase === 3 && Math.random() < 0.25) this.fx.emit(b.center.x - e.dir * 8, b.bottom - 2, { n: 1, angle: Math.PI / 2, spread: 0.2, speed: [10, 30], life: [0.4, 0.7], size: [2, 1], cols: [0xffd060, 0xc87a26], g: 400, mode: 1 });
+  }
+  deathQueen(e, cx, cy, dx, src, charred) {                              // she bursts, and her brood dies with her
+    this.xbDeath(e, cx, cy, 'QUEEN SLAIN', 4); Sfx.scream(); Sfx.wail(1);
+    this.fx.emit(cx, cy, { n: 40, speed: [60, 260], life: [0.5, 1], size: [3, 1], cols: [0xfff0a0, 0xffd040, 0xc87a26, 0x7a3814], g: 500, mode: 1, drag: 0.5 });
+    for (let i = 0; i < 6; i++) this.spawnGib(pick(['g_egg', 'g_wing', 'g_flesh1']), cx + rand(-10, 10), cy, rand(-240, 240), rand(-380, -160));
+  }
+  setupEggsac(e, x, y, cx, cy) { Object.assign(e, { hatchT: TUNE.QUEEN.hatch, owner: null }); }
+  updateEggsac(e, dt, now, dx, dy, dist, alive) {                        // it sits and swells; at zero it hatches
+    const b = e.body; e.stunT = 0; e.dir = 1;
+    if (b.blocked.down || b.touching.down) b.velocity.x *= Math.pow(0.01, dt);
+    e.hatchT -= dt;
+    e.fr = e.hatchT < 1 ? (Math.floor(now / 70) % 2 ? 'e2' : 'e1') : Math.floor(now / (e.hatchT < 2.5 ? 180 : 420)) % 2 ? 'e1' : 'e0';
+    if (e.hatchT < 1 && Math.random() < 0.2) this.fx.emit(b.center.x, b.top + 2, { n: 1, angle: -Math.PI / 2, spread: 1, speed: [10, 40], life: [0.2, 0.4], size: [2, 1], cols: [0xffd060, 0xc87a26], g: 200 });
+    if (e.hatchT <= 0) this.eggHatch(e);
+  }
+  eggHatch(e) {                                                          // out comes the brood: no kill, no reward, just gnats (and a tick once she's hurt)
+    const b = e.body, x = b.center.x, y = b.center.y, q = e.owner && e.owner.alive ? e.owner : null;
+    e.alive = false; e.deadAt = this.time.now; e.disableBody(true, true);
+    if (this.locks.length) this.locks = this.locks.filter(o => o !== e);
+    for (const L of this.limpets) if (L.e === e) { L.e = null; L.vx = rand(-60, 60); L.vy = -120; L.stuck = false; }
+    if (this.tb && this.tb.o === e) this.tb = null;
+    if (!e.summoned && this.lab) this.labKill();
+    for (let i = 0; i < 3; i++) { const o = this.xbAdd('gnat', x + rand(-4, 4), y - 4, q); o.body.setVelocity(rand(-90, 90), rand(-120, -40)); }
+    if (q && q.phase >= 2) { const t = this.xbAdd('tick', x, y - 2, q); t.body.setVelocity(rand(-120, 120), -200); }
+    this.fx.emit(x, y, { n: 18, speed: [40, 160], life: [0.3, 0.6], size: [2, 1], cols: [0xfff0a0, 0xffd040, 0xc87a26, 0x4e200e], g: 500, mode: 1 });
+    for (let i = 0; i < 3; i++) this.spawnGib('g_egg', x, y, rand(-120, 120), rand(-220, -100));
+    Sfx.squelch(); Sfx.chirp();
+  }
+  deathEggsac(e, cx, cy, dx, src, charred) { this.fx.emit(cx, cy, { n: 14, speed: [30, 140], life: [0.3, 0.6], size: [2, 1], cols: [0xffd060, 0xc87a26, 0x7a3814], g: 500, mode: 1 }); Sfx.squelch(); }
+
+  // ---------------------------------------------------------------- the overseer ----
+  // A floating eye (1300 HP) ~115 px over you. Phase one it's sealed behind four orbiting shield nodes (110 HP each):
+  // shots off the eye only spark, and its health is what the nodes have left. Shoot the nodes off. The LASER: 1.1 s to
+  // charge (a red line where it starts and a fan where it'll go), then a beam sweeps under it in 2.2 s, 16 a touch; it
+  // stops at walls, crates and girders, so get under cover or dash through it. Phase two the eye is open: it calls
+  // drones (two at a time, three at most) and sweeps there and back. Phase three it rages: faster sweeps and a GRID of
+  // laser columns round you with two gaps (1.3 s to find one, then 0.9 s live, 18 in a column), twice running.
+  setupOverseer(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false); this.xbFx(); this.xbLift(e, x, y, TUNE.OVERSEER.alt);
+    Object.assign(e, { ai: 'intro', aiUntil: this.time.now + 1800, phase: 1, atkN: 0, cd: 1, side: e.x > this.player.x ? 1 : -1, sideT: 5, spin: 0, nodes: null, look: 0, sw: null, beam: null, grid: null });
+    e.glow = this.add.image(e.x, e.y, 'glow').setBlendMode(ADD).setTint(0x46e6ff).setScale(1.3).setAlpha(0.3).setDepth(4.6);
+  }
+  overseerNodes(e) {                                                     // its four shield nodes, made on its first frame so OVERTIME's HP scaling reaches them
+    const k = e.def.hp / ENEMY.overseer.hp; e.nodes = [];
+    for (let i = 0; i < 4; i++) {
+      const n = this.xbAdd('eyenode', e.x, e.y, e); n.idx = i;
+      if (k !== 1) { n.def = Object.assign({}, n.def, { hp: n.def.hp * k }); n.hp = n.def.hp; }
+      e.nodes.push(n);
+    }
+    this.overseerPlace(e); this.spawnLight(e.x, e.y, 'ring', 0x46e6ff, 0.3, 2.4, 0.9, 0.4); Sfx.shieldHit();
+  }
+  overseerPlace(e) { const b = e.body; e.nodes.forEach((n, i) => { if (n.alive) { const a = e.spin + i * Math.PI / 2; n.body.reset(b.center.x + Math.cos(a) * TUNE.OVERSEER.orbit, b.center.y - 2 + Math.sin(a) * TUNE.OVERSEER.orbit * 0.8); } }); }
+  updateOverseer(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.OVERSEER, b = e.body, pb = this.player.body;
+    e.aggro = true; e.stunT = 0;
+    if (!e.nodes) this.overseerNodes(e);
+    if (e.phase === 1) { let s = 0, m = 0; for (const n of e.nodes) { m += n.def.hp; if (n.alive) s += Math.max(0, n.hp); } e.hp = e.def.hp * (0.66 + 0.34 * s / m); }   // sealed: it has what its nodes have
+    const ph = this.xbPhase(e), rage = ph === 3 ? 1.3 : 1;
+    if (ph !== e.phase) {
+      e.phase = ph; e.sw = null; e.beam = null; e.grid = null;
+      this.xbBreak(e, now, ph === 2 ? 'EYE EXPOSED' : 'OVERSEER ENRAGED', ph === 2 ? ['g_plate', 'g_emitter', 'g_shard', 'g_wire'] : ['g_plate', 'g_xlens', 'g_shard', 'g_wire'], ph === 2 ? 0x46e6ff : 0xff3020);
+      if (ph === 2) { e.hp = Math.min(e.hp, e.def.hp * 0.66); Sfx.shieldPop(); }
+    }
+    if ((e.sideT -= dt) <= 0) { e.sideT = rand(4, 6); e.side = -e.side; }
+    const firing = e.ai === 'sweep' || e.ai === 'sweepTell' || e.ai === 'grid' || e.ai === 'gridTell';
+    this.xbHover(e, dt, firing ? b.center.x : pb.center.x + e.side * 100, this.xbFloor() - T.alt + Math.sin(e.t * 1.8) * 5, firing || e.ai === 'stagger' ? 12 : T.speed * rage);
+    e.spin += dt * T.spin * (e.ai === 'sweep' ? 2.2 : 1); if (e.phase === 1) this.overseerPlace(e);
+    e.dir = dx >= 0 ? 1 : -1; e.look = Math.atan2(dy, dx);
+    switch (e.ai) {
+      case 'intro': if (now >= e.aiUntil) e.ai = 'hover'; break;
+      case 'stagger': if (Math.random() < 0.4) this.fxSparks(b.center.x + rand(-16, 16), b.center.y + rand(-14, 14), 2); if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = 0.8; } break;
+      case 'sweepTell': if (now >= e.aiUntil) { e.ai = 'sweep'; e.sw.t = 0; Sfx.lanceFire(1); this.shake(200, 0.006); } break;
+      case 'sweep': {
+        const S = e.sw; S.t += dt;
+        if (S.t >= S.dur) { if (S.back) { S.back = false; S.t = 0; [S.a0, S.a1] = [S.a1, S.a0]; } else { e.ai = 'hover'; e.cd = T.cd / rage; e.beam = null; break; } }
+        this.overseerBeam(e, S.a0 + (S.a1 - S.a0) * S.t / S.dur, dt);
+        break;
+      }
+      case 'gridTell': if (now >= e.aiUntil) { e.ai = 'grid'; e.aiUntil = now + T.grid * 1000; e.grid.live = true; Sfx.lanceFire(1); Sfx.thunder(); this.shake(260, 0.008); } break;
+      case 'grid':
+        this.overseerGrid(e);
+        if (now >= e.aiUntil) { if (--e.grid.left > 0) { this.overseerGridSet(e); e.ai = 'gridTell'; e.aiUntil = now + T.gridTell * 800; Sfx.alarm(); } else { e.grid = null; e.ai = 'hover'; e.cd = T.cd / rage; } }
+        break;
+      case 'callTell': if (now >= e.aiUntil) { this.overseerDrones(e); e.ai = 'hover'; e.cd = 1.2; } break;
+      default:
+        if (alive && (e.cd -= dt) <= 0) {
+          const cyc = ph === 1 ? ['sweep'] : ph === 2 ? ['drones', 'sweep', 'sweep'] : ['grid', 'sweep', 'drones', 'grid', 'sweep'];
+          let a = cyc[e.atkN++ % cyc.length]; if (a === 'drones' && this.xbOwn(e, 'drone') >= T.maxDrones) a = 'sweep';
+          if (a === 'sweep') { const s = dx >= 0 ? 1 : -1; e.sw = { a0: -s * T.arc, a1: s * T.arc, t: 0, dur: T.sweep / rage, back: ph >= 2 }; e.ai = 'sweepTell'; e.aiUntil = now + T.sweepTell * 1000 / rage; Sfx.charge(0.9); Sfx.magTell(); }
+          else if (a === 'grid') { e.grid = { left: 2 }; this.overseerGridSet(e); e.ai = 'gridTell'; e.aiUntil = now + T.gridTell * 1000; Sfx.alarm(); BUS.emit('callout', 'FIND THE GAP'); }
+          else { e.ai = 'callTell'; e.aiUntil = now + 500; Sfx.radio(); }
+        }
+    }
+    e.fr = ph + (firing ? 'c' : 'i');
+  }
+  overseerRay(e, th) {                                                   // the eye along angle th (0 straight down): to the first wall
+    const b = e.body, ox = b.center.x, oy = b.center.y - 2, ux = Math.sin(th), uy = Math.cos(th);
+    let x = ox, y = oy; for (let d = 6; d < 560; d += 3) { const qx = ox + ux * d, qy = oy + uy * d; if (this.solidAt(qx, qy)) break; x = qx; y = qy; }
+    return { x0: ox + ux * 8, y0: oy + uy * 8, x1: x, y1: y, ux, uy };
+  }
+  overseerBeam(e, th, dt) {                                              // the death laser: 16 to you, and it burns its line across the floor
+    const R = e.beam = this.overseerRay(e, th), pb = this.player.body;
+    if (this.state === 'play') {
+      const t = clamp((pb.center.x - R.x0) * R.ux + (pb.center.y - R.y0) * R.uy, 0, Math.hypot(R.x1 - R.x0, R.y1 - R.y0)), px = R.x0 + R.ux * t, py = R.y0 + R.uy * t;
+      if (Math.abs(pb.center.x - px) < pb.halfWidth + 2 && Math.abs(pb.center.y - py) < pb.halfHeight + 2) this.hurtPlayer(TUNE.OVERSEER.beamDmg, px, { srcY: py, by: 'THE OVERSEER' });
+    }
+    if (Math.random() < 0.7) this.fxSparks(R.x1, R.y1, 2, Math.atan2(-R.uy, -R.ux), 1.2, [40, 160]);
+    if ((e.scorchT = (e.scorchT || 0) - dt) <= 0) {
+      e.scorchT = 0.06; this.paintScorch(R.x1, R.y1, 3);
+      for (const o of this.enemies.getChildren()) if (o.alive && o !== e && o.owner !== e && !o.def.boss && Math.abs(o.body.center.x - R.x1) < o.body.halfWidth + 3 && Math.abs(o.body.center.y - R.y1) < o.body.halfHeight + 3) this.damageEnemy(o, 4, R.ux, R.uy, 'arc');
+    }
+    if (Math.random() < 0.12) Sfx.shockBeam();
+  }
+  overseerGridSet(e) {                                                   // a curtain of laser columns round you with two gaps to stand in
+    const T = TUNE.OVERSEER, pb = this.player.body, w = T.slot, n = 13, me = 6, c0 = Math.round(pb.center.x / w) * w - me * w - w / 2, top = e.body.center.y;
+    const s1 = clamp(me + pick([-2, -1, 1, 2]), 0, n - 1); let s2 = randi(0, n - 1); for (let k = 0; k < 20 && Math.abs(s2 - s1) < 3; k++) s2 = randi(0, n - 1);
+    const cols = [];
+    for (let i = 0; i < n; i++) {
+      const x0 = c0 + i * w, xc = x0 + w / 2; if (xc < 40 || xc > LW - 40) continue;
+      let y1 = top; for (let yy = top; yy < LH; yy += 4) { if (this.solidAt(xc, yy)) break; y1 = yy; }
+      cols.push({ x0, w, y0: top, y1: y1 + 3, safe: i === s1 || i === s2 });
+    }
+    e.grid.cols = cols; e.grid.live = false;
+  }
+  overseerGrid(e) {                                                      // live columns: 18 to anything standing in one
+    const pb = this.player.body;
+    if (this.state !== 'play') return;
+    for (const C of e.grid.cols) if (!C.safe && pb.center.x > C.x0 && pb.center.x < C.x0 + C.w && pb.bottom > C.y0 && pb.top < C.y1) { this.hurtPlayer(TUNE.OVERSEER.gridDmg, C.x0 + C.w / 2, { srcY: pb.center.y, by: 'THE OVERSEER' }); break; }
+  }
+  overseerDrones(e) {
+    const T = TUNE.OVERSEER, b = e.body, n = Math.min(T.drones, T.maxDrones - this.xbOwn(e, 'drone'));
+    for (let i = 0; i < n; i++) { const x = b.center.x + (i ? 26 : -26), y = b.center.y + 8; this.xbAdd('drone', x, y, e); this.spawnLight(x, y, 'ring', 0x46e6ff, 0.3, 1.4, 0.9, 0.3); }
+    BUS.emit('callout', 'DRONES'); Sfx.warp();
+  }
+  visOverseer(e, g, now) {
+    const T = TUNE.OVERSEER, b = e.body, cx = b.center.x, cy = b.center.y - 2, L = this.laserG, G = this.xb.gt, A = this.xb.ga;
+    const charge = e.ai === 'sweepTell' || e.ai === 'gridTell' || e.ai === 'sweep' || e.ai === 'grid', lx = Math.cos(e.look) * 3, ly = Math.sin(e.look) * (charge ? 1 : 2.5), ir = charge ? 3.5 : 4.5;
+    e.glow.setPosition(cx, cy).setAlpha(e.phase === 1 ? 0.35 : 0.25).setTint(e.phase === 3 ? 0xff3020 : 0x46e6ff);
+    G.fillStyle(0x0a1a22, 1).fillCircle(cx + lx, cy + ly, ir + 1); G.fillStyle(e.phase === 3 ? 0xff3020 : charge ? 0xffffff : 0x46e6ff, 1).fillCircle(cx + lx, cy + ly, ir);   // the iris follows you
+    G.fillStyle(0x07080b, 1).fillCircle(cx + lx * 1.2, cy + ly * 1.2, charge ? 1.2 : 2.2); G.fillStyle(0xffffff, 0.9).fillRect(cx + lx - 2, cy + ly - 3, 2, 1);
+    if (e.phase === 1) {                                                 // the shield, and the nodes holding it up
+      const hit = now - (e.shieldHitT || 0) < 120, pulse = 0.35 + 0.15 * Math.sin(now / 160);
+      A.lineStyle(1, 0x46e6ff, hit ? 0.9 : pulse).strokeCircle(cx, cy, 20); if (hit) A.fillStyle(0x46e6ff, 0.18).fillCircle(cx, cy, 20);
+      for (let k = 0; k < 6; k++) { const a = now / 900 + k * Math.PI / 3; A.lineStyle(1, 0x9af4ff, pulse * 0.6).lineBetween(cx + Math.cos(a) * 20, cy + Math.sin(a) * 20, cx + Math.cos(a + 0.5) * 20, cy + Math.sin(a + 0.5) * 20); }
+      for (const n of e.nodes || []) if (n.alive && Math.random() < 0.8) A.lineStyle(1, 0x46e6ff, 0.3 + 0.3 * Math.random()).lineBetween(n.x, n.y, cx + (n.x - cx) * 0.55, cy + (n.y - cy) * 0.55);
+    }
+    if (e.ai === 'sweepTell' && e.sw) {                                  // where the beam starts, and the fan it'll cross
+      const R = this.overseerRay(e, e.sw.a0), on = Math.random() < 0.75;
+      L.lineStyle(1, 0xff2010, on ? 0.85 : 0.3).lineBetween(R.x0, R.y0, R.x1, R.y1);
+      for (let k = 1; k <= 6; k++) { const Q = this.overseerRay(e, e.sw.a0 + (e.sw.a1 - e.sw.a0) * k / 6); L.lineStyle(1, 0xff4020, 0.1).lineBetween(Q.x0, Q.y0, Q.x1, Q.y1); }
+      const s = Math.sign(e.sw.a1 - e.sw.a0); for (let j = 0; j < 3; j++) { const a = Math.PI / 2 - e.sw.a0 - s * (0.3 + j * 0.25 + (now / 300) % 0.25); L.lineStyle(1, 0xff6040, 0.7 - j * 0.2).strokeCircle(cx + Math.cos(a) * 24, cy + Math.sin(a) * 24, 1.5); }
+    }
+    if (e.ai === 'sweep' && e.beam) {
+      const R = e.beam; L.lineStyle(7, 0xff2010, 0.22).lineBetween(R.x0, R.y0, R.x1, R.y1); L.lineStyle(3, 0xff5030, 0.85).lineBetween(R.x0, R.y0, R.x1, R.y1); L.lineStyle(1, 0xffffff, 1).lineBetween(R.x0, R.y0, R.x1, R.y1);
+      L.fillStyle(0xffd0c0, 0.9).fillCircle(R.x1, R.y1, 3); L.fillStyle(0xff3020, 0.4).fillCircle(R.x1, R.y1, 7);
+    }
+    if (e.grid && e.grid.cols) for (const C of e.grid.cols) {
+      const xc = C.x0 + C.w / 2;
+      if (C.safe) { A.fillStyle(0x5cff7a, 0.9).fillRect(C.x0 + 3, C.y1 - 10, 1, 8).fillRect(C.x0 + 3, C.y1 - 10, 4, 1).fillRect(C.x0 + C.w - 4, C.y1 - 10, 1, 8).fillRect(C.x0 + C.w - 7, C.y1 - 10, 4, 1); A.fillStyle(0x5cff7a, 0.07).fillRect(C.x0 + 3, C.y0, C.w - 6, C.y1 - C.y0); continue; }
+      if (!e.grid.live) { L.lineStyle(1, 0xff2010, Math.random() < 0.7 ? 0.7 : 0.25).lineBetween(xc, C.y0, xc, C.y1); L.fillStyle(0xff4020, 0.9).fillRect(xc - 1, C.y0 - 1, 3, 3); }
+      else { L.fillStyle(0xff2010, 0.28).fillRect(C.x0 + 1, C.y0, C.w - 2, C.y1 - C.y0); L.fillStyle(0xff8060, 0.5).fillRect(xc - 3, C.y0, 6, C.y1 - C.y0); L.fillStyle(0xffffff, 0.9).fillRect(xc - 0.5, C.y0, 1, C.y1 - C.y0); }
+    }
+    if (e.grid && e.grid.cols && !e.grid.live) for (const C of e.grid.cols) if (!C.safe && Math.random() < 0.3) L.lineStyle(1, 0xff6040, 0.3).lineBetween(cx, cy, C.x0 + C.w / 2, C.y0);
+    if (e.phase === 3 && Math.random() < 0.25) this.fxSparks(cx + rand(-14, 14), cy + rand(-12, 12), 2);
+  }
+  deathOverseer(e, cx, cy, dx, src, charred) {                           // the eye bursts: a white flash and lens shards
+    this.xbDeath(e, cx, cy, 'OVERSEER BLINDED', 8, 'arc');
+    this.spawnLight(cx, cy, 'glow', 0xffffff, 3, 6, 1, 0.4); BUS.emit('flash', 0.6);
+    for (let i = 0; i < 10; i++) this.spawnGib(i % 2 ? 'g_xlens' : 'g_glass2', cx + rand(-6, 6), cy + rand(-6, 6), rand(-280, 280), rand(-380, -120), 'metal');
+  }
+  setupEyenode(e, x, y, cx, cy) { e.body.setAllowGravity(false); Object.assign(e, { owner: null, idx: 0 }); }
+  updateEyenode(e, dt, now) {                                            // its overseer moves it round; alone it just hangs there
+    e.stunT = 0; e.fr = Math.floor(now / 150 + e.idx) % 2 ? 'n1' : 'n0';
+    if (!e.owner || !e.owner.alive) { e.body.velocity.x *= Math.pow(0.05, dt); e.body.velocity.y = Math.sin(e.t * 2) * 8; }
+  }
+  deathEyenode(e, cx, cy, dx, src, charred) {
+    this.spawnLight(cx, cy, 'ring', 0x46e6ff, 0.3, 2, 0.9, 0.3); this.fxSparks(cx, cy, 14, 0, Math.PI * 2, [80, 240]); Sfx.shieldPop();
+    const o = e.owner; if (o && o.alive && o.nodes && o.nodes.some(n => n.alive)) BUS.emit('callout', 'NODE DOWN');
+  }
+
+  // ---------------------------------------------------------------- the conductor ----
+  // A floating live wire in a tailcoat (1200 HP). It BLINKS: it shimmers where it is and a column of sparks marks
+  // where it's going (0.7 s), then it's there (10 to anything on the mark). CHAIN: baton up (0.65 s, a line that
+  // tracks you and locks white for the last 0.25 s), then a bolt to the lock (12) that hops on to drums and to you
+  // within 90 px; it lights puddles. FLOOR: your floor is cut in strips and the safe ones show first (1.2 s, green),
+  // then the rest goes live for 1.3 s (7 per 0.3 s). ORBS: 2-4 slow ball lightning that drift after you for 6.5 s
+  // (14 a touch; a bullet pops one). Phase two forks the bolt and narrows the floor's safe ground to two gaps; phase
+  // three OVERCHARGES: everything a third quicker and a ring of arcs round it (6 within 34 px).
+  setupConductor(e, x, y, cx, cy) {
+    e.body.setAllowGravity(false); this.xbFx(); this.xbLift(e, x, y, TUNE.CONDUCTOR.alt);
+    Object.assign(e, { ai: 'intro', aiUntil: this.time.now + 1800, phase: 1, atkN: 0, cd: 0.6, hx: e.x, hy: e.y, to: null, lockX: e.x, lockY: e.y, arcT: 0, arcHitT: 0 });
+    e.glow = this.add.image(e.x, e.y, 'glow').setBlendMode(ADD).setTint(0x60c8ff).setScale(1).setAlpha(0.5).setDepth(4.6);
+  }
+  updateConductor(e, dt, now, dx, dy, dist, alive) {
+    const T = TUNE.CONDUCTOR, b = e.body, pb = this.player.body, ph = this.xbPhase(e), q = ph === 3 ? T.over : 1;
+    e.aggro = true; e.stunT = 0;
+    if (ph !== e.phase) { e.phase = ph; e.to = null; this.xbBreak(e, now, ph === 2 ? 'HIGH VOLTAGE' : 'OVERCHARGE', ['g_glass', 'g_glass2', 'g_xcoil', 'g_xcoil', 'g_wire', 'g_shard'], 0x60c8ff); Sfx.thunder(); }
+    if (Math.abs(e.hy - (this.xbFloor() - T.alt)) > 90) e.hy = this.xbFloor() - T.alt;   // you've gone up or down a level: it follows
+    this.xbHover(e, dt, e.hx + Math.sin(e.t * 0.8) * 16, e.hy + Math.sin(e.t * 1.6) * 6, 60);
+    e.dir = dx >= 0 ? 1 : -1;
+    if (ph === 3 && alive) this.conductorArcs(e, dt, now);
+    switch (e.ai) {
+      case 'intro': if (now >= e.aiUntil) e.ai = 'hover'; break;
+      case 'stagger': if (Math.random() < 0.3) this.pylonZaps.push({ x0: b.center.x, y0: b.center.y, x1: b.center.x + rand(-24, 24), y1: b.center.y + rand(-24, 24), t: now }); if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = 0.5; } break;
+      case 'blink': if (Math.random() < 0.6) this.fx.emit(e.to.x + rand(-8, 8), e.to.y + rand(-18, 18), { n: 1, angle: -Math.PI / 2, spread: 0.3, speed: [20, 60], life: [0.2, 0.4], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x60c8ff], add: true }); if (now >= e.aiUntil) this.conductorBlink(e); break;
+      case 'cast':
+        if (now < e.aiUntil - T.lock * 1000) { e.lockX = pb.center.x; e.lockY = pb.center.y; }   // it tracks you, then locks on
+        if (Math.random() < 0.4) Sfx.crackle();
+        if (now >= e.aiUntil) { this.conductorChain(e, e.lockX, e.lockY); if (ph >= 2) this.conductorChain(e, e.lockX + pb.velocity.x * 0.4 + e.dir * 30, e.lockY, true); e.ai = 'hover'; e.cd = T.cd * q; }
+        break;
+      case 'floorTell': if (now >= e.aiUntil) { e.ai = 'floorLive'; e.aiUntil = now + T.floorLive * 1000; Sfx.thunder(); this.shake(240, 0.006); } break;
+      case 'floorLive': if (now >= e.aiUntil) { e.ai = 'hover'; e.cd = T.cd * q; } break;
+      case 'orbTell': if (now >= e.aiUntil) { this.conductorOrbs(e, T.orbs[ph - 1]); e.ai = 'hover'; e.cd = T.cd * q; } break;
+      default:
+        if (alive && (e.cd -= dt) <= 0) {
+          const cyc = ph === 1 ? ['chain', 'blink', 'floor', 'chain', 'orbs', 'blink'] : ph === 2 ? ['floor', 'chain', 'blink', 'orbs', 'chain', 'blink'] : ['blink', 'chain', 'floor', 'orbs', 'chain', 'blink'];
+          let a = cyc[e.atkN++ % cyc.length];
+          if (a === 'orbs' && this.xb.orbs.filter(o => o.src === e).length >= 5) a = 'chain';
+          if (a === 'blink') { e.to = this.conductorSpot(e); if (e.to) { e.ai = 'blink'; e.aiUntil = now + T.blinkTell * 1000 * q; Sfx.decloak(); Sfx.pylonCharge(); } else a = 'chain'; }
+          if (a === 'chain') { e.ai = 'cast'; e.aiUntil = now + T.castTell * 1000 * q; e.lockX = pb.center.x; e.lockY = pb.center.y; Sfx.shockCharge(); Sfx.charge(0.8); }
+          else if (a === 'floor') { e.ai = 'floorTell'; e.aiUntil = now + T.floorTell * 1000 * q; this.conductorFloor(e, ph, T.floorTell * q); Sfx.railHum(); }
+          else if (a === 'orbs') { e.ai = 'orbTell'; e.aiUntil = now + 500 * q; Sfx.shockOrb(); }
+        }
+    }
+    e.fr = ph + (e.ai === 'cast' || e.ai === 'orbTell' || e.ai === 'floorTell' ? 'c' : 'i');
+  }
+  conductorSpot(e) {                                                     // somewhere to blink to: in the air off to one side of you, clear of walls
+    const pb = this.player.body, fy = this.xbFloor(), side = Math.sign(e.body.center.x - pb.center.x) || 1;
+    for (let k = 0; k < 8; k++) {
+      const x = this.xbSafeX(clamp(pb.center.x + (k < 4 ? -side : side) * rand(110, 220), 72, LW - 72)), y = clamp(fy - TUNE.CONDUCTOR.alt + rand(-16, 16), 56, LH - 96);
+      if (Math.abs(x - e.body.center.x) > 60 && !this.solidAt(x, y) && !this.solidAt(x, y - 18) && !this.solidAt(x, y + 18)) return { x, y };
+    }
+    return null;
+  }
+  conductorBlink(e) {                                                    // gone in a flash, there in another
+    const b = e.body, { x, y } = e.to, pb = this.player.body;
+    this.spawnLight(b.center.x, b.center.y, 'ring', 0x80d8ff, 0.3, 2.2, 0.9, 0.3); this.spawnLight(b.center.x, b.center.y, 'conductor_w', 0x80d8ff, 1, 1.4, 0.8, 0.25, e.fr, e.flipX);
+    this.fx.emit(b.center.x, b.center.y, { n: 20, speed: [40, 180], life: [0.2, 0.5], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x60c8ff], add: true });
+    this.pylonZaps.push({ x0: b.center.x, y0: b.center.y, x1: x, y1: y, t: this.time.now });
+    b.reset(x, y); e.hx = x; e.hy = y; e.ai = 'hover'; e.cd = 0.45; e.to = null;
+    this.spawnLight(x, y, 'ring', 0xffffff, 0.2, 2.4, 1, 0.3); this.spawnLight(x, y, 'glow', 0x60c8ff, 2, 3, 0.9, 0.3); Sfx.blink(); Sfx.zap(); this.shake(160, 0.006);
+    if (this.state === 'play' && Math.hypot(pb.center.x - x, pb.center.y - y) < 28) this.hurtPlayer(TUNE.CONDUCTOR.blinkDmg, x, { srcY: y });
+  }
+  conductorTip(e) { const b = e.body, c = e.ai === 'cast'; return [b.center.x + e.dir * (c ? 16 : 19), b.center.y + (c ? -24 : -4)]; }   // the baton's live end
+  conductorChain(e, tx, ty, fork) {                                      // the bolt: to where it locked, then hops to drums and to you
+    const T = TUNE.CONDUCTOR, [sx, sy] = this.conductorTip(e), now = this.time.now, pb = this.player.body;
+    const hit = this.sweep(sx, sy, tx, ty), x1 = hit ? hit.x : tx, y1 = hit ? hit.y : ty;
+    this.pylonZaps.push({ x0: sx, y0: sy, x1, y1, t: now }); this.electrifyLine(sx, sy, x1, y1, 28);
+    Sfx.thunder(); Sfx.pylonZap(); BUS.emit('flash', fork ? 0.04 : 0.08); this.spawnLight(x1, y1, 'glow', 0x80c8ff, 1.4, 0.4, 0.9, 0.2); this.fxSparks(x1, y1, 10); this.paintScorch(x1, y1, 4);
+    const onP = (x, y, r) => this.state === 'play' && Math.abs(pb.center.x - x) < pb.halfWidth + r && Math.abs(pb.center.y - y) < pb.halfHeight + r;
+    let you = false, hx = x1, hy = y1;
+    if (onP(x1, y1, 6)) { you = true; this.hurtPlayer(T.chainDmg, x1, { srcY: y1, by: 'THE CONDUCTOR' }); }
+    for (let k = 0; k < 2; k++) {                                        // two hops: the nearest drum, or you if it missed
+      let to = null, bd = T.chainHop;
+      for (const kk of this.barrelList) { const d = kk.active && !kk.zapped ? Math.hypot(kk.x - hx, kk.y - hy) : 1e9; if (d < bd) { bd = d; to = kk; } }
+      const dp = Math.hypot(pb.center.x - hx, pb.center.y - hy); if (!you && this.state === 'play' && dp < bd) to = 'you';
+      if (!to) break;
+      const nx = to === 'you' ? pb.center.x : to.x, ny = to === 'you' ? pb.center.y : to.y - 4;
+      this.pylonZaps.push({ x0: hx, y0: hy, x1: nx, y1: ny, t: now });
+      if (to === 'you') { you = true; this.hurtPlayer(Math.round(T.chainDmg * 0.6), hx, { srcY: hy, by: 'THE CONDUCTOR' }); }
+      else { to.zapped = true; this.igniteBarrel(to); this.time.delayedCall(400, () => { to.zapped = false; }); }
+      hx = nx; hy = ny;
+    }
+  }
+  conductorFloor(e, ph, tell) {                                          // your floor in 32 px strips: the safe ones show first, then the rest go live
+    const T = TUNE.CONDUCTOR, pb = this.player.body, fy = this.xbFloor(), w = 32, n = 18, me = 9, x0 = Math.floor(pb.center.x / w) * w - me * w;
+    const s1 = me + pick([-3, -2, 2, 3]); let s2 = randi(1, n - 3); for (let k = 0; k < 20 && Math.abs(s2 - s1) < 4; k++) s2 = randi(1, n - 3);
+    const safe = i => ph === 1 ? i % 3 === 0 : i === s1 || i === s1 + 1 || i === s2 || i === s2 + 1;
+    for (let i = 0; i < n;) {                                             // runs of the same kind become one strip each, cut to the floor they're on
+      const on = !safe(i); let j = i; while (j < n && !safe(j) === on) j++;
+      const xa = clamp(x0 + i * w, 32, LW - 32), xb = clamp(x0 + j * w, 32, LW - 32);
+      for (let x = xa, s0 = null; x <= xb; x += 2) {                     // only where there's floor to stand on
+        const ok = x < xb && this.standAt(x, fy + 1) && !this.solidAt(x, fy - 2);
+        if (ok && s0 === null) s0 = x;
+        else if (!ok && s0 !== null) { if (x - s0 >= 8) this.xb.pools.push({ src: e, kind: on ? 'live' : 'safe', x: (s0 + x) / 2, w: x - s0, y: fy, tell, t: T.floorLive, gap: 0.3, tick: 0, dmg: on ? T.floorDmg : 0, fill: 1, ox: (s0 + x) / 2 }); s0 = null; }
+      }
+      i = j;
+    }
+  }
+  conductorOrbs(e, n) {
+    const T = TUNE.CONDUCTOR, b = e.body;
+    for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.8; this.xb.orbs.push({ src: e, x: b.center.x, y: b.center.y, vx: Math.cos(a) * 100, vy: Math.sin(a) * 100, t: T.orbLife, ph: rand(0, 6), spd: T.orbSpeed * (e.phase === 3 ? 1.25 : 1), dmg: T.orbDmg }); }
+    Sfx.shockOrb(); this.spawnLight(b.center.x, b.center.y, 'ring', 0x80d8ff, 0.3, 2, 0.9, 0.3);
+  }
+  conductorArcs(e, dt, now) {                                            // overcharged: arcs crawl round it and bite anything close
+    const T = TUNE.CONDUCTOR, b = e.body, pb = this.player.body;
+    if ((e.arcT -= dt) > 0) return;
+    e.arcT = 0.08; const a = rand(0, Math.PI * 2);
+    this.pylonZaps.push({ x0: b.center.x, y0: b.center.y, x1: b.center.x + Math.cos(a) * T.arcR, y1: b.center.y + Math.sin(a) * T.arcR, t: now });
+    if (this.state === 'play' && Math.hypot(pb.center.x - b.center.x, pb.center.y - b.center.y) < T.arcR + 4 && now > e.arcHitT) { e.arcHitT = now + 400; this.hurtPlayer(T.arcDmg, b.center.x, { srcY: b.center.y, knock: false }); }
+  }
+  visConductor(e, g, now) {
+    const b = e.body, cx = b.center.x, A = this.xb.ga, L = this.laserG, [tx, ty] = this.conductorTip(e);
+    e.glow.setPosition(cx, b.center.y).setScale(e.phase === 3 ? 1.4 + Math.random() * 0.2 : 1).setAlpha(e.ai === 'cast' ? 0.8 : 0.5);
+    if (Math.random() < 0.8) this.fx.emit(cx - e.dir * 3 + rand(-3, 3), b.bottom + 4, { n: 1, angle: Math.PI / 2, spread: 0.6, speed: [20, 60], life: [0.15, 0.35], size: [2, 1], cols: [0xffffff, 0xc8f0ff, 0x60c8ff], add: true, g: -40 });   // the spark it floats on
+    if (Math.random() < 0.15) this.zap(g, cx + rand(-6, 6), b.bottom, cx + rand(-10, 10), b.bottom + rand(6, 14));
+    if (e.ai === 'blink' && e.to) {                                      // a shimmer here, a column of sparks there
+      e.setAlpha(0.35 + 0.65 * Math.random());
+      A.lineStyle(1, 0x80d8ff, 0.7).strokeCircle(e.to.x, e.to.y, 4 + (now / 25) % 14);
+      for (let k = 0; k < 5; k++) A.fillStyle(0xc8f0ff, Math.random() * 0.6).fillRect(e.to.x - 10 + k * 5, e.to.y - 22, 1, 44);
+    } else e.setAlpha(1);
+    if (e.ai === 'cast') {                                               // the line it'll throw along, white once it's locked
+      const lock = now >= e.aiUntil - TUNE.CONDUCTOR.lock * 1000;
+      L.lineStyle(1, lock ? 0xffffff : 0x80d8ff, lock ? 0.9 : 0.25 + 0.25 * Math.random()).lineBetween(tx, ty, e.lockX, e.lockY);
+      if (lock) L.lineStyle(1, 0xffffff, 0.8).strokeCircle(e.lockX, e.lockY, 5);
+      this.zap(g, tx, ty, tx + rand(-7, 7), ty + rand(-7, 7));
+    }
+    if (e.ai === 'orbTell' || e.ai === 'floorTell') this.zap(g, tx, ty, tx + rand(-8, 8), ty + rand(-8, 8));
+  }
+  deathConductor(e, cx, cy, dx, src, charred) {                          // it shorts out: one last discharge to the floor and walls
+    this.xbDeath(e, cx, cy, 'CIRCUIT BROKEN', 16, 'arc'); Sfx.thunder();
+    const now = this.time.now;
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, R = this.sweep(cx, cy, cx + Math.cos(a) * 140, cy + Math.sin(a) * 140); this.pylonZaps.push({ x0: cx, y0: cy, x1: R ? R.x : cx + Math.cos(a) * 140, y1: R ? R.y : cy + Math.sin(a) * 140, t: now }); }
+    for (let i = 0; i < 8; i++) this.spawnGib(pick(['g_glass', 'g_glass2', 'g_xcoil']), cx + rand(-6, 6), cy + rand(-10, 4), rand(-260, 260), rand(-380, -140), 'metal');
   }
   labKill() {
     this.stats.kills++; this.enemiesLeft--;
@@ -7940,7 +8769,7 @@ class GameScene extends Phaser.Scene {
       const F = this.stasisFields[i]; F.t -= dt; const end = F.t <= 0;
       let n = 0;
       for (const e of this.enemies.getChildren()) {
-        if (end || !e.alive || e.under || ['boss', 'foreman', 'wyrm', 'wyrmseg'].includes(e.kind)) continue;
+        if (end || !e.alive || e.under || ['boss', 'foreman', 'wyrm', 'wyrmseg'].includes(e.kind) || e.def.boss) continue;
         if (Math.hypot(e.body.center.x - F.x, e.body.center.y - F.y) > T.radius) continue;
         if (!(e.stasisT > 0)) { e.stasisDmg = 0; e.stasisGrav = this.tb && this.tb.o === e ? this.tb.grav : e.body.allowGravity; e.body.setAllowGravity(false); }
         e.stasisT = 0.12; e.body.setVelocity(0, 0); n++;
@@ -7982,7 +8811,7 @@ class GameScene extends Phaser.Scene {
     if ((this.mwSndT = (this.mwSndT || 0) - W.cooldown / 1000) <= 0) { this.mwSndT = 0.3; Sfx.microwave(); }
     if (!tgt) { this.mwFx = { x0: ox, y0: oy, x1: ox + Math.cos(a) * 40, y1: oy + Math.sin(a) * 40, t: now }; return; }
     const ex = tgt.body.center.x, ey = tgt.body.center.y; this.mwFx = { x0: ox, y0: oy, x1: ex, y1: ey, t: now };
-    tgt.cook = Math.min(1, (tgt.cook || 0) + W.cook * (['boss', 'foreman', 'jugg', 'gunship', 'wyrm'].includes(tgt.kind) ? 0.35 : 1)); tgt.cookT = now;
+    tgt.cook = Math.min(1, (tgt.cook || 0) + W.cook * (['boss', 'foreman', 'jugg', 'gunship', 'wyrm'].includes(tgt.kind) || tgt.def.boss ? 0.35 : 1)); tgt.cookT = now;
     this.damageEnemy(tgt, W.dmg, Math.cos(a), Math.sin(a), 'microwave'); this.stats.hits++;
     if (tgt.alive && tgt.cook >= 1) this.mwPop(tgt);
   }
@@ -8771,7 +9600,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.GRAV; let n = 0;
     for (const e of this.enemies.getChildren()) {
       if (!e.alive || e.under || FLIERS.has(e.kind) || e.def.noClip || e.frozen > 0 || e.netT > 0 || (e.kind === 'para' && e.ai === 'drop')) continue;
-      if (['boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'turret'].includes(e.kind)) continue;
+      if (['boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'burrower', 'turret'].includes(e.kind) || e.def.boss) continue;
       const b = e.body; if (Math.hypot(b.center.x - x, b.center.y - y) > T.radius + b.halfWidth) continue;
       e.gravT = T.float; e.gravSlam = false; b.setAllowGravity(false); b.setVelocity(b.velocity.x * 0.2 + (b.center.x - x) * 0.4, -T.rise);
       this.damageEnemy(e, T.dmg, 0, -1, 'kick'); n++;
@@ -9501,7 +10330,7 @@ class GameScene extends Phaser.Scene {
       out.push([kind, FLIERS.has(kind) ? 'A' : 'G']);
     }
     if (i % 6 === 2) { const mb = ['gunship', 'jugg', 'wyrm'][Math.floor(i / 6) % 3]; out.push([mb, mb === 'gunship' ? 'A' : 'G']); }
-    if (i % 6 === 5) out.push([Math.floor(i / 6) % 2 ? 'foreman' : 'boss', 'B']);   // the Smelter and the Foreman take turns
+    if (i % 6 === 5) out.push([OT_BOSSES[Math.floor(i / 6) % OT_BOSSES.length][0], 'B']);   // the seven bosses take turns, the Smelter first
     return out;
   }
 
@@ -9699,7 +10528,7 @@ class GameScene extends Phaser.Scene {
       if (!e.alive || e.under || e.def.noClip) continue;
       const b = e.body; if (b.right < x0 || b.left > x1 || b.bottom < y0 || b.top > y1) continue;
       this.paintSplatAround(b.center.x, y1 - 2, 12);
-      this.damageEnemy(e, e.kind === 'boss' || e.kind === 'jugg' || e.kind === 'wyrm' ? 60 : T.edmg, 0, 1, 'crush'); if (!e.alive) crushed++;
+      this.damageEnemy(e, e.kind === 'boss' || e.kind === 'jugg' || e.kind === 'wyrm' || e.def.boss ? 60 : T.edmg, 0, 1, 'crush'); if (!e.alive) crushed++;
     }
     if (crushed) { BUS.emit('callout', crushed > 1 ? 'COMPACTED!' : 'CRUSHED!'); this.addStyle(60 * crushed); this.impactFrame(1); }
     for (const k of this.barrelList) if (k.active && k.x > x0 && k.x < x1 && k.y > y0 && k.y < y1) this.explodeBarrel(k);
@@ -9731,7 +10560,7 @@ class GameScene extends Phaser.Scene {
         for (const o of this.enemies.getChildren()) {
           if (!o.alive || o.under || o.kind === 'wyrmseg' || o.kind === 'wraith') continue;
           if (Math.hypot(o.body.center.x - x, o.body.center.y - y) > W.radius + Math.max(o.body.halfWidth, o.body.halfHeight)) continue;
-          const boss = o.kind === 'boss' || o.kind === 'jugg' || o.kind === 'gunship' || o.kind === 'wyrm';
+          const boss = o.kind === 'boss' || o.kind === 'jugg' || o.kind === 'gunship' || o.kind === 'wyrm' || o.def.boss;
           o.netT = boss ? W.hold * 0.4 : W.hold; o.netTick = 0; caught++;
           if (FLIERS.has(o.kind) && !boss) o.body.setAllowGravity(true);
         }
@@ -10954,6 +11783,7 @@ class GameScene extends Phaser.Scene {
       if (kind === 'foreman') { this.boss = e; BUS.emit('boss', 'THE FOREMAN', 'YARD BOSS'); BUS.emit('flash', 0.35); this.shake(500, 0.012); Sfx.roar(); this.camFocus = { x: e.x, y: e.y - 30, until: this.time.now + 2400 }; }
       if (kind === 'wyrm') { this.boss = e; BUS.emit('minibar', 'SLAG WYRM'); BUS.emit('callout', 'SLAG WYRM'); this.shake(400, 0.01); Sfx.roar(); }
       if (kind === 'gunship') { this.boss = e; BUS.emit('minibar', 'GUNSHIP'); BUS.emit('callout', 'GUNSHIP INBOUND'); this.shake(400, 0.008); Sfx.roar(); }
+      if (e.def.boss) this.xbIntro(e);                                   // the expansion bosses: title card, boss bar, camera
       this.spawnLight(x, e.y, 'glow', 0xff60e0, 1.5, 3.5, 1, 0.3);
       this.spawnLight(e.x, e.y, e.def.key + '_w', 0xffffff, 1.6, 1, 1, 0.25, e.fr, e.flipX);
       this.fx.emit(x, e.y, { n: 24, speed: [40, 180], life: [0.3, 0.7], size: [3, 1], cols: [0xffffff, 0xffa0f0, 0xff40c0], add: true, drag: 2 });
@@ -11055,6 +11885,7 @@ class GameScene extends Phaser.Scene {
   onTouchEnemy(p, e) {
     if (!e.alive || this.state === 'dead' || this.lab?.stationary) return;
     if (e.frozen > 0) return;                                          // statues don't bite
+    if (e.def.contact) { this[e.def.contact](p, e); return; }          // an expansion boss or its parts: its own contact rules
     if (e.kind === 'screamer') { if (e.ai === 'dive') this.screamerBoom(e); return; }
     if (e.kind === 'cloaker') return;                                  // it only hurts when it means to (the strike)
     if (e.kind === 'gnat') { if (this.hurtPlayer(TUNE.GNAT.sting, e.x, { knock: false, srcY: e.y })) { e.hp = 0; this.killEnemy(e, 0, 0, 'sting'); } return; }   // stings and dies

@@ -11,7 +11,7 @@
 // KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
 window.KC = (() => {
   const KC = {};
-  const PARTS = { wyrmseg: 'wyrm', slagmid: 'slagling', slagbit: 'slagling' };   // pieces of another foe: the codex row is the parent's
+  const PARTS = { wyrmseg: 'wyrm', slagmid: 'slagling', slagbit: 'slagling', eggsac: 'queen', eyenode: 'overseer' };   // pieces of another foe: the codex row is the parent's
   const RUN_MS = 1500, DEAD_MS = 1200;
 
   KC.check = (only) => {

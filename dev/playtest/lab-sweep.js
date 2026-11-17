@@ -113,6 +113,25 @@ window.labSweep = section => {
         if (id === 'jugg' && !phaseStates.has('fire')) fail('Juggernaut did not fire');
         if (id === 'foreman' && (!phaseStates.has('spray') || !enemies(g).some(o => o.kind === 'hound' && o.summoned))) fail('Foreman did not use its spray and hound reinforcements');
         if (id === 'boss' && ![...phaseStates].some(state => state === 'breath' || state === 'mortarWind')) fail('Smelter did not attack');
+      } else if (ENEMY[id].boss) {                                     // the expansion bosses: phase two at 66%, three at 33%, and each one's signature attacks
+        const seen = new Set(phaseStates);
+        const watch = ms => { for (let t = 0; t < ms; t += 100) { T.run(100); seen.add(e.ai); for (const o of enemies(g)) if (o.owner === e) seen.add('+' + o.kind); if (g.xb?.orbs.length) seen.add('orbs'); if (g.xb?.waves.length) seen.add('waves'); if (g.xb?.blades.length) seen.add('blades'); for (const P of g.xb?.pools || []) seen.add('pool:' + P.kind); } checkScene(g, fail); };
+        if (id === 'overseer') {                                         // sealed until its four nodes are shot off
+          if (e.nodes?.length !== 4) fail('did not raise four shield nodes');
+          const hp = e.hp; g.damageEnemy(e, 50, 0, -1, 'crush'); T.run(50);
+          if (e.hp < hp) fail('took damage through its shield');
+          for (const n of e.nodes || []) if (n.alive) g.damageEnemy(n, 9999, 0, -1, 'crush');
+          T.run(100);
+        } else strike(e.hp - e.def.hp * 0.6);
+        if (e.phase !== 2) fail('did not enter phase 2');
+        watch(9000);
+        strike(e.hp - e.def.hp * 0.28);
+        if (e.phase !== 3) fail('did not enter phase 3');
+        watch(10000);
+        const want = { crucible: ['pour', 'waves', 'pool:slag', 'vent'], grinder: ['roll', 'bladeTell', 'blades', 'hang', 'drop', 'pool:rut'], queen: ['dive', '+eggsac', 'spitTell', '+gnat'],
+          overseer: ['sweep', '+drone', 'grid'], conductor: ['cast', 'blink', 'pool:live', 'orbs'] }[id] || [];
+        const missing = want.filter(s => !seen.has(s));
+        if (missing.length) fail('never used ' + missing.join(', '));
       } else if (id === 'wyrm') {
         if (!stepUntil(() => e.segs.some(part => !part.under), 7000, 17)) { fail('no body segment surfaced'); return; }
         const part = e.segs.find(part => !part.under), hp = e.hp;
