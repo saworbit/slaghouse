@@ -91,6 +91,36 @@ class TitleScene extends Phaser.Scene {
       this.time.delayedCall(0, () => LAB_PANEL.open(room));
       LAB_PANEL.initialRoom = null;
     }
+    this.polTitleInit();                                                 // expansion: polish (cosmetic only)
+  }
+  // ---- expansion: polish ----
+  // Title-screen juice: a sweep of light crosses the logo every few seconds, and a bar glides behind the menu pick
+  // while the new pick pops. Cosmetic only: fxRandom, never Math.random.
+  polTitleInit() {
+    this.polBar = this.add.graphics().setDepth(4.9);                    // under the menu labels and their arrows
+    this.polShine = new PixelLabel(this, 480, 84, 'title_logo_shine', { text: 'SLAGHOUSE', scale: 10, color: '#ffffff', originY: 0.5 }).setBlendMode(ADD).setAlpha(0.6).setDepth(1).setVisible(false);
+    this.polShineT = 1.2; this.polSel = -1; this.polBx = 0; this.polBy = 0; this.polBw = 0; this.polPop = 0;
+  }
+  polTitle(dt) {                                                       // update(), after drawMenu
+    this.polShineT -= dt;                                               // the logo shine: a narrow band of the glyphs, cropped, swept left to right
+    const p = -this.polShineT / 0.9, tw = this.polShine.width, bx = Math.round(-6 + p * (tw + 12)), x0 = Math.max(0, bx), x1 = Math.min(tw, bx + 5);
+    if (p >= 1) this.polShineT = crand(3, 5.5);
+    if (p > 0 && p < 1 && x1 > x0) this.polShine.setVisible(true).setCrop(x0, 0, x1 - x0, 8); else this.polShine.setVisible(false);
+    const g = this.polBar; g.clear();
+    if (!this.menuItems) return;
+    if (this.sub) { if (this.polSel >= 0) { this.menuItems[this.polSel].setScale(2); this.polSel = -1; } return; }
+    const o = this.menuItems[this.menuSel], ow = o.width * 2;
+    if (this.polSel !== this.menuSel) {                                  // a new pick: it pops; the bar sets off toward it
+      if (this.polSel >= 0) this.menuItems[this.polSel].setScale(2);
+      if (!this.polBw) { this.polBx = o.x; this.polBy = o.y; this.polBw = ow; }
+      this.polSel = this.menuSel; this.polPop = 1;
+    }
+    const k = Math.min(1, dt * 18); this.polBx += (o.x - this.polBx) * k; this.polBy += (o.y - this.polBy) * k; this.polBw += (ow - this.polBw) * k;
+    const w = Math.round(this.polBw / 2 + 24), x = Math.round(this.polBx), y = Math.round(this.polBy);
+    g.fillStyle(0x2a1806, 0.8).fillRect(x - w, y - 10, w * 2, 20);
+    g.fillStyle(0xff8a1f, 0.9).fillRect(x - w, y - 10, 2, 20).fillRect(x + w - 2, y - 10, 2, 20);
+    g.fillStyle(0xff8a1f, 0.3).fillRect(x - w + 2, y + 9, w * 2 - 4, 1);
+    this.polPop = Math.max(0, this.polPop - dt * 6); o.setScale(2 * (1 + 0.14 * this.polPop * this.polPop));
   }
   // ---- codex round: the title menu and its pages ----
   buildMenu() {
@@ -420,6 +450,7 @@ class TitleScene extends Phaser.Scene {
       else { if (my) { const n = this.menuItems.length; this.menuSel = (this.menuSel + my + n) % n; Sfx.swap(); } if (mx) this.stepDiff(mx); if (PAD.jd(3)) this.menuPick(1); else if (PAD.jd(0) || PAD.jd(9)) this.menuPick(this.menuSel); }
     }
     if (this.menuItems) this.drawMenu(time);
+    this.polTitle(dt);                                                   // expansion: polish (cosmetic only)
     if (Math.random() < 0.6) this.fx.emit(rand(0, VIEW_W), VIEW_H + 2, { n: 1, angle: -Math.PI / 2, spread: 0.5, speed: [40, 110], life: [2, 4], size: [4, 2], cols: [0xffe46a, 0xff8a1f, 0xd04010], alpha: [0.9, 0], add: true, g: -10, drag: 0.3 });
     this.fx.update(dt); this.fx.draw();
   }
