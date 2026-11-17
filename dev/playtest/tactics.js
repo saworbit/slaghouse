@@ -1,7 +1,8 @@
 // Squad-tactics checks for slaghouse.html (the GameScene tactics section). Load harness.js first.
 // AT.check() sets up small fights in ARENA 01 and checks that the foes do the clever things they should:
 //   - the shared prediction lands a jump on the floor below it and stops a run at a wall, and shots lead a runner;
-//   - a grunt climbs to you on a raised deck by the nav graph instead of pacing under it;
+//   - a grunt climbs to you on a raised deck by the nav graph instead of pacing under it, and so do a Roller and a
+//     Lugger (#204); a Gatling, Swapper, Strider and Warhorn below the deck go round to a spot that sees you;
 //   - drones take hover spots apart from each other, each with a line of sight to you;
 //   - an enforcer lights the drum by your feet, a hard-hit one ducks into cover while a squadmate covers it,
 //     and two that lose you split up: one checks where you went, the other watches the spot;
@@ -53,6 +54,44 @@ window.AT = (() => {
     if (!routed) fails.push('the grunt never took a route over the nav graph');
     if (!reached) fails.push(`the grunt never reached your deck (it ended at tile ${Math.floor(e.x / 16)},${Math.floor(e.body.bottom / 16)})`);
     else notes.push(`grunt climbed to you in ${(reached * 17 / 1000).toFixed(1)} s`);
+  };
+
+  // #204: the ground kinds that used to steer on their own. Movers come up to your deck; shooters, out of sight under
+  // it, take a spot that sees you. You stand on the girder deck at 32,16 with every drum gone, so the Lugger comes for you.
+  AT.climbers = (fails, notes) => {
+    for (const kind of ['roller', 'lugger']) {
+      const g = fresh(), pb = g.player.body;
+      for (const k of g.barrelList) if (k.active) k.disableBody(true, true);
+      stand(g, 32, 16);
+      const e = g.spawnEnemy(kind, 24, 24); e.aggro = true; e.aggroT = 99;
+      let reached = 0, routed = false;
+      for (let i = 0; i < 900 && !reached; i++) {                         // 15 s
+        e.aggroT = 99; routed = routed || !!e.walkNav;
+        T.run(17);
+        if (Math.abs(e.body.bottom - pb.bottom) < 6 && Math.abs(e.body.center.x - pb.center.x) < 64) reached = i;
+      }
+      if (!routed) fails.push(`the ${kind} never took a route over the nav graph`);
+      if (!reached) fails.push(`the ${kind} never reached your deck (it ended at tile ${Math.floor(e.x / 16)},${Math.floor(e.body.bottom / 16)})`);
+      else notes.push(`${kind} climbed to you in ${(reached * 17 / 1000).toFixed(1)} s`);
+    }
+  };
+  AT.standoff = (fails, notes) => {
+    for (const kind of ['gatling', 'swapper', 'strider', 'warhorn']) {
+      const g = fresh(), pb = g.player.body;
+      stand(g, 32, 16);
+      const e = g.spawnEnemy(kind, 30, 24); e.aggro = true; e.aggroT = 99; T.run(200);
+      const eyes = () => g.los(e.body.center.x, e.body.center.y - 3, pb.center.x, pb.center.y - 4);
+      if (eyes()) { fails.push(`test setup: the ${kind} at 30,24 already sees you on the deck`); continue; }
+      let saw = 0, routed = false;
+      for (let i = 0; i < 900 && !saw; i++) {
+        e.aggroT = 99; e.cd = 9; routed = routed || !!e.path;             // no attacks: just where it goes
+        pb.setVelocity(0, 0); T.run(17);
+        if ((e.body.blocked.down || e.body.touching.down) && eyes()) saw = i;
+      }
+      if (!routed) fails.push(`the ${kind} never took a route over the nav graph`);
+      if (!saw) fails.push(`the ${kind} never found a spot that sees you (it ended at tile ${Math.floor(e.x / 16)},${Math.floor(e.body.bottom / 16)})`);
+      else notes.push(`${kind} saw you in ${(saw * 17 / 1000).toFixed(1)} s`);
+    }
   };
 
   AT.drones = (fails, notes) => {
@@ -111,7 +150,7 @@ window.AT = (() => {
     const fails = [], notes = [];
     T.seed(7);                                                             // the same fights every run, sound muted
     RUNMODE = 'overtime'; T.boot(); T.run(300);
-    for (const name of ['prediction', 'climb', 'drones', 'drum', 'squad']) {
+    for (const name of ['prediction', 'climb', 'climbers', 'standoff', 'drones', 'drum', 'squad']) {
       try { AT[name](fails, notes); } catch (err) { fails.push(`${name} threw: ${String(err && err.stack || err).split('\n').slice(0, 2).join(' | ')}`); }
     }
     if (!shown) fails.push('no bark was ever shown');
