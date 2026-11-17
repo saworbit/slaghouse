@@ -136,6 +136,7 @@ class GameScene extends Phaser.Scene {
     this.camX = this.player.x; this.camY = this.player.y;
     this.applyCamera(0);
     this.initPostFx();
+    this.polInit();                                                      // expansion: polish (cosmetic only)
     const onResume = () => {                                           // back from the pause menu: no stale presses, no stray shot
       this.paused = false; Music.paused = false; this.input.keyboard.resetKeys();
       this.input.setDefaultCursor('none'); this.nextFire = Math.max(this.nextFire, this.time.now + 220); this.kickQueued = false; this.mineQueued = false;
@@ -936,6 +937,7 @@ class GameScene extends Phaser.Scene {
     this.updateFxSprites(dt);
     this.updateStyle(dt);
     this.fx.update(dt); this.fx.draw();
+    this.polUpdate(dt, now);                                             // expansion: polish (cosmetic only)
     Sfx.arcSet(now < this.arcActiveUntil && this.state !== 'dead');
     Sfx.flameSet(now < this.flameActiveUntil && this.state !== 'dead');
     Sfx.cryoSet(now < this.cryoActiveUntil && this.state !== 'dead');
@@ -2481,6 +2483,7 @@ class GameScene extends Phaser.Scene {
     if (hs && src === 'ripper' && Math.random() > 0.15) hs = false;          // the blade doesn't ding every bite
     if (hs) { this.headshots++; Sfx.ding(); this.fxBlood(e.body.center.x, e.body.top, 8, -Math.PI / 2, 1.0, [60, 200]); }
     if (!quiet) BUS.emit('hitmark', e.hp <= 0, !!hs);
+    if (!quiet) this.polHit(e, dx, dy, src, dmg);                       // expansion: polish (cosmetic only)
     if (!quiet && (!rapid || Math.random() < 0.25)) Sfx.confirm(e.hp <= 0);
     if (e.hp <= 0) { this.killEnemy(e, dx, dy, src); return; }
     if (!rapid && !quiet) Sfx.hit();
@@ -2507,6 +2510,129 @@ class GameScene extends Phaser.Scene {
       ny -= 9; nx += k % 2 ? 6 : -6;
     }
     this.dmgNums.push({ imgs, x: nx, y: ny, t: 0, vx: rand(-8, 8), big: col === 'R' || col === 'Y' });
+  }
+  // ---- expansion: polish ----
+  // Cosmetic juice over the fight: a white pop and an impact star on every hit, a shock ring and hot flecks on every
+  // kill, smoke curling off a hot barrel, dust kicked along the floor by a hard landing, sparks off a wall slide,
+  // streaks behind a dash and glints on medkits. None of it changes play. It draws only from fxRandom; its particles
+  // have their own pool (this.cfx), since a seeded this.fx.emit stops drawing when that pool runs dry; it never moves
+  // the camera, which the play-test bot's idle aim reads the pointer through; and it only reads the scene. So the
+  // seeded campaigns play out the same with or without it.
+  polInit() {
+    this.cfx = new FX(this, 600, 12); this.cfx.solid = (x, y) => this.solidAt(x, y);   // flecks and sparks bounce off tiles (mode 1); nothing here paints (mode 2)
+    this.polG = this.add.graphics().setDepth(16.5).setBlendMode(ADD);   // impact stars, shock rings, dash streaks, twinkles
+    this.polPops = []; this.polPopI = 0; this.polMarks = []; this.polFree = []; this.polDrawn = false;
+    for (let i = 0; i < 20; i++) { const p = this.add.image(-99, -99, 'glow').setVisible(false).setDepth(5.05); p.on = false; p.t = 0; this.polPops.push(p); }   // white copies just over the foes
+    this.polShotT = this.lastShotT; this.polHeat = 0; this.polSmokeT = 0; this.polGround = true; this.polVy = 0; this.polDash = false; this.polSlideT = 0; this.polGlintT = 0;
+    this.polCol = { star: [0xffb878, 0xfff090, 0xff9a40], ring: [0xff6a4a, 0xffd860, 0xff8a28],   // by material: meat, metal, slag
+      fleck: [[0xffffff, 0xffd0b0, 0xff7050], [0xffffff, 0xffe46a, 0xffa030], [0xffffff, 0xffe080, 0xff8a20, 0xa02008]] };
+    this.polCool = new Set(['arc', 'cryo', 'acid', 'microwave', 'siphon', 'tractor', 'ripper', 'prism', 'sonic', 'whip', 'katana', 'gauntlet', 'shield', 'vacuum', 'hammer',
+      'bubble', 'glue', 'stasis', 'decoy', 'tripwire', 'shrink', 'coil', 'limpet', 'glaive', 'orbital', 'dronepod', 'flail', 'net', 'seed', 'shock']);   // beams, blades and throwers: no barrel to smoke
+  }
+  polMat(D) { return D.molten ? 2 : D.mech ? 1 : 0; }
+  polMark(k, x, y, a, col, s, dur, delay = 0) {                         // k: 0 impact star, 1 shock ring, 2 dash streak, 3 floor ring, 4 twinkle
+    if (this.polMarks.length >= 64) return;
+    const m = this.polFree.pop() || {};
+    m.k = k; m.x = x; m.y = y; m.a = a; m.col = col; m.s = s; m.dur = dur; m.t = -delay; this.polMarks.push(m);
+  }
+  polHit(e, dx, dy, src, dmg) {                                          // damageEnemy: a hit that lands (no burn, gas or net ticks)
+    const now = this.time.now; if (now - (e.polT || -1e9) < 70) return; e.polT = now;   // rapid fire and pellet volleys: one per foe per 70 ms
+    const D = e.def, b = e.body, m = this.polMat(D), big = dmg >= 18 || src === 'rail' || src === 'stake' || src === 'lance' || src === 'kick' || src === 'parry';
+    const L = Math.hypot(dx, dy), ux = L ? dx / L : 0, uy = L ? dy / L : 0, fl = OPTS.flash ? 1 : 0.45;
+    const hx = b.center.x - ux * (b.halfWidth + 1), hy = b.center.y - uy * (b.halfHeight * 0.6 + 1);   // on the skin, the side the hit came from
+    if (e.hp > 0 && e.visible && e.alpha > 0.3) {                        // the flashed body punches up and settles back (a white copy over it; the body's own scale is its hitbox)
+      const p = this.polPops[this.polPopI = (this.polPopI + 1) % this.polPops.length], sc = Math.abs(e.scaleX) || 1, grow = Math.min(big ? 0.32 : 0.22, (big ? 9 : 6) / Math.max(D.fw, D.fh));
+      p.setTexture(D.key + '_w', e.fr).setFlipX(e.flipX).setRotation(e.rotation).setPosition(e.x, e.y).setScale(sc * (1 + grow)).setAlpha(1).setVisible(true);
+      p.on = true; p.t = 0; p.dur = big ? 0.1 : 0.075; p.s0 = sc * (1 + grow); p.s1 = sc; p.e = e;
+    }
+    this.polMark(0, hx, hy, Math.atan2(uy, ux), this.polCol.star[m], big ? 1.8 : 1.1, big ? 0.13 : 0.09);
+    if (big) this.polMark(1, hx, hy, 0, this.polCol.ring[m], 9, 0.16);
+    if (m || big) this.cfx.emit(hx, hy, { n: big ? 5 : 2, angle: Math.atan2(-uy, -ux), spread: 1.4, speed: [60, 190], life: [0.1, 0.28], size: [2, 1], cols: this.polCol.fleck[m], add: true, g: 500, mode: 1, cosmetic: true });
+  }
+  polKill(e, cx, cy, dx, dy) {                                           // killEnemy, after its own pop: a shock ring and a spray of hot flecks
+    const D = e.def, m = this.polMat(D), sz = Math.max(D.fw, D.fh), boss = sz >= 40 || D.hp >= 400;
+    this.polMark(1, cx, cy, 0, this.polCol.ring[m], sz * 0.7 + 5, 0.26);
+    this.polMark(0, cx, cy, Math.atan2(dy || 0, dx || 0), 0xffffff, 2.2, 0.1);
+    if (boss) { this.polMark(1, cx, cy, 0, 0xffffff, sz * 1.3 + 10, 0.4, 0.06); this.polMark(1, cx, cy, 0, this.polCol.ring[m], sz * 1.9 + 16, 0.55, 0.14); }   // a big one rings three times
+    this.cfx.emit(cx, cy, { n: boss ? 22 : 9, speed: [80, boss ? 300 : 220], life: [0.2, 0.5], size: [2, 1], cols: this.polCol.fleck[m], add: true, g: 420, drag: 1, mode: 1, cosmetic: true });
+    if (dx || dy) this.cfx.emit(cx, cy, { n: 4, angle: Math.atan2(dy || 0, dx || 0), spread: 0.35, speed: [220, 360], life: [0.08, 0.16], size: [2, 1], cols: [0xffffff, this.polCol.ring[m]], add: true, drag: 3, cosmetic: true });   // carried on by the killing blow
+  }
+  polLand(x, y, vy) {                                                    // a hard landing kicks dust out along the floor; the longer the drop, the harder the squash
+    const k = clamp((vy - 160) / 360, 0, 1);
+    for (let s = -1; s <= 1; s += 2) this.cfx.emit(x + s * 3, y - 1, { n: 2 + Math.round(5 * k), angle: s > 0 ? -0.12 : Math.PI + 0.12, spread: 0.3, speed: [25, 60 + 110 * k], life: [0.25, 0.5], size: [3, 1], cols: [0x8a8f98, 0x5e626a], alpha: [0.65, 0], g: -12, drag: 4.5, cosmetic: true });
+    if (k > 0.3) this.polMark(3, x, y, 0, 0x7c828c, 10 + 14 * k, 0.2 + 0.1 * k);
+    this.squash(1.14 + 0.26 * k, 0.86 - 0.22 * k);
+  }
+  polUpdate(dt, now) {                                                   // update(), every frame; dt crawls in a hit-stop, so the juice freezes with it
+    const M = this.polMarks;
+    for (let i = M.length - 1; i >= 0; i--) { const m = M[i]; if ((m.t += dt) >= m.dur) { M[i] = M[M.length - 1]; M.pop(); this.polFree.push(m); } }
+    for (const p of this.polPops) {
+      if (!p.on) continue;
+      const k = (p.t += dt) / p.dur;
+      if (k >= 1) { p.on = false; p.e = null; p.setVisible(false); continue; }
+      const e = p.e; if (e.active) p.setPosition(e.x, e.y).setRotation(e.rotation).setFlipX(e.flipX);
+      p.setScale(p.s0 + (p.s1 - p.s0) * (1 - (1 - k) * (1 - k))).setAlpha(k > 0.7 ? (1 - k) / 0.3 : 1);
+    }
+    if (this.state !== 'dead') {
+      const p = this.player, b = p.body, ground = b.blocked.down || b.touching.down;
+      if (ground && !this.polGround && this.polVy > 160) this.polLand(p.x, b.bottom, this.polVy);
+      this.polGround = ground; this.polVy = b.velocity.y;
+      if (this.sliding && b.velocity.y > 30 && (this.polSlideT -= dt) <= 0) {   // a wall slide grinds sparks off the boots
+        this.polSlideT = 0.045;
+        this.cfx.emit(p.x + this.wallSide * 5, b.bottom - 3, { n: 2, angle: -Math.PI / 2 - this.wallSide * 0.9, spread: 0.8, speed: [40, 130], life: [0.12, 0.32], size: [2, 1], cols: [0xffffff, 0xffe46a, 0xff9a30], add: true, g: 520, mode: 1, cosmetic: true });
+      }
+      const dashing = now < this.dashUntil;
+      if (dashing && !this.polDash) {                                   // a dash leaves speed streaks where it set off
+        const a = Math.atan2(this.dashVy, this.dashVx), ca = Math.cos(a), sa = Math.sin(a);
+        for (let i = -1; i <= 1; i++) this.polMark(2, p.x - ca * 4 - sa * i * 6, p.y - 2 - sa * 4 + ca * i * 6, a + Math.PI, 0x9af0ff, 24 - Math.abs(i) * 9, 0.2);
+      }
+      this.polDash = dashing;
+      if (this.lastShotT !== this.polShotT) {                            // a shot went off (fire() and the charge weapons stamp lastShotT): the barrel heats up
+        this.polShotT = this.lastShotT;
+        const W = WEAPONS[this.weapon]; if (!this.polCool.has(W.id)) this.polHeat = Math.min(1, this.polHeat + clamp((W.cooldown || 200) / 700, 0.1, 0.7));
+      }
+      if (this.polHeat > 0) {                                            // barrel smoke: a thin wisp curls off the muzzle once the shooting stops
+        this.polHeat = Math.max(0, this.polHeat - dt * 0.55);
+        if (now - this.lastShotT > 110 && (this.polSmokeT -= dt) <= 0) {
+          this.polSmokeT = 0.03 + 0.08 * (1 - this.polHeat);
+          const G = GUNS[WEAPONS[this.weapon].gun], a = this.aim, r = (G && G.muzzle || 12) - 1, mx = this.shoulder.x + Math.cos(a) * r, my = this.shoulder.y + Math.sin(a) * r;
+          if (!this.solidAt(mx, my)) this.cfx.emit(mx, my, { n: 1, angle: -Math.PI / 2, spread: 0.7, speed: [8, 22], vx: b.velocity.x * 0.15, life: [0.5, 1], size: [2, 5], cols: [0xb8b2ac, 0x8a847e, 0x5a5652], alpha: [0.22 + 0.4 * this.polHeat, 0], g: -36, drag: 1.4, cosmetic: true });
+        }
+      }
+    }
+    if ((this.polGlintT -= dt) <= 0) {                                   // medkits catch the light now and then
+      this.polGlintT = 0.25;
+      for (const k of this.pickups || []) if (!k.taken && fxRandom() < 0.5) this.polMark(4, k.x + (fxRandom() < 0.5 ? -1 : 1) * crand(5, 9), k.img.y + crand(-9, 1), 0, fxRandom() < 0.5 ? 0xffffff : 0x9affb0, 3, 0.4);   // round its edges, clear of the white case
+    }
+    this.cfx.update(dt); this.cfx.draw();
+    this.polDraw();
+  }
+  polDraw() {
+    const g = this.polG, M = this.polMarks;
+    if (!M.length) { if (this.polDrawn) { g.clear(); this.polDrawn = false; } return; }
+    g.clear(); this.polDrawn = true;
+    const fl = OPTS.flash ? 1 : 0.45;                                    // reduced flashes: the stars and rings go dim
+    for (const m of M) {
+      if (m.t < 0) continue;
+      const k = m.t / m.dur, e = 1 - k, x = Math.round(m.x), y = Math.round(m.y);
+      if (m.k === 0) {                                                   // impact star: a hot core, a long arm back along the shot, a short cross arm
+        const L = (4 + 5 * m.s) * (0.45 + 0.55 * e), ca = Math.cos(m.a), sa = Math.sin(m.a), al = Math.sqrt(e) * fl;
+        g.lineStyle(3, m.col, 0.45 * al).lineBetween(x - ca * L * 1.1, y - sa * L * 1.1, x, y);
+        g.lineStyle(1, 0xffffff, al).lineBetween(x - ca * L * 1.3, y - sa * L * 1.3, x + ca * L * 0.3, y + sa * L * 0.3);
+        g.lineStyle(1, m.col, 0.9 * al).lineBetween(x - sa * L * 0.6, y + ca * L * 0.6, x + sa * L * 0.6, y - ca * L * 0.6);
+        g.fillStyle(0xffffff, al).fillRect(x - 1, y - 1, 3, 3);
+      } else if (m.k === 1 || m.k === 3) {                               // a shock ring, or a flat one along the floor
+        const r = Math.max(1, m.s * (0.3 + 0.7 * (1 - e * e * e)));
+        g.lineStyle(k < 0.45 ? 2 : 1, m.col, 0.85 * e * fl);
+        if (m.k === 1) g.strokeCircle(x, y, r); else g.strokeEllipse(x, y - 1, r * 2, Math.max(2, r * 0.45));
+      } else if (m.k === 2) {                                            // dash streak: the near end draws in toward the far one
+        const ca = Math.cos(m.a), sa = Math.sin(m.a);
+        g.lineStyle(1, m.col, 0.7 * e).lineBetween(m.x + ca * m.s * k, m.y + sa * m.s * k, m.x + ca * m.s, m.y + sa * m.s);
+      } else {                                                           // twinkle: a plus that flares and shrinks away
+        const r = Math.round(m.s * Math.sin(Math.PI * k));
+        g.fillStyle(m.col, 0.9 * fl).fillRect(x - r, y, r * 2 + 1, 1).fillRect(x, y - r, 1, r * 2 + 1);
+      }
+    }
   }
   addStyle(p) { this.style.pts = Math.min(1600, this.style.pts + p * (this.perks && this.perks.style ? 1.5 : 1)); }
   updateStyle(dt) {
@@ -2615,6 +2741,7 @@ class GameScene extends Phaser.Scene {
     if (e.gun) { e.gun.setVisible(false); this.spawnGib(D.dropGun || 'icon_rifle', cx, cy, dx * 150 + rand(-60, 60), -rand(200, 300), 'metal'); }
     e.setScale(1);
     if (!rag && !hay) this.spawnLight(e.x, e.y, e.def.key + '_w', 0xffffff, 1, 1.8, 0.9, 0.14, e.fr, e.flipX);   // white silhouette "pop"
+    this.polKill(e, cx, cy, dx, dy);                                    // expansion: polish (cosmetic only)
     e.disableBody(true, true);
     const now = this.time.now;                                       // kill chain: next kill within 2.6 s keeps it going
     this.combo = now - this.lastKillT < 2600 ? this.combo + 1 : 1;
