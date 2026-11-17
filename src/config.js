@@ -790,10 +790,19 @@ const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind =
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
-// Twenty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
+// Thirty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
 // backdrop, 'hang' dangles from whatever is overhead and swings when hit); what it's made of (the chips and the sound a
 // hit makes); the methods that run on a hit, on breaking and while it goes off; how long fire takes to cook it off
 // (cook); its light ([tint, scale x, scale y, x, y, alpha] from its centre) and the callout when it kills something.
+// Where the last ten want to go (PROP_SPOTS cells; the Lab's Breakables Bay has one of each):
+//   hoist:       hang it 2-5 tiles over floor foes walk on, from a solid tile or girder; the block drops straight down.
+//   server, jukebox, vat, paint: floor props; the vat's wave runs along the floor it stands on, so give it a few
+//                open tiles either side. The jukebox flings its records up and out: keep it out of tight corners.
+//   hydrant:     floor, with open air above it (the geyser climbs up to 7 tiles and throws whoever is in it).
+//   gasline:     wall, low over a floor, with 4-5 open tiles on the side it faces (the facing sets the jet's side).
+//   hopper:      wall, with floor within 10 tiles below its chute (that's where the sand heaps up).
+//   transformer: wall; its discharge reaches 120 px and its blackout 200, so put it where lights and foes gather.
+//   sprinkler:   wall, high, over floor within 10 tiles; fire under it (within 2-3 tiles either side) sets it off.
 const PROPS = {
   neon:      { hp: 20, mount: 'wall',  mat: 'glass', hit: 'hitNeon', brk: 'breakNeon', live: 'liveNeon', light: [0xff3aa0, 2.6, 1.0, 0, 0, 0.55], call: 'SIGN OFF!' },
   tube:      { hp: 6,  mount: 'hang',  mat: 'glass', brk: 'breakTube', live: 'liveTube', light: [0xc8ecff, 1.8, 0.7, 0, 2, 0.5], cone: [0xd8f2ff, 1.3, 1.5, 0.15], call: 'LIGHTS OUT!' },
@@ -815,12 +824,26 @@ const PROPS = {
   window:    { hp: 12, mount: 'wall',  mat: 'glass', hit: 'hitWindow', brk: 'breakWindow', call: 'GLASSED!' },
   horn:      { hp: 12, mount: 'wall',  mat: 'metal', brk: 'breakHorn', light: [0xff2a14, 0.45, 0.45, -6, -4, 0.8], call: 'FEEDBACK!' },
   water:     { hp: 40, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakWater', call: 'WASHED OUT!' },
+  // ---- expansion: props ----
+  hoist:       { hp: 40, mount: 'hang',  mat: 'metal', brk: 'breakHoist', live: 'liveHoist', call: 'DEAD WEIGHT!' },
+  server:      { hp: 34, mount: 'floor', mat: 'metal', hit: 'hitServer', brk: 'breakServer', live: 'liveServer', light: [0x46f088, 0.7, 1.3, 0, 0, 0.2], call: 'CRASHED!' },
+  jukebox:     { hp: 30, mount: 'floor', mat: 'glass', hit: 'hitJukebox', brk: 'breakJukebox', live: 'liveJukebox', light: [0xff8a3a, 1.3, 1.4, 0, -5, 0.38], call: 'NOW PLAYING!' },
+  hydrant:     { hp: 30, mount: 'floor', mat: 'metal', brk: 'breakHydrant', live: 'liveHydrant', call: 'HOSED!' },
+  gasline:     { hp: 18, mount: 'wall',  mat: 'metal', brk: 'breakGasline', live: 'liveGasline', cook: 1.6, call: 'GAS LEAK!' },
+  hopper:      { hp: 26, mount: 'wall',  mat: 'metal', brk: 'breakHopper', live: 'liveHopper', call: 'SANDBAGGED!' },
+  vat:         { hp: 24, mount: 'floor', mat: 'glass', brk: 'breakVat', live: 'liveVat', light: [0x7dff4a, 0.9, 1.3, 0, 1, 0.3], call: 'DISSOLVED!' },
+  transformer: { hp: 36, mount: 'wall',  mat: 'metal', hit: 'hitTransformer', brk: 'breakTransformer', live: 'liveTransformer', light: [0x80c8ff, 0.5, 0.5, -2, -9, 0.4], call: 'GRID DOWN!' },
+  paint:       { hp: 14, mount: 'floor', mat: 'metal', brk: 'breakPaint', cook: 2.4, call: 'FRESH COAT!' },
+  sprinkler:   { hp: 6,  mount: 'wall',  mat: 'metal', brk: 'breakSprinkler', live: 'liveSprinkler', call: 'DRENCHED!' },
 };
 const PROP_BLAST = {                                               // the props that go bang
   propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70, scenery: true },
   boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60, scenery: true },
   small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18, scenery: true },
   slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30, scenery: true },
+  // ---- expansion: props ----
+  gasline:     { radius: 46, maxDamage: 42, minDamage: 12, selfDamage: 14, push: 320, maxRise: 400, burn: 2.5, tileDamage: 34, scenery: true },
+  transformer: { radius: 52, maxDamage: 30, minDamage: 10, selfDamage: 10, push: 280, maxRise: 360, tileDamage: 22, scenery: true, style: 'arc' },
 };
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };

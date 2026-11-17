@@ -2063,7 +2063,7 @@ function drawDrone(ctx, sway, charge) {          // 18x16 hovering eye-sentry
 }
 
 // ---- destructible props: art ------------------------------------------------------
-// Twenty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
+// Thirty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
 // outline. Each has its intact frame, any frames it needs while it's hurt or going off, and a wreck ('x') that stays
 // put until the next wave restocks it. PROP_ART[kind] = { w, h, fr: frame names (the first is the intact one), draw }.
 const PRR = {
@@ -2433,6 +2433,216 @@ function drawWaterTank(c, st) {                                   // 22x26 water
   if (st === 'hit') { R(c, '#02060c', 6, 13); R(c, '#8ce0ff', 6, 14, 1, 2); R(c, '#02060c', 14, 6); R(c, '#8ce0ff', 14, 7); R(c, B[2], 12, 3, 2, 1); }
   if (x) { prTear(c, 0, 22, 10, 4, 10, '#0c1e36'); R(c, '#4ac8f8', 6, 12, 8, 1); prScorch(c, 0, 8, 22, 10, 10, 2); }
 }
+// ---- expansion: props ----
+const PRT = {                                                     // the last ten's own ramps
+  trf: ['#141a22', '#1e2630', '#2c3846', '#3e4c5c', '#546474', '#6e8092', '#90a2b4', '#b8c8d8'],   // transformer grey
+  snd: ['#3a2a14', '#5e4422', '#8a6834', '#b08a50', '#d0aa6a', '#e8c88a', '#f8e4b0'],              // sand
+  pnt: [['#4a0a2a', '#8a1450', '#d0307e', '#ff6ab4', '#ffb4dc'], ['#05303a', '#0a6a78', '#18b0c4', '#5ae8f4', '#b8fcff'],
+        ['#4a3804', '#9a7408', '#e8b818', '#ffe050', '#fff4a8']],                                  // paint: pink, cyan, yellow
+};
+const PAINT_COLS = [0xff3a9a, 0x2ad8ec, 0xffd21a];               // what the paint cans splash (PRT.pnt's middles, brighter)
+function drawHoist(c, st) {                                       // 22x18 engine block slung from a crane hook; 'x' is what's left of it on the floor
+  const Rr = PRR.red;
+  if (st === 'x') {
+    R(c, PRR.blk[2], 0, 17, 22, 1); R(c, PRR.blk[4], 3, 17, 5, 1); R(c, PRR.blk[3], 15, 17, 4, 1);                     // oil spreading out from under it
+    R(c, IRN[3], 1, 11, 10, 6); R(c, IRN[5], 1, 11, 9, 1); R(c, IRN[4], 1, 12, 1, 5); R(c, IRN[1], 10, 12, 1, 5);         // the front half, still upright
+    R(c, Rr[3], 2, 9, 8, 2); R(c, Rr[5], 2, 9, 7, 1); R(c, IRN[1], 1, 11, 10, 1); R(c, IRN[2], 2, 15, 8, 1);
+    for (const x of [4, 7]) { R(c, IRN[2], x, 13, 1, 2); R(c, IRN[4], x - 1, 13, 1, 2); }
+    for (const [x, y] of [[11, 10], [11, 12], [10, 14], [11, 16]]) R(c, IRN[0], x, y, 1, 2);                              // the torn face
+    R(c, IRN[3], 12, 13, 9, 4); R(c, IRN[5], 12, 13, 8, 1); R(c, IRN[1], 20, 14, 1, 3); R(c, Rr[2], 13, 12, 5, 1); R(c, Rr[4], 13, 12, 2, 1);   // the back half, on its side
+    R(c, IRN[2], 16, 14, 1, 3); R(c, PRR.brs[5], 5, 14); R(c, PRR.brs[4], 14, 15); R(c, IRN[6], 17, 11); R(c, IRN[6], 7, 8);   // core plugs and bolts
+    blob(c, 1.5, 15, 1.6, 1.6, IRN.slice(2), 2, 0.1);                                                                   // the pulley, knocked loose
+    prScorch(c, 0, 8, 22, 10, 22, 5);
+    return;
+  }
+  R(c, IRN[6], 10, 0, 2, 1); R(c, IRN[7], 10, 0); R(c, IRN[5], 9, 1, 1, 2); R(c, IRN[3], 12, 1, 1, 2); R(c, IRN[2], 10, 3, 2, 1);   // the ring it hangs by
+  R(c, PRR.yel[4], 10, 4, 2, 2); R(c, PRR.yel[6], 10, 4); R(c, '#15161a', 11, 5);                                      // the hook block
+  for (let i = 0; i < 5; i++) { R(c, i % 2 ? IRN[4] : IRN[7], 9 - i, 6 + (i >> 1)); R(c, i % 2 ? IRN[3] : IRN[6], 12 + i, 6 + (i >> 1)); }   // sling chains
+  R(c, IRN[6], 4, 8); R(c, IRN[5], 17, 8);                                                                             // lifting eyes
+  R(c, Rr[4], 5, 8, 12, 2); R(c, Rr[6], 5, 8, 11, 1); R(c, Rr[7], 5, 8, 4, 1); R(c, Rr[2], 5, 9, 12, 1); R(c, Rr[3], 16, 8);   // red rocker cover
+  for (const x of [6, 11, 15]) R(c, IRN[6], x, 9);
+  R(c, IRN[1], 4, 10, 14, 1);                                                                                          // gasket
+  R(c, IRN[4], 4, 11, 14, 2); R(c, IRN[6], 4, 11, 13, 1); for (const x of [6, 9, 12, 15]) R(c, IRN[1], x, 12, 2, 1);     // head and its ports
+  R(c, IRN[3], 3, 13, 16, 3); R(c, IRN[5], 4, 13, 14, 1); R(c, IRN[5], 3, 13, 1, 3); R(c, IRN[1], 18, 13, 1, 3);         // block
+  for (const x of [7, 11, 15]) { R(c, IRN[2], x, 14, 1, 2); R(c, IRN[4], x - 1, 14, 1, 2); }
+  R(c, PRR.brs[5], 5, 15); R(c, PRR.brs[5], 9, 15); R(c, PRR.brs[3], 13, 15);                                         // core plugs
+  R(c, IRN[2], 6, 16, 10, 1); R(c, IRN[4], 6, 16, 4, 1); R(c, IRN[1], 7, 17, 8, 1);                                    // sump
+  R(c, IRN[3], 19, 11, 2, 6); R(c, IRN[5], 19, 11, 1, 6); R(c, IRN[1], 21, 12, 1, 4);                                  // bell housing
+  blob(c, 2, 14, 2.2, 2.2, IRN.slice(2), 2, 0.1); R(c, IRN[0], 2, 14); R(c, IRN[7], 1, 13);                            // crank pulley
+  if (st === 'hit') { prLine(c, IRN[0], 12, 13, 15, 16); R(c, IRN[6], 13, 13); R(c, Rr[1], 8, 8, 2, 1); R(c, Rr[1], 13, 9); R(c, PRR.blk[1], 14, 16, 1, 2); R(c, PRR.blk[4], 14, 17); }
+}
+function drawServer(c, st) {                                      // 14x28 server rack: five units of blinking LEDs; 'ok0'-'ok2' blink
+  const f = st === 'ok1' ? 1 : st === 'ok2' ? 2 : 0, x = st === 'x', hit = st === 'hit', LED = ['#5cff7a', '#ffb040', '#46a0ff'];
+  R(c, IRN[1], 0, 0, 14, 28); R(c, IRN[5], 0, 0, 14, 1); R(c, IRN[4], 0, 1, 1, 24); R(c, IRN[0], 13, 1, 1, 24); R(c, IRN[3], 1, 1, 12, 1);   // the cabinet
+  for (let i = 2; i < 12; i += 2) R(c, IRN[0], i, 2, 1, 2);                                                            // vent slots
+  for (let k = 0; k < 5; k++) {
+    const y = 5 + k * 4, dead = (hit && k === 2) || (x && k !== 1);
+    R(c, IRN[3], 1, y, 12, 3); R(c, IRN[5], 1, y, 12, 1); R(c, IRN[2], 1, y + 2, 12, 1);
+    for (let d = 0; d < 3; d++) { R(c, IRN[1], 2 + d * 2, y + 1); R(c, IRN[4], 3 + d * 2, y + 1); }                      // drive bays
+    for (let i = 0; i < 3; i++) { const on = !dead && (k * 3 + i * 5 + f * 7) % 4 !== 0; R(c, on ? LED[(k + i + f) % 3] : '#16201a', 9 + i, y + 1); }
+    if (dead && x) { R(c, '#05060a', 2 + (k % 2) * 4, y + 1, 4, 2); R(c, IRN[6], 2 + (k % 2) * 4, y + 2, 2, 1); }
+  }
+  R(c, IRN[6], 12, 12, 1, 4);                                                                                          // door handle
+  R(c, IRN[2], 0, 25, 14, 2); R(c, IRN[4], 0, 25, 14, 1); R(c, IRN[0], 1, 27, 3, 1); R(c, IRN[0], 10, 27, 3, 1);         // plinth and feet
+  if (hit) { R(c, IRN[0], 7, 10, 3, 1); R(c, IRN[6], 7, 11, 3, 1); prLine(c, '#e8b422', 4, 18, 3, 22); prLine(c, '#c83020', 6, 18, 6, 21); R(c, '#ffe080', 3, 23); }
+  if (x) {
+    R(c, '#ff3020', 9, 10);
+    prLine(c, '#e8b422', 3, 15, 2, 21); prLine(c, '#c83020', 7, 15, 8, 20); prLine(c, '#3a80e0', 10, 19, 11, 24); prLine(c, IRN[4], 5, 23, 4, 26);   // cables hanging out
+    R(c, IRN[0], 0, 8, 1, 6); R(c, IRN[5], 13, 17, 1, 3);
+    prScorch(c, 0, 0, 14, 28, 36, 13);
+  }
+}
+function drawJukebox(c, st) {                                     // 20x26 jukebox: a neon arch over the record deck, wood pillars, chrome foot; 'disc' is one of its records
+  if (st === 'disc') {                                            // a record, centred in the frame
+    for (let y = 8; y < 18; y++) for (let xx = 5; xx < 15; xx++) {
+      const r = Math.hypot(xx + 0.5 - 10, y + 0.5 - 13); if (r > 4.6) continue;
+      R(c, r < 0.8 ? '#06070a' : r < 1.8 ? '#e0402a' : Math.abs(r - 3.3) < 0.45 || Math.abs(r - 2.4) < 0.35 ? '#34343e' : '#121216', xx, y);
+    }
+    R(c, '#9a9aaa', 7, 10); R(c, '#5a5a68', 8, 9); R(c, '#5a5a68', 6, 11); R(c, '#ff8a6a', 9, 12);
+    return;
+  }
+  const x = st === 'x', W = PRR.wht, C = PRR.cop, ARCH = x ? ['#3a1e2a', '#3a2418', '#38301a'] : ['#ff5ac0', '#ff8a3a', '#ffd23a'];
+  for (let y = 0; y < 11; y++) for (let xx = 0; xx < 20; xx++) {
+    const dx = xx + 0.5 - 10, dy = y + 0.5 - 10.5, r = Math.hypot(dx, dy);
+    if (r > 9.9 || dy > 0) continue;
+    if (r > 8.7) R(c, dx < -2 && dy < -3 ? W[6] : dx > 4 ? W[2] : W[4], xx, y);                                         // chrome rim
+    else if (r > 6.5) { const a = Math.atan2(-dy, dx) / Math.PI; R(c, r > 7.9 && !x ? '#fff0f8' : ARCH[Math.min(2, Math.floor(Math.abs(a - 0.5) * 5))], xx, y); }   // neon tube: pink at the crown to yellow at the sides
+    else R(c, (Math.floor(xx / 2) + Math.floor(y / 2)) % 2 ? '#2e1022' : '#1a0812', xx, y);                              // the grille behind
+  }
+  R(c, C[3], 1, 10, 18, 14);
+  for (const px of [1, 16]) { R(c, C[px > 8 ? 2 : 5], px, 10, 3, 14); R(c, C[px > 8 ? 1 : 6], px, 10, 1, 14); }         // wood pillars
+  for (let y = 11; y < 23; y++) { R(c, ARCH[(y >> 1) % 3], 2, y); R(c, ARCH[((y >> 1) + 1) % 3], 17, y); }              // tubes in the pillars
+  R(c, W[2], 4, 11, 12, 7); R(c, W[5], 4, 11, 12, 1); R(c, '#08090c', 5, 12, 10, 5);                                    // the record window
+  if (!x) {
+    prEll(c, 9.5, 14.6, 4, 1.6, '#16161c'); prEll(c, 9.5, 14.6, 2.6, 1, '#2a2a34'); R(c, '#d83a2a', 9, 14, 2, 1);
+    R(c, W[6], 13, 12, 1, 2); R(c, W[5], 12, 13); R(c, 'rgba(210,240,255,0.35)', 5, 12, 3, 1); R(c, 'rgba(210,240,255,0.2)', 5, 13, 1, 2);
+  } else { R(c, '#8a9aa6', 5, 12, 1, 2); R(c, '#c8d8e0', 14, 15); R(c, '#6a7a86', 11, 12); R(c, '#2a2a34', 6, 15, 4, 1); }
+  for (let i = 0; i < 6; i++) R(c, x ? '#3a3a3a' : i % 2 ? '#ffffff' : '#ffe0a0', 5 + i * 2, 18); R(c, C[1], 4, 19, 12, 1);   // selector keys
+  R(c, '#1a1008', 4, 20, 12, 3); for (let y = 20; y < 23; y++) for (let i = 0; i < 12; i += 2) R(c, C[2], 4 + i + (y % 2), y);   // speaker grille
+  R(c, W[3], 0, 23, 20, 2); R(c, W[6], 0, 23, 20, 1); R(c, W[1], 1, 25, 4, 1); R(c, W[1], 15, 25, 4, 1);                 // chrome foot
+  if (st === 'hit') { prCracks(c, 8, 6, 5, 4, 7, '#fff0f8', '#7a2a4a'); R(c, '#3a1e2a', 17, 15, 1, 3); }
+  if (x) { prCracks(c, 11, 5, 6, 5, 9, '#6a4a5a', '#1a0812'); prScorch(c, 0, 0, 20, 26, 60, 9); R(c, '#05060a', 6, 21, 4, 2); }
+}
+function drawHydrant(c, st) {                                     // 10x14 fire hydrant: bonnet, side caps and a brass pumper nozzle
+  const Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[2], 0, 13, 10, 1); R(c, IRN[4], 0, 13, 4, 1); R(c, IRN[6], 1, 13); R(c, IRN[6], 8, 13);                     // base bolted to the floor
+  R(c, Rr[3], 1, 12, 8, 1); R(c, Rr[5], 1, 12, 3, 1);                                                                  // flange
+  if (st === 'x') {
+    prCyl(c, 5, 9, 12, 3, Rr, 0.04);
+    R(c, '#05080c', 3, 9, 4, 1); R(c, '#1c4a6a', 4, 10, 2, 1); for (const [xx, h] of [[2, 1], [3, 2], [5, 1], [7, 2]]) R(c, Rr[xx < 5 ? 5 : 3], xx, 9 - h, 1, h);   // sheared off, a jagged lip
+    R(c, '#4ac8f8', 2, 11); R(c, '#8ce0ff', 7, 10);
+    return;
+  }
+  prCyl(c, 5, 4, 12, 3, Rr, 0.04);                                                                                     // barrel
+  blob(c, 5, 4.2, 3.4, 3.2, Rr, 2, 0.08, (xx, y) => y < 4);                                                            // bonnet
+  R(c, Rr[2], 1, 4, 8, 1); R(c, Rr[6], 1, 4, 2, 1);
+  R(c, B[5], 4, 0, 2, 1); R(c, B[6], 4, 0); R(c, B[2], 4, 1, 2, 1);                                                    // operating nut
+  R(c, Rr[4], 0, 6, 2, 2); R(c, Rr[6], 0, 6, 2, 1); R(c, B[5], 0, 6, 1, 2); R(c, Rr[3], 8, 6, 2, 2); R(c, B[3], 9, 6, 1, 2);   // side caps
+  blob(c, 5, 8.5, 1.9, 1.9, B, 2, 0.1); R(c, B[1], 5, 9); R(c, B[7], 4, 7);                                             // pumper nozzle
+  prLine(c, IRN[5], 1, 8, 2, 10);                                                                                      // cap chain
+}
+function drawGasline(c, st) {                                     // 20x14 gas main: a yellow line through a shut-off valve and its handwheel to a flanged nozzle (facing right)
+  const Y = PRR.yel, Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[3], 0, 3, 3, 9); R(c, IRN[5], 0, 3, 1, 9); R(c, IRN[1], 2, 4, 1, 8); R(c, IRN[6], 1, 4); R(c, IRN[6], 1, 10);   // wall plate
+  limb(c, 2, 7.5, 16, 7.5, 2.1, 2.1, Y, 0.02, true);                                                                   // the line
+  R(c, IRN[4], 4, 5, 1, 6); R(c, IRN[6], 4, 5); R(c, Rr[4], 14, 6, 1, 4); R(c, Rr[6], 14, 6);                         // a clamp and a red band
+  R(c, B[3], 8, 4, 5, 7); R(c, B[5], 8, 4, 5, 1); R(c, B[5], 8, 4, 1, 7); R(c, B[1], 12, 5, 1, 6); R(c, B[2], 8, 10, 5, 1); R(c, B[6], 9, 5);   // valve body
+  R(c, IRN[5], 10, 2, 1, 2);                                                                                           // stem
+  R(c, Rr[5], 7, 1, 7, 1); R(c, Rr[3], 7, 2, 7, 1); R(c, Rr[7], 7, 1, 2, 1); R(c, IRN[6], 10, 1);                      // handwheel, edge on
+  R(c, IRN[3], 16, 4, 3, 7); R(c, IRN[5], 16, 4, 3, 1); R(c, IRN[6], 16, 5, 1, 5); R(c, IRN[1], 18, 5, 1, 6);           // nozzle flange
+  R(c, '#05060a', 19, 6, 1, 3); R(c, IRN[7], 17, 5); R(c, IRN[7], 17, 9);
+  if (st === 'x') { prTear(c, 7, 14, 6, 2, 13, '#2a1a0c'); prScorch(c, 6, 3, 14, 10, 34, 11); R(c, '#05060a', 9, 6, 3, 1); R(c, '#ff8a20', 10, 6); R(c, '#14100c', 19, 5, 1, 5); }
+}
+function drawHopper(c, st) {                                      // 20x22 sand hopper: a riveted bin, its funnel and a gated chute
+  const O = PRR.olv, S = PRT.snd, Rr = PRR.red, x = st === 'x';
+  if (!x) { prEll(c, 10, 2.4, 7, 2, S[3]); prEll(c, 10, 2, 5, 1.3, S[5]); R(c, S[6], 7, 1, 3, 1); R(c, S[2], 13, 2); }  // sand heaped over the rim
+  R(c, IRN[5], 0, 2, 20, 1); R(c, IRN[6], 0, 2, 8, 1);                                                                // rim
+  R(c, O[3], 1, 3, 18, 10); R(c, O[5], 1, 3, 18, 1); R(c, O[4], 1, 4, 1, 9); R(c, O[1], 18, 4, 1, 9); R(c, O[2], 1, 12, 18, 1);   // the bin
+  for (const sx of [6, 13]) { R(c, O[4], sx, 4, 1, 5); R(c, O[1], sx + 1, 4, 1, 5); }                                // stiffeners
+  for (let i = 2; i < 18; i++) for (const y of [9, 10]) R(c, ((i + y) >> 1) % 2 ? '#15161a' : HAZ[3], i, y);         // hazard band
+  for (const rx of [2, 9, 16]) R(c, O[6], rx, 4);
+  for (let y = 13; y < (x ? 15 : 18); y++) {                                                                          // the funnel
+    const hw = 8.5 - (y - 13) * 1.5, x0 = Math.round(10 - hw), x1 = Math.round(10 + hw);
+    for (let xx = x0; xx < x1; xx++) R(c, O[clamp(Math.round(4 - (xx + 0.5 - 10) / hw * 2.2 - (y - 13) * 0.3), 0, 6)], xx, y);
+  }
+  if (x) {                                                                                                            // the bottom blown out, the chute hanging
+    R(c, '#05060a', 4, 14, 12, 1); for (const xx of [4, 7, 9, 12, 14]) R(c, O[2], xx, 15); R(c, O[3], 6, 15, 1, 2); R(c, O[3], 11, 15, 1, 2);
+    R(c, IRN[3], 13, 16, 2, 4); R(c, IRN[5], 13, 16, 1, 4); R(c, S[3], 8, 13, 3, 1);
+    prScorch(c, 0, 3, 20, 14, 26, 4);
+    return;
+  }
+  R(c, IRN[3], 8, 18, 4, 2); R(c, IRN[5], 8, 18, 1, 2); R(c, IRN[1], 11, 18, 1, 2);                                    // chute
+  R(c, Rr[4], 7, 20, 6, 1); R(c, Rr[6], 7, 20, 2, 1); R(c, IRN[2], 8, 21, 4, 1);                                       // the gate
+  R(c, IRN[6], 13, 17, 1, 3); R(c, Rr[5], 13, 16);                                                                     // its lever
+  if (st === 'hit') { R(c, O[0], 14, 6, 2, 1); R(c, O[6], 14, 7, 2, 1); R(c, '#05060a', 4, 7); R(c, S[4], 4, 8, 1, 1); R(c, O[0], 3, 11, 2, 1); R(c, O[6], 10, 15); }
+}
+function drawVat(c, st) {                                         // 18x26 chem vat: a glass tank of green acid on an iron stand
+  const G = PRR.grn, x = st === 'x';
+  R(c, IRN[2], 1, 21, 16, 3); R(c, IRN[5], 1, 21, 16, 1); R(c, IRN[4], 1, 22, 1, 2); R(c, IRN[0], 16, 22, 1, 2);       // stand
+  R(c, IRN[3], 1, 24, 2, 2); R(c, IRN[3], 15, 24, 2, 2); R(c, IRN[1], 3, 24, 12, 1);                                   // legs
+  R(c, HAZ[3], 7, 22, 4, 2); R(c, HAZ[4], 7, 22, 4, 1); R(c, '#15161a', 8, 22, 2, 1); R(c, '#15161a', 9, 23);           // hazard plate
+  R(c, IRN[4], 2, 20, 14, 1); R(c, IRN[6], 2, 20, 6, 1);                                                               // bottom ring
+  if (x) {                                                                                                            // shattered: jagged glass round a green residue
+    const h = [4, 6, 2, 5, 7, 3, 2, 6, 4, 3, 7, 2, 5, 3];
+    for (let i = 0; i < 14; i++) R(c, i % 3 ? 'rgba(170,230,215,0.6)' : '#d0ece4', 2 + i, 20 - h[i], 1, h[i]);
+    R(c, G[2], 3, 19, 12, 1); R(c, G[4], 4, 19, 5, 1); R(c, G[3], 6, 21, 3, 1); R(c, G[3], 12, 22);
+    return;
+  }
+  R(c, 'rgba(150,220,205,0.22)', 2, 5, 14, 2);                                                                         // empty glass above the acid
+  prCyl(c, 9, 7, 20, 6.5, G, 0.02);                                                                                    // the acid
+  R(c, G[6], 3, 7, 12, 1); R(c, G[5], 3, 8, 3, 1);                                                                     // its surface
+  for (const [bx, by] of [[5, 15], [7, 11], [11, 17], [12, 12], [9, 9], [6, 18], [10, 14]]) R(c, G[6], bx, by);
+  R(c, '#e0fff4', 2, 5, 1, 15); R(c, '#5a8a80', 15, 5, 1, 15); R(c, 'rgba(240,255,250,0.55)', 4, 6, 1, 13); R(c, 'rgba(240,255,250,0.3)', 5, 8, 1, 7);   // glass edges and glare
+  R(c, IRN[4], 2, 4, 14, 1); R(c, IRN[6], 2, 4, 6, 1);                                                                 // top ring
+  blob(c, 9, 4, 6, 2.8, IRN.slice(2), 2, 0.05, (xx, y) => y < 4); R(c, IRN[7], 7, 2, 2, 1);                             // lid
+  R(c, IRN[4], 12, 0, 2, 3); R(c, IRN[6], 12, 0, 1, 3);                                                                // vent pipe
+  if (st === 'hit') { prCracks(c, 6, 12, 5, 4, 17, '#e8ffe0', '#2a6a20'); R(c, G[5], 15, 18, 1, 2); R(c, G[4], 16, 20); }
+}
+function drawTransformer(c, st) {                                 // 16x22 pole transformer: a finned can, two porcelain bushings, a wall bracket
+  const T = PRT.trf, x = st === 'x';
+  R(c, IRN[2], 0, 6, 1, 12); for (const y of [7, 15]) { R(c, IRN[3], 0, y, 4, 2); R(c, IRN[5], 0, y, 4, 1); }          // bracket off the wall
+  for (let y = 8; y < 19; y += 2) { R(c, T[3], 13, y, 2, 1); R(c, T[5], 13, y + 1, 2, 1); }                             // cooling fins
+  prCyl(c, 8, 6, 19.5, 5, T, 0.03);                                                                                    // the can
+  prEll(c, 8, 6, 5, 1.6, T[6]); prEll(c, 8, 6.2, 3.6, 0.9, T[4]);                                                       // lid
+  R(c, T[1], 4, 19, 8, 1); R(c, IRN[5], 8, 20); R(c, IRN[3], 8, 21);                                                    // drain cock
+  R(c, HAZ[3], 7, 11, 2, 1); R(c, HAZ[3], 6, 12, 4, 2); R(c, HAZ[3], 7, 14, 2, 1); R(c, '#15161a', 8, 11); R(c, '#15161a', 7, 12); R(c, '#15161a', 8, 13); R(c, '#15161a', 7, 14);   // the bolt sign
+  if (!x) for (const bx of [5, 10]) { for (let y = 1; y < 6; y++) R(c, y % 2 ? '#a0603a' : '#d8985c', bx, y, 2, 1); R(c, '#f0c090', bx, 2); R(c, PRR.cop[6], bx, 0, 2, 1); }   // bushings
+  if (st === 'hit') { prScorch(c, 9, 12, 5, 6, 12, 5); R(c, '#05060a', 10, 15, 2, 2); R(c, '#80c8ff', 10, 15); R(c, T[0], 13, 12, 2, 1); R(c, T[6], 13, 13, 2, 1); }
+  if (x) {
+    prTear(c, 3, 14, 10, 3, 19, '#1a1410');
+    R(c, PRR.cop[4], 5, 12, 6, 1); R(c, PRR.cop[6], 6, 12, 2, 1); R(c, PRR.cop[3], 5, 13, 6, 1);                        // the windings, cooked
+    R(c, '#a0603a', 5, 8, 2, 2); R(c, '#d8985c', 11, 9, 1, 1);
+    prScorch(c, 0, 6, 16, 16, 56, 21);
+  }
+}
+function drawPaint(c, st) {                                       // 16x12 three tins of paint, stacked two and one, drips down their sides
+  const W = PRR.wht, P = PRT.pnt;
+  if (st === 'x') {                                                                                                   // burst flat, paint everywhere
+    const rnd = prRng(41);
+    R(c, W[2], 1, 9, 6, 3); R(c, W[4], 1, 9, 5, 1); R(c, P[0][2], 1, 10, 6, 1);
+    R(c, W[2], 9, 8, 6, 4); R(c, W[4], 9, 8, 6, 1); R(c, P[1][2], 9, 10, 6, 1); R(c, '#05060a', 11, 8, 2, 1);
+    limb(c, 6, 6.5, 10, 6.5, 2, 2, W.slice(1), 0.02, true); R(c, P[2][2], 7, 6, 2, 2);
+    for (let i = 0; i < 52; i++) { const k = i % 3; R(c, P[k][2 + (rnd() < 0.35 ? 1 : 0)], Math.floor(rnd() * 16), 3 + Math.floor(rnd() * 9)); }
+    R(c, W[6], 13, 3, 3, 1); R(c, W[6], 0, 5, 2, 1);
+    return;
+  }
+  const can = (cx, y0, p) => {
+    prCyl(c, cx, y0 + 1, y0 + 6, 3.5, W.slice(1), 0.02);
+    prCyl(c, cx, y0 + 2.5, y0 + 5, 3.56, p.slice(0, 4));                                                               // its label
+    prEll(c, cx, y0 + 1, 3.5, 1, W[6]); prEll(c, cx, y0 + 1.1, 2.4, 0.6, p[2]);                                        // lid, paint round the rim
+    R(c, p[3], Math.round(cx - 2), y0 + 1, 1, 2); R(c, p[2], Math.round(cx + 1), y0 + 1, 1, 3);                        // drips
+  };
+  can(3.5, 5, P[0]); can(12.5, 5, P[1]); can(8, -1, P[2]);
+  R(c, IRN[5], 6, 0); R(c, IRN[5], 10, 0);                                                                             // the top tin's handle lugs
+}
+function drawSprinkler(c, st) {                                   // 10x8 sprinkler head under a red feed pipe: brass yoke, red glass bulb, deflector
+  const Rr = PRR.red, B = PRR.brs, x = st === 'x';
+  R(c, Rr[5], 0, 0, 10, 1); R(c, Rr[3], 0, 1, 10, 1); R(c, Rr[7], 1, 0, 3, 1);                                         // the feed pipe
+  R(c, B[4], 4, 2, 2, 2); R(c, B[6], 4, 2, 1, 2);                                                                      // fitting
+  R(c, B[5], 3, 4, 1, 2); R(c, B[3], 6, 4, 1, 2);                                                                      // yoke
+  if (!x) { R(c, '#ff3a2a', 4, 4, 2, 2); R(c, '#ffb0a0', 4, 4); R(c, B[6], 1, 6, 8, 1); for (let i = 1; i < 9; i += 2) R(c, B[3], i, 7); }   // bulb, deflector and its teeth
+  else { R(c, '#a02018', 5, 5); R(c, B[6], 1, 6, 4, 1); R(c, B[5], 5, 7, 4, 1); R(c, B[3], 1, 7); R(c, '#8ce0ff', 4, 6); }
+}
 const PROP_ART = {
   neon:     { w: 34, h: 15, fr: ['n4', 'n3', 'n2', 'n1', 'n0', 'dead', 'x'], draw: (c, f) => f === 'x' ? (R(c, '#2a2e35', 7, 0, 2, 2), R(c, '#2a2e35', 9, 1, 2, 1), R(c, '#2a2e35', 25, 0, 2, 3), R(c, '#5d6775', 25, 0, 1, 2), prLine(c, '#1a1c20', 26, 3, 27, 6), prLine(c, '#1a1c20', 27, 6, 25, 9), R(c, '#e8b422', 25, 10), R(c, '#ff8040', 24, 10)) : drawNeon(c, f === 'dead' ? 0 : +f[1], f === 'dead') },
   tube:     { w: 26, h: 6,  fr: ['ok', 'off', 'x'], draw: drawTube },
@@ -2454,6 +2664,17 @@ const PROP_ART = {
   window:   { w: 34, h: 22, fr: ['ok', 'c1', 'c2', 'x'], draw: drawWindow },
   horn:     { w: 16, h: 14, fr: ['ok', 'x'], draw: drawHorn },
   water:    { w: 22, h: 26, fr: ['ok', 'hit', 'x'], draw: drawWaterTank },
+  // ---- expansion: props ----
+  hoist:       { w: 22, h: 18, fr: ['ok', 'hit', 'x'], draw: drawHoist },
+  server:      { w: 14, h: 28, fr: ['ok0', 'ok1', 'ok2', 'hit', 'x'], draw: drawServer },
+  jukebox:     { w: 20, h: 26, fr: ['ok', 'hit', 'x', 'disc'], draw: drawJukebox },
+  hydrant:     { w: 10, h: 14, fr: ['ok', 'x'], draw: drawHydrant },
+  gasline:     { w: 20, h: 14, fr: ['ok', 'x'], draw: drawGasline },
+  hopper:      { w: 20, h: 22, fr: ['ok', 'hit', 'x'], draw: drawHopper },
+  vat:         { w: 18, h: 26, fr: ['ok', 'hit', 'x'], draw: drawVat },
+  transformer: { w: 16, h: 22, fr: ['ok', 'hit', 'x'], draw: drawTransformer },
+  paint:       { w: 16, h: 12, fr: ['ok', 'x'], draw: drawPaint },
+  sprinkler:   { w: 10, h: 8,  fr: ['ok', 'x'], draw: drawSprinkler },
 };
 function genPropTextures(scene) {
   for (const k in PROP_ART) {
@@ -3073,6 +3294,7 @@ function buildLabArena(variant) {
   const workshop = variant === 'breakables', traversal = variant === 'traversal';
   if (workshop) {
     fill(22, 23, 3, 2, 'x'); fill(42, 20, 2, 5, '#'); fill(44, 20, 8, 1, 'g'); fill(52, 20, 2, 5, '#');
+    fill(58, 17, 36, 1, '#'); fill(54, 21, 4, 1, '='); fill(62, 7, 3, 1, '#');   // the upper deck, a step up to it, and a beam over it for the hoist
   }
   if (traversal) {
     fill(14, 21, 6, 1, '='); fill(21, 17, 6, 1, '='); fill(28, 13, 6, 1, '=');
@@ -3086,7 +3308,9 @@ function buildLabArena(variant) {
     points: { G: columns.filter(x => grid[24][x] === '.' && grid[23][x] === '.').map(x => [x, 24]) },
     decor: { lamps: [[156, 165], [394, 128], [702, 150], [972, 130], [1350, 148]], beacons: [[52, 356], [1544, 356]], vents: [] },
     props: workshop ? [['propane', 16, 24], ['oil', 27, 24], ['water', 34, 24], ['capacitor', 38, 24],
-      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24]] : [],
+      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24],
+      ['hydrant', 59, 16], ['hoist', 63, 11], ['server', 67, 16], ['transformer', 68, 12], ['jukebox', 72, 16], ['vat', 78, 16],
+      ['hopper', 82, 11], ['paint', 86, 16], ['sprinkler', 89, 10], ['gasline', 92, 15, -1]] : [],
     barrels: workshop ? [[12, 24], [31, 24], [82, 24]] : [], canisters: workshop ? [[18, 24], [86, 24]] : [],
     pipes: workshop ? [[32, 388, 1], [1568, 388, -1]] : [],
     paint(ctx) {
@@ -3103,7 +3327,7 @@ const LAB_ROOMS = {
     arena: LAB_RANGE, weapon: 'nail', stationary: true, invulnerable: true, groups: [{ kind: 'grunt', count: 3 }, { kind: 'drone', count: 1 }] },
   encounter: { name: 'Combat Pit', detail: 'Mix enemy types and elites in an open arena. Add groups to build a fight.',
     arena: LAB_RANGE, weapon: 'shotgun', groups: [{ kind: 'grunt', count: 3 }, { kind: 'enforcer', count: 1 }, { kind: 'heavy', count: 1 }, { kind: 'drone', count: 2 }] },
-  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle. Shoot out a girder or stack of crates.',
+  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle, then climb to the deck for the heavy kit. Shoot out a girder or stack of crates.',
     arena: buildLabArena('breakables'), weapon: 'rocket', invulnerable: true, groups: [] },
   traversal: { name: 'Traversal Course', detail: 'Climb staggered grates, wall-jump up the shaft and grapple across the gaps.',
     arena: buildLabArena('traversal'), weapon: 'nail', invulnerable: true, groups: [] },

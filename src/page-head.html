@@ -200,9 +200,10 @@
                           it rockets about for 1.2-1.8 s, ricocheting and ramming (25 dmg), then explodes
                           (radius 58, 70->20 dmg).
     Hanging lamps ....... shoot the lamp or its chain: it drops, crushes whatever is under it (80) and goes out.
-    Breakables .......... twenty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
-                          each. Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw blades,
-                          the hose, the wrecking ball and every melee, cone and burst weapon that hits drums wear
+    Breakables .......... thirty more kinds of scenery (PROPS / PROP_ART), restocked each wave; ARENA 01 has one of
+                          each of the first twenty, and the Lab's Breakables Bay one of all thirty (the last ten on
+                          its upper deck). Shots (their damage; beams and blades 12 a touch), blasts, kicks (20), saw
+                          blades, the hose, the wrecking ball and every melee, cone and burst weapon that hits drums wear
                           them down; fire vents, the slag tide, Torchers and Thundercloud strikes cook off what
                           burns, and the Bulldozer's plow and the Foreman's slam break them. The tractor, the scrap
                           vacuum, the Lugger and the Foreman's magnet only move loose things and leave props be.
@@ -229,11 +230,33 @@
       Window 12 ......... cracks, then shatters: glass rains 18 on whoever is below.
       PA horn 12 ........ a feedback shriek: stuns and shoves foes in 104 px and breaks any glass in earshot.
       Water tank 40 ..... leaks where shot; bursts in a wave (shoves, puts fires out) and floods the floor for 12 s.
-                          Water conducts: a fuse box, capacitor or terminal going off near it, a live rail under
-                          it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker link, Arc Pylon,
-                          Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle (10 + stun a
-                          tick to foes in it, 5 to you).
-      Fire cooks off the propane, oil, ammo and flares: a flame jet, fire puddle, burning foe or flare near them.
+                          Water conducts: a fuse box, capacitor, terminal, server rack or transformer going off near
+                          it, a live rail under it, an Arc Caster or Shock Rifle beam or orb reaching it, or a Sparker
+                          link, Arc Pylon, Thundercloud strike or Jammer EMP ring landing on it electrifies the puddle
+                          (10 + stun a tick to foes in it, 5 to you).
+      Chain hoist 40 .... an engine block on a chain. Broken, the chain lets go a link at a time for 0.6 s (creaks,
+                          its shadow darkening on the floor), then it drops; shoot the chain and it drops at once:
+                          120 to whatever it lands on (30 to you), 30 around.
+      Server rack 34 .... sparks when hit; broken, it topples the way it was hit (35 where its top lands) and lies
+                          arcing at the nearest foe in 76 px every 0.12-0.24 s (7 + stun) for 1.4 s.
+      Jukebox 30 ........ a hit skips a note; broken, one last chord, then 5 records fly out spinning (18 each, each
+                          foe once), ricochet twice and shatter.
+      Hydrant 30 ........ shears off: a geyser up to 112 px for 3 s throws foes up (3 each time) and you (ride it like
+                          a jump pad), puts out fire in 72 px and floods the floor.
+      Gas main 18 ....... the valve shears: a 78 px burning jet dips to the floor and back for 4 s (ignites, 5 a tick,
+                          sets the floor it licks alight), then the line goes up: radius 46, 42->12, burning.
+      Sand hopper 26 .... pours for 3 s: the sand heaps up to 72 px wide for 18 s, halves the pace of foes wading
+                          through it and smothers fire in it (and under the stream).
+      Chem vat 24 ....... a wave of acid runs 136 px both ways along the floor till a ledge or wall: 14, a shove and
+                          5 s corroded to each foe it rolls over, 8 to you; it leaves acid pools behind.
+      Transformer 36 .... hits arc off it; broken, it hums 0.5 s, then zaps every foe in 120 px (34 + stun, machines
+                          longer), electrifies water in 170 px and blacks out the lights in 200 px for 4 s.
+      Paint cans 14 ..... burst pink, cyan and yellow over the floor, walls and foes in 64 px (painted 7 s, 10%
+                          slower); the slicks slow foes 20% for 12 s. Cooked off, they leave the floor burning.
+      Sprinkler 6 ....... shot, or fire within 40 px anywhere under it: it rains on everything below for 3.5 s,
+                          putting fires and burning foes out, and leaves water on the floor.
+      Fire cooks off the propane, oil, ammo, flares, paint cans and gas main: a flame jet, fire puddle, burning foe or
+                          flare near them.
       In the campaign's BLACKOUT, SLAG RAIN and GRAVITY LOSS, your hits from fire puddles, live puddles, the propane
                           jet, boiler steam and the ladle's pour share one interval (hazardContactMs: 500 / 425 / 350 ms).
     Rampage ............. hitting S style rank: 6 s of 40% faster fire (sentry too), +25% damage, afterimages,
