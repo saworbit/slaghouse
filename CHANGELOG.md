@@ -373,6 +373,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   differently once more, and from here on a cosmetic change leaves them exactly as they were. With the fix, this
   round's effects leave all twelve pinned seeds identical line for line, and all twelve win.
 
+- **THE OVERSEER closes in over the Wrecking Yard's ball.** The flying bosses used to keep to one side of the ball's
+  whole swing, so in BOSS RUSH THE OVERSEER hung about 210 px from a player on the dais, out of reach of many guns.
+  Now they keep clear of the ball's arc itself: they hover over it, above the dais, and cross over the top of the
+  swing. The ball no longer breaks the Overseer's shield nodes; only you can. (#178)
 - Electric arcs from breakable props last as long as they should, and the shrink ray's beam shows. Both used one list
   with clocks running opposite ways: arcs shorter than 0.15 s never expired (a capacitor's idle sparks piled up to
   dozens until a hit-stop cleared them), longer ones (a capacitor going off, a puddle going live) vanished at once,
