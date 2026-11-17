@@ -353,6 +353,15 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- **Low gravity warns before it starts and before it ends.** Gravity used to halve the moment Gravity Loss began,
+  1.3 s before the LOW GRAVITY! callout, and snap back to full the moment the operation was cleared. Now it eases down
+  over a second once LOW GRAVITY! is called. At the clear, a GRAVITY RESTORED callout follows WAVE CLEARED and gravity
+  eases back. MOON BOOTS and a Lab room's modifier still apply at once, since you pick them. (#190)
+- **The Furnace vents restart from idle.** When the Demolition Team shut the vents off mid-burst, Gravity Loss turned
+  them back on partway through it, with no grate flare. Now they start from idle 6 s after they switch on, so every
+  burst follows a grate tell. (#185)
+- A DOUBLE KILL ... MASSACRE label no longer stays up over the next run's card after R, a Lab deploy or reset, or a
+  lift ride. Its tilt now draws from the cosmetic generator. (#180)
 - **The Furnace's Gunship no longer gets stuck above the catwalk.** The two pillars over the catwalk ran from the
   ceiling down to it, so they boxed in the space above its middle. The campaign Gunship warps in there and flies at
   a fixed height, so the pillars held it in that box for the whole fight. A player who climbed up through the grating

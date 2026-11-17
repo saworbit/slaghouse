@@ -606,6 +606,14 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.mutatorHazards())).fails;
   });
+  await check('low gravity is called before it starts and before it ends, and the vents restart with a tell', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.modifierCues())).fails;
+  });
+  await check('a run reset clears the multi-kill label', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.hudReset())).fails;
+  });
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;

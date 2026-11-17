@@ -8569,7 +8569,7 @@ class GameScene extends Phaser.Scene {
     this.restartArmUntil = 0;
     this.cryoActiveUntil = 0; this.sentry = null; this.sentryReadyAt = 0; this.rampageUntil = 0; this.rampageArmed = true; this.ghostT = 0; this.mod = null; this.rainT = 0;
     this.hook = null; this.hookReady = 0; this.wrecks = []; this.darkA = 0;
-    this.physics.world.gravity.y = TUNE.GRAVITY;
+    this.physics.world.gravity.y = this.gravTo = TUNE.GRAVITY; this.gravAt = 0;   // gravTo: where low gravity is easing to, from gravAt
     this.mineReady = 0; this.mineQueued = false; this.killTimes = []; this.killCamUntil = 0; this.chaosT = []; this.chaosCd = 0; this.lastRag = null;
     this.jd = {}; this._v = new Phaser.Math.Vector2();
     // overdrive round: dash, the four new guns, harpoons, slag tide, pause
@@ -9432,7 +9432,7 @@ class GameScene extends Phaser.Scene {
     if (this.jd.J) this.aimMode = 'keys';
 
     if (this.state !== 'dead') { if (this.ride) this.updateRide(dt, now); else { this.updatePlayer(dt, now); this.updateHook(dt); } } else if (this.hook) this.hook = null;   // in a lift car you're along for the ride
-    this.updateEnemies(dt, now);
+    this.updateEnemies(dt, now); this.updateGravity(dt);
     this.updateTractor(dt, now); this.updateTars(dt, now); this.updateMagnetField(dt);
     this.updateShockOrbs(dt); this.updateNeedles(dt); this.updateJets(dt, now); this.updateDrills(dt, now); this.updateClouds(dt, now);
     this.updateFlares(dt, now); this.updateLimpets(dt, now); this.updatePipes(dt, now); this.updateEmpRings(dt, now);
@@ -14914,7 +14914,7 @@ class GameScene extends Phaser.Scene {
     this.zoomPunch = Math.max(this.zoomPunch, 0.08); this.shake(300, 0.008);
   }
   modOn(m) { return this.mod === m || this.mutator === m; }             // a scripted hazard, or MOON BOOTS / LIGHTS OUT for the whole run
-  applyMod(m) {                                                         // wave modifiers: chaos with rules
+  applyMod(m, restoreLead = 0) {                                        // wave modifiers: chaos with rules (restoreLead: ms before GRAVITY RESTORED)
     if (this.campaign && this.mod === 'slag' && m !== 'slag') {
       for (const s of this.slagList) if (s.active && s.rain) {           // drops still falling cool to cinders and crumble
         this.cfx.emit(s.x, s.y, { n: 5, speed: [10, 50], life: [0.4, 0.8], size: [2, 1], cols: [0x6a5a50, 0x3a2a20, 0xff8a20], g: 300, cosmetic: true });
@@ -14926,8 +14926,24 @@ class GameScene extends Phaser.Scene {
     const rainLead = this.campaign ? 3 : 1.5;
     this.mod = m; this.rainT = rainLead; this.rainOn = true; this.rainTold = false;
     this.rainPhaseT = rainLead + rand(...TUNE.RAIN.shower);                   // the first shower starts with the modifier
-    this.physics.world.gravity.y = this.modOn('lowg') ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;   // a hazard starting or clearing keeps the mutator's
-    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); } });
+    const gTo = this.modOn('lowg') ? TUNE.GRAVITY * 0.5 : TUNE.GRAVITY;   // a hazard starting or clearing keeps the mutator's
+    if (this.mutator === 'lowg' || this.lab) this.physics.world.gravity.y = this.gravTo = gTo;   // MOON BOOTS or a Lab room's modifier was picked from a menu
+    else if (gTo !== this.gravTo) {
+      this.gravTo = gTo;
+      if (gTo < TUNE.GRAVITY) this.gravAt = Infinity;                  // low gravity waits for its callout below
+      else if (this.physics.world.gravity.y === gTo) this.gravAt = 0;   // it never took hold
+      else {                                                           // full gravity comes back once it's called
+        this.gravAt = Infinity;
+        const restore = () => { if (this.gravTo !== gTo || this.gravAt !== Infinity) return; this.gravAt = 0; if (this.state === 'play') BUS.emit('callout', 'GRAVITY RESTORED'); };
+        if (restoreLead) this.time.delayedCall(restoreLead, restore); else restore();
+      }
+    }
+    if (m) this.time.delayedCall(1300, () => { if (this.state === 'play' && this.mod === m) { BUS.emit('callout', m === 'slag' ? 'SLAG RAIN!' : m === 'dark' ? 'BLACKOUT!' : m === 'melt' ? 'MELTDOWN!' : 'LOW GRAVITY!'); Sfx.roar(); this.shake(400, 0.006); if (m === 'lowg') this.gravAt = 0; } });
+  }
+  updateGravity(dt) {                                                   // low gravity eases in over a second once called, and back in half that
+    const G = this.physics.world.gravity, half = TUNE.GRAVITY * 0.5;
+    if (G.y === this.gravTo || this.time.now < this.gravAt) return;
+    G.y = G.y > this.gravTo ? Math.max(this.gravTo, G.y - half * dt) : Math.min(this.gravTo, G.y + half * 2 * dt);
   }
   updateSlagRain(dt) {                                                  // molten drips from the ceiling in showers, marked where they'll land
     const R = TUNE.RAIN;
@@ -17294,6 +17310,10 @@ class GameScene extends Phaser.Scene {
     if (kind === this.campaignMachinery) return;
     this.campaignMachinery = kind;
     if (kind === 'rails') this.railCyc = { st: 'idle', t: 3.5, g: 0 };
+    if (kind === 'vents' && this.jetCycle) {                             // back on from idle, so every burst follows a grate tell
+      this.jetCycle = { st: 'idle', t: 6, f: 0 };
+      for (const jet of this.jets) jet.lit = false;
+    }
     if (kind === 'wreck' && this.wreck) {                                // release from the top of the swing, where its holdback cable kept it
       const W = this.wreck; W.t = W.period / 4; W.snapT = 0.5; Sfx.clank();
       const hx = W.px + Math.sin(W.amp) * W.len, hy = W.py + Math.cos(W.amp) * W.len;
@@ -23103,11 +23123,11 @@ class GameScene extends Phaser.Scene {
   waveCleared(x, y) {
     if (this.campaign) {
       this.campaignMachinery = null;
-      this.applyMod(null);
+      const recovery = CAMPAIGN[this.wave].recovery, patch = this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery;
+      this.applyMod(null, patch ? 2300 : 1100);                        // GRAVITY RESTORED waits for WAVE CLEARED (and SUIT PATCHED)
       this.dousePuddles();
       for (const w of this.wrecks) w.cosmetic = true;                  // a wreck still in the air cannot reignite the arena
-      const recovery = CAMPAIGN[this.wave].recovery;
-      if (this.mutator !== 'vamp' && this.state === 'play' && this.hp < recovery) {
+      if (patch) {
         const gain = Math.round(recovery - this.hp), pb = this.player.body;
         this.hp = recovery;
         BUS.emit('hp', this.hp, 0);
@@ -25344,6 +25364,7 @@ class HudScene extends Phaser.Scene {
     this.setPerkUi(false);
     this.t0 = d.carry ? -1e9 : this.time.now; this.hurtA = 0; this.healA = 0; this.flashA = 0; this.hmT = 0; this.splats = [];
     this.tweens.killTweensOf(this.lblCombo); this.lblCombo.setAlpha(0);
+    this.tweens.killTweensOf(this.mkLbl); this.mkLbl.setAlpha(0);
     this.dirs = []; this.wcT = 0; this.setPause(false);
   }
   onHp(hp, dmg) {
@@ -25361,7 +25382,7 @@ class HudScene extends Phaser.Scene {
   showMulti(name, n) {                                                  // DOUBLE KILL ... MASSACRE: punches in under the callout
     if (this.overOn) return;
     this.tweens.killTweensOf(this.mkLbl);
-    this.mkLbl.setStyle({ color: ['#ffe14a', '#ffe14a', '#ffe14a', '#ffb347', '#ff7a2a', '#ff4a2a'][n] || '#ff3040' }).setText(name).setAlpha(1).setScale(4.6).setAngle(rand(-5, 5));
+    this.mkLbl.setStyle({ color: ['#ffe14a', '#ffe14a', '#ffe14a', '#ffb347', '#ff7a2a', '#ff4a2a'][n] || '#ff3040' }).setText(name).setAlpha(1).setScale(4.6).setAngle(crand(-5, 5));
     this.tweens.add({ targets: this.mkLbl, scale: 3, angle: 0, duration: 180, ease: 'Back.easeOut' });
     this.tweens.add({ targets: this.mkLbl, alpha: 0, delay: 900, duration: 350 });
   }
