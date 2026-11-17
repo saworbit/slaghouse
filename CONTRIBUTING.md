@@ -34,7 +34,10 @@ fails if they're out of step.
 The campaign checks seed `Math.random`, so one extra call anywhere the campaign runs changes everything after it,
 and a pinned seed can tip from a win to a loss. An effect that changes nothing in play (a spark, a glint, a HUD
 wobble, lightning jitter) draws from the cosmetic generator in `src/util.js` instead: `crand(a, b)`, `cpick(arr)`,
-`fxRandom()`, and particles with `this.fx.emit(x, y, { ..., cosmetic: true })`. These also draw `Math.random` or
+`fxRandom()`, and particles with `this.fx.emit(x, y, { ..., cosmetic: true })`. Cosmetic particles also run in
+their own list (`this.cfx`, the emitter's `twin`). Sharing one list, a cosmetic particle's lifetime decided when the
+seeded ones swapped places in it, and so the order that blood and slag drops painted the level in and drew
+`Math.random` for it. Don't give a cosmetic emit `mode: 2` (paint); the twin doesn't paint. These also draw `Math.random` or
 change timing, so keep them out of shared paths unless the change is meant to play differently: `rand`, `randi`,
 `pick`, `this.shake()` (Phaser's camera shake draws every frame), `hitStop` and `slowmoUntil`. Content that the
 campaign never issues or spawns can use them freely in its own code.

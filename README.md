@@ -152,8 +152,9 @@ OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
 
 Clear each squad to start the next countdown. Preparation prompts point to safe terrain before new machinery
 starts. Each new weapon card shows what the weapon does and how to equip it. In Blackout, Slag Rain and Gravity Loss, floor fire, electrified water and sustained prop jets
-share a damage interval, so overlapping hazards cannot hit all at once. Ground fire clears when an
-operation ends. A Gunship wreck that lands after the clear cannot start a new fire.
+share a damage interval, so overlapping hazards cannot hit all at once. When an operation ends,
+the fire suppression sprays out the ground fire. A Gunship wreck that lands after the clear cannot start a new fire.
+New weapons arrive on the green supply beam.
 
 Clearing Lockdown restores health to at least 75 HP before the first perk choice. Clearing Slag Rain brings
 it up to at least 65 HP. The Vampire mutator skips clear recovery. Pick Hollow Points, Vampire or Double Jump
