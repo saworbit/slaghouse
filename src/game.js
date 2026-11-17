@@ -93,7 +93,7 @@ class GameScene extends Phaser.Scene {
     this.supplyG = this.add.graphics().setDepth(6.6); this.auraImg = this.add.image(0, 0, 'glow').setBlendMode(ADD).setDepth(18).setVisible(false);
     if (this.lab) this.supplyT = Infinity;
     // mastery round: the shrink ray's zaps, sonic waves
-    this.zaps = []; this.sonics = [];
+    this.shrinkFx = []; this.sonics = [];                                // the shrink ray's beams (the props' arcs live in this.zaps, from buildProps)
     // finale round: ice sheets, horn blasts, grav pulses, the multikill chain
     this.ices = []; this.horns = []; this.gravFx = []; this.onIce = false; this.chillT = 0; this.mkN = 0; this.mkLast = -1e9;
     this.iceG = this.add.graphics().setDepth(4.96);
@@ -5978,7 +5978,7 @@ class GameScene extends Phaser.Scene {
     const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, n = Math.max(2, Math.round(len / 7)), nx = -dy / len, ny = dx / len;
     let px = x0, py = y0;
     for (let i = 1; i <= n; i++) {
-      const t = i / n, off = i === n ? 0 : rand(-3, 3), qx = x0 + dx * t + nx * off, qy = y0 + dy * t + ny * off;
+      const t = i / n, off = i === n ? 0 : crand(-3, 3), qx = x0 + dx * t + nx * off, qy = y0 + dy * t + ny * off;
       g.lineStyle(3, c0, 0.35).lineBetween(px, py, qx, qy); g.lineStyle(1, c1, 0.95).lineBetween(px, py, qx, qy);
       px = qx; py = qy;
     }
@@ -8983,7 +8983,7 @@ class GameScene extends Phaser.Scene {
     this.stats.shots++;
     let ex = ox, ey = oy, hit = null;
     for (let d = 6; d < W.range; d += 3) { const x = sx + ca * d, y = sy + sa * d; if (this.solidAt(x, y)) break; ex = x; ey = y; const e = this.enemyAt(x, y, 1); if (e && !e.under) { hit = e; break; } }
-    this.zaps.push({ x0: ox, y0: oy, x1: ex, y1: ey, t: 0 });
+    this.shrinkFx.push({ x0: ox, y0: oy, x1: ex, y1: ey, t: 0 });
     Sfx.shrink(); this.recoil = 3; this.spawnLight(mx, my, 'glow', 0x60ffe0, 0.6, 1.2, 0.8, 0.1);
     if (!hit) return;
     const big = ['boss', 'jugg', 'gunship', 'wyrm', 'wyrmseg', 'blimp'].includes(hit.kind);
@@ -11911,7 +11911,7 @@ class GameScene extends Phaser.Scene {
     const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, n = Math.max(2, Math.round(len / 7)), nx = -dy / len, ny = dx / len;
     let px = x0, py = y0;
     for (let i = 1; i <= n; i++) {
-      const t = i / n, off = i === n ? 0 : rand(-3.5, 3.5), qx = x0 + dx * t + nx * off, qy = y0 + dy * t + ny * off;
+      const t = i / n, off = i === n ? 0 : crand(-3.5, 3.5), qx = x0 + dx * t + nx * off, qy = y0 + dy * t + ny * off;   // jitter is cosmetic: no Math.random
       g.lineStyle(3, 0x4ab8ff, 0.35).lineBetween(px, py, qx, qy);
       g.lineStyle(1, 0xe8f8ff, 0.95).lineBetween(px, py, qx, qy);
       px = qx; py = qy;
@@ -12010,8 +12010,8 @@ class GameScene extends Phaser.Scene {
     for (const R2 of this.empRings) { const a = 1 - R2.r / TUNE.JAMMER.reach; g.lineStyle(3, 0x30c070, 0.35 * a).strokeCircle(R2.x, R2.y, R2.r); g.lineStyle(1, 0xc8ffd8, 0.9 * a).strokeCircle(R2.x, R2.y, R2.r); }
     for (const L of this.limpets) if (Math.floor(now / (L.stuck ? 260 : 120)) % 2) g.fillStyle(0xff3020, 1).fillRect(Math.round(L.x) - 1, Math.round(L.y) - 2, 2, 1);   // blinking limpet lights
     for (const L of this.spiders) L.img.setPosition(L.x, L.y - 2).setFlipX(L.dir < 0).setTexture(L.st === 'walk' && Math.floor(now / 70) % 2 ? 'spider1' : 'spider0');
-    for (let i = this.zaps.length - 1; i >= 0; i--) {                    // shrink ray: a wobbling cyan-pink beam
-      const Z = this.zaps[i]; Z.t += this.game.loop.delta / 1000; const a = 1 - Z.t / 0.15; if (a <= 0) { this.zaps.splice(i, 1); continue; }
+    for (let i = this.shrinkFx.length - 1; i >= 0; i--) {                // shrink ray: a wobbling cyan-pink beam
+      const Z = this.shrinkFx[i]; Z.t += this.game.loop.delta / 1000; const a = 1 - Z.t / 0.15; if (a <= 0) { this.shrinkFx.splice(i, 1); continue; }
       const len = Math.hypot(Z.x1 - Z.x0, Z.y1 - Z.y0) || 1, nx = -(Z.y1 - Z.y0) / len, ny = (Z.x1 - Z.x0) / len; let px = Z.x0, py = Z.y0;
       for (let k = 1; k <= 12; k++) { const t = k / 12, w = Math.sin(t * 20 + Z.t * 60) * 3 * Math.sin(t * Math.PI), qx = Z.x0 + (Z.x1 - Z.x0) * t + nx * w, qy = Z.y0 + (Z.y1 - Z.y0) * t + ny * w; g.lineStyle(2, k % 2 ? 0x60ffe0 : 0xff60d0, a).lineBetween(px, py, qx, qy); px = qx; py = qy; }
     }
