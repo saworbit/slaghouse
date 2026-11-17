@@ -328,6 +328,142 @@ window.CP = (() => {
     return { fails: [...fails, ...T.errs] };
   };
 
+  // The route as world objects (#182, #189). Step frame by frame until done(), up to ms; true if it got there.
+  const until = (done, ms) => { for (let t = 0; t < ms; t += 17) { if (done()) return true; T.run(17); } return done(); };
+  const crewOf = g => g.enemies.getChildren().filter(e => e.alive && !e.summoned);
+
+  // The far lift waits for a clear area, then comes, opens and takes you down. Nothing reaches you in the car, and the
+  // next act opens on the car arriving with no control until its doors open. A start without the lift has control.
+  CP.liftRoute = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(0), L = g.liftOut;
+    g.wave = 1; g.enemiesLeft = 1;
+    const foe = g.spawnEnemy('grunt', 20, 24);
+    g.openCampaignRoute(CAMPAIGN[1].route);
+    T.tp(95, 24); T.run(3000);
+    expect(g.routeGoal() === null, 'routeGoal() named the lift with a foe alive');
+    expect(L.st === 'shut' && !g.ride, `the far lift ${L.st === 'shut' ? 'took you in' : "didn't stay shut"} with a foe alive (${L.st})`);
+    g.killEnemy(foe, 1, 0, 'nail');
+    expect(g.routeGoal() === g.campaignRoute[0], 'routeGoal() did not name the lift once the area was clear');
+    expect(until(() => g.ride, 4000), `the lift never came, opened and took you in once the area was clear (lift ${L.st})`);
+    expect(until(() => g.A.id === 2, 5000), `the ride never reached the Furnace (arena ${g.A.id})`);
+    const R = g.ride, x0 = g.player.x;
+    expect(R?.st === 'arrive' && g.liftIn.cover, `the Furnace did not open on the car arriving (ride ${R?.st})`);
+    g.keys.D.isDown = true;
+    T.run(400);
+    expect(Math.abs(g.player.x - x0) < 1, `you moved ${Math.round(g.player.x - x0)} px before the doors opened`);
+    expect(until(() => !g.ride, 3000) && g.liftIn.st === 'open', `the car never let you out (ride ${g.ride?.st}, doors ${g.liftIn.st})`);
+    T.run(400);
+    expect(g.player.x - x0 > 20, 'no control once the doors opened');
+    g.keys.D.isDown = false;
+    const g2 = T.setup(1);
+    expect(!g2.ride, `a carry without the lift started in a car (${g2.ride?.st})`);
+    return { fails: [...fails, ...T.errs] };
+  };
+
+  // Meltdown's route: each valve brings its crew, who count toward the act and end nothing when they fall. A knock off
+  // the wheel sets it back at half speed, and the heat-locked lift only comes once both valves have cooled the shaft.
+  CP.valveRoute = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(2), L = g.liftOut, route = CAMPAIGN[5].route, calls = [], said = [];
+    const hear = txt => said.push(txt);
+    BUS.on('callout', hear);
+    g.waveCleared = () => calls.push('waveCleared'); g.win = () => calls.push('win');
+    try {
+      g.wave = 5; g.enemiesLeft = 0; L.heat = 1;                        // the Wyrm is down after a long Meltdown
+      const kills0 = g.stats.kills;
+      let crews = 0;
+      g.openCampaignRoute(route);
+      for (const [i, st] of route.filter(s => s.valve).entries()) {
+        expect(g.enemiesLeft === st.guard.length, `valve ${i + 1}: enemiesLeft ${g.enemiesLeft} when its crew of ${st.guard.length} was sent`);
+        until(() => crewOf(g).length >= st.guard.length, 5000);
+        const crew = crewOf(g);
+        expect(crew.map(e => e.kind).sort().join() === st.guard.map(([k]) => k).sort().join(), `valve ${i + 1}: crew ${crew.map(e => e.kind).join(', ')}, want ${st.guard.map(([k]) => k).join(', ')}`);
+        expect(g.routeGoal() === g.campaignRoute[0], `valve ${i + 1}: routeGoal() didn't name the wheel with its crew alive`);
+        crews += crew.length; said.length = 0;
+        for (const e of crew) g.killEnemy(e, 1, 0, 'nail');
+        expect(!calls.length, `valve ${i + 1}: killing its crew called ${calls.join(', ')}`);
+        expect(said.includes('AREA CLEAR'), `valve ${i + 1}: no AREA CLEAR once its crew was down`);
+        T.run(1500);                                                    // the kill cam's slow motion runs out
+        T.tp(st.cell[0], st.cell[1]); T.run(300);
+        if (!i) {                                                       // knocked off the wheel, it creeps back
+          const on = g.routeHold; T.run(1000); const held = g.routeHold;
+          T.tp(st.cell[0] + 8, st.cell[1]); T.run(400);
+          const lost = held - g.routeHold;
+          expect(held - on > 0.9, `valve 1 gained ${(held - on).toFixed(2)} s in 1 s on the wheel`);
+          expect(Math.abs(lost - 0.2) < 0.04, `0.4 s off the wheel took ${lost.toFixed(2)} s off it, want 0.2`);
+          T.tp(st.cell[0], st.cell[1]);
+        }
+        expect(until(() => g.coolant === i + 1, 3000), `valve ${i + 1} never turned (coolant ${g.coolant})`);
+      }
+      expect(g.coolant === 2 && L.heat > 0.3, `test setup: coolant ${g.coolant}, lift heat ${L.heat.toFixed(2)}`);
+      T.tp(95, 24);
+      let heatAtCall = null;
+      for (let t = 0; t < 6000 && heatAtCall === null; t += 17) { T.run(17); if (L.st !== 'shut') heatAtCall = L.heat; }
+      expect(heatAtCall !== null && heatAtCall < 0.08, heatAtCall === null ? 'the lift never came after both valves' : `the lift came with the shaft at heat ${heatAtCall.toFixed(2)}`);
+      expect(g.stats.kills - kills0 === crews && crews === 6, `the crews gave ${g.stats.kills - kills0} kills from ${crews} foes, want 6`);
+      const squads = CAMPAIGN[5].squads.reduce((n, s) => n + s.foes.length, 0);
+      expect(campaignFoesFrom(5) - campaignFoesFrom(6) === squads + crews, `Meltdown counts ${campaignFoesFrom(5) - campaignFoesFrom(6)} foes, but sends ${squads} plus ${crews} on its route`);
+      expect(campaignFoesFrom(0) === CAMPAIGN_TOTAL, `CAMPAIGN_TOTAL ${CAMPAIGN_TOTAL} isn't campaignFoesFrom(0) (${campaignFoesFrom(0)})`);
+    } finally { BUS.off('callout', hear); delete g.waveCleared; delete g.win; }
+    return { fails: [...fails, ...T.errs] };
+  };
+
+  // Act 05's breaker: pulling it cuts the power and starts the Smelter in the same arena about 1.6 s later.
+  CP.breakerRoute = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(4), started = [], [cx, cy] = CAMPAIGN[8].route[0].cell;
+    g.time.removeAllEvents();                                           // the act's own opening wave
+    g.startWave = i => started.push({ i, t: g.time.now });
+    g.wave = 8; g.enemiesLeft = 0;
+    g.openCampaignRoute(CAMPAIGN[8].route);
+    T.tp(cx, cy);
+    expect(until(() => g.powerCut, 3000), 'standing at the breaker never cut the power');
+    const cut = g.time.now;
+    expect(!started.length, 'the Smelter started with the breaker');
+    until(() => started.length, 2500);
+    const s = started[0];
+    expect(s && s.i === 9 && Math.abs(s.t - cut - 1600) < 60, s ? `the next operation (${s.i}) started ${Math.round(s.t - cut)} ms after the power cut, want 9 at 1600` : 'the Smelter never started after the breaker');
+    expect(g.A.id === 5 && !g.descending, `the breaker left the Powerhouse (arena ${g.A.id})`);
+    return { fails: [...fails, ...T.errs] };
+  };
+
+  // OVERTIME rides on after an arena's last wave and its perk, but only once you walk into the car. BOSS RUSH's last
+  // arena has no way out.
+  CP.modeLifts = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'endless'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(0), hud = game.scene.getScene('Hud');
+    g.wave = TUNE.ENDLESS.cycle - 1; g.enemiesLeft = 0;
+    g.waveCleared();
+    expect(until(() => g.perkOffer, 3000), 'no perk offer after the arena\'s last wave');
+    T.run(800);                                                         // the cards deal in before a key picks one
+    hud.onPerkKey({ keyCode: 49 });
+    until(() => g.campaignRoute.length, 2000);
+    const st = g.campaignRoute[0] || {};
+    expect(g.campaignRoute.length === 1 && st.label === 'TAKE THE LIFT', `after the perk the route is ${JSON.stringify(g.campaignRoute.map(s => s.label))}`);
+    T.run(6000);
+    expect(g.A.id === 1 && !g.descending && g.liftOut.st === 'open', `with you away from it the lift ${g.descending ? 'left' : 'is ' + g.liftOut.st} (arena ${g.A.id})`);
+    T.tp(Math.floor(st.x / TS), Math.floor(st.y / TS) - 1);
+    expect(until(() => g.ride, 1000), 'walking into the open car did not board it');
+    // In the campaign the car only comes once the area is clear, which shields you too; here only the ride does.
+    expect(g.hurtPlayer(20, g.player.x, { iframes: false }) === false, 'hurtPlayer reached you in the lift car');
+    expect(until(() => g.A.id === 2, 5000), `walking into the car never took you to ARENA 02 (arena ${g.A.id})`);
+    RUNMODE = 'bossrush'; T.boot();
+    for (let i = 0; i < 5; i++) {
+      const b = T.setup(i), last = i === 4;
+      expect(!b.liftOut === last, `BOSS RUSH arena ${i + 1} ${last ? 'has a way out' : 'has no lift'}`);
+    }
+    return { fails: [...fails, ...T.errs] };
+  };
+
   CP.linkerRecovery = () => {
     const [fails, expect] = checker();
     RUNMODE = 'campaign'; OPTS.diff = 1;

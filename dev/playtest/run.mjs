@@ -614,6 +614,22 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.hudReset())).fails;
   });
+  await check('the campaign lift waits for a clear area, shields you in the car and opens the next act on its arrival (#189)', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.liftRoute())).fails;
+  });
+  await check("Meltdown's valve crews count toward the act, a knock sets the wheel back slowly, and the lift waits for the shaft to cool (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.valveRoute())).fails;
+  });
+  await check("Act 05's breaker cuts the power and starts the Smelter in the same arena (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.breakerRoute())).fails;
+  });
+  await check("OVERTIME's lift waits for you to walk in, and BOSS RUSH's last arena has no way out (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.modeLifts())).fails;
+  });
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;

@@ -7,6 +7,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- Scripted checks for the campaign route, so a broken lift or station fails by name in `run.mjs --quick` instead of
+  stalling a seeded campaign minutes in. The far lift stays shut while a foe is alive, then comes, opens and takes you
+  down, and nothing hurts you in the car. The next act opens on the car arriving, with no control until its doors open.
+  Meltdown's valve crews count toward the act and end nothing when they fall, a knock off a wheel sets it back at half
+  speed, and the lift only comes once both valves have cooled the shaft. Act 05's breaker cuts the power and starts the
+  Smelter in the same arena 1.6 s later. OVERTIME's lift waits for you to walk in, and BOSS RUSH's last arena has no
+  way out (#189).
 - Three play-test checks. Every OVERTIME boss now fights and falls in each of ARENAS 06-10 with the machinery running,
   and its hazards go harmless when it does (#179). Every solid deck in every campaign and OVERTIME arena stays in reach
   with each unreinforced breakable blown away, and a reinforced crate, girder and grating stand through a blast that
