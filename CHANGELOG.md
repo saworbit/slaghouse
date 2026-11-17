@@ -7,6 +7,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- A static check that every AAC clip in `sfx_bank_aac.js` and `music_bank_aac.js` carries the MP4 edit list that skips
+  AAC's encoder priming, so a one-shot starts on time where Ogg Opus won't decode. It also checks that the priming
+  (1024 samples, 21 ms) is shorter than each looping track's 100 ms pad, so a decoder that ignored the edit list still
+  wouldn't click at the seam. All 394 clips pass. A rebuild that drops the edit list now fails `node dev/check.mjs`
+  (#169, which still needs a real Safari).
 - **Gamepad remapping** on OPTIONS > KEYS. The PAD rows after the keys rebind jump, dash, kick, hook, fire, mine,
   sentry, the weapon wheel, weapon cycling and pause to any of the pad's face buttons, bumpers, triggers, BACK, START,
   the stick clicks or the D-pad's up and down. A button does one job, so the action that had it takes the old button,
