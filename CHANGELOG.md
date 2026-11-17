@@ -172,6 +172,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Boss rules read two record flags instead of lists of kinds (#177). `boss: true` now marks the Smelter and THE
+  FOREMAN as well as the five expansion bosses, and `miniBoss: true` marks the Juggernaut, the Gunship and the Slag
+  Wyrm. `SWARM_SKIP` and `NO_ELITE` are built from them, and the expansion intro now keys off `title`. The Smelter's
+  own exemptions became record fields (`headCrit`, `anchored`, `slagproof`, `burn`, `chill`, `chillOnly`). Where the
+  old lists disagreed, they now agree: THE FOREMAN and the Gunship take 60 at most from a press, THE FOREMAN gets the
+  short net hold, stasis freezes no Juggernaut or Gunship, Welders, Menders and Banners heal no boss or mini-boss,
+  Linkers tether no boss (nor the blimp or the wraith, which pass through walls), and the Grinder no longer panics
+  when it burns. A boss whose fall can end a run rolls for no supply capsule, so the five expansion bosses join the
+  Smelter there. The seeded campaigns replay line for line, and `compare.mjs` shows only those five bosses' capsule
+  rolls.
 - `node dev/playtest/run.mjs`, and CI's Headless play-test job, now play eight Normal campaigns and pass when seven
   win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
   the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed
