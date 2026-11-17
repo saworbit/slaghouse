@@ -11499,13 +11499,42 @@ class GameScene extends Phaser.Scene {
   }
   xbPhase(e) { const f = e.hp / e.def.hp; return f > 0.66 ? 1 : f > 0.33 ? 2 : 3; }
   xbFloor() { const pb = this.player.body, fy = this.floorBelow(pb.center.x, pb.bottom - 4, 240); return fy === null ? pb.bottom : fy; }   // the floor you're over
-  xbSafeX(x, from = x) {                                                // ARENA 04: a flier keeps to its own side of the wrecking ball's swing
+  xbSafeX(x, from = x) {                                                // ARENA 04: beside the wrecking ball's swing, on the side `from` is on
     const W = this.A.wrecker, r = W ? W.len * Math.sin(W.amp) + 36 : 0;
     return !W ? x : from < W.px ? Math.min(x, W.px - r) : Math.max(x, W.px + r);
   }
-  xbLift(e, x, y, alt) { const fy = this.floorBelow(x, y - 8); e.body.reset(this.xbSafeX(x, x - 1), clamp(fy === null ? y : Math.min(y, fy - alt), 56, LH - 96)); }   // warped in on the floor, a flier rises to hover
+  // ARENA 04: a flier of radius s keeps out of the ball's reach anywhere along its arc. It can hover over the arc, above
+  // the dais, and it crosses over the top of the swing rather than through it.
+  xbReach(e) { const b = e.body; return Math.hypot(b.halfWidth, b.halfHeight) + (e.nodes && e.phase === 1 ? TUNE.OVERSEER.orbit + 8 : 0); }   // the Overseer's nodes too
+  xbBallGap(x, y, s) {                                                  // > 0: (x, y) is that far inside the ball's reach
+    const W = this.A.wrecker; if (!W) return -1;
+    const a = clamp(Math.atan2(x - W.px, y - W.py), -W.amp, W.amp);
+    return TUNE.WRECK.r + s + 4 - Math.hypot(x - W.px - Math.sin(a) * W.len, y - W.py - Math.cos(a) * W.len);
+  }
+  xbClear(x, y, s, inside) {                                            // the nearest point out of the ball's reach, over the arc (inside) or under and beside it
+    const W = this.A.wrecker; if (!W || this.xbBallGap(x, y, s) <= 0) return [x, y];
+    if (inside === undefined) inside = Math.hypot(x - W.px, y - W.py) < W.len;
+    const a = clamp(Math.atan2(x - W.px, y - W.py), -W.amp, W.amp), r = (TUNE.WRECK.r + s + 14) * (inside ? -1 : 1);   // 10 px spare for its drift
+    const nx = W.px + Math.sin(a) * (W.len + r), ny = W.py + Math.cos(a) * (W.len + r);
+    return ny >= 56 && this.xbBallGap(nx, ny, s) <= 0 ? [nx, ny] : [this.xbSafeX(x), y];
+  }
+  xbRoute(x, y, tx, ty, s) {                                            // a line through the arc goes over the swing instead: up, across, then down
+    const W = this.A.wrecker; if (!W) return [tx, ty];
+    const inside = Math.hypot(x - W.px, y - W.py) < W.len;              // a target near the arc is pushed to the side the flier is on, so it can't flip
+    if (this.xbBallGap(x, y, s) > 0) return this.xbClear(x, y, s, inside);   // in its reach: out the shortest way first
+    [tx, ty] = this.xbClear(tx, ty, s, inside);
+    const crosses = (x1, y1) => { for (let i = 1; i <= 12; i++) if (this.xbBallGap(x + (x1 - x) * i / 12, y + (y1 - y) * i / 12, s) > 0) return true; return false; };
+    if (!crosses(tx, ty)) return [tx, ty];
+    const top = W.py + Math.cos(W.amp) * W.len - TUNE.WRECK.r - s - 8;   // the lane over the ends of the swing
+    if (top < 56) return [this.xbSafeX(tx, x), ty];                   // too big to pass over: stay on this side
+    if (y > top + 4) return !crosses(x, top) ? [x, top] : [x < W.px ? W.px - W.len * Math.sin(W.amp) - TUNE.WRECK.r - s - 8 : W.px + W.len * Math.sin(W.amp) + TUNE.WRECK.r + s + 8, y];   // out from under the arc, then up
+    return [tx, top];
+  }
+  xbLift(e, x, y, alt) { const fy = this.floorBelow(x, y - 8), [nx, ny] = this.xbClear(x, clamp(fy === null ? y : Math.min(y, fy - alt), 56, LH - 96), this.xbReach(e)); e.body.reset(nx, ny); }   // warped in on the floor, a flier rises to hover
   xbHover(e, dt, tx, ty, sp, k = 1.6) {                                 // a flier eases toward a point, kept inside the room and out of the ball's way
-    const b = e.body; tx = this.xbSafeX(clamp(tx, 72, LW - 72), b.center.x); ty = clamp(ty, 56, LH - 96);
+    const b = e.body, s = this.xbReach(e);
+    if (this.xbBallGap(b.center.x, b.center.y, s) > 0) sp = Math.max(sp, 90);   // caught in the ball's reach: hurry out
+    [tx, ty] = this.xbRoute(b.center.x, b.center.y, clamp(tx, 72, LW - 72), clamp(ty, 56, LH - 96), s);
     b.velocity.x += (clamp((tx - b.center.x) * 1.4, -sp, sp) - b.velocity.x) * Math.min(1, dt * k);
     b.velocity.y += (clamp((ty - b.center.y) * 1.6, -sp, sp) - b.velocity.y) * Math.min(1, dt * k);
   }
@@ -12225,7 +12254,7 @@ class GameScene extends Phaser.Scene {
   conductorSpot(e) {                                                     // somewhere to blink to: in the air off to one side of you, clear of walls
     const pb = this.player.body, fy = this.xbFloor(), side = Math.sign(e.body.center.x - pb.center.x) || 1;
     for (let k = 0; k < 8; k++) {
-      const x = this.xbSafeX(clamp(pb.center.x + (k < 4 ? -side : side) * rand(110, 220), 72, LW - 72)), y = clamp(fy - TUNE.CONDUCTOR.alt + rand(-16, 16), 56, LH - 96);
+      const [x, y] = this.xbClear(clamp(pb.center.x + (k < 4 ? -side : side) * rand(110, 220), 72, LW - 72), clamp(fy - TUNE.CONDUCTOR.alt + rand(-16, 16), 56, LH - 96), this.xbReach(e));
       if (Math.abs(x - e.body.center.x) > 60 && !this.solidAt(x, y) && !this.solidAt(x, y - 18) && !this.solidAt(x, y + 18)) return { x, y };
     }
     return null;
@@ -19639,7 +19668,7 @@ class GameScene extends Phaser.Scene {
     if (sp < 60) return;
     const ux = vx / sp, uy = vy / sp;
     for (const e of this.enemies.getChildren()) {
-      if (!e.alive || e.under || e.kind === 'wyrmseg') continue;
+      if (!e.alive || e.under || e.kind === 'wyrmseg' || e.kind === 'eyenode') continue;   // the Overseer's nodes are yours to break
       const b = e.body, qx = clamp(bx, b.left, b.right), qy = clamp(by, b.top, b.bottom);
       if (Math.hypot(qx - bx, qy - by) > R0 || (W.hit.get(e) || 0) > now) continue;
       W.hit.set(e, now + 700);
@@ -23517,7 +23546,11 @@ class GameScene extends Phaser.Scene {
   spawnGib(tex, x, y, vx, vy, kind) {                     // kind: undefined = meat, 'shell', 'metal', 'slag' (glowing, cools)
     const shell = kind === 'shell', metal = kind === 'metal' || kind === 'slag';
     let g = this.gibs.getFirstDead(false);
-    if (!g) { g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length; }   // recycle oldest
+    if (!g) {                                              // recycle the oldest: where it lay, it crumbles instead of blinking out
+      g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length;
+      if (this.cameras.main.worldView.contains(g.x, g.y)) this.cfx.emit(g.x, g.y, { n: 6, speed: [15, 50], life: [0.3, 0.6], size: [2, 1], g: 180, cosmetic: true,
+        cols: g.shell ? [0xd8b050, 0x8a6a2a] : g.metal ? (g.hot > 0 ? [0xff8a20, 0x6a5a50] : [0x9aa0a8, 0x5a5e66, 0x3a3c40]) : [0x9a1a1a, 0x5a0a0a, 0x4a3a30] });
+    }
     g.setTexture(tex); g.clearTint();
     g.enableBody(true, x, y, true, true);
     g.body.setSize(Math.max(2, g.frame.width - 3), Math.max(2, g.frame.height - 3), true);

@@ -7,6 +7,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- Three play-test checks. Every OVERTIME boss now fights and falls in each of ARENAS 06-10 with the machinery running,
+  and its hazards go harmless when it does (#179). Every solid deck in every campaign and OVERTIME arena stays in reach
+  with each unreinforced breakable blown away, and a reinforced crate, girder and grating stand through a blast that
+  breaks the loose one beside them (#188). A stretch of seeded play draws the same random numbers however fast the
+  audio clock runs. Seeded checks start with the new `T.seed(n)`, which also mutes sound, because sound throttles on
+  wall time and draws `Math.random`, so a busy machine could change a seeded check's result (#176).
+
 - **Play in the browser** at <https://saworbit.github.io/slaghouse/>. A new `Pages` workflow publishes each `vX.Y.Z`
   tag to GitHub Pages, with the audio banks, and the bare URL opens the game. It can also publish any other ref by
   hand.
@@ -150,6 +157,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
+  of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
+  (#191)
 - **Open source under the MIT License.** The MIT License replaces the proprietary license, and contributions are
   open to all. The sampled SFX banks come from AudioGen and keep their non-commercial note. The README now describes
   the architecture and the build, art, audio, test and release pipelines, with diagrams, in Simplified Technical
@@ -385,6 +395,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   differently once more, and from here on a cosmetic change leaves them exactly as they were. With the fix, this
   round's effects leave all twelve pinned seeds identical line for line, and all twelve win.
 
+- **THE OVERSEER closes in over the Wrecking Yard's ball.** The flying bosses used to keep to one side of the ball's
+  whole swing, so in BOSS RUSH THE OVERSEER hung about 210 px from a player on the dais, out of reach of many guns.
+  Now they keep clear of the ball's arc itself: they hover over it, above the dais, and cross over the top of the
+  swing. The ball no longer breaks the Overseer's shield nodes; only you can. (#178)
 - Electric arcs from breakable props last as long as they should, and the shrink ray's beam shows. Both used one list
   with clocks running opposite ways: arcs shorter than 0.15 s never expired (a capacitor's idle sparks piled up to
   dozens until a hit-stop cleared them), longer ones (a capacitor going off, a puddle going live) vanished at once,
