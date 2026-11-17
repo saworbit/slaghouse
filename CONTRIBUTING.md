@@ -61,8 +61,8 @@ request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save
 isolation, sweeps the weapon and enemy catalogs and arena hazards, and runs the save, DAILY and campaign regression
-checks. The final checks clear all ten operations on Normal seeds 91, 404, 137 and 5. A separate CI job clears them
-on Brutal seeds 91, 137, 7, 11, 10, 4, 6 and 14, and passes when at least seven of them win.
+checks. The final checks clear all ten operations on Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and pass when at least
+seven of them win. A separate CI job clears them on Brutal seeds 91, 137, 7, 11, 10, 4, 6 and 14, and passes when at least seven of them win.
 To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
 `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
@@ -85,6 +85,12 @@ A full campaign check requires every operation, the full kill count, and zero su
 inputs and ordinary in-game healing. A failed run prints the surviving mobs and the bot's position and goal.
 
 ### Campaign smoke check
+
+To check a late act at real speed without playing the acts before it, load `slaghouse.html?act=N` for N from 2 to 5.
+It saves a test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation,
+full health and your difficulty and mutator, then opens the campaign page on **Continue**. If a checkpoint is already
+saved, it asks before replacing it. A test start, and every act its lift rides on to, counts toward no lifetime stats,
+codex sightings, medals, best run or the cleared flag; the act card and the campaign page say **TEST START**.
 
 1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
    grunt patrol falls. Check that the Shotgun arrives on a green supply beam, then equip it using the **2** shown

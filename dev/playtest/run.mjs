@@ -13,7 +13,7 @@
 //   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors
 // Any page error or console error fails the run too. Exits 1 and names each failure.
 //   npm ci --prefix dev/playtest        (once: installs playwright-core, no browser download)
-//   node dev/playtest/run.mjs           (all checks)
+//   node dev/playtest/run.mjs           (all checks, then eight Normal campaigns; seven must win)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7   (CI's Brutal job)
@@ -30,10 +30,11 @@ import { chromium } from 'playwright-core';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
 const USAGE = `Usage: node dev/playtest/run.mjs [options]
-  (no options)       every check, then the Normal campaigns
+  (no options)       every check, then eight Normal campaigns, at least seven to win
   --quick            every check except the full campaigns
   --campaign         full campaigns only
-  --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers)
+  --seeds=91,404     seeds for the full campaigns (comma-separated unsigned 32-bit integers); without it, the
+                     eight Normal pins with --min-wins=7
   --brutal           play the full campaigns on Brutal
   --min-wins=7       pass if at least this many campaigns win; a lost or stalled one is reported as LOST, not FAIL
                      (an error in the page or the harness still fails the run)
@@ -52,12 +53,13 @@ const sweepOnly = args.includes('--lab-sweep');
 const campaignOnly = args.includes('--campaign');
 const brutal = args.includes('--brutal');
 const seedArg = args.findLast(arg => arg.startsWith('--seeds='));
-const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
+// The Normal pins: four from before #165, then the four thinnest wins in a 20-seed Normal sweep (#165).
+const campaignSeeds = (seedArg?.slice('--seeds='.length) ?? '91,404,137,5,15,1,13,17').split(',').map(seed => /^[0-9]+$/.test(seed) ? Number(seed) : NaN);
 if (campaignSeeds.some(seed => !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff)) {
   usageError(`--seeds expects comma-separated unsigned 32-bit integers, got ${seedArg}`);
 }
 const minWinsArg = args.findLast(arg => arg.startsWith('--min-wins='));
-const minWins = minWinsArg ? Number(minWinsArg.slice('--min-wins='.length)) : null;
+const minWins = minWinsArg ? Number(minWinsArg.slice('--min-wins='.length)) : seedArg ? null : 7;   // the pins: seven of eight, as for Brutal (#159, #165)
 if (minWinsArg && (!/^[0-9]+$/.test(minWinsArg.slice('--min-wins='.length)) || minWins < 1 || minWins > campaignSeeds.length)) {
   usageError(`--min-wins expects a whole number from 1 to the number of seeds (${campaignSeeds.length}), got ${minWinsArg}`);
 }
@@ -614,6 +616,22 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.hudReset())).fails;
   });
+  await check('the campaign lift waits for a clear area, shields you in the car and opens the next act on its arrival (#189)', async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.liftRoute())).fails;
+  });
+  await check("Meltdown's valve crews count toward the act, a knock sets the wheel back slowly, and the lift waits for the shaft to cool (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.valveRoute())).fails;
+  });
+  await check("Act 05's breaker cuts the power and starts the Smelter in the same arena (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.breakerRoute())).fails;
+  });
+  await check("OVERTIME's lift waits for you to walk in, and BOSS RUSH's last arena has no way out (#189)", async ctx => {
+    const page = await open(ctx, ['checkpoint']);
+    return (await page.evaluate(() => CP.modeLifts())).fails;
+  });
   await check('Gravity Loss Linkers descend from all three ceiling pockets', async ctx => {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.linkerRecovery())).fails;
@@ -897,6 +915,19 @@ try {
     });
   });
   let saved = null;
+  await check('?act=N saves a test start, asks before replacing a checkpoint, and counts toward nothing lifetime (#173)', async ctx => {
+    let page = await open(ctx, ['checkpoint'], '?act=2');
+    const fails = (await page.evaluate(() => CP.actStart(2))).fails;
+    const asked = [];
+    page.on('dialog', d => { asked.push(d.message()); return asked.length === 1 ? d.dismiss() : d.accept(); });
+    page = await open(ctx, ['checkpoint'], '?act=4');                   // turned down: the act 2 checkpoint stays
+    const kept = await page.evaluate(() => campaignCheckpoint()?.arena);
+    if (asked.length !== 1 || kept !== 1) fails.push(`with a checkpoint saved, ?act=4 asked ${asked.length} time(s) and left act ${kept + 1}, want one question and act 2 kept`);
+    page = await open(ctx, ['checkpoint'], '?act=4');                   // confirmed: replaced, and played
+    fails.push(...(await page.evaluate(() => CP.actStart(4, true))).fails);
+    if (asked.length !== 2) fails.push(`the confirmed ?act=4 asked ${asked.length - 1} time(s), want once`);
+    return fails;
+  });
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {
     let page = await open(ctx, ['checkpoint']);
     const s = await page.evaluate(() => CP.save());
