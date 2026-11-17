@@ -3531,6 +3531,22 @@ function campaignCheckpoint(save = loadCampaign()) {
   // A checkpoint only saves after an act is clear. Keep its kills and use the current rosters for the acts ahead.
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
+// A test start (#173): slaghouse.html?act=N saves the checkpoint act N's lift would write for a run that killed every
+// foe before it, with the weapons earned by then (the latest in hand), a perk for each cleared operation (the first
+// from Lockdown's opening offer), full health and the chosen difficulty and mutator. `test` rides on through every
+// lift and keeps the run out of lifetime stats, codex sightings, medals, the best run and the cleared flag.
+function testCheckpoint(act, rng = Math.random) {
+  const arena = act - 1, wave = CAMPAIGN_ACTS[arena].first, slots = campaignWeaponSlots(wave), perks = {};
+  const pick = ids => { perks[ids[Math.floor(rng() * ids.length)]] = true; };
+  pick(OPENING_PERKS);
+  for (let i = 1; i < wave; i++) pick(PERKS.map(p => p.id).filter(id => !perks[id]));
+  return {
+    hp: TUNE.PLAYER_HP, weapon: slots[slots.length - 1], wave, arena, totalEnemies: CAMPAIGN_TOTAL,
+    stats: { shots: 0, hits: 0, kills: CAMPAIGN_TOTAL - campaignFoesFrom(wave), taken: 0, executes: 0, dodges: 0, wk: {} },
+    style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, perks, medals: [], ms: {}, lastMod: null, lift: true,
+    revision: CAMPAIGN_REVISION, runId: newRunId(), elapsed: 0, diff: OPTS.diff, mut: OPTS.mut, retried: false, test: true,
+  };
+}
 // BOSS RUSH: ten bosses back to back across the first five arenas, two to each, a perk between each
 // Run modes (#128): one record per mode holding every rule that differs between modes, from its waves and music to its
 // start, restart and results. GameScene.create sets this.mode from RUNMODE (or the Lab) and asks it. this.campaign and
@@ -3627,10 +3643,10 @@ const RUN_MODES = {
       if (g.runMut) g.award('mutant');
     },
     writeRecord: (g, r) => {
-      const out = bestRecord(g, r);
+      const out = g.testRun ? { best: 0, newBest: false, won: r.won, rush: false, checkpoint: !r.won } : bestRecord(g, r);   // a test start (#173) files no best run
       if (r.won) {                                                    // the campaign is cleared
         const save = loadCampaign(), checkpoint = campaignCheckpoint(save);
-        writeCampaign({ ...save, checkpoint: checkpoint?.runId === g.campaignRunId ? null : checkpoint, cleared: true, revision: CAMPAIGN_REVISION });   // keeps the owner, so a stale tab's win leaves the newer run's save
+        writeCampaign({ ...save, checkpoint: checkpoint?.runId === g.campaignRunId ? null : checkpoint, ...(g.testRun ? {} : { cleared: true, revision: CAMPAIGN_REVISION }) });   // keeps the owner, so a stale tab's win leaves the newer run's save
       }
       return out;
     },
@@ -3640,7 +3656,7 @@ const RUN_MODES = {
       g.stats.t0 = now;
       const act = CAMPAIGN_ACTS[g.A.id - 1];
       if (!act) throw new Error(`campaign run in ARENA 0${g.A.id}, which has no act (only OVERTIME and DAILY go there)`);
-      BUS.emit('wavecard', 'ACT 0' + g.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
+      BUS.emit('wavecard', 'ACT 0' + g.A.id, act.name + (c ? (c.test ? ' / TEST START' : ' / CHECKPOINT') : ''));
       Music.track(g.waveTrack(act.first), !c);
       g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(act.first); });
     },
@@ -3710,8 +3726,9 @@ function buildLevel2() {
   fill(44, 19, 12, 6);                                                                // the furnace (stand on it at row 18)
   fill(41, 22, 3, 3, 'x'); fill(56, 22, 3, 3, 'x');                                  // crate steps up to it
   fill(23, 14, 3, 11); fill(74, 14, 3, 11);                                           // towers
-  fill(42, 2, 1, 8); fill(57, 2, 1, 8);                                               // pillars the catwalk hangs from
+  fill(42, 2, 1, 4); fill(57, 2, 1, 4);                                               // ceiling brackets: they stop short so fliers and the player can pass above the catwalk
   fill(36, 10, 28, 1, 'g');
+  fill(42, 10, 1, 1); fill(57, 10, 1, 1);                                             // solid joints in the catwalk keep its girder spans supported
   fill(47, 10, 6, 1, '=');                                                            // jump through the center of the catwalk
   fill(46, 16, 5, 1, '='); fill(49, 13, 5, 1, '=');                                   // permanent steps from the furnace top
   fill(5, 21, 7, 1, '='); fill(14, 21, 6, 1, 'g'); fill(80, 21, 6, 1, 'g'); fill(88, 21, 7, 1, '=');
@@ -3746,7 +3763,8 @@ function buildLevel3() {                             // ARENA 03 :: THE SORTING 
   fill(44, 21, 12, 4);                                                                // control block (stand on it at row 20)
   fill(41, 23, 3, 2, 'x'); fill(56, 23, 3, 2, 'x');                                  // crate steps
   fill(8, 17, 22, 1); fill(70, 17, 22, 1);                                            // the upper belts (solid, presses hang under them)
-  fill(35, 2, 1, 12); fill(64, 2, 1, 12); fill(36, 13, 28, 1, 'g');
+  fill(35, 2, 1, 4); fill(64, 2, 1, 4);                                               // ceiling brackets: they stop short so fliers and the player can pass above the catwalk
+  fill(35, 13, 1, 1); fill(64, 13, 1, 1); fill(36, 13, 28, 1, 'g');                   // solid joints at the catwalk's ends keep its girder spans supported
   fill(41, 13, 6, 1, '='); fill(53, 13, 6, 1, '=');                                   // access either side of the central press
   fill(41, 17, 6, 1, '='); fill(53, 17, 6, 1, '=');
   fill(3, 21, 5, 1, '='); fill(92, 21, 5, 1, '='); fill(32, 19, 6, 1, '='); fill(62, 19, 6, 1, '=');   // gratings up

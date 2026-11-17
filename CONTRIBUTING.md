@@ -61,8 +61,8 @@ request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save
 isolation, sweeps the weapon and enemy catalogs and arena hazards, and runs the save, DAILY and campaign regression
-checks. The final checks clear all ten operations on Normal seeds 91, 404, 137 and 5. A separate CI job clears them
-on Brutal seeds 91, 137, 7, 11, 10, 4, 6 and 14, and passes when at least seven of them win.
+checks. The final checks clear all ten operations on Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and pass when at least
+seven of them win. A separate CI job clears them on Brutal seeds 91, 137, 7, 11, 10, 4, 6 and 14, and passes when at least seven of them win.
 To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
 `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
@@ -86,6 +86,12 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 
 ### Campaign smoke check
 
+To check a late act at real speed without playing the acts before it, load `slaghouse.html?act=N` for N from 2 to 5.
+It saves a test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation,
+full health and your difficulty and mutator, then opens the campaign page on **Continue**. If a checkpoint is already
+saved, it asks before replacing it. A test start, and every act its lift rides on to, counts toward no lifetime stats,
+codex sightings, medals, best run or the cleared flag; the act card and the campaign page say **TEST START**.
+
 1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
    grunt patrol falls. Check that the Shotgun arrives on a green supply beam, then equip it using the **2** shown
    on its card. Pick a perk with
@@ -101,7 +107,8 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    cinders and its puddles steam out) and that the vents stop. At each wave start, check that restocked drums, gas
    cans and medkits beam in and that a valve you burst is welded back on.
    After that squad, check that the Gunship countdown prompts you to find cover and gives you about six seconds
-   to move. Verify that its rocket and strafe warnings give you time to react, and that after **WAVE CLEARED** the
+   to move. Run to each end of the arena and check that the Gunship follows you and does not stay above the
+   catwalk. Verify that its rocket and strafe warnings give you time to react, and that after **WAVE CLEARED** the
    fire suppression sprays out the ground fire and it stops damaging you, including any the crash leaves. In Gravity Loss, check that the second Hound
    arrives with **Gravity Surge** and the Linkers arrive in the next squad. Climb onto the catwalk and confirm the
    last Linker stays in reach or descends below it. Hold toward a wall and repeat the jump input to climb without

@@ -7,6 +7,18 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Start the campaign at any act** for a real-speed playtest: `slaghouse.html?act=N`, for N from 2 to 5, saves a
+  test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation, full health
+  and your difficulty and mutator, and opens the campaign page on Continue. It asks before replacing a saved
+  checkpoint. A test start counts toward no lifetime stats, codex sightings, medals, best run or the cleared flag, and
+  its act card says TEST START. `run.mjs` checks one, the way it checks Continue (#173).
+- Scripted checks for the campaign route, so a broken lift or station fails by name in `run.mjs --quick` instead of
+  stalling a seeded campaign minutes in. The far lift stays shut while a foe is alive, then comes, opens and takes you
+  down, and nothing hurts you in the car. The next act opens on the car arriving, with no control until its doors open.
+  Meltdown's valve crews count toward the act and end nothing when they fall, a knock off a wheel sets it back at half
+  speed, and the lift only comes once both valves have cooled the shaft. Act 05's breaker cuts the power and starts the
+  Smelter in the same arena 1.6 s later. OVERTIME's lift waits for you to walk in, and BOSS RUSH's last arena has no
+  way out (#189).
 - Three play-test checks. Every OVERTIME boss now fights and falls in each of ARENAS 06-10 with the machinery running,
   and its hazards go harmless when it does (#179). Every solid deck in every campaign and OVERTIME arena stays in reach
   with each unreinforced breakable blown away, and a reinforced crate, girder and grating stand through a blast that
@@ -191,6 +203,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
     Brutal seeds 1 to 80 the campaign bot won 73 against `main`'s 74, and its losses are the same recurring kinds:
     foes the bot can't find in the Meltdown and Wrecking Yard, and early deaths. Normal seeds 1 to 20 all win, as on
     `main`. All eight of CI's Brutal seeds and all four Normal seeds win.
+- `node dev/playtest/run.mjs`, and CI's Headless play-test job, now play eight Normal campaigns and pass when seven
+  win, the rule the Brutal job has had since #159. Normal seed 137 had won with 4 HP at its lowest, so any change to
+  the random stream could tip a four-of-four job. The new pins 15, 1, 13 and 17 are the thinnest wins in a 20-seed
+  Normal sweep. Seeds 91, 404, 137 and 5 stay (#165).
 - When the gib pool is full, the oldest gib now crumbles into a puff of dust in its own colours where it lay, instead
   of vanishing in a single frame. The puff is cosmetic, so the seeded campaigns play out line for line the same.
   (#191)
@@ -240,6 +256,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   back to the latch instead of it vanishing, so the Foreman cuts it loose from where it hangs. Each route's wave
   card names the act's goal, for example LOCKDOWN LIFTED or LINE BREACHED, and the health top-up after a clear shows
   as SUIT PATCHED with a green flash.
+- The campaign bot no longer stalls at a spot where it can see a foe but has no shot. It scored spots by a sight
+  line from the path node and fired from its body, and when the first line was clear but the second only grazed a
+  ledge's corner, it waited there for good (a warhorn on the Sorting Line's side ledge held Brutal seed 137 for
+  20 minutes). Parked with no clear shot and nothing hurt for 2.2 s, it now marks the spot blind to that foe and
+  moves.
 - The campaign bot and `T.bot` fight a valve crew instead of waiting at a lift that won't come (`routeGoal()`). The
   bot also stops flipping between a foe it can reach and one stranded on a deck whose steps were blown away (a
   Meltdown stall that cost Brutal seeds on main too). A stranded foe now comes last, and the bot shoots it from any
@@ -406,6 +427,16 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   burst follows a grate tell. (#185)
 - A DOUBLE KILL ... MASSACRE label no longer stays up over the next run's card after R, a Lab deploy or reset, or a
   lift ride. Its tilt now draws from the cosmetic generator. (#180)
+- **The Furnace's Gunship no longer gets stuck above the catwalk.** The two pillars over the catwalk ran from the
+  ceiling down to it, so they boxed in the space above its middle. The campaign Gunship warps in there and flies at
+  a fixed height, so the pillars held it in that box for the whole fight. A player who climbed up through the grating
+  could only get out with S + Space. The pillars now stop as ceiling brackets above the Gunship's height. The
+  Gunship follows you across the arena, and you can walk out along the catwalk. Solid joints in the catwalk, where
+  the pillars met it, keep its girder spans supported.
+- **The Sorting Line no longer boxes in a Gunship either.** Its catwalk pillars also ran from the ceiling down to
+  the catwalk. In OVERTIME, DAILY and BOSS RUSH, a Gunship that warped in above the catwalk stayed there, and one
+  that warped in at either side couldn't cross to the other. These pillars now also stop as ceiling brackets, and
+  their bottom tiles stay as joints at the catwalk's ends. You can walk off either end of the catwalk.
 - Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
   scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
   That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,

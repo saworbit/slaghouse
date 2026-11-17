@@ -23,6 +23,8 @@ class GameScene extends Phaser.Scene {
     this.runMut = this.mode.mutator(this);
     this.mutator = MUTATORS[this.runMut].id;
     this.chapterStart = this.campaign ? this.carry : null;
+    this.testRun = !!this.chapterStart?.test;                           // ?act=N (#173): the run's own rules, but nothing lifetime counts
+    if (this.testRun) this.mode = Object.create(this.mode, { lifetime: { value: false } });
     this.campaignElapsed = this.chapterStart?.elapsed ?? 0;
     this.campaignRetried = !!(data?.retry || this.chapterStart?.retried);
     this.campaignRunId = this.chapterStart?.runId ?? (this.campaign ? data?.runId ?? newRunId() : null);
@@ -8261,6 +8263,7 @@ class GameScene extends Phaser.Scene {
         carry.runId = this.campaignRunId;
         carry.elapsed = Math.max(0, this.runTime() * 1000);
         carry.diff = this.runDiff; carry.mut = this.runMut; carry.retried = this.campaignRetried;
+        if (this.testRun) carry.test = true;
         if (this.mutator !== 'vamp') carry.hp = Math.max(carry.hp, CAMPAIGN_ACTS[arena].recovery);
         if (carry.hp > this.hp) carry.patched = Math.round(carry.hp - this.hp);   // the next act says so as you step out
         delete carry.stats.t0;
@@ -13252,7 +13255,7 @@ class GameScene extends Phaser.Scene {
   // ================================================================== slagforge round ====
   // ---------------------------------------------------------------- perks ----
   offerPerks(next) {
-    const opening = this.campaign && this.wave === 0 ? ['hollow', 'djump', 'vampire'] : null;
+    const opening = this.campaign && this.wave === 0 ? OPENING_PERKS : null;
     const pool = PERKS.filter(q => !this.perks[q.id] && (!opening || opening.includes(q.id)));
     if (!pool.length || this.state !== 'play') { next(); return; }
     const ids = [];

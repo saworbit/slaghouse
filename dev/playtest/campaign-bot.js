@@ -4,7 +4,7 @@ window.campaignBot = () => {
   const grounded = b => b.blocked.down || b.touching.down;
   const xOf = node => (node.x + 0.5) * TS;
   const feetOf = node => (node.y + 1) * TS;
-  let player, graph, walk, plan, action, timeout, failedEdges, focus, progress, lastHp, aim, motion, detour, anchor;
+  let player, graph, walk, plan, action, timeout, failedEdges, focus, progress, lastHp, aim, motion, detour, anchor, blind;
   const input = (g, key, held, press = false) => {
     g.keys[key].isDown = held;
     g.keys[key]._justDown = press;
@@ -216,7 +216,7 @@ window.campaignBot = () => {
   return g => {
     const b = g.player.body, now = g.time.now;
     if (player !== g.player || graph !== NAV) {
-      player = g.player; graph = NAV; walk = plan = action = focus = motion = detour = anchor = null; timeout = 0; failedEdges = new Map(); progress = now;
+      player = g.player; graph = NAV; walk = plan = action = focus = motion = detour = anchor = null; timeout = 0; failedEdges = new Map(); progress = now; blind = [];
     }
     if (g.perkOffer) {
       const choice = priority.find(id => g.perkOffer.includes(id)) || g.perkOffer[0];
@@ -246,6 +246,15 @@ window.campaignBot = () => {
     if (chasing && !(target && Math.hypot(target.x - px, target.y - py) < 0.6 * Math.hypot(focus.x - px, focus.y - py))) foe = focus;
     if (focus !== foe || foe?.hp < lastHp) { focus = foe; lastHp = foe?.hp; progress = now; anchor = null; }
     const stall = now - progress > 2200;
+    // Parked at its chosen spot with no clear shot and nothing hurt for a while: the spot's sight line only grazes a
+    // corner (positions are scored from the node, shots from the body), so mark it blind to this foe and pick another.
+    blind = blind.filter(s => s.until > now && s.foe.alive);
+    if (stall && foe && !target && !objective && ground && plan && Math.hypot(plan.x - px, plan.feet - b.bottom) < 20 &&
+        !blind.some(s => s.foe === foe && Math.hypot(s.x - px, s.feet - b.bottom) < 40)) {
+      blind.push({ foe, x: px, feet: b.bottom, until: now + 20000 });
+      plan = null; timeout = 0; progress = now;
+    }
+    const blindAt = (x, feet) => blind.some(s => s.foe === foe && Math.hypot(s.x - x, s.feet - feet) < 40);
     let gx = px, gy = b.bottom, direct = false;
     const out = ground && hazardAt(g, px, b.bottom) ? safeGround(g, b) : null;
     if (objective && Math.abs(py - (objective.y - 12)) < 8 && visible(objective.x, objective.y - 12)) {
@@ -265,7 +274,7 @@ window.campaignBot = () => {
       const goal = objective || heal;
       const targetX = foe?.body.center.x, targetY = foe?.body.center.y, stranded = foe && foe !== buried && foe !== g.boss && !reachable(g, start, foe);
       plan = choosePosition(g, start, (x, y) => {
-        const hazard = (y + 14 > tide ? 140 : 0) + (hazardAt(g, x, y + 14) ? 160 : 0);
+        const hazard = (y + 14 > tide ? 140 : 0) + (hazardAt(g, x, y + 14) ? 160 : 0) + (!goal && blindAt(x, y + 14) ? 400 : 0);
         if (goal) return Math.abs(x - goal.x) * 1.8 + Math.abs(y - (objective ? goal.y - 14 : goal.y)) * 3 + hazard;
         if (!foe) return Math.abs(x - px) + Math.abs(y - py) + hazard;
         if (foe === buried) return Math.abs(x - (foe.ux ?? px)) * 0.16 + (LH - y) * 2 + hazard;
