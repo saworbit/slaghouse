@@ -3561,6 +3561,396 @@ const DECOR5 = {
   vents: [[26 * TS, 25 * TS], [74 * TS, 25 * TS]],
   glows: [[50 * TS, 21 * TS, 3.5, 0x80c8ff]],
 };
+// ---- expansion: arenas ----
+// ARENAS 06-10, for OVERTIME's lift rotation, the DAILY and the Lab (never the campaign). Each is a grid builder (tiers
+// 4 tiles apart, as in 01-05), a paint function, its DECOR and, on its ARENAS record, the settings for its machinery
+// (GameScene.setupArenaMachinery).
+function xaGrid() {                                   // the shell every arena shares, and the fill helper
+  const g = [];
+  for (let y = 0; y < MAP_H; y++) g.push(new Array(MAP_W).fill('.'));
+  const fill = (x, y, w, h, c = '#') => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (g[j] && i >= 0 && i < MAP_W) g[j][i] = c; };
+  fill(0, 0, 100, 2); fill(0, 25, 100, 2); fill(0, 0, 2, 27); fill(98, 0, 2, 27);
+  return [g, fill];
+}
+const xaBehind = (ctx, fn) => { ctx.globalCompositeOperation = 'destination-over'; fn(); ctx.globalCompositeOperation = 'source-over'; };   // paints only where no tile is
+// ARENA 06 :: THE COOLING TOWER: a pump housing in the middle of a basin that floods with coolant, gratings close
+// together so dry footing is never far off, and two high-voltage cable reels in the roof.
+function buildLevel6() {
+  const [g, fill] = xaGrid();
+  fill(44, 17, 12, 8);                                                                // the pump housing (stand on it at row 16)
+  fill(20, 2, 2, 4); fill(78, 2, 2, 4);                                               // spray headers hung from the roof
+  fill(4, 21, 7, 1, '='); fill(15, 21, 6, 1, '='); fill(26, 21, 7, 1, 'g'); fill(37, 21, 6, 1, '='); fill(57, 21, 6, 1, '='); fill(67, 21, 7, 1, 'g'); fill(79, 21, 6, 1, '='); fill(89, 21, 7, 1, '=');
+  fill(9, 17, 7, 1, '='); fill(21, 17, 7, 1, '='); fill(33, 17, 6, 1, 'g'); fill(61, 17, 6, 1, 'g'); fill(72, 17, 7, 1, '='); fill(84, 17, 7, 1, '=');
+  fill(2, 13, 6, 1); fill(15, 13, 6, 1, '='); fill(27, 13, 7, 1, '='); fill(46, 13, 8, 1, '='); fill(66, 13, 7, 1, '='); fill(79, 13, 6, 1, '='); fill(92, 13, 6, 1);
+  fill(9, 9, 7, 1, '='); fill(25, 9, 7, 1, '='); fill(45, 9, 10, 1, '='); fill(68, 9, 7, 1, '='); fill(84, 9, 7, 1, '=');
+  fill(32, 23, 2, 2, 'x'); fill(66, 23, 2, 2, 'x');
+  return g;
+}
+const FLOOD6 = { top: 21 * TS + 6, floor: 25 * TS, cables: [24 * TS + 8, 75 * TS + 8], idle: [10, 14], first: 7, warn: 2.6, rise: 3, hold: 6, drain: 3.5,
+  live: 0.45, cable: 1.4, dmg: 6, edmg: 14, tick: 0.35 };
+function paintTower(ctx) {                           // ARENA 06: the curved concrete shell, the inlets, the pump and the flood line
+  xaBehind(ctx, () => {
+    for (let y = 2 * TS; y < 25 * TS; y += 2) {      // the hyperbolic shell leans in to a waist at mid-height
+      const k = (y - 12 * TS) / (13 * TS), w = Math.round(30 + 90 * k * k);
+      for (const dir of [1, -1]) {
+        const x0 = dir > 0 ? 2 * TS : 98 * TS - w, edge = dir > 0 ? x0 + w - 3 : x0;
+        R(ctx, '#18232a', x0, y, w, 2); R(ctx, '#2c3f46', edge, y, 3, 2); R(ctx, '#3e5860', dir > 0 ? edge + 2 : edge, y, 1, 2);
+        for (let x = 4; x < w - 4; x += 6) if (hash2(x0 + x * 7, 11) % 4 === 0) R(ctx, (hash2(x, y >> 4) & 1) ? '#141c22' : '#1d2a31', x0 + x, y, 1, 2);   // stains run down it
+        if ((y >> 1) % 24 === 0) R(ctx, '#121a20', x0, y, w, 1);                                                                // pour lines
+      }
+    }
+    for (let i = 0; i < 9; i++) { const r = 70 - i * 7; R(ctx, i % 2 ? '#1a2a30' : '#1e3038', 50 * TS - r, 2 * TS + i, r * 2, 1); }   // daylight through the open top
+  });
+  for (const dir of [1, -1]) {                       // the inlets the flood pours from
+    const cx = dir > 0 ? 2 * TS - 6 : 98 * TS + 6, cy = 18 * TS;
+    R(ctx, '#0b0f12', cx - 8, cy - 12, 16, 24); R(ctx, '#3a4a52', cx - 9, cy - 13, 18, 2); R(ctx, '#3a4a52', cx - 9, cy + 11, 18, 2);
+    R(ctx, '#56707a', cx - 9, cy - 13, 18, 1); for (let j = -10; j <= 8; j += 6) R(ctx, '#22303a', cx - 6, cy + j, 12, 2);
+    R(ctx, '#e8b422', dir > 0 ? cx + 7 : cx - 9, cy - 14, 2, 28);
+  }
+  const px = 44 * TS, py = 17 * TS;                  // the pump housing: casing, a teal sight glass, the gauge
+  R(ctx, '#121820', px + 6, py + 10, 12 * TS - 12, 6 * TS); R(ctx, '#243440', px + 8, py + 12, 12 * TS - 16, 6 * TS - 4);
+  for (let i = 0; i < 6; i++) R(ctx, '#1a6a78', px + 16 + i * 26, py + 20, 14, 52), R(ctx, '#3ab8c8', px + 18 + i * 26, py + 22, 3, 48), R(ctx, '#0e3a44', px + 16 + i * 26, py + 66, 14, 6);
+  for (let y = 21 * TS - 30; y < 25 * TS; y += 8) R(ctx, '#7f8b99', px + 2, y, y % 32 === 0 ? 5 : 3, 1);
+  R(ctx, '#ff3a2a', px, FLOOD6.top, 7, 2); drawGlyphs(ctx, 'MAX', px + 9, FLOOD6.top - 3, '#ff6a50');
+  drawGlyphs(ctx, 'COOLANT', px + 50, py + 4, '#9ae8f0');
+  for (const x of FLOOD6.cables) {                   // the high-voltage reels the live cable drops from
+    R(ctx, '#15181d', x - 10, 2 * TS, 20, 9); R(ctx, '#3a414a', x - 9, 2 * TS + 1, 18, 7); R(ctx, '#e8b422', x - 9, 2 * TS + 7, 18, 2);
+    for (let i = 0; i < 4; i++) R(ctx, '#15181d', x - 8 + i * 5, 2 * TS + 7, 2, 2);
+    R(ctx, '#0b0c0f', x - 6, 2 * TS + 2, 12, 4); R(ctx, '#ff5a2a', x - 1, 2 * TS + 3, 2, 2);
+  }
+  for (const x of [20, 78]) for (let i = 0; i < 2; i++) { R(ctx, '#0e1216', x * TS + 6 + i * 12, 6 * TS, 8, 3); R(ctx, '#3ab8c8', x * TS + 8 + i * 12, 6 * TS + 3, 4, 1); }   // spray nozzles
+  for (const x of [12, 24, 76, 88]) { R(ctx, '#0b0e10', x * TS, 25 * TS + 1, 32, 4); for (let i = 0; i < 7; i++) R(ctx, '#2a3a40', x * TS + 2 + i * 4, 25 * TS + 2, 2, 2); }   // floor drains
+  for (let x = 2 * TS; x < 98 * TS; x += 2) if (hash2(x, 7) % 3) R(ctx, '#1e4a52', x, 25 * TS, 2, 1);   // a wet film on the floor
+}
+const DECOR6 = {
+  lamps: [[150, 66], [560, 74], [1040, 74], [1450, 66]],
+  beacons: [[45, 230], [1555, 230], [44 * TS + 4, 17 * TS - 6], [56 * TS - 4, 17 * TS - 6]],
+  vents: [[38 * TS, 25 * TS], [62 * TS, 25 * TS]],
+  glows: [[50 * TS, 20 * TS, 4, 0x3ac8e0], [50 * TS, 3 * TS, 5, 0x6a9ab0]],
+};
+// ARENA 07 :: THE CHILL VAULT: a cold store of racks and shelves over sheet-ice floors. Icicles grow under the roof and
+// the solid shelves and drop on a shadow tell; cryo vents in the floor puff frost.
+function buildLevel7() {
+  const [g, fill] = xaGrid();
+  fill(45, 21, 10, 4);                                                                // the freezer unit (stand on it at row 20)
+  fill(5, 21, 7, 1, '='); fill(18, 21, 7, 1, '='); fill(31, 21, 6, 1, '='); fill(63, 21, 6, 1, '='); fill(75, 21, 7, 1, '='); fill(88, 21, 7, 1, '=');
+  fill(10, 17, 8, 1); fill(24, 17, 6, 1, '='); fill(38, 17, 6, 1, '='); fill(56, 17, 6, 1, '='); fill(70, 17, 6, 1, '='); fill(82, 17, 8, 1);
+  fill(2, 13, 6, 1); fill(16, 13, 6, 1, '='); fill(29, 13, 8, 1); fill(41, 13, 18, 1, '='); fill(63, 13, 8, 1); fill(78, 13, 6, 1, '='); fill(92, 13, 6, 1);
+  fill(9, 9, 6, 1, '='); fill(22, 9, 7, 1, '='); fill(44, 9, 12, 1); fill(71, 9, 7, 1, '='); fill(85, 9, 6, 1, '=');
+  fill(34, 23, 2, 2, 'x'); fill(64, 23, 2, 2, 'x');
+  return g;
+}
+const GRID7 = buildLevel7();
+// sheet ice [first column, last column + 1, the row whose top it lies on]; icicle spots [column, the solid row they hang
+// under]; cryo vents [x, floor y]
+const VAULT7 = { ice: [[6, 28, 25], [72, 94, 25], [45, 55, 21], [10, 18, 17], [82, 90, 17], [29, 37, 13], [63, 71, 13], [44, 56, 9]],
+  icicles: [[16, 1], [33, 1], [68, 1], [84, 1], [13, 17], [86, 17], [32, 13], [67, 13], [47, 9], [53, 9]],
+  vents: [[20 * TS, 25 * TS], [40 * TS, 25 * TS], [60 * TS, 25 * TS], [80 * TS, 25 * TS], [50 * TS, 21 * TS]],
+  grow: [6, 9], ripe: [0.8, 3.5], tell: 1, regrow: [3, 5], dmg: 16, edmg: 45, hp: 12,
+  vent: { idle: [5, 8], tell: 0.9, puff: 1.4, h: 60, w: 18, dmg: 3, chill: 0.25, tick: 0.3 } };
+function paintVault(ctx) {                           // ARENA 07: frost on every ledge, a vault door, racks of frozen stock
+  xaBehind(ctx, () => {
+    const dx = 50 * TS, dy = 9 * TS + 4;             // the vault door on the back wall, its locking wheel
+    for (let r = 46; r > 0; r -= 2) R(ctx, r > 42 ? '#2a3442' : r > 40 ? '#4a5868' : (r >> 1) % 3 ? '#222c38' : '#1c2430', dx - r, dy - Math.round(r * 0.9), r * 2, 2);
+    for (let a = 0; a < 6; a++) { const ca = Math.cos(a * Math.PI / 3), sa = Math.sin(a * Math.PI / 3); for (let t = 4; t < 22; t++) R(ctx, '#5a6878', Math.round(dx + ca * t), Math.round(dy + sa * t * 0.9), 2, 2); }
+    for (const x of [8 * TS, 26 * TS, 72 * TS, 90 * TS]) {             // freezer-room doors, rimed shut
+      R(ctx, '#121820', x - 18, 19 * TS + 2, 36, 6 * TS - 2); R(ctx, '#2a3644', x - 16, 19 * TS + 4, 32, 6 * TS - 4); R(ctx, '#46566a', x - 16, 19 * TS + 4, 32, 1);
+      R(ctx, '#8a94a0', x + 10, 22 * TS, 3, 10); for (let i = 0; i < 32; i += 2) R(ctx, '#a8d0f0', x - 16 + i, 19 * TS + 4, 2, 1 + hash2(x, i) % 3);
+    }
+    for (let x = 2 * TS; x < 98 * TS; x += 4) R(ctx, '#202a36', x, 2 * TS, 2, 2 + hash2(x, 3) % 5);   // rime along the roof
+  });
+  for (let ty = 1; ty < MAP_H - 1; ty++) for (let tx = 1; tx < MAP_W - 1; tx++) {          // rime on whatever faces up, frost fringes under what faces down
+    const c = GRID7[ty][tx], x = tx * TS, y = ty * TS, h = hash2(tx, ty * 3);
+    if (c === '.' || c === 'x') continue;
+    if (GRID7[ty - 1][tx] === '.') { R(ctx, '#d8f4ff', x, y, 16, 1); R(ctx, '#9ad0f0', x, y + 1, 16, 1); for (let i = 0; i < 16; i += 3) if ((h >> i) & 1) R(ctx, '#ffffff', x + i, y, 2, 1); }
+    if (GRID7[ty + 1][tx] === '.' && c === '#') for (let i = 1; i < 15; i += 3) if ((h >> (i + 2)) % 3) R(ctx, '#a8dcf8', x + i, y + 16, 1, 1 + ((h >> i) & 3));
+  }
+  for (const [x0, x1, row] of VAULT7.ice) { const y = row * TS; for (let x = x0 * TS; x < x1 * TS; x += 2) { R(ctx, '#bfe8ff', x, y, 2, 1); if (hash2(x, row) % 5 === 0) R(ctx, '#ffffff', x, y, 2, 1); if (hash2(x, row + 9) % 7 === 0) R(ctx, '#8ac4e8', x, y + 1, 1, 2 + hash2(x, 1) % 3); } }
+  for (const [tx, ty] of VAULT7.icicles) { const x = tx * TS + 8, y = (ty + 1) * TS; R(ctx, '#d8f4ff', x - 4, y, 9, 2); R(ctx, '#8ac4e8', x - 3, y + 2, 7, 1); }   // frost caps where icicles grow
+  for (const [vx, vy] of VAULT7.vents) {             // cryo vents: a ribbed grate with a cyan pilot
+    R(ctx, '#1a2028', vx - 10, vy - 1, 20, 5); R(ctx, '#4a5868', vx - 10, vy - 1, 20, 1);
+    for (let i = 0; i < 5; i++) R(ctx, '#0a0e12', vx - 8 + i * 4, vy + 1, 2, 3);
+    R(ctx, '#6ae0ff', vx - 1, vy + 3, 2, 1);
+  }
+  drawGlyphs(ctx, 'COLD STORE 7', 50 * TS - 35, 21 * TS + 6, '#8ac4e8');
+  drawGlyphs(ctx, '-28C', 50 * TS - 11, 22 * TS + 6, '#6ae0ff');
+}
+const DECOR7 = {
+  lamps: [[180, 66], [600, 74], [1000, 74], [1420, 66]],
+  beacons: [[35, 180], [1565, 180]],
+  vents: [],
+  glows: [[50 * TS, 9 * TS, 4.5, 0x6ab8ff], [20 * TS, 24 * TS, 3, 0x60c0ff], [80 * TS, 24 * TS, 3, 0x60c0ff]],
+};
+// ARENA 08 :: THE STORM ROOF: a rooftop at night under an open sky. A stairwell hut, a water tower, a radio mast,
+// a billboard and a shed with its chimney; lightning favours whatever stands highest and gusts sweep the roof.
+function buildLevel8() {
+  const [g, fill] = xaGrid();
+  fill(6, 21, 9, 4); fill(2, 17, 5, 1, '='); fill(2, 13, 4, 1);                      // the stairwell hut, its fire escape
+  fill(21, 22, 6, 3); fill(17, 17, 6, 1, '=');                                        // an air-con unit
+  fill(32, 21, 12, 4); fill(33, 13, 10, 4); fill(31, 17, 14, 1, '=');                // the water tower: its base, the tank, the catwalk
+  fill(48, 17, 4, 8); fill(52, 21, 6, 1, '='); fill(46, 13, 8, 1, '='); fill(47, 9, 6, 1, '=');   // the radio mast's base and platforms
+  fill(60, 21, 10, 1, '='); fill(62, 17, 9, 1, '='); fill(60, 13, 10, 1, '='); fill(62, 9, 7, 1, '=');   // the billboard's scaffold
+  fill(72, 22, 5, 3);                                                                 // another air-con unit
+  fill(80, 21, 9, 4); fill(91, 17, 3, 8); fill(94, 21, 4, 1, '='); fill(94, 13, 4, 1); // the shed, its chimney, the far corner
+  return g;
+}
+const STORM8 = { every: [2.4, 4.2], warn: 1.3, r: 16, dmg: 22, edmg: 50, gust: { idle: [7, 10], first: 9, warn: 1.6, blow: 3.2, push: 115, shelter: 5 } };
+function paintStorm(ctx) {                           // ARENA 08: the open sky above, parapets and a chain-link fence at the edges, rooftop kit
+  ctx.clearRect(0, 0, LW, 2 * TS);                                                  // no roof over it (the sky layer shows through)
+  for (const x0 of [0, 98 * TS]) {                   // a chain-link fence over each parapet
+    ctx.clearRect(x0, 2 * TS, 2 * TS, 19 * TS);
+    R(ctx, '#3a414a', x0 + 2, 6 * TS, 3, 15 * TS); R(ctx, '#3a414a', x0 + 26, 6 * TS, 3, 15 * TS); R(ctx, '#5a636e', x0, 6 * TS, 2 * TS, 2);
+    for (let y = 6 * TS + 2; y < 21 * TS; y++) for (let x = 0; x < 2 * TS; x++) if ((x + y) % 6 === 0 || (x - y + 600) % 6 === 0) R(ctx, '#2a3038', x0 + x, y, 1, 1);
+    R(ctx, '#4a3a30', x0, 21 * TS, 2 * TS, 4 * TS); for (let y = 21 * TS; y < 25 * TS; y += 6) R(ctx, '#3a2c24', x0, y, 2 * TS, 1);   // brick parapet
+  }
+  xaBehind(ctx, () => {
+    const tl = 32 * TS + 6, tr = 44 * TS - 6;        // the water tower's legs and cross braces
+    for (const x of [tl, tl + 26, tr - 26, tr]) R(ctx, '#20252c', x - 2, 17 * TS, 4, 4 * TS);
+    for (let i = 0; i < 4 * TS; i++) { R(ctx, '#1a1e24', tl + Math.round(i * 26 / (4 * TS)), 17 * TS + i, 2, 1); R(ctx, '#1a1e24', tr - Math.round(i * 26 / (4 * TS)), 17 * TS + i, 2, 1); }
+    const mx = 50 * TS;                              // the radio mast up into the storm, a lightning rod on top
+    for (let y = 2; y < 17 * TS; y++) { R(ctx, '#252a32', mx - 5, y, 2, 1); R(ctx, '#252a32', mx + 3, y, 2, 1); if (y % 12 === 0) R(ctx, '#2e343d', mx - 5, y, 10, 1); if (y % 12 < 6) R(ctx, '#1c2026', mx - 3 + (y % 12), y, 1, 1); }
+    R(ctx, '#8a94a0', mx - 1, 0, 2, 8);
+    const bx = 60 * TS, by = 3 * TS + 8, bw = 10 * TS;   // the billboard: a faded ad for coolant cola
+    R(ctx, '#1a1e24', bx, by, bw, 5 * TS); R(ctx, '#3a2a40', bx + 3, by + 3, bw - 6, 5 * TS - 6);
+    for (let y = 0; y < 5 * TS - 6; y += 2) R(ctx, y < 30 ? '#4a2a50' : '#2a3a5a', bx + 3, by + 3 + y, bw - 6, 1);
+    drawGlyphs(ctx, 'COOLANT', bx + 38, by + 20, '#ff60b0'); drawGlyphs(ctx, 'COLA', bx + 56, by + 32, '#60e0ff');
+    for (let x = bx + 8; x < bx + bw; x += 30) R(ctx, '#0c0e12', x, by + 5 * TS, 3, 21 * TS - by - 5 * TS);
+  });
+  for (let x = 2 * TS; x < 98 * TS; x += 2) { R(ctx, hash2(x, 5) % 4 ? '#2a3038' : '#323a44', x, 25 * TS, 2, 1); if (hash2(x, 9) % 37 === 0) R(ctx, '#3a5a7a', x, 25 * TS, 6, 1); }   // wet roofing felt, rain pools
+  for (const [x, w] of [[21, 6], [72, 5]]) {         // air-con fans
+    const cx = x * TS + w * 8, cy = 23 * TS;
+    for (let r = 10; r > 0; r--) R(ctx, r > 8 ? '#15181d' : r % 3 ? '#2a3038' : '#3a414a', cx - r, cy - r, r * 2, r * 2);
+    R(ctx, '#5a636e', cx - 1, cy - 9, 2, 18); R(ctx, '#5a636e', cx - 9, cy - 1, 18, 2);
+  }
+  R(ctx, '#0b0c0f', 9 * TS, 22 * TS, 3 * TS, 3 * TS); R(ctx, '#3a414a', 9 * TS - 2, 22 * TS - 2, 3 * TS + 4, 2); drawGlyphs(ctx, 'EXIT', 9 * TS + 12, 22 * TS + 6, '#40ff80');   // the stairwell door
+  for (let y = 17 * TS; y < 25 * TS; y += 4) R(ctx, '#4a3a30', 91 * TS, y, 3 * TS, 1);   // chimney bricks
+  R(ctx, '#15181d', 91 * TS - 2, 17 * TS, 3 * TS + 4, 3);
+  const tx = 33 * TS, ty = 13 * TS, tw = 10 * TS, th = 4 * TS;      // the water tank: timber staves, iron hoops, a conical cap
+  for (let x = 0; x < tw; x++) { const k = Math.abs(x - tw / 2) / (tw / 2), col = k > 0.85 ? '#2a1c14' : x % 8 === 0 ? '#3a2618' : k > 0.6 ? '#4a3020' : '#5a3a26'; R(ctx, col, tx + x, ty + 2, 1, th - 2); }
+  for (const hy of [ty + 8, ty + 30, ty + 52]) { R(ctx, '#3a414a', tx, hy, tw, 3); R(ctx, '#6a7380', tx, hy, tw, 1); }
+  R(ctx, '#15181d', tx - 2, ty, tw + 4, 3); R(ctx, '#5a636e', tx - 2, ty, tw + 4, 1); drawGlyphs(ctx, 'H2O', tx + tw / 2 - 9, ty + 17, '#c8b080');
+  for (let x = 80 * TS; x < 89 * TS; x += 4) { R(ctx, '#2e343c', x, 21 * TS + 1, 2, 4 * TS - 1); R(ctx, '#4a525c', x + 2, 21 * TS + 1, 1, 4 * TS - 1); }   // the shed's corrugated wall
+  R(ctx, '#15181d', 82 * TS, 22 * TS, 20, 3 * TS); R(ctx, '#3a2c20', 82 * TS + 2, 22 * TS + 2, 16, 3 * TS - 2); R(ctx, '#8a94a0', 82 * TS + 14, 23 * TS + 4, 2, 4);
+}
+const DECOR8 = {
+  lamps: [],
+  beacons: [[50 * TS, 6], [44 * TS - 6, 13 * TS + 4], [70 * TS - 6, 3 * TS + 6], [92 * TS + 8, 17 * TS - 4]],
+  vents: [[84 * TS, 21 * TS], [24 * TS, 22 * TS]],
+  glows: [[9 * TS + 24, 22 * TS, 2.4, 0x40ff80], [65 * TS, 6 * TS, 6, 0xff60b0], [38 * TS, 18 * TS, 3, 0x6a80c0]],
+};
+// ARENA 09 :: THE CRUSHER: a compactor hall. Hydraulic walls close in from both ends to the crush line on a cycle; the
+// outer floors are open gratings, so anything left on the floor is caught between a wall and an anvil. The middle is
+// never touched.
+function buildLevel9() {
+  const [g, fill] = xaGrid();
+  const both = (x, y, w, h, c) => { fill(x, y, w, h, c); fill(100 - x - w, y, w, h, c); };   // mirrored about the middle
+  fill(44, 21, 12, 4);                                                                // the press bed (stand on it at row 20)
+  both(30, 22, 3, 3);                                                                 // the anvils at the crush line
+  both(3, 21, 9, 1, '='); both(16, 21, 14, 1, '=');
+  both(7, 17, 10, 1, '='); both(21, 17, 15, 1, '=');
+  both(2, 13, 9, 1, '='); both(15, 13, 10, 1, '=');
+  both(8, 9, 8, 1, '='); both(22, 9, 9, 1, '=');
+  both(38, 17, 5, 1); fill(44, 13, 12, 1, 'g'); both(36, 9, 7, 1, '='); fill(46, 5, 8, 1);
+  return g;
+}
+const CRUSH9 = { reach: 28 * TS, idle: [9, 13], first: 8, warn: 2.2, close: 3.2, hold: 1.4, open: 2.6, dmg: 45, edmg: 400, bossDmg: 80 };
+function paintCrusher(ctx) {                         // ARENA 09: the crush lines, the piston housings in the end walls, the press bed
+  for (const x of [30 * TS, 70 * TS]) {              // hazard paint where the walls stop
+    for (let y = 2 * TS; y < 22 * TS; y += 8) R(ctx, (y >> 3) % 2 ? '#15161a' : '#c83020', x - 1, y, 2, 4);
+    for (let i = 0; i < 6; i++) R(ctx, i % 2 ? '#15161a' : '#e8b422', x - 24 + i * 8, 25 * TS, 8, 3);
+  }
+  drawGlyphs(ctx, 'CRUSH', 30 * TS - 32, 21 * TS - 8, '#ff5040'); drawGlyphs(ctx, 'CRUSH', 70 * TS + 4, 21 * TS - 8, '#ff5040');
+  for (const x0 of [0, 98 * TS]) for (let ty = 3; ty < 24; ty += 5) {   // piston housings in the end walls
+    R(ctx, '#0e1014', x0 + 4, ty * TS, 24, 3 * TS); R(ctx, '#3a414a', x0 + 6, ty * TS + 2, 20, 3 * TS - 4);
+    R(ctx, '#8a94a0', x0 + 8, ty * TS + 20, 16, 8); R(ctx, '#c8d0d8', x0 + 8, ty * TS + 20, 16, 2);
+  }
+  const bx = 44 * TS, by = 21 * TS;                  // the press bed: a steel platen with a drain channel
+  R(ctx, '#3a2c20', bx + 4, by + 6, 12 * TS - 8, 3); for (let x = bx + 6; x < bx + 12 * TS - 6; x += 10) R(ctx, '#14100c', x, by + 6, 4, 3);
+  drawGlyphs(ctx, 'PRESS 9', bx + 72, by + 22, '#e8b422');
+  xaBehind(ctx, () => { for (let x = 2 * TS; x < 98 * TS; x += 64) { R(ctx, '#1a1612', x, 2 * TS, 6, 23 * TS); for (let y = 2 * TS; y < 25 * TS; y += 32) R(ctx, '#241e18', x - 2, y, 10, 3); } });
+}
+const DECOR9 = {
+  lamps: [[560, 74], [1040, 74], [700, 50], [900, 50]],
+  beacons: [[30 * TS, 2 * TS + 6], [70 * TS, 2 * TS + 6], [44 * TS + 6, 21 * TS - 4], [56 * TS - 6, 21 * TS - 4]],
+  vents: [[38 * TS, 25 * TS], [62 * TS, 25 * TS]],
+  glows: [[50 * TS, 22 * TS, 3.5, 0xffb030]],
+};
+// ARENA 10 :: THE TURBINE HALL: floor fans whose updrafts carry you up, a turbine in the left wall that blows the upper
+// hall to the right, and two rotors over the gaps in the middle tier that spin in a steady rhythm.
+function buildLevel10() {
+  const [g, fill] = xaGrid();
+  fill(2, 3, 3, 8);                                                                   // the turbine nacelle in the left wall
+  fill(40, 21, 7, 4); fill(53, 21, 7, 4);                                             // generator housings either side of the middle fan
+  fill(4, 21, 7, 1, '='); fill(19, 21, 7, 1, '='); fill(30, 21, 6, 1, '='); fill(64, 21, 6, 1, '='); fill(74, 21, 7, 1, '='); fill(89, 21, 7, 1, '=');
+  fill(6, 17, 6, 1, '='); fill(22, 17, 9, 1); fill(35, 17, 12, 1); fill(47, 17, 6, 1, '='); fill(53, 17, 12, 1); fill(69, 17, 9, 1); fill(88, 17, 6, 1, '=');
+  fill(2, 13, 6, 1); fill(17, 13, 8, 1, '='); fill(36, 13, 9, 1, '='); fill(55, 13, 9, 1, '='); fill(75, 13, 8, 1, '='); fill(92, 13, 6, 1);
+  fill(8, 9, 5, 1, '='); fill(24, 9, 8, 1, '='); fill(44, 9, 12, 1, '='); fill(68, 9, 8, 1, '='); fill(87, 9, 5, 1, '=');
+  fill(46, 5, 8, 1, '=');
+  return g;
+}
+// fans [x, the y the updraft reaches]; rotors [x, y, phase]; the gust band [top, bottom] blows from the nacelle
+const TURB10 = { fans: [[15 * TS + 8, 9 * TS], [50 * TS, 4 * TS], [84 * TS + 8, 9 * TS]], w: 40, lift: 230,
+  rotors: [[33 * TS, 16 * TS + 4, 0], [67 * TS, 16 * TS + 4, 0.5]], r: 30, spin: 3.4, slow: 0.8, stop: 2.2, wind: 0.9, dmg: 18, edmg: 35,
+  gust: { x0: 5 * TS, x1: 97 * TS, top: 3 * TS, bot: 12 * TS, idle: [6, 9], first: 6, warn: 1.5, blow: 4, push: 130, shelter: 4 } };
+function paintTurbine(ctx) {                         // ARENA 10: the turbine nacelle, fan pits in the floor, cable trays and dials
+  const nx = 2 * TS, ny = 3 * TS;                    // the nacelle: a riveted cowl round the blades
+  R(ctx, '#1a2026', nx, ny, 3 * TS, 8 * TS); R(ctx, '#3a4652', nx + 2, ny + 2, 3 * TS - 4, 8 * TS - 4); R(ctx, '#56646e', nx + 2, ny + 2, 3 * TS - 4, 2);
+  for (let y = ny + 8; y < ny + 8 * TS - 4; y += 12) { R(ctx, '#8a94a0', nx + 4, y, 2, 2); R(ctx, '#8a94a0', nx + 3 * TS - 6, y, 2, 2); }
+  R(ctx, '#0b0e12', nx + 3 * TS - 6, ny + 6, 6, 8 * TS - 12);
+  for (const [fx] of TURB10.fans) {                  // fan pits: a housing in the floor and a guard grille
+    R(ctx, '#0b0e12', fx - 22, 25 * TS, 44, 6); R(ctx, '#3a4652', fx - 24, 25 * TS, 4, 6); R(ctx, '#3a4652', fx + 20, 25 * TS, 4, 6);
+    for (let i = 0; i < 11; i++) R(ctx, '#56646e', fx - 20 + i * 4, 25 * TS, 2, 1);
+    R(ctx, '#e8b422', fx - 24, 25 * TS + 6, 48, 2); for (let i = 0; i < 6; i++) R(ctx, '#15161a', fx - 22 + i * 8, 25 * TS + 6, 4, 2);
+  }
+  xaBehind(ctx, () => {
+    for (const [rx, ry] of TURB10.rotors) { R(ctx, '#1a2026', rx - 2, 2 * TS, 4, ry - 2 * TS); R(ctx, '#2a333c', rx - 1, 2 * TS, 1, ry - 2 * TS); }   // the rotors' struts
+    for (let x = 6 * TS; x < 96 * TS; x += 2) { R(ctx, '#151a1f', x, 2 * TS + 4, 2, 3); if (x % 48 === 0) R(ctx, '#1e252c', x, 2 * TS + 2, 2, 9); }   // cable trays under the roof
+    for (const [dx, dy] of [[40 * TS, 19 * TS], [60 * TS, 19 * TS], [12 * TS, 6 * TS], [88 * TS, 6 * TS]]) {   // dials and status panels
+      R(ctx, '#121619', dx - 14, dy - 10, 28, 20); R(ctx, '#2a333c', dx - 13, dy - 9, 26, 18);
+      for (let i = 0; i < 4; i++) R(ctx, i % 2 ? '#40ff80' : '#e8b422', dx - 10 + i * 6, dy + 4, 3, 2);
+      R(ctx, '#0b0e12', dx - 8, dy - 6, 16, 8); R(ctx, '#40ff80', dx - 6, dy - 3, 12, 1);
+    }
+  });
+  for (const x of [40 * TS, 53 * TS]) { R(ctx, '#121619', x + 4, 21 * TS + 6, 7 * TS - 8, 3 * TS); for (let i = 0; i < 5; i++) R(ctx, i % 2 ? '#c87a30' : '#ffb060', x + 10 + i * 18, 21 * TS + 12, 10, 3 * TS - 12); }   // generator windings
+  drawGlyphs(ctx, 'T-10', 50 * TS - 11, 24 * TS - 2, '#e8b422');
+}
+const DECOR10 = {
+  lamps: [[300, 66], [700, 74], [900, 74], [1300, 66]],
+  beacons: [[5 * TS + 4, 3 * TS + 4], [5 * TS + 4, 11 * TS - 4], [35, 340], [1565, 340]],
+  vents: [[26 * TS, 25 * TS], [74 * TS, 25 * TS]],
+  glows: [[43 * TS, 23 * TS, 2.5, 0xffa040], [56 * TS, 23 * TS, 2.5, 0xffa040], [4 * TS, 7 * TS, 4, 0x80f0ff]],
+};
+function xaNoise(x, y, s, seed) {                    // smooth value noise for the storm clouds
+  const ix = Math.floor(x / s), iy = Math.floor(y / s), u0 = x / s - ix, v0 = y / s - iy, u = u0 * u0 * (3 - 2 * u0), v = v0 * v0 * (3 - 2 * v0);
+  const h = (a, b) => (hash2(a + seed * 131, b - seed * 71) & 1023) / 1023, a = h(ix, iy), b = h(ix + 1, iy), c = h(ix, iy + 1), d = h(ix + 1, iy + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function drawStormSky(flash) {                       // ARENA 08's night sky, dithered storm cloud over a city skyline; flash: the clouds lit
+  const [w, h] = bgSize(BG.far), { c, ctx } = mkCanvas(w, h), img = ctx.createImageData(w, h), px = img.data;
+  const deck = [[20, 27, 44], [29, 38, 62], [40, 52, 84], [56, 70, 108]], lit = [[90, 110, 160], [140, 160, 210], [190, 205, 240], [230, 238, 255]], bayer = [0, 0.5, 0.75, 0.25];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const t = y / h, n = xaNoise(x, y * 1.9, 96, 1) * 0.55 + xaNoise(x, y * 1.9, 36, 2) * 0.3 + xaNoise(x, y * 2.2, 13, 3) * 0.15;
+    const cloud = clamp((n - 0.4) * 2.6, 0, 1) * (1 - t * 0.55), lv = Math.floor(cloud * 4 + bayer[(x & 1) + (y & 1) * 2]) - 1, i = (y * w + x) * 4;
+    if (flash) { if (lv >= 1) { const [r, g, b] = lit[Math.min(3, lv)]; px[i] = r; px[i + 1] = g; px[i + 2] = b; px[i + 3] = 60 + lv * 45; } continue; }
+    let r = 4 + t * 12, g = 6 + t * 12, b = 12 + t * 24;
+    if (lv >= 0) [r, g, b] = deck[Math.min(3, lv)];
+    px[i] = r; px[i + 1] = g; px[i + 2] = b; px[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  if (flash) return c;
+  let s = 23; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let x = 0; x < w;) {                          // the city on the horizon, a few windows still lit
+    const bw = (12 + rnd() * 36) | 0, bh = (16 + rnd() * 64) | 0;
+    R(ctx, '#05070b', x, h - bh, bw, bh); R(ctx, '#0b0f17', x, h - bh, bw, 1);
+    for (let wy = h - bh + 4; wy < h - 4; wy += 5) for (let wx = x + 2; wx < x + bw - 2; wx += 4) if (rnd() < 0.09) R(ctx, rnd() < 0.6 ? '#c8a050' : '#6a8ac0', wx, wy, 1, 2);
+    if (rnd() < 0.3) { R(ctx, '#05070b', x + (bw >> 1), h - bh - 12, 2, 12); R(ctx, '#ff3020', x + (bw >> 1), h - bh - 13, 2, 2); }
+    x += bw + ((rnd() * 5) | 0);
+  }
+  for (let y = h - 34; y < h; y += 2) { ctx.fillStyle = `rgba(60,80,130,${(((y - (h - 34)) / 34) * 0.25).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // rain haze low down
+  return c;
+}
+function drawXaBackdrop(kind) {                     // a back wall for ARENAS 06, 07, 09 and 10, in place of the factory's (BG.mid parallax)
+  const [w, h] = bgSize(BG.mid), { c, ctx } = mkCanvas(w, h), img = ctx.createImageData(w, h), px = img.data;
+  const base = { tower: [20, 30, 34], vault: [30, 40, 54], crusher: [30, 24, 18], turbine: [20, 28, 32] }[kind];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {          // the wall itself: mottled, with fine grain
+    const n = xaNoise(x, y, 40, 7) * 0.7 + xaNoise(x, y, 9, 8) * 0.3, g = (hash2(x, y) & 7) - 3.5, k = 0.8 + n * 0.45, i = (y * w + x) * 4;
+    px[i] = base[0] * k + g; px[i + 1] = base[1] * k + g; px[i + 2] = base[2] * k + g; px[i + 3] = 255;
+  }
+  const cx = w / 2, discs = [[cx - 330, 150, 96], [cx, 180, 120], [cx + 330, 150, 96]];
+  if (kind === 'turbine') for (const [tx, ty, r] of discs) for (let y = -r - 10; y <= r + 10; y++) for (let x = -r - 10; x <= r + 10; x++) {   // the great rotors of the turbines behind
+    const d = Math.hypot(x, y), X = Math.round(tx + x), Y = ty + y; if (d > r + 10 || X < 0 || X >= w || Y < 0 || Y >= h) continue;
+    let col;
+    if (d > r) col = d > r + 7 ? [12, 16, 20] : [42, 52, 60];
+    else if (d < r * 0.22) col = d < r * 0.1 ? [138, 148, 160] : [62, 72, 82];
+    else { const a = ((Math.atan2(y, x) + Math.PI) / (Math.PI * 2) * 18 + d / r * 1.4) % 1; col = a < 0.55 ? (a < 0.12 ? [90, 102, 114] : [52, 64, 74]) : [20, 26, 32]; }
+    const i = (Y * w + X) * 4; px[i] = col[0]; px[i + 1] = col[1]; px[i + 2] = col[2];
+  }
+  ctx.putImageData(img, 0, 0);
+  if (kind === 'tower') {                            // the inside of a cooling tower: pour lines bowing round the drum, ribs, daylight from the top
+    for (let a = -1.4; a <= 1.41; a += 0.2) {
+      const x = Math.round(cx + Math.sin(a) * cx * 1.02), rw = Math.max(3, Math.round(16 * Math.cos(a)));
+      R(ctx, '#121a1e', x - rw / 2, 0, rw, h); R(ctx, '#2a3c42', x + (a < 0 ? rw / 2 - 2 : -rw / 2), 0, 2, h);
+    }
+    for (let j = 0; j < 9; j++) for (let x = 0; x < w; x += 2) { const t = (x - cx) / cx, y = Math.round(30 + j * 46 + 26 * t * t); R(ctx, '#10181b', x, y, 2, 2); R(ctx, '#273840', x, y + 2, 2, 1); if (hash2(x, j) % 12 === 0) R(ctx, '#0e1518', x, y + 3, 1, 8 + hash2(j, x) % 30); }
+    for (let r = 120; r > 0; r -= 4) { ctx.fillStyle = `rgba(150,215,225,${(0.012 + (120 - r) / 120 * 0.05).toFixed(3)})`; ctx.beginPath(); ctx.ellipse(cx, -10, r * 1.6, r * 0.55, 0, 0, Math.PI * 2); ctx.fill(); }
+    for (let s = 0; s < 5; s++) { ctx.fillStyle = 'rgba(140,210,220,0.035)'; ctx.beginPath(); const x0 = cx - 80 + s * 40; ctx.moveTo(x0, 0); ctx.lineTo(x0 + 26, 0); ctx.lineTo(x0 + 70 + s * 14, h); ctx.lineTo(x0 + 20 + s * 14, h); ctx.fill(); }
+    for (let y = h - 120; y < h; y += 2) { ctx.fillStyle = `rgba(90,170,180,${(((y - (h - 120)) / 120) * 0.12).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // vapour off the basin
+  } else if (kind === 'vault') {                     // a cold store: frosted panels, evaporator coils, a rail of hooks
+    for (let py = 0; py < h; py += 40) for (let qx = 0; qx < w; qx += 48) {
+      R(ctx, '#1a222e', qx, py, 48, 1); R(ctx, '#1a222e', qx, py, 1, 40);
+      for (let i = 0; i < 48; i++) if (hash2(qx + i, py) % 3) R(ctx, '#6a88a4', qx + i, py + 1, 1, 1 + (hash2(i, py + qx) % 3));   // rime along the top edge
+    }
+    for (const cy of [96, 250]) {
+      R(ctx, '#0e141c', 0, cy - 2, w, 30); for (let x = 0; x < w; x += 3) R(ctx, '#3a4a5c', x, cy, 1, 26);
+      R(ctx, '#56708a', 0, cy - 2, w, 2); for (let x = 0; x < w; x++) if (hash2(x, cy) % 2) R(ctx, '#b8d8f0', x, cy - 3, 1, 1 + hash2(cy, x) % 2);
+    }
+    R(ctx, '#3a4452', 0, 40, w, 4); R(ctx, '#6a7686', 0, 40, w, 1);
+    for (let x = 30; x < w; x += 46) {                                // hooks, a few still carrying frozen stock
+      R(ctx, '#4a5462', x, 44, 1, 14); R(ctx, '#6a7686', x - 2, 57, 3, 1); R(ctx, '#6a7686', x - 3, 55, 1, 3);
+      if (hash2(x, 5) % 3 === 0) { const ch = 34 + hash2(x, 9) % 16; R(ctx, '#2a1a1e', x - 7, 58, 14, ch); R(ctx, '#3a2428', x - 6, 58, 6, ch - 4); R(ctx, '#8aa8c0', x - 7, 58, 14, 1); R(ctx, '#20141a', x - 4, 58 + ch, 8, 4); }
+    }
+    for (let y = h - 90; y < h; y += 2) { ctx.fillStyle = `rgba(190,225,255,${(((y - (h - 90)) / 90) * 0.16).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // cold fog on the floor
+  } else if (kind === 'crusher') {                   // a compactor hall: bales of crushed scrap stacked to the gantry, warning stripes
+    R(ctx, '#1a140e', 0, 34, w, 10); for (let x = 0; x < w; x += 24) R(ctx, '#2e241a', x, 34, 12, 10);
+    for (let x = 0; x < w; x += 4) R(ctx, ((x >> 3) & 1) ? '#14120e' : '#5a4a14', x, 64, 4, 6);
+    const metal = ['#3a3e44', '#4a3a30', '#2e3a44', '#4a4434', '#3a2a2a', '#344034'];
+    for (let stack = 0; stack < 9; stack++) {
+      const sx = 20 + stack * 124, rows = 3 + hash2(stack, 3) % 3;
+      for (let r = 0; r < rows; r++) for (let b = 0; b < 3 - (r > 2 ? 1 : 0); b++) {
+        const bx = sx + b * 30 + (r % 2) * 14, by = h - 26 - (r + 1) * 26, col = metal[hash2(stack * 7 + r, b) % metal.length];
+        R(ctx, '#0c0a08', bx - 1, by - 1, 30, 26); R(ctx, col, bx, by, 28, 24);
+        for (let i = 0; i < 9; i++) R(ctx, hash2(bx + i, by) % 2 ? '#1a1612' : '#6a6458', bx + hash2(i, bx) % 26, by + hash2(by, i) % 22, 2 + hash2(i, by) % 4, 1);   // crumpled panels
+        R(ctx, '#8a8070', bx, by, 28, 1); R(ctx, '#5a5048', bx, by + 8, 28, 1); R(ctx, '#5a5048', bx, by + 16, 28, 1);   // baling wire
+      }
+    }
+    for (let x = 60; x < w; x += 220) { R(ctx, '#120e0a', x, 44, 10, h); R(ctx, '#2a2218', x, 44, 2, h); }
+  } else {                                           // the turbine hall: status lights under the rotors, ducts along the wall
+    for (const [tx, ty, r] of discs) { R(ctx, '#40ff80', tx - 2, ty + r + 14, 4, 2); R(ctx, '#e8b422', tx + 8, ty + r + 14, 4, 2); }
+    for (const y of [40, h - 70]) { R(ctx, '#161c22', 0, y, w, 12); R(ctx, '#2c3640', 0, y, w, 2); for (let x = 20; x < w; x += 90) R(ctx, '#3a4652', x, y - 2, 6, 16); }
+  }
+  ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = 'rgba(3,5,10,0.38)'; ctx.fillRect(0, 0, w, h);   // back, so the foreground reads
+  return c;
+}
+const ICICLE_LEN = [6, 10, 14, 18, 23];
+function drawIcicle(c, len) {                        // 7x24, hanging from its top: a tapered spike of blue ice with a bright edge
+  for (let y = 0; y < len; y++) {
+    const hw = Math.max(0, Math.round(3 * (1 - y / len) + 0.3)), x0 = 3 - hw;
+    R(c, '#7ab4e0', x0, y, hw * 2 + 1, 1); R(c, '#d8f4ff', x0, y, 1, 1); if (hw > 0) R(c, '#4a80b8', 3 + hw, y, 1, 1);
+    if (y % 5 === 2 && hw > 1) R(c, '#ffffff', x0 + 1, y, 1, 1);
+  }
+  R(c, '#ffffff', 2, 0, 3, 1);
+}
+function drawRotor(c) {                              // 64x64: three swept steel blades on a hub, hazard paint at the tips
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+    const dx = x + 0.5 - 32, dy = y + 0.5 - 32, r = Math.hypot(dx, dy);
+    if (r < 5 || r > 30) continue;
+    for (let b = 0; b < 3; b++) {
+      const a = Math.atan2(dy, dx) - b * Math.PI * 2 / 3 - 0.18 * (r - 5) / 25, along = r * Math.cos(a), side = r * Math.sin(a), hw = 3.6 - 1.8 * (r - 5) / 25;
+      if (along <= 0 || Math.abs(side) > hw) continue;
+      R(c, r > 24 ? ((r >> 1) % 2 ? '#e8b422' : '#15161a') : side < -hw * 0.3 ? '#c8d0d8' : side > hw * 0.4 ? '#3e4652' : '#7f8b99', x, y);
+    }
+  }
+}
+function genExpansionArenaArt(scene) {               // the machinery of ARENAS 06-10
+  addSheet(scene, 'xa_icicle', ICICLE_LEN.map((len, i) => ({ name: 'i' + i, c: makeSprite(7, 24, c => drawIcicle(c, len), '#14243a') })), 7, 24, false);
+  addTex(scene, 'xa_rotor', makeSprite(64, 64, drawRotor));
+  addTex(scene, 'xa_hub', makeSprite(14, 14, c => { for (let y = 0; y < 14; y++) for (let x = 0; x < 14; x++) { const d = Math.hypot(x + 0.5 - 7, y + 0.5 - 7); if (d < 6) R(c, d > 4.6 ? '#2a3038' : d < 1.6 ? '#c8d0d8' : (x + y) % 5 ? '#5a636e' : '#8a94a0', x, y); } }));
+  addSheet(scene, 'xa_fan', [0, 1, 2].map(f => ({ name: 'f' + f, c: makeSprite(44, 6, c => {   // a floor fan seen edge-on in its pit, blades blurring past
+    R(c, '#0b0e12', 0, 0, 44, 6); R(c, '#3a4652', 0, 4, 44, 2);
+    for (let x = (f * 5) % 15; x < 44; x += 15) { R(c, '#8a94a0', x, 1, 6, 3); R(c, '#c8d0d8', x, 1, 6, 1); R(c, '#4b535e', x + 5, 1, 2, 3); }
+    R(c, '#2a3038', 20, 0, 4, 6);
+  }, null) })), 44, 6, false);
+  addSheet(scene, 'xa_turbine', [0, 1, 2].map(f => ({ name: 't' + f, c: makeSprite(12, 124, c => {   // the turbine's rotor edge-on in the nacelle mouth
+    R(c, '#0b0e12', 2, 0, 8, 124);
+    for (let y = (f * 9) % 27; y < 124; y += 27) { R(c, '#8a94a0', 3, y, 6, 12); R(c, '#c8d0d8', 3, y, 2, 12); R(c, '#4b535e', 8, y, 1, 12); }
+    R(c, '#5a636e', 1, 56, 10, 12); R(c, '#e8b422', 1, 61, 10, 2);
+  }) })), 12, 124, false);
+}
+function xaLazyTex(scene, key) {                     // the big backdrops are painted the first time their arena is built, not at load
+  if (!scene.textures.exists(key)) addTex(scene, key, key === 'xa_sky' ? drawStormSky(false) : key === 'xa_skyflash' ? drawStormSky(true) : drawXaBackdrop(key.slice(6)));
+  return key;
+}
+// ---- end expansion: arenas ----
 const ARENAS = [
   { id: 1, name: 'ARENA 01', sub: 'THE MELT FLOOR', grid: LEVEL_GRID, spawns: SPAWNS, points: WAVE_POINTS, decor: DECOR, barrels: BARRELS, canisters: CANISTERS, last: 1, pipes: [[32, 388, 1], [1568, 388, -1], [608, 388, -1], [912, 388, 1]] },
   { id: 2, name: 'ARENA 02', sub: 'THE FURNACE', grid: buildLevel2(), bgTint: 0xffb8a0, paint: paintFurnace, last: 3,
@@ -3588,6 +3978,37 @@ const ARENAS = [
               A: [[20, 8], [80, 8], [34, 10], [66, 10], [50, 6], [10, 13], [90, 13], [50, 13]], B: [[50, 16]] },
     decor: DECOR5, barrels: [[14, 24], [35, 24], [64, 24], [85, 24], [18, 14], [82, 14]], canisters: [[30, 24], [70, 24], [48, 16], [20, 19]],
     pipes: [[32, 388, 1], [1568, 388, -1]] },
+  // ---- expansion: arenas ---- (OVERTIME, DAILY and the Lab only; last: 99 keeps BOSS RUSH from riding on to them)
+  { id: 6, name: 'ARENA 06', sub: 'THE COOLING TOWER', grid: buildLevel6(), bgTint: 0x98d8d8, paint: paintTower, last: 99, backdrop: 'tower', flood: FLOOD6, lampTint: 0x9af0ff,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 16], [50, 8]] },
+    points: { G: [[10, 24], [25, 24], [40, 24], [60, 24], [75, 24], [92, 24], [7, 20], [30, 20], [70, 20], [92, 20], [50, 16], [12, 16], [87, 16], [18, 12], [82, 12], [50, 8]],
+              A: [[20, 9], [50, 5], [80, 9], [36, 12], [64, 12], [12, 15], [88, 15], [50, 14]], B: [[50, 16]] },
+    decor: DECOR6, barrels: [[12, 24], [36, 24], [63, 24], [86, 24], [47, 16], [24, 16]], canisters: [[29, 24], [71, 24], [53, 16], [75, 16]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
+  { id: 7, name: 'ARENA 07', sub: 'THE CHILL VAULT', grid: GRID7, bgTint: 0xc8e4ff, paint: paintVault, last: 99, backdrop: 'vault', vault: VAULT7, lampTint: 0xd0f0ff,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 20], [50, 8]] },
+    points: { G: [[10, 24], [24, 24], [39, 24], [60, 24], [76, 24], [92, 24], [50, 20], [13, 16], [86, 16], [32, 12], [67, 12], [5, 12], [94, 12], [50, 8]],
+              A: [[20, 6], [50, 5], [80, 6], [30, 10], [70, 10], [12, 14], [88, 14], [50, 16]], B: [[50, 20]] },
+    decor: DECOR7, barrels: [[16, 24], [42, 24], [58, 24], [84, 24], [14, 16], [33, 12]], canisters: [[28, 24], [72, 24], [52, 20], [66, 12]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
+  { id: 8, name: 'ARENA 08', sub: 'THE STORM ROOF', grid: buildLevel8(), bgTint: 0x7888b8, paint: paintStorm, last: 99, storm: STORM8,
+    spawns: { player: [4, 24], health: [[3, 12], [96, 12], [38, 12], [50, 8]] },
+    points: { G: [[17, 24], [29, 24], [46, 24], [58, 24], [76, 24], [89, 24], [10, 20], [37, 20], [84, 20], [24, 21], [65, 20], [38, 12], [50, 12], [65, 12], [92, 16], [50, 8]],
+              A: [[14, 8], [28, 10], [40, 6], [56, 6], [76, 8], [86, 12], [22, 14], [80, 15]], B: [[84, 20]] },
+    decor: DECOR8, barrels: [[18, 24], [45, 24], [57, 24], [78, 24], [8, 20], [84, 20]], canisters: [[28, 24], [69, 24], [41, 20], [66, 16]],
+    pipes: [] },
+  { id: 9, name: 'ARENA 09', sub: 'THE CRUSHER', grid: buildLevel9(), bgTint: 0xffe0a0, paint: paintCrusher, last: 99, backdrop: 'crusher', crusher: CRUSH9, lampTint: 0xffb040,
+    spawns: { player: [4, 24], health: [[50, 20], [50, 4], [40, 16], [59, 16]] },
+    points: { G: [[10, 24], [22, 24], [36, 24], [64, 24], [78, 24], [90, 24], [50, 20], [40, 16], [59, 16], [28, 16], [71, 16], [50, 12], [39, 8], [60, 8], [50, 4]],
+              A: [[20, 6], [50, 8], [80, 6], [36, 12], [64, 12], [12, 15], [88, 15], [50, 16]], B: [[50, 20]] },
+    decor: DECOR9, barrels: [[36, 24], [63, 24], [45, 20], [54, 20], [39, 8], [60, 8]], canisters: [[41, 24], [58, 24], [42, 16], [57, 16]],
+    pipes: [] },
+  { id: 10, name: 'ARENA 10', sub: 'THE TURBINE HALL', grid: buildLevel10(), bgTint: 0xd8f0e0, paint: paintTurbine, last: 99, backdrop: 'turbine', turbine: TURB10, lampTint: 0xc0ffe0,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 4], [50, 16]] },
+    points: { G: [[10, 24], [26, 24], [36, 24], [64, 24], [74, 24], [90, 24], [43, 20], [56, 20], [26, 16], [40, 16], [59, 16], [73, 16], [20, 12], [79, 12], [28, 8], [71, 8]],
+              A: [[20, 6], [50, 7], [80, 6], [33, 11], [67, 11], [12, 15], [88, 15], [50, 14]], B: [[27, 24]] },
+    decor: DECOR10, barrels: [[11, 24], [37, 24], [62, 24], [89, 24], [41, 20], [58, 20]], canisters: [[27, 24], [73, 24], [24, 16], [75, 16]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
 ];
 // Where each arena keeps its breakables: [kind, tile x, tile y, facing]. Floor props stand in that cell, wall props
 // centre on it and hanging ones dangle there from whatever is overhead. ARENA 01 has one of each.
@@ -3603,6 +4024,17 @@ const PROP_SPOTS = [
    ['fan', 3, 13], ['flood', 6, 8], ['horn', 22, 5], ['ext', 40, 15], ['tube', 64, 6], ['cryo', 88, 20], ['capacitor', 12, 20]],
   [['water', 17, 24], ['water', 95, 24], ['capacitor', 38, 24], ['capacitor', 61, 24], ['terminal', 50, 16], ['fuse', 13, 21], ['fuse', 94, 21, -1], ['neon', 50, 5],
    ['window', 25, 6], ['horn', 31, 8], ['tube', 47, 11], ['tube', 52, 11], ['cryo', 15, 14], ['ext', 60, 18], ['vending', 80, 14], ['fan', 3, 13]],
+  // ---- expansion: arenas ---- ARENAS 06-10
+  [['terminal', 50, 16], ['horn', 3, 10], ['water', 40, 24], ['cryo', 58, 24], ['capacitor', 19, 20], ['tube', 12, 18], ['tube', 87, 18], ['ext', 43, 22],
+   ['flood', 6, 12], ['flood', 93, 12, -1], ['window', 50, 11], ['vending', 30, 12], ['ammo', 70, 12], ['oil', 17, 24], ['propane', 83, 24]],
+  [['cryo', 30, 24], ['cryo', 70, 24], ['cryo', 47, 20], ['vending', 53, 20, -1], ['terminal', 4, 12], ['flares', 95, 12], ['tube', 18, 14], ['tube', 80, 14],
+   ['fan', 3, 19], ['fan', 96, 19, -1], ['ext', 44, 23], ['horn', 50, 6], ['water', 60, 24], ['ammo', 24, 16], ['neon', 50, 3]],
+  [['neon', 65, 6], ['flood', 13, 20], ['flood', 86, 20, -1], ['capacitor', 49, 16], ['fuse', 16, 23], ['water', 55, 24], ['propane', 30, 24], ['oil', 46, 24],
+   ['horn', 53, 11], ['terminal', 82, 20], ['ammo', 95, 20], ['tube', 64, 18], ['flares', 4, 16]],
+  [['terminal', 49, 20], ['capacitor', 51, 20], ['ammo', 39, 16], ['flares', 60, 16], ['oil', 34, 24], ['propane', 65, 24], ['water', 38, 24], ['toxic', 61, 24],
+   ['fuse', 43, 22], ['fuse', 56, 22, -1], ['horn', 50, 10], ['window', 50, 16], ['tube', 46, 14], ['tube', 54, 14], ['neon', 50, 3]],
+  [['fan', 96, 6, -1], ['capacitor', 43, 20], ['capacitor', 56, 20], ['terminal', 4, 12], ['flares', 95, 12], ['boiler', 92, 24], ['oil', 8, 24], ['fuse', 38, 22],
+   ['fuse', 61, 22, -1], ['tube', 26, 18], ['tube', 73, 18], ['horn', 20, 6], ['window', 50, 11], ['ammo', 28, 8], ['propane', 72, 8], ['vending', 33, 24]],
 ];
 ARENAS.forEach((A, i) => { A.props = PROP_SPOTS[i] || []; });
 const CAMPAIGN_ARENAS = [
@@ -3666,6 +4098,17 @@ const LAB_ROOMS = {
     arena: ARENAS[4], weapon: 'coil', groups: [] },
   bosses: { name: 'Boss Chamber', detail: 'Practice one boss at a time. Change the enemy group to pick a different boss.',
     arena: LAB_RANGE, weapon: 'rail', groups: [{ kind: 'boss', count: 1 }] },
+  // ---- expansion: arenas ----
+  tower: { name: 'Cooling Tower', detail: 'Climb clear of the coolant floods. When a cable drops in, the water goes live until it drains.',
+    arena: ARENAS[5], weapon: 'arc', groups: [] },
+  vault: { name: 'Chill Vault', detail: 'Slide on the ice, read the icicle shadows and shoot them down onto enemies. Cryo vents puff frost.',
+    arena: ARENAS[6], weapon: 'flame', groups: [] },
+  storm: { name: 'Storm Roof', detail: 'Lightning hits the marked spots, most often up high. Get behind cover when the gust streaks blow in.',
+    arena: ARENAS[7], weapon: 'shock', groups: [] },
+  crusher: { name: 'Crusher', detail: 'Get off the floor or into the middle before the walls close. Anything caught against an anvil is crushed.',
+    arena: ARENAS[8], weapon: 'hammer', groups: [] },
+  turbine: { name: 'Turbine Hall', detail: 'Ride the fan updrafts, lean into the turbine gusts and cross the rotors while they idle.',
+    arena: ARENAS[9], weapon: 'saw', groups: [] },
 };
 const LAB_MODIFIERS = { none: 'None', dark: 'Blackout', slag: 'Slag Rain', lowg: 'Low Gravity', melt: 'Meltdown' };
 const LAB_BOSSES = new Set(RUSH.map(([entry]) => entry[0]));
@@ -4284,6 +4727,7 @@ function genTextures(scene) {
   addSheet(scene, 'lugger', ['w0', 'w1', 'carry', 'throw'].map(f => ({ name: f, c: makeSprite(22, 26, x => drawLugger(x, f)) })), 22, 26, true);
   addSheet(scene, 'blimp', ['b0', 'b1'].map(f => ({ name: f, c: makeSprite(34, 20, x => drawBlimp(x, f)) })), 34, 20, true);
   addSheet(scene, 'strider', ['w0', 'w1', 'fire'].map(f => ({ name: f, c: makeSprite(20, 36, x => drawStrider(x, f)) })), 20, 36, true);
+  genExpansionArenaArt(scene);                                        // ARENAS 06-10: their machinery
   const grf = [{ name: 'idle', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [1, 0], [-1, 0], 'idle')) }, { name: 'crouch', c: makeSprite(18, 24, x => drawGrenadier(x, 1, [2, 0], [-2, 0], 'crouch')) },
                { name: 'lunge', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [3, 0], [-3, 0], 'lunge')) }, { name: 'air', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [3, 3], [-2, 1], 'idle')) }];
   for (let i = 0; i < 6; i++) grf.push({ name: 'run' + i, c: makeSprite(18, 24, x => drawGrenadier(x, RUN_BOB[i], RUN_LEGS[i], RUN_LEGS[(i + 3) % 6], 'idle')) });

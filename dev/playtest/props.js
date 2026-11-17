@@ -24,7 +24,8 @@ window.PR = (() => {
 
   PR.check = (only) => {
     const fails = [], arenas = only || [...ARENAS.map((_, i) => i), 'lab'], mode = RUNMODE, other = mode === 'campaign' ? 'endless' : 'campaign';
-    const stages = arenas.flatMap(a => a === 'lab' ? [[a]] : CAMPAIGN_ARENAS[a].grid === ARENAS[a].grid ? [[a, mode]] : [[a, mode], [a, other]]);
+    const stages = arenas.flatMap(a => a === 'lab' ? [[a]] : !CAMPAIGN_ARENAS[a] ? [[a, 'endless']]   // ARENAS 06-10: OVERTIME's only, never the campaign's
+      : CAMPAIGN_ARENAS[a].grid === ARENAS[a].grid ? [[a, mode]] : [[a, mode], [a, other]]);
     let count = 0;
     for (const kind of Object.keys(PROPS)) {
       const D = PROPS[kind], A = PROP_ART[kind], say = msg => fails.push(`${kind}: ${msg}`);
