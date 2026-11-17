@@ -1,0 +1,85 @@
+name: Pages
+
+# Publishes the playable game to GitHub Pages (https://saworbit.github.io/slaghouse/).
+# - A vX.Y.Z tag publishes that release, so players only get released builds.
+# - Run it by hand (Actions, Pages, Run workflow) to publish another ref, for example main. The ref doesn't need this
+#   file in it, so an older tag can be published again.
+# - A pull request that changes this file builds the site but publishes nothing.
+# The site holds what the release zip holds: the page, the four audio banks, LICENSE, README and CHANGELOG, plus an
+# index.html that sends the bare URL to slaghouse.html with its query string (so ?lab=furnace still works).
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths: ['.github/workflows/pages.yml']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag, branch or commit to publish
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:                           # one deployment at a time; a newer one waits instead of cancelling a live one
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Compile the game script and audio banks
+        run: node dev/check.mjs
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp slaghouse.html LICENSE README.md CHANGELOG.md _site/
+          for f in sfx_bank.js music_bank.js sfx_bank_aac.js music_bank_aac.js; do   # optional: the game plays synth audio without them
+            if [ -f "$f" ]; then cp "$f" _site/; fi
+          done
+          cat > _site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>SLAGHOUSE</title>
+          <link rel="canonical" href="slaghouse.html">
+          <script>location.replace('slaghouse.html' + location.search + location.hash);</script>
+          <meta http-equiv="refresh" content="0; url=slaghouse.html">
+          </head>
+          <body style="background:#050608;color:#cdd6e0;font:16px monospace;padding:24px">
+          <p><a href="slaghouse.html" style="color:#ffb840">Play SLAGHOUSE</a></p>
+          </body>
+          </html>
+          EOF
+          ls -l _site
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5

@@ -7,6 +7,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Play in the browser** at <https://saworbit.github.io/slaghouse/>. A new `Pages` workflow publishes each `vX.Y.Z`
+  tag to GitHub Pages, with the audio banks, and the bare URL opens the game. It can also publish any other ref by
+  hand.
+
 - **Ten new weapons**, all on the wheel, in OVERTIME, DAILY, BOSS RUSH and the Lab (71 in all; the campaign arsenal
   is unchanged). The **hand cannon** lobs an iron ball that plows through up to three light foes and cannon-jumps you
   back. The **seismic launcher** runs a quake along the floor that pops foes up, and launched foes take x1.5 in the air
