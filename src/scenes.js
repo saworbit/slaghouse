@@ -151,9 +151,9 @@ class TitleScene extends Phaser.Scene {
     this.codexName = new PixelLabel(this, 480, 438, 'title_cxn', { maxChars: 20, scale: 3, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.codexDesc = new PixelLabel(this, 480, 470, 'title_cxd', { maxChars: 64, scale: 2, color: '#d8dee6', shadow: sh, originY: 0.5 }).setDepth(21);
     this.codexCount = new PixelLabel(this, 480, 88, 'title_cxc', { maxChars: 24, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
-    const got = loadMedals();
+    const got = loadMedals(), medalRowH = Math.min(44, Math.floor(396 / Math.ceil(MEDALS.length / 3)));   // rows close up as medals are added, clear of the hint line
     this.medalRows = MEDALS.map((m, i) => {
-      const x = 52 + (i % 3) * 300, y = 116 + Math.floor(i / 3) * 44, on = got.includes(m.id);
+      const x = 52 + (i % 3) * 300, y = 116 + Math.floor(i / 3) * medalRowH, on = got.includes(m.id);
       return { x, y, on,
         name: new PixelLabel(this, x + 26, y - 6, 'title_mn' + i, { text: m.name, align: 'left', scale: 2, color: on ? '#ffd040' : '#5a636e', shadow: sh }).setDepth(21),
         desc: new PixelLabel(this, x + 26, y + 12, 'title_md' + i, { text: m.d, align: 'left', scale: 1, color: on ? '#e8ecf0' : '#8f9bab' }).setDepth(21) };

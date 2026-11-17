@@ -280,6 +280,15 @@ const TUNE = {
                pop: { radius: 26, maxDamage: 14, minDamage: 4, enemyDamage: 14, selfDamage: 12, push: 220, maxRise: 300, enemy: true, tileDamage: 20 } },
   BANNER:    { speed: 40, keep: [200, 300], radius: 150, heal: 5, plant: 6 },
   FOREMAN:   { speed: 40, rage: 62, cd: 2.2, slamTell: 700, slamDmg: 22, spray: 3, magnet: 1.6, pull: 110, maxHounds: 4, core: 1.3 },
+  // ---- expansion: bosses ----
+  CRUCIBLE:  { alt: 92, speed: 70, cd: 2.4, pourTell: 0.85, pour: 0.45, wave: { speed: 165, dmg: 18, h: 14 }, bombs: [3, 4, 5], bombTell: 0.6,
+               floodTell: 1.4, flood: 3.5, floodW: 230, floodDmg: 7, ventTell: 0.7, vent: 2.6, core: 2, rain: 0.9 },
+  GRINDER:   { roll: [150, 205, 235], rev: [0.75, 0.6, 0.5], bounces: [1, 2, 2], touch: 26, climb: 150, climbH: 112, hang: 0.55, slam: 24,
+               blades: [2, 3, 4], bladeTell: 0.5, bladeSpeed: 230, bladeDmg: 14, rut: 3, rutDmg: 5, bare: 1.35 },
+  QUEEN:     { alt: 120, speed: 95, cd: 2.4, eggs: [2, 3, 3], eggMax: 6, hatch: 4.5, layTell: 0.5, screech: 0.7, lock: 0.25, dive: 360, diveDmg: 22, spitTell: 0.45, globs: 5, escort: 6, frenzy: 1.35 },
+  OVERSEER:  { alt: 115, speed: 60, cd: 2.2, orbit: 36, spin: 1.4, sweepTell: 1.1, sweep: 2.2, arc: 1.4, beamDmg: 16, drones: 2, maxDrones: 3, gridTell: 1.3, grid: 0.9, gridDmg: 18, slot: 40 },
+  CONDUCTOR: { alt: 100, cd: 1.9, blinkTell: 0.7, blinkDmg: 10, castTell: 0.65, lock: 0.25, chainDmg: 12, chainHop: 90, floorTell: 1.2, floorLive: 1.3, floorDmg: 7,
+               orbs: [2, 3, 4], orbSpeed: 55, orbLife: 6.5, orbDmg: 14, arcR: 34, arcDmg: 6, over: 0.65 },
 };
 const DIFFS = [                                        // title screen: left / right picks one
   { name: 'EASY', dmg: 0.6, hp: 0.8, score: 0.7 },
@@ -297,7 +306,7 @@ const MUTATORS = [
   { id: 'dark', name: 'LIGHTS OUT', d: 'EVERY WAVE IN THE DARK.' },
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
-const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship']);   // SWARM never doubles (or thins) a boss
+const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship', 'crucible', 'grinder', 'queen', 'overseer', 'conductor']);   // SWARM never doubles (or thins) a boss
 const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
@@ -357,6 +366,7 @@ const MEDALS = [
   { id: 'slayer', name: 'SLAG SLAYER', d: 'BEAT THE SMELTER' },
   { id: 'speed', name: 'SPEEDRUNNER', d: 'WIN IN UNDER 10 MINUTES IN ONE RUN' },
   { id: 'ironclad', name: 'IRONCLAD', d: 'WIN ON BRUTAL' },
+  { id: 'management', name: 'NEW MANAGEMENT', d: 'DOWN THE FIVE NEW BOSSES IN ONE RUN' },
 ];
 const mutTag = r => { const m = r && r.mut && MUTATORS.find(o => o.id === r.mut); return m ? '  ' + m.name : ''; };   // '  GLASS CANNON' for a record set with a mutator on
 // ---- saved progress: read the stored value again right before writing, so two tabs on this origin add up instead of overwriting each other ----
@@ -493,6 +503,11 @@ const CODEX = [
   ['clinger', 'CLINGER', 'c0', 'CLAMPS ON AND BLOWS. KICK OR DASH IT OFF AT THEM.'],
   ['foreman', 'THE FOREMAN', 'w0', 'OVERTIME BOSS. SLAMS, SPRAYS RIVETS, MAGNETS YOU IN, CALLS HOUNDS.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
+  ['crucible', 'THE CRUCIBLE', '1i', 'BOSS. POURS SLAG WAVES, FLOODS THE FLOOR, VENTS ITS HOT CORE.'],
+  ['grinder', 'THE GRINDER', '1a', 'BOSS. ROLLS AT YOU, CLIMBS WALLS TO DROP ON YOU, THROWS SAWS.'],
+  ['queen', 'THE HIVE QUEEN', '1a', 'BOSS. LAYS EGGS THAT HATCH, DIVES WITH A SCREECH, SPITS ACID.'],
+  ['overseer', 'THE OVERSEER', '1i', 'BOSS. SHOOT OFF ITS FOUR SHIELD NODES. DODGE THE DEATH LASER.'],
+  ['conductor', 'THE CONDUCTOR', '1i', 'BOSS. BLINKS, CHAIN LIGHTNING, LIVE FLOORS, BALL LIGHTNING.'],
 ];
 const SEEN = new Set(Store.get('slaghouse.seen', Array.isArray, []));
 const markSeen = kind => {                                // adds to the stored list, so another tab's sightings stay
@@ -688,7 +703,8 @@ slotLabels();
 // elite foes: one trait each, a coloured aura and a diamond over the head
 const ELITE_KINDS = ['armored', 'shielded', 'volatile', 'regen'];
 const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, regen: 0x5cff7a };
-const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger']);
+const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger',
+  'crucible', 'grinder', 'queen', 'overseer', 'conductor', 'eggsac', 'eyenode']);
 // One record per foe kind: stats, hitbox and gibs, plus what the scene looks up by kind: frame0 is the frame it
 // spawns on, flier means no gravity and air spawn points, humanoid means head shots, cover and alerts, and update
 // names the GameScene method that runs it each frame (updateWalker for the plain ones). visuals names the method
@@ -863,6 +879,29 @@ const ENEMY = {
              gibs: ['g_magnet', 'g_shard', 'g_wire'], gibN: [4, 6], noAirStyle: true },
   tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visTarspit', death: 'deathTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
+  // ---- expansion: bosses ---- (boss marks a full boss: its title card and bar, and stasis, nets, gravity pulses, presses and
+  // the microwave treat it like the Smelter; bossArmour names its damageEnemy hook, run before every other foe's, and
+  // bossContact its onTouchEnemy one, which replaces all contact rules; title is its card,
+  // barNotches where its phases break, for the boss bar)
+  crucible: { key: 'crucible', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE CRUCIBLE', 'SLAG CAULDRON'], setup: 'setupCrucible', update: 'updateCrucible', visuals: 'visCrucible', death: 'deathCrucible',
+              bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 56, fh: 48, bw: 40, bh: 32, hp: 1300, sight: 1400, touch: 16, kb: 0, mech: true, noClip: true, noFreeze: true,
+              gibs: ['g_plate', 'g_plateL', 'g_slag', 'g_crust', 'g_slag', 'g_core', 'g_shard', 'g_wire'], gibN: [26, 32], gibPower: 1.6, gibSpread: 16, winDelay: 1900 },
+  grinder: { key: 'grinder', frame0: '1a', boss: true, barNotches: [0.66, 0.33], title: ['THE GRINDER', 'SCRAP MILL'], setup: 'setupGrinder', update: 'updateGrinder', visuals: 'visGrinder', death: 'deathGrinder',
+             bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 48, fh: 48, bw: 40, bh: 40, hp: 1250, sight: 1400, touch: 14, kb: 0, mech: true, noFreeze: true,
+             gibs: ['g_plate', 'g_plateL', 'g_xtooth', 'g_xtooth', 'g_shard', 'g_shard2', 'g_wire', 'g_core'], gibN: [26, 32], gibPower: 1.6, gibSpread: 16, winDelay: 1900 },
+  queen: { key: 'queen', frame0: '1a', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE HIVE QUEEN', 'BROOD MOTHER'], setup: 'setupQueen', update: 'updateQueen', visuals: 'visQueen', death: 'deathQueen',
+           bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 56, fh: 40, bw: 40, bh: 24, hp: 1150, sight: 1400, touch: 12, kb: 0, noClip: true, noFreeze: true,
+           gibs: ['g_wing', 'g_wing', 'g_egg', 'g_egg', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_hive', 'g_flesh1', 'g_chunk'], gibN: [28, 34], gibPower: 1.5, gibSpread: 16, winDelay: 1900 },
+  overseer: { key: 'overseer', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE OVERSEER', 'ALL-SEEING EYE'], setup: 'setupOverseer', update: 'updateOverseer', visuals: 'visOverseer', death: 'deathOverseer',
+              bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 48, fh: 48, bw: 32, bh: 32, hp: 1300, sight: 1400, touch: 14, kb: 0, mech: true, noClip: true, noFreeze: true,
+              gibs: ['g_plate', 'g_plateL', 'g_xlens', 'g_xlens', 'g_eye', 'g_wire', 'g_shard', 'g_emitter'], gibN: [24, 30], gibPower: 1.6, gibSpread: 14, winDelay: 1900 },
+  conductor: { key: 'conductor', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE CONDUCTOR', 'LIVE WIRE'], setup: 'setupConductor', update: 'updateConductor', visuals: 'visConductor', death: 'deathConductor',
+               bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 40, fh: 48, bw: 22, bh: 34, hp: 1200, sight: 1400, touch: 12, kb: 0, mech: true, noClip: true, noFreeze: true,
+               gibs: ['g_glass', 'g_glass2', 'g_xcoil', 'g_xcoil', 'g_wire', 'g_wire', 'g_plate', 'g_shard'], gibN: [22, 28], gibPower: 1.5, gibSpread: 12, winDelay: 1900 },
+  eggsac: { key: 'eggsac', frame0: 'e0', setup: 'setupEggsac', update: 'updateEggsac', death: 'deathEggsac', bossContact: 'xbTouch', fw: 14, fh: 16, bw: 10, bh: 13, hp: 30, sight: 400, touch: 0, kb: 0.3,
+            gibs: ['g_egg', 'g_egg', 'g_flesh1', 'g_chunk'], gibN: [5, 7], skipOneLeft: true },
+  eyenode: { key: 'eyenode', frame0: 'n0', flier: true, setup: 'setupEyenode', update: 'updateEyenode', death: 'deathEyenode', bossContact: 'xbTouch', fw: 14, fh: 14, bw: 10, bh: 10, hp: 110, sight: 600, touch: 0, kb: 0,
+             mech: true, noClip: true, noFreeze: true, gibs: ['g_emitter', 'g_shard', 'g_wire'], gibN: [5, 7], skipOneLeft: true },
 };
 const KEEPER_HOP = 290;                             // ranged keepers' hop when blocked: clears the 3-tile step stepOk lets them take (48 px needs 277 at gravity 800)
 const HUMANOIDS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].humanoid));

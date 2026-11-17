@@ -2,8 +2,8 @@
 // KC.check() goes through every kind in ENEMY. Each one is warped in on its own, in a fresh ARENA 01 stage, the way
 // a wave brings it in. It must:
 //   - have a CODEX row (body parts of another foe aside) and a texture holding its start frame and codex frame
-//   - name an update method the scene has (its per-frame brain), and if it names setup, visuals, death, armour or
-//     contact, a method the scene has too, with marks left out, 'net' or 'none'
+//   - name an update method the scene has (its per-frame brain), and if it names setup, visuals, death, armour,
+//     contact, bossArmour or bossContact, a method the scene has too, with marks left out, 'net' or 'none'
 //   - carry the right type for each value killEnemy reads off the record, and ragdoll: true exactly when RAG has
 //     ragdoll art for it
 //   - spawn on its start frame
@@ -11,7 +11,7 @@
 // KC.check(['wasp', 'tick']) checks only those. Returns { fails: [...], kinds: n }; an empty list is a pass.
 window.KC = (() => {
   const KC = {};
-  const PARTS = { wyrmseg: 'wyrm', slagmid: 'slagling', slagbit: 'slagling' };   // pieces of another foe: the codex row is the parent's
+  const PARTS = { wyrmseg: 'wyrm', slagmid: 'slagling', slagbit: 'slagling', eggsac: 'queen', eyenode: 'overseer' };   // pieces of another foe: the codex row is the parent's
   const RUN_MS = 1500, DEAD_MS = 1200;
 
   KC.check = (only) => {
@@ -28,7 +28,7 @@ window.KC = (() => {
 
       const g = T.setup(1);
       if (typeof g[D.update] !== 'function') { say(`update '${D.update}' isn't a GameScene method`); continue; }
-      const missing = ['setup', 'visuals', 'death', 'armour', 'contact'].filter(f => D[f] !== undefined && typeof g[D[f]] !== 'function');
+      const missing = ['setup', 'visuals', 'death', 'armour', 'contact', 'bossArmour', 'bossContact'].filter(f => D[f] !== undefined && typeof g[D[f]] !== 'function');
       if (missing.length) { for (const f of missing) say(`${f} '${D[f]}' isn't a GameScene method`); continue; }
       if (D.marks !== undefined && D.marks !== 'net' && D.marks !== 'none') say(`marks '${D.marks}' should be left out, 'net' or 'none'`);
       // the values killEnemy reads off the record (#145)

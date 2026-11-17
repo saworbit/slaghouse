@@ -4,7 +4,7 @@ window.CH = (() => {
   const LISTS = ['fireworks', 'stars', 'splits', 'discs', 'spores', 'souls', 'horbs', 'emines', 'bubbles', 'globs', 'nukes', 'seeds', 'pspores',
     'trips', 'bwalls', 'gluePuds', 'puddles', 'clouds', 'ragdolls', 'slashFx', 'allies', 'stasisFields', 'pylonZaps', 'shrooms', 'ices', 'horns', 'tethered', 'souls'];
   const STATIC = new Set(['pylon', 'sporepod', 'turret', 'mimic', 'burrower', 'wyrmseg', 'claw', 'hive']);
-  CH.kinds = () => Object.keys(ENEMY).filter(k => !['wyrmseg', 'slagmid', 'slagbit', 'boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'gnat', 'turret'].includes(k));
+  CH.kinds = () => Object.keys(ENEMY).filter(k => !['wyrmseg', 'slagmid', 'slagbit', 'boss', 'foreman', 'jugg', 'gunship', 'wyrm', 'gnat', 'turret'].includes(k) && !ENEMY[k].boss && k !== 'eggsac' && k !== 'eyenode');
   // check invariants; returns a list of problems
   CH.check = (g, tag) => {
     const out = [];
