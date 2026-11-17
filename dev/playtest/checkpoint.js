@@ -258,6 +258,76 @@ window.CP = (() => {
     return { fails };
   };
 
+  // Gravity Loss tells you before gravity drops and before it comes back (#190), and the Furnace vents come back on
+  // from idle, so every burst follows a grate tell (#185).
+  CP.modifierCues = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(1), full = TUNE.GRAVITY, G = () => g.physics.world.gravity.y;
+    const said = [], hear = txt => said.push({ txt, t: g.time.now });
+    BUS.on('callout', hear);
+    const callAt = txt => (said.find(c => c.txt === txt) || {}).t;
+    // Step frame by frame and note the first frame gravity moved off `from`.
+    const watch = (ms, from) => { let moved = null; for (let t = 0; t < ms; t += 17) { T.run(17); if (moved === null && G() !== from) moved = g.time.now; } return moved; };
+    try {
+      g.applyMod('lowg');
+      expect(G() === full, `gravity changed the moment Low Gravity applied (${G()})`);
+      let moved = watch(3000, full);
+      const lowCall = callAt('LOW GRAVITY!');
+      expect(lowCall !== undefined, 'Low Gravity never called LOW GRAVITY!');
+      expect(moved !== null && lowCall !== undefined && moved >= lowCall, `gravity dropped ${lowCall === undefined ? 'with no callout' : Math.round(lowCall - moved) + ' ms before LOW GRAVITY!'}`);
+      expect(G() === full * 0.5, `gravity did not settle at half within 3 s (${G()})`);
+      said.length = 0;
+      g.applyMod(null);
+      moved = watch(1000, full * 0.5);
+      const back = callAt('GRAVITY RESTORED');
+      expect(back !== undefined && moved !== null && moved >= back, `full gravity came back ${back === undefined ? 'with no GRAVITY RESTORED' : 'before GRAVITY RESTORED'}`);
+      expect(G() === full, `gravity did not settle back at full within 1 s (${G()})`);
+      // At the end of an operation WAVE CLEARED goes up in the same frame, so the cue waits for it.
+      g.applyMod('lowg'); T.run(3000); said.length = 0;
+      g.wave = 3;                                                       // Gravity Loss: no suit patch, so the cue comes 1.1 s in
+      g.waveCleared();
+      moved = watch(2000, full * 0.5);
+      const order = said.map(c => c.txt), after = callAt('GRAVITY RESTORED');
+      expect(order.indexOf('WAVE CLEARED') >= 0 && order.indexOf('GRAVITY RESTORED') > order.indexOf('WAVE CLEARED'), `GRAVITY RESTORED did not follow WAVE CLEARED: ${order.join(', ')}`);
+      expect(after !== undefined && moved !== null && moved >= after, 'gravity came back at the clear before GRAVITY RESTORED was called');
+      // MOON BOOTS is picked from the menu: low gravity from the first frame, and Slag Rain clearing keeps it.
+      g.mutator = 'lowg'; g.applyMod(null);
+      expect(G() === full * 0.5, `MOON BOOTS did not hold gravity at half (${G()})`);
+      g.mutator = null; g.applyMod(null); T.run(1000);
+
+      // The vents switch off mid-burst and come back on: they start from idle and flare the grate before firing.
+      g.setCampaignMachinery('vents'); T.run(50);
+      g.jetCycle.st = 'fire'; g.jetCycle.t = 1.5; g.jetCycle.f = 0.2;
+      g.setCampaignMachinery(null); T.run(500);
+      g.setCampaignMachinery('vents');
+      expect(g.jetCycle.st === 'idle' && g.jetCycle.t > 1, `the vents came back on in '${g.jetCycle.st}' with ${g.jetCycle.t.toFixed(2)} s left`);
+      let told = false, firedFirst = false;
+      for (let t = 0; t < 10000 && !(told && g.jetCycle.st === 'fire'); t += 17) {
+        T.run(17);
+        if (g.jetCycle.st === 'tell') told = true;
+        if (g.jetCycle.st === 'fire' && !told) firedFirst = true;
+      }
+      expect(!firedFirst, 'the vents fired before the grate flared');
+      expect(told && g.jetCycle.st === 'fire', `the vents never went through a tell and a burst after restarting ('${g.jetCycle.st}')`);
+    } finally { BUS.off('callout', hear); }
+    return { fails: [...fails, ...T.errs] };
+  };
+
+  // A run reset clears a DOUBLE KILL ... MASSACRE still on screen (#180).
+  CP.hudReset = () => {
+    const [fails, expect] = checker();
+    RUNMODE = 'campaign'; OPTS.diff = 1; OPTS.mut = 0;
+    T.boot();
+    const g = T.setup(0), hud = game.scene.getScene('Hud');
+    hud.showMulti('TRIPLE KILL', 3); T.run(100);
+    expect(hud.mkLbl.alpha === 1, 'test setup: the multi-kill label did not show');
+    g.restartRun(); T.run(100);
+    expect(hud.mkLbl.alpha === 0, `the multi-kill label was still up after a restart (alpha ${hud.mkLbl.alpha})`);
+    return { fails: [...fails, ...T.errs] };
+  };
+
   CP.linkerRecovery = () => {
     const [fails, expect] = checker();
     RUNMODE = 'campaign'; OPTS.diff = 1;
