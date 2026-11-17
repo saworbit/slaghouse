@@ -162,13 +162,15 @@ name an `armour` method on its record, which `damageEnemy` calls just before the
 `contact` method that replaces the plain bite when it touches you. Armour whose place in the damage order matters
 differently still goes in `damageEnemy` itself.
 
-A full boss also sets `boss: true` (its title card and bar, and the Smelter's treatment from stasis, nets, gravity
-pulses, presses and the microwave), `title: [name, subtitle]` for the card and `barNotches` for its phase marks on
-the boss bar. Its own hooks are `bossArmour` and `bossContact`: they run before every other kind's, and
-`bossContact` replaces all contact rules. Add it to `RUSH` and `RUSH_SUBS` for BOSS RUSH, `OT_BOSSES` for OVERTIME's
-sixth wave, `SWARM_SKIP` and `NO_ELITE`, and give it phase checks in the mob sweep in `dev/playtest/lab-sweep.js`.
-Scattered kind lists still name the older bosses (for example a Banner's heal), so search for `'foreman'` and add
-`|| e.def.boss` where a new boss should be left out too.
+A full boss sets `boss: true` and a mini-boss `miniBoss: true`. Every shared rule reads those flags, never the kind
+(#177): neither is made an elite, doubled by SWARM, made to panic when it burns, frozen by stasis, hasted by an
+Overclocker, healed by a Welder, Mender or Banner, or yanked by the hook or the tractor. Each takes 60 at most from a
+press and a short net hold. A boss is never tethered by a Linker; a mini-boss is, unless it passes through walls. A
+boss with `title: [name, subtitle]` gets the title card, the boss bar and the camera on its warp-in, with
+`barNotches` for its phase marks. Its own hooks are `bossArmour` and `bossContact`: they run before every other
+kind's, and `bossContact` replaces all contact rules. Then add it to `RUSH` and `RUSH_SUBS` for BOSS RUSH and
+`OT_BOSSES` for OVERTIME's sixth wave, and give it phase checks in the mob sweep in `dev/playtest/lab-sweep.js`.
+`SWARM_SKIP` and `NO_ELITE` build themselves from the flags.
 
 A run mode is one record in `RUN_MODES`. The comment above it lists every rule a record carries: its waves and
 music, its start and restart, its difficulty and mutator, and its results screen. `dev/playtest/modes.js` plays every
