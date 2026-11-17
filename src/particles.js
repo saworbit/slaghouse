@@ -8,9 +8,14 @@ class FX {
     this.gN = scene.add.graphics().setDepth(depth);
     this.gA = scene.add.graphics().setDepth(depth + 1).setBlendMode(ADD);
     this.pool = []; this.live = []; this.solid = null; this.paint = null;
+    // twin: a second FX that takes the cosmetic emits. Sharing one list, a cosmetic particle's fxRandom lifetime set
+    // when the seeded ones swap places in it, so the order they painted the level in (and drew Math.random for it)
+    // shifted with any cosmetic change, and the seeded campaigns with it.
+    this.twin = null;
     for (let i = 0; i < max; i++) this.pool.push({});
   }
   emit(x, y, o) {                                     // o.cosmetic: draw from fxRandom, leaving the seeded Math.random alone
+    if (o.cosmetic && this.twin) return this.twin.emit(x, y, o);     // ...and live in the twin's list (see the constructor)
     const n = o.n || 1, spread = o.spread === undefined ? Math.PI * 2 : o.spread, ang = o.angle || 0, j = o.jitter || 0;
     const r = o.cosmetic ? fxRandom : Math.random, rr = (a, b) => a + r() * (b - a);
     for (let i = 0; i < n; i++) {
