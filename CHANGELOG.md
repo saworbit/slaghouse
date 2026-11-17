@@ -289,6 +289,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Fixed
 
+- Electric arcs from breakable props last as long as they should, and the shrink ray's beam shows. Both used one list
+  with clocks running opposite ways: arcs shorter than 0.15 s never expired (a capacitor's idle sparks piled up to
+  dozens until a hit-stop cleared them), longer ones (a capacitor going off, a puddle going live) vanished at once,
+  and the shrink ray's beam was deleted before it was ever drawn. The shrink ray keeps its own list now. Lightning
+  jitter (`zap`, `zapCol`) draws from the cosmetic random source, so drawing arcs no longer moves the seeded runs.
 - The page no longer sits black while about 6 MB of scripts load. A static SLAGHOUSE / LOADING screen paints first,
   the scripts moved below it, and the audio banks are deferred so they don't hold up that paint (they still load
   before the title starts its audio). If Phaser can't load, the same screen says so in the game's colours with a
