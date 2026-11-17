@@ -183,7 +183,7 @@ class TitleScene extends Phaser.Scene {
     this.armCount = new PixelLabel(this, 480, 96, 'title_arc', { maxChars: 28, scale: 2, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21);
     this.mutDesc = new PixelLabel(this, 480, 482, 'title_mutd', { maxChars: 44, scale: 2, color: '#c8a0ff', shadow: sh, originY: 0.5 }).setDepth(21);
     this.optLbls = OPTION_ITEMS.map(({ id }, i) => new PixelLabel(this, 480, 124 + i * 34, 'title_op_' + id, { maxChars: 28, scale: 3, color: '#c6ced8', shadow: sh, originY: 0.5 }).setDepth(21));
-    this.keyRows = [...BIND_ROWS, ['reset', 'RESET ALL TO DEFAULTS'], ['back', 'BACK']];
+    this.keyRows = [...BIND_ROWS, ...PAD_ROWS.map(([id, label]) => ['pad.' + id, 'PAD ' + label]), ['reset', 'RESET ALL TO DEFAULTS'], ['back', 'BACK']];
     this.keyLbls = Array.from({ length: 12 }, (_, j) => new PixelLabel(this, 480, 106 + j * 29, 'title_key' + j, { maxChars: 44, scale: 2.5, color: '#8f9bab', shadow: sh, originY: 0.5 }).setDepth(21));
     this.keyNote = new PixelLabel(this, 480, 470, 'title_keyn', { maxChars: 64, scale: 1.75, color: '#ffb347', shadow: sh, originY: 0.5 }).setDepth(21);
     this.campaignCards = CAMPAIGN_ACTS.map((act, i) => {
@@ -261,7 +261,7 @@ class TitleScene extends Phaser.Scene {
       const N = this.keyRows.length, top = clamp(this.subSel - 5, 0, N - this.keyLbls.length);
       this.keyLbls.forEach((o, j) => {
         const i = top + j, [name, label] = this.keyRows[i], sel = i === this.subSel;
-        const keys = BINDS[name] ? BINDS[name].map(keyLabel).join(' / ') : '';
+        const keys = BINDS[name] ? BINDS[name].map(keyLabel).join(' / ') : name.startsWith('pad.') ? padLabel(name.slice(4)) : '';
         const text = this.capture === name ? label.padEnd(24) + '...' : keys ? label.padEnd(24) + keys : label;
         o.setText(sel ? '> ' + text : text).setStyle({ color: this.capture === name ? '#76e8ff' : sel ? '#ffe46a' : '#8f9bab' });
       });
@@ -284,7 +284,9 @@ class TitleScene extends Phaser.Scene {
         const d = { up: -1, down: 1, pgup: -10, pgdn: 10 }[a];
         this.subSel = Math.abs(d) > 1 ? clamp(this.subSel + d, 0, N - 1) : (this.subSel + d + N) % N; Sfx.swap();
       } else if (a === 'ok' && row === 'reset') {
-        BINDS = loadBinds.defaults(); this.bindsChanged('ALL KEYS ARE BACK ON THEIR DEFAULTS');
+        BINDS = loadBinds.defaults(); PAD_BINDS = padDefaults(); this.bindsChanged('ALL KEYS AND PAD BUTTONS ARE BACK ON THEIR DEFAULTS');
+      } else if (a === 'ok' && row.startsWith('pad.')) {
+        this.capture = row; this.keyNote.setText('PRESS A PAD BUTTON FOR ' + padRow(row.slice(4)) + '   ESC KEEPS ' + padLabel(row.slice(4))); Sfx.ui();
       } else if (a === 'ok') { this.capture = row; this.keyNote.setText('PRESS A KEY FOR ' + bindRow(row) + '   ESC KEEPS ' + BINDS[row].map(keyLabel).join(' / ')); Sfx.ui(); }
       this.refreshSub();
       return;
@@ -335,6 +337,10 @@ class TitleScene extends Phaser.Scene {
   }
   keysKey(ev) {                                    // true when the KEYS page used the key, so onTitleKey skips it
     if (!this.capture) return false;
+    if (this.capture.startsWith('pad.')) {           // waiting for a pad button: Esc keeps the old one, other keys do nothing
+      if (ev.code === 'Escape') { const id = this.capture.slice(4); this.capture = null; Sfx.ui(); this.keyNote.setText(padRow(id) + ' STAYS ON ' + padLabel(id)); this.refreshSub(); }
+      return true;
+    }
     const name = this.capture, code = ev.code;
     this.capture = null;
     if (!code || code === 'Escape') { Sfx.ui(); this.keyNote.setText(bindRow(name) + ' STAYS ON ' + bindLabel(name)); this.refreshSub(); return true; }
@@ -347,6 +353,13 @@ class TitleScene extends Phaser.Scene {
     }
     this.bindsChanged(note);
     return true;
+  }
+  padBind(b) {                                     // the pad button pressed for the row waiting on one; it swaps with the action that had it
+    const id = this.capture.slice(4), old = PAD_BINDS[id], other = Object.keys(PAD_BINDS).find(k => k !== id && PAD_BINDS[k] === b);
+    this.capture = null;
+    if (b === old) { Sfx.ui(); this.keyNote.setText(padRow(id) + ' STAYS ON ' + PAD_NAMES[b]); this.refreshSub(); return; }
+    PAD_BINDS = { ...PAD_BINDS, [id]: b, ...(other ? { [other]: old } : {}) };
+    this.bindsChanged(padRow(id) + ' ON ' + PAD_NAMES[b] + (other ? '   ' + padRow(other) + ' MOVED TO ' + PAD_NAMES[old] : ''));
   }
   bindsChanged(note) { saveBinds(); bindTexts(); BUS.emit('binds'); Sfx.ui(); this.keyNote.setText(note); this.refreshSub(); }
   menuPick(i) {
@@ -462,7 +475,9 @@ class TitleScene extends Phaser.Scene {
     if (this.rotateNote) this.rotateNote.setVisible(this.coarse && window.innerHeight > window.innerWidth);
     if (this.menuItems && !this.started && !LAB_PANEL.isOpen()) {        // the pad drives the menu and its pages
       const my = PAD.menuY(), mx = PAD.menuX();
-      if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
+      const padWait = this.sub === 'keys' && !!this.capture?.startsWith('pad.'), pressed = padWait ? PAD_NAMES.findIndex((_, b) => PAD.jd(b)) : -1;
+      if (padWait) { if (pressed >= 0) this.padBind(pressed); }         // the KEYS page is waiting on a pad button
+      else if (this.sub) { if (my) this.subKey(my < 0 ? 'up' : 'down'); if (mx) this.subKey(mx < 0 ? 'left' : 'right'); if (PAD.jd(0)) this.subKey('ok'); if (PAD.jd(1)) this.subKey('back'); }
       else { if (my) { const n = this.menuItems.length; this.menuSel = (this.menuSel + my + n) % n; Sfx.swap(); } if (mx) this.stepDiff(mx); if (PAD.jd(3)) this.menuPick(1); else if (PAD.jd(0) || PAD.jd(9)) this.menuPick(this.menuSel); }
     }
     if (this.menuItems) this.drawMenu(time);

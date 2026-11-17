@@ -308,8 +308,9 @@ const MUTATORS = [
 ];
 const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
-//  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
-//  D-pad up/down cycle weapons, Start pause. Menus: D-pad / LS, A pick, B back.
+//  LS move (down + jump drops), RS aim, and by default RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry,
+//  hold LB wheel, D-pad up/down cycle weapons, Start pause; OPTIONS > KEYS rebinds those (PAD_BINDS, #167).
+//  Menus always take D-pad / LS, A pick, B back, and the D-pad's left and right always move.
 const PAD = {
   b: [], prev: [], ax: [0, 0, 0, 0], on: false, active: false, gp: null, stickY: 0, prevStickY: 0, stickX: 0, prevStickX: 0, rumbleAt: 0,
   poll() {
@@ -325,6 +326,9 @@ const PAD = {
   },
   down(i) { return (this.b[i] || 0) > 0.4; },
   jd(i) { return this.down(i) && !((this.prev[i] || 0) > 0.4); },
+  held(id) { return this.down(PAD_BINDS[id]); },                        // an in-run action, on whatever button it's bound to
+  hit(id) { return this.jd(PAD_BINDS[id]); },
+  pull(id) { return this.b[PAD_BINDS[id]] || 0; },                      // how far its button or trigger is in
   menuY() { return this.jd(12) || (this.stickY < 0 && this.prevStickY >= 0) ? -1 : this.jd(13) || (this.stickY > 0 && this.prevStickY <= 0) ? 1 : 0; },
   menuX() { return this.jd(14) || (this.stickX < 0 && this.prevStickX >= 0) ? -1 : this.jd(15) || (this.stickX > 0 && this.prevStickX <= 0) ? 1 : 0; },
   rumble(ms, k) {                                                       // a buzz in the hands for hits and blasts (follows the screen-shake setting)
@@ -691,7 +695,25 @@ function loadBinds() {                             // a saved binding wins only 
 }
 loadBinds.defaults = () => Object.fromEntries(Object.entries(BIND_DEFAULTS).map(([n, c]) => [n, c.slice()]));
 let BINDS = loadBinds();
-function saveBinds() { try { localStorage.setItem('slaghouse.binds', JSON.stringify(BINDS)); } catch (err) { /* private mode */ } }
+// The pad's in-run actions, top to bottom on the KEYS page after the keys, each with its standard-mapping button (#167).
+// Any of buttons 0-13 can take one (BACK, the stick clicks and the D-pad's up and down too); a button does one job.
+const PAD_ROWS = [
+  ['jump', 'JUMP', 0], ['dash', 'DASH', 1], ['kick', 'KICK', 2], ['hook', 'HOOK', 3], ['fire', 'FIRE', 7], ['mine', 'MINE', 6],
+  ['sentry', 'SENTRY', 5], ['wheel', 'WEAPON WHEEL', 4], ['prev', 'PREVIOUS WEAPON', 12], ['next', 'NEXT WEAPON', 13], ['pause', 'PAUSE', 9],
+];
+const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'BACK', 'START', 'LS', 'RS', 'DPAD UP', 'DPAD DOWN'];   // the buttons a binding can use
+const padDefaults = () => Object.fromEntries(PAD_ROWS.map(([id, , b]) => [id, b]));
+function loadPadBinds() {                          // saved with the keys; kept only if every action has its own button
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('slaghouse.binds') || 'null')?.pad; } catch (err) { /* private mode or junk */ }
+  const ids = PAD_ROWS.map(([id]) => id), ok = isObj(saved) && ids.every(id => Number.isInteger(saved[id]) && saved[id] >= 0 && saved[id] < PAD_NAMES.length) &&
+    new Set(ids.map(id => saved[id])).size === ids.length;
+  return ok ? Object.fromEntries(ids.map(id => [id, saved[id]])) : padDefaults();
+}
+let PAD_BINDS = loadPadBinds();
+function saveBinds() { try { localStorage.setItem('slaghouse.binds', JSON.stringify({ ...BINDS, pad: PAD_BINDS })); } catch (err) { /* private mode */ } }
+const padLabel = id => PAD_NAMES[PAD_BINDS[id]];
+const padRow = id => PAD_ROWS.find(r => r[0] === id)[1];
 const bindLabel = name => keyLabel(BINDS[name][0]);
 const bindRow = name => (BIND_ROWS.find(r => r[0] === name) || [name, name])[1];
 const SLOT_KEYS = [];                              // the HUD's short label per weapon slot (< = backspace); wheel-only guns get a space

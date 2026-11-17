@@ -7,6 +7,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Gamepad remapping** on OPTIONS > KEYS. The PAD rows after the keys rebind jump, dash, kick, hook, fire, mine,
+  sentry, the weapon wheel, weapon cycling and pause to any of the pad's face buttons, bumpers, triggers, BACK, START,
+  the stick clicks or the D-pad's up and down. A button does one job, so the action that had it takes the old button,
+  and RESET ALL resets the pad too. The buttons save with the keys, and the hint strip, the CONTROLS page and the
+  weapon cards name them. Menus keep A to pick and B to go back. `run.mjs` checks a remap with a stubbed pad (#167).
 - A play-test check that a Gunship can cross every campaign and OVERTIME arena at its cruise height. It fails, naming
   the arena and the columns, if solid tiles, crates or girders cross the rows its body fills there, as the Furnace's
   and the Sorting Line's ceiling pillars did before #194 and #195 (#200).
