@@ -10,15 +10,16 @@ class FX {
     this.pool = []; this.live = []; this.solid = null; this.paint = null;
     for (let i = 0; i < max; i++) this.pool.push({});
   }
-  emit(x, y, o) {
+  emit(x, y, o) {                                     // o.cosmetic: draw from fxRandom, leaving the seeded Math.random alone
     const n = o.n || 1, spread = o.spread === undefined ? Math.PI * 2 : o.spread, ang = o.angle || 0, j = o.jitter || 0;
+    const r = o.cosmetic ? fxRandom : Math.random, rr = (a, b) => a + r() * (b - a);
     for (let i = 0; i < n; i++) {
       const p = this.pool.pop(); if (!p) return;
-      const a = ang + (Math.random() - 0.5) * spread, sp = rand(o.speed[0], o.speed[1]);
-      p.x = x + (j ? rand(-j, j) : 0); p.y = y + (j ? rand(-j, j) : 0);
+      const a = ang + (r() - 0.5) * spread, sp = rr(o.speed[0], o.speed[1]);
+      p.x = x + (j ? rr(-j, j) : 0); p.y = y + (j ? rr(-j, j) : 0);
       p.vx = Math.cos(a) * sp + (o.vx || 0); p.vy = Math.sin(a) * sp + (o.vy || 0);
-      p.max = p.life = rand(o.life[0], o.life[1]);
-      p.s0 = o.size[0]; p.s1 = o.size[1]; p.cols = o.cols; p.fixed = o.randCol ? pick(o.cols) : undefined;
+      p.max = p.life = rr(o.life[0], o.life[1]);
+      p.s0 = o.size[0]; p.s1 = o.size[1]; p.cols = o.cols; p.fixed = o.randCol ? o.cols[(r() * o.cols.length) | 0] : undefined;
       p.a0 = o.alpha ? o.alpha[0] : 1; p.a1 = o.alpha ? o.alpha[1] : 1;
       p.g = o.g || 0; p.drag = o.drag || 0; p.add = !!o.add; p.mode = o.mode || 0;
       this.live.push(p);
