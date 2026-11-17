@@ -246,10 +246,49 @@ const TUNE = {
   // ---- gold round ----
   SEED:      { cooldown: 1200, speed: 260, max: 2, grow: 1, life: 9, cd: 1.6, range: 220, dmg: 8, spore: 150 },
   TETHER:    { cooldown: 300, speed: 600, max: 3, share: 0.6, life: 8, dmg: 6 },
+  // ---- expansion: weapons ----
+  CANNON:    { cooldown: 1100, speed: 400, lift: 40, grav: 560, dmg: 60, pierce: 3, keep: 0.72, knock: 360, recoil: 300, jump: 400, maxRise: 520, tile: 80, life: 2.4 },
+  QUAKE:     { cooldown: 900, speed: 280, range: 400, dmg: 24, launch: 390, juggle: 1.4, bonus: 1.5, tile: 10 },
+  PHASE:     { cooldown: 280, speed: 820, dmg: 22, range: 560, pierce: 3, head: 1.5 },
+  BALLLIGHT: { cooldown: 1300, speed: 70, life: 2.5, reach: 80, n: 3, rate: 0.22, dmg: 7,
+               boom: { radius: 44, maxDamage: 45, minDamage: 15, selfDamage: 8, push: 240, maxRise: 320, tileDamage: 20, style: 'arc' } },
+  CYCLONE:   { cooldown: 1500, speed: 260, lift: 60, walk: 70, life: 3, reach: 44, maxHp: 140, dps: 15, fling: 420, max: 2 },
+  CALTROP:   { cooldown: 650, n: 7, speed: 230, fan: 0.5, life: 8, dmg: 9, slow: 0.55, slowT: 1, cd: 0.45, max: 42 },
+  SPEAR:     { cooldown: 950, speed: 640, range: 320, dmg: 35, light: 140, yank: 470, pull: 480, reelT: 0.7, carry: 2 },
+  HEATRAY:   { cooldown: 50, range: 210, dmg0: 1.2, dmg1: 6, ramp: 1.8, heat: 3.2, cool: 1.5, vent: 1.6, burn: 1.5 },
+  BARRAGE:   { cooldown: 2400, speed: 300, lift: 70, delay: 0.7, shells: 6, gap: 0.28, step: 32, tell: 0.55,
+               blast: { radius: 34, maxDamage: 48, minDamage: 14, selfDamage: 10, push: 300, maxRise: 400, tileDamage: 50 } },
+  HYDRO:     { cooldown: 55, range: 140, cone: 8, dmg: 1, push: 340, soak: 5, zap: 1.5, chill: 1.8, pud: 0.3 },
   CINDER:    { speed: 150, hop: 260, trail: 1.6, owned: 1.5, ownSpeed: 260, ownDmg: 40 },
   GATLING:   { speed: 35, keep: [140, 260], spin: 0.9, burst: 2.2, rate: 0.07, dmg: 5, turn: 1.2, cool: 1.5, front: 0.6, hot: 1.5 },
+  // ---- expansion: enemies ----
+  FLAILER:   { speed: 50, close: 26, keep: 60, r: 32, spin: 5.5, windSpin: 12, windMs: 550, cd: [2.8, 3.8], reach: 165, throwSpeed: 420, reel: 460, hit: 12, ehit: 10, throwDmg: 22, ethrowDmg: 20 },
+  HOSER:     { speed: 85, keep: [80, 160], range: 190, braceMs: 450, spray: 1.1, turn: 1.8, blast: 340, push: 2600, dmg: 3, tick: 0.3, soak: 1.6, cd: [2.4, 3.2], tank: 72 },
+  DEMO:      { speed: 175, lightMs: 700, fuse: 3, hop: 300, drop: 0.7,
+               boom: { radius: 52, maxDamage: 36, minDamage: 10, enemyDamage: 40, selfDamage: 30, push: 400, maxRise: 500, enemy: true, tileDamage: 90 },
+               shot: { radius: 56, maxDamage: 40, minDamage: 12, enemyDamage: 70, selfDamage: 24, push: 420, maxRise: 520, enemy: true, tileDamage: 90 } },
+  PANZER:    { speed: 38, keep: [150, 260], turnMs: 900, gunTurn: 1.8, aimMs: 650, flight: 1.1, cd: [3.4, 4.4], coaxAt: 120, burst: 4, gap: 0.08, coaxDmg: 5, coaxCd: 2.2,
+               front: 0.35, rear: 1.5, top: 1.5, boom: { radius: 50, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 360, maxRise: 460, tileDamage: 60, scenery: true } },
+  REAPER:    { speed: 70, rush: 110, at: 120, tellMs: 700, whirl: 1.2, drive: 185, r: 20, tick: 0.2, dmg: 9, edmg: 10, dizzy: 1.6, take: 1.75, cd: [2, 3] },
+  GULL:      { speed: 95, alt: 105, orbit: 80, screamMs: 520, dive: [0.45, 0.85], rake: 14, cd: [2.4, 3.4], bonk: 0.8 },
+  OVERCLOCK: { speed: 60, keep: [160, 260], range: 150, links: 3, charge: 0.5, haste: 1.35 },
+  REFRACTOR: { cd: [2.8, 3.6], tellMs: 900, fireMs: 250, bounces: 2, range: 760, dmg: 20, edmg: 15, near: 6, bank: 0.5 },
+  MIRAGE:    { speed: 80, keep: [140, 240], fireCd: [2, 2.6], volley: 3, gap: 0.16, boltSpeed: 220, dmg: 6, castMs: 600, castCd: [6, 8], spread: 56, life: 12 },
+  CLINGER:   { speed: 150, hold: 2, throwSpeed: 420, flight: 1.2,
+               boom: { radius: 40, maxDamage: 30, minDamage: 10, enemyDamage: 30, selfDamage: 28, push: 320, maxRise: 420, enemy: true, tileDamage: 50 },
+               thrown: { radius: 44, maxDamage: 60, minDamage: 20, selfDamage: 12, push: 340, maxRise: 440, tileDamage: 60 },
+               pop: { radius: 26, maxDamage: 14, minDamage: 4, enemyDamage: 14, selfDamage: 12, push: 220, maxRise: 300, enemy: true, tileDamage: 20 } },
   BANNER:    { speed: 40, keep: [200, 300], radius: 150, heal: 5, plant: 6 },
   FOREMAN:   { speed: 40, rage: 62, cd: 2.2, slamTell: 700, slamDmg: 22, spray: 3, magnet: 1.6, pull: 110, maxHounds: 4, core: 1.3 },
+  // ---- expansion: bosses ----
+  CRUCIBLE:  { alt: 92, speed: 70, cd: 2.4, pourTell: 0.85, pour: 0.45, wave: { speed: 165, dmg: 18, h: 14 }, bombs: [3, 4, 5], bombTell: 0.6,
+               floodTell: 1.4, flood: 3.5, floodW: 230, floodDmg: 7, ventTell: 0.7, vent: 2.6, core: 2, rain: 0.9 },
+  GRINDER:   { roll: [150, 205, 235], rev: [0.75, 0.6, 0.5], bounces: [1, 2, 2], touch: 26, climb: 150, climbH: 112, hang: 0.55, slam: 24,
+               blades: [2, 3, 4], bladeTell: 0.5, bladeSpeed: 230, bladeDmg: 14, rut: 3, rutDmg: 5, bare: 1.35 },
+  QUEEN:     { alt: 120, speed: 95, cd: 2.4, eggs: [2, 3, 3], eggMax: 6, hatch: 4.5, layTell: 0.5, screech: 0.7, lock: 0.25, dive: 360, diveDmg: 22, spitTell: 0.45, globs: 5, escort: 6, frenzy: 1.35 },
+  OVERSEER:  { alt: 115, speed: 60, cd: 2.2, orbit: 36, spin: 1.4, sweepTell: 1.1, sweep: 2.2, arc: 1.4, beamDmg: 16, drones: 2, maxDrones: 3, gridTell: 1.3, grid: 0.9, gridDmg: 18, slot: 40 },
+  CONDUCTOR: { alt: 100, cd: 1.9, blinkTell: 0.7, blinkDmg: 10, castTell: 0.65, lock: 0.25, chainDmg: 12, chainHop: 90, floorTell: 1.2, floorLive: 1.3, floorDmg: 7,
+               orbs: [2, 3, 4], orbSpeed: 55, orbLife: 6.5, orbDmg: 14, arcR: 34, arcDmg: 6, over: 0.65 },
 };
 const DIFFS = [                                        // title screen: left / right picks one
   { name: 'EASY', dmg: 0.6, hp: 0.8, score: 0.7 },
@@ -267,7 +306,7 @@ const MUTATORS = [
   { id: 'dark', name: 'LIGHTS OUT', d: 'EVERY WAVE IN THE DARK.' },
   { id: 'vamp', name: 'VAMPIRE', d: 'EVERY KILL HEALS 4. NO MEDKITS.' },
 ];
-const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship']);   // SWARM never doubles (or thins) a boss
+const SWARM_SKIP = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'gunship', 'crucible', 'grinder', 'queen', 'overseer', 'conductor']);   // SWARM never doubles (or thins) a boss
 const dailyArena = (day = dayKey()) => Math.floor(seeded(day)() * ARENAS.length);   // the DAILY's arena: the same for everyone that day
 // ---- gamepad (standard mapping): polled once per game step so every scene sees the same just-pressed edges ----
 //  LS move (down + A drops), RS aim, RT fire, LT mine, A jump, B dash, X kick, Y hook, RB sentry, hold LB wheel,
@@ -327,6 +366,7 @@ const MEDALS = [
   { id: 'slayer', name: 'SLAG SLAYER', d: 'BEAT THE SMELTER' },
   { id: 'speed', name: 'SPEEDRUNNER', d: 'WIN IN UNDER 10 MINUTES IN ONE RUN' },
   { id: 'ironclad', name: 'IRONCLAD', d: 'WIN ON BRUTAL' },
+  { id: 'management', name: 'NEW MANAGEMENT', d: 'DOWN THE FIVE NEW BOSSES IN ONE RUN' },
 ];
 const mutTag = r => { const m = r && r.mut && MUTATORS.find(o => o.id === r.mut); return m ? '  ' + m.name : ''; };   // '  GLASS CANNON' for a record set with a mutator on
 // ---- saved progress: read the stored value again right before writing, so two tabs on this origin add up instead of overwriting each other ----
@@ -451,8 +491,23 @@ const CODEX = [
   ['cinder', 'CINDER WHEEL', 'w0', 'A BURNING WHEEL THAT ROLLS AND HOPS. KICK IT BACK AT THEM.'],
   ['gatling', 'GATLING', 'w0', 'SPINS UP, THEN HOSES YOU. OUTRUN THE STREAM; HIT IT WHEN HOT.'],
   ['banner', 'BANNER', 'w0', 'PLANTS A BANNER THAT HEALS EVERY FOE NEAR IT. TAKE IT DOWN.'],
+  ['flailer', 'FLAILER', 'w0', 'WHIRLS A SPIKED BALL ROUND ITSELF, THEN HURLS IT. GET INSIDE.'],
+  ['hoser', 'HOSER', 'w0', 'ITS JET BLASTS YOU BACK AND SOAKS YOU. ITS TANK LEAVES A PUDDLE.'],
+  ['demo', 'DEMO RUNNER', 'r0', 'SPRINTS AT YOU WITH LIT DYNAMITE. SHOOT THE BUNDLE FIRST.'],
+  ['panzer', 'PANZER', 'w0', 'MINI-TANK THAT LOBS SHELLS. ARMOURED UP FRONT: GET BEHIND IT.'],
+  ['reaper', 'REAPER', 'w0', 'WHIRLS ITS SCYTHES AT YOU, THEN REELS. HIT IT WHILE IT IS DIZZY.'],
+  ['gull', 'GULL', 'f0', 'CIRCLES HIGH, SCREECHES, THEN SWOOPS TO RAKE YOU.'],
+  ['overclock', 'OVERCLOCKER', 'o0', 'BEAMS HASTE INTO THREE FOES. KILL IT AND THE LINKS SNAP.'],
+  ['refractor', 'REFRACTOR', 'p0', 'BANKS A LASER OFF TWO WALLS. THE THIN LINE SHOWS ITS PATH.'],
+  ['mirage', 'MIRAGE', 'w0', 'PROJECTS TWO DECOYS OF ITSELF. ONLY THE REAL ONE BLEEDS.'],
+  ['clinger', 'CLINGER', 'c0', 'CLAMPS ON AND BLOWS. KICK OR DASH IT OFF AT THEM.'],
   ['foreman', 'THE FOREMAN', 'w0', 'OVERTIME BOSS. SLAMS, SPRAYS RIVETS, MAGNETS YOU IN, CALLS HOUNDS.'],
   ['boss', 'THE SMELTER', 'w0', 'THE FOUNDRY WARDEN. MORTARS, SLAMS, SLAG BREATH, OVERHEAT.'],
+  ['crucible', 'THE CRUCIBLE', '1i', 'BOSS. POURS SLAG WAVES, FLOODS THE FLOOR, VENTS ITS HOT CORE.'],
+  ['grinder', 'THE GRINDER', '1a', 'BOSS. ROLLS AT YOU, CLIMBS WALLS TO DROP ON YOU, THROWS SAWS.'],
+  ['queen', 'THE HIVE QUEEN', '1a', 'BOSS. LAYS EGGS THAT HATCH, DIVES WITH A SCREECH, SPITS ACID.'],
+  ['overseer', 'THE OVERSEER', '1i', 'BOSS. SHOOT OFF ITS FOUR SHIELD NODES. DODGE THE DEATH LASER.'],
+  ['conductor', 'THE CONDUCTOR', '1i', 'BOSS. BLINKS, CHAIN LIGHTNING, LIVE FLOORS, BALL LIGHTNING.'],
 ];
 const SEEN = new Set(Store.get('slaghouse.seen', Array.isArray, []));
 const markSeen = kind => {                                // adds to the stored list, so another tab's sightings stay
@@ -543,6 +598,17 @@ const WEAPONS = [
   Object.assign({ id: 'dragon', name: "DRAGON'S BREATH", gun: 'dragon' }, TUNE.DRAGON),
   Object.assign({ id: 'seed', name: 'SEED LAUNCHER', gun: 'seed' }, TUNE.SEED),
   Object.assign({ id: 'tether', name: 'TETHER GUN', gun: 'tether' }, TUNE.TETHER),
+  // ---- expansion: weapons (wheel-only; the campaign never issues them) ----
+  Object.assign({ id: 'cannon', name: 'HAND CANNON', gun: 'cannon' }, TUNE.CANNON),
+  Object.assign({ id: 'quake', name: 'SEISMIC LAUNCHER', gun: 'quake' }, TUNE.QUAKE),
+  Object.assign({ id: 'phase', name: 'PHASE RIFLE', gun: 'phase' }, TUNE.PHASE),
+  Object.assign({ id: 'balllight', name: 'BALL LIGHTNING', gun: 'balllight' }, TUNE.BALLLIGHT),
+  Object.assign({ id: 'cyclone', name: 'CYCLONE LAUNCHER', gun: 'cyclone' }, TUNE.CYCLONE),
+  Object.assign({ id: 'caltrop', name: 'CALTROP SCATTER', gun: 'caltrop' }, TUNE.CALTROP),
+  Object.assign({ id: 'spear', name: 'SPEAR GUN', gun: 'spear' }, TUNE.SPEAR),
+  Object.assign({ id: 'heatray', name: 'HEAT RAY', gun: 'heatray' }, TUNE.HEATRAY),
+  Object.assign({ id: 'barrage', name: 'BARRAGE BEACON', gun: 'barrage' }, TUNE.BARRAGE),
+  Object.assign({ id: 'hydro', name: 'HYDRO CANNON', gun: 'hydro' }, TUNE.HYDRO),
 ];
 // one line per gun for the weapon wheel
 const BLURBS = {
@@ -570,6 +636,12 @@ const BLURBS = {
   shield: 'HOLD: BLOCK, REFLECT. LET GO: BASH.', glue: 'GLUE GLOBS. GUMMED-UP FOES CRAWL.',
   nuke: 'ONE SLOW SHELL. ONE VERY BIG BANG.', dragon: 'BURNING BUCKSHOT. SETS FLOORS ALIGHT.',
   seed: 'PLANTS A FUNGUS THAT SPORES FOES.', tether: 'LINK 3 FOES. HURT ONE, HURT ALL.',
+  // ---- expansion: weapons ----
+  cannon: 'IRON BALL. PLOWS ROWS, CRUSHES CRATES.', quake: 'A FLOOR QUAKE. POPS FOES UP: JUGGLE.',
+  phase: 'BOLTS THAT PASS THROUGH WALLS.', balllight: 'A DRIFTING ORB THAT ARCS TO 3 FOES.',
+  cyclone: 'A TORNADO THAT SPINS FOES, THEN FLINGS.', caltrop: 'FLOOR SPIKES. FOES LIMP AND BLEED.',
+  spear: 'SKEWER, REEL IN, BOOT. PINS THE DEAD.', heatray: 'HOLD ON A FOE: IT BURNS HOTTER. VENTS.',
+  barrage: 'A BEACON. SHELLS WALK OUT FROM IT.', hydro: 'SHOVES, DOUSES, SOAKS. ZAP THE WET.',
 };
 // Keyboard bindings (#109). The scene reads keys by name (this.keys.W, this.jd.SPACE), and each name sits on one or two
 // physical keys by KeyboardEvent.code, so WASD, the number row and the punctuation weapon keys stay where they are on
@@ -631,7 +703,8 @@ slotLabels();
 // elite foes: one trait each, a coloured aura and a diamond over the head
 const ELITE_KINDS = ['armored', 'shielded', 'volatile', 'regen'];
 const ELITE_COL = { armored: 0x9ab8d8, shielded: 0x46e6ff, volatile: 0xff6a20, regen: 0x5cff7a };
-const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit']);
+const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship', 'hive', 'turret', 'mimic', 'echo', 'burrower', 'gnat', 'slagling', 'slagmid', 'slagbit', 'demo', 'mirage', 'clinger',
+  'crucible', 'grinder', 'queen', 'overseer', 'conductor', 'eggsac', 'eyenode']);
 // One record per foe kind: stats, hitbox and gibs, plus what the scene looks up by kind: frame0 is the frame it
 // spawns on, flier means no gravity and air spawn points, humanoid means head shots, cover and alerts, and update
 // names the GameScene method that runs it each frame (updateWalker for the plain ones). visuals names the method
@@ -639,8 +712,11 @@ const NO_ELITE = new Set(['boss', 'foreman', 'jugg', 'wyrm', 'wyrmseg', 'gunship
 // marks draw over it first: all of them (a net, a microwave's swell, a bubble, stasis) unless it says 'net' for only
 // the net or 'none'. death names the method for its own death: blasts, spills, loose parts, a boss's fall (none for
 // the ones that just burst). setup names the method that gives it its own fields, images and start position when it
-// spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). FLIERS
-// and isHumanoid below are built from these, and dev/playtest/kinds.js checks every kind (#52).
+// spawns (setupHumanoid for the humanoids without their own, setupMolten for the slag; the grunt needs none). armour
+// names a method that adjusts each hit on it in damageEnemy before difficulty and perks (a plate, a weak spot, a fuse
+// a shot sets off), and contact one that runs when it touches you instead of the plain bite and says whether it dealt
+// with the touch (a blast, a clamp, a rake). FLIERS and isHumanoid below are built from these, and
+// dev/playtest/kinds.js checks every kind (#52).
 // The rest are values killEnemy reads, all left out on most kinds: ragdoll drops it as a ragdoll you can keep shooting
 // on a light kill (it needs RAG art), haywire sends its jetpack off on one, noAirStyle skips the airborne kill bonus,
 // deathFlash is the colours of a flash as it dies, killZoom a camera punch, gibPower the least force its gibs fly
@@ -780,8 +856,52 @@ const ENEMY = {
   wraith: { key: 'wraith', frame0: 'f0', flier: true, setup: 'setupWraith', update: 'updateWraith', visuals: 'visWraith', death: 'deathWraith', fw: 18, fh: 22, bw: 12, bh: 16, hp: 70, speed: 50, sight: 600, touch: 14, kb: 0.3, mech: true, noClip: true, noFreeze: true, gibs: [], gibN: [0, 0] },
   chiller: { key: 'chiller', frame0: 'w0', setup: 'setupChiller', update: 'updateChiller', visuals: 'visChiller', death: 'deathChiller', fw: 18, fh: 24, bw: 11, bh: 20, hp: 80, speed: 50, sight: 340, touch: 8, kb: 0.6, gibs: ['g_flesh1', 'g_flesh2', 'g_chunk', 'g_shard', 'g_shard2', 'g_bone'], gibN: [10, 13] },
   warhorn: { key: 'warhorn', frame0: 'w0', setup: 'setupWarhorn', update: 'updateWarhorn', fw: 20, fh: 20, bw: 14, bh: 16, hp: 110, speed: 45, sight: 380, touch: 8, kb: 0.5, mech: true, gibs: ['g_plate', 'g_wire', 'g_shard', 'g_plate', 'g_shard2'], gibN: [8, 11] },
+  // ---- expansion: enemies ----
+  flailer: { key: 'flailer', frame0: 'w0', setup: 'setupFlailer', update: 'updateFlailer', visuals: 'visFlailer', death: 'deathFlailer', contact: 'contactNone', fw: 24, fh: 24, bw: 14, bh: 20, hp: 130, speed: 50, sight: 400, touch: 0, kb: 0.35,
+             gibs: ['g_chain', 'g_chain', 'g_plate', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [12, 16] },
+  hoser: { key: 'hoser', frame0: 'w0', setup: 'setupHoser', update: 'updateHoser', visuals: 'visHoser', death: 'deathHoser', fw: 18, fh: 24, bw: 11, bh: 20, hp: 75, speed: 85, sight: 380, touch: 8, kb: 0.7,
+           gibs: ['g_hosetank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib'], gibN: [11, 14] },
+  demo: { key: 'demo', frame0: 'r0', setup: 'setupDemo', update: 'updateDemo', visuals: 'visDemo', death: 'deathDemo', armour: 'armourDemo', contact: 'contactDemo', fw: 16, fh: 22, bw: 10, bh: 18, hp: 35, speed: 175, sight: 420, touch: 0, kb: 0.9,
+          gibs: ['g_tnt', 'g_tnt', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone'], gibN: [9, 12] },
+  panzer: { key: 'panzer', frame0: 'w0', setup: 'setupPanzer', update: 'updatePanzer', visuals: 'visPanzer', death: 'deathPanzer', armour: 'armourPanzer', fw: 30, fh: 20, bw: 26, bh: 15, hp: 200, speed: 38, sight: 460, touch: 12, kb: 0.1, mech: true,
+            gibs: ['g_tread', 'g_tread', 'g_plateL', 'g_plateL', 'g_plate', 'g_wire', 'g_shard', 'g_shard2'], gibN: [12, 16], killShake: [220, 0.01], killStop: 80 },
+  reaper: { key: 'reaper', frame0: 'w0', setup: 'setupReaper', update: 'updateReaper', visuals: 'visReaper', armour: 'armourReaper', contact: 'contactReaper', fw: 22, fh: 32, bw: 12, bh: 28, hp: 140, speed: 70, sight: 420, touch: 10, kb: 0.4, mech: true,
+            gibs: ['g_scythe', 'g_scythe', 'g_plate', 'g_wire', 'g_shard', 'g_eye'], gibN: [10, 13] },
+  gull: { key: 'gull', frame0: 'f0', flier: true, setup: 'setupGull', update: 'updateGull', visuals: 'visGull', contact: 'contactGull', fw: 22, fh: 14, bw: 14, bh: 9, hp: 40, speed: 95, sight: 460, touch: 0, kb: 0.9, mech: true,
+          gibs: ['g_feather', 'g_feather', 'g_feather', 'g_wire', 'g_plate', 'g_eye'], gibN: [8, 11], noAirStyle: true },
+  overclock: { key: 'overclock', frame0: 'o0', flier: true, setup: 'setupOverclock', update: 'updateOverclock', visuals: 'visOverclock', death: 'deathOverclock', contact: 'contactNone', fw: 16, fh: 16, bw: 12, bh: 12, hp: 45, speed: 60, sight: 460, touch: 0, kb: 0.8, mech: true,
+               gibs: ['g_coil', 'g_plate', 'g_wire', 'g_shard', 'g_wire'], gibN: [7, 9], noAirStyle: true },
+  refractor: { key: 'refractor', frame0: 'p0', setup: 'setupRefractor', update: 'updateRefractor', visuals: 'visRefractor', fw: 18, fh: 18, bw: 14, bh: 14, hp: 90, speed: 0, sight: 520, touch: 6, kb: 0, mech: true,
+               gibs: ['g_prism', 'g_prism', 'g_glass', 'g_plate', 'g_wire', 'g_shard'], gibN: [8, 11] },
+  mirage: { key: 'mirage', frame0: 'w0', setup: 'setupMirage', update: 'updateMirage', visuals: 'visMirage', death: 'deathMirage', fw: 16, fh: 24, bw: 10, bh: 20, hp: 70, speed: 80, sight: 420, touch: 8, kb: 0.7,
+            gibs: ['g_xmask', 'g_flesh1', 'g_flesh2', 'g_chunk', 'g_bone', 'g_rib'], gibN: [10, 13] },
+  clinger: { key: 'clinger', frame0: 'c0', flier: true, setup: 'setupClinger', update: 'updateClinger', visuals: 'visClinger', death: 'deathClinger', armour: 'armourClinger', contact: 'contactClinger', fw: 12, fh: 12, bw: 9, bh: 9, hp: 20, speed: 150, sight: 420, touch: 0, kb: 1.2, mech: true,
+             gibs: ['g_magnet', 'g_shard', 'g_wire'], gibN: [4, 6], noAirStyle: true },
   tarspit: { key: 'tarspit', frame0: 'idle', humanoid: true, setup: 'setupHumanoid', update: 'updateHumanoid', visuals: 'visTarspit', death: 'deathTarspit', fw: 18, fh: 24, bw: 11, bh: 20, hp: 60, speed: 100, sight: 300, touch: 8, kb: 0.8, dodge: 0.3, dodgeCd: 2, head: 'g_tmask',
              gibs: ['g_tartank', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_bone', 'g_rib', 'g_chunk'], gibN: [12, 15] },
+  // ---- expansion: bosses ---- (boss marks a full boss: its title card and bar, and stasis, nets, gravity pulses, presses and
+  // the microwave treat it like the Smelter; bossArmour names its damageEnemy hook, run before every other foe's, and
+  // bossContact its onTouchEnemy one, which replaces all contact rules; title is its card,
+  // barNotches where its phases break, for the boss bar)
+  crucible: { key: 'crucible', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE CRUCIBLE', 'SLAG CAULDRON'], setup: 'setupCrucible', update: 'updateCrucible', visuals: 'visCrucible', death: 'deathCrucible',
+              bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 56, fh: 48, bw: 40, bh: 32, hp: 1300, sight: 1400, touch: 16, kb: 0, mech: true, noClip: true, noFreeze: true,
+              gibs: ['g_plate', 'g_plateL', 'g_slag', 'g_crust', 'g_slag', 'g_core', 'g_shard', 'g_wire'], gibN: [26, 32], gibPower: 1.6, gibSpread: 16, winDelay: 1900 },
+  grinder: { key: 'grinder', frame0: '1a', boss: true, barNotches: [0.66, 0.33], title: ['THE GRINDER', 'SCRAP MILL'], setup: 'setupGrinder', update: 'updateGrinder', visuals: 'visGrinder', death: 'deathGrinder',
+             bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 48, fh: 48, bw: 40, bh: 40, hp: 1250, sight: 1400, touch: 14, kb: 0, mech: true, noFreeze: true,
+             gibs: ['g_plate', 'g_plateL', 'g_xtooth', 'g_xtooth', 'g_shard', 'g_shard2', 'g_wire', 'g_core'], gibN: [26, 32], gibPower: 1.6, gibSpread: 16, winDelay: 1900 },
+  queen: { key: 'queen', frame0: '1a', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE HIVE QUEEN', 'BROOD MOTHER'], setup: 'setupQueen', update: 'updateQueen', visuals: 'visQueen', death: 'deathQueen',
+           bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 56, fh: 40, bw: 40, bh: 24, hp: 1150, sight: 1400, touch: 12, kb: 0, noClip: true, noFreeze: true,
+           gibs: ['g_wing', 'g_wing', 'g_egg', 'g_egg', 'g_egg', 'g_flesh1', 'g_flesh2', 'g_flesh3', 'g_chunk', 'g_hive', 'g_flesh1', 'g_chunk'], gibN: [28, 34], gibPower: 1.5, gibSpread: 16, winDelay: 1900 },
+  overseer: { key: 'overseer', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE OVERSEER', 'ALL-SEEING EYE'], setup: 'setupOverseer', update: 'updateOverseer', visuals: 'visOverseer', death: 'deathOverseer',
+              bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 48, fh: 48, bw: 32, bh: 32, hp: 1300, sight: 1400, touch: 14, kb: 0, mech: true, noClip: true, noFreeze: true,
+              gibs: ['g_plate', 'g_plateL', 'g_xlens', 'g_xlens', 'g_eye', 'g_wire', 'g_shard', 'g_emitter'], gibN: [24, 30], gibPower: 1.6, gibSpread: 14, winDelay: 1900 },
+  conductor: { key: 'conductor', frame0: '1i', flier: true, boss: true, barNotches: [0.66, 0.33], title: ['THE CONDUCTOR', 'LIVE WIRE'], setup: 'setupConductor', update: 'updateConductor', visuals: 'visConductor', death: 'deathConductor',
+               bossArmour: 'xbArmour', bossContact: 'xbTouch', fw: 40, fh: 48, bw: 22, bh: 34, hp: 1200, sight: 1400, touch: 12, kb: 0, mech: true, noClip: true, noFreeze: true,
+               gibs: ['g_glass', 'g_glass2', 'g_xcoil', 'g_xcoil', 'g_wire', 'g_wire', 'g_plate', 'g_shard'], gibN: [22, 28], gibPower: 1.5, gibSpread: 12, winDelay: 1900 },
+  eggsac: { key: 'eggsac', frame0: 'e0', setup: 'setupEggsac', update: 'updateEggsac', death: 'deathEggsac', bossContact: 'xbTouch', fw: 14, fh: 16, bw: 10, bh: 13, hp: 30, sight: 400, touch: 0, kb: 0.3,
+            gibs: ['g_egg', 'g_egg', 'g_flesh1', 'g_chunk'], gibN: [5, 7], skipOneLeft: true },
+  eyenode: { key: 'eyenode', frame0: 'n0', flier: true, setup: 'setupEyenode', update: 'updateEyenode', death: 'deathEyenode', bossContact: 'xbTouch', fw: 14, fh: 14, bw: 10, bh: 10, hp: 110, sight: 600, touch: 0, kb: 0,
+             mech: true, noClip: true, noFreeze: true, gibs: ['g_emitter', 'g_shard', 'g_wire'], gibN: [5, 7], skipOneLeft: true },
 };
 const KEEPER_HOP = 290;                             // ranged keepers' hop when blocked: clears the 3-tile step stepOk lets them take (48 px needs 277 at gravity 800)
 const HUMANOIDS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].humanoid));
@@ -790,10 +910,19 @@ const isRifleman = e => e.kind === 'enforcer' || e.kind === 'sniper' || e.kind =
 const BARRELS = [[20, 24], [45, 20], [58, 24], [75, 24], [88, 12], [35, 16]];
 const TILE_HP = { x: 55, g: 80, '=': 30 };                        // breakable tiles: crate, girder, grating
 const CANISTERS = [[12, 24], [50, 20], [66, 16], [83, 24]];        // gas canisters: shoot one and it rockets about
-// Twenty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
+// Thirty kinds of breakable scenery. Each row: HP; how it mounts ('floor' stands on a tile, 'wall' is bolted to the
 // backdrop, 'hang' dangles from whatever is overhead and swings when hit); what it's made of (the chips and the sound a
 // hit makes); the methods that run on a hit, on breaking and while it goes off; how long fire takes to cook it off
 // (cook); its light ([tint, scale x, scale y, x, y, alpha] from its centre) and the callout when it kills something.
+// Where the last ten want to go (PROP_SPOTS cells; the Lab's Breakables Bay has one of each):
+//   hoist:       hang it 2-5 tiles over floor foes walk on, from a solid tile or girder; the block drops straight down.
+//   server, jukebox, vat, paint: floor props; the vat's wave runs along the floor it stands on, so give it a few
+//                open tiles either side. The jukebox flings its records up and out: keep it out of tight corners.
+//   hydrant:     floor, with open air above it (the geyser climbs up to 7 tiles and throws whoever is in it).
+//   gasline:     wall, low over a floor, with 4-5 open tiles on the side it faces (the facing sets the jet's side).
+//   hopper:      wall, with floor within 10 tiles below its chute (that's where the sand heaps up).
+//   transformer: wall; its discharge reaches 120 px and its blackout 200, so put it where lights and foes gather.
+//   sprinkler:   wall, high, over floor within 10 tiles; fire under it (within 2-3 tiles either side) sets it off.
 const PROPS = {
   neon:      { hp: 20, mount: 'wall',  mat: 'glass', hit: 'hitNeon', brk: 'breakNeon', live: 'liveNeon', light: [0xff3aa0, 2.6, 1.0, 0, 0, 0.55], call: 'SIGN OFF!' },
   tube:      { hp: 6,  mount: 'hang',  mat: 'glass', brk: 'breakTube', live: 'liveTube', light: [0xc8ecff, 1.8, 0.7, 0, 2, 0.5], cone: [0xd8f2ff, 1.3, 1.5, 0.15], call: 'LIGHTS OUT!' },
@@ -815,12 +944,26 @@ const PROPS = {
   window:    { hp: 12, mount: 'wall',  mat: 'glass', hit: 'hitWindow', brk: 'breakWindow', call: 'GLASSED!' },
   horn:      { hp: 12, mount: 'wall',  mat: 'metal', brk: 'breakHorn', light: [0xff2a14, 0.45, 0.45, -6, -4, 0.8], call: 'FEEDBACK!' },
   water:     { hp: 40, mount: 'floor', mat: 'metal', hit: 'hitLeak', brk: 'breakWater', call: 'WASHED OUT!' },
+  // ---- expansion: props ----
+  hoist:       { hp: 40, mount: 'hang',  mat: 'metal', brk: 'breakHoist', live: 'liveHoist', call: 'DEAD WEIGHT!' },
+  server:      { hp: 34, mount: 'floor', mat: 'metal', hit: 'hitServer', brk: 'breakServer', live: 'liveServer', light: [0x46f088, 0.7, 1.3, 0, 0, 0.2], call: 'CRASHED!' },
+  jukebox:     { hp: 30, mount: 'floor', mat: 'glass', hit: 'hitJukebox', brk: 'breakJukebox', live: 'liveJukebox', light: [0xff8a3a, 1.3, 1.4, 0, -5, 0.38], call: 'NOW PLAYING!' },
+  hydrant:     { hp: 30, mount: 'floor', mat: 'metal', brk: 'breakHydrant', live: 'liveHydrant', call: 'HOSED!' },
+  gasline:     { hp: 18, mount: 'wall',  mat: 'metal', brk: 'breakGasline', live: 'liveGasline', cook: 1.6, call: 'GAS LEAK!' },
+  hopper:      { hp: 26, mount: 'wall',  mat: 'metal', brk: 'breakHopper', live: 'liveHopper', call: 'SANDBAGGED!' },
+  vat:         { hp: 24, mount: 'floor', mat: 'glass', brk: 'breakVat', live: 'liveVat', light: [0x7dff4a, 0.9, 1.3, 0, 1, 0.3], call: 'DISSOLVED!' },
+  transformer: { hp: 36, mount: 'wall',  mat: 'metal', hit: 'hitTransformer', brk: 'breakTransformer', live: 'liveTransformer', light: [0x80c8ff, 0.5, 0.5, -2, -9, 0.4], call: 'GRID DOWN!' },
+  paint:       { hp: 14, mount: 'floor', mat: 'metal', brk: 'breakPaint', cook: 2.4, call: 'FRESH COAT!' },
+  sprinkler:   { hp: 6,  mount: 'wall',  mat: 'metal', brk: 'breakSprinkler', live: 'liveSprinkler', call: 'DRENCHED!' },
 };
 const PROP_BLAST = {                                               // the props that go bang
   propane: { radius: 72, maxDamage: 85, minDamage: 25, selfDamage: 22, push: 470, maxRise: 600, burn: 3, tileDamage: 70, scenery: true },
   boiler:  { radius: 84, maxDamage: 60, minDamage: 15, selfDamage: 18, push: 640, maxRise: 660, tileDamage: 60, scenery: true },
   small:   { radius: 30, maxDamage: 26, minDamage: 8, selfDamage: 8, push: 240, maxRise: 340, tileDamage: 18, scenery: true },
   slag:    { radius: 40, maxDamage: 40, minDamage: 12, selfDamage: 14, push: 300, maxRise: 380, burn: 2, tileDamage: 30, scenery: true },
+  // ---- expansion: props ----
+  gasline:     { radius: 46, maxDamage: 42, minDamage: 12, selfDamage: 14, push: 320, maxRise: 400, burn: 2.5, tileDamage: 34, scenery: true },
+  transformer: { radius: 52, maxDamage: 30, minDamage: 10, selfDamage: 10, push: 280, maxRise: 360, tileDamage: 22, scenery: true, style: 'arc' },
 };
 const FLIERS = new Set(Object.keys(ENEMY).filter(k => ENEMY[k].flier));
 const MOD_CARDS = { dark: 'BLACKOUT :: STAY IN THE LIGHT', slag: 'SLAG RAIN :: WATCH THE SKY', lowg: 'LOW GRAVITY :: MIND THE HANG TIME', melt: 'MELTDOWN :: THE FLOOR IS SLAG' };

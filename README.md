@@ -8,8 +8,8 @@
 ![SLAGHOUSE: a railgun fight mid-wave, with the weapon ribbon, combo counter and style rank](docs/screenshot.png)
 
 A pixel-art side-scrolling arena shooter running on [Phaser 4](https://phaser.io/) with procedural pixel art,
-ragdolls, destructible terrain, twenty kinds of breakable scenery, 61 weapons with mastery stars, 94 enemy types and
-27 medals. The five-act
+ragdolls, destructible terrain, thirty kinds of breakable scenery, 71 weapons with mastery stars, 109 enemy types and
+28 medals. The five-act
 campaign ends in a boss fight. The game also includes endless OVERTIME, a seeded DAILY run and BOSS RUSH.
 Play on Easy, Normal or Brutal with keyboard and mouse or a gamepad with aim assist. The game runs in a browser
 as one self-contained page, with no build step to play it.
@@ -27,7 +27,7 @@ Open <http://127.0.0.1:8765/slaghouse.html> and click the game. On the title scr
 **Enter** to select, **A / D** to change difficulty and **E** to start OVERTIME. In **CAMPAIGN**, use **A / D**
 to choose **New Campaign** or **Continue** when a checkpoint is available.
 
-The title also has **OVERTIME** (endless waves), **DAILY** (today's seeded OVERTIME run), **BOSS RUSH** (five bosses
+The title also has **OVERTIME** (endless waves), **DAILY** (today's seeded OVERTIME run), **BOSS RUSH** (ten bosses
 back to back), **CODEX**, **ARMORY**, **MEDALS** and **OPTIONS**. Options include the Glass Cannon, Swarm, Moon Boots,
 Lights Out and Vampire mutators, and the full controls list. With a mouse, the wheel pages the CODEX and steps through
 the other lists; leave a page with **< BACK**, a right click or **Esc**.
@@ -43,8 +43,9 @@ decode Ogg Opus (older Safari) loads `sfx_bank_aac.js` and `music_bank_aac.js` i
 
 Choose **LAB** on the title screen to practice with the full arsenal. Pick the **Firing Range** for stationary targets,
 the **Combat Pit** for a mixed fight, the **Boss Chamber** for a single boss, or the **Breakables Bay** and
-**Traversal Course** for scenery and movement. **Machinery Floor**, **Furnace Vents**, **Wrecking Yard** and
-**Live Rails** let you practice the arena hazards. A URL such as `slaghouse.html?lab=furnace` opens the room picker
+**Traversal Course** for scenery and movement. **Machinery Floor**, **Furnace Vents**, **Wrecking Yard**, **Live Rails**,
+**Cooling Tower** (`tower`), **Chill Vault** (`vault`), **Storm Roof** (`storm`), **The Crusher** (`crusher`) and
+**Turbine Hall** (`turbine`) let you practice the arena hazards. A URL such as `slaghouse.html?lab=furnace` opens the room picker
 with Furnace Vents selected; an unknown room name opens the Firing Range and says so.
 
 Choose a starting weapon, build a roster of up to 16 enemies including at most one boss, and set the difficulty,
@@ -69,7 +70,7 @@ See the [playtest guide](dev/playtest/README.md#lab-browser-api) for scripted ro
 | Prox mine | **G** or middle click |
 | Auto-sentry | **T** |
 | Grapple hook | **C** (press again to let go) |
-| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher and tether gun have no key: use the wheel or Q/E) |
+| Pick a weapon | **1-9**, **0**, **-**, **=**, **Backspace**, **[**, **]**, `\`, **;**, **'**, **,**, **.**, **/**, **Z**, **X**, **K**, **L**, **U**, **I**, **O**, **Y**, **H** (the chain flail, orbital designator, plasma cutter, spider mines, napalm launcher, bee swarm, laser whip, shrink ray, sonic blaster, grav bomb, pinball cannon, firework launcher, plasma katana, scrap vacuum, siphon, splitter, decoy launcher, stasis grenade, microwave, rocket gauntlet, marksman rifle, tripwire, drone pod, gas launcher, bubble gun, riot shield, glue gun, mini-nuke, dragon's breath, seed launcher, tether gun, hand cannon, seismic launcher, phase rifle, ball lightning, cyclone launcher, caltrop scatter, spear gun, heat ray, barrage beacon and hydro cannon have no key: use the wheel or Q/E) |
 | Weapon wheel (time slows while it's open) | hold **Tab** |
 | Cycle weapons | **Q / E** or mouse wheel |
 | Pause menu (resume, retry act or restart, volume, screen shake, post FX, flashes, controls, quit to title) | **Esc** or **P** |
@@ -122,7 +123,12 @@ wheel (pick with the right stick), the D-pad cycles weapons and **Start** pauses
 | wheel | Bubble gun (floats foes up in bubbles; pop them to drop them) | wheel | Riot shield (hold to block and reflect shots, let go to bash) |
 | wheel | Glue gun (gums foes up so they crawl) | wheel | Mini-nuke (one slow shell, one very big bang) |
 | wheel | Dragon's breath (burning buckshot) | wheel | Seed launcher (plants a fungus turret that spores foes) |
-| wheel | Tether gun (links three foes: hurt one, hurt all) | | |
+| wheel | Tether gun (links three foes: hurt one, hurt all) | wheel | Hand cannon (an iron ball that plows through foes and crates; cannon-jump on the recoil) |
+| wheel | Seismic launcher (a quake along the floor that pops foes up to juggle) | wheel | Phase rifle (bolts that pass through walls) |
+| wheel | Ball lightning (a drifting orb that arcs to three foes and lights puddles) | wheel | Cyclone launcher (a tornado that whirls foes round, then flings them) |
+| wheel | Caltrop scatter (floor spikes that make foes limp and bleed) | wheel | Spear gun (skewer and reel in, or reel yourself to big ones; pins kills to walls) |
+| wheel | Heat ray (a beam that burns hotter the longer it holds; overheats) | wheel | Barrage beacon (a line of shells walks out from where it lands) |
+| wheel | Hydro cannon (shoves, puts out fires, soaks foes for electric hits) | | |
 
 The comment at the top of `slaghouse.html` documents every weapon, enemy, wave and tuning value.
 
@@ -134,7 +140,7 @@ arsenal. The opening patrol has two grunts, and Sorting Shift brings squads of u
 later threats arrive in pairs, with longer preparation breaks before bosses. Incoming damage rises from 80%
 to full across the first five operations for the selected difficulty. The HUD counts down each break.
 The first heavy arrives alone after you get the Shotgun.
-OVERTIME, DAILY and BOSS RUSH start with all 61 weapons.
+OVERTIME, DAILY and BOSS RUSH start with all 71 weapons.
 
 | Act | Operations | New weapons | Threats and objectives |
 | --- | --- | --- | --- |
@@ -168,8 +174,11 @@ when a checkpoint is available. **Retry Act**, **Restart** and **Quit to Title**
 confirm. Speedrunner requires a clear under 10 minutes without using **Continue** or retrying from a checkpoint.
 
 **OVERTIME** (E on the title screen) is endless: random waves that grow and toughen, a mini-boss every few waves,
-a boss every sixth (the Smelter and THE FOREMAN, a four-legged crane walker, take turns), a perk after each wave and a new arena every three, including THE WRECKING YARD,
-with a wrecking ball swinging across the middle, and THE POWERHOUSE, whose floor rails go live in turns. Your best wave is kept. Every enemy
+a boss every sixth (seven take turns: the Smelter, THE FOREMAN, a four-legged crane walker, then THE CRUCIBLE, THE GRINDER,
+THE HIVE QUEEN, THE OVERSEER and THE CONDUCTOR), a perk after each wave and a new arena every three, round all ten: among them
+THE WRECKING YARD, with a wrecking ball swinging across the middle, THE POWERHOUSE, whose floor rails go live in turns, THE COOLING
+TOWER, whose basin floods (and sometimes goes live), THE CHILL VAULT's ice and falling icicles, THE STORM ROOF's lightning and
+gusts, THE CRUSHER's closing walls and THE TURBINE HALL's updrafts and rotors. Your best wave is kept. Every enemy
 type can turn up, from echoes (holograms that replay your path and shots) to wraiths and warhorns.
 **DAILY** is an OVERTIME run seeded by the date: the same arena, starting perks, waves and modifiers for everyone
 that day (mutators are switched off for it). A run keeps the day you started it on, past 00:00 UTC and through

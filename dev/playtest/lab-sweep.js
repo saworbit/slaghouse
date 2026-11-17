@@ -27,7 +27,7 @@ window.labSweep = section => {
   }
   const trigger = (g, on) => { g.keys.J.isDown = on; };
   function weapons() {
-    const lob = new Set(['grenade', 'cluster', 'grav', 'napalm', 'decoy', 'stasis', 'gaslaunch', 'tripwire', 'seed', 'nuke']);
+    const lob = new Set(['grenade', 'cluster', 'grav', 'napalm', 'decoy', 'stasis', 'gaslaunch', 'tripwire', 'seed', 'nuke', 'cannon', 'cyclone', 'caltrop', 'barrage']);
     const melee = new Set(['ripper', 'hammer', 'katana', 'shield', 'gauntlet', 'flail', 'whip']);
     const hold = { hornet: 950, lance: 1250, hammer: 850, shock: 650, orbital: 1300, mini: 1300, flail: 950, tractor: 450, vacuum: 550, shield: 350 };
     for (const { id } of catalog.weapons) test(id, fail => {
@@ -113,6 +113,25 @@ window.labSweep = section => {
         if (id === 'jugg' && !phaseStates.has('fire')) fail('Juggernaut did not fire');
         if (id === 'foreman' && (!phaseStates.has('spray') || !enemies(g).some(o => o.kind === 'hound' && o.summoned))) fail('Foreman did not use its spray and hound reinforcements');
         if (id === 'boss' && ![...phaseStates].some(state => state === 'breath' || state === 'mortarWind')) fail('Smelter did not attack');
+      } else if (ENEMY[id].boss) {                                     // the expansion bosses: phase two at 66%, three at 33%, and each one's signature attacks
+        const seen = new Set(phaseStates);
+        const watch = ms => { for (let t = 0; t < ms; t += 100) { T.run(100); seen.add(e.ai); for (const o of enemies(g)) if (o.owner === e) seen.add('+' + o.kind); if (g.xb?.orbs.length) seen.add('orbs'); if (g.xb?.waves.length) seen.add('waves'); if (g.xb?.blades.length) seen.add('blades'); for (const P of g.xb?.pools || []) seen.add('pool:' + P.kind); } checkScene(g, fail); };
+        if (id === 'overseer') {                                         // sealed until its four nodes are shot off
+          if (e.nodes?.length !== 4) fail('did not raise four shield nodes');
+          const hp = e.hp; g.damageEnemy(e, 50, 0, -1, 'crush'); T.run(50);
+          if (e.hp < hp) fail('took damage through its shield');
+          for (const n of e.nodes || []) if (n.alive) g.damageEnemy(n, 9999, 0, -1, 'crush');
+          T.run(100);
+        } else strike(e.hp - e.def.hp * 0.6);
+        if (e.phase !== 2) fail('did not enter phase 2');
+        watch(9000);
+        strike(e.hp - e.def.hp * 0.28);
+        if (e.phase !== 3) fail('did not enter phase 3');
+        watch(10000);
+        const want = { crucible: ['pour', 'waves', 'pool:slag', 'vent'], grinder: ['roll', 'bladeTell', 'blades', 'hang', 'drop', 'pool:rut'], queen: ['dive', '+eggsac', 'spitTell', '+gnat'],
+          overseer: ['sweep', '+drone', 'grid'], conductor: ['cast', 'blink', 'pool:live', 'orbs'] }[id] || [];
+        const missing = want.filter(s => !seen.has(s));
+        if (missing.length) fail('never used ' + missing.join(', '));
       } else if (id === 'wyrm') {
         if (!stepUntil(() => e.segs.some(part => !part.under), 7000, 17)) { fail('no body segment surfaced'); return; }
         const part = e.segs.find(part => !part.under), hp = e.hp;
@@ -218,6 +237,72 @@ window.labSweep = section => {
           if (Math.hypot(W.vx, W.vy) > 100) g.player.body.reset(W.x, W.y);
           return g.hp < TUNE.PLAYER_HP;
         }, 6000, 17)) fail('wrecking ball did not hurt the player');
+      },
+      // ARENAS 06-10's machinery, in their Lab rooms
+      flood(fail) {
+        const g = load('tower'), W = g.flood;
+        W.t = 0; T.run(50); W.live = true;                               // this one goes live
+        if (W.st !== 'warn') fail('no klaxon before the flood');
+        if (!stepUntil(() => W.k >= 1, 7000)) fail('the coolant did not rise');
+        g.player.body.reset(10 * TS + 8, 25 * TS - 12);
+        if (!stepUntil(() => g.hp < TUNE.PLAYER_HP, 5000)) fail('the live flood did not hurt a wading player');
+        if (!stepUntil(() => W.st === 'idle' && W.k === 0, 12000)) fail('the flood did not drain');
+      },
+      icicles(fail) {
+        const g = load('vault'), [I, J] = g.vault.icicles.filter(i => i.y === 18 * TS);   // under the shelves, over the floor
+        I.k = 1; I.st = 'ripe'; I.t = 0; g.player.body.reset(I.x, I.fy - 12);
+        if (!stepUntil(() => g.hp < TUNE.PLAYER_HP, 3000, 17)) fail('a falling icicle did not hurt the player under it');
+        J.k = 1; J.st = 'ripe'; J.t = 99;
+        if (!g.hitIcicleAt(J.x, J.y + 8) || J.st !== 'fall') fail('a shot did not bring an icicle down');
+        if (!stepUntil(() => J.st === 'gone', 3000, 17)) fail('the dropped icicle did not shatter');
+      },
+      'vault ice and vents'(fail) {
+        const g = load('vault'), S = g.vault.sheets[0], vt = g.vault.vents[0];
+        g.player.body.reset(S.x, S.y - 12); T.run(200);
+        if (!g.onIce) fail('the vault floor ice did not make the player slide');
+        vt.st = 'idle'; vt.t = 0; g.player.body.reset(vt.x, vt.y - 12);
+        if (!stepUntil(() => g.hp < TUNE.PLAYER_HP && g.chillT > 0, 4000, 17)) fail('a cryo vent did not chill the player standing on it');
+      },
+      lightning(fail) {
+        const g = load('storm'), W = g.storm;
+        g.player.body.reset(28 * TS + 8, 25 * TS - 12); T.run(100);      // open sky over it
+        W.next = 99; W.marks.push({ x: g.player.x, y: g.floorBelow(g.player.x, 2 * TS + 2, 400), t: 0.4 });
+        if (!stepUntil(() => g.hp < TUNE.PLAYER_HP, 1500, 17)) fail('lightning on its mark did not hurt the player');
+      },
+      'storm gust'(fail) {
+        const g = load('storm'), Gs = g.storm.gust, x = 58 * TS + 8;
+        g.player.body.reset(x, 25 * TS - 12); T.run(100);
+        Gs.st = 'idle'; Gs.t = 0; T.run(50);
+        if (Gs.st !== 'warn') fail('no streaks before the gust');
+        stepUntil(() => Gs.st === 'blow', 2500); T.run(1500);
+        if (Math.abs(g.player.x - x) < 40) fail('the gust did not push the player');
+      },
+      crusher(fail) {
+        const g = load('crusher'), W = g.crusher;
+        g.player.body.reset(20 * TS + 8, 25 * TS - 12); T.run(100);
+        W.st = 'idle'; W.t = 0;
+        if (!stepUntil(() => g.player.x > 26 * TS, 7000)) fail('the closing wall did not push the player');
+        if (!stepUntil(() => g.hp < TUNE.PLAYER_HP, 3000, 17)) fail('the walls did not crush the player against the anvil');
+        if (!stepUntil(() => W.st === 'idle', 6000)) fail('the walls did not open again');
+      },
+      updraft(fail) {
+        const g = load('turbine'), F = g.turbine.fans[1];
+        g.player.body.reset(F.x, 25 * TS - 12); T.run(50);
+        const y = g.player.y; T.run(800);
+        if (g.player.y > y - 48) fail('the fan updraft did not lift the player');
+      },
+      rotors(fail) {
+        const g = load('turbine'), W = g.turbine, Rt = W.rotors[0], hold = () => { g.player.body.reset(Rt.x + 18, Rt.y); return g.hp < TUNE.PLAYER_HP; };
+        W.clock = 5; Rt.w = 0;                                           // its standing phase
+        if (stepUntil(hold, 1200, 17)) fail('a standing rotor hurt the player');
+        W.clock = 0; Rt.w = 10;
+        if (!stepUntil(hold, 1500, 17)) fail('a spinning rotor did not hurt the player');
+      },
+      'turbine gust'(fail) {
+        const g = load('turbine'), Gs = g.turbine.gust, x = 30 * TS;
+        g.player.body.reset(x, 9 * TS - 12); T.run(50);
+        Gs.st = 'blow'; Gs.t = 3; T.run(1200);
+        if (g.player.x < x + 40) fail('the turbine gust did not push the player');
       },
       breakables(fail) {
         const g = load('breakables');

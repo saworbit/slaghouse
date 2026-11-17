@@ -7,6 +7,59 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Ten new weapons**, all on the wheel, in OVERTIME, DAILY, BOSS RUSH and the Lab (71 in all; the campaign arsenal
+  is unchanged). The **hand cannon** lobs an iron ball that plows through up to three light foes and cannon-jumps you
+  back. The **seismic launcher** runs a quake along the floor that pops foes up, and launched foes take x1.5 in the air
+  (a kill there calls JUGGLE). The **phase rifle**'s bolts pass through walls and terrain. **Ball lightning** drifts,
+  arcing to three foes at a time and electrifying puddles. The **cyclone launcher**'s tornado spins up light foes, gibs,
+  corpses and drums and flings them. **Caltrop scatter** seeds the floor with spikes that hurt and slow walkers. The
+  **spear gun** reels light foes to you and you to heavy ones, then pins a skewered kill to the next wall. The **heat
+  ray** ramps up on one target and overheats into a steam vent. The **barrage beacon** walks six marked shells out from
+  where it lands. The **hydro cannon** shoves foes, puts out fire, leaves puddles and soaks foes so electric hits do
+  x1.5 and cryo chills faster. Kills by anything a gun leaves behind credit that gun, even after a swap. The weapon
+  wheel staggers its icons on two rings and the ARMORY page gets a sixth row.
+- **Ten new foes** in OVERTIME, DAILY and the Lab: the **Flailer** (a spiked ball whirled on a chain, then hurled),
+  the **Hoser** (a water cannon that knocks you off ledges, and a tank that bursts into a puddle that conducts), the
+  **Demo Runner** (lights its fuse, then sprints; shoot the bundle early), the **Panzer** (front armour, arcing shells
+  with landing rings, a coax burst), the **Reaper** (a telegraphed scythe whirl, then dizzy), the **Gull** (circles,
+  screeches, dive-rakes), the **Overclocker** (beams that haste up to three foes), the **Refractor** (a laser that
+  shows its two-bounce path before it fires), the **Mirage** (two hologram decoys; only the real one bleeds) and the
+  **Clinger** (clamps on and ticks; kick or dash it off and it blows on what it hits). ENEMY records can now name an
+  `armour` method (damage taken by angle or state) and a `contact` method (what touching it does), and `KC.check`
+  checks both.
+- **Five new bosses**, each with three phases, its own wear per phase, a title card and its own phase notches on the
+  boss bar: **The Crucible**, a hovering slag cauldron that pours floor waves, lobs molten bombs, tips to flood a marked
+  side and vents its core; **The Grinder**, a saw drum that rolls and bounces round the room, climbs walls to slam down
+  and splits its blades; **The Hive Queen**, who lays egg sacs (shoot them before they hatch), dives on a locked line
+  and spits acid; **The Overseer**, an eye shielded by four orbiting nodes that sweeps a death laser and calls a laser
+  grid with safe gaps; and **The Conductor**, which teleports on a shimmer, throws chain lightning that locks before it
+  strikes, electrifies floor strips (safe ones shown first) and lets loose ball lightning. **BOSS RUSH** is now ten
+  bosses, two to an arena, with the Smelter still last. OVERTIME's sixth-wave boss rotates through all seven, starting
+  with the Smelter and the Foreman as before. Downing all five new ones in a run earns **NEW MANAGEMENT** (28 medals),
+  and the MEDALS page packs its rows to fit. The Lab sweep checks each boss's phases and signature attacks.
+- **Ten more kinds of breakable scenery** (thirty in all): a chain hoist that drops its engine block, a server rack
+  that topples and arcs, a jukebox that flings its records, a hydrant geyser you can ride, a gas main's burning jet, a
+  sand hopper that smothers fire and slows foes, a chem vat whose acid wave stops at ledges, a transformer that zaps
+  and blacks out nearby lights, paint cans that colour the floor and the foes, and a sprinkler that rains on fire. They
+  chain with the old ones (fire cooks, water conducts, horns shatter glass). The Lab's Breakables Bay has a new upper
+  deck with one of each, and ARENAS 06-10 use them. `PR.check()` walks the Bay too.
+- **ARENAS 06-10**, each with its own machinery, join OVERTIME and DAILY (the rotation is now ten arenas) and the
+  Lab: **The Cooling Tower** floods its basin on a klaxon, and some floods go live when a cable drops in. **The Chill
+  Vault** has ice floors, icicles that drop over a shadow and frost vents. **The Storm Roof** is open to the sky: rain,
+  marked lightning strikes that favour high ground, and gusts with warning streaks. **The Crusher**'s end walls close in
+  and flatten what they pin. **The Turbine Hall** has fan updrafts to ride, a turbine gust and rotors with a safe
+  rhythm. Machinery hurts foes too and stands down while no foes are left. New Lab rooms: `tower`, `vault`, `storm`,
+  `crusher`, `turbine`. The Lab hazard sweep covers the new machinery, and the navigation check covers the new arenas.
+- **Polish and juice.** Foes punch up when hit, with a directional impact star and sparks or embers by material, and
+  kills throw a shock ring (three for bosses). Barrels smoke after firing, heavy landings kick dust and a floor ring
+  scaled by the drop, wall slides spark, dashes leave speed streaks and medkits twinkle. The boss bar fills in on
+  arrival, holds a chip trail before it drains, flashes on big hits, pulses low and shows each boss's own phase notches
+  (the Foreman's were the Smelter's). The crosshair blooms with recoil and twists red on a kill, the low-HP edge and
+  HP number throb with the heartbeat, weapon swaps slide in, wave cards get a light sweep, perk cards deal in and lift,
+  the pause highlight glides, the results grade lands with a ring, and the title logo shines. OPTS.flash dims all of it.
+- `fxRandom`, `crand` and `cpick` (`src/util.js`), and `fx.emit(..., { cosmetic: true })`: effects that change nothing
+  in play draw from their own generator, so the seeded campaign runs play out the same with or without them. Every
+  effect added in this round uses them, and the seeded Normal and Brutal campaigns replay exactly as before.
 - `run.mjs --min-wins=N` passes a set of full campaigns when at least N win. A lost or stalled campaign prints as `LOST`
   with its details instead of failing, while an error in the page or the harness still fails the run. CI's Brutal job
   plays eight seeds and needs seven, so one thin run tipping over after an unrelated change no longer turns it red.
@@ -19,7 +72,7 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   bound keys, with the keyboard's own labels where the browser offers them. With the defaults every hint reads as
   before. `run.mjs` rebinds JUMP with real key input and checks the swap, the save, a reload, the HUD, an AZERTY key
   at W's place and RESET ALL. (#109)
-- **Lab practice mode.** Choose from nine rooms, equip any weapon, and build encounters with enemies, elites,
+- **Lab practice mode.** Choose from fourteen rooms, equip any weapon, and build encounters with enemies, elites,
   bosses and hazards. Reset a room to repeat the setup. Lab practice leaves campaign saves and progression intact.
 - `SlagLab` browser controls let test scripts list presets, deploy or reset a room, and inspect the player, enemies
   and props. Headless sweeps exercise the full weapon catalog, enemy roster, boss phases and arena hazards.

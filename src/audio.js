@@ -442,6 +442,56 @@ const Sfx = {
   gatlingSpin() { if (!this.ok('gsp', 0.6)) return; if (this.smp('gatlingSpin')) return; this.tone({ type: 'sawtooth', f0: 80, f1: 600, dur: 0.9, vol: 0.05 }); },
   gatlingFire() { if (!this.ok('gfr', 0.06)) return; if (this.smp('gatlingFire')) return; this.noise({ filter: 'bandpass', f0: 1500, q: 1, dur: 0.05, vol: 0.18 }); },
   bannerPlant() { if (!this.ok('bnp', 0.5)) return; if (this.smp('bannerPlant')) return; this.noise({ filter: 'lowpass', f0: 1200, f1: 200, dur: 0.2, vol: 0.25 }); this.tone({ type: 'sine', f0: 520, f1: 780, dur: 0.3, vol: 0.05, delay: 0.1 }); },
+  // ---- expansion: weapons (synth only) ----
+  cannon() { if (!this.ok('xcan', 0.08)) return; this.noise({ filter: 'lowpass', f0: 2600, f1: 110, dur: 0.55, vol: 0.75, dest: this.crunch }); this.tone({ type: 'sine', f0: 130, f1: 32, dur: 0.45, vol: 0.6 }); this.tone({ type: 'square', f0: 260, f1: 70, dur: 0.1, vol: 0.1 }); },
+  cannonHit(v = 1) { if (!this.ok('xcanh', 0.05)) return; this.tone({ type: 'sine', f0: 150, f1: 45, dur: 0.18, vol: 0.45 * v }); this.noise({ filter: 'lowpass', f0: 1300, f1: 200, dur: 0.16, vol: 0.35 * v }); },
+  quake() { if (!this.ok('xqk', 0.1)) return; this.noise({ filter: 'lowpass', f0: 800, f1: 60, dur: 0.9, vol: 0.7, dest: this.crunch }); this.tone({ type: 'sine', f0: 75, f1: 28, dur: 0.8, vol: 0.55 }); this.tone({ type: 'sawtooth', f0: 52, f1: 38, dur: 0.6, vol: 0.07 }); },
+  quakePop() { if (!this.ok('xqkp', 0.05)) return; this.noise({ filter: 'bandpass', f0: 500, f1: 1500, q: 1, dur: 0.12, vol: 0.3 }); this.tone({ type: 'sine', f0: 90, f1: 240, dur: 0.12, vol: 0.22 }); },
+  phase() { if (!this.ok('xph', 0.05)) return; this.tone({ type: 'sine', f0: 1900, f1: 210, dur: 0.22, vol: 0.12 }); this.tone({ type: 'triangle', f0: 3700, f1: 900, dur: 0.15, vol: 0.04 }); this.noise({ filter: 'bandpass', f0: 5200, f1: 1600, q: 4, dur: 0.18, vol: 0.08 }); },
+  phaseHit() { if (!this.ok('xphh', 0.04)) return; this.tone({ type: 'sine', f0: 900, f1: 1500, dur: 0.07, vol: 0.06 }); this.noise({ filter: 'highpass', f0: 4000, dur: 0.05, vol: 0.05 }); },
+  ballLaunch() { if (!this.ok('xbl', 0.1)) return; this.tone({ type: 'sawtooth', f0: 80, f1: 260, dur: 0.35, vol: 0.08 }); this.noise({ filter: 'bandpass', f0: 2400, q: 2, dur: 0.3, vol: 0.12 }); this.tone({ type: 'sine', f0: 600, f1: 1200, dur: 0.25, vol: 0.05 }); },
+  ballZap() { if (!this.ok('xblz', 0.06)) return; this.noise({ filter: 'highpass', f0: 2800, dur: 0.07, vol: 0.15 }); this.tone({ type: 'square', f0: 1300 + Math.random() * 500, f1: 500, dur: 0.05, vol: 0.035 }); },
+  cycloneLaunch() { if (!this.ok('xcyl', 0.1)) return; this.noise({ filter: 'bandpass', f0: 500, f1: 2200, q: 1, dur: 0.3, vol: 0.25 }); this.tone({ type: 'sine', f0: 220, f1: 90, dur: 0.15, vol: 0.2 }); },
+  cyclone(v = 1) { if (!this.ok('xcy', 0.35)) return; this.noise({ filter: 'bandpass', f0: 360, f1: 900, q: 1.3, dur: 0.5, vol: 0.18 * v, attack: 0.1 }); this.noise({ filter: 'bandpass', f0: 1900, f1: 1200, q: 3, dur: 0.45, vol: 0.06 * v, attack: 0.12 }); },
+  caltrops() { if (!this.ok('xct', 0.08)) return; for (let i = 0; i < 5; i++) this.tone({ type: 'triangle', f0: 2400 + i * 260, f1: 1600, dur: 0.04, vol: 0.04, delay: i * 0.025 }); this.noise({ filter: 'highpass', f0: 3000, dur: 0.12, vol: 0.08 }); },
+  caltropStab() { if (!this.ok('xcts', 0.06)) return; this.noise({ filter: 'bandpass', f0: 1700, q: 2, dur: 0.06, vol: 0.18 }); this.tone({ type: 'square', f0: 720, f1: 280, dur: 0.05, vol: 0.05 }); },
+  spear() { if (!this.ok('xsp', 0.08)) return; this.tone({ type: 'triangle', f0: 190, f1: 85, dur: 0.25, vol: 0.22 }); this.noise({ filter: 'bandpass', f0: 1100, f1: 3200, q: 1.5, dur: 0.18, vol: 0.2 }); this.tone({ type: 'sawtooth', f0: 330, f1: 300, dur: 0.16, vol: 0.04 }); },
+  spearReel() { if (!this.ok('xspr', 0.25)) return; for (let i = 0; i < 5; i++) this.tone({ type: 'square', f0: 1500 - i * 60, dur: 0.015, vol: 0.04, delay: i * 0.035 }); },
+  overheat() { if (!this.ok('xhr', 0.5)) return; for (let i = 0; i < 3; i++) this.tone({ type: 'square', f0: 1300, f1: 1100, dur: 0.06, vol: 0.05, delay: i * 0.09 }); this.noise({ filter: 'highpass', f0: 2600, dur: 1.1, vol: 0.22, attack: 0.03 }); },
+  beaconSet() { if (!this.ok('xbcs', 0.2)) return; this.tone({ type: 'square', f0: 900, f1: 1800, dur: 0.1, vol: 0.05 }); this.noise({ filter: 'lowpass', f0: 1200, dur: 0.08, vol: 0.12 }); },
+  beaconPing(n = 0) { if (!this.ok('xbcp', 0.05)) return; this.tone({ type: 'square', f0: 1600 + n * 120, dur: 0.04, vol: 0.045 }); },
+  heatSet(v) {                                                     // the heat ray's hum: it climbs in pitch and grit as the beam locks on
+    if (!this.ctx) return;
+    if (v > 0.02 && !this.heatNode && !this.muted) {
+      const c = this.ctx, g = c.createGain(); g.gain.value = 0.0001;
+      const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 120;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 600; f.Q.value = 4;
+      const src = c.createBufferSource(); src.buffer = this.noiseBuf; src.loop = true;
+      const nf = c.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2400; nf.Q.value = 1.2; const ng = c.createGain(); ng.gain.value = 0.5;
+      o.connect(f); f.connect(g); src.connect(nf); nf.connect(ng); ng.connect(g); g.connect(this.out); o.start(); src.start();
+      this.heatNode = { g, o, f, nodes: [o, src] };
+    }
+    const n = this.heatNode; if (!n) return;
+    const t = this.ctx.currentTime;
+    if (v <= 0.02) { this.heatNode = null; n.g.gain.setTargetAtTime(0.0001, t, 0.05); for (const s of n.nodes) s.stop(t + 0.3); return; }
+    n.g.gain.setTargetAtTime(0.05 + 0.05 * v, t, 0.04); n.o.frequency.setTargetAtTime(110 + 170 * v, t, 0.08); n.f.frequency.setTargetAtTime(500 + 1600 * v, t, 0.08);
+  },
+  hydroSet(on) {                                                   // the hydro cannon's jet: a hard hiss over a low rush
+    if (!this.ctx) return;
+    if (on && !this.hydroNode && !this.muted) {
+      const c = this.ctx, g = c.createGain(); g.gain.value = 0.0001;
+      const src = c.createBufferSource(); src.buffer = this.noiseBuf; src.loop = true;
+      const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1700; f.Q.value = 0.6;
+      const src2 = c.createBufferSource(); src2.buffer = this.noiseBuf; src2.loop = true; const f2 = c.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = 300;
+      const lfo = c.createOscillator(); lfo.frequency.value = 17; const lg = c.createGain(); lg.gain.value = 0.025;
+      src.connect(f); f.connect(g); src2.connect(f2); f2.connect(g); lfo.connect(lg); lg.connect(g.gain); g.connect(this.out);
+      src.start(0, Math.random()); src2.start(0, Math.random()); lfo.start(); g.gain.setTargetAtTime(0.14, c.currentTime, 0.03);
+      this.hydroNode = { g, nodes: [src, src2, lfo] };
+    } else if (!on && this.hydroNode) {
+      const a = this.hydroNode, t = this.ctx.currentTime; this.hydroNode = null;
+      a.g.gain.setTargetAtTime(0.0001, t, 0.05); a.nodes.forEach(n => n.stop(t + 0.3));
+    }
+  },
   // ---- powerhouse round ----
   nuke() { if (!this.ok('nuk', 0.3)) return; if (this.smp('nuke')) return; this.noise({ filter: 'lowpass', f0: 2500, f1: 60, dur: 1.8, vol: 0.8, dest: this.crunch }); this.tone({ type: 'sine', f0: 60, f1: 25, dur: 1.6, vol: 0.6 }); },
   dragon() { if (!this.ok('drg', 0.1)) return; if (this.smp('dragon')) return; this.noise({ filter: 'lowpass', f0: 4000, f1: 600, dur: 0.4, vol: 0.45 }); this.noise({ filter: 'bandpass', f0: 900, f1: 1800, q: 0.8, dur: 0.5, vol: 0.2, delay: 0.04 }); },
@@ -603,6 +653,7 @@ const Sfx = {
   stopLoops() {                                                    // every continuous weapon sound; a new loop gets its line here and nowhere else
     this.arcSet(false); this.flameSet(false); this.miniSet(0); this.cryoSet(false); this.ripperSet(0);
     this.lanceSet(0); this.swarmSet(0); this.acidSet(false); this.tractorSet(0);
+    this.heatSet(0); this.hydroSet(false);
   },
   acidSet(on) {                                                    // hiss of the corroder while it sprays
     if (!this.ctx) return;

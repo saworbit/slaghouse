@@ -1587,6 +1587,273 @@ const RAG = {
   cloaker:  { up: true, hp: 35, fw: 18, fh: 24, body: x => drawCloaker(x, 0, [0, 0], [0, 0], 'idle'), head: [4, 0, 10, 8], torso: [2, 8, 12, 7], P: CKLEG, legW: 2 },
   pyro:     { up: true, hp: 45, fw: 18, fh: 24, body: x => drawPyro(x, 0, [0, 0], [0, 0], 'idle'), head: [4, 0, 11, 8], torso: [1, 8, 13, 7], P: PYLEG, legW: 3 },
 };
+// ---- expansion: bosses ----------------------------------------------------------------
+// The five expansion bosses (BOSS RUSH, OVERTIME, the Lab): every one is drawn for its three phases, so the wear
+// shows as the fight goes on, plus the egg sacs, shield nodes and saw blades that come with them.
+const XCH = ['#0a0710', '#160e20', '#24162e', '#36203f', '#4c2c54', '#6a406e', '#8e5c8e'];   // brood chitin
+const XCU = ['#24100a', '#42200e', '#6a3416', '#984c20', '#c46a2c', '#e8904a', '#ffc27a'];   // copper windings
+const XGL = ['#0c1824', '#16283a', '#244056', '#3a6482', '#5e94b8', '#9ccce8', '#e0f6ff'];   // glass
+const XCT = ['#05060c', '#0b0f1c', '#141a2e', '#1e2842', '#2c3a5a', '#425478'];               // tailcoat
+const XSC = ['#4a3a3a', '#7a6a66', '#a89a94', '#d2c8c0', '#f2ece4'];                          // sclera
+const XSR = ['#300606', '#5a1010', '#8a1c1c', '#b83434', '#e06060'];                          // a bloodshot sclera
+const xbHash = (x, y, s = 0) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };   // fixed noise: art never reads Math.random
+function xbCrack(c, pts, glow) {                     // a jagged crack along a polyline, lit from inside when glow is set
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; pxLine(c, '#07080b', x0, y0, x1, y1); if (glow) pxLine(c, glow, x0 + 1, y0, x1 + 1, y1); }
+}
+function drawCrucible(ctx, ph, pose) {               // 56x48 the crucible: a slag cauldron on thrusters, spout right; pose i | t (pouring) | v (venting)
+  const W = 56, H = 48, tl = pose === 't', vt = pose === 'v', hot = ph === 3;
+  const BOWL = hot ? ['#0c0e12', '#1a1210', '#2e1a14', '#4a2418', '#6a3420', '#8c4a2a', '#a86a48'] : IRN;
+  part(ctx, W, H, c => {                                                     // thruster pods and their stubby flames
+    for (const x of [17, 39]) { limb(c, x, 37, x, 43, 3.6, 2.6, IRN, -0.05, true); R(c, IRN[6], x - 2, 37, 4, 1); R(c, IRN[0], x - 2, 43, 5, 1); R(c, vt ? MLT[4] : '#9ad8ff', x - 1, 44, 3, 1); R(c, '#ffffff', x, 44, 1, 1); }
+    for (const x of [4, 52]) { blob(c, x, 24, 4.2, 4.6, IRN, 2.4, 0.06); R(c, IRN[0], x - 2, 28, 4, 2); R(c, IRN[6], x - 2, 21, 2, 1); }
+    limb(c, 8, 24, 12, 24, 1.4, 1.4, IRN, 0.1, true); limb(c, 44, 24, 48, 24, 1.4, 1.4, IRN, 0.1, true);   // trunnion arms
+  });
+  part(ctx, W, H, c => {                                                     // the bowl
+    const cx = 28, cy = 25, rx = 20, ry = 15, P = 2.3, ins = (x, y) => inBlob(x, y, cx, cy, rx, ry, P);
+    blob(c, cx, cy, rx, ry, BOWL, P, 0.05, (x, y) => y >= 12);
+    blob(c, cx, cy, rx, ry, RST, P, 0.04, (x, y) => y >= 31);                 // scorched underside
+    for (let x = 8; x < 49; x++) for (const y of [30, 31]) if (ins(x, y)) R(c, HAZ[((x + y) >> 1) & 1 ? 3 : 0], x, y);   // hazard band
+    for (let x = 10; x < 47; x += 4) if (ins(x, 17) && !(ph === 3 && x > 30 && x < 40)) { R(c, IRN[7], x, 17); R(c, IRN[2], x, 18); }   // rivets
+    R(c, IRN[1], 12, 20, 6, 6); R(c, IRN[5], 13, 21, 4, 4); R(c, '#e8e2d0', 14, 22, 2, 2); R(c, '#d02a1a', 15, 22, 1, 2);   // pressure gauge, needle in the red
+    for (let i = 0; i < 3; i++) R(c, IRN[1], 39, 20 + i * 2, 6, 1);           // side vents
+    if (ph >= 2) {
+      xbCrack(c, [[19, 13], [17, 17], [20, 21], [18, 27]], MLT[4]); xbCrack(c, [[41, 24], [45, 28], [43, 33]], MLT[3]); R(c, IRN[1], 34, 33, 4, 2); R(c, IRN[2], 9, 19, 2, 2);
+      for (const [x, y0, n] of [[24, 14, 4], [36, 14, 6], [11, 16, 3]]) for (let i = 0; i < n; i++) R(c, MLT[i < 2 ? 5 : 3], x + (i > 2 ? 1 : 0), y0 + i);   // slag running down from the lip
+    }
+    if (ph === 3) {                                                           // plates blown off: the glowing liner shows
+      for (const [x0, y0, w, h] of [[31, 15, 9, 4], [8, 25, 5, 5], [40, 33, 6, 3]]) for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (ins(x, y)) R(c, MLT[2 + ((x + y) % 3)], x, y);
+      R(c, MLT[6], 34, 16, 2, 1); R(c, MLT[5], 10, 27, 2, 1);
+    }
+  });
+  part(ctx, W, H, c => {                                                     // the hatch over its core
+    const hx = 28, hy = 24;
+    if (vt) {
+      blob(c, hx, hy, 7, 6.5, IRN, 2, -0.2); blob(c, hx, hy, 5.6, 5.2, MLT, 2, 0.35);
+      R(c, '#ffffff', hx - 2, hy - 2, 3, 2); R(c, MLT[7], hx - 3, hy - 1, 5, 3); R(c, '#ffffff', hx - 1, hy - 1, 2, 1);
+      blob(c, hx - 11, hy, 2.4, 6, IRN, 2.6, 0.1); blob(c, hx + 11, hy, 2.4, 6, IRN, 2.6, 0.1);   // the doors swung open
+    } else {
+      blob(c, hx, hy, 7, 6.5, IRN, 2.2, 0.08);
+      for (let y = hy - 3; y <= hy + 3; y += 2) R(c, IRN[0], hx - 5, y, 11, 1);
+      for (let y = hy - 3; y <= hy + 3; y += 2) R(c, MLT[tl || hot ? 4 : 2], hx - 4 + ((y >> 1) & 1), y, 9, 1);   // the glow through the grille
+      R(c, IRN[7], hx - 1, hy - 6, 3, 1); R(c, IRN[0], hx - 1, hy + 6, 3, 1);
+    }
+  });
+  part(ctx, W, H, c => {                                                     // the rim, the slag in it and the spout
+    const cx = 28, cy = 11;
+    for (let y = 5; y <= 17; y++) for (let x = 6; x <= 50; x++) {
+      const o = Math.pow((x + 0.5 - cx) / 22, 2) + Math.pow((y + 0.5 - cy) / 5.6, 2), n = Math.pow((x + 0.5 - cx) / 18, 2) + Math.pow((y + 0.5 - cy + 0.6) / 3.4, 2);
+      if (o > 1) continue;
+      if (n <= 1) { const d = Math.sqrt(n), sl = tl ? (x - cx) / 40 : 0; R(c, MLT[clamp(Math.round(7 - d * 4 - (hot ? 0 : 1) + sl * 2 + (xbHash(x, y, ph) < 0.12 ? -2 : 0)), 2, 7)], x, y); }
+      else R(c, hot ? (y < cy ? RST[5] : y > cy + 2 ? RST[2] : MLT[2]) : (y < cy - 1 ? IRN[6] : y > cy + 2 ? IRN[2] : IRN[4]), x, y);
+    }
+    for (let x = 9; x < 48; x += 5) R(c, hot ? MLT[3] : IRN[7], x, cy - 5 + (Math.abs(x - cx) > 15 ? 1 : 0));
+    limb(c, 47, 11, 54, 13, 2.6, 2.0, hot ? RST : IRN, 0.1, true);            // spout trough
+    R(c, MLT[tl ? 6 : 4], 48, 10, 5, 1); R(c, MLT[tl ? 7 : 5], 50, 10, 2, 1);
+    if (tl) { R(c, MLT[6], 54, 14, 2, 2); R(c, MLT[5], 55, 16, 1, 2); R(c, MLT[4], 54, 18, 1, 1); }   // slag leaving the lip
+    if (ph >= 2) { R(c, '#07080b', 14, 7, 3, 1); R(c, '#07080b', 40, 14, 4, 1); }   // dents in the lip
+    if (hot) for (const [x, y] of [[12, 9], [44, 9], [30, 6]]) R(c, '#ffffff', x, y);   // boiling over
+  });
+}
+function drawGrinder(ctx, ph, k) {                   // 48x48 the grinder: a saw ring spinning round a fixed armoured hub; k 0-3 steps the spin
+  const cx = 24, cy = 24, a0 = k * Math.PI / 24, seg = Math.PI / 6;
+  const SAW = ['#1a1e24', '#2a3038', '#3e4652', '#5a6474', '#7e8a9a', '#a8b4c2', '#d8e2ec'];
+  part(ctx, 48, 48, c => {                                                   // the saw ring and its teeth
+    for (let y = 0; y < 48; y++) for (let x = 0; x < 48; x++) {
+      const dx = x + 0.5 - cx, dy = y + 0.5 - cy, r = Math.hypot(dx, dy), ang = Math.atan2(dy, dx), u = (((ang - a0) / seg) % 1 + 1) % 1;
+      const lit = clamp(Math.round(3.5 - (dx * 0.5 + dy * 0.75) / r * 2.5), 0, 6);
+      if (r >= 15 && r < 19.5) {
+        const band = r >= 17.5 ? (Math.floor((ang - a0) / seg + 12) % 2 ? HAZ[3] : '#15161a') : null;   // painted outer band: the stripes show it turning
+        R(c, band && ph < 3 ? band : r < 16 ? SAW[1] : SAW[clamp(lit, 1, 5)], x, y);
+        if (ph >= 2 && band && xbHash(Math.floor((ang - a0) * 8), 3, ph) < 0.25) R(c, SAW[2], x, y);   // paint chipped off
+      } else if (r >= 19.5 && r < 24 && r - 19.5 < 4.4 * Math.pow(1 - u, 0.8)) R(c, u < 0.2 ? SAW[6] : SAW[clamp(lit + 1, 3, 6)], x, y);   // the teeth, keen on the leading edge
+    }
+    for (let i = 0; i < 6; i++) { const a = a0 + i * seg * 2 + seg / 2; R(c, SAW[0], Math.round(cx + Math.cos(a) * 16.5), Math.round(cy + Math.sin(a) * 16.5), 1, 1); }   // bolt heads
+  });
+  part(ctx, 48, 48, c => {                                                   // the hub housing, upright whatever the ring does
+    blob(c, cx, cy, 13, 12, IRN, 3.4, 0.06);
+    if (ph === 1) {
+      for (const [x0, y0] of [[13, 15], [26, 15], [13, 25], [26, 25]]) { R(c, IRN[5], x0, y0, 9, 8); R(c, IRN[6], x0, y0, 9, 1); R(c, IRN[3], x0, y0 + 7, 9, 1); R(c, IRN[7], x0 + 1, y0 + 1); R(c, IRN[7], x0 + 7, y0 + 6); }
+      for (let i = 0; i < 6; i++) R(c, i % 2 ? '#15161a' : HAZ[3], 13 + i * 4, 23, 4, 2);
+    } else if (ph === 2) {
+      for (const [x0, y0] of [[13, 15], [13, 25], [26, 25]]) { R(c, IRN[4], x0, y0, 9, 8); R(c, IRN[5], x0, y0, 9, 1); R(c, IRN[2], x0, y0 + 7, 9, 1); }
+      R(c, IRN[0], 26, 15, 9, 8); for (let i = 0; i < 4; i++) R(c, i % 2 ? '#c84a20' : '#40c0ff', 27 + i * 2, 16 + i, 1, 5);   // a plate gone: wiring
+      xbCrack(c, [[14, 26], [18, 29], [17, 32]], null); xbCrack(c, [[30, 27], [33, 30]], null);
+      for (let i = 0; i < 6; i++) R(c, i % 2 ? '#15161a' : HAZ[1], 13 + i * 4, 23, 4, 2);
+    } else {
+      blob(c, cx, cy, 11, 10, ['#140806', '#2a0e08', '#4a1a0c', '#7a2a10'], 2.6, 0);   // stripped: the gearbox and its hot core
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; R(c, IRN[4], Math.round(cx + Math.cos(a) * 8.5), Math.round(cy + Math.sin(a) * 8), 2, 2); }
+      blob(c, cx, cy, 5.2, 5, MLT, 2, 0.3); R(c, '#ffffff', cx - 2, cy - 2, 2, 2);
+      R(c, IRN[3], 12, 14, 4, 3); R(c, IRN[3], 33, 31, 4, 3);
+    }
+    R(c, IRN[0], 32, 18, 6, 4); R(c, ph === 3 ? MLT[6] : '#ff3020', 33, 19, 5, 2); R(c, '#ffe0a0', 36, 19, 2, 1);   // the visor slit, looking ahead
+    if (ph >= 2) R(c, '#07080b', 34, 18, 1, 4);
+    limb(c, 17, 11, 17, 6, 1.8, 1.6, IRN, -0.1, true); limb(c, 22, 11, 22, 7, 1.5, 1.4, IRN, -0.1, true);   // exhaust stacks
+    R(c, ph === 3 ? MLT[5] : IRN[1], 16, 5, 3, 1); R(c, ph === 3 ? MLT[4] : IRN[1], 21, 6, 3, 1);
+    blob(c, cx, cy + 12, 4, 2.2, IRN, 2.4, 0.1); R(c, IRN[7], cx - 1, cy + 11, 2, 1);   // axle cap
+  });
+}
+function drawQueen(ctx, ph, pose) {                  // 56x40 the hive queen, faces right; pose a | b wingbeat, s rearing to screech
+  const sc = pose === 's', up = pose === 'a' || sc, by = sc ? -2 : 0;
+  const wingFill = (c, cx, cy, rx, ry, rot, tatter) => {
+    const cs = Math.cos(rot), sn = Math.sin(rot);
+    for (let y = Math.floor(cy - rx - 1); y <= cy + rx + 1; y++) for (let x = Math.floor(cx - rx - 1); x <= cx + rx + 1; x++) {
+      const px = x + 0.5 - cx, py = y + 0.5 - cy, u = (px * cs + py * sn) / rx, v = (-px * sn + py * cs) / ry;
+      if (u * u + v * v > 1 || x < 0 || y < 0 || x >= 56 || y >= 40) continue;
+      if (tatter && xbHash(x >> 1, y >> 1, tatter) < 0.22 * tatter && u > -0.3) continue;   // torn membrane
+      const vein = Math.abs(v - u * 0.4) < 0.09 || Math.abs(v + u * 0.5 - 0.3) < 0.08 || Math.abs(u - 0.35) < 0.05;
+      c.fillStyle = vein ? 'rgba(90,120,150,0.95)' : u > 0.55 ? 'rgba(220,240,255,0.7)' : 'rgba(170,210,240,0.5)'; c.fillRect(x, y, 1, 1);
+    }
+  };
+  const wings = (back) => part(ctx, 56, 40, c => {
+    const t = back ? 0 : ph - 1, dx = back ? -3 : 0;
+    if (sc) wingFill(c, 23 + dx, 8, 13, 4, -0.5, t);
+    else if (up) wingFill(c, 21 + dx, 9, 13, 4, -0.38, t);
+    else wingFill(c, 18 + dx, 15, 15, 3.6, -0.06, t);
+  }, back ? '#20182a' : '#07080b');
+  wings(true);
+  part(ctx, 56, 40, c => {                                                   // legs, folded under
+    for (const [hx, f] of [[27, 0], [31, 1], [35, 2]]) {
+      const kx = hx - 3 + f * 2, ky = 30 + by + (f === 1 ? 1 : 0), fx = hx - 6 + f * 4, fy = 35 + by;
+      pxLine(c, XCH[3], hx, 24 + by, kx, ky, 1); pxLine(c, XCH[4], hx + 1, 24 + by, kx + 1, ky, 1); pxLine(c, XCH[2], kx, ky, fx, fy, 1); R(c, XCH[5], fx, fy, 1, 1);
+    }
+  });
+  part(ctx, 56, 40, c => {                                                   // the egg-heavy abdomen
+    const cx = 15, cy = 23 + by * 0.5, rx = 13.5, ry = 10.5;
+    blob(c, cx, cy, rx, ry, BRF, 2.1, 0.04);
+    blob(c, cx + 1, cy - 3.5, rx - 1, ry - 4.5, XCH, 2.4, 0.08, (x, y) => y < cy - 1);   // dorsal plates
+    for (let x = 6; x < 26; x += 5) for (let y = Math.round(cy - 8); y < cy + 9; y++) if (inBlob(x, y, cx, cy, rx, ry, 2.1)) R(c, '#1a0808', x, y);   // segment bands
+    for (const [x, y] of [[8, 25], [13, 27], [19, 26], [10, 21], [16, 23], [22, 22], [5, 23]]) { R(c, BRE[ph === 3 ? 3 : 2], x, y + by * 0.5, 2, 2); R(c, BRE[4], x, y + by * 0.5, 1, 1); }   // eggs glowing through
+    R(c, XCH[2], 1, 23, 3, 3); R(c, BRE[1], 0, 24, 2, 1);                     // ovipositor
+    if (ph === 3) {                                                           // ruptured: brood seeping out
+      blob(c, 17, 28, 4.2, 3, ['#140404', '#2a0808', '#4a1010'], 2, -0.2);
+      for (const [x, y] of [[15, 27], [18, 28], [16, 29], [19, 27]]) { R(c, BRE[3], x, y); R(c, BRE[4], x, y - 1 + (x & 1)); }
+      R(c, BRE[2], 16, 31, 1, 3); R(c, BRE[3], 16, 34, 1, 1); R(c, BRE[2], 19, 31, 1, 2);
+    }
+    if (ph >= 2) xbCrack(c, [[12, 15], [14, 18], [12, 21]], null);
+  });
+  part(ctx, 56, 40, c => {                                                   // thorax and head
+    blob(c, 31, 19 + by, 7.5, 6.5, XCH, 2.2, 0.1);
+    R(c, XCH[6], 29, 13 + by, 4, 1); if (ph >= 2) xbCrack(c, [[30, 15 + by], [32, 19 + by]], null);
+    const hx = 41 + (sc ? 1 : 0), hy = 18 + by - (sc ? 2 : 0);
+    for (const [x, h] of [[hx - 4, 3], [hx - 2, 4], [hx, 3]]) { R(c, XCH[3], x, hy - 4 - h, 1, h); R(c, XCH[6], x, hy - 4 - h, 1, 1); }   // her crown of spines
+    blob(c, hx, hy, 6, 5.2, XCH, 2.3, 0.12);
+    pxLine(c, XCH[5], hx + 1, hy - 4, hx + 7, hy - 11 - (sc ? 1 : 0)); pxLine(c, XCH[4], hx - 1, hy - 4, hx + 3, hy - 12);   // antennae
+    R(c, XCH[6], hx + 7, hy - 12, 1, 1); R(c, XCH[6], hx + 3, hy - 13, 1, 1);
+    const eye = ph === 3 ? ['#ff2010', '#ffb080', '#ffffff'] : ['#c02818', '#ff7040', '#ffd0a0'];
+    R(c, '#140606', hx - 1, hy - 3, 5, 4); R(c, eye[0], hx - 1, hy - 3, 4, 3); R(c, eye[1], hx, hy - 3, 2, 2); R(c, eye[2], hx + 1, hy - 3, 1, 1);   // compound eye
+    const open = sc ? 4 : 1;                                                // mandibles
+    pxLine(c, XCH[5], hx + 5, hy + 1, hx + 10, hy - open, 2); R(c, '#e8e2d0', hx + 10, hy - open, 1, 2);
+    pxLine(c, XCH[4], hx + 5, hy + 2, hx + 10, hy + 2 + open, 2); R(c, '#e8e2d0', hx + 10, hy + 1 + open, 1, 2);
+    if (sc) { R(c, '#3a0808', hx + 6, hy, 3, 2); R(c, '#ff6040', hx + 7, hy + 1, 1, 1); }
+  });
+  wings(false);
+}
+function drawOverseer(ctx, ph, pose) {               // 48x48 the overseer: an armoured eye on a thruster stalk; pose i | c (charging, lids narrowed). The iris is drawn live
+  const ch = pose === 'c', cx = 24, cy = 22;
+  part(ctx, 48, 48, c => {                                                   // stalk, fins, antenna
+    limb(c, cx, 35, cx, 44, 4.2, 2.6, IRN, -0.05, true); R(c, IRN[6], cx - 3, 36, 2, 1); R(c, '#40e0ff', cx - 1, 45, 3, 1); R(c, '#ffffff', cx, 45, 1, 1);
+    limb(c, 10, 24, 2, 33, 2.4, 1.4, IRN, 0, true); limb(c, 38, 24, 46, 33 + (ph >= 2 ? 2 : 0), 2.4, 1.4, IRN, 0.05, true);
+    R(c, ph === 3 ? '#401010' : '#ff3020', 2, 33, 1, 1); R(c, '#40e0ff', 45, 33 + (ph >= 2 ? 2 : 0), 1, 1);
+    limb(c, cx, 7, cx, 2, 1, 0.8, IRN, 0, true); R(c, '#ff3020', cx, 1, 1, 1);
+    limb(c, 15, 9, 12, 4, 1.4, 1, IRN, 0, true); limb(c, 33, 9, 36, 4, 1.4, 1, IRN, 0, true);
+  });
+  part(ctx, 48, 48, c => {                                                   // the armoured housing
+    const P = 2.4, ins = (x, y) => inBlob(x, y, cx, cy, 17, 16, P);
+    blob(c, cx, cy, 17, 16, IRN, P, 0.06);
+    for (let a = 0; a < 8; a++) { const t = a / 8 * Math.PI * 2 + 0.2; for (let r = 12; r < 16; r++) { const x = Math.round(cx + Math.cos(t) * r), y = Math.round(cy + Math.sin(t) * r * 0.94); if (ins(x, y)) R(c, IRN[1], x, y); } }   // panel seams
+    for (const [px, py] of [[cx - 13, cy - 9], [cx + 12, cy - 9], [cx - 13, cy + 9], [cx + 12, cy + 9]]) { R(c, IRN[0], px, py, 3, 3); R(c, ph === 1 ? '#46e6ff' : ph === 2 ? '#1a4a58' : '#401010', px + 1, py + 1, 1, 1); }   // shield ports
+    if (ph >= 2) { xbCrack(c, [[12, 12], [15, 15], [14, 19]], null); xbCrack(c, [[34, 31], [36, 34], [33, 36]], null); }
+    if (ph === 3) for (const [x0, y0, w, h] of [[30, 8, 7, 5], [8, 26, 6, 6]]) for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (ins(x, y)) R(c, (y - y0) % 2 === 1 && (x - x0) % 5 < 4 ? ((x + y) % 4 ? '#c83a18' : '#ffb040') : '#1a0606', x, y);   // blown panels: hot wiring
+  });
+  part(ctx, 48, 48, c => {                                                   // the socket, the eye and its lids
+    blob(c, cx, cy, 11.5, 11, IRN, 2, -0.25);
+    blob(c, cx, cy, 9.4, 9.2, ph === 3 ? XSR : XSC, 2, 0.1);
+    if (ph >= 2) for (const [x0, y0, x1, y1] of [[cx - 8, cy - 2, cx - 4, cy - 1], [cx + 8, cy + 3, cx + 4, cy + 2], [cx - 6, cy + 5, cx - 3, cy + 3]]) pxLine(c, ph === 3 ? '#ff7060' : '#c03030', x0, y0, x1, y1);   // bloodshot
+    const lid = ch ? 5 : 2;
+    for (let y = cy - 12; y < cy - 9 + lid; y++) for (let x = cx - 12; x <= cx + 12; x++) if (inBlob(x, y, cx, cy, 11.5, 11, 2)) R(c, y === cy - 10 + lid ? IRN[1] : IRN[y < cy - 9 ? 5 : 4], x, y);
+    for (let y = cy + 10 - lid; y <= cy + 12; y++) for (let x = cx - 12; x <= cx + 12; x++) if (inBlob(x, y, cx, cy, 11.5, 11, 2)) R(c, y === cy + 10 - lid ? IRN[1] : IRN[3], x, y);
+  });
+}
+function drawConductor(ctx, ph, pose) {              // 40x48 the conductor: a live wire in a tailcoat, a glass-domed head and a lightning baton; pose i | c (baton raised)
+  const cast = pose === 'c', hot = ph === 3, CU = hot ? XCU.slice(2).concat(['#fff0c0']) : XCU;
+  part(ctx, 40, 48, c => {                                                   // coat tails, trailing as it floats
+    for (const [x0, len, sw, w0] of [[12, 14, -5, 6], [20, 16, -8, 7]]) for (let i = 0; i < len; i++) {
+      const y = 31 + i, w = Math.max(1, Math.round(w0 - i * 0.38)), x = Math.round(x0 + sw * (i / len) * (i / len));
+      if (ph >= 2 && x0 === 20 && i > len - 6 && i % 2) continue;             // a tail torn ragged
+      R(c, XCT[i < 3 ? 3 : 2], x, y, w, 1); R(c, hot ? '#80e0ff' : XCT[4], x, y, 1, 1); R(c, XCT[1], x + w - 1, y, 1, 1);
+    }
+  });
+  const arm = (sx, sy, hx, hy, back) => part(ctx, 40, 48, c => {
+    const ex = (sx + hx) / 2 + (back ? -1 : 1), ey = (sy + hy) / 2 + 1;
+    limb(c, sx, sy, ex, ey, 2.4, 2.1, XCT, back ? -0.2 : 0.05); limb(c, ex, ey, hx, hy, 2.1, 1.6, XCT, back ? -0.2 : 0.05);
+    R(c, CU[4], Math.round(ex) - 1, Math.round(ey), 3, 1); blob(c, hx, hy, 1.9, 1.9, CU, 2, 0.1);
+  });
+  if (cast) arm(10, 17, 5, 6, true); else arm(10, 17, 7, 30, true);
+  part(ctx, 40, 48, c => {                                                   // the coat, its copper waistcoat and lapels
+    blob(c, 20, 25, 10.5, 11, XCT, 2.7, 0.05);
+    for (let y = 18; y < 32; y += 2) { R(c, CU[3], 16, y, 8, 1); R(c, CU[5], 17, y, 3, 1); R(c, CU[1], 16, y + 1, 8, 1); }   // windings
+    pxLine(c, XCT[5], 15, 16, 17, 30); pxLine(c, XCT[5], 25, 16, 23, 30); R(c, '#e8b422', 20, 32, 1, 1); R(c, '#e8b422', 20, 34, 1, 1);
+    blob(c, 9.5, 17, 4, 2.8, CU, 2.2, 0.1); blob(c, 30.5, 17, 4, 2.8, CU, 2.2, 0.12);   // coil epaulettes
+    for (const x of [7, 9, 11, 29, 31, 33]) R(c, CU[1], x, 16, 1, 3);
+    if (ph >= 2) { R(c, XCT[0], 25, 27, 3, 3); R(c, '#80e0ff', 26, 28, 1, 1); R(c, XCT[0], 12, 31, 2, 2); }
+    if (hot) { pxLine(c, '#80e0ff', 12, 21, 13, 33); pxLine(c, '#80e0ff', 28, 21, 27, 33); R(c, '#ffffff', 20, 24, 1, 1); }
+    limb(c, 14, 14, 26, 14, 2.4, 2.4, CU, 0.05, true);                        // the coil collar
+  });
+  part(ctx, 40, 48, c => {                                                   // the glass dome and its filament
+    blob(c, 20, 8, 7.4, 7, XGL, 2.1, 0.1);
+    const F = hot ? '#ffffff' : '#c8faff';
+    pxLine(c, F, 16, 12, 17, 6); pxLine(c, F, 17, 6, 20, 11); pxLine(c, F, 20, 11, 23, 6); pxLine(c, F, 23, 6, 24, 12);
+    R(c, XGL[6], 15, 3, 2, 1); R(c, XGL[6], 14, 4, 1, 3);
+    R(c, '#ffe060', 18, 8, 1, 1); R(c, '#ffe060', 22, 8, 1, 1);
+    if (ph >= 2) { xbCrack(c, [[22, 1], [24, 4], [26, 5]], null); R(c, XGL[1], 24, 2, 2, 2); }
+    R(c, CU[2], 14, 13, 13, 1); R(c, CU[4], 15, 13, 5, 1);                     // the dome's base ring
+  });
+  if (cast) arm(30, 17, 33, 6, false); else arm(30, 17, 33, 26, false);
+  part(ctx, 40, 48, c => {                                                   // the baton, a lightning rod with a live tip
+    const [x0, y0, x1, y1] = cast ? [33, 6, 36, 0] : [33, 26, 39, 20];
+    pxLine(c, '#c8a040', x0, y0, x1, y1); pxLine(c, '#fff0a0', x0, y0 - 1, x1 - 1, y1);
+    R(c, '#ffffff', x1, y1, 1, 1); R(c, '#80e0ff', x1 - 1, y1, 1, 1);
+  });
+}
+function drawEyenode(ctx, f) {                       // 14x14 shield node: a steel octahedron round a cyan emitter
+  for (let y = 0; y < 14; y++) for (let x = 0; x < 14; x++) {
+    const dx = x - 6.5, dy = y - 6.5; if (Math.abs(dx) + Math.abs(dy) > 6.5) continue;
+    R(ctx, IRN[dx < 0 && dy < 0 ? 6 : dx < 0 || dy < 0 ? 4 : 2], x, y);
+  }
+  R(ctx, IRN[0], 4, 4, 6, 6); R(ctx, '#1a6a80', 5, 5, 4, 4); R(ctx, f ? '#c8faff' : '#46e6ff', 6 - f, 6 - f, 2 + 2 * f, 2 + 2 * f); R(ctx, '#ffffff', 6, 6, 1, 1);
+}
+function drawEggsac(ctx, f) {                        // 14x16 egg sac: an amber sac on a goo foot; f 0 | 1 pulse | 2 hatching
+  const sw = f ? 0.5 : 0;
+  R(ctx, XCH[2], 2, 14, 10, 2); R(ctx, XCH[4], 3, 14, 7, 1);
+  blob(ctx, 7, 8.5, 5.4 + sw, 6.4 + sw, ['#2a1008', '#4e200e', '#7a3814', '#a8561c', '#cc7a26', '#e8a238'], 2.1, f === 2 ? 0.2 : 0.06);
+  blob(ctx, 7.5, 9.5, 2.6 + sw, 3.2 + sw, ['#e89a2a', '#ffd060', '#fff0a8'], 2, 0.1);   // the yolk glowing through
+  for (const [x0, y0, x1, y1] of [[4, 4, 5, 12], [9, 3, 8, 13], [6, 2, 7, 7]]) pxLine(ctx, XCH[3], x0, y0, x1, y1);
+  R(ctx, '#ffffff', 5, 5, 1, 1);
+  if (f === 2) { pxLine(ctx, '#140606', 6, 3, 8, 8); pxLine(ctx, '#140606', 8, 8, 6, 12); R(ctx, '#ff3020', 7, 7, 1, 1); R(ctx, XCH[4], 11, 9, 2, 1); }
+}
+function drawXBlade(ctx, r) {                        // a launched saw blade (12x12, or 8x8 split off)
+  const c0 = r + 2;
+  for (let y = 0; y < c0 * 2; y++) for (let x = 0; x < c0 * 2; x++) {
+    const dx = x + 0.5 - c0, dy = y + 0.5 - c0, d = Math.hypot(dx, dy), u = (((Math.atan2(dy, dx) / (Math.PI / 4)) % 1) + 1) % 1;
+    if (d <= r - 0.5) R(ctx, d < 1.5 ? '#2a3038' : dx + dy < 0 ? '#c8d2dc' : '#7e8a9a', x, y);
+    else if (d < r + 1.8 * (1 - u)) R(ctx, '#e8f0f8', x, y);
+  }
+}
+function genExpansionBossArt(scene) {                 // their sheets: a frame per phase and pose, with white hit-flash copies
+  const sheet = (key, w, h, names, draw) => addSheet(scene, key, names.map(n => ({ name: n, c: makeSprite(w, h, x => draw(x, +n[0], n.slice(1))) })), w, h, true);
+  const per = poses => [1, 2, 3].flatMap(p => poses.map(q => p + q));
+  sheet('crucible', 56, 48, per(['i', 't', 'v']), drawCrucible);
+  sheet('grinder', 48, 48, per(['a', 'b', 'c', 'd']), (x, p, q) => drawGrinder(x, p, 'abcd'.indexOf(q)));
+  sheet('queen', 56, 40, per(['a', 'b', 's']), drawQueen);
+  sheet('overseer', 48, 48, per(['i', 'c']), drawOverseer);
+  sheet('conductor', 40, 48, per(['i', 'c']), drawConductor);
+  addSheet(scene, 'eyenode', ['n0', 'n1'].map((n, f) => ({ name: n, c: makeSprite(14, 14, x => drawEyenode(x, f)) })), 14, 14, true);
+  addSheet(scene, 'eggsac', ['e0', 'e1', 'e2'].map((n, f) => ({ name: n, c: makeSprite(14, 16, x => drawEggsac(x, f)) })), 14, 16, true);
+  addTex(scene, 'xblade', makeSprite(12, 12, x => drawXBlade(x, 4))); addTex(scene, 'xbladeS', makeSprite(8, 8, x => drawXBlade(x, 2)));
+  addTex(scene, 'g_xtooth', makeSprite(6, 5, c => { R(c, '#d8e2ec', 1, 1, 3, 1); R(c, '#7e8a9a', 1, 2, 2, 1); R(c, '#d8e2ec', 1, 3, 1, 1); }));
+  addTex(scene, 'g_xlens', makeSprite(6, 6, c => { R(c, '#f2ece4', 1, 1, 3, 3); R(c, '#46e6ff', 2, 2, 2, 2); R(c, '#07080b', 3, 3, 1, 1); }));
+  addTex(scene, 'g_xcoil', makeSprite(7, 5, c => { for (let i = 0; i < 3; i++) R(c, XCU[i % 2 ? 3 : 5], 1 + i * 2, 1, 1, 3); R(c, XCU[1], 1, 3, 5, 1); }));
+}
 function buildRagParts(scene) {
   const put = (key, c) => { addTex(scene, key, c); addTex(scene, key + '_w', whiteCopy(c)); };   // + white hit-flash copy
   for (const kind in RAG) {
@@ -1629,6 +1896,230 @@ function drawRifle(ctx, arm) {                   // 24x11, pivot (2,5)
 // ---- weapons (drawn pointing right; pivot = shoulder at x=2, y=py) -------------
 function drawArm(ctx, py, P = PLEG) {
   R(ctx, P.b, 1, py - 1, 5, 3); R(ctx, P.c, 1, py - 1, 4, 1); R(ctx, P.a, 1, py + 1, 5, 1); R(ctx, P.k, 5, py - 1, 2, 3);
+}
+// ---- expansion: enemies --------------------------------------------------------
+// Ten foes for OVERTIME, the DAILY and the Lab. Each faces right; the parts they swing, aim or throw (a ball and
+// chain, a turret, a bundle of dynamite, a water jet) are their own sprites or drawn live.
+const XLTH = ['#1a0e08', '#2e180e', '#4a2616', '#6a3a20', '#8c522e'];           // leather
+const XRUB = ['#3a2a06', '#6a4e0c', '#a07810', '#d0a020', '#f0c840'];           // yellow rubber
+const XTNK = ['#0e1a2e', '#1a3050', '#2a5080', '#4a80b8', '#8ac0e8'];           // blue steel
+const XOLV = ['#14180e', '#222a16', '#343f22', '#4a5a30', '#66783f', '#8a9a5a']; // olive drab
+const XBNE = ['#3a3630', '#6a6458', '#a8a090', '#d8d0c0', '#f4eee0'];           // bone plate
+const XGUL = ['#2a2c30', '#4a4e56', '#7a808a', '#b0b8c2', '#e0e6ec'];           // gull grey
+const XVIO = ['#160a22', '#2a1440', '#422266', '#5e348c', '#8050b8'];           // illusionist's cloak
+const XSKN = ['#3a1e14', '#5e3424', '#8a5038', '#b07050'];
+function xArc(ctx, cx, cy, r, a0, a1, col, w = 1) {  // a curved blade: an arc of pixels, w thick at its root tapering to a point
+  const n = Math.ceil(Math.abs(a1 - a0) * r * 1.5) + 1;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, a = a0 + (a1 - a0) * t, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, k = Math.max(1, Math.round(w * (1 - t)));
+    for (let j = 0; j < k; j++) R(ctx, col, Math.round(x - Math.cos(a) * j), Math.round(y - Math.sin(a) * j));
+  }
+}
+function drawFlailer(ctx, frame) {                   // 24x24 flailer: a mail-clad brute in a bucket helm (its ball and chain are drawn live)
+  const s = frame === 'w1' ? 1 : 0, wd = frame === 'wind', th = frame === 'throw', by = wd ? 1 : s ? -1 : 0;
+  // Thick legs in leather breeches + iron sabatons
+  limb(ctx, 9, 15 + by, 8 - s, 21, 2.2, 1.8, XLTH, -0.2); R(ctx, '#2a2e35', 5 - s, 21, 6, 3); R(ctx, '#5d6775', 6 - s, 21, 4, 1);
+  limb(ctx, 14, 15 + by, 15 + s, 21, 2.2, 1.8, XLTH, 0.2); R(ctx, '#2a2e35', 13 + s, 21, 6, 3); R(ctx, '#7f8a99', 14 + s, 21, 4, 1);
+  // Back arm hanging at its side
+  limb(ctx, 7, 9 + by, 5, 15 + by, 1.7, 1.5, XLTH, -0.3);
+  // Barrel chest in chainmail, a blood-red tabard and a studded belt
+  blob(ctx, 11.5, 11 + by, 6.2, 5.6, IRN.slice(1, 7));
+  for (let y = 7; y < 16; y++) for (let x = 6 + (y & 1); x < 18; x += 2) if (inBlob(x, y - by, 11.5, 11, 5.4, 4.8, 2)) R(ctx, '#232730', x, y);
+  R(ctx, '#6a1610', 9, 10 + by, 5, 7); R(ctx, '#a82a1e', 10, 10 + by, 3, 6); R(ctx, '#d84a30', 10, 10 + by, 1, 5);
+  R(ctx, '#3a2010', 6, 15 + by, 12, 2); for (let i = 0; i < 4; i++) R(ctx, '#c8d0da', 7 + i * 3, 15 + by, 1, 1);
+  R(ctx, '#5d6775', 4, 7 + by, 5, 3); R(ctx, '#aab4c2', 5, 7 + by, 2, 1); R(ctx, '#c8d0da', 3, 6 + by, 1, 1);           // pauldron + spike
+  // Bucket helm with a cross slit and one ember eye
+  blob(ctx, 12.5, 4.5 + by, 3.8, 3.8, IRN.slice(2), 4);
+  R(ctx, '#aab4c2', 10, 1 + by, 4, 1); R(ctx, '#0a0a0c', 12, 4 + by, 5, 1); R(ctx, '#0a0a0c', 14, 3 + by, 1, 3); R(ctx, '#ff5a1a', 15, 4 + by, 1, 1);
+  // Front arm: chain fist at the chest (whirling), cocked over the shoulder (wind-up), punched out (throw)
+  const [hx, hy] = th ? [21, 10] : wd ? [9, 3] : [16, 10];
+  limb(ctx, 14, 9 + by, hx, hy + by, 1.9, 1.7, XLTH, 0.1);
+  R(ctx, '#3a3f47', hx - 1, hy - 1 + by, 3, 3); R(ctx, '#8a94a0', hx - 1, hy - 1 + by, 2, 1);                           // gauntlet
+}
+function drawHoser(ctx, frame) {                     // 18x24 hoser: a trooper in a rubber suit with a water tank and a fire hose
+  const s = frame === 'w1' ? 1 : 0, br = frame === 'brace' || frame === 'spray', sp = frame === 'spray', by = br ? 1 : 0, fs = br ? 2 : s;
+  // Rubber-booted legs, braced wide against the kick of the hose
+  limb(ctx, 7, 15 + by, 6 - fs, 22, 1.6, 1.5, XRUB, -0.2); R(ctx, '#141210', 4 - fs, 22, 5, 2);
+  limb(ctx, 11, 15 + by, 12 + fs, 22, 1.6, 1.5, XRUB, 0.2); R(ctx, '#141210', 10 + fs, 22, 5, 2);
+  // The water tank on its back: blue steel, a valve and a pressure gauge
+  limb(ctx, 3, 8 + by, 3, 16 + by, 2.6, 2.6, XTNK, -0.2, true); R(ctx, '#c8d0da', 2, 5 + by, 3, 2); R(ctx, '#ffffff', 2, 10 + by, 1, 3);
+  R(ctx, '#e8e8e0', 3, 12 + by, 2, 2); R(ctx, '#ff3020', 4, 12 + by, 1, 1);
+  // Rubber suit with reflective bands
+  blob(ctx, 9.5, 11.5 + by, 4.6, 5, XRUB);
+  R(ctx, '#e0e8f0', 6, 12 + by, 8, 1); R(ctx, '#8a94a0', 6, 13 + by, 8, 1);
+  // Helmet with a wide brim and a fogged faceplate
+  blob(ctx, 10, 4.6 + by, 3.4, 3.2, XRUB);
+  R(ctx, '#a07810', 6, 6 + by, 9, 1); R(ctx, '#1a2a3a', 10, 3 + by, 4, 3); R(ctx, '#6ab8e0', 11, 4 + by, 3, 1); R(ctx, '#ffffff', 13, 4 + by, 1, 1);
+  // The hose over its shoulder down to a brass nozzle held in both hands
+  pxLine(ctx, '#1a1a1e', 3, 6 + by, 7, 8 + by, 1); pxLine(ctx, '#1a1a1e', 7, 8 + by, 12, 12 + (br ? 0 : 1) + by, 1);
+  const ny = br ? 10 : 12;
+  limb(ctx, 10, 9 + by, 14, ny + by, 1.4, 1.2, XRUB, 0.1);
+  R(ctx, '#22262c', 12, ny - 1 + by, 3, 3); R(ctx, '#c8a040', 15, ny + by, 3, 2); R(ctx, '#ffe080', 15, ny + by, 3, 1);
+  if (sp) R(ctx, '#bfe8ff', 17, ny - 1 + by, 1, 4);
+}
+function drawDemo(ctx, frame) {                      // 16x22 demo runner: a wiry sprinter clutching a bundle of lit dynamite
+  const a = frame === 'air', lt = frame === 'light', s = frame === 'r1' ? 1 : 0, PNT = ['#141420', '#24243a', '#3a3a5a', '#56567a'];
+  // Legs in full stride, tucked for a hop, or planted while it lights the fuse
+  if (lt) { limb(ctx, 6, 13, 4, 20, 1.4, 1.2, PNT, -0.2); limb(ctx, 9, 13, 11, 20, 1.4, 1.2, PNT); R(ctx, '#c8c0b0', 2, 20, 4, 2); R(ctx, '#e8e0d0', 10, 20, 4, 2); }
+  else if (a) { limb(ctx, 6, 13, 3, 17, 1.4, 1.2, PNT); limb(ctx, 9, 13, 12, 16, 1.4, 1.2, PNT); R(ctx, '#e8e0d0', 1, 17, 3, 2); R(ctx, '#e8e0d0', 11, 16, 3, 2); }
+  else {
+    const [fx, bx, by] = s ? [11, 3, 17] : [12, 2, 18];
+    limb(ctx, 7, 13, bx, by, 1.4, 1.2, PNT, -0.3); R(ctx, '#c8c0b0', bx - 2, by, 3, 2);
+    limb(ctx, 8, 13, fx - 2, 17, 1.5, 1.3, PNT); limb(ctx, fx - 2, 17, fx, 20, 1.3, 1.2, PNT); R(ctx, '#e8e0d0', fx - 1, 20, 4, 2);
+  }
+  // Lean torso in a striped vest, pitched forward into the run
+  blob(ctx, 8, 9.5, 3.4, 4, ['#3a0c0c', '#6a1612', '#9a2418', '#c03a28']);
+  for (let i = 0; i < 3; i++) R(ctx, '#e8e0d0', 6, 8 + i * 2, 5, 1);
+  // Head with a red bandana and welding goggles
+  blob(ctx, 10, 4, 2.8, 2.8, XSKN);
+  R(ctx, '#c02020', 8, 1, 5, 2); R(ctx, '#c02020', 5, 2, 3, 1); R(ctx, '#ff5a40', 9, 1, 2, 1);
+  R(ctx, '#2a2e35', 10, 3, 4, 1); R(ctx, '#ffe040', 12, 3, 1, 1);
+  // Both arms out front clutching three sticks of dynamite taped together, the fuse on top
+  limb(ctx, 9, 8, 12, 11, 1.1, 1.0, XSKN);
+  R(ctx, '#6a0c0c', 12, 9, 4, 5); R(ctx, '#d02818', 12, 9, 1, 5); R(ctx, '#d02818', 14, 9, 1, 5); R(ctx, '#ff6a50', 12, 9, 1, 1);
+  R(ctx, '#e8b422', 12, 11, 4, 1); R(ctx, '#8a8a80', 14, 7, 1, 2);
+  if (lt) { R(ctx, '#ffe46a', 13, 5, 3, 2); R(ctx, '#ffffff', 14, 5, 1, 1); }                                              // the match flaring at the fuse
+}
+function drawPanzer(ctx, frame) {                    // 30x20 panzer: a treaded mini-tank hull behind a thick glacis plate (the turret is its own sprite)
+  const s = frame === 'w1' ? 1 : 0;
+  // The track loop, road wheels and cleats
+  blob(ctx, 15, 16.2, 14.2, 3.6, IRN.slice(0, 5), 3);
+  for (let i = 0; i < 6; i++) { const wx = 4.5 + i * 4.2; blob(ctx, wx, 16.5, 1.9, 1.9, IRN.slice(3)); R(ctx, '#0c0e12', Math.round(wx) - 1, 16, 1, 1); }
+  for (let i = 0; i < 13; i++) { R(ctx, '#5d6775', 2 + i * 2 + s, 13, 1, 1); R(ctx, '#323843', 3 + i * 2 - s, 19, 1, 1); }
+  // Hull: an olive armour box with a hazard stripe; the engine deck at the back glows through its grille (its soft spot)
+  blob(ctx, 14, 10, 11.5, 3.4, XOLV, 4);
+  R(ctx, '#e8b422', 8, 11, 14, 1); for (let i = 0; i < 4; i++) R(ctx, '#15161a', 9 + i * 4, 11, 2, 1);
+  R(ctx, '#1a1c20', 2, 8, 5, 5); for (let y = 0; y < 4; y++) R(ctx, y % 2 ? '#c04010' : '#ff8a20', 3, 9 + y, 3, 1);
+  R(ctx, '#3a3f47', 1, 5, 2, 4); R(ctx, '#5d6775', 1, 5, 2, 1);                                                          // exhaust stack
+  // Front glacis: a thick sloped plate with rivets, a coax gun and a headlight
+  for (let y = 7; y < 14; y++) { const w = 3 + ((y - 7) >> 1); R(ctx, y < 9 ? '#aab4c2' : y < 11 ? '#7f8a99' : '#5d6775', 24 - ((y - 7) >> 2), y, w, 1); }
+  R(ctx, '#232730', 25, 9, 1, 1); R(ctx, '#232730', 26, 12, 1, 1); R(ctx, '#ffe080', 28, 10, 1, 1);
+  R(ctx, '#232730', 27, 11, 3, 1); R(ctx, '#0c0e12', 29, 11, 1, 1);
+  R(ctx, '#232730', 10, 6, 10, 2); R(ctx, '#4a5a30', 11, 6, 8, 1);                                                      // turret ring
+}
+function drawPanzerGun(ctx) {                        // 18x9 panzer turret: a domed mantlet and a long barrel, pivot at (5, 4.5)
+  blob(ctx, 5, 4.5, 4.5, 3.6, XOLV);
+  R(ctx, '#e8b422', 2, 6, 6, 1);
+  limb(ctx, 8, 4, 16, 4, 1.4, 1.2, IRN.slice(2), 0, true); R(ctx, '#3a3f47', 15, 3, 3, 3); R(ctx, '#0c0e12', 17, 4, 1, 1);
+  R(ctx, '#aab4c2', 3, 2, 3, 1); R(ctx, '#ff3020', 6, 3, 1, 1);
+}
+function drawReaper(ctx, frame) {                    // 22x32 reaper: a gaunt robot on stilt legs with two scythe arms
+  const s = frame === 'w1' ? 1 : 0, tl = frame === 'tell', sp = frame === 'spin0' || frame === 'spin1', sp1 = frame === 'spin1', dz = frame === 'dizzy';
+  const by = tl ? 2 : dz ? 1 : 0, LG = IRN.slice(2), BL = '#d8e0e8', BLD = '#8a94a0';
+  // Stilt legs: pistons with reverse knees
+  limb(ctx, 9, 18 + by, 6 - s, 24, 1.3, 1.1, LG, -0.3); limb(ctx, 6 - s, 24, 8 - s, 30, 1.1, 1.0, LG); R(ctx, '#141618', 5 - s, 30, 5, 2);
+  limb(ctx, 13, 18 + by, 16 + s, 24, 1.3, 1.1, LG, 0.3); limb(ctx, 16 + s, 24, 14 + s, 30, 1.1, 1.0, LG); R(ctx, '#141618', 12 + s, 30, 5, 2);
+  R(ctx, '#7f8a99', 5 - s, 23, 2, 2); R(ctx, '#aab4c2', 15 + s, 23, 2, 2);
+  // Back scythe arm (behind the body)
+  if (sp) { limb(ctx, 9, 10 + by, 2, 11 + by, 1.1, 1.0, LG); xArc(ctx, 2, sp1 ? 6 : 16, 5, sp1 ? Math.PI / 2 : -Math.PI / 2, sp1 ? Math.PI * 1.25 : -Math.PI * 1.25, BLD, 2); }
+  else if (tl) { limb(ctx, 9, 10 + by, 6, 3, 1.1, 1.0, LG); xArc(ctx, 3, 4, 3.5, 0, -Math.PI * 1.1, BLD, 2); }
+  else if (dz) { limb(ctx, 9, 10 + by, 6, 18, 1.1, 1.0, LG); xArc(ctx, 6, 22, 4, -Math.PI / 2, -Math.PI * 1.2, BLD, 2); }
+  else { limb(ctx, 9, 10 + by, 6, 16, 1.1, 1.0, LG); xArc(ctx, 6, 11, 5, Math.PI / 2, Math.PI * 1.2, BLD, 2); }
+  // Ribbed chest cage and pelvis with a red core
+  R(ctx, '#2a2e35', 9, 16 + by, 5, 3);
+  blob(ctx, 11, 12 + by, 4.2, 5, IRN.slice(1, 7));
+  for (let i = 0; i < 3; i++) R(ctx, '#0c0e12', 8, 10 + i * 2 + by, 6, 1);
+  R(ctx, '#ff2a1a', 10, 12 + by, 2, 2); R(ctx, '#ffb0a0', 10, 12 + by, 1, 1);
+  // Skull head: a bone plate with a single red eye slit (dim and askew when it's dizzy)
+  blob(ctx, 11.5 + (dz ? 1 : 0), 5 + by, 3.4, 3.6, XBNE);
+  R(ctx, '#0a0a0c', 11 + (dz ? 1 : 0), 5 + by, 4, 1); R(ctx, dz ? '#7a2010' : '#ff3020', 13 + (dz ? 1 : 0), 5 + by, 2, 1); R(ctx, '#0a0a0c', 11 + (dz ? 1 : 0), 7 + by, 3, 1);
+  // Front scythe arm
+  if (sp) { limb(ctx, 13, 10 + by, 20, 11 + by, 1.2, 1.1, LG); xArc(ctx, 20, sp1 ? 16 : 6, 5, sp1 ? -Math.PI / 2 : Math.PI / 2, sp1 ? Math.PI * 0.25 : -Math.PI * 0.25, BL, 2); }
+  else if (tl) { limb(ctx, 13, 10 + by, 17, 2, 1.2, 1.1, LG); xArc(ctx, 19, 4, 3.5, Math.PI, Math.PI * 2.1, BL, 2); }
+  else if (dz) { limb(ctx, 13, 10 + by, 15, 19, 1.2, 1.1, LG); xArc(ctx, 15, 23, 4, -Math.PI / 2, Math.PI * 0.2, BL, 2); }
+  else { limb(ctx, 13, 10 + by, 16, 16, 1.2, 1.1, LG); xArc(ctx, 16, 11, 5, Math.PI / 2, -Math.PI * 0.2, BL, 2); }
+}
+function drawGull(ctx, frame) {                      // 22x14 gull: a carrion drone in scrap feathers with a hooked beak
+  const up = frame === 'f0', dv = frame === 'dive', sc = frame === 'scream', K = '#141618';
+  const wing = (pts, cols) => { for (let i = 0; i < pts.length - 1; i++) pxLine(ctx, cols[Math.min(i, cols.length - 1)], pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], 2); };
+  // Far wing, behind the body (darker)
+  if (dv) wing([[12, 5], [8, 4], [4, 4]], ['#4a4e56', '#2a2c30']);
+  else if (up) wing([[12, 5], [11, 2], [9, 0]], ['#4a4e56', '#2a2c30']);
+  else wing([[12, 8], [12, 11], [11, 12]], ['#4a4e56', '#2a2c30']);
+  // Tail fan + a sleek body: dark steel back, pale belly, rivets along the spine
+  R(ctx, '#4a4e56', 2, 6, 4, 3); R(ctx, '#7a808a', 1, 7, 3, 1); R(ctx, K, 0, 7, 1, 2);
+  blob(ctx, 10, 8, 6, 2.8, XGUL);
+  R(ctx, '#4a4e56', 6, 6, 8, 1); R(ctx, '#e0e6ec', 7, 10, 7, 1); for (let i = 0; i < 3; i++) R(ctx, K, 7 + i * 3, 6, 1, 1);
+  // Head, red eye and a hooked beak (gaping when it screeches)
+  blob(ctx, 16, 6.5, 2.7, 2.5, XGUL);
+  R(ctx, '#ff3020', 17, 6, 1, 1); R(ctx, '#ffb0a0', 17, 5, 1, 1);
+  R(ctx, '#e8b422', 18, sc ? 5 : 6, 3, 1); R(ctx, '#c08a14', 21, sc ? 5 : 6, 1, 2);
+  if (sc) { R(ctx, '#7a1a14', 18, 6, 3, 1); R(ctx, '#c08a14', 18, 7, 3, 1); }
+  // Near wing: raised, beating down, or folded back for the dive, with black tips
+  if (dv) { wing([[13, 7], [9, 5], [5, 5], [2, 4]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 1, 4, 2, 1); }
+  else if (up) { wing([[12, 7], [10, 3], [7, 1], [5, 0]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 4, 0, 2, 1); R(ctx, K, 6, 2, 1, 1); }
+  else { wing([[12, 8], [10, 11], [8, 12], [6, 12]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 5, 12, 2, 1); R(ctx, K, 7, 13, 1, 1); }
+}
+function drawOverclock(ctx, frame) {                 // 16x16 overclocker: a hovering capacitor drone around a glowing yellow coil
+  const f = frame === 'o1' ? 1 : 0;
+  R(ctx, '#2a2e35', 3 + f, 0, 10 - 2 * f, 1); R(ctx, '#5d6775', 7, 1, 2, 2);                                             // rotor
+  for (let i = 0; i < 3; i++) { const c = (i + f) % 2 ? '#aab4c2' : '#5d6775'; R(ctx, c, 0, 5 + i * 2, 3, 1); R(ctx, c, 13, 5 + i * 2, 3, 1); }   // cooling fins
+  blob(ctx, 8, 8, 5, 4.6, IRN.slice(2), 3);
+  R(ctx, '#e8b422', 4, 11, 8, 1); R(ctx, '#15161a', 5, 11, 1, 1); R(ctx, '#15161a', 8, 11, 1, 1); R(ctx, '#15161a', 11, 11, 1, 1);
+  R(ctx, '#3a2006', 6, 5, 4, 5); for (let i = 0; i < 5; i++) R(ctx, (i + f) % 2 ? '#fff4b0' : '#ffc830', 6, 5 + i, 4, 1);   // the coil window
+  R(ctx, '#5d6775', 5, 13, 1, 2); R(ctx, '#5d6775', 10, 13, 1, 2); R(ctx, '#ffe060', 5, 15, 1, 1); R(ctx, '#ffe060', 10, 15, 1, 1);   // emitter prongs
+}
+function drawRefractor(ctx, frame) {                 // 18x18 refractor: a tripod turret under a faceted prism
+  const ch = frame === 'charge', g = frame === 'p1';
+  pxLine(ctx, '#2a2e35', 8, 12, 3, 17, 2); pxLine(ctx, '#2a2e35', 10, 12, 15, 17, 2); R(ctx, '#3a3f47', 8, 12, 3, 6);   // tripod
+  R(ctx, '#5d6775', 5, 11, 9, 2); R(ctx, '#8a94a0', 5, 11, 9, 1);
+  R(ctx, '#3a3f47', 4, 4, 2, 8); R(ctx, '#3a3f47', 13, 4, 2, 8); R(ctx, '#7f8a99', 4, 4, 1, 3);                          // gimbal yoke
+  const CR = ch ? ['#6ad8f0', '#c8f8ff', '#ffffff'] : ['#145a78', '#2a9ac0', '#6ad8f0'];
+  for (let y = 0; y < 11; y++) { const w = 5 - Math.abs(y - 5); if (w <= 0) continue; R(ctx, CR[0], 9.5 - w, y + 1, w, 1); R(ctx, CR[1], 9.5, y + 1, w, 1); }
+  R(ctx, CR[2], 9, 3, 1, 3); R(ctx, CR[2], 10, 5, 2, 1); if (g || ch) R(ctx, '#ffffff', 8, 4, 1, 1);
+  R(ctx, '#0a2a3a', 13, 6, 2, 1); R(ctx, ch ? '#ffffff' : '#60e8ff', 15, 6, 1, 1);                                        // emitter lens
+}
+function drawMirage(ctx, frame) {                    // 16x24 mirage: a hooded illusionist in a cracked porcelain mask
+  const s = frame === 'w1' ? 1 : 0, ca = frame === 'cast', fi = frame === 'fire';
+  R(ctx, '#141018', 5 - s, 21, 3, 3); R(ctx, '#141018', 9 + s, 21, 3, 3);
+  blob(ctx, 8, 16.5, 5, 5.5, XVIO); R(ctx, '#46e6ff', 3, 21, 10, 1); R(ctx, '#2a8ab0', 4, 22, 8, 1);                    // cloak, holo-trim hem
+  blob(ctx, 8, 10, 4.2, 4.6, XVIO);
+  R(ctx, '#46e6ff', 7, 8, 1, 6); R(ctx, '#2a8ab0', 7, 14, 1, 1);                                                        // seam
+  blob(ctx, 8.5, 4.5, 3.6, 3.8, XVIO);
+  R(ctx, '#e8e4dc', 9, 3, 3, 4); R(ctx, '#b8b0a8', 9, 6, 3, 1); R(ctx, '#46e6ff', 10, 4, 1, 1); R(ctx, '#3a3040', 11, 2, 1, 3);   // mask, eye, crack
+  if (ca) { limb(ctx, 6, 8, 3, 2, 1.1, 1.0, XVIO); limb(ctx, 11, 8, 14, 2, 1.1, 1.0, XVIO); R(ctx, '#ffffff', 2, 1, 2, 2); R(ctx, '#ffffff', 13, 1, 2, 2); R(ctx, '#46e6ff', 4, 0, 9, 1); }
+  else if (fi) { limb(ctx, 10, 8, 14, 10, 1.1, 1.0, XVIO); R(ctx, '#2a2e35', 13, 9, 3, 3); R(ctx, '#ff60e0', 15, 10, 1, 1); }
+  else { limb(ctx, 10, 8, 11, 13, 1.1, 1.0, XVIO); R(ctx, '#2a2e35', 10, 13, 2, 2); }
+}
+function drawClinger(ctx, frame) {                   // 12x12 clinger: a magnetic limpet bomb on a little thruster, claws out
+  const f = frame === 'c1' ? 1 : 0, cl = frame === 'clamp';
+  if (cl) { R(ctx, '#5d6775', 1, 3, 1, 3); R(ctx, '#5d6775', 10, 3, 1, 3); R(ctx, '#5d6775', 1, 8, 2, 1); R(ctx, '#5d6775', 9, 8, 2, 1); }
+  else { R(ctx, '#5d6775', 0, 2 + f, 2, 1); R(ctx, '#5d6775', 10, 2 + f, 2, 1); R(ctx, '#5d6775', 0, 9 - f, 2, 1); R(ctx, '#5d6775', 10, 9 - f, 2, 1); }
+  blob(ctx, 6, 6, 4, 4, IRN.slice(2));
+  R(ctx, '#8a1414', 2, 7, 8, 1); R(ctx, '#e02a1a', 3, 7, 6, 1);                                                           // magnet band
+  R(ctx, cl || f ? '#ff3020' : '#6a1010', 5, 3, 2, 2); if (cl || f) R(ctx, '#ffffff', 5, 3, 1, 1);                        // the LED
+  R(ctx, '#3a3f47', 0, 5, 1, 2); R(ctx, f ? '#ffa040' : '#ff6020', 0, 5 + f, 1, 1);                                       // thruster nub
+}
+const XGIBDEF = {                                    // their own loose parts
+  g_hosetank: [6, 8, c => { R(c, '#2a5080', 1, 1, 4, 6); R(c, '#8ac0e8', 1, 1, 1, 6); R(c, '#c8d0da', 2, 1, 2, 1); }],
+  g_tnt: [7, 4, c => { R(c, '#d02818', 1, 1, 5, 2); R(c, '#ff6a50', 1, 1, 5, 1); R(c, '#e8b422', 3, 1, 1, 2); }],
+  g_tread: [10, 4, c => { R(c, '#232730', 1, 1, 8, 2); for (let i = 0; i < 4; i++) R(c, '#5d6775', 1 + i * 2, 1, 1, 1); }],
+  g_scythe: [9, 7, c => { R(c, '#d8e0e8', 1, 1, 5, 1); R(c, '#d8e0e8', 6, 2, 1, 2); R(c, '#8a94a0', 7, 4, 1, 2); R(c, '#454d5a', 1, 2, 2, 1); }],
+  g_feather: [7, 3, c => { R(c, '#7a808a', 1, 1, 5, 1); R(c, '#b0b8c2', 2, 1, 2, 1); }],
+  g_coil: [6, 6, c => { R(c, '#3a2006', 1, 1, 4, 4); R(c, '#ffc830', 1, 1, 4, 1); R(c, '#ffc830', 1, 3, 4, 1); R(c, '#fff4b0', 2, 1, 1, 1); }],
+  g_prism: [5, 5, c => { R(c, '#2a9ac0', 1, 2, 3, 1); R(c, '#6ad8f0', 2, 1, 1, 3); R(c, '#ffffff', 2, 2, 1, 1); }],
+  g_xmask: [7, 7, c => { R(c, '#e8e4dc', 1, 1, 5, 5); R(c, '#b8b0a8', 1, 5, 5, 1); R(c, '#46e6ff', 2, 3, 1, 1); R(c, '#3a3040', 4, 1, 1, 3); }],
+};
+function genExpansionEnemyArt(scene) {               // their sheets (+ the white copies a hit flashes), loose parts and props
+  addSheet(scene, 'flailer', ['w0', 'w1', 'wind', 'throw'].map(f => ({ name: f, c: makeSprite(24, 24, x => drawFlailer(x, f)) })), 24, 24, true);
+  addSheet(scene, 'hoser', ['w0', 'w1', 'brace', 'spray'].map(f => ({ name: f, c: makeSprite(18, 24, x => drawHoser(x, f)) })), 18, 24, true);
+  addSheet(scene, 'demo', ['r0', 'r1', 'air', 'light'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawDemo(x, f)) })), 16, 22, true);
+  addSheet(scene, 'panzer', ['w0', 'w1'].map(f => ({ name: f, c: makeSprite(30, 20, x => drawPanzer(x, f)) })), 30, 20, true);
+  addSheet(scene, 'reaper', ['w0', 'w1', 'tell', 'spin0', 'spin1', 'dizzy'].map(f => ({ name: f, c: makeSprite(22, 32, x => drawReaper(x, f)) })), 22, 32, true);
+  addSheet(scene, 'gull', ['f0', 'f1', 'scream', 'dive'].map(f => ({ name: f, c: makeSprite(22, 14, x => drawGull(x, f)) })), 22, 14, true);
+  addSheet(scene, 'overclock', ['o0', 'o1'].map(f => ({ name: f, c: makeSprite(16, 16, x => drawOverclock(x, f)) })), 16, 16, true);
+  addSheet(scene, 'refractor', ['p0', 'p1', 'charge'].map(f => ({ name: f, c: makeSprite(18, 18, x => drawRefractor(x, f)) })), 18, 18, true);
+  addSheet(scene, 'mirage', ['w0', 'w1', 'cast', 'fire'].map(f => ({ name: f, c: makeSprite(16, 24, x => drawMirage(x, f)) })), 16, 24, true);
+  addSheet(scene, 'clinger', ['c0', 'c1', 'clamp'].map(f => ({ name: f, c: makeSprite(12, 12, x => drawClinger(x, f)) })), 12, 12, true);
+  const gun = makeSprite(18, 9, drawPanzerGun); addTex(scene, 'panzer_gun', gun); addTex(scene, 'panzer_gun_w', whiteCopy(gun));
+  addTex(scene, 'flailer_ball', makeSprite(13, 13, c => {
+    blob(c, 6.5, 6.5, 3.8, 3.8, IRN.slice(1, 7));
+    R(c, '#c8ced6', 6, 0, 1, 2); R(c, '#c8ced6', 6, 11, 1, 2); R(c, '#c8ced6', 0, 6, 2, 1); R(c, '#c8ced6', 11, 6, 2, 1);   // spikes
+    for (const [x, y] of [[2, 2], [10, 2], [2, 10], [10, 10]]) R(c, '#aab4c2', x, y);
+    R(c, '#5a3020', 5, 5, 2, 2);                                                                                         // dried blood
+  }));
+  addTex(scene, 'demo_tnt', makeSprite(7, 8, c => { R(c, '#6a0c0c', 1, 2, 5, 6); R(c, '#d02818', 1, 2, 1, 6); R(c, '#d02818', 3, 2, 1, 6); R(c, '#e8b422', 1, 4, 5, 1); R(c, '#8a8a80', 3, 0, 1, 2); }));
+  for (const k in XGIBDEF) { const [w, h, fn] = XGIBDEF[k]; addTex(scene, k, makeSprite(w, h, fn, '#140606')); }
 }
 const GUNS = {
   nail: { w: 23, h: 11, py: 5, muzzle: 21, draw(ctx, arm) {
@@ -1980,7 +2471,108 @@ const GUNS = {
     for (let i = 0; i < 4; i++) { R(ctx, '#ff60d0', 7 + i * 3, 1 + (i % 2), 1, 3); R(ctx, '#ffd0f4', 7 + i * 3, 1 + (i % 2), 1, 1); }
     R(ctx, '#4a3a52', 17, 5, 5, 3); R(ctx, '#ff9ae8', 22, 6, 1, 1);
   } },
+  // ---- expansion: weapons ----
+  cannon: { w: 26, h: 14, py: 7, muzzle: 24, draw(ctx, arm) {                 // hand cannon: a banded iron barrel on a wooden grip
+    if (arm) drawArm(ctx, 7);
+    R(ctx, '#5a3a20', 4, 7, 6, 4); R(ctx, '#7a5a30', 4, 7, 6, 1); R(ctx, '#3a2414', 6, 11, 3, 3);                       // stock + grip
+    R(ctx, '#2a2e35', 9, 3, 13, 8); R(ctx, '#4b535e', 9, 3, 13, 2); R(ctx, '#15171a', 9, 10, 13, 1);                    // iron barrel
+    for (const x of [11, 17]) { R(ctx, '#8a6a20', x, 2, 2, 10); R(ctx, '#e0b850', x, 2, 1, 10); }                      // brass bands
+    R(ctx, '#3a3f47', 22, 1, 3, 12); R(ctx, '#6a7380', 22, 1, 3, 1); R(ctx, '#0a0b0d', 23, 4, 2, 6);                    // flared muzzle
+    R(ctx, '#ff8a20', 14, 2, 1, 1); R(ctx, '#ffe080', 14, 1, 1, 1);                                                      // a spark at the touchhole
+  } },
+  quake: { w: 25, h: 14, py: 6, muzzle: 22, draw(ctx, arm) {                   // seismic launcher: a hazard-striped thumper with a piston ram
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 12, 7); R(ctx, '#6a7380', 5, 3, 12, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let i = 0; i < 4; i++) R(ctx, i % 2 ? '#15161a' : '#e8b422', 7 + i * 2, 8, 2, 2);                              // hazard stripes
+    R(ctx, '#7a4a20', 9, 4, 5, 3); R(ctx, '#ffa040', 10, 5, 3, 1); R(ctx, '#ffe080', 11, 5, 1, 1);                       // seismic core
+    R(ctx, '#4b535e', 17, 2, 4, 10); R(ctx, '#8a94a0', 17, 2, 4, 1); R(ctx, '#2a2e35', 17, 11, 4, 1);                    // ram housing
+    R(ctx, '#9aa4b0', 21, 3, 3, 8); R(ctx, '#c8d0d8', 21, 3, 3, 1); R(ctx, '#5a636e', 23, 4, 1, 7);                      // the ram face
+  } },
+  phase: { w: 28, h: 11, py: 5, muzzle: 27, draw(ctx, arm) {                  // phase rifle: a slim black rifle ringed with violet emitters
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#2a2438', 5, 3, 10, 5); R(ctx, '#4a3e66', 5, 3, 10, 1); R(ctx, '#1a1622', 7, 8, 3, 3); R(ctx, '#7a40d0', 8, 5, 5, 1);
+    R(ctx, '#3a3248', 15, 4, 11, 2); R(ctx, '#5a4e78', 15, 4, 11, 1);
+    for (let i = 0; i < 3; i++) { R(ctx, '#a060ff', 16 + i * 3, 2, 1, 6); R(ctx, '#e8d8ff', 16 + i * 3, 2, 1, 1); }      // phase rings
+    R(ctx, '#d8b0ff', 26, 4, 1, 2); R(ctx, '#ffffff', 26, 4, 1, 1);
+  } },
+  balllight: { w: 24, h: 14, py: 6, muzzle: 22, draw(ctx, arm) {              // ball lightning: a caged plasma orb on a copper-wound stock
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 4, 9, 6); R(ctx, '#6a7380', 5, 4, 9, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let i = 0; i < 3; i++) R(ctx, i % 2 ? '#b8732a' : '#e09a48', 7 + i * 2, 5, 1, 4);                              // copper winding
+    for (let y = 2; y < 12; y++) for (let x = 14; x < 21; x++) { const d = Math.hypot(x + 0.5 - 17.5, y + 0.5 - 7); if (d < 3.4) R(ctx, d < 1.3 ? '#ffffff' : d < 2.4 ? '#9ae8ff' : '#2a8ad0', x, y); }   // the orb
+    R(ctx, '#5a636e', 13, 2, 1, 10); R(ctx, '#5a636e', 21, 2, 1, 10); R(ctx, '#8a94a0', 13, 1, 9, 1); R(ctx, '#4b535e', 13, 12, 9, 1); R(ctx, '#5a636e', 17, 2, 1, 1);   // the cage
+  } },
+  cyclone: { w: 26, h: 14, py: 6, muzzle: 24, draw(ctx, arm) {                // cyclone launcher: a turbine drum and a flared vortex nozzle
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 4, 8, 6); R(ctx, '#6a7380', 5, 4, 8, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    for (let y = 1; y < 13; y++) for (let x = 10; x < 20; x++) {                                                       // turbine: six blades in a ring
+      const dx = x + 0.5 - 15, dy = y + 0.5 - 7, d = Math.hypot(dx, dy); if (d >= 5.6) continue;
+      R(ctx, d > 4.5 ? '#5a636e' : d < 1.2 ? '#e8f4ff' : Math.floor(Math.atan2(dy, dx) / (Math.PI / 3) + 6) % 2 ? '#c8d0d8' : '#6a7380', x, y);
+    }
+    R(ctx, '#4b535e', 20, 4, 2, 6); R(ctx, '#8a94a0', 22, 2, 3, 10); R(ctx, '#bfe8f0', 23, 5, 1, 4);                    // nozzle
+  } },
+  caltrop: { w: 24, h: 13, py: 6, muzzle: 22, draw(ctx, arm) {                // caltrop scatter: a hopper of spikes over a short bell-mouthed barrel
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 5, 13, 5); R(ctx, '#6a7380', 5, 5, 13, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    R(ctx, '#4b535e', 8, 2, 7, 3); R(ctx, '#2a2e35', 8, 4, 7, 1);                                                       // hopper
+    for (const [x, y] of [[9, 0], [11, 1], [13, 0]]) { R(ctx, '#eef2f6', x, y, 1, 1); R(ctx, '#9aa4b0', x, y + 1, 1, 1); }   // spikes poking out
+    R(ctx, '#4b535e', 18, 4, 2, 7); R(ctx, '#8a94a0', 18, 4, 2, 1); R(ctx, '#15171a', 20, 5, 2, 5); R(ctx, '#9aa4b0', 22, 3, 1, 9); R(ctx, '#c8d0d8', 22, 3, 1, 1);   // bell mouth
+  } },
+  spear: { w: 30, h: 12, py: 5, muzzle: 28, draw(ctx, arm) {                  // spear gun: a cable reel under a long rail, a barbed spear loaded
+    if (arm) drawArm(ctx, 5);
+    R(ctx, '#3a3f47', 5, 3, 9, 5); R(ctx, '#6a7380', 5, 3, 9, 1); R(ctx, '#2a2e35', 7, 8, 3, 3);
+    R(ctx, '#5a636e', 9, 7, 5, 4); R(ctx, '#c8a040', 10, 8, 3, 1); R(ctx, '#2a2e35', 11, 9, 1, 1);                       // cable reel
+    R(ctx, '#2a2e35', 14, 5, 12, 2); R(ctx, '#a0aab6', 12, 4, 14, 1);                                                   // rail + shaft
+    R(ctx, '#eef2f6', 26, 3, 2, 3); R(ctx, '#9aa4b0', 25, 2, 1, 1); R(ctx, '#9aa4b0', 25, 6, 1, 1); R(ctx, '#ffffff', 28, 4, 1, 1);   // barbed head
+  } },
+  heatray: { w: 27, h: 13, py: 6, muzzle: 25, draw(ctx, arm) {                // heat ray: radiator fins down a fat emitter, a red lens
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 9, 7); R(ctx, '#6a7380', 5, 3, 9, 1); R(ctx, '#2a2e35', 6, 10, 3, 3); R(ctx, '#e8b422', 7, 5, 4, 1);
+    R(ctx, '#4b535e', 14, 4, 9, 5); R(ctx, '#8a94a0', 14, 4, 9, 1);
+    for (let i = 0; i < 4; i++) { R(ctx, '#2a2e35', 15 + i * 2, 2, 1, 9); R(ctx, '#7c8790', 15 + i * 2, 2, 1, 1); }      // radiator fins
+    R(ctx, '#7a2008', 23, 3, 2, 7); R(ctx, '#ff4a20', 25, 4, 1, 5); R(ctx, '#ffd0a0', 25, 6, 1, 1);                       // lens
+  } },
+  barrage: { w: 24, h: 13, py: 6, muzzle: 22, draw(ctx, arm) {               // barrage beacon: a stubby launcher with a beacon nosed in, its aerial up
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#4a5240', 5, 4, 13, 6); R(ctx, '#6e7a5e', 5, 4, 13, 1); R(ctx, '#2e3428', 5, 9, 13, 1); R(ctx, '#2a2e35', 6, 10, 3, 3);
+    R(ctx, '#e8b422', 11, 6, 4, 1); R(ctx, '#2e3428', 9, 1, 1, 3); R(ctx, '#ff3020', 9, 0, 1, 1);                       // stripe + aerial
+    R(ctx, '#2a2e35', 18, 3, 2, 8); R(ctx, '#3a3f47', 20, 4, 3, 6); R(ctx, '#ff3020', 21, 6, 2, 2); R(ctx, '#ffb0a0', 21, 6, 1, 1);   // the beacon in the mouth
+  } },
+  hydro: { w: 26, h: 13, py: 6, muzzle: 24, draw(ctx, arm) {                 // hydro cannon: a blue pressure tank, a gauge and a brass nozzle
+    if (arm) drawArm(ctx, 6);
+    R(ctx, '#3a3f47', 5, 3, 11, 5); R(ctx, '#6a7380', 5, 3, 11, 1); R(ctx, '#2a2e35', 6, 8, 3, 4);
+    R(ctx, '#1e4a8a', 9, 8, 7, 4); R(ctx, '#4a90d8', 9, 8, 7, 1); R(ctx, '#9ad0ff', 10, 9, 2, 1);                        // water tank
+    R(ctx, '#d8dee6', 11, 0, 3, 3); R(ctx, '#ff3020', 12, 1, 1, 1);                                                      // pressure gauge
+    R(ctx, '#4b535e', 16, 4, 5, 3); R(ctx, '#8a94a0', 16, 4, 5, 1); R(ctx, '#8a6a20', 21, 3, 3, 5); R(ctx, '#e0b850', 21, 3, 3, 1); R(ctx, '#9ad8ff', 24, 5, 1, 1);   // brass nozzle
+  } },
 };
+// ---- expansion: weapons ---- what the ten wheel-only guns fire and leave behind (the quake's rocks, the cyclone's
+// funnel, the beams and the jet are drawn live in game.js)
+function genExpansionWeaponArt(scene) {
+  addTex(scene, 'xw_ball', makeSprite(9, 9, c => {                                                                      // cannonball: lit iron with a glint
+    for (let y = 1; y < 8; y++) for (let x = 1; x < 8; x++) { const dx = x + 0.5 - 4.5, dy = y + 0.5 - 4.5, d = Math.hypot(dx, dy); if (d < 3.6) R(c, dx + dy < -2.5 ? '#5a636e' : dx + dy > 2.5 ? '#15171a' : '#2e333b', x, y); }
+    R(c, '#c8d0d8', 3, 3, 1, 1); R(c, '#8a94a0', 4, 3, 1, 1); R(c, '#8a94a0', 3, 4, 1, 1);
+  }));
+  for (const f of [0, 1]) addTex(scene, 'xw_lball' + f, makeSprite(13, 13, c => {                                     // ball lightning: a white core in a jagged blue corona
+    for (let y = 0; y < 13; y++) for (let x = 0; x < 13; x++) { const d = Math.hypot(x + 0.5 - 6.5, y + 0.5 - 6.5); if (d < 4) R(c, d < 1.6 ? '#ffffff' : d < 2.8 ? '#c8f4ff' : '#4ab8ff', x, y); }
+    const spikes = f ? [[6, 0], [12, 5], [1, 10], [9, 11], [2, 2]] : [[0, 6], [10, 1], [11, 10], [4, 12], [7, 0]];
+    for (const [sx, sy] of spikes) { R(c, '#9ae8ff', Math.round((sx + 6) / 2), Math.round((sy + 6) / 2)); R(c, '#4ab8ff', sx, sy); }
+  }, null));
+  addTex(scene, 'xw_cyc', makeSprite(8, 7, c => { R(c, '#4b535e', 1, 1, 6, 5); R(c, '#8a94a0', 1, 1, 6, 1); R(c, '#bfe8f0', 2, 3, 1, 2); R(c, '#bfe8f0', 4, 2, 1, 2); R(c, '#2a2e35', 6, 2, 1, 3); }));   // cyclone canister
+  for (const f of [0, 1]) addTex(scene, 'xw_caltrop' + f, makeSprite(7, 7, c => {                                     // caltrop: a spike up, three legs down (two poses to tumble through)
+    if (f) { R(c, '#eef2f6', 1, 1); R(c, '#9aa4b0', 2, 2); R(c, '#5a636e', 3, 3); R(c, '#c8d0d8', 5, 1); R(c, '#9aa4b0', 4, 2); R(c, '#c8d0d8', 3, 4); R(c, '#9aa4b0', 3, 5); R(c, '#c8d0d8', 5, 5); R(c, '#8a94a0', 4, 4); }
+    else { R(c, '#ffffff', 3, 1); R(c, '#c8d0d8', 3, 2); R(c, '#5a636e', 3, 3); R(c, '#9aa4b0', 2, 3); R(c, '#9aa4b0', 4, 3); R(c, '#c8d0d8', 1, 4); R(c, '#c8d0d8', 5, 4); R(c, '#8a94a0', 3, 4); R(c, '#eef2f6', 3, 5); }
+  }));
+  addTex(scene, 'xw_spear', makeSprite(18, 5, c => {                                                                    // spear: a steel shaft, a barbed head
+    R(c, '#5a636e', 1, 2, 2, 1); R(c, '#a0aab6', 3, 2, 9, 1); R(c, '#d8dee6', 4, 2, 6, 1);
+    R(c, '#9aa4b0', 12, 1, 1, 1); R(c, '#9aa4b0', 12, 3, 1, 1); R(c, '#eef2f6', 12, 2, 4, 1); R(c, '#c8d0d8', 13, 1, 2, 3); R(c, '#ffffff', 16, 2, 1, 1);
+  }));
+  for (const f of [0, 1]) addTex(scene, 'xw_beacon' + f, makeSprite(7, 10, c => {                                    // barrage beacon: a squat olive can, an aerial, a red lamp (lit in frame 1)
+    R(c, '#4a5240', 1, 5, 5, 4); R(c, '#6e7a5e', 1, 5, 5, 1); R(c, '#e8b422', 1, 7, 5, 1); R(c, '#2e3428', 3, 1, 1, 4);
+    R(c, f ? '#ff3020' : '#7a1810', 2, 3, 3, 2); if (f) R(c, '#ffd0c0', 3, 3, 1, 1); R(c, '#9aa4b0', 3, 1, 1, 1);
+  }));
+  addTex(scene, 'xw_shell', makeSprite(5, 10, c => { R(c, '#4a5240', 1, 1, 3, 6); R(c, '#6e7a5e', 1, 1, 1, 6); R(c, '#e8b422', 1, 3, 3, 1); R(c, '#2a2e35', 1, 7, 3, 1); R(c, '#8a94a0', 2, 8, 1, 1); }));   // a falling shell, nose down
+}
 function drawGlaiveBlade(ctx, cx, cy) {              // three hooked blades on a ring, centred on (cx, cy)
   for (let y = Math.floor(cy - 9); y < cy + 9; y++) for (let x = Math.floor(cx - 9); x < cx + 9; x++) {
     const px = x + 0.5 - cx, py = y + 0.5 - cy, d = Math.hypot(px, py);
@@ -2063,7 +2655,7 @@ function drawDrone(ctx, sway, charge) {          // 18x16 hovering eye-sentry
 }
 
 // ---- destructible props: art ------------------------------------------------------
-// Twenty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
+// Thirty breakables, drawn like the rest of the scenery: lit from the top left, volumes quantised to a ramp and a 1px
 // outline. Each has its intact frame, any frames it needs while it's hurt or going off, and a wreck ('x') that stays
 // put until the next wave restocks it. PROP_ART[kind] = { w, h, fr: frame names (the first is the intact one), draw }.
 const PRR = {
@@ -2433,6 +3025,216 @@ function drawWaterTank(c, st) {                                   // 22x26 water
   if (st === 'hit') { R(c, '#02060c', 6, 13); R(c, '#8ce0ff', 6, 14, 1, 2); R(c, '#02060c', 14, 6); R(c, '#8ce0ff', 14, 7); R(c, B[2], 12, 3, 2, 1); }
   if (x) { prTear(c, 0, 22, 10, 4, 10, '#0c1e36'); R(c, '#4ac8f8', 6, 12, 8, 1); prScorch(c, 0, 8, 22, 10, 10, 2); }
 }
+// ---- expansion: props ----
+const PRT = {                                                     // the last ten's own ramps
+  trf: ['#141a22', '#1e2630', '#2c3846', '#3e4c5c', '#546474', '#6e8092', '#90a2b4', '#b8c8d8'],   // transformer grey
+  snd: ['#3a2a14', '#5e4422', '#8a6834', '#b08a50', '#d0aa6a', '#e8c88a', '#f8e4b0'],              // sand
+  pnt: [['#4a0a2a', '#8a1450', '#d0307e', '#ff6ab4', '#ffb4dc'], ['#05303a', '#0a6a78', '#18b0c4', '#5ae8f4', '#b8fcff'],
+        ['#4a3804', '#9a7408', '#e8b818', '#ffe050', '#fff4a8']],                                  // paint: pink, cyan, yellow
+};
+const PAINT_COLS = [0xff3a9a, 0x2ad8ec, 0xffd21a];               // what the paint cans splash (PRT.pnt's middles, brighter)
+function drawHoist(c, st) {                                       // 22x18 engine block slung from a crane hook; 'x' is what's left of it on the floor
+  const Rr = PRR.red;
+  if (st === 'x') {
+    R(c, PRR.blk[2], 0, 17, 22, 1); R(c, PRR.blk[4], 3, 17, 5, 1); R(c, PRR.blk[3], 15, 17, 4, 1);                     // oil spreading out from under it
+    R(c, IRN[3], 1, 11, 10, 6); R(c, IRN[5], 1, 11, 9, 1); R(c, IRN[4], 1, 12, 1, 5); R(c, IRN[1], 10, 12, 1, 5);         // the front half, still upright
+    R(c, Rr[3], 2, 9, 8, 2); R(c, Rr[5], 2, 9, 7, 1); R(c, IRN[1], 1, 11, 10, 1); R(c, IRN[2], 2, 15, 8, 1);
+    for (const x of [4, 7]) { R(c, IRN[2], x, 13, 1, 2); R(c, IRN[4], x - 1, 13, 1, 2); }
+    for (const [x, y] of [[11, 10], [11, 12], [10, 14], [11, 16]]) R(c, IRN[0], x, y, 1, 2);                              // the torn face
+    R(c, IRN[3], 12, 13, 9, 4); R(c, IRN[5], 12, 13, 8, 1); R(c, IRN[1], 20, 14, 1, 3); R(c, Rr[2], 13, 12, 5, 1); R(c, Rr[4], 13, 12, 2, 1);   // the back half, on its side
+    R(c, IRN[2], 16, 14, 1, 3); R(c, PRR.brs[5], 5, 14); R(c, PRR.brs[4], 14, 15); R(c, IRN[6], 17, 11); R(c, IRN[6], 7, 8);   // core plugs and bolts
+    blob(c, 1.5, 15, 1.6, 1.6, IRN.slice(2), 2, 0.1);                                                                   // the pulley, knocked loose
+    prScorch(c, 0, 8, 22, 10, 22, 5);
+    return;
+  }
+  R(c, IRN[6], 10, 0, 2, 1); R(c, IRN[7], 10, 0); R(c, IRN[5], 9, 1, 1, 2); R(c, IRN[3], 12, 1, 1, 2); R(c, IRN[2], 10, 3, 2, 1);   // the ring it hangs by
+  R(c, PRR.yel[4], 10, 4, 2, 2); R(c, PRR.yel[6], 10, 4); R(c, '#15161a', 11, 5);                                      // the hook block
+  for (let i = 0; i < 5; i++) { R(c, i % 2 ? IRN[4] : IRN[7], 9 - i, 6 + (i >> 1)); R(c, i % 2 ? IRN[3] : IRN[6], 12 + i, 6 + (i >> 1)); }   // sling chains
+  R(c, IRN[6], 4, 8); R(c, IRN[5], 17, 8);                                                                             // lifting eyes
+  R(c, Rr[4], 5, 8, 12, 2); R(c, Rr[6], 5, 8, 11, 1); R(c, Rr[7], 5, 8, 4, 1); R(c, Rr[2], 5, 9, 12, 1); R(c, Rr[3], 16, 8);   // red rocker cover
+  for (const x of [6, 11, 15]) R(c, IRN[6], x, 9);
+  R(c, IRN[1], 4, 10, 14, 1);                                                                                          // gasket
+  R(c, IRN[4], 4, 11, 14, 2); R(c, IRN[6], 4, 11, 13, 1); for (const x of [6, 9, 12, 15]) R(c, IRN[1], x, 12, 2, 1);     // head and its ports
+  R(c, IRN[3], 3, 13, 16, 3); R(c, IRN[5], 4, 13, 14, 1); R(c, IRN[5], 3, 13, 1, 3); R(c, IRN[1], 18, 13, 1, 3);         // block
+  for (const x of [7, 11, 15]) { R(c, IRN[2], x, 14, 1, 2); R(c, IRN[4], x - 1, 14, 1, 2); }
+  R(c, PRR.brs[5], 5, 15); R(c, PRR.brs[5], 9, 15); R(c, PRR.brs[3], 13, 15);                                         // core plugs
+  R(c, IRN[2], 6, 16, 10, 1); R(c, IRN[4], 6, 16, 4, 1); R(c, IRN[1], 7, 17, 8, 1);                                    // sump
+  R(c, IRN[3], 19, 11, 2, 6); R(c, IRN[5], 19, 11, 1, 6); R(c, IRN[1], 21, 12, 1, 4);                                  // bell housing
+  blob(c, 2, 14, 2.2, 2.2, IRN.slice(2), 2, 0.1); R(c, IRN[0], 2, 14); R(c, IRN[7], 1, 13);                            // crank pulley
+  if (st === 'hit') { prLine(c, IRN[0], 12, 13, 15, 16); R(c, IRN[6], 13, 13); R(c, Rr[1], 8, 8, 2, 1); R(c, Rr[1], 13, 9); R(c, PRR.blk[1], 14, 16, 1, 2); R(c, PRR.blk[4], 14, 17); }
+}
+function drawServer(c, st) {                                      // 14x28 server rack: five units of blinking LEDs; 'ok0'-'ok2' blink
+  const f = st === 'ok1' ? 1 : st === 'ok2' ? 2 : 0, x = st === 'x', hit = st === 'hit', LED = ['#5cff7a', '#ffb040', '#46a0ff'];
+  R(c, IRN[1], 0, 0, 14, 28); R(c, IRN[5], 0, 0, 14, 1); R(c, IRN[4], 0, 1, 1, 24); R(c, IRN[0], 13, 1, 1, 24); R(c, IRN[3], 1, 1, 12, 1);   // the cabinet
+  for (let i = 2; i < 12; i += 2) R(c, IRN[0], i, 2, 1, 2);                                                            // vent slots
+  for (let k = 0; k < 5; k++) {
+    const y = 5 + k * 4, dead = (hit && k === 2) || (x && k !== 1);
+    R(c, IRN[3], 1, y, 12, 3); R(c, IRN[5], 1, y, 12, 1); R(c, IRN[2], 1, y + 2, 12, 1);
+    for (let d = 0; d < 3; d++) { R(c, IRN[1], 2 + d * 2, y + 1); R(c, IRN[4], 3 + d * 2, y + 1); }                      // drive bays
+    for (let i = 0; i < 3; i++) { const on = !dead && (k * 3 + i * 5 + f * 7) % 4 !== 0; R(c, on ? LED[(k + i + f) % 3] : '#16201a', 9 + i, y + 1); }
+    if (dead && x) { R(c, '#05060a', 2 + (k % 2) * 4, y + 1, 4, 2); R(c, IRN[6], 2 + (k % 2) * 4, y + 2, 2, 1); }
+  }
+  R(c, IRN[6], 12, 12, 1, 4);                                                                                          // door handle
+  R(c, IRN[2], 0, 25, 14, 2); R(c, IRN[4], 0, 25, 14, 1); R(c, IRN[0], 1, 27, 3, 1); R(c, IRN[0], 10, 27, 3, 1);         // plinth and feet
+  if (hit) { R(c, IRN[0], 7, 10, 3, 1); R(c, IRN[6], 7, 11, 3, 1); prLine(c, '#e8b422', 4, 18, 3, 22); prLine(c, '#c83020', 6, 18, 6, 21); R(c, '#ffe080', 3, 23); }
+  if (x) {
+    R(c, '#ff3020', 9, 10);
+    prLine(c, '#e8b422', 3, 15, 2, 21); prLine(c, '#c83020', 7, 15, 8, 20); prLine(c, '#3a80e0', 10, 19, 11, 24); prLine(c, IRN[4], 5, 23, 4, 26);   // cables hanging out
+    R(c, IRN[0], 0, 8, 1, 6); R(c, IRN[5], 13, 17, 1, 3);
+    prScorch(c, 0, 0, 14, 28, 36, 13);
+  }
+}
+function drawJukebox(c, st) {                                     // 20x26 jukebox: a neon arch over the record deck, wood pillars, chrome foot; 'disc' is one of its records
+  if (st === 'disc') {                                            // a record, centred in the frame
+    for (let y = 8; y < 18; y++) for (let xx = 5; xx < 15; xx++) {
+      const r = Math.hypot(xx + 0.5 - 10, y + 0.5 - 13); if (r > 4.6) continue;
+      R(c, r < 0.8 ? '#06070a' : r < 1.8 ? '#e0402a' : Math.abs(r - 3.3) < 0.45 || Math.abs(r - 2.4) < 0.35 ? '#34343e' : '#121216', xx, y);
+    }
+    R(c, '#9a9aaa', 7, 10); R(c, '#5a5a68', 8, 9); R(c, '#5a5a68', 6, 11); R(c, '#ff8a6a', 9, 12);
+    return;
+  }
+  const x = st === 'x', W = PRR.wht, C = PRR.cop, ARCH = x ? ['#3a1e2a', '#3a2418', '#38301a'] : ['#ff5ac0', '#ff8a3a', '#ffd23a'];
+  for (let y = 0; y < 11; y++) for (let xx = 0; xx < 20; xx++) {
+    const dx = xx + 0.5 - 10, dy = y + 0.5 - 10.5, r = Math.hypot(dx, dy);
+    if (r > 9.9 || dy > 0) continue;
+    if (r > 8.7) R(c, dx < -2 && dy < -3 ? W[6] : dx > 4 ? W[2] : W[4], xx, y);                                         // chrome rim
+    else if (r > 6.5) { const a = Math.atan2(-dy, dx) / Math.PI; R(c, r > 7.9 && !x ? '#fff0f8' : ARCH[Math.min(2, Math.floor(Math.abs(a - 0.5) * 5))], xx, y); }   // neon tube: pink at the crown to yellow at the sides
+    else R(c, (Math.floor(xx / 2) + Math.floor(y / 2)) % 2 ? '#2e1022' : '#1a0812', xx, y);                              // the grille behind
+  }
+  R(c, C[3], 1, 10, 18, 14);
+  for (const px of [1, 16]) { R(c, C[px > 8 ? 2 : 5], px, 10, 3, 14); R(c, C[px > 8 ? 1 : 6], px, 10, 1, 14); }         // wood pillars
+  for (let y = 11; y < 23; y++) { R(c, ARCH[(y >> 1) % 3], 2, y); R(c, ARCH[((y >> 1) + 1) % 3], 17, y); }              // tubes in the pillars
+  R(c, W[2], 4, 11, 12, 7); R(c, W[5], 4, 11, 12, 1); R(c, '#08090c', 5, 12, 10, 5);                                    // the record window
+  if (!x) {
+    prEll(c, 9.5, 14.6, 4, 1.6, '#16161c'); prEll(c, 9.5, 14.6, 2.6, 1, '#2a2a34'); R(c, '#d83a2a', 9, 14, 2, 1);
+    R(c, W[6], 13, 12, 1, 2); R(c, W[5], 12, 13); R(c, 'rgba(210,240,255,0.35)', 5, 12, 3, 1); R(c, 'rgba(210,240,255,0.2)', 5, 13, 1, 2);
+  } else { R(c, '#8a9aa6', 5, 12, 1, 2); R(c, '#c8d8e0', 14, 15); R(c, '#6a7a86', 11, 12); R(c, '#2a2a34', 6, 15, 4, 1); }
+  for (let i = 0; i < 6; i++) R(c, x ? '#3a3a3a' : i % 2 ? '#ffffff' : '#ffe0a0', 5 + i * 2, 18); R(c, C[1], 4, 19, 12, 1);   // selector keys
+  R(c, '#1a1008', 4, 20, 12, 3); for (let y = 20; y < 23; y++) for (let i = 0; i < 12; i += 2) R(c, C[2], 4 + i + (y % 2), y);   // speaker grille
+  R(c, W[3], 0, 23, 20, 2); R(c, W[6], 0, 23, 20, 1); R(c, W[1], 1, 25, 4, 1); R(c, W[1], 15, 25, 4, 1);                 // chrome foot
+  if (st === 'hit') { prCracks(c, 8, 6, 5, 4, 7, '#fff0f8', '#7a2a4a'); R(c, '#3a1e2a', 17, 15, 1, 3); }
+  if (x) { prCracks(c, 11, 5, 6, 5, 9, '#6a4a5a', '#1a0812'); prScorch(c, 0, 0, 20, 26, 60, 9); R(c, '#05060a', 6, 21, 4, 2); }
+}
+function drawHydrant(c, st) {                                     // 10x14 fire hydrant: bonnet, side caps and a brass pumper nozzle
+  const Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[2], 0, 13, 10, 1); R(c, IRN[4], 0, 13, 4, 1); R(c, IRN[6], 1, 13); R(c, IRN[6], 8, 13);                     // base bolted to the floor
+  R(c, Rr[3], 1, 12, 8, 1); R(c, Rr[5], 1, 12, 3, 1);                                                                  // flange
+  if (st === 'x') {
+    prCyl(c, 5, 9, 12, 3, Rr, 0.04);
+    R(c, '#05080c', 3, 9, 4, 1); R(c, '#1c4a6a', 4, 10, 2, 1); for (const [xx, h] of [[2, 1], [3, 2], [5, 1], [7, 2]]) R(c, Rr[xx < 5 ? 5 : 3], xx, 9 - h, 1, h);   // sheared off, a jagged lip
+    R(c, '#4ac8f8', 2, 11); R(c, '#8ce0ff', 7, 10);
+    return;
+  }
+  prCyl(c, 5, 4, 12, 3, Rr, 0.04);                                                                                     // barrel
+  blob(c, 5, 4.2, 3.4, 3.2, Rr, 2, 0.08, (xx, y) => y < 4);                                                            // bonnet
+  R(c, Rr[2], 1, 4, 8, 1); R(c, Rr[6], 1, 4, 2, 1);
+  R(c, B[5], 4, 0, 2, 1); R(c, B[6], 4, 0); R(c, B[2], 4, 1, 2, 1);                                                    // operating nut
+  R(c, Rr[4], 0, 6, 2, 2); R(c, Rr[6], 0, 6, 2, 1); R(c, B[5], 0, 6, 1, 2); R(c, Rr[3], 8, 6, 2, 2); R(c, B[3], 9, 6, 1, 2);   // side caps
+  blob(c, 5, 8.5, 1.9, 1.9, B, 2, 0.1); R(c, B[1], 5, 9); R(c, B[7], 4, 7);                                             // pumper nozzle
+  prLine(c, IRN[5], 1, 8, 2, 10);                                                                                      // cap chain
+}
+function drawGasline(c, st) {                                     // 20x14 gas main: a yellow line through a shut-off valve and its handwheel to a flanged nozzle (facing right)
+  const Y = PRR.yel, Rr = PRR.red, B = PRR.brs;
+  R(c, IRN[3], 0, 3, 3, 9); R(c, IRN[5], 0, 3, 1, 9); R(c, IRN[1], 2, 4, 1, 8); R(c, IRN[6], 1, 4); R(c, IRN[6], 1, 10);   // wall plate
+  limb(c, 2, 7.5, 16, 7.5, 2.1, 2.1, Y, 0.02, true);                                                                   // the line
+  R(c, IRN[4], 4, 5, 1, 6); R(c, IRN[6], 4, 5); R(c, Rr[4], 14, 6, 1, 4); R(c, Rr[6], 14, 6);                         // a clamp and a red band
+  R(c, B[3], 8, 4, 5, 7); R(c, B[5], 8, 4, 5, 1); R(c, B[5], 8, 4, 1, 7); R(c, B[1], 12, 5, 1, 6); R(c, B[2], 8, 10, 5, 1); R(c, B[6], 9, 5);   // valve body
+  R(c, IRN[5], 10, 2, 1, 2);                                                                                           // stem
+  R(c, Rr[5], 7, 1, 7, 1); R(c, Rr[3], 7, 2, 7, 1); R(c, Rr[7], 7, 1, 2, 1); R(c, IRN[6], 10, 1);                      // handwheel, edge on
+  R(c, IRN[3], 16, 4, 3, 7); R(c, IRN[5], 16, 4, 3, 1); R(c, IRN[6], 16, 5, 1, 5); R(c, IRN[1], 18, 5, 1, 6);           // nozzle flange
+  R(c, '#05060a', 19, 6, 1, 3); R(c, IRN[7], 17, 5); R(c, IRN[7], 17, 9);
+  if (st === 'x') { prTear(c, 7, 14, 6, 2, 13, '#2a1a0c'); prScorch(c, 6, 3, 14, 10, 34, 11); R(c, '#05060a', 9, 6, 3, 1); R(c, '#ff8a20', 10, 6); R(c, '#14100c', 19, 5, 1, 5); }
+}
+function drawHopper(c, st) {                                      // 20x22 sand hopper: a riveted bin, its funnel and a gated chute
+  const O = PRR.olv, S = PRT.snd, Rr = PRR.red, x = st === 'x';
+  if (!x) { prEll(c, 10, 2.4, 7, 2, S[3]); prEll(c, 10, 2, 5, 1.3, S[5]); R(c, S[6], 7, 1, 3, 1); R(c, S[2], 13, 2); }  // sand heaped over the rim
+  R(c, IRN[5], 0, 2, 20, 1); R(c, IRN[6], 0, 2, 8, 1);                                                                // rim
+  R(c, O[3], 1, 3, 18, 10); R(c, O[5], 1, 3, 18, 1); R(c, O[4], 1, 4, 1, 9); R(c, O[1], 18, 4, 1, 9); R(c, O[2], 1, 12, 18, 1);   // the bin
+  for (const sx of [6, 13]) { R(c, O[4], sx, 4, 1, 5); R(c, O[1], sx + 1, 4, 1, 5); }                                // stiffeners
+  for (let i = 2; i < 18; i++) for (const y of [9, 10]) R(c, ((i + y) >> 1) % 2 ? '#15161a' : HAZ[3], i, y);         // hazard band
+  for (const rx of [2, 9, 16]) R(c, O[6], rx, 4);
+  for (let y = 13; y < (x ? 15 : 18); y++) {                                                                          // the funnel
+    const hw = 8.5 - (y - 13) * 1.5, x0 = Math.round(10 - hw), x1 = Math.round(10 + hw);
+    for (let xx = x0; xx < x1; xx++) R(c, O[clamp(Math.round(4 - (xx + 0.5 - 10) / hw * 2.2 - (y - 13) * 0.3), 0, 6)], xx, y);
+  }
+  if (x) {                                                                                                            // the bottom blown out, the chute hanging
+    R(c, '#05060a', 4, 14, 12, 1); for (const xx of [4, 7, 9, 12, 14]) R(c, O[2], xx, 15); R(c, O[3], 6, 15, 1, 2); R(c, O[3], 11, 15, 1, 2);
+    R(c, IRN[3], 13, 16, 2, 4); R(c, IRN[5], 13, 16, 1, 4); R(c, S[3], 8, 13, 3, 1);
+    prScorch(c, 0, 3, 20, 14, 26, 4);
+    return;
+  }
+  R(c, IRN[3], 8, 18, 4, 2); R(c, IRN[5], 8, 18, 1, 2); R(c, IRN[1], 11, 18, 1, 2);                                    // chute
+  R(c, Rr[4], 7, 20, 6, 1); R(c, Rr[6], 7, 20, 2, 1); R(c, IRN[2], 8, 21, 4, 1);                                       // the gate
+  R(c, IRN[6], 13, 17, 1, 3); R(c, Rr[5], 13, 16);                                                                     // its lever
+  if (st === 'hit') { R(c, O[0], 14, 6, 2, 1); R(c, O[6], 14, 7, 2, 1); R(c, '#05060a', 4, 7); R(c, S[4], 4, 8, 1, 1); R(c, O[0], 3, 11, 2, 1); R(c, O[6], 10, 15); }
+}
+function drawVat(c, st) {                                         // 18x26 chem vat: a glass tank of green acid on an iron stand
+  const G = PRR.grn, x = st === 'x';
+  R(c, IRN[2], 1, 21, 16, 3); R(c, IRN[5], 1, 21, 16, 1); R(c, IRN[4], 1, 22, 1, 2); R(c, IRN[0], 16, 22, 1, 2);       // stand
+  R(c, IRN[3], 1, 24, 2, 2); R(c, IRN[3], 15, 24, 2, 2); R(c, IRN[1], 3, 24, 12, 1);                                   // legs
+  R(c, HAZ[3], 7, 22, 4, 2); R(c, HAZ[4], 7, 22, 4, 1); R(c, '#15161a', 8, 22, 2, 1); R(c, '#15161a', 9, 23);           // hazard plate
+  R(c, IRN[4], 2, 20, 14, 1); R(c, IRN[6], 2, 20, 6, 1);                                                               // bottom ring
+  if (x) {                                                                                                            // shattered: jagged glass round a green residue
+    const h = [4, 6, 2, 5, 7, 3, 2, 6, 4, 3, 7, 2, 5, 3];
+    for (let i = 0; i < 14; i++) R(c, i % 3 ? 'rgba(170,230,215,0.6)' : '#d0ece4', 2 + i, 20 - h[i], 1, h[i]);
+    R(c, G[2], 3, 19, 12, 1); R(c, G[4], 4, 19, 5, 1); R(c, G[3], 6, 21, 3, 1); R(c, G[3], 12, 22);
+    return;
+  }
+  R(c, 'rgba(150,220,205,0.22)', 2, 5, 14, 2);                                                                         // empty glass above the acid
+  prCyl(c, 9, 7, 20, 6.5, G, 0.02);                                                                                    // the acid
+  R(c, G[6], 3, 7, 12, 1); R(c, G[5], 3, 8, 3, 1);                                                                     // its surface
+  for (const [bx, by] of [[5, 15], [7, 11], [11, 17], [12, 12], [9, 9], [6, 18], [10, 14]]) R(c, G[6], bx, by);
+  R(c, '#e0fff4', 2, 5, 1, 15); R(c, '#5a8a80', 15, 5, 1, 15); R(c, 'rgba(240,255,250,0.55)', 4, 6, 1, 13); R(c, 'rgba(240,255,250,0.3)', 5, 8, 1, 7);   // glass edges and glare
+  R(c, IRN[4], 2, 4, 14, 1); R(c, IRN[6], 2, 4, 6, 1);                                                                 // top ring
+  blob(c, 9, 4, 6, 2.8, IRN.slice(2), 2, 0.05, (xx, y) => y < 4); R(c, IRN[7], 7, 2, 2, 1);                             // lid
+  R(c, IRN[4], 12, 0, 2, 3); R(c, IRN[6], 12, 0, 1, 3);                                                                // vent pipe
+  if (st === 'hit') { prCracks(c, 6, 12, 5, 4, 17, '#e8ffe0', '#2a6a20'); R(c, G[5], 15, 18, 1, 2); R(c, G[4], 16, 20); }
+}
+function drawTransformer(c, st) {                                 // 16x22 pole transformer: a finned can, two porcelain bushings, a wall bracket
+  const T = PRT.trf, x = st === 'x';
+  R(c, IRN[2], 0, 6, 1, 12); for (const y of [7, 15]) { R(c, IRN[3], 0, y, 4, 2); R(c, IRN[5], 0, y, 4, 1); }          // bracket off the wall
+  for (let y = 8; y < 19; y += 2) { R(c, T[3], 13, y, 2, 1); R(c, T[5], 13, y + 1, 2, 1); }                             // cooling fins
+  prCyl(c, 8, 6, 19.5, 5, T, 0.03);                                                                                    // the can
+  prEll(c, 8, 6, 5, 1.6, T[6]); prEll(c, 8, 6.2, 3.6, 0.9, T[4]);                                                       // lid
+  R(c, T[1], 4, 19, 8, 1); R(c, IRN[5], 8, 20); R(c, IRN[3], 8, 21);                                                    // drain cock
+  R(c, HAZ[3], 7, 11, 2, 1); R(c, HAZ[3], 6, 12, 4, 2); R(c, HAZ[3], 7, 14, 2, 1); R(c, '#15161a', 8, 11); R(c, '#15161a', 7, 12); R(c, '#15161a', 8, 13); R(c, '#15161a', 7, 14);   // the bolt sign
+  if (!x) for (const bx of [5, 10]) { for (let y = 1; y < 6; y++) R(c, y % 2 ? '#a0603a' : '#d8985c', bx, y, 2, 1); R(c, '#f0c090', bx, 2); R(c, PRR.cop[6], bx, 0, 2, 1); }   // bushings
+  if (st === 'hit') { prScorch(c, 9, 12, 5, 6, 12, 5); R(c, '#05060a', 10, 15, 2, 2); R(c, '#80c8ff', 10, 15); R(c, T[0], 13, 12, 2, 1); R(c, T[6], 13, 13, 2, 1); }
+  if (x) {
+    prTear(c, 3, 14, 10, 3, 19, '#1a1410');
+    R(c, PRR.cop[4], 5, 12, 6, 1); R(c, PRR.cop[6], 6, 12, 2, 1); R(c, PRR.cop[3], 5, 13, 6, 1);                        // the windings, cooked
+    R(c, '#a0603a', 5, 8, 2, 2); R(c, '#d8985c', 11, 9, 1, 1);
+    prScorch(c, 0, 6, 16, 16, 56, 21);
+  }
+}
+function drawPaint(c, st) {                                       // 16x12 three tins of paint, stacked two and one, drips down their sides
+  const W = PRR.wht, P = PRT.pnt;
+  if (st === 'x') {                                                                                                   // burst flat, paint everywhere
+    const rnd = prRng(41);
+    R(c, W[2], 1, 9, 6, 3); R(c, W[4], 1, 9, 5, 1); R(c, P[0][2], 1, 10, 6, 1);
+    R(c, W[2], 9, 8, 6, 4); R(c, W[4], 9, 8, 6, 1); R(c, P[1][2], 9, 10, 6, 1); R(c, '#05060a', 11, 8, 2, 1);
+    limb(c, 6, 6.5, 10, 6.5, 2, 2, W.slice(1), 0.02, true); R(c, P[2][2], 7, 6, 2, 2);
+    for (let i = 0; i < 52; i++) { const k = i % 3; R(c, P[k][2 + (rnd() < 0.35 ? 1 : 0)], Math.floor(rnd() * 16), 3 + Math.floor(rnd() * 9)); }
+    R(c, W[6], 13, 3, 3, 1); R(c, W[6], 0, 5, 2, 1);
+    return;
+  }
+  const can = (cx, y0, p) => {
+    prCyl(c, cx, y0 + 1, y0 + 6, 3.5, W.slice(1), 0.02);
+    prCyl(c, cx, y0 + 2.5, y0 + 5, 3.56, p.slice(0, 4));                                                               // its label
+    prEll(c, cx, y0 + 1, 3.5, 1, W[6]); prEll(c, cx, y0 + 1.1, 2.4, 0.6, p[2]);                                        // lid, paint round the rim
+    R(c, p[3], Math.round(cx - 2), y0 + 1, 1, 2); R(c, p[2], Math.round(cx + 1), y0 + 1, 1, 3);                        // drips
+  };
+  can(3.5, 5, P[0]); can(12.5, 5, P[1]); can(8, -1, P[2]);
+  R(c, IRN[5], 6, 0); R(c, IRN[5], 10, 0);                                                                             // the top tin's handle lugs
+}
+function drawSprinkler(c, st) {                                   // 10x8 sprinkler head under a red feed pipe: brass yoke, red glass bulb, deflector
+  const Rr = PRR.red, B = PRR.brs, x = st === 'x';
+  R(c, Rr[5], 0, 0, 10, 1); R(c, Rr[3], 0, 1, 10, 1); R(c, Rr[7], 1, 0, 3, 1);                                         // the feed pipe
+  R(c, B[4], 4, 2, 2, 2); R(c, B[6], 4, 2, 1, 2);                                                                      // fitting
+  R(c, B[5], 3, 4, 1, 2); R(c, B[3], 6, 4, 1, 2);                                                                      // yoke
+  if (!x) { R(c, '#ff3a2a', 4, 4, 2, 2); R(c, '#ffb0a0', 4, 4); R(c, B[6], 1, 6, 8, 1); for (let i = 1; i < 9; i += 2) R(c, B[3], i, 7); }   // bulb, deflector and its teeth
+  else { R(c, '#a02018', 5, 5); R(c, B[6], 1, 6, 4, 1); R(c, B[5], 5, 7, 4, 1); R(c, B[3], 1, 7); R(c, '#8ce0ff', 4, 6); }
+}
 const PROP_ART = {
   neon:     { w: 34, h: 15, fr: ['n4', 'n3', 'n2', 'n1', 'n0', 'dead', 'x'], draw: (c, f) => f === 'x' ? (R(c, '#2a2e35', 7, 0, 2, 2), R(c, '#2a2e35', 9, 1, 2, 1), R(c, '#2a2e35', 25, 0, 2, 3), R(c, '#5d6775', 25, 0, 1, 2), prLine(c, '#1a1c20', 26, 3, 27, 6), prLine(c, '#1a1c20', 27, 6, 25, 9), R(c, '#e8b422', 25, 10), R(c, '#ff8040', 24, 10)) : drawNeon(c, f === 'dead' ? 0 : +f[1], f === 'dead') },
   tube:     { w: 26, h: 6,  fr: ['ok', 'off', 'x'], draw: drawTube },
@@ -2454,6 +3256,17 @@ const PROP_ART = {
   window:   { w: 34, h: 22, fr: ['ok', 'c1', 'c2', 'x'], draw: drawWindow },
   horn:     { w: 16, h: 14, fr: ['ok', 'x'], draw: drawHorn },
   water:    { w: 22, h: 26, fr: ['ok', 'hit', 'x'], draw: drawWaterTank },
+  // ---- expansion: props ----
+  hoist:       { w: 22, h: 18, fr: ['ok', 'hit', 'x'], draw: drawHoist },
+  server:      { w: 14, h: 28, fr: ['ok0', 'ok1', 'ok2', 'hit', 'x'], draw: drawServer },
+  jukebox:     { w: 20, h: 26, fr: ['ok', 'hit', 'x', 'disc'], draw: drawJukebox },
+  hydrant:     { w: 10, h: 14, fr: ['ok', 'x'], draw: drawHydrant },
+  gasline:     { w: 20, h: 14, fr: ['ok', 'x'], draw: drawGasline },
+  hopper:      { w: 20, h: 22, fr: ['ok', 'hit', 'x'], draw: drawHopper },
+  vat:         { w: 18, h: 26, fr: ['ok', 'hit', 'x'], draw: drawVat },
+  transformer: { w: 16, h: 22, fr: ['ok', 'hit', 'x'], draw: drawTransformer },
+  paint:       { w: 16, h: 12, fr: ['ok', 'x'], draw: drawPaint },
+  sprinkler:   { w: 10, h: 8,  fr: ['ok', 'x'], draw: drawSprinkler },
 };
 function genPropTextures(scene) {
   for (const k in PROP_ART) {
@@ -2709,7 +3522,7 @@ function campaignCheckpoint(save = loadCampaign()) {
   // A checkpoint only saves after an act is clear. Keep its kills and use the current rosters for the acts ahead.
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
-// BOSS RUSH: five bosses back to back across the three arenas, a perk between each
+// BOSS RUSH: ten bosses back to back across the first five arenas, two to each, a perk between each
 // Run modes (#128): one record per mode holding every rule that differs between modes, from its waves and music to its
 // start, restart and results. GameScene.create sets this.mode from RUNMODE (or the Lab) and asks it. this.campaign and
 // this.lab stay as flags for the campaign's own systems (squads, routes, checkpoints) and the Lab's (its roster and
@@ -2790,7 +3603,7 @@ const overtimeMode = (id, record, dated) => ({                       // OVERTIME
     if (mod && mod === g.lastMod) mod = MOD_ROLL.filter(m => m !== mod)[Math.floor(rng() * 3)];
     return mod;
   },
-  card: (g, i, mod) => ['OVERTIME ' + (i + 1), i % 6 === 5 ? (Math.floor(i / 6) % 2 ? 'THE FOREMAN CLOCKS IN' : 'THE SMELTER RETURNS') : MOD_CARDS[mod] || 'HOSTILES INBOUND'],
+  card: (g, i, mod) => ['OVERTIME ' + (i + 1), i % 6 === 5 ? OT_BOSSES[Math.floor(i / 6) % OT_BOSSES.length][1] : MOD_CARDS[mod] || 'HOSTILES INBOUND'],
   elites: (g, i) => Math.min(6, Math.floor(i / 2)),
   music: (g, i) => WAVE_MUSIC[i % WAVE_MUSIC.length],                // round the six-wave cycle
 });
@@ -2835,7 +3648,7 @@ const RUN_MODES = {
     begin: (g, c) => {                                                // straight into the first boss (or the next one, down the lift)
       BUS.emit('wave', (c ? c.wave : 0) + 1, g.mode.waves);
       if (c) { liftArrival(g, c); return; }
-      BUS.emit('wavecard', 'BOSS RUSH', 'FIVE BOSSES BACK TO BACK'); Music.track(g.waveTrack(0), true);
+      BUS.emit('wavecard', 'BOSS RUSH', 'TEN BOSSES BACK TO BACK'); Music.track(g.waveTrack(0), true);
       g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(0); });
     },
     liftAfter: g => g.wave >= g.A.last,
@@ -2858,13 +3671,16 @@ const RUN_MODES = {
     },
     music: campaignMusic },
 };
-const RUSH = [[['jugg', 'G']], [['gunship', 'A']], [['wyrm', 'G']], [['foreman', 'B']], [['boss', 'B']]];
-const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GUNSHIP', 'THE SLAG WYRM', 'THE FOREMAN', 'THE SMELTER'];
+const RUSH = [[['jugg', 'G']], [['grinder', 'B']], [['gunship', 'A']], [['crucible', 'B']], [['wyrm', 'G']], [['queen', 'B']], [['foreman', 'B']], [['overseer', 'B']], [['conductor', 'B']], [['boss', 'B']]];
+const RUSH_SUBS = ['THE JUGGERNAUT', 'THE GRINDER', 'THE GUNSHIP', 'THE CRUCIBLE', 'THE SLAG WYRM', 'THE HIVE QUEEN', 'THE FOREMAN', 'THE OVERSEER', 'THE CONDUCTOR', 'THE SMELTER'];
+// OVERTIME's boss every sixth wave, in turn (DAILY too): [kind, the wave card's line]
+const OT_BOSSES = [['boss', 'THE SMELTER RETURNS'], ['foreman', 'THE FOREMAN CLOCKS IN'], ['crucible', 'THE CRUCIBLE BOILS OVER'], ['grinder', 'THE GRINDER ROLLS IN'],
+  ['queen', 'THE HIVE QUEEN DESCENDS'], ['overseer', 'THE OVERSEER IS WATCHING'], ['conductor', 'THE CONDUCTOR TAKES THE STAGE']];
 // what a copycat copies: lobs, spreads and beams; anything else is a rapid burst
-const CAT_LOB = new Set(['grenade', 'cluster', 'napalm', 'grav', 'gaslaunch', 'stasis', 'decoy', 'limpet', 'coil', 'nuke', 'sing', 'spider', 'tripwire', 'glue', 'bubble']);
-const CAT_SPREAD = new Set(['shotgun', 'flak', 'dragon', 'vacuum', 'splitter', 'bees', 'firework', 'cutter', 'saw']);
-const CAT_BEAM = new Set(['arc', 'rail', 'prism', 'lance', 'siphon', 'microwave', 'cryo', 'flame', 'acid', 'shrink', 'marksman', 'orbital', 'sonic', 'whip', 'shock']);
-const SPONGE_EATS = new Set(['nail', 'pellet', 'rivet', 'shard', 'needle', 'revolver', 'parry', 'prism']);
+const CAT_LOB = new Set(['grenade', 'cluster', 'napalm', 'grav', 'gaslaunch', 'stasis', 'decoy', 'limpet', 'coil', 'nuke', 'sing', 'spider', 'tripwire', 'glue', 'bubble', 'cannon', 'quake', 'balllight', 'cyclone', 'barrage']);
+const CAT_SPREAD = new Set(['shotgun', 'flak', 'dragon', 'vacuum', 'splitter', 'bees', 'firework', 'cutter', 'saw', 'caltrop']);
+const CAT_BEAM = new Set(['arc', 'rail', 'prism', 'lance', 'siphon', 'microwave', 'cryo', 'flame', 'acid', 'shrink', 'marksman', 'orbital', 'sonic', 'whip', 'shock', 'phase', 'spear', 'heatray', 'hydro']);
+const SPONGE_EATS = new Set(['nail', 'pellet', 'rivet', 'shard', 'needle', 'revolver', 'parry', 'prism', 'phase']);
 const WAVE_POINTS = {
   G: [[10, 24], [26, 24], [52, 20], [63, 24], [80, 16], [95, 24], [87, 12], [47, 8], [33, 16], [4, 12], [16, 16], [73, 20]],
   A: [[20, 10], [47, 11], [72, 8], [90, 6], [30, 6], [56, 6], [10, 16], [82, 10]],
@@ -3015,6 +3831,396 @@ const DECOR5 = {
   vents: [[26 * TS, 25 * TS], [74 * TS, 25 * TS]],
   glows: [[50 * TS, 21 * TS, 3.5, 0x80c8ff]],
 };
+// ---- expansion: arenas ----
+// ARENAS 06-10, for OVERTIME's lift rotation, the DAILY and the Lab (never the campaign). Each is a grid builder (tiers
+// 4 tiles apart, as in 01-05), a paint function, its DECOR and, on its ARENAS record, the settings for its machinery
+// (GameScene.setupArenaMachinery).
+function xaGrid() {                                   // the shell every arena shares, and the fill helper
+  const g = [];
+  for (let y = 0; y < MAP_H; y++) g.push(new Array(MAP_W).fill('.'));
+  const fill = (x, y, w, h, c = '#') => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (g[j] && i >= 0 && i < MAP_W) g[j][i] = c; };
+  fill(0, 0, 100, 2); fill(0, 25, 100, 2); fill(0, 0, 2, 27); fill(98, 0, 2, 27);
+  return [g, fill];
+}
+const xaBehind = (ctx, fn) => { ctx.globalCompositeOperation = 'destination-over'; fn(); ctx.globalCompositeOperation = 'source-over'; };   // paints only where no tile is
+// ARENA 06 :: THE COOLING TOWER: a pump housing in the middle of a basin that floods with coolant, gratings close
+// together so dry footing is never far off, and two high-voltage cable reels in the roof.
+function buildLevel6() {
+  const [g, fill] = xaGrid();
+  fill(44, 17, 12, 8);                                                                // the pump housing (stand on it at row 16)
+  fill(20, 2, 2, 4); fill(78, 2, 2, 4);                                               // spray headers hung from the roof
+  fill(4, 21, 7, 1, '='); fill(15, 21, 6, 1, '='); fill(26, 21, 7, 1, 'g'); fill(37, 21, 6, 1, '='); fill(57, 21, 6, 1, '='); fill(67, 21, 7, 1, 'g'); fill(79, 21, 6, 1, '='); fill(89, 21, 7, 1, '=');
+  fill(9, 17, 7, 1, '='); fill(21, 17, 7, 1, '='); fill(33, 17, 6, 1, 'g'); fill(61, 17, 6, 1, 'g'); fill(72, 17, 7, 1, '='); fill(84, 17, 7, 1, '=');
+  fill(2, 13, 6, 1); fill(15, 13, 6, 1, '='); fill(27, 13, 7, 1, '='); fill(46, 13, 8, 1, '='); fill(66, 13, 7, 1, '='); fill(79, 13, 6, 1, '='); fill(92, 13, 6, 1);
+  fill(9, 9, 7, 1, '='); fill(25, 9, 7, 1, '='); fill(45, 9, 10, 1, '='); fill(68, 9, 7, 1, '='); fill(84, 9, 7, 1, '=');
+  fill(32, 23, 2, 2, 'x'); fill(66, 23, 2, 2, 'x');
+  return g;
+}
+const FLOOD6 = { top: 21 * TS + 6, floor: 25 * TS, cables: [24 * TS + 8, 75 * TS + 8], idle: [10, 14], first: 7, warn: 2.6, rise: 3, hold: 6, drain: 3.5,
+  live: 0.45, cable: 1.4, dmg: 6, edmg: 14, tick: 0.35 };
+function paintTower(ctx) {                           // ARENA 06: the curved concrete shell, the inlets, the pump and the flood line
+  xaBehind(ctx, () => {
+    for (let y = 2 * TS; y < 25 * TS; y += 2) {      // the hyperbolic shell leans in to a waist at mid-height
+      const k = (y - 12 * TS) / (13 * TS), w = Math.round(30 + 90 * k * k);
+      for (const dir of [1, -1]) {
+        const x0 = dir > 0 ? 2 * TS : 98 * TS - w, edge = dir > 0 ? x0 + w - 3 : x0;
+        R(ctx, '#18232a', x0, y, w, 2); R(ctx, '#2c3f46', edge, y, 3, 2); R(ctx, '#3e5860', dir > 0 ? edge + 2 : edge, y, 1, 2);
+        for (let x = 4; x < w - 4; x += 6) if (hash2(x0 + x * 7, 11) % 4 === 0) R(ctx, (hash2(x, y >> 4) & 1) ? '#141c22' : '#1d2a31', x0 + x, y, 1, 2);   // stains run down it
+        if ((y >> 1) % 24 === 0) R(ctx, '#121a20', x0, y, w, 1);                                                                // pour lines
+      }
+    }
+    for (let i = 0; i < 9; i++) { const r = 70 - i * 7; R(ctx, i % 2 ? '#1a2a30' : '#1e3038', 50 * TS - r, 2 * TS + i, r * 2, 1); }   // daylight through the open top
+  });
+  for (const dir of [1, -1]) {                       // the inlets the flood pours from
+    const cx = dir > 0 ? 2 * TS - 6 : 98 * TS + 6, cy = 18 * TS;
+    R(ctx, '#0b0f12', cx - 8, cy - 12, 16, 24); R(ctx, '#3a4a52', cx - 9, cy - 13, 18, 2); R(ctx, '#3a4a52', cx - 9, cy + 11, 18, 2);
+    R(ctx, '#56707a', cx - 9, cy - 13, 18, 1); for (let j = -10; j <= 8; j += 6) R(ctx, '#22303a', cx - 6, cy + j, 12, 2);
+    R(ctx, '#e8b422', dir > 0 ? cx + 7 : cx - 9, cy - 14, 2, 28);
+  }
+  const px = 44 * TS, py = 17 * TS;                  // the pump housing: casing, a teal sight glass, the gauge
+  R(ctx, '#121820', px + 6, py + 10, 12 * TS - 12, 6 * TS); R(ctx, '#243440', px + 8, py + 12, 12 * TS - 16, 6 * TS - 4);
+  for (let i = 0; i < 6; i++) R(ctx, '#1a6a78', px + 16 + i * 26, py + 20, 14, 52), R(ctx, '#3ab8c8', px + 18 + i * 26, py + 22, 3, 48), R(ctx, '#0e3a44', px + 16 + i * 26, py + 66, 14, 6);
+  for (let y = 21 * TS - 30; y < 25 * TS; y += 8) R(ctx, '#7f8b99', px + 2, y, y % 32 === 0 ? 5 : 3, 1);
+  R(ctx, '#ff3a2a', px, FLOOD6.top, 7, 2); drawGlyphs(ctx, 'MAX', px + 9, FLOOD6.top - 3, '#ff6a50');
+  drawGlyphs(ctx, 'COOLANT', px + 50, py + 4, '#9ae8f0');
+  for (const x of FLOOD6.cables) {                   // the high-voltage reels the live cable drops from
+    R(ctx, '#15181d', x - 10, 2 * TS, 20, 9); R(ctx, '#3a414a', x - 9, 2 * TS + 1, 18, 7); R(ctx, '#e8b422', x - 9, 2 * TS + 7, 18, 2);
+    for (let i = 0; i < 4; i++) R(ctx, '#15181d', x - 8 + i * 5, 2 * TS + 7, 2, 2);
+    R(ctx, '#0b0c0f', x - 6, 2 * TS + 2, 12, 4); R(ctx, '#ff5a2a', x - 1, 2 * TS + 3, 2, 2);
+  }
+  for (const x of [20, 78]) for (let i = 0; i < 2; i++) { R(ctx, '#0e1216', x * TS + 6 + i * 12, 6 * TS, 8, 3); R(ctx, '#3ab8c8', x * TS + 8 + i * 12, 6 * TS + 3, 4, 1); }   // spray nozzles
+  for (const x of [12, 24, 76, 88]) { R(ctx, '#0b0e10', x * TS, 25 * TS + 1, 32, 4); for (let i = 0; i < 7; i++) R(ctx, '#2a3a40', x * TS + 2 + i * 4, 25 * TS + 2, 2, 2); }   // floor drains
+  for (let x = 2 * TS; x < 98 * TS; x += 2) if (hash2(x, 7) % 3) R(ctx, '#1e4a52', x, 25 * TS, 2, 1);   // a wet film on the floor
+}
+const DECOR6 = {
+  lamps: [[150, 66], [560, 74], [1040, 74], [1450, 66]],
+  beacons: [[45, 230], [1555, 230], [44 * TS + 4, 17 * TS - 6], [56 * TS - 4, 17 * TS - 6]],
+  vents: [[38 * TS, 25 * TS], [62 * TS, 25 * TS]],
+  glows: [[50 * TS, 20 * TS, 4, 0x3ac8e0], [50 * TS, 3 * TS, 5, 0x6a9ab0]],
+};
+// ARENA 07 :: THE CHILL VAULT: a cold store of racks and shelves over sheet-ice floors. Icicles grow under the roof and
+// the solid shelves and drop on a shadow tell; cryo vents in the floor puff frost.
+function buildLevel7() {
+  const [g, fill] = xaGrid();
+  fill(45, 21, 10, 4);                                                                // the freezer unit (stand on it at row 20)
+  fill(5, 21, 7, 1, '='); fill(18, 21, 7, 1, '='); fill(31, 21, 6, 1, '='); fill(63, 21, 6, 1, '='); fill(75, 21, 7, 1, '='); fill(88, 21, 7, 1, '=');
+  fill(10, 17, 8, 1); fill(24, 17, 6, 1, '='); fill(38, 17, 6, 1, '='); fill(56, 17, 6, 1, '='); fill(70, 17, 6, 1, '='); fill(82, 17, 8, 1);
+  fill(2, 13, 6, 1); fill(16, 13, 6, 1, '='); fill(29, 13, 8, 1); fill(41, 13, 18, 1, '='); fill(63, 13, 8, 1); fill(78, 13, 6, 1, '='); fill(92, 13, 6, 1);
+  fill(9, 9, 6, 1, '='); fill(22, 9, 7, 1, '='); fill(44, 9, 12, 1); fill(71, 9, 7, 1, '='); fill(85, 9, 6, 1, '=');
+  fill(34, 23, 2, 2, 'x'); fill(64, 23, 2, 2, 'x');
+  return g;
+}
+const GRID7 = buildLevel7();
+// sheet ice [first column, last column + 1, the row whose top it lies on]; icicle spots [column, the solid row they hang
+// under]; cryo vents [x, floor y]
+const VAULT7 = { ice: [[6, 28, 25], [72, 94, 25], [45, 55, 21], [10, 18, 17], [82, 90, 17], [29, 37, 13], [63, 71, 13], [44, 56, 9]],
+  icicles: [[16, 1], [33, 1], [68, 1], [84, 1], [13, 17], [86, 17], [32, 13], [67, 13], [47, 9], [53, 9]],
+  vents: [[20 * TS, 25 * TS], [40 * TS, 25 * TS], [60 * TS, 25 * TS], [80 * TS, 25 * TS], [50 * TS, 21 * TS]],
+  grow: [6, 9], ripe: [0.8, 3.5], tell: 1, regrow: [3, 5], dmg: 16, edmg: 45, hp: 12,
+  vent: { idle: [5, 8], tell: 0.9, puff: 1.4, h: 60, w: 18, dmg: 3, chill: 0.25, tick: 0.3 } };
+function paintVault(ctx) {                           // ARENA 07: frost on every ledge, a vault door, racks of frozen stock
+  xaBehind(ctx, () => {
+    const dx = 50 * TS, dy = 9 * TS + 4;             // the vault door on the back wall, its locking wheel
+    for (let r = 46; r > 0; r -= 2) R(ctx, r > 42 ? '#2a3442' : r > 40 ? '#4a5868' : (r >> 1) % 3 ? '#222c38' : '#1c2430', dx - r, dy - Math.round(r * 0.9), r * 2, 2);
+    for (let a = 0; a < 6; a++) { const ca = Math.cos(a * Math.PI / 3), sa = Math.sin(a * Math.PI / 3); for (let t = 4; t < 22; t++) R(ctx, '#5a6878', Math.round(dx + ca * t), Math.round(dy + sa * t * 0.9), 2, 2); }
+    for (const x of [8 * TS, 26 * TS, 72 * TS, 90 * TS]) {             // freezer-room doors, rimed shut
+      R(ctx, '#121820', x - 18, 19 * TS + 2, 36, 6 * TS - 2); R(ctx, '#2a3644', x - 16, 19 * TS + 4, 32, 6 * TS - 4); R(ctx, '#46566a', x - 16, 19 * TS + 4, 32, 1);
+      R(ctx, '#8a94a0', x + 10, 22 * TS, 3, 10); for (let i = 0; i < 32; i += 2) R(ctx, '#a8d0f0', x - 16 + i, 19 * TS + 4, 2, 1 + hash2(x, i) % 3);
+    }
+    for (let x = 2 * TS; x < 98 * TS; x += 4) R(ctx, '#202a36', x, 2 * TS, 2, 2 + hash2(x, 3) % 5);   // rime along the roof
+  });
+  for (let ty = 1; ty < MAP_H - 1; ty++) for (let tx = 1; tx < MAP_W - 1; tx++) {          // rime on whatever faces up, frost fringes under what faces down
+    const c = GRID7[ty][tx], x = tx * TS, y = ty * TS, h = hash2(tx, ty * 3);
+    if (c === '.' || c === 'x') continue;
+    if (GRID7[ty - 1][tx] === '.') { R(ctx, '#d8f4ff', x, y, 16, 1); R(ctx, '#9ad0f0', x, y + 1, 16, 1); for (let i = 0; i < 16; i += 3) if ((h >> i) & 1) R(ctx, '#ffffff', x + i, y, 2, 1); }
+    if (GRID7[ty + 1][tx] === '.' && c === '#') for (let i = 1; i < 15; i += 3) if ((h >> (i + 2)) % 3) R(ctx, '#a8dcf8', x + i, y + 16, 1, 1 + ((h >> i) & 3));
+  }
+  for (const [x0, x1, row] of VAULT7.ice) { const y = row * TS; for (let x = x0 * TS; x < x1 * TS; x += 2) { R(ctx, '#bfe8ff', x, y, 2, 1); if (hash2(x, row) % 5 === 0) R(ctx, '#ffffff', x, y, 2, 1); if (hash2(x, row + 9) % 7 === 0) R(ctx, '#8ac4e8', x, y + 1, 1, 2 + hash2(x, 1) % 3); } }
+  for (const [tx, ty] of VAULT7.icicles) { const x = tx * TS + 8, y = (ty + 1) * TS; R(ctx, '#d8f4ff', x - 4, y, 9, 2); R(ctx, '#8ac4e8', x - 3, y + 2, 7, 1); }   // frost caps where icicles grow
+  for (const [vx, vy] of VAULT7.vents) {             // cryo vents: a ribbed grate with a cyan pilot
+    R(ctx, '#1a2028', vx - 10, vy - 1, 20, 5); R(ctx, '#4a5868', vx - 10, vy - 1, 20, 1);
+    for (let i = 0; i < 5; i++) R(ctx, '#0a0e12', vx - 8 + i * 4, vy + 1, 2, 3);
+    R(ctx, '#6ae0ff', vx - 1, vy + 3, 2, 1);
+  }
+  drawGlyphs(ctx, 'COLD STORE 7', 50 * TS - 35, 21 * TS + 6, '#8ac4e8');
+  drawGlyphs(ctx, '-28C', 50 * TS - 11, 22 * TS + 6, '#6ae0ff');
+}
+const DECOR7 = {
+  lamps: [[180, 66], [600, 74], [1000, 74], [1420, 66]],
+  beacons: [[35, 180], [1565, 180]],
+  vents: [],
+  glows: [[50 * TS, 9 * TS, 4.5, 0x6ab8ff], [20 * TS, 24 * TS, 3, 0x60c0ff], [80 * TS, 24 * TS, 3, 0x60c0ff]],
+};
+// ARENA 08 :: THE STORM ROOF: a rooftop at night under an open sky. A stairwell hut, a water tower, a radio mast,
+// a billboard and a shed with its chimney; lightning favours whatever stands highest and gusts sweep the roof.
+function buildLevel8() {
+  const [g, fill] = xaGrid();
+  fill(6, 21, 9, 4); fill(2, 17, 5, 1, '='); fill(2, 13, 4, 1);                      // the stairwell hut, its fire escape
+  fill(21, 22, 6, 3); fill(17, 17, 6, 1, '=');                                        // an air-con unit
+  fill(32, 21, 12, 4); fill(33, 13, 10, 4); fill(31, 17, 14, 1, '=');                // the water tower: its base, the tank, the catwalk
+  fill(48, 17, 4, 8); fill(52, 21, 6, 1, '='); fill(46, 13, 8, 1, '='); fill(47, 9, 6, 1, '=');   // the radio mast's base and platforms
+  fill(60, 21, 10, 1, '='); fill(62, 17, 9, 1, '='); fill(60, 13, 10, 1, '='); fill(62, 9, 7, 1, '=');   // the billboard's scaffold
+  fill(72, 22, 5, 3);                                                                 // another air-con unit
+  fill(80, 21, 9, 4); fill(91, 17, 3, 8); fill(94, 21, 4, 1, '='); fill(94, 13, 4, 1); // the shed, its chimney, the far corner
+  return g;
+}
+const STORM8 = { every: [2.4, 4.2], warn: 1.3, r: 16, dmg: 22, edmg: 50, gust: { idle: [7, 10], first: 9, warn: 1.6, blow: 3.2, push: 115, shelter: 5 } };
+function paintStorm(ctx) {                           // ARENA 08: the open sky above, parapets and a chain-link fence at the edges, rooftop kit
+  ctx.clearRect(0, 0, LW, 2 * TS);                                                  // no roof over it (the sky layer shows through)
+  for (const x0 of [0, 98 * TS]) {                   // a chain-link fence over each parapet
+    ctx.clearRect(x0, 2 * TS, 2 * TS, 19 * TS);
+    R(ctx, '#3a414a', x0 + 2, 6 * TS, 3, 15 * TS); R(ctx, '#3a414a', x0 + 26, 6 * TS, 3, 15 * TS); R(ctx, '#5a636e', x0, 6 * TS, 2 * TS, 2);
+    for (let y = 6 * TS + 2; y < 21 * TS; y++) for (let x = 0; x < 2 * TS; x++) if ((x + y) % 6 === 0 || (x - y + 600) % 6 === 0) R(ctx, '#2a3038', x0 + x, y, 1, 1);
+    R(ctx, '#4a3a30', x0, 21 * TS, 2 * TS, 4 * TS); for (let y = 21 * TS; y < 25 * TS; y += 6) R(ctx, '#3a2c24', x0, y, 2 * TS, 1);   // brick parapet
+  }
+  xaBehind(ctx, () => {
+    const tl = 32 * TS + 6, tr = 44 * TS - 6;        // the water tower's legs and cross braces
+    for (const x of [tl, tl + 26, tr - 26, tr]) R(ctx, '#20252c', x - 2, 17 * TS, 4, 4 * TS);
+    for (let i = 0; i < 4 * TS; i++) { R(ctx, '#1a1e24', tl + Math.round(i * 26 / (4 * TS)), 17 * TS + i, 2, 1); R(ctx, '#1a1e24', tr - Math.round(i * 26 / (4 * TS)), 17 * TS + i, 2, 1); }
+    const mx = 50 * TS;                              // the radio mast up into the storm, a lightning rod on top
+    for (let y = 2; y < 17 * TS; y++) { R(ctx, '#252a32', mx - 5, y, 2, 1); R(ctx, '#252a32', mx + 3, y, 2, 1); if (y % 12 === 0) R(ctx, '#2e343d', mx - 5, y, 10, 1); if (y % 12 < 6) R(ctx, '#1c2026', mx - 3 + (y % 12), y, 1, 1); }
+    R(ctx, '#8a94a0', mx - 1, 0, 2, 8);
+    const bx = 60 * TS, by = 3 * TS + 8, bw = 10 * TS;   // the billboard: a faded ad for coolant cola
+    R(ctx, '#1a1e24', bx, by, bw, 5 * TS); R(ctx, '#3a2a40', bx + 3, by + 3, bw - 6, 5 * TS - 6);
+    for (let y = 0; y < 5 * TS - 6; y += 2) R(ctx, y < 30 ? '#4a2a50' : '#2a3a5a', bx + 3, by + 3 + y, bw - 6, 1);
+    drawGlyphs(ctx, 'COOLANT', bx + 38, by + 20, '#ff60b0'); drawGlyphs(ctx, 'COLA', bx + 56, by + 32, '#60e0ff');
+    for (let x = bx + 8; x < bx + bw; x += 30) R(ctx, '#0c0e12', x, by + 5 * TS, 3, 21 * TS - by - 5 * TS);
+  });
+  for (let x = 2 * TS; x < 98 * TS; x += 2) { R(ctx, hash2(x, 5) % 4 ? '#2a3038' : '#323a44', x, 25 * TS, 2, 1); if (hash2(x, 9) % 37 === 0) R(ctx, '#3a5a7a', x, 25 * TS, 6, 1); }   // wet roofing felt, rain pools
+  for (const [x, w] of [[21, 6], [72, 5]]) {         // air-con fans
+    const cx = x * TS + w * 8, cy = 23 * TS;
+    for (let r = 10; r > 0; r--) R(ctx, r > 8 ? '#15181d' : r % 3 ? '#2a3038' : '#3a414a', cx - r, cy - r, r * 2, r * 2);
+    R(ctx, '#5a636e', cx - 1, cy - 9, 2, 18); R(ctx, '#5a636e', cx - 9, cy - 1, 18, 2);
+  }
+  R(ctx, '#0b0c0f', 9 * TS, 22 * TS, 3 * TS, 3 * TS); R(ctx, '#3a414a', 9 * TS - 2, 22 * TS - 2, 3 * TS + 4, 2); drawGlyphs(ctx, 'EXIT', 9 * TS + 12, 22 * TS + 6, '#40ff80');   // the stairwell door
+  for (let y = 17 * TS; y < 25 * TS; y += 4) R(ctx, '#4a3a30', 91 * TS, y, 3 * TS, 1);   // chimney bricks
+  R(ctx, '#15181d', 91 * TS - 2, 17 * TS, 3 * TS + 4, 3);
+  const tx = 33 * TS, ty = 13 * TS, tw = 10 * TS, th = 4 * TS;      // the water tank: timber staves, iron hoops, a conical cap
+  for (let x = 0; x < tw; x++) { const k = Math.abs(x - tw / 2) / (tw / 2), col = k > 0.85 ? '#2a1c14' : x % 8 === 0 ? '#3a2618' : k > 0.6 ? '#4a3020' : '#5a3a26'; R(ctx, col, tx + x, ty + 2, 1, th - 2); }
+  for (const hy of [ty + 8, ty + 30, ty + 52]) { R(ctx, '#3a414a', tx, hy, tw, 3); R(ctx, '#6a7380', tx, hy, tw, 1); }
+  R(ctx, '#15181d', tx - 2, ty, tw + 4, 3); R(ctx, '#5a636e', tx - 2, ty, tw + 4, 1); drawGlyphs(ctx, 'H2O', tx + tw / 2 - 9, ty + 17, '#c8b080');
+  for (let x = 80 * TS; x < 89 * TS; x += 4) { R(ctx, '#2e343c', x, 21 * TS + 1, 2, 4 * TS - 1); R(ctx, '#4a525c', x + 2, 21 * TS + 1, 1, 4 * TS - 1); }   // the shed's corrugated wall
+  R(ctx, '#15181d', 82 * TS, 22 * TS, 20, 3 * TS); R(ctx, '#3a2c20', 82 * TS + 2, 22 * TS + 2, 16, 3 * TS - 2); R(ctx, '#8a94a0', 82 * TS + 14, 23 * TS + 4, 2, 4);
+}
+const DECOR8 = {
+  lamps: [],
+  beacons: [[50 * TS, 6], [44 * TS - 6, 13 * TS + 4], [70 * TS - 6, 3 * TS + 6], [92 * TS + 8, 17 * TS - 4]],
+  vents: [[84 * TS, 21 * TS], [24 * TS, 22 * TS]],
+  glows: [[9 * TS + 24, 22 * TS, 2.4, 0x40ff80], [65 * TS, 6 * TS, 6, 0xff60b0], [38 * TS, 18 * TS, 3, 0x6a80c0]],
+};
+// ARENA 09 :: THE CRUSHER: a compactor hall. Hydraulic walls close in from both ends to the crush line on a cycle; the
+// outer floors are open gratings, so anything left on the floor is caught between a wall and an anvil. The middle is
+// never touched.
+function buildLevel9() {
+  const [g, fill] = xaGrid();
+  const both = (x, y, w, h, c) => { fill(x, y, w, h, c); fill(100 - x - w, y, w, h, c); };   // mirrored about the middle
+  fill(44, 21, 12, 4);                                                                // the press bed (stand on it at row 20)
+  both(30, 22, 3, 3);                                                                 // the anvils at the crush line
+  both(3, 21, 9, 1, '='); both(16, 21, 14, 1, '=');
+  both(7, 17, 10, 1, '='); both(21, 17, 15, 1, '=');
+  both(2, 13, 9, 1, '='); both(15, 13, 10, 1, '=');
+  both(8, 9, 8, 1, '='); both(22, 9, 9, 1, '=');
+  both(38, 17, 5, 1); fill(44, 13, 12, 1, 'g'); both(36, 9, 7, 1, '='); fill(46, 5, 8, 1);
+  return g;
+}
+const CRUSH9 = { reach: 28 * TS, idle: [9, 13], first: 8, warn: 2.2, close: 3.2, hold: 1.4, open: 2.6, dmg: 45, edmg: 400, bossDmg: 80 };
+function paintCrusher(ctx) {                         // ARENA 09: the crush lines, the piston housings in the end walls, the press bed
+  for (const x of [30 * TS, 70 * TS]) {              // hazard paint where the walls stop
+    for (let y = 2 * TS; y < 22 * TS; y += 8) R(ctx, (y >> 3) % 2 ? '#15161a' : '#c83020', x - 1, y, 2, 4);
+    for (let i = 0; i < 6; i++) R(ctx, i % 2 ? '#15161a' : '#e8b422', x - 24 + i * 8, 25 * TS, 8, 3);
+  }
+  drawGlyphs(ctx, 'CRUSH', 30 * TS - 32, 21 * TS - 8, '#ff5040'); drawGlyphs(ctx, 'CRUSH', 70 * TS + 4, 21 * TS - 8, '#ff5040');
+  for (const x0 of [0, 98 * TS]) for (let ty = 3; ty < 24; ty += 5) {   // piston housings in the end walls
+    R(ctx, '#0e1014', x0 + 4, ty * TS, 24, 3 * TS); R(ctx, '#3a414a', x0 + 6, ty * TS + 2, 20, 3 * TS - 4);
+    R(ctx, '#8a94a0', x0 + 8, ty * TS + 20, 16, 8); R(ctx, '#c8d0d8', x0 + 8, ty * TS + 20, 16, 2);
+  }
+  const bx = 44 * TS, by = 21 * TS;                  // the press bed: a steel platen with a drain channel
+  R(ctx, '#3a2c20', bx + 4, by + 6, 12 * TS - 8, 3); for (let x = bx + 6; x < bx + 12 * TS - 6; x += 10) R(ctx, '#14100c', x, by + 6, 4, 3);
+  drawGlyphs(ctx, 'PRESS 9', bx + 72, by + 22, '#e8b422');
+  xaBehind(ctx, () => { for (let x = 2 * TS; x < 98 * TS; x += 64) { R(ctx, '#1a1612', x, 2 * TS, 6, 23 * TS); for (let y = 2 * TS; y < 25 * TS; y += 32) R(ctx, '#241e18', x - 2, y, 10, 3); } });
+}
+const DECOR9 = {
+  lamps: [[560, 74], [1040, 74], [700, 50], [900, 50]],
+  beacons: [[30 * TS, 2 * TS + 6], [70 * TS, 2 * TS + 6], [44 * TS + 6, 21 * TS - 4], [56 * TS - 6, 21 * TS - 4]],
+  vents: [[38 * TS, 25 * TS], [62 * TS, 25 * TS]],
+  glows: [[50 * TS, 22 * TS, 3.5, 0xffb030]],
+};
+// ARENA 10 :: THE TURBINE HALL: floor fans whose updrafts carry you up, a turbine in the left wall that blows the upper
+// hall to the right, and two rotors over the gaps in the middle tier that spin in a steady rhythm.
+function buildLevel10() {
+  const [g, fill] = xaGrid();
+  fill(2, 3, 3, 8);                                                                   // the turbine nacelle in the left wall
+  fill(40, 21, 7, 4); fill(53, 21, 7, 4);                                             // generator housings either side of the middle fan
+  fill(4, 21, 7, 1, '='); fill(19, 21, 7, 1, '='); fill(30, 21, 6, 1, '='); fill(64, 21, 6, 1, '='); fill(74, 21, 7, 1, '='); fill(89, 21, 7, 1, '=');
+  fill(6, 17, 6, 1, '='); fill(22, 17, 9, 1); fill(35, 17, 12, 1); fill(47, 17, 6, 1, '='); fill(53, 17, 12, 1); fill(69, 17, 9, 1); fill(88, 17, 6, 1, '=');
+  fill(2, 13, 6, 1); fill(17, 13, 8, 1, '='); fill(36, 13, 9, 1, '='); fill(55, 13, 9, 1, '='); fill(75, 13, 8, 1, '='); fill(92, 13, 6, 1);
+  fill(8, 9, 5, 1, '='); fill(24, 9, 8, 1, '='); fill(44, 9, 12, 1, '='); fill(68, 9, 8, 1, '='); fill(87, 9, 5, 1, '=');
+  fill(46, 5, 8, 1, '=');
+  return g;
+}
+// fans [x, the y the updraft reaches]; rotors [x, y, phase]; the gust band [top, bottom] blows from the nacelle
+const TURB10 = { fans: [[15 * TS + 8, 9 * TS], [50 * TS, 4 * TS], [84 * TS + 8, 9 * TS]], w: 40, lift: 230,
+  rotors: [[33 * TS, 16 * TS + 4, 0], [67 * TS, 16 * TS + 4, 0.5]], r: 30, spin: 3.4, slow: 0.8, stop: 2.2, wind: 0.9, dmg: 18, edmg: 35,
+  gust: { x0: 5 * TS, x1: 97 * TS, top: 3 * TS, bot: 12 * TS, idle: [6, 9], first: 6, warn: 1.5, blow: 4, push: 130, shelter: 4 } };
+function paintTurbine(ctx) {                         // ARENA 10: the turbine nacelle, fan pits in the floor, cable trays and dials
+  const nx = 2 * TS, ny = 3 * TS;                    // the nacelle: a riveted cowl round the blades
+  R(ctx, '#1a2026', nx, ny, 3 * TS, 8 * TS); R(ctx, '#3a4652', nx + 2, ny + 2, 3 * TS - 4, 8 * TS - 4); R(ctx, '#56646e', nx + 2, ny + 2, 3 * TS - 4, 2);
+  for (let y = ny + 8; y < ny + 8 * TS - 4; y += 12) { R(ctx, '#8a94a0', nx + 4, y, 2, 2); R(ctx, '#8a94a0', nx + 3 * TS - 6, y, 2, 2); }
+  R(ctx, '#0b0e12', nx + 3 * TS - 6, ny + 6, 6, 8 * TS - 12);
+  for (const [fx] of TURB10.fans) {                  // fan pits: a housing in the floor and a guard grille
+    R(ctx, '#0b0e12', fx - 22, 25 * TS, 44, 6); R(ctx, '#3a4652', fx - 24, 25 * TS, 4, 6); R(ctx, '#3a4652', fx + 20, 25 * TS, 4, 6);
+    for (let i = 0; i < 11; i++) R(ctx, '#56646e', fx - 20 + i * 4, 25 * TS, 2, 1);
+    R(ctx, '#e8b422', fx - 24, 25 * TS + 6, 48, 2); for (let i = 0; i < 6; i++) R(ctx, '#15161a', fx - 22 + i * 8, 25 * TS + 6, 4, 2);
+  }
+  xaBehind(ctx, () => {
+    for (const [rx, ry] of TURB10.rotors) { R(ctx, '#1a2026', rx - 2, 2 * TS, 4, ry - 2 * TS); R(ctx, '#2a333c', rx - 1, 2 * TS, 1, ry - 2 * TS); }   // the rotors' struts
+    for (let x = 6 * TS; x < 96 * TS; x += 2) { R(ctx, '#151a1f', x, 2 * TS + 4, 2, 3); if (x % 48 === 0) R(ctx, '#1e252c', x, 2 * TS + 2, 2, 9); }   // cable trays under the roof
+    for (const [dx, dy] of [[40 * TS, 19 * TS], [60 * TS, 19 * TS], [12 * TS, 6 * TS], [88 * TS, 6 * TS]]) {   // dials and status panels
+      R(ctx, '#121619', dx - 14, dy - 10, 28, 20); R(ctx, '#2a333c', dx - 13, dy - 9, 26, 18);
+      for (let i = 0; i < 4; i++) R(ctx, i % 2 ? '#40ff80' : '#e8b422', dx - 10 + i * 6, dy + 4, 3, 2);
+      R(ctx, '#0b0e12', dx - 8, dy - 6, 16, 8); R(ctx, '#40ff80', dx - 6, dy - 3, 12, 1);
+    }
+  });
+  for (const x of [40 * TS, 53 * TS]) { R(ctx, '#121619', x + 4, 21 * TS + 6, 7 * TS - 8, 3 * TS); for (let i = 0; i < 5; i++) R(ctx, i % 2 ? '#c87a30' : '#ffb060', x + 10 + i * 18, 21 * TS + 12, 10, 3 * TS - 12); }   // generator windings
+  drawGlyphs(ctx, 'T-10', 50 * TS - 11, 24 * TS - 2, '#e8b422');
+}
+const DECOR10 = {
+  lamps: [[300, 66], [700, 74], [900, 74], [1300, 66]],
+  beacons: [[5 * TS + 4, 3 * TS + 4], [5 * TS + 4, 11 * TS - 4], [35, 340], [1565, 340]],
+  vents: [[26 * TS, 25 * TS], [74 * TS, 25 * TS]],
+  glows: [[43 * TS, 23 * TS, 2.5, 0xffa040], [56 * TS, 23 * TS, 2.5, 0xffa040], [4 * TS, 7 * TS, 4, 0x80f0ff]],
+};
+function xaNoise(x, y, s, seed) {                    // smooth value noise for the storm clouds
+  const ix = Math.floor(x / s), iy = Math.floor(y / s), u0 = x / s - ix, v0 = y / s - iy, u = u0 * u0 * (3 - 2 * u0), v = v0 * v0 * (3 - 2 * v0);
+  const h = (a, b) => (hash2(a + seed * 131, b - seed * 71) & 1023) / 1023, a = h(ix, iy), b = h(ix + 1, iy), c = h(ix, iy + 1), d = h(ix + 1, iy + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function drawStormSky(flash) {                       // ARENA 08's night sky, dithered storm cloud over a city skyline; flash: the clouds lit
+  const [w, h] = bgSize(BG.far), { c, ctx } = mkCanvas(w, h), img = ctx.createImageData(w, h), px = img.data;
+  const deck = [[20, 27, 44], [29, 38, 62], [40, 52, 84], [56, 70, 108]], lit = [[90, 110, 160], [140, 160, 210], [190, 205, 240], [230, 238, 255]], bayer = [0, 0.5, 0.75, 0.25];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const t = y / h, n = xaNoise(x, y * 1.9, 96, 1) * 0.55 + xaNoise(x, y * 1.9, 36, 2) * 0.3 + xaNoise(x, y * 2.2, 13, 3) * 0.15;
+    const cloud = clamp((n - 0.4) * 2.6, 0, 1) * (1 - t * 0.55), lv = Math.floor(cloud * 4 + bayer[(x & 1) + (y & 1) * 2]) - 1, i = (y * w + x) * 4;
+    if (flash) { if (lv >= 1) { const [r, g, b] = lit[Math.min(3, lv)]; px[i] = r; px[i + 1] = g; px[i + 2] = b; px[i + 3] = 60 + lv * 45; } continue; }
+    let r = 4 + t * 12, g = 6 + t * 12, b = 12 + t * 24;
+    if (lv >= 0) [r, g, b] = deck[Math.min(3, lv)];
+    px[i] = r; px[i + 1] = g; px[i + 2] = b; px[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  if (flash) return c;
+  let s = 23; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let x = 0; x < w;) {                          // the city on the horizon, a few windows still lit
+    const bw = (12 + rnd() * 36) | 0, bh = (16 + rnd() * 64) | 0;
+    R(ctx, '#05070b', x, h - bh, bw, bh); R(ctx, '#0b0f17', x, h - bh, bw, 1);
+    for (let wy = h - bh + 4; wy < h - 4; wy += 5) for (let wx = x + 2; wx < x + bw - 2; wx += 4) if (rnd() < 0.09) R(ctx, rnd() < 0.6 ? '#c8a050' : '#6a8ac0', wx, wy, 1, 2);
+    if (rnd() < 0.3) { R(ctx, '#05070b', x + (bw >> 1), h - bh - 12, 2, 12); R(ctx, '#ff3020', x + (bw >> 1), h - bh - 13, 2, 2); }
+    x += bw + ((rnd() * 5) | 0);
+  }
+  for (let y = h - 34; y < h; y += 2) { ctx.fillStyle = `rgba(60,80,130,${(((y - (h - 34)) / 34) * 0.25).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // rain haze low down
+  return c;
+}
+function drawXaBackdrop(kind) {                     // a back wall for ARENAS 06, 07, 09 and 10, in place of the factory's (BG.mid parallax)
+  const [w, h] = bgSize(BG.mid), { c, ctx } = mkCanvas(w, h), img = ctx.createImageData(w, h), px = img.data;
+  const base = { tower: [20, 30, 34], vault: [30, 40, 54], crusher: [30, 24, 18], turbine: [20, 28, 32] }[kind];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {          // the wall itself: mottled, with fine grain
+    const n = xaNoise(x, y, 40, 7) * 0.7 + xaNoise(x, y, 9, 8) * 0.3, g = (hash2(x, y) & 7) - 3.5, k = 0.8 + n * 0.45, i = (y * w + x) * 4;
+    px[i] = base[0] * k + g; px[i + 1] = base[1] * k + g; px[i + 2] = base[2] * k + g; px[i + 3] = 255;
+  }
+  const cx = w / 2, discs = [[cx - 330, 150, 96], [cx, 180, 120], [cx + 330, 150, 96]];
+  if (kind === 'turbine') for (const [tx, ty, r] of discs) for (let y = -r - 10; y <= r + 10; y++) for (let x = -r - 10; x <= r + 10; x++) {   // the great rotors of the turbines behind
+    const d = Math.hypot(x, y), X = Math.round(tx + x), Y = ty + y; if (d > r + 10 || X < 0 || X >= w || Y < 0 || Y >= h) continue;
+    let col;
+    if (d > r) col = d > r + 7 ? [12, 16, 20] : [42, 52, 60];
+    else if (d < r * 0.22) col = d < r * 0.1 ? [138, 148, 160] : [62, 72, 82];
+    else { const a = ((Math.atan2(y, x) + Math.PI) / (Math.PI * 2) * 18 + d / r * 1.4) % 1; col = a < 0.55 ? (a < 0.12 ? [90, 102, 114] : [52, 64, 74]) : [20, 26, 32]; }
+    const i = (Y * w + X) * 4; px[i] = col[0]; px[i + 1] = col[1]; px[i + 2] = col[2];
+  }
+  ctx.putImageData(img, 0, 0);
+  if (kind === 'tower') {                            // the inside of a cooling tower: pour lines bowing round the drum, ribs, daylight from the top
+    for (let a = -1.4; a <= 1.41; a += 0.2) {
+      const x = Math.round(cx + Math.sin(a) * cx * 1.02), rw = Math.max(3, Math.round(16 * Math.cos(a)));
+      R(ctx, '#121a1e', x - rw / 2, 0, rw, h); R(ctx, '#2a3c42', x + (a < 0 ? rw / 2 - 2 : -rw / 2), 0, 2, h);
+    }
+    for (let j = 0; j < 9; j++) for (let x = 0; x < w; x += 2) { const t = (x - cx) / cx, y = Math.round(30 + j * 46 + 26 * t * t); R(ctx, '#10181b', x, y, 2, 2); R(ctx, '#273840', x, y + 2, 2, 1); if (hash2(x, j) % 12 === 0) R(ctx, '#0e1518', x, y + 3, 1, 8 + hash2(j, x) % 30); }
+    for (let r = 120; r > 0; r -= 4) { ctx.fillStyle = `rgba(150,215,225,${(0.012 + (120 - r) / 120 * 0.05).toFixed(3)})`; ctx.beginPath(); ctx.ellipse(cx, -10, r * 1.6, r * 0.55, 0, 0, Math.PI * 2); ctx.fill(); }
+    for (let s = 0; s < 5; s++) { ctx.fillStyle = 'rgba(140,210,220,0.035)'; ctx.beginPath(); const x0 = cx - 80 + s * 40; ctx.moveTo(x0, 0); ctx.lineTo(x0 + 26, 0); ctx.lineTo(x0 + 70 + s * 14, h); ctx.lineTo(x0 + 20 + s * 14, h); ctx.fill(); }
+    for (let y = h - 120; y < h; y += 2) { ctx.fillStyle = `rgba(90,170,180,${(((y - (h - 120)) / 120) * 0.12).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // vapour off the basin
+  } else if (kind === 'vault') {                     // a cold store: frosted panels, evaporator coils, a rail of hooks
+    for (let py = 0; py < h; py += 40) for (let qx = 0; qx < w; qx += 48) {
+      R(ctx, '#1a222e', qx, py, 48, 1); R(ctx, '#1a222e', qx, py, 1, 40);
+      for (let i = 0; i < 48; i++) if (hash2(qx + i, py) % 3) R(ctx, '#6a88a4', qx + i, py + 1, 1, 1 + (hash2(i, py + qx) % 3));   // rime along the top edge
+    }
+    for (const cy of [96, 250]) {
+      R(ctx, '#0e141c', 0, cy - 2, w, 30); for (let x = 0; x < w; x += 3) R(ctx, '#3a4a5c', x, cy, 1, 26);
+      R(ctx, '#56708a', 0, cy - 2, w, 2); for (let x = 0; x < w; x++) if (hash2(x, cy) % 2) R(ctx, '#b8d8f0', x, cy - 3, 1, 1 + hash2(cy, x) % 2);
+    }
+    R(ctx, '#3a4452', 0, 40, w, 4); R(ctx, '#6a7686', 0, 40, w, 1);
+    for (let x = 30; x < w; x += 46) {                                // hooks, a few still carrying frozen stock
+      R(ctx, '#4a5462', x, 44, 1, 14); R(ctx, '#6a7686', x - 2, 57, 3, 1); R(ctx, '#6a7686', x - 3, 55, 1, 3);
+      if (hash2(x, 5) % 3 === 0) { const ch = 34 + hash2(x, 9) % 16; R(ctx, '#2a1a1e', x - 7, 58, 14, ch); R(ctx, '#3a2428', x - 6, 58, 6, ch - 4); R(ctx, '#8aa8c0', x - 7, 58, 14, 1); R(ctx, '#20141a', x - 4, 58 + ch, 8, 4); }
+    }
+    for (let y = h - 90; y < h; y += 2) { ctx.fillStyle = `rgba(190,225,255,${(((y - (h - 90)) / 90) * 0.16).toFixed(3)})`; ctx.fillRect(0, y, w, 2); }   // cold fog on the floor
+  } else if (kind === 'crusher') {                   // a compactor hall: bales of crushed scrap stacked to the gantry, warning stripes
+    R(ctx, '#1a140e', 0, 34, w, 10); for (let x = 0; x < w; x += 24) R(ctx, '#2e241a', x, 34, 12, 10);
+    for (let x = 0; x < w; x += 4) R(ctx, ((x >> 3) & 1) ? '#14120e' : '#5a4a14', x, 64, 4, 6);
+    const metal = ['#3a3e44', '#4a3a30', '#2e3a44', '#4a4434', '#3a2a2a', '#344034'];
+    for (let stack = 0; stack < 9; stack++) {
+      const sx = 20 + stack * 124, rows = 3 + hash2(stack, 3) % 3;
+      for (let r = 0; r < rows; r++) for (let b = 0; b < 3 - (r > 2 ? 1 : 0); b++) {
+        const bx = sx + b * 30 + (r % 2) * 14, by = h - 26 - (r + 1) * 26, col = metal[hash2(stack * 7 + r, b) % metal.length];
+        R(ctx, '#0c0a08', bx - 1, by - 1, 30, 26); R(ctx, col, bx, by, 28, 24);
+        for (let i = 0; i < 9; i++) R(ctx, hash2(bx + i, by) % 2 ? '#1a1612' : '#6a6458', bx + hash2(i, bx) % 26, by + hash2(by, i) % 22, 2 + hash2(i, by) % 4, 1);   // crumpled panels
+        R(ctx, '#8a8070', bx, by, 28, 1); R(ctx, '#5a5048', bx, by + 8, 28, 1); R(ctx, '#5a5048', bx, by + 16, 28, 1);   // baling wire
+      }
+    }
+    for (let x = 60; x < w; x += 220) { R(ctx, '#120e0a', x, 44, 10, h); R(ctx, '#2a2218', x, 44, 2, h); }
+  } else {                                           // the turbine hall: status lights under the rotors, ducts along the wall
+    for (const [tx, ty, r] of discs) { R(ctx, '#40ff80', tx - 2, ty + r + 14, 4, 2); R(ctx, '#e8b422', tx + 8, ty + r + 14, 4, 2); }
+    for (const y of [40, h - 70]) { R(ctx, '#161c22', 0, y, w, 12); R(ctx, '#2c3640', 0, y, w, 2); for (let x = 20; x < w; x += 90) R(ctx, '#3a4652', x, y - 2, 6, 16); }
+  }
+  ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = 'rgba(3,5,10,0.38)'; ctx.fillRect(0, 0, w, h);   // back, so the foreground reads
+  return c;
+}
+const ICICLE_LEN = [6, 10, 14, 18, 23];
+function drawIcicle(c, len) {                        // 7x24, hanging from its top: a tapered spike of blue ice with a bright edge
+  for (let y = 0; y < len; y++) {
+    const hw = Math.max(0, Math.round(3 * (1 - y / len) + 0.3)), x0 = 3 - hw;
+    R(c, '#7ab4e0', x0, y, hw * 2 + 1, 1); R(c, '#d8f4ff', x0, y, 1, 1); if (hw > 0) R(c, '#4a80b8', 3 + hw, y, 1, 1);
+    if (y % 5 === 2 && hw > 1) R(c, '#ffffff', x0 + 1, y, 1, 1);
+  }
+  R(c, '#ffffff', 2, 0, 3, 1);
+}
+function drawRotor(c) {                              // 64x64: three swept steel blades on a hub, hazard paint at the tips
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+    const dx = x + 0.5 - 32, dy = y + 0.5 - 32, r = Math.hypot(dx, dy);
+    if (r < 5 || r > 30) continue;
+    for (let b = 0; b < 3; b++) {
+      const a = Math.atan2(dy, dx) - b * Math.PI * 2 / 3 - 0.18 * (r - 5) / 25, along = r * Math.cos(a), side = r * Math.sin(a), hw = 3.6 - 1.8 * (r - 5) / 25;
+      if (along <= 0 || Math.abs(side) > hw) continue;
+      R(c, r > 24 ? ((r >> 1) % 2 ? '#e8b422' : '#15161a') : side < -hw * 0.3 ? '#c8d0d8' : side > hw * 0.4 ? '#3e4652' : '#7f8b99', x, y);
+    }
+  }
+}
+function genExpansionArenaArt(scene) {               // the machinery of ARENAS 06-10
+  addSheet(scene, 'xa_icicle', ICICLE_LEN.map((len, i) => ({ name: 'i' + i, c: makeSprite(7, 24, c => drawIcicle(c, len), '#14243a') })), 7, 24, false);
+  addTex(scene, 'xa_rotor', makeSprite(64, 64, drawRotor));
+  addTex(scene, 'xa_hub', makeSprite(14, 14, c => { for (let y = 0; y < 14; y++) for (let x = 0; x < 14; x++) { const d = Math.hypot(x + 0.5 - 7, y + 0.5 - 7); if (d < 6) R(c, d > 4.6 ? '#2a3038' : d < 1.6 ? '#c8d0d8' : (x + y) % 5 ? '#5a636e' : '#8a94a0', x, y); } }));
+  addSheet(scene, 'xa_fan', [0, 1, 2].map(f => ({ name: 'f' + f, c: makeSprite(44, 6, c => {   // a floor fan seen edge-on in its pit, blades blurring past
+    R(c, '#0b0e12', 0, 0, 44, 6); R(c, '#3a4652', 0, 4, 44, 2);
+    for (let x = (f * 5) % 15; x < 44; x += 15) { R(c, '#8a94a0', x, 1, 6, 3); R(c, '#c8d0d8', x, 1, 6, 1); R(c, '#4b535e', x + 5, 1, 2, 3); }
+    R(c, '#2a3038', 20, 0, 4, 6);
+  }, null) })), 44, 6, false);
+  addSheet(scene, 'xa_turbine', [0, 1, 2].map(f => ({ name: 't' + f, c: makeSprite(12, 124, c => {   // the turbine's rotor edge-on in the nacelle mouth
+    R(c, '#0b0e12', 2, 0, 8, 124);
+    for (let y = (f * 9) % 27; y < 124; y += 27) { R(c, '#8a94a0', 3, y, 6, 12); R(c, '#c8d0d8', 3, y, 2, 12); R(c, '#4b535e', 8, y, 1, 12); }
+    R(c, '#5a636e', 1, 56, 10, 12); R(c, '#e8b422', 1, 61, 10, 2);
+  }) })), 12, 124, false);
+}
+function xaLazyTex(scene, key) {                     // the big backdrops are painted the first time their arena is built, not at load
+  if (!scene.textures.exists(key)) addTex(scene, key, key === 'xa_sky' ? drawStormSky(false) : key === 'xa_skyflash' ? drawStormSky(true) : drawXaBackdrop(key.slice(6)));
+  return key;
+}
+// ---- end expansion: arenas ----
 const ARENAS = [
   { id: 1, name: 'ARENA 01', sub: 'THE MELT FLOOR', grid: LEVEL_GRID, spawns: SPAWNS, points: WAVE_POINTS, decor: DECOR, barrels: BARRELS, canisters: CANISTERS, last: 1, pipes: [[32, 388, 1], [1568, 388, -1], [608, 388, -1], [912, 388, 1]] },
   { id: 2, name: 'ARENA 02', sub: 'THE FURNACE', grid: buildLevel2(), bgTint: 0xffb8a0, paint: paintFurnace, last: 3,
@@ -3023,13 +4229,13 @@ const ARENAS = [
               A: [[20, 8], [50, 6], [80, 8], [32, 12], [68, 12], [10, 15], [90, 15], [50, 14]], B: [[50, 18]] },
     decor: DECOR2, barrels: [[12, 24], [36, 24], [63, 24], [86, 24], [47, 18], [20, 16]], canisters: [[30, 24], [70, 24], [53, 18], [87, 16]],
     pipes: [[32, 388, 1], [1568, 388, -1], [368, 388, -1], [416, 388, 1], [1184, 388, -1], [1232, 388, 1]] },
-  { id: 3, name: 'ARENA 03', sub: 'THE SORTING LINE', grid: buildLevel3(), bgTint: 0xb8d0ff, paint: paintSorting, last: 99, belts: BELTS3, presses: PRESSES3,
+  { id: 3, name: 'ARENA 03', sub: 'THE SORTING LINE', grid: buildLevel3(), bgTint: 0xb8d0ff, paint: paintSorting, last: 5, belts: BELTS3, presses: PRESSES3,
     spawns: { player: [4, 24], health: [[4, 10], [94, 10], [40, 12], [60, 12]] },
     points: { G: [[10, 24], [25, 24], [37, 24], [62, 24], [75, 24], [90, 24], [50, 20], [15, 16], [85, 16], [45, 12], [55, 12], [5, 10], [95, 10]],
               A: [[20, 8], [50, 6], [80, 8], [30, 12], [70, 12], [10, 14], [90, 14], [50, 16]], B: [[50, 20]] },
     decor: DECOR3, barrels: [[12, 24], [36, 24], [63, 24], [88, 24], [47, 20], [20, 16]], canisters: [[30, 24], [70, 24], [53, 20], [80, 16]],
     pipes: [[32, 388, 1], [1568, 388, -1], [704, 388, -1], [896, 388, 1]] },
-  { id: 4, name: 'ARENA 04', sub: 'THE WRECKING YARD', grid: buildLevel4(), bgTint: 0xc8f0d0, paint: paintYard, last: 99,
+  { id: 4, name: 'ARENA 04', sub: 'THE WRECKING YARD', grid: buildLevel4(), bgTint: 0xc8f0d0, paint: paintYard, last: 7,
     wrecker: { px: 50 * TS, py: 3 * TS, len: 12 * TS, amp: 0.95, period: 5.2 },
     spawns: { player: [4, 24], health: [[4, 8], [95, 8], [27, 18], [72, 18]] },
     points: { G: [[13, 20], [21, 24], [36, 24], [63, 24], [78, 24], [86, 20], [95, 24], [50, 17], [28, 18], [71, 18], [5, 8], [94, 8]],
@@ -3041,6 +4247,37 @@ const ARENAS = [
     points: { G: [[12, 24], [33, 24], [66, 24], [86, 24], [50, 16], [16, 19], [84, 19], [32, 19], [67, 19], [18, 14], [82, 14], [5, 9], [94, 9]],
               A: [[20, 8], [80, 8], [34, 10], [66, 10], [50, 6], [10, 13], [90, 13], [50, 13]], B: [[50, 16]] },
     decor: DECOR5, barrels: [[14, 24], [35, 24], [64, 24], [85, 24], [18, 14], [82, 14]], canisters: [[30, 24], [70, 24], [48, 16], [20, 19]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
+  // ---- expansion: arenas ---- (OVERTIME, DAILY and the Lab only; last: 99 keeps BOSS RUSH from riding on to them)
+  { id: 6, name: 'ARENA 06', sub: 'THE COOLING TOWER', grid: buildLevel6(), bgTint: 0x98d8d8, paint: paintTower, last: 99, backdrop: 'tower', flood: FLOOD6, lampTint: 0x9af0ff,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 16], [50, 8]] },
+    points: { G: [[10, 24], [25, 24], [40, 24], [60, 24], [75, 24], [92, 24], [7, 20], [30, 20], [70, 20], [92, 20], [50, 16], [12, 16], [87, 16], [18, 12], [82, 12], [50, 8]],
+              A: [[20, 9], [50, 5], [80, 9], [36, 12], [64, 12], [12, 15], [88, 15], [50, 14]], B: [[50, 16]] },
+    decor: DECOR6, barrels: [[12, 24], [36, 24], [63, 24], [86, 24], [47, 16], [24, 16]], canisters: [[29, 24], [71, 24], [53, 16], [75, 16]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
+  { id: 7, name: 'ARENA 07', sub: 'THE CHILL VAULT', grid: GRID7, bgTint: 0xc8e4ff, paint: paintVault, last: 99, backdrop: 'vault', vault: VAULT7, lampTint: 0xd0f0ff,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 20], [50, 8]] },
+    points: { G: [[10, 24], [24, 24], [39, 24], [60, 24], [76, 24], [92, 24], [50, 20], [13, 16], [86, 16], [32, 12], [67, 12], [5, 12], [94, 12], [50, 8]],
+              A: [[20, 6], [50, 5], [80, 6], [30, 10], [70, 10], [12, 14], [88, 14], [50, 16]], B: [[50, 20]] },
+    decor: DECOR7, barrels: [[16, 24], [42, 24], [58, 24], [84, 24], [14, 16], [33, 12]], canisters: [[28, 24], [72, 24], [52, 20], [66, 12]],
+    pipes: [[32, 388, 1], [1568, 388, -1]] },
+  { id: 8, name: 'ARENA 08', sub: 'THE STORM ROOF', grid: buildLevel8(), bgTint: 0x7888b8, paint: paintStorm, last: 99, storm: STORM8,
+    spawns: { player: [4, 24], health: [[3, 12], [96, 12], [38, 12], [50, 8]] },
+    points: { G: [[17, 24], [29, 24], [46, 24], [58, 24], [76, 24], [89, 24], [10, 20], [37, 20], [84, 20], [24, 21], [65, 20], [38, 12], [50, 12], [65, 12], [92, 16], [50, 8]],
+              A: [[14, 8], [28, 10], [40, 6], [56, 6], [76, 8], [86, 12], [22, 14], [80, 15]], B: [[84, 20]] },
+    decor: DECOR8, barrels: [[18, 24], [45, 24], [57, 24], [78, 24], [8, 20], [84, 20]], canisters: [[28, 24], [69, 24], [41, 20], [66, 16]],
+    pipes: [] },
+  { id: 9, name: 'ARENA 09', sub: 'THE CRUSHER', grid: buildLevel9(), bgTint: 0xffe0a0, paint: paintCrusher, last: 99, backdrop: 'crusher', crusher: CRUSH9, lampTint: 0xffb040,
+    spawns: { player: [4, 24], health: [[50, 20], [50, 4], [40, 16], [59, 16]] },
+    points: { G: [[10, 24], [22, 24], [36, 24], [64, 24], [78, 24], [90, 24], [50, 20], [40, 16], [59, 16], [28, 16], [71, 16], [50, 12], [39, 8], [60, 8], [50, 4]],
+              A: [[20, 6], [50, 8], [80, 6], [36, 12], [64, 12], [12, 15], [88, 15], [50, 16]], B: [[50, 20]] },
+    decor: DECOR9, barrels: [[36, 24], [63, 24], [45, 20], [54, 20], [39, 8], [60, 8]], canisters: [[41, 24], [58, 24], [42, 16], [57, 16]],
+    pipes: [] },
+  { id: 10, name: 'ARENA 10', sub: 'THE TURBINE HALL', grid: buildLevel10(), bgTint: 0xd8f0e0, paint: paintTurbine, last: 99, backdrop: 'turbine', turbine: TURB10, lampTint: 0xc0ffe0,
+    spawns: { player: [4, 24], health: [[4, 12], [95, 12], [50, 4], [50, 16]] },
+    points: { G: [[10, 24], [26, 24], [36, 24], [64, 24], [74, 24], [90, 24], [43, 20], [56, 20], [26, 16], [40, 16], [59, 16], [73, 16], [20, 12], [79, 12], [28, 8], [71, 8]],
+              A: [[20, 6], [50, 7], [80, 6], [33, 11], [67, 11], [12, 15], [88, 15], [50, 14]], B: [[27, 24]] },
+    decor: DECOR10, barrels: [[11, 24], [37, 24], [62, 24], [89, 24], [41, 20], [58, 20]], canisters: [[27, 24], [73, 24], [24, 16], [75, 16]],
     pipes: [[32, 388, 1], [1568, 388, -1]] },
 ];
 // Where each arena keeps its breakables: [kind, tile x, tile y, facing]. Floor props stand in that cell, wall props
@@ -3057,6 +4294,22 @@ const PROP_SPOTS = [
    ['fan', 3, 13], ['flood', 6, 8], ['horn', 22, 5], ['ext', 40, 15], ['tube', 64, 6], ['cryo', 88, 20], ['capacitor', 12, 20]],
   [['water', 17, 24], ['water', 95, 24], ['capacitor', 38, 24], ['capacitor', 61, 24], ['terminal', 50, 16], ['fuse', 13, 21], ['fuse', 94, 21, -1], ['neon', 50, 5],
    ['window', 25, 6], ['horn', 31, 8], ['tube', 47, 11], ['tube', 52, 11], ['cryo', 15, 14], ['ext', 60, 18], ['vending', 80, 14], ['fan', 3, 13]],
+  // ---- expansion: arenas ---- ARENAS 06-10
+  [['terminal', 50, 16], ['horn', 3, 10], ['water', 40, 24], ['cryo', 58, 24], ['capacitor', 19, 20], ['tube', 12, 18], ['tube', 87, 18], ['ext', 43, 22],
+   ['flood', 6, 12], ['flood', 93, 12, -1], ['window', 50, 11], ['vending', 30, 12], ['ammo', 70, 12], ['oil', 17, 24], ['propane', 83, 24],
+   ['transformer', 36, 15], ['server', 69, 20], ['sprinkler', 64, 15], ['vat', 88, 16, -1]],
+  [['cryo', 30, 24], ['cryo', 70, 24], ['cryo', 47, 20], ['vending', 53, 20, -1], ['terminal', 4, 12], ['flares', 95, 12], ['tube', 18, 14], ['tube', 80, 14],
+   ['fan', 3, 19], ['fan', 96, 19, -1], ['ext', 44, 23], ['horn', 50, 6], ['water', 60, 24], ['ammo', 24, 16], ['neon', 50, 3],
+   ['gasline', 40, 19], ['hopper', 60, 19], ['jukebox', 7, 20], ['paint', 91, 20]],
+  [['neon', 65, 6], ['flood', 13, 20], ['flood', 86, 20, -1], ['capacitor', 49, 16], ['fuse', 16, 23], ['water', 55, 24], ['propane', 30, 24], ['oil', 46, 24],
+   ['horn', 53, 11], ['terminal', 82, 20], ['ammo', 95, 20], ['tube', 64, 18], ['flares', 4, 16],
+   ['hydrant', 20, 24], ['transformer', 28, 14], ['server', 66, 12, -1], ['sprinkler', 76, 14]],
+  [['terminal', 49, 20], ['capacitor', 51, 20], ['ammo', 39, 16], ['flares', 60, 16], ['oil', 34, 24], ['propane', 65, 24], ['water', 38, 24], ['toxic', 61, 24],
+   ['fuse', 43, 22], ['fuse', 56, 22, -1], ['horn', 50, 10], ['window', 50, 16], ['tube', 46, 14], ['tube', 54, 14], ['neon', 50, 3],
+   ['vat', 43, 24], ['jukebox', 56, 24, -1], ['gasline', 36, 14], ['hopper', 63, 14]],
+  [['fan', 96, 6, -1], ['capacitor', 43, 20], ['capacitor', 56, 20], ['terminal', 4, 12], ['flares', 95, 12], ['boiler', 92, 24], ['oil', 8, 24], ['fuse', 38, 22],
+   ['fuse', 61, 22, -1], ['tube', 26, 18], ['tube', 73, 18], ['horn', 20, 6], ['window', 50, 11], ['ammo', 28, 8], ['propane', 72, 8], ['vending', 33, 24],
+   ['hoist', 40, 15], ['hydrant', 68, 24], ['paint', 6, 20], ['transformer', 88, 16]],
 ];
 ARENAS.forEach((A, i) => { A.props = PROP_SPOTS[i] || []; });
 const CAMPAIGN_ARENAS = [
@@ -3073,6 +4326,7 @@ function buildLabArena(variant) {
   const workshop = variant === 'breakables', traversal = variant === 'traversal';
   if (workshop) {
     fill(22, 23, 3, 2, 'x'); fill(42, 20, 2, 5, '#'); fill(44, 20, 8, 1, 'g'); fill(52, 20, 2, 5, '#');
+    fill(58, 17, 36, 1, '#'); fill(54, 21, 4, 1, '='); fill(62, 7, 3, 1, '#');   // the upper deck, a step up to it, and a beam over it for the hoist
   }
   if (traversal) {
     fill(14, 21, 6, 1, '='); fill(21, 17, 6, 1, '='); fill(28, 13, 6, 1, '=');
@@ -3086,7 +4340,9 @@ function buildLabArena(variant) {
     points: { G: columns.filter(x => grid[24][x] === '.' && grid[23][x] === '.').map(x => [x, 24]) },
     decor: { lamps: [[156, 165], [394, 128], [702, 150], [972, 130], [1350, 148]], beacons: [[52, 356], [1544, 356]], vents: [] },
     props: workshop ? [['propane', 16, 24], ['oil', 27, 24], ['water', 34, 24], ['capacitor', 38, 24],
-      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24]] : [],
+      ['ladle', 48, 21], ['terminal', 57, 24], ['cryo', 63, 24], ['vending', 69, 24], ['boiler', 76, 24],
+      ['hydrant', 59, 16], ['hoist', 63, 11], ['server', 67, 16], ['transformer', 68, 12], ['jukebox', 72, 16], ['vat', 78, 16],
+      ['hopper', 82, 11], ['paint', 86, 16], ['sprinkler', 89, 10], ['gasline', 92, 15, -1]] : [],
     barrels: workshop ? [[12, 24], [31, 24], [82, 24]] : [], canisters: workshop ? [[18, 24], [86, 24]] : [],
     pipes: workshop ? [[32, 388, 1], [1568, 388, -1]] : [],
     paint(ctx) {
@@ -3103,7 +4359,7 @@ const LAB_ROOMS = {
     arena: LAB_RANGE, weapon: 'nail', stationary: true, invulnerable: true, groups: [{ kind: 'grunt', count: 3 }, { kind: 'drone', count: 1 }] },
   encounter: { name: 'Combat Pit', detail: 'Mix enemy types and elites in an open arena. Add groups to build a fight.',
     arena: LAB_RANGE, weapon: 'shotgun', groups: [{ kind: 'grunt', count: 3 }, { kind: 'enforcer', count: 1 }, { kind: 'heavy', count: 1 }, { kind: 'drone', count: 2 }] },
-  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle. Shoot out a girder or stack of crates.',
+  breakables: { name: 'Breakables Bay', detail: 'Set off drums, fluids and a hanging ladle, then climb to the deck for the heavy kit. Shoot out a girder or stack of crates.',
     arena: buildLabArena('breakables'), weapon: 'rocket', invulnerable: true, groups: [] },
   traversal: { name: 'Traversal Course', detail: 'Climb staggered grates, wall-jump up the shaft and grapple across the gaps.',
     arena: buildLabArena('traversal'), weapon: 'nail', invulnerable: true, groups: [] },
@@ -3117,11 +4373,22 @@ const LAB_ROOMS = {
     arena: ARENAS[4], weapon: 'coil', groups: [] },
   bosses: { name: 'Boss Chamber', detail: 'Practice one boss at a time. Change the enemy group to pick a different boss.',
     arena: LAB_RANGE, weapon: 'rail', groups: [{ kind: 'boss', count: 1 }] },
+  // ---- expansion: arenas ----
+  tower: { name: 'Cooling Tower', detail: 'Climb clear of the coolant floods. When a cable drops in, the water goes live until it drains.',
+    arena: ARENAS[5], weapon: 'arc', groups: [] },
+  vault: { name: 'Chill Vault', detail: 'Slide on the ice, read the icicle shadows and shoot them down onto enemies. Cryo vents puff frost.',
+    arena: ARENAS[6], weapon: 'flame', groups: [] },
+  storm: { name: 'Storm Roof', detail: 'Lightning hits the marked spots, most often up high. Get behind cover when the gust streaks blow in.',
+    arena: ARENAS[7], weapon: 'shock', groups: [] },
+  crusher: { name: 'Crusher', detail: 'Get off the floor or into the middle before the walls close. Anything caught against an anvil is crushed.',
+    arena: ARENAS[8], weapon: 'hammer', groups: [] },
+  turbine: { name: 'Turbine Hall', detail: 'Ride the fan updrafts, lean into the turbine gusts and cross the rotors while they idle.',
+    arena: ARENAS[9], weapon: 'saw', groups: [] },
 };
 const LAB_MODIFIERS = { none: 'None', dark: 'Blackout', slag: 'Slag Rain', lowg: 'Low Gravity', melt: 'Meltdown' };
 const LAB_BOSSES = new Set(RUSH.map(([entry]) => entry[0]));
 const LAB_ENEMIES = [...CODEX.map(([id, name]) => ({ id, name })),
-  { id: 'slagmid', name: 'SLAGLING HALF' }, { id: 'slagbit', name: 'SLAGLING BIT' }]
+  { id: 'slagmid', name: 'SLAGLING HALF' }, { id: 'slagbit', name: 'SLAGLING BIT' }, { id: 'eggsac', name: 'EGG SAC' }, { id: 'eyenode', name: 'SHIELD NODE' }]
   .sort((a, b) => a.name.localeCompare(b.name));
 const LAB_MAX_ENEMIES = 16;
 
@@ -3717,6 +4984,7 @@ function genTextures(scene) {
   addSheet(scene, 'shinobi', ['w0', 'w1', 'air', 'cling'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawShinobi(x, f)) })), 16, 22, true);
   addSheet(scene, 'thundercloud', ['c0', 'c1'].map(f => ({ name: f, c: makeSprite(26, 14, x => drawThunder(x, f)) })), 26, 14, true);
   addSheet(scene, 'foreman', ['w0', 'w1', 'slam', 'magnet'].map(f => ({ name: f, c: makeSprite(44, 36, x => drawForeman(x, f)) })), 44, 36, true);
+  genExpansionBossArt(scene);
   addSheet(scene, 'vortex', ['v0', 'v1', 'spin'].map(f => ({ name: f, c: makeSprite(18, 18, x => drawVortex(x, f)) })), 18, 18, true);
   addSheet(scene, 'pylon', ['p0', 'p1'].map(f => ({ name: f, c: makeSprite(16, 28, x => drawPylon(x, f)) })), 16, 28, true);
   addSheet(scene, 'scavenger', ['w0', 'w1', 'eat'].map(f => ({ name: f, c: makeSprite(20, 18, x => drawScavenger(x, f)) })), 20, 18, true);
@@ -3735,12 +5003,14 @@ function genTextures(scene) {
   addSheet(scene, 'lugger', ['w0', 'w1', 'carry', 'throw'].map(f => ({ name: f, c: makeSprite(22, 26, x => drawLugger(x, f)) })), 22, 26, true);
   addSheet(scene, 'blimp', ['b0', 'b1'].map(f => ({ name: f, c: makeSprite(34, 20, x => drawBlimp(x, f)) })), 34, 20, true);
   addSheet(scene, 'strider', ['w0', 'w1', 'fire'].map(f => ({ name: f, c: makeSprite(20, 36, x => drawStrider(x, f)) })), 20, 36, true);
+  genExpansionArenaArt(scene);                                        // ARENAS 06-10: their machinery
   const grf = [{ name: 'idle', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [1, 0], [-1, 0], 'idle')) }, { name: 'crouch', c: makeSprite(18, 24, x => drawGrenadier(x, 1, [2, 0], [-2, 0], 'crouch')) },
                { name: 'lunge', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [3, 0], [-3, 0], 'lunge')) }, { name: 'air', c: makeSprite(18, 24, x => drawGrenadier(x, 0, [3, 3], [-2, 1], 'idle')) }];
   for (let i = 0; i < 6; i++) grf.push({ name: 'run' + i, c: makeSprite(18, 24, x => drawGrenadier(x, RUN_BOB[i], RUN_LEGS[i], RUN_LEGS[(i + 3) % 6], 'idle')) });
   addSheet(scene, 'grenadier', grf, 18, 24, true);
   addSheet(scene, 'spikeball', ['k0', 'k1'].map(f => ({ name: f, c: makeSprite(14, 14, x => drawSpikeball(x, f)) })), 14, 14, true);
   addSheet(scene, 'para', ['drop', 'w0', 'w1'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawPara(x, f)) })), 16, 22, true);
+  genExpansionEnemyArt(scene);
   addTex(scene, 'enade', makeSprite(5, 6, c => { R(c, '#4a5a2a', 0, 1, 5, 5); R(c, '#6a7a40', 1, 1, 2, 1); R(c, '#8a94a0', 1, 0, 3, 1); }));
   addTex(scene, 'supply', makeSprite(14, 12, c => { R(c, '#5a4a28', 0, 0, 14, 12); R(c, '#7a6a38', 1, 1, 12, 1); R(c, '#3a3018', 0, 11, 14, 1); R(c, '#e8e0d0', 5, 3, 4, 6); R(c, '#e8e0d0', 3, 5, 8, 2); R(c, '#c83020', 6, 4, 2, 4); R(c, '#c83020', 4, 5, 6, 2); }));
   addTex(scene, 'capsule', makeSprite(9, 9, c => { for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const d = Math.hypot(x + 0.5 - 4.5, y + 0.5 - 4.5); if (d < 4.3) R(c, d > 3.2 ? '#8a94a0' : '#ffffff', x, y); } }));
@@ -3756,6 +5026,7 @@ function genTextures(scene) {
   addSheet(scene, 'claw', ['open', 'closed'].map(f => ({ name: f, c: makeSprite(16, 12, x => drawClaw(x, f)) })), 16, 12, true);
   addSheet(scene, 'sparker', ['s0', 's1'].map(f => ({ name: f, c: makeSprite(12, 12, x => drawSparker(x, f)) })), 12, 12, true);
   addSheet(scene, 'golem', ['g0', 'g1', 'throw', 'slam'].map(f => ({ name: f, c: makeSprite(28, 30, x => drawGolem(x, f)) })), 28, 30, true);
+  genExpansionWeaponArt(scene);
   addTex(scene, 'netball', makeSprite(7, 7, c => { R(c, '#8a8070', 1, 1, 5, 5); R(c, '#c8c0a8', 1, 1, 5, 1); R(c, '#c8c0a8', 1, 3, 5, 1); R(c, '#c8c0a8', 3, 1, 1, 5); R(c, '#4a4438', 2, 5, 3, 1); }));
   addTex(scene, 'flailball', makeSprite(11, 11, c => { R(c, '#3a3f47', 3, 3, 5, 5); R(c, '#8a94a0', 4, 3, 3, 1); for (const [x, y] of [[5, 0], [5, 9], [0, 5], [9, 5], [1, 1], [8, 1], [1, 8], [8, 8]]) R(c, '#c8ced6', x, y, 2, 2); }));
   addTex(scene, 'scrap', makeSprite(7, 6, c => { R(c, '#5a636e', 1, 1, 5, 4); R(c, '#7a4a30', 2, 2, 3, 2); R(c, '#8a94a0', 1, 1, 3, 1); }));
