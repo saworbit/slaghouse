@@ -86,6 +86,12 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
 
 ### Campaign smoke check
 
+To check a late act at real speed without playing the acts before it, load `slaghouse.html?act=N` for N from 2 to 5.
+It saves a test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation,
+full health and your difficulty and mutator, then opens the campaign page on **Continue**. If a checkpoint is already
+saved, it asks before replacing it. A test start, and every act its lift rides on to, counts toward no lifetime stats,
+codex sightings, medals, best run or the cleared flag; the act card and the campaign page say **TEST START**.
+
 1. In a fresh campaign on Normal, confirm that the wheel, hotkeys and cycling only offer the Nailgun until the first
    grunt patrol falls. Check that the Shotgun arrives on a green supply beam, then equip it using the **2** shown
    on its card. Pick a perk with

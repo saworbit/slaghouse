@@ -3531,6 +3531,22 @@ function campaignCheckpoint(save = loadCampaign()) {
   // A checkpoint only saves after an act is clear. Keep its kills and use the current rosters for the acts ahead.
   return { ...c, revision: CAMPAIGN_REVISION, legacyWeapon, totalEnemies: stats.kills + campaignFoesFrom(c.wave) };
 }
+// A test start (#173): slaghouse.html?act=N saves the checkpoint act N's lift would write for a run that killed every
+// foe before it, with the weapons earned by then (the latest in hand), a perk for each cleared operation (the first
+// from Lockdown's opening offer), full health and the chosen difficulty and mutator. `test` rides on through every
+// lift and keeps the run out of lifetime stats, codex sightings, medals, the best run and the cleared flag.
+function testCheckpoint(act, rng = Math.random) {
+  const arena = act - 1, wave = CAMPAIGN_ACTS[arena].first, slots = campaignWeaponSlots(wave), perks = {};
+  const pick = ids => { perks[ids[Math.floor(rng() * ids.length)]] = true; };
+  pick(OPENING_PERKS);
+  for (let i = 1; i < wave; i++) pick(PERKS.map(p => p.id).filter(id => !perks[id]));
+  return {
+    hp: TUNE.PLAYER_HP, weapon: slots[slots.length - 1], wave, arena, totalEnemies: CAMPAIGN_TOTAL,
+    stats: { shots: 0, hits: 0, kills: CAMPAIGN_TOTAL - campaignFoesFrom(wave), taken: 0, executes: 0, dodges: 0, wk: {} },
+    style: { pts: 0, rank: 0, best: 0, lastWeapon: null }, headshots: 0, bestCombo: 0, perks, medals: [], ms: {}, lastMod: null, lift: true,
+    revision: CAMPAIGN_REVISION, runId: newRunId(), elapsed: 0, diff: OPTS.diff, mut: OPTS.mut, retried: false, test: true,
+  };
+}
 // BOSS RUSH: ten bosses back to back across the first five arenas, two to each, a perk between each
 // Run modes (#128): one record per mode holding every rule that differs between modes, from its waves and music to its
 // start, restart and results. GameScene.create sets this.mode from RUNMODE (or the Lab) and asks it. this.campaign and
@@ -3627,10 +3643,10 @@ const RUN_MODES = {
       if (g.runMut) g.award('mutant');
     },
     writeRecord: (g, r) => {
-      const out = bestRecord(g, r);
+      const out = g.testRun ? { best: 0, newBest: false, won: r.won, rush: false, checkpoint: !r.won } : bestRecord(g, r);   // a test start (#173) files no best run
       if (r.won) {                                                    // the campaign is cleared
         const save = loadCampaign(), checkpoint = campaignCheckpoint(save);
-        writeCampaign({ ...save, checkpoint: checkpoint?.runId === g.campaignRunId ? null : checkpoint, cleared: true, revision: CAMPAIGN_REVISION });   // keeps the owner, so a stale tab's win leaves the newer run's save
+        writeCampaign({ ...save, checkpoint: checkpoint?.runId === g.campaignRunId ? null : checkpoint, ...(g.testRun ? {} : { cleared: true, revision: CAMPAIGN_REVISION }) });   // keeps the owner, so a stale tab's win leaves the newer run's save
       }
       return out;
     },
@@ -3640,7 +3656,7 @@ const RUN_MODES = {
       g.stats.t0 = now;
       const act = CAMPAIGN_ACTS[g.A.id - 1];
       if (!act) throw new Error(`campaign run in ARENA 0${g.A.id}, which has no act (only OVERTIME and DAILY go there)`);
-      BUS.emit('wavecard', 'ACT 0' + g.A.id, act.name + (c ? ' / CHECKPOINT' : ''));
+      BUS.emit('wavecard', 'ACT 0' + g.A.id, act.name + (c ? (c.test ? ' / TEST START' : ' / CHECKPOINT') : ''));
       Music.track(g.waveTrack(act.first), !c);
       g.time.delayedCall(1800, () => { if (g.state === 'play') g.startWave(act.first); });
     },

@@ -7,6 +7,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- **Start the campaign at any act** for a real-speed playtest: `slaghouse.html?act=N`, for N from 2 to 5, saves a
+  test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation, full health
+  and your difficulty and mutator, and opens the campaign page on Continue. It asks before replacing a saved
+  checkpoint. A test start counts toward no lifetime stats, codex sightings, medals, best run or the cleared flag, and
+  its act card says TEST START. `run.mjs` checks one, the way it checks Continue (#173).
 - Scripted checks for the campaign route, so a broken lift or station fails by name in `run.mjs --quick` instead of
   stalling a seeded campaign minutes in. The far lift stays shut while a foe is alive, then comes, opens and takes you
   down, and nothing hurts you in the car. The next act opens on the car arriving, with no control until its doors open.

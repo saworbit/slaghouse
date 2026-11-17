@@ -7,6 +7,7 @@ class BootScene extends Phaser.Scene {
 }
 
 // -----------------------------------------------------------------------------
+let actStart = new URLSearchParams(location.search).get('act');        // ?act=N: a test start at act N (#173), once per page load
 class TitleScene extends Phaser.Scene {
   constructor() { super('Title'); }
   create() {
@@ -91,7 +92,21 @@ class TitleScene extends Phaser.Scene {
       this.time.delayedCall(0, () => LAB_PANEL.open(room));
       LAB_PANEL.initialRoom = null;
     }
+    if (actStart !== null) { const act = actStart; actStart = null; this.time.delayedCall(0, () => this.testStart(act)); }
     this.polTitleInit();                                                 // expansion: polish (cosmetic only)
+  }
+  // slaghouse.html?act=N (#173): save a test start at act N for a real-speed playtest of a late operation, then open the
+  // CAMPAIGN page on CONTINUE. A checkpoint already saved is only replaced if you say so.
+  testStart(raw) {
+    const act = Number(raw), save = loadCampaign(), had = campaignCheckpoint(save), last = CAMPAIGN_ACTS.length;
+    if (!Number.isInteger(act) || act < 2 || act > last) {
+      this.showSub('campaign'); this.campaignNote.setText('?ACT= TAKES AN ACT FROM 2 TO ' + last); return;
+    }
+    if (!had || window.confirm(`Replace your campaign checkpoint at act ${had.arena + 1} with a test start at act ${act}?`)) {
+      const checkpoint = testCheckpoint(act);
+      writeCampaign({ ...save, checkpoint, cleared: !!save?.cleared, owner: checkpoint.runId });
+    }
+    this.showSub('campaign');
   }
   // ---- expansion: polish ----
   // Title-screen juice: a sweep of light crosses the logo every few seconds, and a bar glides behind the menu pick
@@ -231,7 +246,7 @@ class TitleScene extends Phaser.Scene {
       const diff = resume ? cp.diff : OPTS.diff, mut = resume ? cp.mut : OPTS.mut;
       this.campaignSettings.setText(DIFFS[diff].name + (mut ? '  /  ' + MUTATORS[mut].name : '') +
         (resume ? '  /  ' + Math.ceil(cp.hp) + ' HP  /  ' + Object.keys(cp.perks).length + ' PERKS' : ''));
-      this.campaignNote.setText(resume ? 'RESUME AT THE START OF THIS ACT' : cp ? 'NEW CAMPAIGN REPLACES THE ACTIVE CHECKPOINT' : 'CHECKPOINTS SAVE AT THE START OF ACTS 2-5');
+      this.campaignNote.setText(resume ? (cp.test ? 'TEST START: NO LIFETIME STATS, MEDALS OR RECORDS' : 'RESUME AT THE START OF THIS ACT') : cp ? 'NEW CAMPAIGN REPLACES THE ACTIVE CHECKPOINT' : 'CHECKPOINTS SAVE AT THE START OF ACTS 2-5');
       this.campaignButtons.forEach((o, i) => o.setStyle({ color: i === this.subSel ? '#ffe46a' : i === 0 && !cp ? '#606a76' : '#c6ced8' }));
     } else if (this.sub === 'codex') {
       const [kind, name, , d] = CODEX[this.subSel], seen = SEEN.has(kind), pg = Math.floor(this.subSel / 66), pages = Math.ceil(CODEX.length / 66);

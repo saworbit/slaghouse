@@ -397,6 +397,7 @@ const PERKS = [
   { id: 'adren', tag: 'ADR', name: 'ADRENALINE', d: ['UNDER 35 HP YOU', 'DEAL 50% MORE'] },
   { id: 'thorns', tag: 'BRB', name: 'BARBED PLATE', d: ['FOES THAT TOUCH', 'YOU TAKE 20'] },
 ];
+const OPENING_PERKS = ['hollow', 'djump', 'vampire'];                 // the campaign's first clear offers these three
 // ---- codex: every foe, a silhouette until you've met it ----
 const CODEX = [
   ['grunt', 'GRUNT', 'w0', 'A MELTWORKER GONE FERAL. 45 HP, BITES FOR 12, NEVER ALONE.'],

@@ -913,6 +913,19 @@ try {
     });
   });
   let saved = null;
+  await check('?act=N saves a test start, asks before replacing a checkpoint, and counts toward nothing lifetime (#173)', async ctx => {
+    let page = await open(ctx, ['checkpoint'], '?act=2');
+    const fails = (await page.evaluate(() => CP.actStart(2))).fails;
+    const asked = [];
+    page.on('dialog', d => { asked.push(d.message()); return asked.length === 1 ? d.dismiss() : d.accept(); });
+    page = await open(ctx, ['checkpoint'], '?act=4');                   // turned down: the act 2 checkpoint stays
+    const kept = await page.evaluate(() => campaignCheckpoint()?.arena);
+    if (asked.length !== 1 || kept !== 1) fails.push(`with a checkpoint saved, ?act=4 asked ${asked.length} time(s) and left act ${kept + 1}, want one question and act 2 kept`);
+    page = await open(ctx, ['checkpoint'], '?act=4');                   // confirmed: replaced, and played
+    fails.push(...(await page.evaluate(() => CP.actStart(4, true))).fails);
+    if (asked.length !== 2) fails.push(`the confirmed ?act=4 asked ${asked.length - 1} time(s), want once`);
+    return fails;
+  });
   await check('campaign checkpoint: save, reload, Continue, die, retry the act', async ctx => {
     let page = await open(ctx, ['checkpoint']);
     const s = await page.evaluate(() => CP.save());

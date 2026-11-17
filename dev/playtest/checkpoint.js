@@ -627,6 +627,48 @@ window.CP = (() => {
     return { fails };
   };
 
+  // A test start (#173). Every act's test checkpoint passes campaignCheckpoint(); after loading slaghouse.html?act=N the
+  // campaign page offers CONTINUE on act N's checkpoint. With play set, Continue starts act N's first operation, and
+  // nothing it does counts toward lifetime stats, medals, the best run or the cleared flag.
+  CP.actStart = (act, play = false) => {
+    const [fails, expect] = checker();
+    for (let n = 2; n <= CAMPAIGN_ACTS.length; n++) {
+      const c = testCheckpoint(n), ok = campaignCheckpoint({ checkpoint: c, cleared: false });
+      expect(ok && ok.arena === n - 1 && ok.wave === CAMPAIGN_ACTS[n - 1].first && ok.test, `campaignCheckpoint() turned down the act ${n} test start: ${JSON.stringify(c)}`);
+      expect(ok && Object.keys(ok.perks).length === CAMPAIGN_ACTS[n - 1].first && OPENING_PERKS.some(id => ok.perks[id]), `the act ${n} test start has perks ${ok && Object.keys(ok.perks)}, want one per cleared operation, the first from the opening offer`);
+      expect(ok && ok.stats.kills + campaignFoesFrom(ok.wave) === CAMPAIGN_TOTAL, `the act ${n} test start counts ${ok?.stats.kills} kills before it`);
+    }
+    const ts = title(), c = campaignCheckpoint();
+    expect(ts.sub === 'campaign' && ts.subSel === 0, `?act=${act} did not open the campaign page on CONTINUE (page ${ts.sub}, pick ${ts.subSel})`);
+    expect(c && c.test && c.arena === act - 1 && c.diff === OPTS.diff && c.mut === OPTS.mut, `?act=${act} saved ${JSON.stringify(c && { arena: c.arena, test: c.test, diff: c.diff, mut: c.mut })}`);
+    expect(c && campaignWeaponSlots(c.wave).includes(c.weapon), 'the test start holds a weapon not earned by its act');
+    if (!play || fails.length) return { fails };
+    const life = JSON.stringify(LIFE), seen = SEEN.size;
+    const [g] = startFromTitle(0);
+    expect(g && g.campaign && g.A.id === act && g.testRun && !g.mode.lifetime, `Continue did not start a test run in act ${act} (arena ${g?.A.id}, test ${g?.testRun})`);
+    if (fails.length) return { fails };
+    T.run(4500);                                                        // the car arrives, the act's card, then its first operation
+    expect(g.wave === CAMPAIGN_ACTS[act - 1].first, `the test start opened on operation ${g.wave + 1}, want ${CAMPAIGN_ACTS[act - 1].first + 1}`);
+    const foe = g.enemies.getChildren().find(e => e.alive && !e.summoned);
+    if (foe) g.killEnemy(foe, 1, 0, 'nail');
+    g.award('speed');
+    expect(!g.medals.has('speed'), 'a test run earned a medal');
+    if (act < CAMPAIGN_ACTS.length) {                                    // down the lift: the next act is still a test run
+      g.startWave = () => {};                                           // the act is done: its last operation rides the lift
+      g.wave = CAMPAIGN_ACTS[act - 1].last;
+      g.descend(); T.run(2600);
+      delete g.startWave;
+      const next = campaignCheckpoint();
+      expect(g.A.id === act + 1 && g.testRun && next?.test && next.arena === act, `the lift from a test start saved ${JSON.stringify(next && { arena: next.arena, test: next.test })} (arena ${g.A.id}, test ${g.testRun})`);
+    }
+    g.win(); T.run(2500);
+    const save = loadCampaign();
+    expect(JSON.stringify(LIFE) === life && SEEN.size === seen, `a test run counted toward lifetime stats or the codex: ${life} -> ${JSON.stringify(LIFE)}`);
+    expect(save && !save.cleared && !save.checkpoint, `a won test run left the save ${JSON.stringify(save && { cleared: save.cleared, checkpoint: !!save.checkpoint })}, want it uncleared with the test checkpoint gone`);
+    expect(localStorage.getItem(RUN_MODES.campaign.record) === null, 'a test run filed a best run');
+    return { fails: [...fails, ...T.errs] };
+  };
+
   CP.legacy = () => {
     const [fails, expect] = checker();
     const [g, offered] = startFromTitle(0);
