@@ -1630,6 +1630,228 @@ function drawRifle(ctx, arm) {                   // 24x11, pivot (2,5)
 function drawArm(ctx, py, P = PLEG) {
   R(ctx, P.b, 1, py - 1, 5, 3); R(ctx, P.c, 1, py - 1, 4, 1); R(ctx, P.a, 1, py + 1, 5, 1); R(ctx, P.k, 5, py - 1, 2, 3);
 }
+// ---- expansion: enemies --------------------------------------------------------
+// Ten foes for OVERTIME, the DAILY and the Lab. Each faces right; the parts they swing, aim or throw (a ball and
+// chain, a turret, a bundle of dynamite, a water jet) are their own sprites or drawn live.
+const XLTH = ['#1a0e08', '#2e180e', '#4a2616', '#6a3a20', '#8c522e'];           // leather
+const XRUB = ['#3a2a06', '#6a4e0c', '#a07810', '#d0a020', '#f0c840'];           // yellow rubber
+const XTNK = ['#0e1a2e', '#1a3050', '#2a5080', '#4a80b8', '#8ac0e8'];           // blue steel
+const XOLV = ['#14180e', '#222a16', '#343f22', '#4a5a30', '#66783f', '#8a9a5a']; // olive drab
+const XBNE = ['#3a3630', '#6a6458', '#a8a090', '#d8d0c0', '#f4eee0'];           // bone plate
+const XGUL = ['#2a2c30', '#4a4e56', '#7a808a', '#b0b8c2', '#e0e6ec'];           // gull grey
+const XVIO = ['#160a22', '#2a1440', '#422266', '#5e348c', '#8050b8'];           // illusionist's cloak
+const XSKN = ['#3a1e14', '#5e3424', '#8a5038', '#b07050'];
+function xArc(ctx, cx, cy, r, a0, a1, col, w = 1) {  // a curved blade: an arc of pixels, w thick at its root tapering to a point
+  const n = Math.ceil(Math.abs(a1 - a0) * r * 1.5) + 1;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, a = a0 + (a1 - a0) * t, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, k = Math.max(1, Math.round(w * (1 - t)));
+    for (let j = 0; j < k; j++) R(ctx, col, Math.round(x - Math.cos(a) * j), Math.round(y - Math.sin(a) * j));
+  }
+}
+function drawFlailer(ctx, frame) {                   // 24x24 flailer: a mail-clad brute in a bucket helm (its ball and chain are drawn live)
+  const s = frame === 'w1' ? 1 : 0, wd = frame === 'wind', th = frame === 'throw', by = wd ? 1 : s ? -1 : 0;
+  // Thick legs in leather breeches + iron sabatons
+  limb(ctx, 9, 15 + by, 8 - s, 21, 2.2, 1.8, XLTH, -0.2); R(ctx, '#2a2e35', 5 - s, 21, 6, 3); R(ctx, '#5d6775', 6 - s, 21, 4, 1);
+  limb(ctx, 14, 15 + by, 15 + s, 21, 2.2, 1.8, XLTH, 0.2); R(ctx, '#2a2e35', 13 + s, 21, 6, 3); R(ctx, '#7f8a99', 14 + s, 21, 4, 1);
+  // Back arm hanging at its side
+  limb(ctx, 7, 9 + by, 5, 15 + by, 1.7, 1.5, XLTH, -0.3);
+  // Barrel chest in chainmail, a blood-red tabard and a studded belt
+  blob(ctx, 11.5, 11 + by, 6.2, 5.6, IRN.slice(1, 7));
+  for (let y = 7; y < 16; y++) for (let x = 6 + (y & 1); x < 18; x += 2) if (inBlob(x, y - by, 11.5, 11, 5.4, 4.8, 2)) R(ctx, '#232730', x, y);
+  R(ctx, '#6a1610', 9, 10 + by, 5, 7); R(ctx, '#a82a1e', 10, 10 + by, 3, 6); R(ctx, '#d84a30', 10, 10 + by, 1, 5);
+  R(ctx, '#3a2010', 6, 15 + by, 12, 2); for (let i = 0; i < 4; i++) R(ctx, '#c8d0da', 7 + i * 3, 15 + by, 1, 1);
+  R(ctx, '#5d6775', 4, 7 + by, 5, 3); R(ctx, '#aab4c2', 5, 7 + by, 2, 1); R(ctx, '#c8d0da', 3, 6 + by, 1, 1);           // pauldron + spike
+  // Bucket helm with a cross slit and one ember eye
+  blob(ctx, 12.5, 4.5 + by, 3.8, 3.8, IRN.slice(2), 4);
+  R(ctx, '#aab4c2', 10, 1 + by, 4, 1); R(ctx, '#0a0a0c', 12, 4 + by, 5, 1); R(ctx, '#0a0a0c', 14, 3 + by, 1, 3); R(ctx, '#ff5a1a', 15, 4 + by, 1, 1);
+  // Front arm: chain fist at the chest (whirling), cocked over the shoulder (wind-up), punched out (throw)
+  const [hx, hy] = th ? [21, 10] : wd ? [9, 3] : [16, 10];
+  limb(ctx, 14, 9 + by, hx, hy + by, 1.9, 1.7, XLTH, 0.1);
+  R(ctx, '#3a3f47', hx - 1, hy - 1 + by, 3, 3); R(ctx, '#8a94a0', hx - 1, hy - 1 + by, 2, 1);                           // gauntlet
+}
+function drawHoser(ctx, frame) {                     // 18x24 hoser: a trooper in a rubber suit with a water tank and a fire hose
+  const s = frame === 'w1' ? 1 : 0, br = frame === 'brace' || frame === 'spray', sp = frame === 'spray', by = br ? 1 : 0, fs = br ? 2 : s;
+  // Rubber-booted legs, braced wide against the kick of the hose
+  limb(ctx, 7, 15 + by, 6 - fs, 22, 1.6, 1.5, XRUB, -0.2); R(ctx, '#141210', 4 - fs, 22, 5, 2);
+  limb(ctx, 11, 15 + by, 12 + fs, 22, 1.6, 1.5, XRUB, 0.2); R(ctx, '#141210', 10 + fs, 22, 5, 2);
+  // The water tank on its back: blue steel, a valve and a pressure gauge
+  limb(ctx, 3, 8 + by, 3, 16 + by, 2.6, 2.6, XTNK, -0.2, true); R(ctx, '#c8d0da', 2, 5 + by, 3, 2); R(ctx, '#ffffff', 2, 10 + by, 1, 3);
+  R(ctx, '#e8e8e0', 3, 12 + by, 2, 2); R(ctx, '#ff3020', 4, 12 + by, 1, 1);
+  // Rubber suit with reflective bands
+  blob(ctx, 9.5, 11.5 + by, 4.6, 5, XRUB);
+  R(ctx, '#e0e8f0', 6, 12 + by, 8, 1); R(ctx, '#8a94a0', 6, 13 + by, 8, 1);
+  // Helmet with a wide brim and a fogged faceplate
+  blob(ctx, 10, 4.6 + by, 3.4, 3.2, XRUB);
+  R(ctx, '#a07810', 6, 6 + by, 9, 1); R(ctx, '#1a2a3a', 10, 3 + by, 4, 3); R(ctx, '#6ab8e0', 11, 4 + by, 3, 1); R(ctx, '#ffffff', 13, 4 + by, 1, 1);
+  // The hose over its shoulder down to a brass nozzle held in both hands
+  pxLine(ctx, '#1a1a1e', 3, 6 + by, 7, 8 + by, 1); pxLine(ctx, '#1a1a1e', 7, 8 + by, 12, 12 + (br ? 0 : 1) + by, 1);
+  const ny = br ? 10 : 12;
+  limb(ctx, 10, 9 + by, 14, ny + by, 1.4, 1.2, XRUB, 0.1);
+  R(ctx, '#22262c', 12, ny - 1 + by, 3, 3); R(ctx, '#c8a040', 15, ny + by, 3, 2); R(ctx, '#ffe080', 15, ny + by, 3, 1);
+  if (sp) R(ctx, '#bfe8ff', 17, ny - 1 + by, 1, 4);
+}
+function drawDemo(ctx, frame) {                      // 16x22 demo runner: a wiry sprinter clutching a bundle of lit dynamite
+  const a = frame === 'air', s = frame === 'r1' ? 1 : 0, PNT = ['#141420', '#24243a', '#3a3a5a', '#56567a'];
+  // Legs in full stride, or tucked for a hop
+  if (a) { limb(ctx, 6, 13, 3, 17, 1.4, 1.2, PNT); limb(ctx, 9, 13, 12, 16, 1.4, 1.2, PNT); R(ctx, '#e8e0d0', 1, 17, 3, 2); R(ctx, '#e8e0d0', 11, 16, 3, 2); }
+  else {
+    const [fx, bx, by] = s ? [11, 3, 17] : [12, 2, 18];
+    limb(ctx, 7, 13, bx, by, 1.4, 1.2, PNT, -0.3); R(ctx, '#c8c0b0', bx - 2, by, 3, 2);
+    limb(ctx, 8, 13, fx - 2, 17, 1.5, 1.3, PNT); limb(ctx, fx - 2, 17, fx, 20, 1.3, 1.2, PNT); R(ctx, '#e8e0d0', fx - 1, 20, 4, 2);
+  }
+  // Lean torso in a striped vest, pitched forward into the run
+  blob(ctx, 8, 9.5, 3.4, 4, ['#3a0c0c', '#6a1612', '#9a2418', '#c03a28']);
+  for (let i = 0; i < 3; i++) R(ctx, '#e8e0d0', 6, 8 + i * 2, 5, 1);
+  // Head with a red bandana and welding goggles
+  blob(ctx, 10, 4, 2.8, 2.8, XSKN);
+  R(ctx, '#c02020', 8, 1, 5, 2); R(ctx, '#c02020', 5, 2, 3, 1); R(ctx, '#ff5a40', 9, 1, 2, 1);
+  R(ctx, '#2a2e35', 10, 3, 4, 1); R(ctx, '#ffe040', 12, 3, 1, 1);
+  // Both arms out front clutching three sticks of dynamite taped together, the fuse on top
+  limb(ctx, 9, 8, 12, 11, 1.1, 1.0, XSKN);
+  R(ctx, '#6a0c0c', 12, 9, 4, 5); R(ctx, '#d02818', 12, 9, 1, 5); R(ctx, '#d02818', 14, 9, 1, 5); R(ctx, '#ff6a50', 12, 9, 1, 1);
+  R(ctx, '#e8b422', 12, 11, 4, 1); R(ctx, '#8a8a80', 14, 7, 1, 2);
+}
+function drawPanzer(ctx, frame) {                    // 30x20 panzer: a treaded mini-tank hull behind a thick glacis plate (the turret is its own sprite)
+  const s = frame === 'w1' ? 1 : 0;
+  // The track loop, road wheels and cleats
+  blob(ctx, 15, 16.2, 14.2, 3.6, IRN.slice(0, 5), 3);
+  for (let i = 0; i < 6; i++) { const wx = 4.5 + i * 4.2; blob(ctx, wx, 16.5, 1.9, 1.9, IRN.slice(3)); R(ctx, '#0c0e12', Math.round(wx) - 1, 16, 1, 1); }
+  for (let i = 0; i < 13; i++) { R(ctx, '#5d6775', 2 + i * 2 + s, 13, 1, 1); R(ctx, '#323843', 3 + i * 2 - s, 19, 1, 1); }
+  // Hull: an olive armour box with a hazard stripe; the engine deck at the back glows through its grille (its soft spot)
+  blob(ctx, 14, 10, 11.5, 3.4, XOLV, 4);
+  R(ctx, '#e8b422', 8, 11, 14, 1); for (let i = 0; i < 4; i++) R(ctx, '#15161a', 9 + i * 4, 11, 2, 1);
+  R(ctx, '#1a1c20', 2, 8, 5, 5); for (let y = 0; y < 4; y++) R(ctx, y % 2 ? '#c04010' : '#ff8a20', 3, 9 + y, 3, 1);
+  R(ctx, '#3a3f47', 1, 5, 2, 4); R(ctx, '#5d6775', 1, 5, 2, 1);                                                          // exhaust stack
+  // Front glacis: a thick sloped plate with rivets, a coax gun and a headlight
+  for (let y = 7; y < 14; y++) { const w = 3 + ((y - 7) >> 1); R(ctx, y < 9 ? '#aab4c2' : y < 11 ? '#7f8a99' : '#5d6775', 24 - ((y - 7) >> 2), y, w, 1); }
+  R(ctx, '#232730', 25, 9, 1, 1); R(ctx, '#232730', 26, 12, 1, 1); R(ctx, '#ffe080', 28, 10, 1, 1);
+  R(ctx, '#232730', 27, 11, 3, 1); R(ctx, '#0c0e12', 29, 11, 1, 1);
+  R(ctx, '#232730', 10, 6, 10, 2); R(ctx, '#4a5a30', 11, 6, 8, 1);                                                      // turret ring
+}
+function drawPanzerGun(ctx) {                        // 18x9 panzer turret: a domed mantlet and a long barrel, pivot at (5, 4.5)
+  blob(ctx, 5, 4.5, 4.5, 3.6, XOLV);
+  R(ctx, '#e8b422', 2, 6, 6, 1);
+  limb(ctx, 8, 4, 16, 4, 1.4, 1.2, IRN.slice(2), 0, true); R(ctx, '#3a3f47', 15, 3, 3, 3); R(ctx, '#0c0e12', 17, 4, 1, 1);
+  R(ctx, '#aab4c2', 3, 2, 3, 1); R(ctx, '#ff3020', 6, 3, 1, 1);
+}
+function drawReaper(ctx, frame) {                    // 22x32 reaper: a gaunt robot on stilt legs with two scythe arms
+  const s = frame === 'w1' ? 1 : 0, tl = frame === 'tell', sp = frame === 'spin0' || frame === 'spin1', sp1 = frame === 'spin1', dz = frame === 'dizzy';
+  const by = tl ? 2 : dz ? 1 : 0, LG = IRN.slice(2), BL = '#d8e0e8', BLD = '#8a94a0';
+  // Stilt legs: pistons with reverse knees
+  limb(ctx, 9, 18 + by, 6 - s, 24, 1.3, 1.1, LG, -0.3); limb(ctx, 6 - s, 24, 8 - s, 30, 1.1, 1.0, LG); R(ctx, '#141618', 5 - s, 30, 5, 2);
+  limb(ctx, 13, 18 + by, 16 + s, 24, 1.3, 1.1, LG, 0.3); limb(ctx, 16 + s, 24, 14 + s, 30, 1.1, 1.0, LG); R(ctx, '#141618', 12 + s, 30, 5, 2);
+  R(ctx, '#7f8a99', 5 - s, 23, 2, 2); R(ctx, '#aab4c2', 15 + s, 23, 2, 2);
+  // Back scythe arm (behind the body)
+  if (sp) { limb(ctx, 9, 10 + by, 2, 11 + by, 1.1, 1.0, LG); xArc(ctx, 2, sp1 ? 6 : 16, 5, sp1 ? Math.PI / 2 : -Math.PI / 2, sp1 ? Math.PI * 1.25 : -Math.PI * 1.25, BLD, 2); }
+  else if (tl) { limb(ctx, 9, 10 + by, 6, 3, 1.1, 1.0, LG); xArc(ctx, 3, 4, 3.5, 0, -Math.PI * 1.1, BLD, 2); }
+  else if (dz) { limb(ctx, 9, 10 + by, 6, 18, 1.1, 1.0, LG); xArc(ctx, 6, 22, 4, -Math.PI / 2, -Math.PI * 1.2, BLD, 2); }
+  else { limb(ctx, 9, 10 + by, 6, 16, 1.1, 1.0, LG); xArc(ctx, 6, 11, 5, Math.PI / 2, Math.PI * 1.2, BLD, 2); }
+  // Ribbed chest cage and pelvis with a red core
+  R(ctx, '#2a2e35', 9, 16 + by, 5, 3);
+  blob(ctx, 11, 12 + by, 4.2, 5, IRN.slice(1, 7));
+  for (let i = 0; i < 3; i++) R(ctx, '#0c0e12', 8, 10 + i * 2 + by, 6, 1);
+  R(ctx, '#ff2a1a', 10, 12 + by, 2, 2); R(ctx, '#ffb0a0', 10, 12 + by, 1, 1);
+  // Skull head: a bone plate with a single red eye slit (dim and askew when it's dizzy)
+  blob(ctx, 11.5 + (dz ? 1 : 0), 5 + by, 3.4, 3.6, XBNE);
+  R(ctx, '#0a0a0c', 11 + (dz ? 1 : 0), 5 + by, 4, 1); R(ctx, dz ? '#7a2010' : '#ff3020', 13 + (dz ? 1 : 0), 5 + by, 2, 1); R(ctx, '#0a0a0c', 11 + (dz ? 1 : 0), 7 + by, 3, 1);
+  // Front scythe arm
+  if (sp) { limb(ctx, 13, 10 + by, 20, 11 + by, 1.2, 1.1, LG); xArc(ctx, 20, sp1 ? 16 : 6, 5, sp1 ? -Math.PI / 2 : Math.PI / 2, sp1 ? Math.PI * 0.25 : -Math.PI * 0.25, BL, 2); }
+  else if (tl) { limb(ctx, 13, 10 + by, 17, 2, 1.2, 1.1, LG); xArc(ctx, 19, 4, 3.5, Math.PI, Math.PI * 2.1, BL, 2); }
+  else if (dz) { limb(ctx, 13, 10 + by, 15, 19, 1.2, 1.1, LG); xArc(ctx, 15, 23, 4, -Math.PI / 2, Math.PI * 0.2, BL, 2); }
+  else { limb(ctx, 13, 10 + by, 16, 16, 1.2, 1.1, LG); xArc(ctx, 16, 11, 5, Math.PI / 2, -Math.PI * 0.2, BL, 2); }
+}
+function drawGull(ctx, frame) {                      // 22x14 gull: a carrion drone in scrap feathers with a hooked beak
+  const up = frame === 'f0', dv = frame === 'dive', sc = frame === 'scream', K = '#141618';
+  const wing = (pts, cols) => { for (let i = 0; i < pts.length - 1; i++) pxLine(ctx, cols[Math.min(i, cols.length - 1)], pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], 2); };
+  // Far wing, behind the body (darker)
+  if (dv) wing([[12, 5], [8, 4], [4, 4]], ['#4a4e56', '#2a2c30']);
+  else if (up) wing([[12, 5], [11, 2], [9, 0]], ['#4a4e56', '#2a2c30']);
+  else wing([[12, 8], [12, 11], [11, 12]], ['#4a4e56', '#2a2c30']);
+  // Tail fan + a sleek body: dark steel back, pale belly, rivets along the spine
+  R(ctx, '#4a4e56', 2, 6, 4, 3); R(ctx, '#7a808a', 1, 7, 3, 1); R(ctx, K, 0, 7, 1, 2);
+  blob(ctx, 10, 8, 6, 2.8, XGUL);
+  R(ctx, '#4a4e56', 6, 6, 8, 1); R(ctx, '#e0e6ec', 7, 10, 7, 1); for (let i = 0; i < 3; i++) R(ctx, K, 7 + i * 3, 6, 1, 1);
+  // Head, red eye and a hooked beak (gaping when it screeches)
+  blob(ctx, 16, 6.5, 2.7, 2.5, XGUL);
+  R(ctx, '#ff3020', 17, 6, 1, 1); R(ctx, '#ffb0a0', 17, 5, 1, 1);
+  R(ctx, '#e8b422', 18, sc ? 5 : 6, 3, 1); R(ctx, '#c08a14', 21, sc ? 5 : 6, 1, 2);
+  if (sc) { R(ctx, '#7a1a14', 18, 6, 3, 1); R(ctx, '#c08a14', 18, 7, 3, 1); }
+  // Near wing: raised, beating down, or folded back for the dive, with black tips
+  if (dv) { wing([[13, 7], [9, 5], [5, 5], [2, 4]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 1, 4, 2, 1); }
+  else if (up) { wing([[12, 7], [10, 3], [7, 1], [5, 0]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 4, 0, 2, 1); R(ctx, K, 6, 2, 1, 1); }
+  else { wing([[12, 8], [10, 11], [8, 12], [6, 12]], ['#e0e6ec', '#b0b8c2', '#7a808a']); R(ctx, K, 5, 12, 2, 1); R(ctx, K, 7, 13, 1, 1); }
+}
+function drawOverclock(ctx, frame) {                 // 16x16 overclocker: a hovering capacitor drone around a glowing yellow coil
+  const f = frame === 'o1' ? 1 : 0;
+  R(ctx, '#2a2e35', 3 + f, 0, 10 - 2 * f, 1); R(ctx, '#5d6775', 7, 1, 2, 2);                                             // rotor
+  for (let i = 0; i < 3; i++) { const c = (i + f) % 2 ? '#aab4c2' : '#5d6775'; R(ctx, c, 0, 5 + i * 2, 3, 1); R(ctx, c, 13, 5 + i * 2, 3, 1); }   // cooling fins
+  blob(ctx, 8, 8, 5, 4.6, IRN.slice(2), 3);
+  R(ctx, '#e8b422', 4, 11, 8, 1); R(ctx, '#15161a', 5, 11, 1, 1); R(ctx, '#15161a', 8, 11, 1, 1); R(ctx, '#15161a', 11, 11, 1, 1);
+  R(ctx, '#3a2006', 6, 5, 4, 5); for (let i = 0; i < 5; i++) R(ctx, (i + f) % 2 ? '#fff4b0' : '#ffc830', 6, 5 + i, 4, 1);   // the coil window
+  R(ctx, '#5d6775', 5, 13, 1, 2); R(ctx, '#5d6775', 10, 13, 1, 2); R(ctx, '#ffe060', 5, 15, 1, 1); R(ctx, '#ffe060', 10, 15, 1, 1);   // emitter prongs
+}
+function drawRefractor(ctx, frame) {                 // 18x18 refractor: a tripod turret under a faceted prism
+  const ch = frame === 'charge', g = frame === 'p1';
+  pxLine(ctx, '#2a2e35', 8, 12, 3, 17, 2); pxLine(ctx, '#2a2e35', 10, 12, 15, 17, 2); R(ctx, '#3a3f47', 8, 12, 3, 6);   // tripod
+  R(ctx, '#5d6775', 5, 11, 9, 2); R(ctx, '#8a94a0', 5, 11, 9, 1);
+  R(ctx, '#3a3f47', 4, 4, 2, 8); R(ctx, '#3a3f47', 13, 4, 2, 8); R(ctx, '#7f8a99', 4, 4, 1, 3);                          // gimbal yoke
+  const CR = ch ? ['#6ad8f0', '#c8f8ff', '#ffffff'] : ['#145a78', '#2a9ac0', '#6ad8f0'];
+  for (let y = 0; y < 11; y++) { const w = 5 - Math.abs(y - 5); if (w <= 0) continue; R(ctx, CR[0], 9.5 - w, y + 1, w, 1); R(ctx, CR[1], 9.5, y + 1, w, 1); }
+  R(ctx, CR[2], 9, 3, 1, 3); R(ctx, CR[2], 10, 5, 2, 1); if (g || ch) R(ctx, '#ffffff', 8, 4, 1, 1);
+  R(ctx, '#0a2a3a', 13, 6, 2, 1); R(ctx, ch ? '#ffffff' : '#60e8ff', 15, 6, 1, 1);                                        // emitter lens
+}
+function drawMirage(ctx, frame) {                    // 16x24 mirage: a hooded illusionist in a cracked porcelain mask
+  const s = frame === 'w1' ? 1 : 0, ca = frame === 'cast', fi = frame === 'fire';
+  R(ctx, '#141018', 5 - s, 21, 3, 3); R(ctx, '#141018', 9 + s, 21, 3, 3);
+  blob(ctx, 8, 16.5, 5, 5.5, XVIO); R(ctx, '#46e6ff', 3, 21, 10, 1); R(ctx, '#2a8ab0', 4, 22, 8, 1);                    // cloak, holo-trim hem
+  blob(ctx, 8, 10, 4.2, 4.6, XVIO);
+  R(ctx, '#46e6ff', 7, 8, 1, 6); R(ctx, '#2a8ab0', 7, 14, 1, 1);                                                        // seam
+  blob(ctx, 8.5, 4.5, 3.6, 3.8, XVIO);
+  R(ctx, '#e8e4dc', 9, 3, 3, 4); R(ctx, '#b8b0a8', 9, 6, 3, 1); R(ctx, '#46e6ff', 10, 4, 1, 1); R(ctx, '#3a3040', 11, 2, 1, 3);   // mask, eye, crack
+  if (ca) { limb(ctx, 6, 8, 3, 2, 1.1, 1.0, XVIO); limb(ctx, 11, 8, 14, 2, 1.1, 1.0, XVIO); R(ctx, '#ffffff', 2, 1, 2, 2); R(ctx, '#ffffff', 13, 1, 2, 2); R(ctx, '#46e6ff', 4, 0, 9, 1); }
+  else if (fi) { limb(ctx, 10, 8, 14, 10, 1.1, 1.0, XVIO); R(ctx, '#2a2e35', 13, 9, 3, 3); R(ctx, '#ff60e0', 15, 10, 1, 1); }
+  else { limb(ctx, 10, 8, 11, 13, 1.1, 1.0, XVIO); R(ctx, '#2a2e35', 10, 13, 2, 2); }
+}
+function drawClinger(ctx, frame) {                   // 12x12 clinger: a magnetic limpet bomb on a little thruster, claws out
+  const f = frame === 'c1' ? 1 : 0, cl = frame === 'clamp';
+  if (cl) { R(ctx, '#5d6775', 1, 3, 1, 3); R(ctx, '#5d6775', 10, 3, 1, 3); R(ctx, '#5d6775', 1, 8, 2, 1); R(ctx, '#5d6775', 9, 8, 2, 1); }
+  else { R(ctx, '#5d6775', 0, 2 + f, 2, 1); R(ctx, '#5d6775', 10, 2 + f, 2, 1); R(ctx, '#5d6775', 0, 9 - f, 2, 1); R(ctx, '#5d6775', 10, 9 - f, 2, 1); }
+  blob(ctx, 6, 6, 4, 4, IRN.slice(2));
+  R(ctx, '#8a1414', 2, 7, 8, 1); R(ctx, '#e02a1a', 3, 7, 6, 1);                                                           // magnet band
+  R(ctx, cl || f ? '#ff3020' : '#6a1010', 5, 3, 2, 2); if (cl || f) R(ctx, '#ffffff', 5, 3, 1, 1);                        // the LED
+  R(ctx, '#3a3f47', 0, 5, 1, 2); R(ctx, f ? '#ffa040' : '#ff6020', 0, 5 + f, 1, 1);                                       // thruster nub
+}
+const XGIBDEF = {                                    // their own loose parts
+  g_hosetank: [6, 8, c => { R(c, '#2a5080', 1, 1, 4, 6); R(c, '#8ac0e8', 1, 1, 1, 6); R(c, '#c8d0da', 2, 1, 2, 1); }],
+  g_tnt: [7, 4, c => { R(c, '#d02818', 1, 1, 5, 2); R(c, '#ff6a50', 1, 1, 5, 1); R(c, '#e8b422', 3, 1, 1, 2); }],
+  g_tread: [10, 4, c => { R(c, '#232730', 1, 1, 8, 2); for (let i = 0; i < 4; i++) R(c, '#5d6775', 1 + i * 2, 1, 1, 1); }],
+  g_scythe: [9, 7, c => { R(c, '#d8e0e8', 1, 1, 5, 1); R(c, '#d8e0e8', 6, 2, 1, 2); R(c, '#8a94a0', 7, 4, 1, 2); R(c, '#454d5a', 1, 2, 2, 1); }],
+  g_feather: [7, 3, c => { R(c, '#7a808a', 1, 1, 5, 1); R(c, '#b0b8c2', 2, 1, 2, 1); }],
+  g_coil: [6, 6, c => { R(c, '#3a2006', 1, 1, 4, 4); R(c, '#ffc830', 1, 1, 4, 1); R(c, '#ffc830', 1, 3, 4, 1); R(c, '#fff4b0', 2, 1, 1, 1); }],
+  g_prism: [5, 5, c => { R(c, '#2a9ac0', 1, 2, 3, 1); R(c, '#6ad8f0', 2, 1, 1, 3); R(c, '#ffffff', 2, 2, 1, 1); }],
+  g_xmask: [7, 7, c => { R(c, '#e8e4dc', 1, 1, 5, 5); R(c, '#b8b0a8', 1, 5, 5, 1); R(c, '#46e6ff', 2, 3, 1, 1); R(c, '#3a3040', 4, 1, 1, 3); }],
+};
+function genExpansionEnemyArt(scene) {               // their sheets (+ the white copies a hit flashes), loose parts and props
+  addSheet(scene, 'flailer', ['w0', 'w1', 'wind', 'throw'].map(f => ({ name: f, c: makeSprite(24, 24, x => drawFlailer(x, f)) })), 24, 24, true);
+  addSheet(scene, 'hoser', ['w0', 'w1', 'brace', 'spray'].map(f => ({ name: f, c: makeSprite(18, 24, x => drawHoser(x, f)) })), 18, 24, true);
+  addSheet(scene, 'demo', ['r0', 'r1', 'air'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawDemo(x, f)) })), 16, 22, true);
+  addSheet(scene, 'panzer', ['w0', 'w1'].map(f => ({ name: f, c: makeSprite(30, 20, x => drawPanzer(x, f)) })), 30, 20, true);
+  addSheet(scene, 'reaper', ['w0', 'w1', 'tell', 'spin0', 'spin1', 'dizzy'].map(f => ({ name: f, c: makeSprite(22, 32, x => drawReaper(x, f)) })), 22, 32, true);
+  addSheet(scene, 'gull', ['f0', 'f1', 'scream', 'dive'].map(f => ({ name: f, c: makeSprite(22, 14, x => drawGull(x, f)) })), 22, 14, true);
+  addSheet(scene, 'overclock', ['o0', 'o1'].map(f => ({ name: f, c: makeSprite(16, 16, x => drawOverclock(x, f)) })), 16, 16, true);
+  addSheet(scene, 'refractor', ['p0', 'p1', 'charge'].map(f => ({ name: f, c: makeSprite(18, 18, x => drawRefractor(x, f)) })), 18, 18, true);
+  addSheet(scene, 'mirage', ['w0', 'w1', 'cast', 'fire'].map(f => ({ name: f, c: makeSprite(16, 24, x => drawMirage(x, f)) })), 16, 24, true);
+  addSheet(scene, 'clinger', ['c0', 'c1', 'clamp'].map(f => ({ name: f, c: makeSprite(12, 12, x => drawClinger(x, f)) })), 12, 12, true);
+  const gun = makeSprite(18, 9, drawPanzerGun); addTex(scene, 'panzer_gun', gun); addTex(scene, 'panzer_gun_w', whiteCopy(gun));
+  addTex(scene, 'flailer_ball', makeSprite(13, 13, c => {
+    blob(c, 6.5, 6.5, 3.8, 3.8, IRN.slice(1, 7));
+    R(c, '#c8ced6', 6, 0, 1, 2); R(c, '#c8ced6', 6, 11, 1, 2); R(c, '#c8ced6', 0, 6, 2, 1); R(c, '#c8ced6', 11, 6, 2, 1);   // spikes
+    for (const [x, y] of [[2, 2], [10, 2], [2, 10], [10, 10]]) R(c, '#aab4c2', x, y);
+    R(c, '#5a3020', 5, 5, 2, 2);                                                                                         // dried blood
+  }));
+  addTex(scene, 'demo_tnt', makeSprite(7, 8, c => { R(c, '#6a0c0c', 1, 2, 5, 6); R(c, '#d02818', 1, 2, 1, 6); R(c, '#d02818', 3, 2, 1, 6); R(c, '#e8b422', 1, 4, 5, 1); R(c, '#8a8a80', 3, 0, 1, 2); }));
+  for (const k in XGIBDEF) { const [w, h, fn] = XGIBDEF[k]; addTex(scene, k, makeSprite(w, h, fn, '#140606')); }
+}
 const GUNS = {
   nail: { w: 23, h: 11, py: 5, muzzle: 21, draw(ctx, arm) {
     if (arm) drawArm(ctx, 5);
@@ -3741,6 +3963,7 @@ function genTextures(scene) {
   addSheet(scene, 'grenadier', grf, 18, 24, true);
   addSheet(scene, 'spikeball', ['k0', 'k1'].map(f => ({ name: f, c: makeSprite(14, 14, x => drawSpikeball(x, f)) })), 14, 14, true);
   addSheet(scene, 'para', ['drop', 'w0', 'w1'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawPara(x, f)) })), 16, 22, true);
+  genExpansionEnemyArt(scene);
   addTex(scene, 'enade', makeSprite(5, 6, c => { R(c, '#4a5a2a', 0, 1, 5, 5); R(c, '#6a7a40', 1, 1, 2, 1); R(c, '#8a94a0', 1, 0, 3, 1); }));
   addTex(scene, 'supply', makeSprite(14, 12, c => { R(c, '#5a4a28', 0, 0, 14, 12); R(c, '#7a6a38', 1, 1, 12, 1); R(c, '#3a3018', 0, 11, 14, 1); R(c, '#e8e0d0', 5, 3, 4, 6); R(c, '#e8e0d0', 3, 5, 8, 2); R(c, '#c83020', 6, 4, 2, 4); R(c, '#c83020', 4, 5, 6, 2); }));
   addTex(scene, 'capsule', makeSprite(9, 9, c => { for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const d = Math.hypot(x + 0.5 - 4.5, y + 0.5 - 4.5); if (d < 4.3) R(c, d > 3.2 ? '#8a94a0' : '#ffffff', x, y); } }));
