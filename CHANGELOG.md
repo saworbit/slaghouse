@@ -359,6 +359,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   could only get out with S + Space. The pillars now stop as ceiling brackets above the Gunship's height. The
   Gunship follows you across the arena, and you can walk out along the catwalk. Solid joints in the catwalk, where
   the pillars met it, keep its girder spans supported.
+- **The Sorting Line no longer boxes in a Gunship either.** Its catwalk pillars also ran from the ceiling down to
+  the catwalk. In OVERTIME, DAILY and BOSS RUSH, a Gunship that warped in above the catwalk stayed there, and one
+  that warped in at either side couldn't cross to the other. These pillars now also stop as ceiling brackets, and
+  their bottom tiles stay as joints at the catwalk's ends. You can walk off either end of the catwalk.
 - Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
   scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
   That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,
