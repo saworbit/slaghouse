@@ -7,6 +7,9 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- A play-test check that a Gunship can cross every campaign and OVERTIME arena at its cruise height. It fails, naming
+  the arena and the columns, if solid tiles, crates or girders cross the rows its body fills there, as the Furnace's
+  and the Sorting Line's ceiling pillars did before #194 and #195 (#200).
 - **Start the campaign at any act** for a real-speed playtest: `slaghouse.html?act=N`, for N from 2 to 5, saves a
   test start at that act's checkpoint, with the weapons earned by then, a perk for each cleared operation, full health
   and your difficulty and mutator, and opens the campaign page on Continue. It asks before replacing a saved
