@@ -646,6 +646,29 @@ try {
     const page = await open(ctx, ['checkpoint']);
     return (await page.evaluate(() => CP.latePacing())).fails;
   });
+  await check('a recycled gib crumbles where it lay and draws no seeded random numbers for it', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'campaign'; T.boot();
+      const g = T.setup(0), view = g.cameras.main.worldView, cx = view.centerX, cy = view.centerY;
+      for (let i = 0; i < g.gibList.length; i++) g.spawnGib('g_chunk', cx - 30 + (i % 20) * 3, cy, 0, 0);
+      const spawnCounting = () => {                                    // one more gib, counting its Math.random draws
+        const real = Math.random; let n = 0;
+        Math.random = () => { n++; return real(); };
+        try { g.spawnGib('g_chunk', cx, cy - 40, 0, 0); } finally { Math.random = real; }
+        return n;
+      };
+      const old = g.gibList[g.gibCursor], at = { x: old.x, y: old.y }, n0 = g.cfx.live.length;
+      const recycled = spawnCounting();
+      const crumble = g.cfx.live.slice(n0).filter(p => Math.hypot(p.x - at.x, p.y - at.y) < 6).length;
+      if (!crumble) fails.push(`the recycled gib at (${Math.round(at.x)},${Math.round(at.y)}) vanished with no crumble`);
+      g.gibList[5].disableBody(true, true);
+      const fresh = spawnCounting();
+      if (recycled !== fresh) fails.push(`recycling a gib drew ${recycled} seeded random numbers, a free one ${fresh}`);
+      return [...fails, ...T.errs];
+    });
+  });
   await check('every run mode keeps its own wave total, lifetime stats and record', async ctx => {
     const page = await open(ctx, ['modes']);
     return (await page.evaluate(() => RMC.check())).fails;

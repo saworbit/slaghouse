@@ -15003,7 +15003,11 @@ class GameScene extends Phaser.Scene {
   spawnGib(tex, x, y, vx, vy, kind) {                     // kind: undefined = meat, 'shell', 'metal', 'slag' (glowing, cools)
     const shell = kind === 'shell', metal = kind === 'metal' || kind === 'slag';
     let g = this.gibs.getFirstDead(false);
-    if (!g) { g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length; }   // recycle oldest
+    if (!g) {                                              // recycle the oldest: where it lay, it crumbles instead of blinking out
+      g = this.gibList[this.gibCursor]; this.gibCursor = (this.gibCursor + 1) % this.gibList.length;
+      if (this.cameras.main.worldView.contains(g.x, g.y)) this.cfx.emit(g.x, g.y, { n: 6, speed: [15, 50], life: [0.3, 0.6], size: [2, 1], g: 180, cosmetic: true,
+        cols: g.shell ? [0xd8b050, 0x8a6a2a] : g.metal ? (g.hot > 0 ? [0xff8a20, 0x6a5a50] : [0x9aa0a8, 0x5a5e66, 0x3a3c40]) : [0x9a1a1a, 0x5a0a0a, 0x4a3a30] });
+    }
     g.setTexture(tex); g.clearTint();
     g.enableBody(true, x, y, true, true);
     g.body.setSize(Math.max(2, g.frame.width - 3), Math.max(2, g.frame.height - 3), true);
