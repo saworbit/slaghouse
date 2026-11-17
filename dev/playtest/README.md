@@ -18,7 +18,7 @@ Load them from DevTools or use the headless runner. The game's built-in `SlagLab
 | `dump.js` | `window.KD`: `KD.run(kinds, states)` spawns, draws and kills each kind on a seeded RNG and pinned clocks and returns what each step did, line by line, for `compare.mjs` to diff. `KD.kinds()` and `KD.states()` list the build's kinds and the AI states its scene tests for |
 | `compare.mjs` | Runs `dump.js` in the working tree and in a git ref side by side and lists the kinds and cases that differ. See [Comparing two builds](#comparing-two-builds) |
 | `run.mjs` | Serves the repo, opens the game in headless Chrome and runs the checks below. CI runs it on pushes to `main` and on pull requests. |
-| `campaign-bot.js` | The campaign controller follows platforms, jumps, grapples, climbs walls, takes long drops, dodges fire, steps off burning, corrosive, gassed or live ground and seeks medkits using normal game mechanics. It plans on the same graph `run.mjs` checks, the player's long drops and wall climbs included. It keeps after the foe it's chasing while it can reach and hurt it, unless one in sight is much closer. A foe stranded on a deck whose steps were blown away comes last, and the controller shoots it from any reachable spot that can see it rather than trying to reach it. If it parks at a spot whose shot only grazes a corner, it marks that spot blind to the foe for 20 s and picks another. On a route it turns valves and pulls the breaker under fire, and it fights a valve crew rather than wait at a lift that won't come (the scene's `routeGoal()`). |
+| `campaign-bot.js` | The campaign controller follows platforms, jumps, grapples, climbs walls, takes long drops, dodges fire, steps off burning, corrosive, gassed or live ground and seeks medkits using normal game mechanics. It plans on the same graph `run.mjs` checks, the player's long drops and wall climbs included. It keeps after the foe it's chasing while it can reach and hurt it, unless one in sight is much closer. A foe stranded on a deck whose steps were blown away comes last, and the controller shoots it from any reachable spot that can see it rather than trying to reach it. It rates a spot's shot along the line its body fires from. If it still parks at a spot with no clear shot and hurts nothing for 2.2 s, it marks that spot blind to the foe for 20 s and picks another; a railgun shot through cover that does no harm counts as no shot. A medkit it gets no closer to for 5 s is passed over for 30 s. Each campaign's line counts the blind spots and passed-over medkits. On a route it turns valves and pulls the breaker under fire, and it fights a valve crew rather than wait at a lift that won't come (the scene's `routeGoal()`). |
 | `vibe.js` | `window.VB`: `VB.campaign(maxSecs)` plays the campaign to the end (the Smelter down) and reports per-wave time and damage, kills, errors, callout counts and the real cost of each simulated frame |
 
 ## Running it headless
@@ -62,7 +62,7 @@ job with the same rule, since any change that moves the random stream can tip on
 page or the harness still fails. Run this command to repeat it.
 
 ```bash
-node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7
+node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,21,4,6,14 --min-wins=7
 ```
 
 Page errors and console errors fail the check. The runner exits with status 1 and names the failing checks.

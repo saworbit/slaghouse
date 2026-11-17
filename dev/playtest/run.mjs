@@ -16,7 +16,7 @@
 //   node dev/playtest/run.mjs           (all checks, then eight Normal campaigns; seven must win)
 //   node dev/playtest/run.mjs --quick   (skip the campaign run)
 //   node dev/playtest/run.mjs --campaign --brutal --seeds=91,404
-//   node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7   (CI's Brutal job)
+//   node dev/playtest/run.mjs --campaign --brutal --seeds=91,137,7,11,21,4,6,14 --min-wins=7   (CI's Brutal job)
 //   node dev/playtest/run.mjs --help    (every option; an unknown option or a bad --seeds exits with status 2)
 // It uses the installed Google Chrome (Playwright's 'chrome' channel). Set PLAYTEST_CHROME to a browser's path to
 // use another. It needs network access once: it fetches Phaser from jsDelivr (with retries), checks it against the
@@ -879,6 +879,25 @@ try {
       return [...fails, ...T.errs];
     });
   });
+  await check('a hurt campaign bot passes over a pickup it cannot reach and clears Blackout (#187)', async ctx => {
+    const page = await open(ctx, ['campaign-bot']);
+    return page.evaluate(() => {
+      T.seed(91);
+      RUNMODE = 'campaign'; T.boot(); T.run(300);
+      const g = T.g();
+      g.time.removeAllEvents(); g.wave = 1; g.enemiesLeft = 2; g.applyMod('dark');
+      const creeper = g.spawnEnemy('creeper', 68, 2), mimic = g.spawnEnemy('mimic', 95, 24);
+      const [stuck, ...rest] = g.pickups;                               // one medkit hangs under the ceiling, out of any reach,
+      for (const k of rest) k.taken = true;                             // and the others are gone
+      stuck.x = 72; stuck.y = 40; stuck.img.setPosition(72, 40); stuck.glow.setPosition(72, 40);
+      g.hp = 50;
+      const fails = [], drive = campaignBot();
+      let c;
+      for (let i = 0; i < 3600 && g.enemiesLeft && g.state === 'play'; i++) { c = drive(g); g.hp = Math.min(g.hp, 50); T.run(17); }
+      if (creeper.alive || mimic.alive || g.enemiesLeft) fails.push(`at 50 HP Blackout stalled with ${creeper.hp} creeper HP and ${mimic.hp} mimic HP (passed over ${c?.passedHeals} pickups)`);
+      return [...fails, ...T.errs];
+    });
+  });
   await check('ammo crate cook-offs and scenery blasts leave accuracy alone', async ctx => {
     const page = await open(ctx, ['props']);
     return page.evaluate(() => PR.accuracy());
@@ -998,7 +1017,7 @@ try {
         RUNMODE = 'campaign'; T.boot(); T.run(300);
         return await VB.campaign(1500);
       }, { seed, brutal });
-      console.log(`      seed ${seed}: ${r.state}, ${r.kills}/${r.total} kills, ${r.pending} pending, ${r.remaining.length} survivors, ${Math.round(r.hp)} HP at finish (${Math.round(r.minHp)} minimum), ${r.simFps} sim fps; ${r.waves.join('; ')}`);
+      console.log(`      seed ${seed}: ${r.state}, ${r.kills}/${r.total} kills, ${r.pending} pending, ${r.remaining.length} survivors, ${Math.round(r.hp)} HP at finish (${Math.round(r.minHp)} minimum), ${r.control?.blindSpots ?? 0} blind spots, ${r.control?.passedHeals ?? 0} pickups passed over, ${r.simFps} sim fps; ${r.waves.join('; ')}`);
       const fails = [];
       if (r.difficulty !== (brutal ? 'BRUTAL' : 'NORMAL')) fails.push(`unexpected difficulty: ${r.difficulty}`);
       if (r.state !== 'won') fails.push(`state ${r.state}, want won (stopped at ${r.kills}/${r.total} kills)`);
