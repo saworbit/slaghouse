@@ -101,7 +101,8 @@ inputs and ordinary in-game healing. A failed run prints the surviving mobs and 
    cinders and its puddles steam out) and that the vents stop. At each wave start, check that restocked drums, gas
    cans and medkits beam in and that a valve you burst is welded back on.
    After that squad, check that the Gunship countdown prompts you to find cover and gives you about six seconds
-   to move. Verify that its rocket and strafe warnings give you time to react, and that after **WAVE CLEARED** the
+   to move. Run to each end of the arena and check that the Gunship follows you and does not stay above the
+   catwalk. Verify that its rocket and strafe warnings give you time to react, and that after **WAVE CLEARED** the
    fire suppression sprays out the ground fire and it stops damaging you, including any the crash leaves. In Gravity Loss, check that the second Hound
    arrives with **Gravity Surge** and the Linkers arrive in the next squad. Climb onto the catwalk and confirm the
    last Linker stays in reach or descends below it. Hold toward a wall and repeat the jump input to climb without

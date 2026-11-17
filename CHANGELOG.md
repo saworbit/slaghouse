@@ -206,6 +206,11 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   back to the latch instead of it vanishing, so the Foreman cuts it loose from where it hangs. Each route's wave
   card names the act's goal, for example LOCKDOWN LIFTED or LINE BREACHED, and the health top-up after a clear shows
   as SUIT PATCHED with a green flash.
+- The campaign bot no longer stalls at a spot where it can see a foe but has no shot. It scored spots by a sight
+  line from the path node and fired from its body, and when the first line was clear but the second only grazed a
+  ledge's corner, it waited there for good (a warhorn on the Sorting Line's side ledge held Brutal seed 137 for
+  20 minutes). Parked with no clear shot and nothing hurt for 2.2 s, it now marks the spot blind to that foe and
+  moves.
 - The campaign bot and `T.bot` fight a valve crew instead of waiting at a lift that won't come (`routeGoal()`). The
   bot also stops flipping between a foe it can reach and one stranded on a deck whose steps were blown away (a
   Meltdown stall that cost Brutal seeds on main too). A stranded foe now comes last, and the bot shoots it from any
@@ -378,6 +383,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   could only get out with S + Space. The pillars now stop as ceiling brackets above the Gunship's height. The
   Gunship follows you across the arena, and you can walk out along the catwalk. Solid joints in the catwalk, where
   the pillars met it, keep its girder spans supported.
+- **The Sorting Line no longer boxes in a Gunship either.** Its catwalk pillars also ran from the ceiling down to
+  the catwalk. In OVERTIME, DAILY and BOSS RUSH, a Gunship that warped in above the catwalk stayed there, and one
+  that warped in at either side couldn't cross to the other. These pillars now also stop as ceiling brackets, and
+  their bottom tiles stay as joints at the catwalk's ends. You can walk off either end of the catwalk.
 - Effects marked cosmetic no longer shift the seeded campaigns. They drew from the cosmetic generator but shared the
   scene's particle list, and each cosmetic particle's lifetime decided when the seeded ones swapped places in it.
   That changed the order blood and slag drops painted the level in, which draws `Math.random`. So any cosmetic tweak,
