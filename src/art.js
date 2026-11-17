@@ -1691,9 +1691,10 @@ function drawHoser(ctx, frame) {                     // 18x24 hoser: a trooper i
   if (sp) R(ctx, '#bfe8ff', 17, ny - 1 + by, 1, 4);
 }
 function drawDemo(ctx, frame) {                      // 16x22 demo runner: a wiry sprinter clutching a bundle of lit dynamite
-  const a = frame === 'air', s = frame === 'r1' ? 1 : 0, PNT = ['#141420', '#24243a', '#3a3a5a', '#56567a'];
-  // Legs in full stride, or tucked for a hop
-  if (a) { limb(ctx, 6, 13, 3, 17, 1.4, 1.2, PNT); limb(ctx, 9, 13, 12, 16, 1.4, 1.2, PNT); R(ctx, '#e8e0d0', 1, 17, 3, 2); R(ctx, '#e8e0d0', 11, 16, 3, 2); }
+  const a = frame === 'air', lt = frame === 'light', s = frame === 'r1' ? 1 : 0, PNT = ['#141420', '#24243a', '#3a3a5a', '#56567a'];
+  // Legs in full stride, tucked for a hop, or planted while it lights the fuse
+  if (lt) { limb(ctx, 6, 13, 4, 20, 1.4, 1.2, PNT, -0.2); limb(ctx, 9, 13, 11, 20, 1.4, 1.2, PNT); R(ctx, '#c8c0b0', 2, 20, 4, 2); R(ctx, '#e8e0d0', 10, 20, 4, 2); }
+  else if (a) { limb(ctx, 6, 13, 3, 17, 1.4, 1.2, PNT); limb(ctx, 9, 13, 12, 16, 1.4, 1.2, PNT); R(ctx, '#e8e0d0', 1, 17, 3, 2); R(ctx, '#e8e0d0', 11, 16, 3, 2); }
   else {
     const [fx, bx, by] = s ? [11, 3, 17] : [12, 2, 18];
     limb(ctx, 7, 13, bx, by, 1.4, 1.2, PNT, -0.3); R(ctx, '#c8c0b0', bx - 2, by, 3, 2);
@@ -1710,6 +1711,7 @@ function drawDemo(ctx, frame) {                      // 16x22 demo runner: a wir
   limb(ctx, 9, 8, 12, 11, 1.1, 1.0, XSKN);
   R(ctx, '#6a0c0c', 12, 9, 4, 5); R(ctx, '#d02818', 12, 9, 1, 5); R(ctx, '#d02818', 14, 9, 1, 5); R(ctx, '#ff6a50', 12, 9, 1, 1);
   R(ctx, '#e8b422', 12, 11, 4, 1); R(ctx, '#8a8a80', 14, 7, 1, 2);
+  if (lt) { R(ctx, '#ffe46a', 13, 5, 3, 2); R(ctx, '#ffffff', 14, 5, 1, 1); }                                              // the match flaring at the fuse
 }
 function drawPanzer(ctx, frame) {                    // 30x20 panzer: a treaded mini-tank hull behind a thick glacis plate (the turret is its own sprite)
   const s = frame === 'w1' ? 1 : 0;
@@ -1834,7 +1836,7 @@ const XGIBDEF = {                                    // their own loose parts
 function genExpansionEnemyArt(scene) {               // their sheets (+ the white copies a hit flashes), loose parts and props
   addSheet(scene, 'flailer', ['w0', 'w1', 'wind', 'throw'].map(f => ({ name: f, c: makeSprite(24, 24, x => drawFlailer(x, f)) })), 24, 24, true);
   addSheet(scene, 'hoser', ['w0', 'w1', 'brace', 'spray'].map(f => ({ name: f, c: makeSprite(18, 24, x => drawHoser(x, f)) })), 18, 24, true);
-  addSheet(scene, 'demo', ['r0', 'r1', 'air'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawDemo(x, f)) })), 16, 22, true);
+  addSheet(scene, 'demo', ['r0', 'r1', 'air', 'light'].map(f => ({ name: f, c: makeSprite(16, 22, x => drawDemo(x, f)) })), 16, 22, true);
   addSheet(scene, 'panzer', ['w0', 'w1'].map(f => ({ name: f, c: makeSprite(30, 20, x => drawPanzer(x, f)) })), 30, 20, true);
   addSheet(scene, 'reaper', ['w0', 'w1', 'tell', 'spin0', 'spin1', 'dizzy'].map(f => ({ name: f, c: makeSprite(22, 32, x => drawReaper(x, f)) })), 22, 32, true);
   addSheet(scene, 'gull', ['f0', 'f1', 'scream', 'dive'].map(f => ({ name: f, c: makeSprite(22, 14, x => drawGull(x, f)) })), 22, 14, true);

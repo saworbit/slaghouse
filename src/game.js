@@ -10999,15 +10999,22 @@ class GameScene extends Phaser.Scene {
   }
 
   // ---------------------------------------------------------------- demo runner ----
-  // A wiry sprinter (35 HP) holding a bundle of dynamite out front. The moment it knows you're there it lights the fuse
-  // (3 s; fire burns it down twice as fast) and sprints at you (175 px/s), hopping steps and gaps. It blows when it
+  // A wiry sprinter (35 HP) holding a bundle of dynamite out front. The moment it knows you're there it stops to light
+  // the fuse (0.7 s, a flare at the bundle), then sprints at you (175 px/s), hopping steps and gaps; the fuse burns 3 s
+  // (fire burns it down twice as fast). It blows when it
   // touches you or the fuse runs out (radius 52: 30 to you, 40 to foes). A shot into the bundle from the front, or any
   // blast, sets it off early and hits the foes round it harder (70). Killed any other way it drops the bundle, which
   // goes off 0.7 s later where it lands (shoot it, or kick it at them). Frozen or time-stopped, the fuse waits.
   setupDemo(e, x, y, cx, cy) { Object.assign(e, { ai: 'idle', fuse: TUNE.DEMO.fuse, lit: false, hopT: 0, beepT: 0, blown: false }); }
   updateDemo(e, dt, now, dx, dy, dist, alive) {
     const T = TUNE.DEMO, b = e.body, onG = b.blocked.down || b.touching.down;
-    if (!e.lit && (e.aggro || (alive && (e.sees || dist < 200) && dist < e.def.sight))) { e.lit = true; e.ai = 'run'; e.aggro = true; e.aggroT = 6; Sfx.ignite(); this.popAlert(e); }
+    if (e.ai === 'idle' && (e.aggro || (alive && (e.sees || dist < 200) && dist < e.def.sight))) { e.ai = 'light'; e.aiUntil = now + T.lightMs; e.aggro = true; e.aggroT = 6; Sfx.sputter(); this.popAlert(e); }
+    if (e.ai === 'light') {                                             // the tell: it stops dead and puts a match to the fuse
+      if (b.blocked.down || b.touching.down) b.velocity.x *= Math.pow(0.01, dt);
+      e.fr = 'light'; if (alive) e.dir = dx >= 0 ? 1 : -1;
+      if (now < e.aiUntil) return;
+      e.ai = 'run'; e.lit = true; Sfx.ignite();
+    }
     if (e.lit) {
       e.fuse -= dt * (e.burnT > 0 ? 2 : 1); e.panicT = 0;                 // alight, it doesn't panic: it just burns down faster
       if ((e.beepT -= dt) <= 0) { e.beepT = 0.07 + 0.28 * Math.max(0, e.fuse / T.fuse); Sfx.sputter(); }
@@ -11038,6 +11045,7 @@ class GameScene extends Phaser.Scene {
     this.xfoes.bundles.push({ img: this.add.image(x, cy, 'demo_tnt').setDepth(6), x, y: cy, vx: e.body.velocity.x * 0.3 + dx * 50, vy: -140, rot: 0, t: TUNE.DEMO.drop });
   }
   visDemo(e, g, now) {                                                  // the fuse spits sparks, faster and redder as it burns down
+    if (e.ai === 'light') { const k = clamp(1 - (e.aiUntil - now) / TUNE.DEMO.lightMs, 0, 1); g.fillStyle(0xfff4c0, 0.5 + 0.5 * k).fillCircle(e.x + 6 * e.dir, e.y - 5, 1 + 2 * k); if (Math.random() < 0.5) this.fx.emit(e.x + 6 * e.dir, e.y - 5, { n: 1, angle: -Math.PI / 2, spread: 2, speed: [20, 60], life: [0.1, 0.2], size: [2, 1], cols: [0xffffff, 0xffe46a], add: true }); return; }
     if (!e.lit) return;
     const fx0 = e.x + 6 * e.dir, fy0 = e.y - 4, k = 1 - Math.max(0, e.fuse) / TUNE.DEMO.fuse;
     if (Math.random() < 0.8) this.fx.emit(fx0, fy0, { n: 1, angle: -Math.PI / 2, spread: 1.6, speed: [20, 80], life: [0.1, 0.25], size: [2, 1], cols: [0xffffff, 0xffe46a, 0xff8a1f], add: true });

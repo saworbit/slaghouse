@@ -251,7 +251,7 @@ const TUNE = {
   // ---- expansion: enemies ----
   FLAILER:   { speed: 50, close: 26, keep: 60, r: 32, spin: 5.5, windSpin: 12, windMs: 550, cd: [2.8, 3.8], reach: 165, throwSpeed: 420, reel: 460, hit: 12, ehit: 10, throwDmg: 22, ethrowDmg: 20 },
   HOSER:     { speed: 85, keep: [80, 160], range: 190, braceMs: 450, spray: 1.1, turn: 1.8, blast: 340, push: 2600, dmg: 3, tick: 0.3, soak: 1.6, cd: [2.4, 3.2], tank: 72 },
-  DEMO:      { speed: 175, fuse: 3, hop: 300, drop: 0.7,
+  DEMO:      { speed: 175, lightMs: 700, fuse: 3, hop: 300, drop: 0.7,
                boom: { radius: 52, maxDamage: 36, minDamage: 10, enemyDamage: 40, selfDamage: 30, push: 400, maxRise: 500, enemy: true, tileDamage: 90 },
                shot: { radius: 56, maxDamage: 40, minDamage: 12, enemyDamage: 70, selfDamage: 24, push: 420, maxRise: 520, enemy: true, tileDamage: 90 } },
   PANZER:    { speed: 38, keep: [150, 260], turnMs: 900, gunTurn: 1.8, aimMs: 650, flight: 1.1, cd: [3.4, 4.4], coaxAt: 120, burst: 4, gap: 0.08, coaxDmg: 5, coaxCd: 2.2,
