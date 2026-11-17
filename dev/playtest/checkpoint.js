@@ -127,7 +127,7 @@ window.CP = (() => {
 
   CP.furnacePacing = () => {
     const [fails, expect] = checker();
-    Math.random = seeded(426);
+    T.seed(426);
     const [g] = startFromTitle(1);
     g.scene.restart({ arena: 1 }); T.run(100);
     g.time.removeAllEvents();
@@ -234,7 +234,7 @@ window.CP = (() => {
   CP.mutatorHazards = () => {
     const [fails, expect] = checker();
     for (const id of ['lowg', 'dark']) {
-      Math.random = seeded(426);
+      T.seed(426);
       OPTS.mut = MUTATORS.findIndex(m => m.id === id);
       const [g] = startFromTitle(1);
       g.scene.restart({ arena: 1 }); T.run(100);
@@ -423,7 +423,7 @@ window.CP = (() => {
 
   CP.latePacing = () => {
     const [fails, expect] = checker();
-    Math.random = seeded(628);
+    T.seed(628);
     const [g] = startFromTitle(1);
     const hud = game.scene.getScene('Hud');
     const begin = (arena, wave) => {

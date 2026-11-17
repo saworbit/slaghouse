@@ -7,6 +7,13 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Added
 
+- Three play-test checks. Every OVERTIME boss now fights and falls in each of ARENAS 06-10 with the machinery running,
+  and its hazards go harmless when it does (#179). Every solid deck in every campaign and OVERTIME arena stays in reach
+  with each unreinforced breakable blown away, and a reinforced crate, girder and grating stand through a blast that
+  breaks the loose one beside them (#188). A stretch of seeded play draws the same random numbers however fast the
+  audio clock runs. Seeded checks start with the new `T.seed(n)`, which also mutes sound, because sound throttles on
+  wall time and draws `Math.random`, so a busy machine could change a seeded check's result (#176).
+
 - **Play in the browser** at <https://saworbit.github.io/slaghouse/>. A new `Pages` workflow publishes each `vX.Y.Z`
   tag to GitHub Pages, with the audio banks, and the bare URL opens the game. It can also publish any other ref by
   hand.

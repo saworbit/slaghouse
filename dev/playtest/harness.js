@@ -7,6 +7,10 @@ window.T = (() => {
   const T = { game, errs: [], dmgLog: [] };
   let vnow = Date.now(), aim = null;
   T.start = () => { game.loop.sleep(); Date.now = () => vnow; };
+  // A seeded check: Math.random replays from n, with sound muted. Sfx.ok throttles repeats on the audio clock, which
+  // follows wall time, and most sounds then draw Math.random, so with sound on, how fast the machine steps the game
+  // would change the stream (#176). Every seeded check starts with this.
+  T.seed = n => { Math.random = seeded(n); Sfx.muted = true; };
   T.run = ms => {
     const n = Math.max(1, Math.round(ms / 16.667));
     const pointer = game.input.activePointer, project = pointer.positionToCamera;
