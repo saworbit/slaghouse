@@ -239,7 +239,11 @@ window.campaignBot = () => {
     const heal = !objective && g.hp <= 70 && g.pickups.filter(k => !k.taken)
       .sort((a, c) => Math.hypot(a.x - px, a.y - py) - Math.hypot(c.x - px, c.y - py))[0];
     const buried = g.enemies.getChildren().find(e => e.alive && e.under && !e.summoned && (e.kind === 'wyrm' || e.kind === 'burrower'));
-    const foe = target || nearest || buried;
+    let foe = target || nearest || buried;
+    // Stay on the foe it's chasing while it can still reach and hurt it (9 s without a hit lets go), unless one in sight
+    // is much closer. Otherwise it flips between a foe in sight across the room and a nearer one out of sight.
+    const chasing = focus && focus !== foe && focus.alive && !focus.under && focus.body.enable && reachable(g, start, focus) && now - progress < 9000;
+    if (chasing && !(target && Math.hypot(target.x - px, target.y - py) < 0.6 * Math.hypot(focus.x - px, focus.y - py))) foe = focus;
     if (focus !== foe || foe?.hp < lastHp) { focus = foe; lastHp = foe?.hp; progress = now; anchor = null; }
     const stall = now - progress > 2200;
     let gx = px, gy = b.bottom, direct = false;
