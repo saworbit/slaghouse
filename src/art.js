@@ -4573,6 +4573,41 @@ function navAt(x, feetY) {                        // node an actor is standing o
   for (const ox of [0, -5, 5]) { const m = NAV.id(Math.floor((x + ox) / TS), ty); if (m >= 0) return m; }
   return -1;
 }
+// The breakable steps that are the only way up to a solid deck or ledge. A blast that took them out would strand that
+// deck, and whatever stood on it, for the rest of the act, so GameScene reinforces them: blast-proof and drawn bolted.
+// A Dijkstra over the player's moves from the start, where landing on a breakable support costs 1000, finds the
+// cheapest way up to the nearest '#'-supported cell that still needs one; its breakable supports are kept, then it
+// searches again, until every solid deck has one way up that can't be blown away. A grating or girder also keeps the
+// span back to its nearest anchor, and a crate the crates it stands on. Reads NAV, which must be this grid's.
+function reinforcedTiles(grid, sx, sy) {
+  const W = grid[0].length, H = grid.length, cell = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '#' : grid[y][x]);
+  const key = (x, y) => y * W + x, hard = new Set(), start = NAV.id(sx, sy);
+  const breakable = (x, y) => !!TILE_HP[cell(x, y)] && !hard.has(key(x, y));
+  if (start < 0) return hard;
+  for (let round = 0; round < 40; round++) {
+    const res = navDijkstra(start, -1, Infinity, (u, ed) => { const n = NAV.nodes[ed.to]; return (ed.playerCost ?? ed.cost) + (breakable(n.x, n.y + 1) ? 1000 : 0); });
+    let pick = -1;
+    for (let i = 0; i < NAV.nodes.length; i++) {
+      const n = NAV.nodes[i];
+      if (cell(n.x, n.y + 1) === '#' && Number.isFinite(res.dist[i]) && res.dist[i] >= 1000 && (pick < 0 || res.dist[i] < res.dist[pick])) pick = i;
+    }
+    if (pick < 0) break;
+    for (let v = pick; res.prev[v] >= 0; v = res.prev[v]) { const m = NAV.nodes[v]; if (breakable(m.x, m.y + 1)) hard.add(key(m.x, m.y + 1)); }
+  }
+  const D4 = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+  for (const k of [...hard]) {
+    const x = k % W, y = (k - x) / W, c = cell(x, y);
+    if (c === 'x') { for (let yy = y + 1; cell(x, yy) === 'x'; yy++) hard.add(key(x, yy)); continue; }
+    const anchored = xx => cell(xx - 1, y) !== c || cell(xx + 1, y) !== c || D4.some(([dx, dy]) => cell(xx + dx, y + dy) === '#');
+    let best = null;
+    for (const d of [-1, 1]) {
+      const run = [];
+      for (let xx = x; cell(xx, y) === c; xx += d) { run.push(xx); if (anchored(xx)) { if (!best || run.length < best.length) best = run; break; } }
+    }
+    for (const xx of best || [x]) hard.add(key(xx, y));
+  }
+  return hard;
+}
 function navBelow(x, y, rows = 12) {              // first node straight down from a point (airborne targets)
   const tx = Math.floor(x / TS);
   for (let ty = Math.floor(y / TS), r = 0; r < rows; r++, ty++) {

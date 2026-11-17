@@ -199,7 +199,7 @@ class GameScene extends Phaser.Scene {
     });
     this.beacons = this.A.decor.beacons.map(([x, y], i) => ({ img: this.add.image(x, y, 'glow').setBlendMode(ADD).setTint(0xff2a14).setScale(1.2).setDepth(18), ph: i * 1.7 }));
     this.vents = this.A.decor.vents.map(([x, y], i) => ({ x, y, t: i * 1.9, acc: 0 }));
-    this.pipeGroup = this.physics.add.staticGroup();
+    this.pipeGroup = this.physics.add.staticGroup(); this.pipeG = this.add.graphics().setDepth(4.85);   // pipeG: the clamps on welded valves
     this.pipes = (this.A.pipes || []).map(([x, y, dir]) => {
       const sp = this.pipeGroup.create(x + dir * 3, y, 'pipe').setFlipX(dir < 0).setDepth(4.8);
       sp.body.setSize(8, 10); sp.refreshBody();
@@ -305,8 +305,16 @@ class GameScene extends Phaser.Scene {
       k.enableBody(true, cx * TS + 8, (cy + 1) * TS - 7, true, true);
       k.body.setSize(10, 13, true); k.body.setAllowGravity(true); k.body.setBounce(0.2); k.body.setDrag(200, 0);
       k.clearTint(); Object.assign(k, { hp: TUNE.BARREL.hp, fuse: -1, burning: false, kicked: false, prevV: 0 });
-      if (fx) this.fx.emit(k.x, k.y, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xffc060], add: true, g: -40 });
+      if (fx) { this.fx.emit(k.x, k.y, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xffc060], add: true, g: -40 }); this.beamIn(k.x, (cy + 1) * TS, 13, [k]); }
     });
+  }
+  // Restocking: the supply teleporter beams it back in, a short green column (the foes' warp beam is magenta) it fades
+  // in inside. Only the look: the body is there from the same frame as before, so nothing plays differently.
+  beamIn(x, bottom, h, objs) {
+    const beam = this.add.image(x, bottom, 'beam').setOrigin(0.5, 1).setBlendMode(ADD).setTint(0x7dffb0).setAlpha(0).setScale(1, Math.max(0.5, (h + 20) / 64)).setDepth(17);
+    this.tweens.add({ targets: beam, alpha: 0.85, scaleX: 0.35, duration: 260, yoyo: true, hold: 140, onComplete: () => beam.destroy() });
+    this.spawnLight(x, bottom - h / 2, 'glow', 0x7dffb0, 0.4, 1.2, 0.7, 0.4);
+    for (const o of objs) if (o) { const a = o.alpha || 1; o.setAlpha(0); this.tweens.add({ targets: o, alpha: a, duration: 380, delay: 150 }); }
   }
 
   buildActors() {
@@ -775,9 +783,12 @@ class GameScene extends Phaser.Scene {
     if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) return true;
     return this.grid[ty][tx] !== '.';
   }
-  losHard(x0, y0, x1, y1) {                                           // line of sight that ignores breakables
+  losHard(x0, y0, x1, y1) {                                           // line of sight that ignores breakables (but not reinforced ones)
     const dx = x1 - x0, dy = y1 - y0, n = Math.ceil(Math.hypot(dx, dy) / 6);
-    for (let i = 1; i < n; i++) if (this.tileAt(Math.floor((x0 + dx * i / n) / TS), Math.floor((y0 + dy * i / n) / TS)) === '#') return false;
+    for (let i = 1; i < n; i++) {
+      const tx = Math.floor((x0 + dx * i / n) / TS), ty = Math.floor((y0 + dy * i / n) / TS);
+      if (this.tileAt(tx, ty) === '#' || this.hardTiles?.has(ty * MAP_W + tx)) return false;
+    }
     return true;
   }
   los(x0, y0, x1, y1) {
@@ -1546,7 +1557,7 @@ class GameScene extends Phaser.Scene {
       const x = this.shoulder.x + ca * d, y = this.shoulder.y + sa * d;
       if (this.solidAt(x, y)) {                                         // punches through up to 3 breakable tiles
         const tx = Math.floor(x / TS), ty = Math.floor(y / TS);
-        if (pierced < 3 && TILE_HP[this.tileAt(tx, ty)]) { pierced++; this.destroyTile(tx, ty, true); } else break;
+        if (pierced < 3 && this.breakable(tx, ty)) { pierced++; this.destroyTile(tx, ty, true); } else break;
       }
       ex = x; ey = y;
       for (const e of this.enemies.getChildren()) {
@@ -4028,16 +4039,32 @@ class GameScene extends Phaser.Scene {
   // ------------------------------------------------------------ destructible terrain ----
   // 'x' crates fall when nothing is under them; 'g' girders and '=' gratings hang from their anchors
   // (original ends, or anything bolted to solid metal) and anything more than TUNE.TILE.span tiles out
-  // sags off. Blasts, rails, bullets, saws, kicks, the rammer and the boss all chew through them.
+  // sags off. Blasts, rails, bullets, saws, kicks, the rammer and the boss all chew through them. The few that are
+  // the only way up to a solid deck (reinforcedTiles) are reinforced: bolted, striped, blast-proof and never sagging,
+  // so no blast can strand a deck and whatever's on it for the rest of the act. The Lab's rooms leave them all loose.
   initTerrain() {
     this.tileHp = new Map(); this.breakZones = []; this.onewayDirty = false; this.navDirtyT = 0; this.stabQ = [];
-    this.anchors = new Set();
+    this.anchors = new Set(); this.hardPingT = 0;
     for (let ty = 0; ty < MAP_H; ty++) for (let tx = 0; tx < MAP_W; tx++) {
       const c = this.grid[ty][tx];
       if ((c === 'g' || c === '=') && (this.grid[ty][tx - 1] !== c || this.grid[ty][tx + 1] !== c)) this.anchors.add(ty * MAP_W + tx);
     }
+    this.hardTiles = this.lab ? new Set() : reinforcedTiles(this.grid, ...this.A.spawns.player);
+    for (const k of this.hardTiles) this.paintReinforced(k % MAP_W, Math.floor(k / MAP_W));
     this.rebuildBreakZones();
   }
+  paintReinforced(tx, ty) {                                            // steel straps and rivets on a crate, bolts and a hazard edge on a grating or girder
+    const L = this.lvlCtx, x = tx * TS, y = ty * TS, c = this.grid[ty][tx], px = (col, a, b, w, h) => { L.fillStyle = col; L.fillRect(a, b, w, h); };
+    if (c === 'x') {
+      for (const by of [y + 3, y + 11]) { px('#5a6574', x, by, 16, 2); px('#9aa6b4', x, by, 16, 1); for (const rx of [x + 2, x + 13]) px('#d8dee6', rx, by, 1, 1); }
+    } else {
+      const h = c === '=' ? 6 : 16;
+      for (let i = 0; i < 16; i += 2) px(((x + i) >> 1) & 1 ? '#16171a' : '#e8b422', x + i, y + h - 2, 2, 2);
+      for (const rx of [x + 2, x + 12]) { px('#2a2e35', rx, y + 1, 3, 3); px('#d8dee6', rx + 1, y + 2, 1, 1); }
+    }
+    this.lvlMark(x + 8, y + 8, 10);
+  }
+  breakable(tx, ty) { return !!TILE_HP[this.tileAt(tx, ty)] && !this.hardTiles.has(ty * MAP_W + tx); }
   tileAt(tx, ty) { return tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H ? '#' : this.grid[ty][tx]; }
   rebuildBreakZones() {
     for (const z of this.breakZones) z.destroy();
@@ -4063,7 +4090,13 @@ class GameScene extends Phaser.Scene {
   }
   damageTile(tx, ty, dmg) {
     const c = this.tileAt(tx, ty), max = TILE_HP[c]; if (!max || !(dmg > 0)) return false;
-    const key = ty * MAP_W + tx, hp0 = this.tileHp.has(key) ? this.tileHp.get(key) : max, hp = hp0 - dmg;
+    const key = ty * MAP_W + tx;
+    if (this.hardTiles.has(key)) {                                      // reinforced: it just rings
+      const now = this.time.now;
+      if (now > this.hardPingT) { this.hardPingT = now + 120; this.fx.emit(tx * TS + 8, ty * TS + (c === '=' ? 3 : 8), { n: 3, speed: [40, 120], life: [0.1, 0.25], size: [1, 1], cols: [0xffffff, 0xffe080], add: true, g: 300, cosmetic: true }); }
+      return false;
+    }
+    const hp0 = this.tileHp.has(key) ? this.tileHp.get(key) : max, hp = hp0 - dmg;
     if (hp <= 0) { this.destroyTile(tx, ty, true); return true; }
     this.tileHp.set(key, hp);
     if (Math.floor(hp / max * 3) < Math.floor(hp0 / max * 3)) this.crackTile(tx, ty, c);
@@ -4086,7 +4119,7 @@ class GameScene extends Phaser.Scene {
     Sfx.clunk(0.8);
   }
   destroyTile(tx, ty, fx) {
-    const c = this.tileAt(tx, ty); if (!TILE_HP[c]) return;
+    const c = this.tileAt(tx, ty); if (!this.breakable(tx, ty)) return;
     this.grid[ty][tx] = '.'; this.tileHp.delete(ty * MAP_W + tx);
     for (const rd of this.ragdolls) if (rd.pin && rd.pin.tile[0] === tx && rd.pin.tile[1] === ty) { rd.pin = null; rd.asleep = false; }   // pinned bodies drop with the wall
     for (const d of this.stakeDecals) if (d.visible && d.tile && d.tile[0] === tx && d.tile[1] === ty) d.setVisible(false);
@@ -4143,7 +4176,7 @@ class GameScene extends Phaser.Scene {
     const dist = new Map(), bq = [];
     for (const [x, y] of comp) {
       const k = y * MAP_W + x;
-      if (this.anchors.has(k) || D4.some(([dx, dy]) => this.tileAt(x + dx, y + dy) === '#')) { dist.set(k, 0); bq.push([x, y]); }
+      if (this.anchors.has(k) || this.hardTiles.has(k) || D4.some(([dx, dy]) => this.tileAt(x + dx, y + dy) === '#')) { dist.set(k, 0); bq.push([x, y]); }
     }
     for (let i = 0; i < bq.length; i++) {
       const [x, y] = bq[i], d = dist.get(y * MAP_W + x);
@@ -4154,7 +4187,7 @@ class GameScene extends Phaser.Scene {
     if (n) { Sfx.creak(); this.shake(220, 0.005); if (n >= 3) BUS.emit('callout', 'COLLAPSE!'); }
   }
   collapseTile(tx, ty) {                                               // tears loose and drops as a solid block
-    const c = this.tileAt(tx, ty); if (!TILE_HP[c]) return;
+    const c = this.tileAt(tx, ty); if (!this.breakable(tx, ty)) return;
     this.destroyTile(tx, ty, false);
     const cx = tx * TS + 8, cy = ty * TS + (c === '=' ? 3 : 8);
     this.fxDust(cx, cy, 3);
@@ -4799,7 +4832,7 @@ class GameScene extends Phaser.Scene {
       k.enableBody(true, cx * TS + 8, (cy + 1) * TS - 7, true, true);
       k.body.setSize(7, 13, true); k.body.setAllowGravity(true); k.body.setBounce(0.15, 0.15); k.body.setDrag(200, 0);
       k.setRotation(0); k.clearTint(); k.body.setGravityY(0); Object.assign(k, { state: 'idle', t: 0, heading: 0, hits: new Set(), hitP: false, hissT: 0 });
-      if (fx) this.fx.emit(k.x, k.y, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x80ffb0], add: true, g: -40 });
+      if (fx) { this.fx.emit(k.x, k.y, { n: 10, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x80ffb0], add: true, g: -40 }); this.beamIn(k.x, (cy + 1) * TS, 13, [k]); }
     });
   }
   igniteCanister(k, heading) {                                          // valve shears off: it becomes a very bad rocket
@@ -4870,7 +4903,7 @@ class GameScene extends Phaser.Scene {
     if (p.blade) { p.blade.setVisible(true); p.grill.setVisible(true); }
     for (const o of [p.glow, p.cone, p.beam]) if (o) o.setVisible(true);
     this.placeProp(p);
-    if (fx) { this.fx.emit(p.cx, p.cy, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xa0e8ff], add: true, g: -40 }); this.spawnLight(p.cx, p.cy, 'glow', 0xa0e8ff, 0.6, 1.4, 0.6, 0.25); }
+    if (fx) { this.fx.emit(p.cx, p.cy, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0xa0e8ff], add: true, g: -40 }); this.spawnLight(p.cx, p.cy, 'glow', 0xa0e8ff, 0.6, 1.4, 0.6, 0.25); this.beamIn(p.cx, p.cy + p.A.h / 2, p.A.h, [p.img, p.blade, p.grill]); }
   }
   placeProp(p) {                                                       // centre for hit tests, then the sprites and lights
     const D = p.D, A = p.A, j = p.jig > 0 ? Math.sin(p.wob * 53) * p.jig : 0;
@@ -6927,7 +6960,7 @@ class GameScene extends Phaser.Scene {
       const x = sx + ca * d, y = sy + sa * d;
       if (this.solidAt(x, y)) {
         const tx = Math.floor(x / TS), ty = Math.floor(y / TS);
-        if (bored < bore && TILE_HP[this.tileAt(tx, ty)]) { bored++; this.destroyTile(tx, ty, true); } else break;
+        if (bored < bore && this.breakable(tx, ty)) { bored++; this.destroyTile(tx, ty, true); } else break;
       }
       ex = x; ey = y;
       if (d < 8) continue;
@@ -12966,6 +12999,14 @@ class GameScene extends Phaser.Scene {
     pp.broken = true; pp.t = TUNE.PIPE.t; pp.sp.setTexture('pipeb');
     this.fxSparks(pp.x, pp.y, 6, pp.dir > 0 ? 0 : Math.PI, 1.2); Sfx.clang(0.6); Sfx.steam(); this.addStyle(10);
   }
+  repairPipe(pp) {                                                     // a new wave: the burst valve is welded back on, and keeps the clamp to show for it
+    pp.broken = false; pp.sp.setTexture('pipe');
+    const x = Math.round(pp.x + pp.dir * 3.5), y = pp.y, G = this.pipeG;
+    G.fillStyle(0x15171b, 1).fillRect(x - 1, y - 4, 3, 8); G.fillStyle(0x5a6574, 1).fillRect(x, y - 4, 1, 8);
+    G.fillStyle(0xd8dee6, 1).fillRect(x, y - 4, 1, 1).fillRect(x, y + 3, 1, 1); G.fillStyle(0xc87a30, 0.9).fillRect(x - 1, y - 1, 3, 2);
+    Sfx.weld(); this.spawnLight(x, y, 'glow', 0xbfe8ff, 0.5, 1.1, 0.9, 0.7);
+    this.time.addEvent({ delay: 90, repeat: 7, callback: () => this.fx.emit(x + crand(-2, 2), y + crand(-3, 3), { n: 3, speed: [40, 150], life: [0.1, 0.3], size: [1, 1], cols: [0xffffff, 0xbfe8ff, 0xffd070], add: true, g: 300, cosmetic: true }) });
+  }
   updatePipes(dt, now) {
     const T = TUNE.PIPE, pb = this.player.body;
     for (const pp of this.pipes || []) {
@@ -14640,12 +14681,13 @@ class GameScene extends Phaser.Scene {
     if (op) { this.setCampaignMachinery(op.machinery); this.issueWeapons(op.unlock); }
     this.spawnBarrels(true); this.spawnCanisters(true); this.restockProps();
     this.applyMod(mod || (this.mutator === 'lowg' ? 'lowg' : this.mutator === 'dark' ? 'dark' : null));
-    for (const pp of this.pipes) if (pp.broken && pp.t <= 0) { pp.broken = false; pp.sp.setTexture('pipe'); }
+    for (const pp of this.pipes) if (pp.broken && pp.t <= 0) this.repairPipe(pp);
     this.waveTaken = this.stats.taken; this.supplyT = TUNE.SUPPLY.first; saveMastery(); saveLife();
     Sfx.warp(); Music.track(this.waveTrack(i)); this.musicAhead(i);
     for (const k of this.pickups) if (k.taken && this.mutator !== 'vamp') {   // restock medkits between waves
       k.taken = false; k.img.setVisible(true); k.glow.setVisible(true);
       this.fx.emit(k.x, k.y, { n: 12, speed: [20, 80], life: [0.3, 0.6], size: [2, 1], cols: [0xffffff, 0x7dff8a], add: true, g: -40 });
+      this.beamIn(k.x, k.y + 9, 12, [k.img]);
     }
     const nE = M.elites(this, i);
     const eliteEntries = op && squads.length > 1 ? squads.slice(1).flatMap(squad => squad.spawns) : entries;
