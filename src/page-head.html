@@ -335,7 +335,23 @@
                           hides behind its patient out of your sight, backs off and jinks when shot at.
                           Squads spread round you (pincer spots) and hurt ones steal medkits.
                           Sniper 45 HP: climbs to high perches with long sight lines, 1.1 s blue laser
-                          (locks at 75%), 900 px/s 22-dmg round; backs off if you close within 130 px.
+                          (locks at 75%), 900 px/s 22-dmg round; backs off if you close within 130 px,
+                          and moves to a new perch after 55% of its shots.
+    Squad tactics ....... shared by every foe (TUNE.AI). Shots lead where you're going: your smoothed run
+                          speed, a jump's arc down to the floor it lands on, stopped at walls; x0.5 / 0.85 / 1
+                          of it on Easy / Normal / Brutal, none in a stationary Lab room. Grunts and heavies
+                          path up to your deck over the nav graph and steer off routes their packmates hold;
+                          heavies leap at your landing spot, grunts hop your rockets (40%). Drones take
+                          spread-out hover slots in sight of you and off your aim, and jink when aimed at
+                          (1.3 s cooldown). Gunmen hold ~235 px against short-reach guns, ~145 px near cover
+                          against long ones, and spread out against splash. A gunman that loses 30% of its HP
+                          inside about a second ducks to cover, even mid-aim, and the nearest squadmate that
+                          can see you fires at once (6 s cooldown). A squad that loses you splits: one goes
+                          where you were heading, one watches the spot, the rest check behind. On Normal and
+                          Brutal an enforcer sets a drum within 50 px of you burning (never with an ally by
+                          it or you in the line; 7 s cooldown). Humanoids within 260 px that see an ally die
+                          learn where you are. Barks over their heads (FLANKING!, COVER ME!, ...) are display
+                          only and draw no random numbers.
     Tick 12 HP .......... 150 px/s crawler, 230 px/s leap; arms on contact (350 ms beeping fuse),
                           blast radius 46, 40->12 dmg; dead ticks still pop, so they chain.
     Rocketeer 70 HP ..... humanoid launcher trooper; keeps ~165 px away, 0.75 s orange laser (locks at 60%),
