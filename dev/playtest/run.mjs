@@ -797,6 +797,42 @@ try {
     const page = await open(ctx, ['modes']);
     return (await page.evaluate(() => RMC.check())).fails;
   });
+  await check('every enemy bullet comes from spawnEBullet with its per-shot fields reset (#203)', async ctx => {
+    const page = await open(ctx, []);
+    return page.evaluate(() => {
+      const fails = [];
+      RUNMODE = 'endless'; T.boot();
+      const g = T.setup(0), stale = { active: true, x: 0, y: 0 };
+      // Each spawner, from a foe aiming level along open floor, and the shot it should make.
+      const shots = [
+        ['sniper', 'sniperShoot', { tex: 'sbullet', size: 4, life: 1.2, snipe: true, keg: null }],
+        ['jet', 'jetShoot', { tex: 'ebullet', size: 3, life: 1.4, snipe: false, keg: null }],
+        ['jugg', 'juggShoot', { tex: 'ebullet', size: 3, life: 1.4, snipe: false, keg: null }],
+        ['gunship', 'gunshipGun', { tex: 'ebullet', size: 3, life: 1.4, snipe: false, keg: null }],
+        ['enforcer', 'enforcerShoot', { tex: 'ebullet', size: 3, life: 1.4, snipe: false, keg: null }],
+        ['enforcer', 'enforcerShoot', { tex: 'ebullet', size: 3, life: 1.4, snipe: false, keg: 'drum' }],
+      ];
+      T.tp(90, 24); T.run(200);
+      for (const [kind, method, want] of shots) {
+        for (const b of g.ebulletList) { if (b.active) b.disableBody(true, true); Object.assign(b, { life: 99, snipe: !want.snipe, keg: stale }); }   // last shots' leftovers
+        const e = g.spawnEnemy(kind, 60, 24); T.run(17);
+        e.dir = 1; e.aimA = 0; e.keg = want.keg === 'drum' ? stale : null;
+        if (kind === 'gunship') e.body.reset(60 * TS, 20 * TS);
+        g[method](e);
+        const b = g.ebulletList.find(o => o.active);
+        if (!b) { fails.push(`${method}: no bullet`); }
+        else {
+          const got = { tex: b.texture.key, size: Math.round(b.body.width), life: b.life, snipe: b.snipe, keg: b.keg === stale ? 'drum' : b.keg };
+          if (JSON.stringify(got) !== JSON.stringify(want)) fails.push(`${method}${want.keg ? ' at a drum' : ''}: ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+        }
+        e.alive = false; e.disableBody(true, true); if (e.glow) e.glow.setVisible(false);
+      }
+      for (const b of g.ebulletList) { if (b.active) b.disableBody(true, true); Object.assign(b, { life: 99, snipe: true, keg: stale }); }
+      const d = g.spawnEBullet(400, 300, 0, 200, 5);
+      if (!d || d.texture.key !== 'ebullet' || Math.round(d.body.width) !== 3 || d.life !== 1.6 || d.snipe || d.keg !== null) fails.push(`spawnEBullet's defaults gave ${d && JSON.stringify({ tex: d.texture.key, size: d.body.width, life: d.life, snipe: d.snipe, keg: !!d.keg })}`);
+      return [...fails, ...T.errs];
+    });
+  });
   await check('every enemy kind spawns, takes a hit and dies cleanly', async ctx => {
     const page = await open(ctx, ['kinds']);
     return (await page.evaluate(() => { RUNMODE = 'campaign'; T.boot(); T.run(300); return KC.check(); })).fails;

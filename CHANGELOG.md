@@ -182,6 +182,18 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- Six more ground foes use the nav graph (#204). The Roller and the Lugger come to you like Grunts: a player on a deck
+  above no longer stays out of their reach, and a Lugger with a drum walks it up to throwing range. The Gatling,
+  Swapper, Strider and Warhorn hold ground and shoot: while one sees you it keeps its own range along the floor, and
+  when it can't it takes a spot from `pickPosition` that does, jumps and drops included. The four shooters and the
+  Roller don't start an attack mid-jump. These were the kinds the campaign bot most often lost track of on high
+  ledges. `AT.check()` adds a climb for each mover and a find-a-sight-line run for each shooter. A 40-seed Brutal
+  sweep wins 38, against 37 without it, with no stalls, and the eight Normal pins all win.
+- Every enemy bullet now comes from `spawnEBullet`, which resets each per-shot field (texture, body size, life,
+  `snipe` and the `keg` an Enforcer's burst aims at) before applying the shot's own. The Sniper, Jet trooper,
+  Juggernaut, Gunship and Enforcer each set those fields on a raw pooled bullet, so a new spawner that copied one and
+  left a field out would inherit the last shot's value, such as a drum to set burning. No shot or random number moves:
+  `compare.mjs` reports no kind as different, and a new check fires each spawner from a pool of stale bullets (#203).
 - **Smarter foes.** A squad-tactics layer that every foe shares sits on top of each kind's own moves.
   - **They read where you're going.** Shots lead your run speed (smoothed, so a jink isn't a heading), follow the arc
     of a jump down to the floor it lands on and stop at the wall that stops you. The lead is half your movement on

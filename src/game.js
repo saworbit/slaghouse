@@ -2001,10 +2001,7 @@ class GameScene extends Phaser.Scene {
     this.spawnLight(mx, my, 'glow', 0x9adcff, 1, 2, 1, 0.12); this.fxSparks(mx, my, 6, e.aimA, 0.5, [80, 220]); this.fxSmoke(mx, my, 3);
     Sfx.snipe();
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const b = this.ebullets.getFirstDead(false); if (!b) return;
-    b.setTexture('sbullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(4, 4, true);
-    b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.2, px: mx, py: my, ang: a, dmg: T.damage, snipe: true, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { tex: 'sbullet', size: 4, life: 1.2, snipe: true });
   }
 
   // -------------------------------------------------------------------- boss ----
@@ -4761,10 +4758,7 @@ class GameScene extends Phaser.Scene {
     const T = TUNE.JET, a = e.aimA + rand(-4, 4) * DEG, mx = e.x + Math.cos(a) * 14, my = e.y + 1 + Math.sin(a) * 14;
     e.recoil = 2; Sfx.eshot(); this.spawnLight(mx, my, 'glow', 0xffe080, 0.6, 1, 0.9, 0.06);
     if (this.solidAt(mx, my) || !this.los(e.x, e.y, mx, my)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4 });
   }
   spawnHaywire(e, dx) {
     const h = this.haywires.getFirstDead(false); if (!h) return false;
@@ -6427,10 +6421,7 @@ class GameScene extends Phaser.Scene {
     if (Math.random() < 0.5) this.spawnGib('g_casing', sx, sy, -e.dir * rand(40, 100), rand(-200, -120), 'shell');
     this.shake(30, 0.0015);
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, mx, my, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(bl, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4 });
   }
   juggCrack(e) {
     const b = e.body;
@@ -6730,10 +6721,7 @@ class GameScene extends Phaser.Scene {
     const pb = this.player.body, sx = e.x + e.dir * 22, sy = e.body.bottom - 2, a = Math.atan2(pb.center.y - sy, pb.center.x - sx) + rand(-8, 8) * DEG;
     Sfx.eshot(); this.spawnLight(sx, sy, 'glow', 0xffd080, 0.6, 1, 0.9, 0.05);
     if (this.solidAt(sx, sy)) return;
-    const bl = this.ebullets.getFirstDead(false); if (!bl) return;
-    bl.setTexture('ebullet'); bl.enableBody(true, sx, sy, true, true); bl.body.setAllowGravity(false); bl.body.setSize(3, 3, true);
-    bl.setRotation(a); bl.setVelocity(Math.cos(a) * 380, Math.sin(a) * 380);
-    Object.assign(bl, { life: 1.4, px: sx, py: sy, ang: a, dmg: this.campaign ? 3 : 4, snipe: false, keg: null });
+    this.spawnEBullet(sx, sy, a, 380, this.campaign ? 3 : 4, { life: 1.4 });
   }
   gunshipDrop(e) {
     const kind = this.campaign || Math.random() < 0.5 ? 'grunt' : 'tick';
@@ -7549,11 +7537,14 @@ class GameScene extends Phaser.Scene {
       px = qx; py = qy;
     }
   }
-  spawnEBullet(x, y, a, speed, dmg) {
+  // Every enemy bullet comes from here (#203): a pooled bullet gets every per-shot field reset to its default, then
+  // the shot's own. tex and size are its look and body, life its seconds aloft, snipe a sniper round (swept between
+  // frames, a heavier hit) and keg the drum a burst is aimed at (thinkEnforcer), which it sets burning on the way.
+  spawnEBullet(x, y, a, speed, dmg, { tex = 'ebullet', size = 3, life = 1.6, snipe = false, keg = null } = {}) {
     const b = this.ebullets.getFirstDead(false); if (!b) return null;
-    b.setTexture('ebullet'); b.enableBody(true, x, y, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
+    b.setTexture(tex); b.enableBody(true, x, y, true, true); b.body.setAllowGravity(false); b.body.setSize(size, size, true);
     b.setRotation(a); b.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
-    Object.assign(b, { life: 1.6, px: x, py: y, ang: a, dmg, snipe: false, keg: null });
+    Object.assign(b, { life, px: x, py: y, ang: a, dmg, snipe, keg });
     return b;
   }
 
@@ -8793,11 +8784,13 @@ class GameScene extends Phaser.Scene {
     e.cd -= dt;
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
-      let mv = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
-      if (mv && !this.standAt(b.center.x + mv * 10, b.bottom + 4)) mv = 0;
-      b.velocity.x = mv * T.speed;
-      if (mv && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
-      if (e.cd <= 0 && e.sees) { e.ai = 'spin'; e.aiUntil = now + T.spin * 1000; e.aimA = want; Sfx.gatlingSpin(); return; }
+      if (!this.standoff(e, dt, now, onG, T.speed)) {                   // out of sight: round by the nav graph to a spot that sees you
+        let mv = ax > T.keep[1] ? e.dir : ax < T.keep[0] ? -e.dir : 0;
+        if (mv && !this.standAt(b.center.x + mv * 10, b.bottom + 4)) mv = 0;
+        b.velocity.x = mv * T.speed;
+        if (mv && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      }
+      if (e.cd <= 0 && e.sees && !e.navAir) { e.ai = 'spin'; e.aiUntil = now + T.spin * 1000; e.aimA = want; Sfx.gatlingSpin(); return; }
     } else b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 4; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
   }
@@ -11772,11 +11765,13 @@ class GameScene extends Phaser.Scene {
     e.cd -= dt;
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
-      let want = ax > 260 ? e.dir : ax < 140 ? -e.dir : 0;
-      if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
-      b.velocity.x = want * T.speed;
-      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
-      if (e.cd <= 0 && e.sees && dist < T.range && onG) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.tellDmg = 0; Sfx.swapTell(); return; }
+      if (!this.standoff(e, dt, now, onG, T.speed)) {                   // out of sight: round by the nav graph to a spot that sees you
+        let want = ax > 260 ? e.dir : ax < 140 ? -e.dir : 0;
+        if (want && !this.standAt(b.center.x + want * 10, b.bottom + 4)) want = 0;
+        b.velocity.x = want * T.speed;
+        if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -240;
+      }
+      if (e.cd <= 0 && e.sees && dist < T.range && onG && !e.navAir) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.tellDmg = 0; Sfx.swapTell(); return; }
       if (e.sees && (e.fireCd -= dt) <= 0) { e.fireCd = rand(1.6, 2.2); const a = this.aimLead(e.x, e.y - 4, 240); this.spawnEBullet(e.x + Math.cos(a) * 8, e.y - 4 + Math.sin(a) * 8, a, 240, 7); Sfx.eshot(); }
     } else b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
@@ -12024,12 +12019,14 @@ class GameScene extends Phaser.Scene {
     if (e.stunT > 0) return;
     e.cd -= dt;
     if (e.aggro) {
-      if (e.cd <= 0) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.cd = T.cd * rand(0.9, 1.1); Sfx.charge(0.4); return; }
+      if (e.cd <= 0 && !e.navAir) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; e.cd = T.cd * rand(0.9, 1.1); Sfx.charge(0.4); return; }
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
-      let want = ax < 170 ? -e.dir : ax > 320 ? e.dir : 0;                 // it backs off facing you
-      if (want && !this.standAt(b.center.x + want * 12, b.bottom + 4)) want = 0;
-      b.velocity.x = want * T.speed;
-      if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -220;
+      if (!this.standoff(e, dt, now, onG, T.speed)) {                   // out of sight: round by the nav graph to a spot that sees you
+        let want = ax < 170 ? -e.dir : ax > 320 ? e.dir : 0;               // it backs off facing you
+        if (want && !this.standAt(b.center.x + want * 12, b.bottom + 4)) want = 0;
+        b.velocity.x = want * T.speed;
+        if (want && onG && (b.blocked.left || b.blocked.right)) b.velocity.y = -220;
+      }
     } else b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 6; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; } else e.fr = 'w0';
   }
@@ -12138,6 +12135,10 @@ class GameScene extends Phaser.Scene {
       const p = this.spawnEProj('drum', sx, sy, ddx / FT, (ddy - 0.5 * G * FT * FT) / FT); if (p) p.life = FT + 1;
       e.ai = 'throw'; e.aiUntil = now + 450; Sfx.whoosh(); return;
     }
+    if (tx === null && e.aggro && alive && !(e.carry && dist < 120) && this.walkerNav(e, dt, now, onG, T.speed)) {   // on another level: by the nav graph (#204)
+      e.stepK += dt * 5; e.fr = e.carry ? 'carry' : Math.abs(b.velocity.x) > 5 ? (Math.floor(e.stepK) % 2 ? 'w1' : 'w0') : 'w0';
+      return;
+    }
     if (tx === null && e.aggro && alive) tx = pb.center.x;
     let want = tx === null ? 0 : Math.sign(tx - e.x);
     if (want && Math.abs(tx - e.x) < 6) want = 0;
@@ -12194,12 +12195,14 @@ class GameScene extends Phaser.Scene {
       return;
     }
     if (e.stunT > 0) return;
+    let routed = false;
     if (e.aggro && alive) {
       e.dir = dx >= 0 ? 1 : -1; const ax = Math.abs(dx);
-      b.velocity.x = ax > 200 ? e.dir * T.speed : ax < 90 ? -e.dir * T.speed : 0;
-      if (e.cd <= 0 && dist < 380 && this.los(ex, ey, pb.center.x, pb.center.y)) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; Sfx.charge(0.5); return; }   // it sees from its eye, up high
+      routed = this.standoff(e, dt, now, b.blocked.down || b.touching.down, T.speed);   // out of sight: round by the nav graph to a spot that sees you
+      if (!routed) b.velocity.x = ax > 200 ? e.dir * T.speed : ax < 90 ? -e.dir * T.speed : 0;
+      if (e.cd <= 0 && !e.navAir && dist < 380 && this.los(ex, ey, pb.center.x, pb.center.y)) { e.ai = 'tell'; e.aiUntil = now + T.tellMs; Sfx.charge(0.5); return; }   // it sees from its eye, up high
     } else { b.velocity.x = e.dir * T.speed * 0.6; if (b.blocked.left || b.blocked.right) e.dir *= -1; }
-    if (b.velocity.x && !this.standAt(b.center.x + Math.sign(b.velocity.x) * 10, b.bottom + 4)) b.velocity.x = 0;
+    if (!routed && b.velocity.x && !this.standAt(b.center.x + Math.sign(b.velocity.x) * 10, b.bottom + 4)) b.velocity.x = 0;
     if (Math.abs(b.velocity.x) > 3) { e.stepK += dt * 3; e.fr = Math.floor(e.stepK) % 2 ? 'w1' : 'w0'; if (Math.floor(e.stepK) !== e.lastStep) { e.lastStep = Math.floor(e.stepK); if (dist < 300) Sfx.clunk(0.4); } } else e.fr = 'w0';
   }
 
@@ -13209,8 +13212,8 @@ class GameScene extends Phaser.Scene {
     e.cd -= dt;
     if (e.stunT > 0) return;
     if (e.aggro && alive) {
-      e.dir = dx >= 0 ? 1 : -1; b.velocity.x = e.dir * T.walk;
-      if (e.cd <= 0 && onG && Math.abs(dy) < 40) { e.ai = 'curl'; e.aiUntil = now + T.curlMs; e.rollDir = e.dir; Sfx.creak(); }
+      if (!this.walkerNav(e, dt, now, onG, T.walk)) { e.dir = dx >= 0 ? 1 : -1; b.velocity.x = e.dir * T.walk; }   // on another level: up or down to you by the nav graph (#204)
+      if (e.cd <= 0 && onG && !e.navAir && Math.abs(dy) < 40) { e.ai = 'curl'; e.aiUntil = now + T.curlMs; e.rollDir = e.dir; Sfx.creak(); }
     } else { b.velocity.x = e.dir * T.walk * 0.6; if (b.blocked.left || b.blocked.right) e.dir *= -1; }
     e.stepK += dt * 6; e.fr = Math.abs(b.velocity.x) > 5 ? (Math.floor(e.stepK) % 2 ? 'r1' : 'r0') : 'r0';
   }
@@ -15281,16 +15284,35 @@ class GameScene extends Phaser.Scene {
     if (heavy) e.fr = fr === 'wind' ? 'wind' : 'w' + legs;
     else e.fr = !onGround ? 'c1' : (fr === 'c' ? 'c' : 'w') + legs;
   }
-  walkerNav(e, dt, now, onGround) {                                     // true while it's taking a route to you rather than a straight run
+  walkerNav(e, dt, now, onGround, speed = e.def.chase) {                // true while it's taking a route to you rather than a straight run
     const b = e.body;
-    if (e.navAir) { this.followPath(e, now, onGround, e.def.chase, dt); if (Math.abs(b.velocity.x) > 10) e.dir = b.velocity.x > 0 ? 1 : -1; return true; }
+    if (e.navAir) { this.followPath(e, now, onGround, speed, dt); if (Math.abs(b.velocity.x) > 10) e.dir = b.velocity.x > 0 ? 1 : -1; return true; }
     if (!onGround || e.stunT > 0) return false;
     if ((e.repathT = (e.repathT || 0) - dt) <= 0) { e.repathT = e.walkNav ? 0.5 : 0.35; this.walkerPlan(e); }
     if (!e.walkNav) return false;
-    if (!this.followPath(e, now, onGround, e.def.chase, dt)) { e.walkNav = false; return false; }
+    if (!this.followPath(e, now, onGround, speed, dt)) { e.walkNav = false; return false; }
     if (!e.navAir && Math.abs(b.velocity.x) < 8) { if ((e.stuckT = (e.stuckT || 0) + dt) > 0.9) { e.walkNav = false; e.path = null; e.stuckT = 0; e.repathT = 1.2; return false; } }
     else e.stuckT = 0;
     if (Math.abs(b.velocity.x) > 10) e.dir = b.velocity.x > 0 ? 1 : -1;
+    return true;
+  }
+  // The ground kinds that hold ground and shoot (the Gatling, Swapper, Strider and Warhorn, #204): while one sees you
+  // it keeps its own range along the floor. When it can't, it takes a spot that does from pickPosition, which weighs
+  // your weapon, and walks the nav graph there, jumps and drops included. True while it's on that route.
+  standoff(e, dt, now, onGround, speed) {
+    const b = e.body, pb = this.player.body;
+    e.lkx = pb.center.x; e.lky = pb.center.y;                           // a roused one always knows where you are
+    if (e.navAir) { this.followPath(e, now, onGround, speed, dt); return true; }
+    if (!onGround || e.stunT > 0) return false;
+    if (e.sees) { e.path = null; e.goalNode = -1; return false; }        // in sight: its own range and its shots
+    if (!e.path && (e.repickT = (e.repickT || 0) - dt) <= 0) {
+      e.repickT = 1.5;
+      if (!this.pickPosition(e, 'attack')) this.pathTo(e, navBelow(e.lkx, e.lky - 4), 140);
+    }
+    if (!e.path) return false;
+    if (!this.followPath(e, now, onGround, speed, dt)) { e.path = null; e.goalNode = -1; return false; }
+    if (!e.navAir && Math.abs(b.velocity.x) < 8) { if ((e.stuckT = (e.stuckT || 0) + dt) > 0.9) { e.path = null; e.goalNode = -1; e.stuckT = 0; e.repickT = 1.2; return false; } }
+    else e.stuckT = 0;
     return true;
   }
   heavyStomp(e) {
@@ -15965,10 +15987,7 @@ class GameScene extends Phaser.Scene {
     this.fxSparks(mx, my, 2, e.aimA, 0.6, [60, 140]);
     Sfx.eshot();
     if (this.solidAt(mx, my) || !this.los(sx, sy, mx, my)) return;
-    const b = this.ebullets.getFirstDead(false); if (!b) return;
-    b.setTexture('ebullet'); b.enableBody(true, mx, my, true, true); b.body.setAllowGravity(false); b.body.setSize(3, 3, true);
-    b.setRotation(a); b.setVelocity(Math.cos(a) * T.bulletSpeed, Math.sin(a) * T.bulletSpeed);
-    Object.assign(b, { life: 1.4, px: mx, py: my, ang: a, dmg: T.damage, snipe: false, keg: e.keg || null });
+    this.spawnEBullet(mx, my, a, T.bulletSpeed, T.damage, { life: 1.4, keg: e.keg || null });
   }
   onEBulletHit(p, b) {
     if (!b.active || this.state === 'dead') return;
