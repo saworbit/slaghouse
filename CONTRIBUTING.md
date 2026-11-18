@@ -29,9 +29,9 @@ and the header comment), `config.js` (`TUNE`, weapons, the `ENEMY` records), `ut
 `game-enemies.js`, `game-world.js`, `game-campaign.js`, `hud.js`, `lab.js`, `boot.js` and `page-tail.html`.
 
 `GameScene` spans five parts (#166). The class itself is in `game.js`: its scene setup, the update loop, damage, the
-run's flow (waves, elites, medals, perks, supply drops) and the AI that every foe shares (the nav routes and the
-squad tactics). The other four add plain methods after it with
-`Object.assign(GameScene.prototype, { ... })`, so `game.js` has to come first:
+run's flow (waves, elites, medals, perks, supply drops) and the AI that every foe shares (the nav routes and the squad
+tactics). The other four add plain methods after it with `Object.assign(GameScene.prototype, { ... })`, so `game.js`
+has to come first:
 
 - `game-weapons.js`: firing, projectiles and each gun's own effects
 - `game-enemies.js`: every method an `ENEMY` record names (`setup`, `update`, `visuals`, `death`, `armour`, `contact`
@@ -39,8 +39,8 @@ squad tactics). The other four add plain methods after it with
 - `game-world.js`: terrain, props, gibs and ragdolls, and the arena hazards and machinery
 - `game-campaign.js`: the campaign's squads, the route's stations, the lifts and the ride between acts
 
-A new method goes in the part for its subsystem, with a comma after it. Commit both `src/` and the rebuilt `slaghouse.html`. `node dev/check.mjs`, and so CI,
-fails if they're out of step.
+A new method goes in the part for its subsystem, with a comma after it. Commit both `src/` and the rebuilt
+`slaghouse.html`. `node dev/check.mjs`, and so CI, fails if they're out of step.
 
 ### Keeping the seeded campaigns steady
 
@@ -74,10 +74,10 @@ request.
 
 CI also runs the [playtest harness](dev/playtest/README.md) in headless Chrome. It checks Lab controls and save
 isolation, sweeps the weapon and enemy catalogs and arena hazards, and runs the save, DAILY and campaign regression
-checks. The final checks clear all ten operations on Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and pass when at least
-seven of them win. A separate CI job clears them on Brutal seeds 91, 137, 7, 11, 21, 4, 6 and 14, and passes when at least seven of them win.
-To run it locally from the repository root, use Node.js 22 (the CI version) and installed Google Chrome. Set
-`PLAYTEST_CHROME` to the executable path if using a different browser binary.
+checks. The final checks clear all ten operations on Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and pass when at
+least seven of them win. A separate CI job clears them on Brutal seeds 91, 137, 7, 11, 21, 4, 6 and 14, and passes
+when at least seven of them win. To run it locally from the repository root, use Node.js 22 (the CI version) and
+installed Google Chrome. Set `PLAYTEST_CHROME` to the executable path if using a different browser binary.
 
 ```bash
 npm ci --prefix dev/playtest
@@ -165,10 +165,10 @@ codex sightings, medals, best run or the cleared flag; the act card and the camp
 
 ## Adding an enemy kind or a run mode
 
-An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene` methods (`src/game-enemies.js`). The comment above
-`ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names for its
-`setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death reads (a
-ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.
+An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene` methods (`src/game-enemies.js`). The
+comment above `ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names
+for its `setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death
+reads (a ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.
 `dev/playtest/kinds.js` warps in every kind and fails one with a missing codex row, start frame or method, so run
 `node dev/playtest/run.mjs --quick` after adding one. A kind with its own armour (a plate, a weak spot, a fuse) can
 name an `armour` method on its record, which `damageEnemy` calls just before the bulldozer's plow check, and a

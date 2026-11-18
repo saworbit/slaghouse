@@ -34,18 +34,22 @@ npm ci --prefix dev/playtest
 node dev/playtest/run.mjs
 ```
 
-Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time
-for runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the pause menu's restart and quit confirms
-with real key and pad input, rebinding keys from OPTIONS > KEYS (and keys going by position on another layout), rebinding pad buttons there with a stubbed pad, the pause menu over a perk draft, pausing on blur, mute, and enemy spawning, plus prop
-placement, breakage, restocking and overlapping hazard damage on Normal. Each run mode keeps its own wave total,
-lifetime stats and record. Every arena's navigation graph, counting
-the player's long drops and wall climbs, must let every standing cell reach the start and get back. No arena may have a wall across the rows a Gunship flies in at its cruise height. Campaign checks
-cover weapon and preparation prompts, blackout, the Gunship warning and fire cleanup, staged Furnace squads,
-Linker descent, catwalk access, repeated wall jumps and late machinery and boss phases. Checkpoint coverage
-includes reload, retry, legacy migration and five damaged saves. The full suite calls `VB.campaign(1500)` for
-Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and at least seven must win. Each winning run must complete all ten operations, win with the
-full kill count, and leave zero survivors at the lifts and at victory. The Smelter's death sequence pops everything
-it summoned, so none may be left a second after it falls.
+Each check gets a fresh browser profile. The suite covers multi-tab persistence, DAILY date changes, lifetime time for
+runs ended by R, quit or a hidden tab, run accuracy, mid-run **R** and the pause menu's restart and quit confirms with
+real key and pad input, rebinding keys from OPTIONS > KEYS (and keys going by position on another layout), rebinding
+pad buttons there with a stubbed pad, the pause menu over a perk draft, pausing on blur, mute, and enemy spawning,
+plus prop placement, breakage, restocking and overlapping hazard damage on Normal. Each run mode keeps its own wave
+total, lifetime stats and record. Every arena's navigation graph, counting the player's long drops and wall climbs,
+must let every standing cell reach the start and get back. No arena may have a wall across the rows a Gunship flies in
+at its cruise height. Every enemy bullet comes from `spawnEBullet` with its per-shot fields reset, the flying bosses
+close in over the Wrecking Yard's ball without it touching them or the Overseer's nodes, and a recycled gib crumbles
+where it lay without drawing a seeded random number. Campaign checks cover weapon and preparation prompts, blackout,
+the Gunship warning and fire cleanup, staged Furnace squads, Linker descent, catwalk access, repeated wall jumps and
+late machinery and boss phases. Checkpoint coverage includes reload, retry, legacy migration and five damaged saves.
+The full suite calls `VB.campaign(1500)` for Normal seeds 91, 404, 137, 5, 15, 1, 13 and 17, and at least seven must
+win. Each winning run must complete all ten operations, win with the full kill count, and leave zero survivors at the
+lifts and at victory. The Smelter's death sequence pops everything it summoned, so none may be left a second after it
+falls.
 
 | Option | What it runs |
 | --- | --- |

@@ -6,13 +6,17 @@
 //     and dies without an error
 //   - every breakable prop in every arena (props.js): it sits where it can, breaks and goes off, restocks and breaks
 //     again to a blast without an error
-//   - squad tactics (tactics.js): shots lead you, a grunt climbs to your deck, drones spread out with a line of sight,
+//   - squad tactics (tactics.js): shots lead you, a grunt, a Roller and a Lugger climb to your deck, a Gatling,
+//     Swapper, Strider and Warhorn below it find a spot that sees you (#204), drones spread out with a line of sight,
 //     an enforcer lights the drum by your feet, ducks under fire while a squadmate covers, and searchers split up
 //   - every arena's nav graph, with the player's long drops and wall climbs: each standing cell reaches the start
-//     and gets back (#125)
+//     and gets back (#125); no blast strands a deck (#188); a Gunship can cross every arena at its height (#200)
 //   - the campaign checkpoint checks (checkpoint.js): save at the Furnace lift, reload and Continue, die and retry
-//     the act, and a few damaged saves that must fall back to New Campaign
-//   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors
+//     the act, and a few damaged saves that must fall back to New Campaign; a ?act=N test start (#173); the route,
+//     lifts and arrival ride (#189)
+//   - every enemy bullet's fields reset by spawnEBullet (#203), and every OVERTIME boss in ARENAS 06-10 (#179)
+//   - full VB.campaign(1500) runs (vibe.js), which must win with every wave enemy killed and no survivors; each line
+//     counts the bot's blind spots and passed-over medkits (#201)
 // Any page error or console error fails the run too. Exits 1 and names each failure.
 //   npm ci --prefix dev/playtest        (once: installs playwright-core, no browser download)
 //   node dev/playtest/run.mjs           (all checks, then eight Normal campaigns; seven must win)
