@@ -182,6 +182,12 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
 
 ### Changed
 
+- `GameScene` is split across five parts of `src/` (#166). The class stays in `game.js` with its setup, update loop,
+  damage, run flow and shared AI, and four new parts add plain methods to it with `Object.assign(GameScene.prototype,
+  { ... })`: `game-weapons.js`, `game-enemies.js` (every method an `ENEMY` record names, and the humanoid `think`
+  methods), `game-world.js` (terrain, props, hazards and machinery) and `game-campaign.js`. Each method moved as it
+  was, with a comma after it, so `join.mjs` is still a plain concatenation. `compare.mjs` finds no kind different and
+  the pinned campaigns replay line for line.
 - Six more ground foes use the nav graph (#204). The Roller and the Lugger come to you like Grunts: a player on a deck
   above no longer stays out of their reach, and a Lugger with a drum walks it up to throwing range. The Gatling,
   Swapper, Strider and Warhorn hold ground and shoot: while one sees you it keeps its own range along the floor, and

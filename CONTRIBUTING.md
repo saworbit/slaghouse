@@ -25,8 +25,21 @@ node src/join.mjs
 
 `src/join.mjs` concatenates the parts in a fixed order, with no bundler: `page-head.html` (the page, its loading screen
 and the header comment), `config.js` (`TUNE`, weapons, the `ENEMY` records), `util.js`, `audio.js` (`Sfx`, `Music`),
-`font.js`, `art.js`, `particles.js`, `scenes.js` (boot and title), `game.js` (`GameScene`), `hud.js`, `lab.js`,
-`boot.js` and `page-tail.html`. Commit both `src/` and the rebuilt `slaghouse.html`. `node dev/check.mjs`, and so CI,
+`font.js`, `art.js`, `particles.js`, `scenes.js` (boot and title), `game.js` (`GameScene`), `game-weapons.js`,
+`game-enemies.js`, `game-world.js`, `game-campaign.js`, `hud.js`, `lab.js`, `boot.js` and `page-tail.html`.
+
+`GameScene` spans five parts (#166). The class itself is in `game.js`: its scene setup, the update loop, damage, the
+run's flow (waves, elites, medals, perks, supply drops) and the AI that every foe shares (the nav routes and the
+squad tactics). The other four add plain methods after it with
+`Object.assign(GameScene.prototype, { ... })`, so `game.js` has to come first:
+
+- `game-weapons.js`: firing, projectiles and each gun's own effects
+- `game-enemies.js`: every method an `ENEMY` record names (`setup`, `update`, `visuals`, `death`, `armour`, `contact`
+  and the boss hooks), and each humanoid kind's `think` method
+- `game-world.js`: terrain, props, gibs and ragdolls, and the arena hazards and machinery
+- `game-campaign.js`: the campaign's squads, the route's stations, the lifts and the ride between acts
+
+A new method goes in the part for its subsystem, with a comma after it. Commit both `src/` and the rebuilt `slaghouse.html`. `node dev/check.mjs`, and so CI,
 fails if they're out of step.
 
 ### Keeping the seeded campaigns steady
@@ -152,7 +165,7 @@ codex sightings, medals, best run or the cleared flag; the act card and the camp
 
 ## Adding an enemy kind or a run mode
 
-An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene` methods (`src/game.js`). The comment above
+An enemy kind is one record in `ENEMY` (`src/config.js`) plus its own `GameScene` methods (`src/game-enemies.js`). The comment above
 `ENEMY` lists the fields: its stats and gibs, `frame0`, `flier` or `humanoid`, and the methods it names for its
 `setup` when it spawns, its `update` each frame, its `visuals` and its `death`, plus the values its death reads (a
 ragdoll, a gun to drop, a bigger shake). Give it a `CODEX` row too.

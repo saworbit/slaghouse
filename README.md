@@ -397,12 +397,12 @@ slaghouse/
 
 ### Source parts
 
-`node src/join.mjs` joins the 13 parts of `src/` into `slaghouse.html` in a fixed order. It joins the bytes only. It
+`node src/join.mjs` joins the 17 parts of `src/` into `slaghouse.html` in a fixed order. It joins the bytes only. It
 does not transform or minify them.
 
 ```mermaid
 flowchart LR
-  parts["src/<br/>13 parts"] -- "node src/join.mjs" --> html["slaghouse.html"]
+  parts["src/<br/>17 parts"] -- "node src/join.mjs" --> html["slaghouse.html"]
   html -- "node dev/check.mjs" --> same{"Same bytes as<br/>src/ builds?"}
   same -- "yes" --> passed["Check passes"]
   same -- "no" --> failed["Check fails"]
@@ -418,11 +418,18 @@ flowchart LR
 | 6 | `art.js` | Sprite drawings, arenas, `NAV`, `CAMPAIGN`, `RUN_MODES`, `genTextures()` |
 | 7 | `particles.js` | `FX`: the pooled pixel particles that can bounce or paint |
 | 8 | `scenes.js` | `BootScene` and `TitleScene` |
-| 9 | `game.js` | `GameScene`: player, enemies, weapons, props, hazards, campaign route, lifts |
-| 10 | `hud.js` | `HudScene` |
-| 11 | `lab.js` | `LAB_PANEL`: the logic of the Lab setup dialog |
-| 12 | `boot.js` | `new Phaser.Game(...)`, and the pause on a hidden tab |
-| 13 | `page-tail.html` | The closing tags |
+| 9 | `game.js` | `GameScene`: setup, the update loop, the player, damage, the run's flow, and the AI every foe shares |
+| 10 | `game-weapons.js` | `GameScene`, continued: firing, projectiles and each gun's own effects |
+| 11 | `game-enemies.js` | `GameScene`, continued: each `ENEMY` record's methods and each humanoid's `think` |
+| 12 | `game-world.js` | `GameScene`, continued: terrain, props, gibs, ragdolls, arena hazards and machinery |
+| 13 | `game-campaign.js` | `GameScene`, continued: campaign squads, the route, the lifts and the ride |
+| 14 | `hud.js` | `HudScene` |
+| 15 | `lab.js` | `LAB_PANEL`: the logic of the Lab setup dialog |
+| 16 | `boot.js` | `new Phaser.Game(...)`, and the pause on a hidden tab |
+| 17 | `page-tail.html` | The closing tags |
+
+Parts 10 to 13 add plain methods to `GameScene` with `Object.assign(GameScene.prototype, { ... })` after the class is
+defined (#166).
 
 ### Boot and scenes
 
