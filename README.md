@@ -556,6 +556,8 @@ flowchart TB
 
 - `slaghouse.html` is the same, byte for byte, as the output of `src/`.
 - Each inline script and each audio bank compiles. Each AAC bank has the same sounds and tracks as its Opus bank.
+- Each AAC clip has the MP4 edit list that skips the encoder priming, and the priming is shorter than each looping
+  track's 100 ms pad.
 - Each local `<script src>` exists. Each CDN script has an exact version and an integrity hash.
 - Each entry in `dev/sfxgen/calib.json` agrees with the code of its procedural sound.
 - It shows each sampled sound that the game asks for and that `sfx_bank.js` does not have.

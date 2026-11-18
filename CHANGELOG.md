@@ -154,8 +154,8 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   uploads them as an artifact instead of publishing. Tag pushes work as before. (#43)
 - `dev/playtest/kinds.js`, run by `run.mjs` and CI: every enemy kind is warped in on its own and must have a codex
   row and its start frame, then run, take a hit and die without an error. A broken kind fails by name. (#52)
-- CI runs the Brutal campaign check (seeds 91, 137, 7, 11, 10, 4, 6 and 14, at least seven to win) as its own job.
-  (#96, #146)
+- CI runs the Brutal campaign check (eight seeds, at least seven to win) as its own job. Seed 21 has replaced seed 10
+  since #205. (#96, #146)
 - `node dev/playtest/run.mjs --help` lists the options. An unknown option or a bad `--seeds` value stops with a
   one-line error and status 2, instead of running the full suite or printing a stack trace. (#110)
 - A stalled campaign check names each survivor's cell and whether the player can see it or how long it has been
@@ -392,9 +392,10 @@ All notable changes to SLAGHOUSE are recorded here. The format follows
   banner, and only a second press within two seconds restarts. In the pause menu, RESTART / RETRY ACT and QUIT TO
   TITLE turn red with a question mark and need a second pick; moving off, Esc or B cancels. The pause list no longer
   wraps from RESUME to QUIT TO TITLE. R on the results screen and in the Lab still acts at once. (#98)
-- Headless campaign checks run three fixed Normal seeds by default. Use `--campaign --brutal --seeds=91,137,7,11,10,4,6,14 --min-wins=7`
-  to repeat the Brutal matrix. Each run uses normal traversal, combat and in-game healing, and verifies all ten
-  operations, the full kill count and zero survivors at lifts and victory.
+- Headless campaign checks run fixed Normal seeds by default (eight since #165, seven to win). Use
+  `--campaign --brutal --seeds=91,137,7,11,21,4,6,14 --min-wins=7` to repeat the Brutal matrix. Each run uses normal
+  traversal, combat and in-game healing, and verifies all ten operations, the full kill count and zero survivors at
+  lifts and victory.
 - Refreshed the player and enemy sprites, including the Gunship and its wreck. (#77)
 - Hold toward a wall for a shorter sideways kick, so repeated wall jumps can climb the same wall.
 - Slag Rain gives 6.2 seconds to find cover after the Demolition Team clears and before the Gunship arrives.
